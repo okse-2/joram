@@ -25,14 +25,15 @@
 package org.objectweb.jtests.jms.conform.selector;
 
 import org.objectweb.jtests.jms.framework.*;
-import javax.jms.*;
 import junit.framework.*;
+
+import javax.jms.*;
 
 /**
  * Test the message selector features of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorTest.java,v 1.1 2002-03-18 13:42:13 joram Exp $
+ * @version $Id: SelectorTest.java,v 1.2 2002-03-19 15:01:40 joram Exp $
  */
 public class SelectorTest extends PTPTestCase {
 
