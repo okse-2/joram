@@ -168,11 +168,11 @@ public class Message implements javax.jms.Message
   {
     if (dest == null)
       momMsg.setDestination(null, true);
-
-    momMsg.setDestination(
-      ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
-      ((org.objectweb.joram.client.jms.Destination) dest).isQueue());
-
+    else
+      momMsg.setDestination(
+        ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
+        ((org.objectweb.joram.client.jms.Destination) dest).isQueue());
+    
     if (dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)
       momMsg.setOptionalHeader("JMSTempDestination", new Boolean(true));
     else
@@ -245,9 +245,15 @@ public class Message implements javax.jms.Message
    * @exception JMSException  Actually never thrown.
    */
   public void setJMSCorrelationIDAsBytes(byte[] correlationID)
-            throws JMSException
-  {
-    momMsg.setCorrelationId(ConversionHelper.toString(correlationID));
+    throws JMSException {
+    try {
+      momMsg.setCorrelationId(ConversionHelper.toString(correlationID));
+    } catch (MessageValueException exc) {
+      JMSException jE =
+        new JMSException(exc.getMessage());
+      jE.setLinkedException(exc);
+      throw jE;
+    }
   }
   
   /**
@@ -413,10 +419,17 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getJMSType() throws JMSException
-  {
+  public String getJMSType() 
+    throws JMSException {
     Object value = momMsg.getOptionalHeader("JMSType");
-    return ConversionHelper.toString(value);
+    try {
+      return ConversionHelper.toString(value);
+    } catch (MessageValueException exc) {
+      JMSException jE =
+        new JMSException(exc.getMessage());
+      jE.setLinkedException(exc);
+      throw jE;
+    }
   }
 
   /**
@@ -674,9 +687,16 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  If the name is invalid.
    */
-  public String getStringProperty(String name) throws JMSException
-  {
-    return ConversionHelper.toString(doGetProperty(name));
+  public String getStringProperty(String name) 
+    throws JMSException {
+    try {
+      return ConversionHelper.toString(doGetProperty(name));
+    } catch (MessageValueException exc) {
+      JMSException jE =
+        new JMSException(exc.getMessage());
+      jE.setLinkedException(exc);
+      throw jE;
+    }
   }
 
   /**
@@ -874,6 +894,7 @@ public class Message implements javax.jms.Message
     msg.setJMSCorrelationID(jmsMsg.getJMSCorrelationID());
     msg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
     msg.setJMSType(jmsMsg.getJMSType());
+    msg.setJMSMessageID(jmsMsg.getJMSMessageID());
 
     Enumeration names = jmsMsg.getPropertyNames();
     if (names == null) 
