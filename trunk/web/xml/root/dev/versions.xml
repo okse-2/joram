@@ -16,6 +16,12 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: February 19, 2004)"> 
       <ul>
+        <li>kJoram compiling issues, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00058.html">
+        Stanley</a>. Due to improper build setup and JORAM 4.0 new 
+        connection management, kJoram client classes could not be compiled 
+        and used anymore. Many corrections have been made in the CVS
+        tree, to get them please update <code>com/scalagent</code>.</li>
         <li>Blocking connection request, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00090.html">
         Piero de Salvia</a>. In case a user does not exist, trying to
