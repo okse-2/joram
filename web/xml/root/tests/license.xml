@@ -17,7 +17,8 @@
 	General Public License</a> (LGPL).
       </p>
       <p>This test suite also uses <em>external code</em> belonging to the <a
-	  href="http://xml.apache.org/xalan-j/">Xalan</a> which is under
+	  href="http://xml.apache.org/xalan-j/">Xalan</a> which is releases
+          under
 	  the <a href="http://xml.apache.org/dist/LICENSE.txt">Apache
 	  Software license</a>.
       </p>
