@@ -324,12 +324,12 @@ public class Message {
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setDoubleProperty(String name, double value)
-         throws MessageROException
-  {
-    preparePropSetting(name);
-    properties.put(name, new Double(value));
-  }
+//    public void setDoubleProperty(String name, double value)
+//           throws MessageROException
+//    {
+//      preparePropSetting(name);
+//      properties.put(name, new Double(value));
+//    }
 
   /**
    * Sets a property as a float value.
@@ -339,12 +339,12 @@ public class Message {
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setFloatProperty(String name, float value)
-         throws MessageROException
-  {
-    preparePropSetting(name);
-    properties.put(name, new Float(value));
-  }
+//    public void setFloatProperty(String name, float value)
+//           throws MessageROException
+//    {
+//      preparePropSetting(name);
+//      properties.put(name, new Float(value));
+//    }
 
   /**
    * Sets a property as an int value.
@@ -392,7 +392,10 @@ public class Message {
 
     if (value instanceof Boolean
         || value instanceof String
-        || value instanceof Number)
+        || value instanceof Integer
+        || value instanceof Long
+        || value instanceof Short
+        || value instanceof Byte)
       properties.put(name, value);
 
     else
@@ -438,7 +441,7 @@ public class Message {
   public boolean getBooleanProperty(String name) throws MessageValueException 
   {
     if (properties == null)
-      return Boolean.valueOf(null).booleanValue();
+      throw new RuntimeException("getBooleanProperty properties = null");
     return ConversionHelper.toBoolean(properties.get(name));
   }
   
@@ -449,7 +452,7 @@ public class Message {
   public byte getByteProperty(String name) throws MessageValueException 
   {
     if (properties == null)
-      return Byte.valueOf(null).byteValue();
+    throw new RuntimeException("getByteProperty properties = null");
     return ConversionHelper.toByte(properties.get(name));
   }
 
@@ -460,12 +463,12 @@ public class Message {
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public double getDoubleProperty(String name) throws MessageValueException
-  {
-    if (properties == null)
-      return Double.valueOf(null).doubleValue();
-    return ConversionHelper.toDouble(properties.get(name));
-  }
+//    public double getDoubleProperty(String name) throws MessageValueException
+//    {
+//      if (properties == null)
+//        return Double.valueOf(null).doubleValue();
+//      return ConversionHelper.toDouble(properties.get(name));
+//    }
 
   /**
    * Returns a property as a float value.
@@ -474,12 +477,12 @@ public class Message {
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public float getFloatProperty(String name) throws MessageValueException
-  {
-    if (properties == null)
-      return Float.valueOf(null).floatValue();
-    return ConversionHelper.toFloat(properties.get(name));
-  }
+//    public float getFloatProperty(String name) throws MessageValueException
+//    {
+//      if (properties == null)
+//        return Float.valueOf(null).floatValue();
+//      return ConversionHelper.toFloat(properties.get(name));
+//    }
 
   /**
    * Returns a property as a int value.
@@ -505,7 +508,7 @@ public class Message {
   public long getLongProperty(String name) throws MessageValueException
   {
     if (properties == null)
-      return Long.valueOf(null).longValue();
+      throw new RuntimeException("getLongProperty properties = null");
     return ConversionHelper.toLong(properties.get(name));
   }
 
@@ -531,7 +534,7 @@ public class Message {
   public short getShortProperty(String name) throws MessageValueException
   {
     if (properties == null)
-      return Short.valueOf(null).shortValue();
+      throw new RuntimeException("getShortProperty properties = null");
     return ConversionHelper.toShort(properties.get(name));
   }
 
@@ -877,22 +880,22 @@ public class Message {
    * Specializes the serialization method for protecting the message's
    * properties and body as soon as it is sent.
    */
-  private void writeObject(ObjectOutputStream s) throws IOException
-  {
-    s.defaultWriteObject();
-    bodyRO = true;
-    propertiesRO = true;
-  }
+//    private void writeObject(ObjectOutputStream s) throws IOException
+//    {
+//      s.defaultWriteObject();
+//      bodyRO = true;
+//      propertiesRO = true;
+//    }
 
   /**
    * Specializes the deserialization method for initializing the message's
    * transient fields.
    */
-  private void readObject(ObjectInputStream s)
-               throws IOException, ClassNotFoundException
-  {
-    s.defaultReadObject();
-    acksCounter = 0;
-    durableAcksCounter = 0;
-  }
+//    private void readObject(ObjectInputStream s)
+//                 throws IOException, ClassNotFoundException
+//    {
+//      s.defaultReadObject();
+//      acksCounter = 0;
+//      durableAcksCounter = 0;
+//    }
 }

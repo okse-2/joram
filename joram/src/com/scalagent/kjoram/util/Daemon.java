@@ -55,8 +55,8 @@ import com.scalagent.kjoram.JoramTracing;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.4 2004-02-13 10:12:42 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.5 2004-02-19 12:57:32 tachker Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -191,9 +191,9 @@ public abstract class Daemon implements Runnable {
   /**
    * Interrupts this daemon.
    */
-  public void interrupt() {
-    thread.interrupt();
-  }
+//    public void interrupt() {
+//      thread.interrupt();
+//    }
 
   final protected void finish() {
     running = false;
