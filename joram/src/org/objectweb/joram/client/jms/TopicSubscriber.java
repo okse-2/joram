@@ -66,9 +66,7 @@ public class TopicSubscriber extends MessageConsumer
    */
   public boolean getNoLocal() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " subscriber.");
+    checkClosed();
     return noLocal;
   }
 
@@ -79,9 +77,7 @@ public class TopicSubscriber extends MessageConsumer
    */
   public javax.jms.Topic getTopic() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " subscriber.");
+    checkClosed();
     return (javax.jms.Topic) dest;
   }
 }

@@ -19,19 +19,21 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+
 /**
  * Implements the <code>javax.jms.QueueConnection</code> interface.
  */
 public class QueueConnection extends Connection
-                             implements javax.jms.QueueConnection
-{
+    implements javax.jms.QueueConnection {
+
   /**
    * Creates a <code>QueueConnection</code> instance.
    *
@@ -42,11 +44,10 @@ public class QueueConnection extends Connection
    * @exception IllegalStateException  If the server is not listening.
    */
   public QueueConnection(FactoryParameters factoryParameters,
-                         ConnectionItf connectionImpl) throws JMSException
-  {
-    super(factoryParameters, connectionImpl);
+                         RequestChannel requestChannel) 
+    throws JMSException {
+    super(factoryParameters, requestChannel);
   }
-
 
   /**
    * API method.
@@ -58,16 +59,16 @@ public class QueueConnection extends Connection
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer
-         createConnectionConsumer(javax.jms.Queue queue, String selector,
-                                  javax.jms.ServerSessionPool sessionPool,
-                                  int maxMessages) throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new ConnectionConsumer(this, (Queue) queue, selector,
-                                  sessionPool, maxMessages);
+      createConnectionConsumer(javax.jms.Queue queue, 
+                               String selector,
+                               javax.jms.ServerSessionPool sessionPool,
+                               int maxMessages) 
+    throws JMSException {
+    return super.createConnectionConsumer(
+      queue, 
+      selector,
+      sessionPool, 
+      maxMessages);
   }
 
   /**
@@ -76,15 +77,18 @@ public class QueueConnection extends Connection
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.QueueSession
+  public synchronized javax.jms.QueueSession
          createQueueSession(boolean transacted, int acknowledgeMode)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new QueueSession(this, transacted, acknowledgeMode);
+    checkClosed();
+    QueueSession qs = new QueueSession(
+      this, 
+      transacted, 
+      acknowledgeMode,
+      getRequestMultiplexer());
+    addSession(qs);
+    return qs;
   }
 
   /** 

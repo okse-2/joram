@@ -82,13 +82,9 @@ public class Message implements javax.jms.Message {
   public void acknowledge() throws JMSException
   {
     if (sess == null
-        || sess.transacted
-        || sess.acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE)
+        || sess.getTransacted()
+        || sess.getAcknowledgeMode() != javax.jms.Session.CLIENT_ACKNOWLEDGE)
       return;
-
-    if (sess.closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
     sess.acknowledge();
   }
 

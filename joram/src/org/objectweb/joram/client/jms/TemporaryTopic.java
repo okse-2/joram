@@ -84,18 +84,8 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
                                  + ": deleting...");
 
     // Checking the connection's subscribers:
-    Session sess;
-    MessageConsumer cons;
-    for (int i = 0; i < cnx.sessions.size(); i++) {
-      sess = (Session) cnx.sessions.get(i);
-      for (int j = 0; j < sess.consumers.size(); j++) {
-        cons = (MessageConsumer) sess.consumers.get(j);
-        // NTA: never arrived, cons.targetName=subName !=agentId
-        // if (agentId.equals(cons.targetName)) 
-        if (cons != null)
-          throw new JMSException("Subscribers still exist for this temp. topic.");
-      }
-    }
+    cnx.checkConsumers(agentId);
+
     // Sending the request to the server:
     cnx.syncRequest(new TempDestDeleteRequest(agentId));
 

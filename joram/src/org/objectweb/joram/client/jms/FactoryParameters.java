@@ -81,4 +81,13 @@ public class FactoryParameters implements java.io.Serializable
   {
     return port;
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",host=" + host + 
+      ",port=" + port + 
+      ",connectingTimer=" + connectingTimer +
+      ",txPendingTimer=" + txPendingTimer +
+      ",cnxPendingTimer=" + cnxPendingTimer + ')';
+  }
 }

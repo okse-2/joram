@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -248,8 +249,7 @@ public class ManagedConnectionImpl
         OutboundConnection outboundCnx = null;
         for (java.util.Enumeration e = handles.elements(); e.hasMoreElements(); ) {
           outboundCnx = (OutboundConnection) e.nextElement();
-          if (outboundCnx.cnxEquals(cnx))
-            break;
+          if (outboundCnx.cnxEquals(cnx)) break;
         }
 
         if (outboundCnx == null)
@@ -314,7 +314,8 @@ public class ManagedConnectionImpl
           AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                         this + " getXAResource session is XASession and not null");
         // set Session transacted = true
-        ((org.objectweb.joram.client.jms.Session) session).setTransacted(true);
+        ((org.objectweb.joram.client.jms.XASession)session).getDelegateSession().setTransacted(true);
+
         // TODO
         // cnx.sessions.add((org.objectweb.joram.client.jms.Session) session);
       } else if (! (session instanceof javax.jms.XASession)) {

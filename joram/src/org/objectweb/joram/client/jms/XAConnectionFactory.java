@@ -48,8 +48,7 @@ public abstract class XAConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XAConnectionFactory(String host, int port)
-  {
+  public XAConnectionFactory(String host, int port) {
     super(host + ":" + port);
     params = new FactoryParameters(host, port);
 
@@ -58,8 +57,7 @@ public abstract class XAConnectionFactory
   }
 
   /** Returns a string view of the connection factory. */
-  public String toString()
-  {
+  public String toString() {
     return "XACF:" + params.getHost() + "-" + params.getPort();
   }
 
@@ -81,8 +79,7 @@ public abstract class XAConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAConnection createXAConnection() throws JMSException
-  {
+  public javax.jms.XAConnection createXAConnection() throws JMSException {
     return createXAConnection(ConnectionFactory.getDefaultLogin(),
                               ConnectionFactory.getDefaultPassword());
   }
@@ -90,14 +87,12 @@ public abstract class XAConnectionFactory
   /**
    * Returns the factory's configuration parameters.
    */
-  public FactoryParameters getParameters()
-  {
+  public FactoryParameters getParameters() {
     return params;
   } 
 
   /** Sets the naming reference of an XA connection factory. */
-  public Reference getReference() throws NamingException
-  {
+  public Reference getReference() throws NamingException {
     Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.host", params.getHost()));
     ref.add(new StringRefAddr("cFactory.port",

@@ -38,6 +38,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import java.io.*;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -80,7 +82,7 @@ public abstract class DestinationImpl implements java.io.Serializable {
    * is created during agent <tt>AdminTopicinitialization</tt>, then reused
    * during the topic life.
    */
-  transient StringBuffer strbuf = null;
+  transient StringBuffer strbuf;
 
   /**
    * Constructs a <code>DestinationImpl</code>.
@@ -93,6 +95,7 @@ public abstract class DestinationImpl implements java.io.Serializable {
     this.destId = destId;
     this.adminId = adminId;
     clients = new Hashtable();
+    strbuf = new StringBuffer();
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
@@ -545,4 +548,27 @@ public abstract class DestinationImpl implements java.io.Serializable {
    * processing notifications.
    */
   protected abstract void specialProcess(Notification not);
+
+  private void writeObject(java.io.ObjectOutputStream out)
+    throws IOException {
+    out.writeBoolean(deletable);
+    out.writeObject(adminId);
+    out.writeObject(destId);
+    out.writeBoolean(freeReading);
+    out.writeBoolean(freeWriting);
+    out.writeObject(clients);    
+    out.writeObject(dmqId);
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+    throws IOException, ClassNotFoundException {
+    deletable = in.readBoolean();
+    adminId = (AgentId)in.readObject();
+    destId = (AgentId)in.readObject();    
+    freeReading = in.readBoolean();
+    freeWriting = in.readBoolean();
+    clients = (Hashtable)in.readObject();
+    dmqId = (AgentId)in.readObject();
+    strbuf = new StringBuffer();
+  }
 }

@@ -258,6 +258,93 @@ public class AdminModule
   }
 
   /**
+   * Adds a server to the platform.
+   *
+   * @param serverName  Name of the added server
+   * @param hostName Address of the added server
+   * @param serverId Identifier of the added server
+   * @param domainName Name of the domain where the server is added
+   * @param port Listening port of the server in the specified domain
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void addServer(String serverName,
+                               String hostName,
+                               short serverId,
+                               String domainName,
+                               int port)
+    throws ConnectException, AdminException {
+    doRequest(new AddServerRequest(
+      serverName,
+      hostName,
+      serverId,
+      domainName,
+      port));
+  }
+
+  /**
+   * Removes a server from the platform.
+   *
+   * @param serverName  Name of the added server
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void removeServer(String serverName)
+    throws ConnectException, AdminException {
+    doRequest(new RemoveServerRequest(
+      serverName));
+  }
+
+  /**
+   * Adds a domain to the platform.
+   *
+   * @param domainName Name of the added domain
+   * @param serverName Name of the router server that
+   *                   gives access to the added domain
+   * @param port Listening port in the added domain of the
+   *             router server
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void addDomain(String domainName,
+                               String serverName,
+                               int port)
+    throws ConnectException, AdminException {
+    doRequest(new AddDomainRequest(
+      domainName,
+      serverName,
+      port));
+  }
+
+  /**
+   * Removes a domain from the platform.
+   *
+   * @param domainName Name of the added domain
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void removeDomain(String domainName)
+    throws ConnectException, AdminException {
+    doRequest(new RemoveDomainRequest(
+      domainName));
+  }
+
+  /**
+   * Returns the current servers configuration (a3servers.xml).
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static String getConfiguration()
+    throws ConnectException, AdminException {
+    return doRequest(new GetConfigRequest()).getInfo();
+  }
+
+  /**
    * Sets a given dead message queue as the default DMQ for a given server
    * (<code>null</code> for unsetting previous DMQ).
    * <p>

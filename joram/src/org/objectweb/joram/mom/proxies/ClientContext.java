@@ -26,7 +26,7 @@ package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.AgentId;
 import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
 
 import java.util.Enumeration;
@@ -125,8 +125,12 @@ class ClientContext implements java.io.Serializable
   }
 
   /** Adds a pending delivery. */
-  void addPendingDelivery(ConsumerMessages reply)
-  {
+  void addPendingDelivery(AbstractJmsReply reply) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientContext[" + proxyId + ',' + id + 
+        "].addPendingDelivery(" + reply + ')');
     repliesBuffer.add(reply);
   }
 

@@ -26,6 +26,7 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 
 /**
  * Implements the <code>javax.jms.TopicSession</code> interface.
@@ -41,17 +42,19 @@ public class TopicSession extends Session implements javax.jms.TopicSession
    *
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  TopicSession(Connection cnx, boolean transacted,
-               int acknowledgeMode) throws JMSException
-  {
-    super(cnx, transacted, acknowledgeMode);
+  TopicSession(Connection cnx, 
+               boolean transacted,
+               int acknowledgeMode,
+               RequestMultiplexer mtpx) 
+    throws JMSException {
+    super(cnx, transacted, acknowledgeMode, mtpx);
   }
 
 
   /** Returns a String image of this session. */
   public String toString()
   {
-    return "TopicSess:" + ident;
+    return "TopicSess:" + getId();
   }
 
   /**
@@ -64,10 +67,10 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   public javax.jms.TopicPublisher
          createPublisher(javax.jms.Topic topic) throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new TopicPublisher(this, (Topic) topic);
+    checkClosed();
+    TopicPublisher tp = new TopicPublisher(this, (Topic) topic);
+    addProducer(tp);
+    return tp;
   }
 
   /**
@@ -81,10 +84,11 @@ public class TopicSession extends Session implements javax.jms.TopicSession
          createSubscriber(javax.jms.Topic topic, String selector,
                           boolean noLocal) throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new TopicSubscriber(this, (Topic) topic, null, selector, noLocal);
+    checkClosed();
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, null, selector, noLocal);
+    addConsumer(ts);
+    return ts;
   }
 
   /**
@@ -97,10 +101,11 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   public javax.jms.TopicSubscriber
          createSubscriber(javax.jms.Topic topic) throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new TopicSubscriber(this, (Topic) topic, null, null, false);
+    checkClosed();
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, null, null, false);
+    addConsumer(ts);
+    return ts;
   }
 
   /**

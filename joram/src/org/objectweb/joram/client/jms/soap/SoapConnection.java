@@ -19,13 +19,13 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.soap;
 
-import org.objectweb.joram.client.jms.Driver;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import org.apache.soap.Constants;
 import org.apache.soap.Fault;
@@ -42,6 +42,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 import java.util.Hashtable;
+import java.lang.reflect.Method;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -54,14 +55,19 @@ import javax.jms.JMSSecurityException;
  * <p>
  * Requests and replies travel through the connections in SOAP (XML) format.
  */
-public class SoapConnection implements org.objectweb.joram.client.jms.ConnectionItf 
-{ 
+public class SoapConnection 
+    implements RequestChannel { 
   /** The user's name */
   private String name;
+
   /** URL of the SOAP service this object communicates with. */
   private URL serviceUrl = null;
+
   /** SOAP call object for sending the requests. */
   private Call sendCall;
+
+  private Call receiveCall;
+
   /** Identifier of the connection. */
   private int cnxId;
 
@@ -163,19 +169,32 @@ public class SoapConnection implements org.objectweb.joram.client.jms.Connection
     sendCall.setTargetObjectURI("urn:ProxyService");
     sendCall.setMethodName("send");
     sendCall.setEncodingStyleURI(Constants.NS_URI_SOAP_ENC);
-  }
 
+    mappingReg = new SOAPMappingRegistry();
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "AbstractJmsReply"),
+                                  AbstractJmsReply.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "CnxConnectReply"),
+                                  CnxConnectReply.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "ServerReply"),
+                                  ServerReply.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "SessCreateTDReply"),
+                                  SessCreateTDReply.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "CnxCloseReply"),
+                                  CnxCloseReply.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "GetAdminTopicReply"),
+                                  GetAdminTopicReply.class, beanSer, beanSer);
 
-  /**
-   * Creates a driver for the connection.
-   *
-   * @param cnx  The calling <code>Connection</code> instance.
-   */
-  public Driver createDriver(org.objectweb.joram.client.jms.Connection cnx)
-  {
-    Driver driver = new SoapDriver(cnx, serviceUrl, name, cnxId);
-    driver.setDaemon(true);
-    return driver;
+    receiveCall = new Call();
+    receiveCall.setSOAPMappingRegistry(mappingReg);
+    receiveCall.setTargetObjectURI("urn:ProxyService");
+    receiveCall.setMethodName("getReply");
+    receiveCall.setEncodingStyleURI(Constants.NS_URI_SOAP_ENC);
   }
 
   /**
@@ -184,8 +203,7 @@ public class SoapConnection implements org.objectweb.joram.client.jms.Connection
    * @exception IllegalStateException  If the SOAP service fails.
    */
   public synchronized void send(AbstractJmsRequest request)
-                           throws IllegalStateException
-  {
+    throws Exception {
     Hashtable h = request.soapCode();
 
     // Setting the call's parameters:
@@ -214,13 +232,7 @@ public class SoapConnection implements org.objectweb.joram.client.jms.Connection
   }
 
   /** Closes the <code>SoapConnection</code>. */
-  public void close()
-  { 
-    // try {
-//       send(new CnxCloseRequest());
-//     }
-//     catch (Exception exc) {}
-  }
+  public void close() {}
 
   /**
    * Actually tries to set a first SOAP connection with the server.
@@ -342,5 +354,44 @@ public class SoapConnection implements org.objectweb.joram.client.jms.Connection
         }
       }
     }
+  }
+
+  public AbstractJmsReply receive()
+    throws Exception {
+    Vector params = new Vector();
+    params.addElement(
+      new Parameter("name", String.class, name, null));
+    params.addElement(
+      new Parameter("cnxId", int.class, new Integer(cnxId), null));    
+    receiveCall.setParams(params);
+    
+    Response resp = null;
+    AbstractJmsReply reply = null;
+    
+    try {
+      resp = receiveCall.invoke(serviceUrl, "");
+    }
+    catch (SOAPException exc) {
+      throw new IOException("The SOAP call failed: " + exc.getMessage());
+    }
+
+    if (resp.generatedFault()) {
+      throw new IOException("The SOAP service failed to process the call: "
+                            + resp.getFault().getFaultString());
+    }   
+    
+    try {
+      Hashtable h = (Hashtable) resp.getReturnValue().getValue();
+            
+      String className = (String) h.get("className");
+      Class clazz = Class.forName(className);
+      Class [] classParam = { new Hashtable().getClass() };
+      Method m = clazz.getMethod("soapDecode",classParam);
+      reply = (AbstractJmsReply) m.invoke(null,new Object[]{h});
+    } catch (Exception exc) {
+      throw new IOException(exc.getMessage());
+    }
+
+    return reply;
   }
 }

@@ -72,4 +72,10 @@ class MessageAcks
   {
     return queueMode;
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",ids=" + ids +
+      ",queueMode=" + queueMode + ')';
+  }
 } 

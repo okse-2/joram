@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -19,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): Nicolas Tachker (Bull SA)
+ *                 ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.connector;
 

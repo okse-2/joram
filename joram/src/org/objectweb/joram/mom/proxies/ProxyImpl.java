@@ -589,7 +589,7 @@ public class ProxyImpl implements java.io.Serializable {
     // Delivering the pending deliveries, if any:
     for (Enumeration deliveries = activeCtx.getPendingDeliveries();
          deliveries.hasMoreElements();)
-      doReply((ConsumerMessages) deliveries.nextElement());
+      doReply((AbstractJmsReply) deliveries.nextElement());
 
     // Clearing the pending deliveries.
     activeCtx.clearPendingDeliveries();
@@ -825,18 +825,25 @@ public class ProxyImpl implements java.io.Serializable {
    *
    * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerUnsetListRequest req) throws DestinationException
-  {
+  private void doReact(ConsumerUnsetListRequest req) 
+    throws DestinationException {
     // If the listener was listening to a queue, cancelling any pending reply:
-    if (req.getQueueMode())
+    if (req.getQueueMode()) {
       activeCtx.cancelReceive(req.getCancelledRequestId());
-    // If the listener was listening to a topic, unsetting the listener.
-    else {
+      AgentId to = AgentId.fromString(req.getTarget());
+      proxyAgent.sendNot(
+        to,
+        new AbortReceiveRequest(activeCtx.getId(), 
+                                req.getRequestId(),
+                                req.getCancelledRequestId()));
+    } else {
+      // If the listener was listening to a topic, unsetting the listener.
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
       if (sub == null)
-        throw new DestinationException("Can't unset a listener on the non existing subscription: " + subName);
+        throw new DestinationException(
+          "Can't unset a listener on the non existing subscription: " + subName);
 
       sub.unsetListener();
     }
@@ -912,8 +919,12 @@ public class ProxyImpl implements java.io.Serializable {
    *
    * @exception DestinationException  If the subscription does not exist. 
    */
-  private void doReact(ConsumerReceiveRequest req) throws DestinationException
-  {
+  private void doReact(ConsumerReceiveRequest req) 
+    throws DestinationException {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ProxyImpl.doReact(" + req + ')');
+    
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
@@ -927,15 +938,19 @@ public class ProxyImpl implements java.io.Serializable {
     // Nothing to deliver but immediate delivery request: building an empty
     // reply.
     if (consM == null && req.getTimeToLive() == -1) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                " -> immediate delivery");
       sub.unsetReceiver();
       consM = new ConsumerMessages(req.getRequestId(), subName, false);
     }
-
+    
     // Delivering.
-    if (consM != null && activeCtx.getActivated())
+    if (consM != null && activeCtx.getActivated()) {
       doReply(consM);
-    else if (consM != null)
+    } else if (consM != null) {
       activeCtx.addPendingDelivery(consM);
+    }
   }
 
   /** 
@@ -1603,6 +1618,23 @@ public class ProxyImpl implements java.io.Serializable {
         if (DeadMQueueImpl.getId() != null
             && ! agId.equals(DeadMQueueImpl.getId()))
           sendToDMQ((ClientMessages) req);
+      } else if (req instanceof ReceiveRequest) {
+        DestinationException exc = new DestinationException(
+          "Destination " + agId + " does not exist.");
+        MomExceptionReply mer = new MomExceptionReply(
+          req.getRequestId(), exc);
+        try {
+          setCtx(req.getClientContext());
+          if (activeCtx.getActivated()) {
+            doReply(mer);
+          } else {
+            activeCtx.addPendingDelivery(mer);
+          }
+        } catch (StateException se) {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", se);          
+          // Do nothing (the contexte doesn't exist any more).
+        }
       }
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
         MomTracing.dbgProxy.log(BasicLevel.WARN, "Connection "
@@ -1623,8 +1655,7 @@ public class ProxyImpl implements java.io.Serializable {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "ProxyImpl.setCtx(" + key + ')');
 
-    if (key < 0)
-      throw new StateException("Context " + key + " is invalid.");
+    if (key < 0) throw new StateException("Invalid context: " + key);
 
     // If the required context is the last used, no need to update the
     // references:

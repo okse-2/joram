@@ -23,6 +23,13 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
@@ -38,11 +45,6 @@ import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.*;
-
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -82,7 +84,6 @@ public class QueueImpl extends DestinationImpl {
   protected transient Vector messages;
   /** Table holding the delivered messages before acknowledgement. */
   protected transient Hashtable deliveredMsgs;
-
 
   /**
    * Constructs a <code>QueueImpl</code> instance.
@@ -138,6 +139,8 @@ public class QueueImpl extends DestinationImpl {
         doReact(from, (AcknowledgeRequest) not);
       else if (not instanceof DenyRequest)
         doReact(from, (DenyRequest) not);
+      else if (not instanceof AbortReceiveRequest)
+        doReact(from, (AbortReceiveRequest) not);
       else
         super.react(from, not);
 
@@ -149,8 +152,10 @@ public class QueueImpl extends DestinationImpl {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
         MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
 
-      AbstractRequest req = (AbstractRequest) not;
-      Channel.sendTo(from, new ExceptionReply(req, exc));
+      if (not instanceof AbstractRequest) {
+        AbstractRequest req = (AbstractRequest) not;
+        Channel.sendTo(from, new ExceptionReply(req, exc));
+      }
 
       // Rolling back the message persistence orders.
       persistenceModule.rollback();
@@ -293,6 +298,10 @@ public class QueueImpl extends DestinationImpl {
     not.requester = from;
     not.setExpiration(System.currentTimeMillis());
     requests.add(not);
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG, " -> requests count = " + requests.size());
 
     // Launching a delivery sequence for this request:
     int reqIndex = requests.size() - 1;
@@ -505,6 +514,19 @@ public class QueueImpl extends DestinationImpl {
     deliverMessages(0);
   }
 
+  protected void doReact(AgentId from, 
+                         AbortReceiveRequest not) {
+    for (int i = 0; i < requests.size(); i++) {
+      ReceiveRequest request = (ReceiveRequest) requests.get(i);
+      if (request.requester.equals(from) &&
+          request.getClientContext() == not.getClientContext() &&
+          request.getRequestId() == not.getAbortedRequestId()) {
+        requests.remove(i);
+        break;
+      }
+    }
+  }
+
   /**
    * The <code>DestinationImpl</code> class calls this method for passing
    * notifications which have been partly processed, so that they are
@@ -521,7 +543,6 @@ public class QueueImpl extends DestinationImpl {
     else if (not instanceof DeleteNot)
       doProcess((DeleteNot) not);
   }
-
 
   /**
    * Method specifically processing a <code>SetRightRequest</code> instance.
@@ -681,14 +702,16 @@ public class QueueImpl extends DestinationImpl {
     // Sending it to the pending receivers:
     for (int i = 0; i < requests.size(); i++) {
       rec = (ReceiveRequest) requests.elementAt(i);
-      excRep = new ExceptionReply(rec, exc);
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
-                                      + rec.requester
-                                      + " notified of the queue deletion.");
-      
-      Channel.sendTo(rec.requester, excRep);
+      // Check that the request is valid
+      if (rec.isValid()) {
+        excRep = new ExceptionReply(rec, exc);
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
+                                        + rec.requester
+                                        + " notified of the queue deletion.");
+        Channel.sendTo(rec.requester, excRep);
+      }
     }
     // Sending the remaining messages to the DMQ, if needed:
     if (! messages.isEmpty()) {
@@ -943,5 +966,23 @@ public class QueueImpl extends DestinationImpl {
     }
     // Commiting the messages persistence orders.
     persistenceModule.commit();
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    receiving = in.readBoolean();
+    messages = (Vector)in.readObject();
+    deliveredMsgs = (Hashtable)in.readObject();
+    for (int i = 0; i < messages.size(); i++) {
+      Message message = (Message)messages.elementAt(i);
+      persistenceModule.save(message);
+    }
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    out.writeBoolean(receiving);
+    out.writeObject(messages);
+    out.writeObject(deliveredMsgs);
   }
 }

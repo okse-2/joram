@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.messages;
 
@@ -39,68 +39,68 @@ import java.util.*;
 public class Message implements Cloneable, Serializable
 {
   /** The message type (SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES). */
-  int type;
+  transient int type;
 
   /** <code>true</code> if the message must be persisted. **/
-  boolean persistent = true;
+  transient boolean persistent = true;
 
   /** The message identifier. */
-  String id = null;
+  transient String id = null;
   /** The message priority (from 0 to 9, 9 being the highest). */
-  int priority = 4;
+  transient int priority = 4;
   /** The message expiration time (0 for infinite time-to-live). */
-  long expiration = 0;
+  transient long expiration = 0;
   /** The message time stamp. */
-  long timestamp;
+  transient long timestamp;
   /** The message destination identifier. */
-  String toId = null;
+  transient String toId = null;
   /** <code>true</code> if the message destination is a queue. */
-  boolean toQueue;
+  transient boolean toQueue;
   /** The correlation identifier field. */
-  String correlationId = null;
+  transient String correlationId = null;
   /** The reply to destination identifier. */
-  String replyToId = null;
+  transient String replyToId = null;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  boolean replyToQueue;
+  transient boolean replyToQueue;
 
   /**
    * Table holding header fields that may be required by particular
    * clients (such as JMS clients).
    */
-  Hashtable optionalHeader = null;
+  transient Hashtable optionalHeader = null;
 
   /** The bytes body. */
-  byte[] body_bytes = null;
+  transient byte[] body_bytes = null;
   /** The map body. */
-  HashMap body_map = null;
+  transient HashMap body_map = null;
   /** The text body. */
-  String body_text = null;
+  transient String body_text = null;
   /** <code>true</code> if the body is read-only. */
-  boolean bodyRO = false;
+  transient boolean bodyRO = false;
 
   /** The message properties table. */
-  Hashtable properties = null;
+  transient Hashtable properties = null;
   /** <code>true</code> if the properties are read-only. */
-  boolean propertiesRO = false;
+  transient boolean propertiesRO = false;
 
   /** Arrival position of this message on its queue or proxy. */
-  public long order;
+  transient public long order;
   /** The number of delivery attempts for this message. */
-  public int deliveryCount = 0;
+  transient public int deliveryCount = 0;
   /**
    * <code>true</code> if the message has been denied at least once by a
    * consumer.
    */
-  public boolean denied = false;
+  transient public boolean denied = false;
   
   /** <code>true</code> if the message target destination is deleted. */
-  public boolean deletedDest = false;
+  transient public boolean deletedDest = false;
   /** <code>true</code> if the message expired. */
-  public boolean expired = false;
+  transient public boolean expired = false;
   /** <code>true</code> if the message could not be written on the dest. */
-  public boolean notWriteable = false;
+  transient public boolean notWriteable = false;
   /** <code>true</code> if the message is considered as undeliverable. */
-  public boolean undeliverable = false;
+  transient public boolean undeliverable = false;
 
   /**
    * The number of acknowledgements a message still expects from its 
@@ -889,13 +889,82 @@ public class Message implements Cloneable, Serializable
       properties = new Hashtable();
   }
 
+  private static void writeString(ObjectOutputStream os,
+                                  String s) throws IOException {
+    if (s == null) {
+      os.writeInt(-1);
+    } else if (s.length() == 0) {
+      os.writeInt(0);
+    } else {
+      byte[] bout = s.getBytes();
+      os.writeInt(bout.length);
+      os.write(bout);
+    }
+  }
+
+  private static String readString(ObjectInputStream is) throws IOException {
+    int length = is.readInt();
+    if (length == -1) {
+      return null;
+    } else if (length == 0) {
+      return "";
+    } else {
+      byte[] bin = new byte[length];
+      is.readFully(bin);
+      return new String(bin);
+    }
+  }
+
   /**
    * Specializes the serialization method for protecting the message's
    * properties and body as soon as it is sent.
    */
-  private void writeObject(ObjectOutputStream s) throws IOException
+  private void writeObject(ObjectOutputStream os) throws IOException
   {
-    s.defaultWriteObject();
+//     os.defaultWriteObject();
+
+    os.writeInt(type);
+    os.writeBoolean(persistent);
+    writeString(os, id);
+    os.writeInt(priority);
+    os.writeLong(expiration);
+    os.writeLong(timestamp);
+    writeString(os, toId);
+    os.writeBoolean(toQueue);
+    writeString(os, correlationId);
+    writeString(os, replyToId);
+    os.writeBoolean(replyToQueue);
+
+    os.writeObject(optionalHeader);
+
+    if (type == MessageType.SIMPLE) {
+    } else if (type == MessageType.TEXT) {
+      writeString(os, body_text);
+    } else if ((type == MessageType.OBJECT) ||
+               (type == MessageType.STREAM) ||
+               (type == MessageType.BYTES)) {
+      if (body_bytes == null) {
+        os.writeInt(-1);
+      } else {
+        os.writeInt(body_bytes.length);
+        os.write(body_bytes);
+      }
+    } else if (type == MessageType.MAP) {
+      os.writeObject(body_map);
+    }
+    os.writeBoolean(bodyRO);
+
+    os.writeObject(properties);
+    
+    os.writeLong(order);
+    os.writeInt(deliveryCount);
+
+    os.writeBoolean(denied);
+    os.writeBoolean(deletedDest);
+    os.writeBoolean(expired);
+    os.writeBoolean(notWriteable);
+    os.writeBoolean(undeliverable);
+
     bodyRO = true;
   }
 
@@ -903,10 +972,55 @@ public class Message implements Cloneable, Serializable
    * Specializes the deserialization method for initializing the message's
    * transient fields.
    */
-  private void readObject(ObjectInputStream s)
+  private void readObject(ObjectInputStream is)
                throws IOException, ClassNotFoundException
   {
-    s.defaultReadObject();
+//     is.defaultReadObject();
+
+    type = is.readInt();
+    persistent = is.readBoolean();
+    id = readString(is);
+    priority = is.readInt();
+    expiration = is.readLong();
+    timestamp = is.readLong();
+    toId = readString(is);
+    toQueue = is.readBoolean();
+    correlationId = readString(is);
+    replyToId = readString(is);
+    replyToQueue = is.readBoolean();
+
+    optionalHeader = (Hashtable) is.readObject();
+
+    clearBody();
+    if (type == MessageType.SIMPLE) {
+    } else if (type == MessageType.TEXT) {
+      body_text = readString(is);
+    } else if ((type == MessageType.OBJECT) ||
+               (type == MessageType.STREAM) ||
+               (type == MessageType.BYTES)) {
+      int length = is.readInt();
+      if (length ==  -1) {
+        body_bytes = null;
+      } else {
+        body_bytes = new byte[length];
+        is.readFully(body_bytes);
+      }
+    } else if (type == MessageType.MAP) {
+      body_map = (HashMap) is.readObject();
+    }
+    bodyRO = is.readBoolean();
+
+    properties = (Hashtable) is.readObject();
+    
+    order = is.readLong();
+    deliveryCount = is.readInt();
+
+    denied = is.readBoolean();
+    deletedDest= is.readBoolean();
+    expired = is.readBoolean();
+    notWriteable = is.readBoolean();
+    undeliverable = is.readBoolean();
+
     acksCounter = 0;
     durableAcksCounter = 0;
     propertiesRO = true;

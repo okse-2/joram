@@ -279,24 +279,9 @@ public class OutboundConnection implements javax.jms.Connection
   public void cleanup() {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " cleanup()");
-    
-    // Closing the sessions:
-    Session session;
     org.objectweb.joram.client.jms.Connection cnx = 
       (org.objectweb.joram.client.jms.Connection) xac;
-    while (cnx.sessions != null && 
-           ! cnx.sessions.isEmpty()) {
-      session = (Session) cnx.sessions.elementAt(0);
-      try {
-        session.close();
-      }
-      // Catching a JMSException if the connection is broken:
-      catch (JMSException jE) {}
-    } 
-    if (cnx.requestsTable != null)
-      cnx.requestsTable.clear();
-    if (cnx.repliesTable != null)
-      cnx.repliesTable.clear();
+    cnx.cleanup();
   }
 
   public String toString()

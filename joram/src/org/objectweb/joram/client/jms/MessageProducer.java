@@ -38,28 +38,34 @@ public class MessageProducer implements javax.jms.MessageProducer
 {
   /** Default delivery mode. */
   private int deliveryMode = javax.jms.DeliveryMode.PERSISTENT;
+
   /** Default priority. */
   private int priority = 4;
+
   /** Default time to live. */
   private long timeToLive = 0;
+
   /**
    * <code>true</code> if the client requests not to use the message
    * identifiers; however it is not taken into account, as our MOM needs
    * message identifiers for managing acknowledgements.
    */
   private boolean messageIDDisabled = false;
+
   /** <code>true</code> if the time stamp is disabled. */
   private boolean timestampDisabled = false;
+
   /** <code>true</code> if the producer's destination is identified. */
   private boolean identified = true;
 
   /** <code>true</code> if the producer is closed. */
   protected boolean closed = false;
+
   /** The session the producer belongs to. */
   protected Session sess;
+
   /** The destination the producer sends messages to. */
   protected Destination dest = null;
-  
 
   /**
    * Constructs a producer.
@@ -70,15 +76,13 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  MessageProducer(Session sess, Destination dest) throws JMSException
-  {
+  MessageProducer(Session sess, 
+                  Destination dest) 
+    throws JMSException {
     this.sess = sess;
     this.dest = dest;
-
     if (dest == null)
       identified = false;
-
-    sess.producers.add(this);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
@@ -89,7 +93,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public void setDisableMessageID(boolean value) throws JMSException
+  public synchronized void setDisableMessageID(boolean value) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -101,7 +105,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid delivery mode.
    */
-  public void setDeliveryMode(int deliveryMode) throws JMSException
+  public synchronized void setDeliveryMode(int deliveryMode) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -119,7 +123,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid priority.
    */
-  public void setPriority(int priority) throws JMSException
+  public synchronized void setPriority(int priority) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -135,7 +139,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public void setTimeToLive(long timeToLive) throws JMSException
+  public synchronized void setTimeToLive(long timeToLive) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -148,7 +152,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public void setDisableMessageTimestamp(boolean value) throws JMSException
+  public synchronized void setDisableMessageTimestamp(boolean value) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -161,7 +165,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public javax.jms.Destination getDestination() throws JMSException
+  public synchronized javax.jms.Destination getDestination() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -174,7 +178,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public boolean getDisableMessageID() throws JMSException
+  public synchronized boolean getDisableMessageID() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -187,7 +191,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public int getDeliveryMode() throws JMSException
+  public synchronized int getDeliveryMode() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -200,7 +204,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public int getPriority() throws JMSException
+  public synchronized int getPriority() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -213,7 +217,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public long getTimeToLive() throws JMSException
+  public synchronized long getTimeToLive() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -226,7 +230,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public boolean getDisableMessageTimestamp() throws JMSException
+  public synchronized boolean getDisableMessageTimestamp() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
@@ -243,7 +247,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Message message) throws JMSException
+  public synchronized void send(javax.jms.Message message) throws JMSException
   {
     if (! identified)
       throw new UnsupportedOperationException("Can't send message to"
@@ -261,8 +265,10 @@ public class MessageProducer implements javax.jms.MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Message message, int deliveryMode,
-                   int priority, long timeToLive) throws JMSException
+  public synchronized void send(javax.jms.Message message, 
+                                int deliveryMode,
+                                int priority, 
+                                long timeToLive) throws JMSException
   {
     if (! identified)
       throw new UnsupportedOperationException("Can't send message to"
@@ -284,8 +290,8 @@ public class MessageProducer implements javax.jms.MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Destination dest,
-                   javax.jms.Message message) throws JMSException
+  public synchronized void send(javax.jms.Destination dest,
+                                javax.jms.Message message) throws JMSException
   {
     if (identified)
       throw new UnsupportedOperationException("An unidentified message"
@@ -312,9 +318,11 @@ public class MessageProducer implements javax.jms.MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Destination dest, javax.jms.Message message,
-                   int deliveryMode, int priority,
-                   long timeToLive) throws JMSException
+  public synchronized void send(javax.jms.Destination dest, 
+                                javax.jms.Message message,
+                                int deliveryMode, 
+                                int priority,
+                                long timeToLive) throws JMSException
   {
     if (identified)
       throw new UnsupportedOperationException("An unidentified message"
@@ -334,7 +342,7 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void close() throws JMSException
+  public synchronized void close() throws JMSException
   {
     // Ignoring call if producer is already closed:
     if (closed)
@@ -344,7 +352,7 @@ public class MessageProducer implements javax.jms.MessageProducer
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": closing...");
 
-    sess.producers.remove(this);
+    sess.closeProducer(this);
     closed = true;
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -361,74 +369,16 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  private void doSend(Destination dest, javax.jms.Message message,
-                      int deliveryMode, int priority,
-                      long timeToLive) throws JMSException
-  {
+  private void doSend(Destination dest, 
+                      javax.jms.Message message,
+                      int deliveryMode, 
+                      int priority,
+                      long timeToLive) 
+    throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": producing...");
-
-    // Updating the message property fields:
-    String msgID = sess.cnx.nextMessageId();
-    message.setJMSMessageID(msgID);
-    message.setJMSDeliveryMode(deliveryMode);
-    message.setJMSDestination(dest);
-    if (timeToLive == 0)
-      message.setJMSExpiration(0);
-    else
-      message.setJMSExpiration(System.currentTimeMillis() + timeToLive);
-    message.setJMSPriority(priority);
-    if (! timestampDisabled)
-      message.setJMSTimestamp(System.currentTimeMillis());
-
-    org.objectweb.joram.shared.messages.Message momMsg = null;
-    // If the message to send is a proprietary one, getting the MOM message
-    // it wraps:
-    if (message instanceof org.objectweb.joram.client.jms.Message)
-      momMsg = ((Message) message).getMomMessage();
-
-    // If the message to send is a non proprietary JMS message, building
-    // a proprietary message and then getting the MOM message it wraps:
-    else if (message instanceof javax.jms.Message) {
-      try {
-        Message joramMessage = Message.convertJMSMessage(message);
-        momMsg = joramMessage.getMomMessage();
-      }
-      catch (JMSException jE) {
-        MessageFormatException mE = new MessageFormatException("Message to"
-                                                               + " send is"
-                                                               + " invalid.");
-        mE.setLinkedException(jE);
-        throw mE;
-      }
-    }
-    else {
-      MessageFormatException mE = new MessageFormatException("Message to"
-                                                             + " send is"
-                                                             + " invalid.");
-      throw mE;
-    }
-
-    // If the session is transacted, keeping the request for later delivery:
-    if (sess.transacted) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Buffering the message.");
-
-      sess.prepareSend(dest,
-                       (org.objectweb.joram.shared.messages.Message) momMsg.clone());
-    }
-    // If not, building a new request and sending it:
-    else {
-      ProducerMessages pM = new ProducerMessages(dest.getName(), momMsg);
-
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending " + momMsg);
-      
-      sess.cnx.syncRequest(pM);
-    }
+    
+    sess.send(dest, message, deliveryMode, priority, 
+              timeToLive, timestampDisabled);
   }
 }

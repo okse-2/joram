@@ -63,10 +63,11 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                     ", " + cxManager + ")");
 
     this.mcf = mcf;
-    if (cxManager != null)
+    if (cxManager != null) {
       this.cxManager = cxManager;
-    else
+    } else {
       this.cxManager = DefaultConnectionManager.getRef();
+    }
   }
 
 

@@ -19,19 +19,21 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+
 /**
  * Implements the <code>javax.jms.TopicConnection</code> interface.
  */
 public class TopicConnection extends Connection
-                             implements javax.jms.TopicConnection
-{
+    implements javax.jms.TopicConnection {
+
   /**
    * Creates a <code>TopicConnection</code> instance.
    *
@@ -42,11 +44,10 @@ public class TopicConnection extends Connection
    * @exception IllegalStateException  If the server is not listening.
    */
   public TopicConnection(FactoryParameters factoryParameters,
-                         ConnectionItf connectionImpl) throws JMSException
-  {
-    super(factoryParameters, connectionImpl);
+                         RequestChannel requestChannel) 
+    throws JMSException {
+    super(factoryParameters, requestChannel);
   }
-
 
   /**
    * API method.
@@ -60,14 +61,13 @@ public class TopicConnection extends Connection
   public javax.jms.ConnectionConsumer
          createConnectionConsumer(javax.jms.Topic topic, String selector,
                                   javax.jms.ServerSessionPool sessionPool,
-                                  int maxMessages) throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new ConnectionConsumer(this, (Topic) topic, selector,
-                                  sessionPool, maxMessages);
+                                  int maxMessages) 
+    throws JMSException {
+    return super.createConnectionConsumer(
+      topic,
+      selector,
+      sessionPool, 
+      maxMessages);
   }
 
   /**
@@ -85,12 +85,12 @@ public class TopicConnection extends Connection
                                          javax.jms.ServerSessionPool sessPool,
                                          int maxMessages) throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new ConnectionConsumer(this, (Topic) topic, subName, selector,
-                                  sessPool, maxMessages);
+    return super.createDurableConnectionConsumer(
+      topic, 
+      subName, 
+      selector,
+      sessPool, 
+      maxMessages);
   }
 
   /**
@@ -103,10 +103,13 @@ public class TopicConnection extends Connection
          createTopicSession(boolean transacted, int acknowledgeMode)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    
-    return new TopicSession(this, transacted, acknowledgeMode);
+    checkClosed();
+    TopicSession ts = new TopicSession(
+      this, 
+      transacted, 
+      acknowledgeMode, 
+      getRequestMultiplexer());
+    addSession(ts);
+    return ts;
   }
 }
