@@ -40,12 +40,13 @@
 
     <s1 name="Administration refactoring">
       <s2 name="Documentation">
-      <p>A <a href="../current/doc/admin.pdf">PDF document</a> gives some
-      information on this topic.</p>
+      <p>The new administration protocol has been implemented and is included
+      in JORAM 3.3 in the CVS distribution. It is described in a
+      <a href="../current/doc/admin.pdf">PDF document</a>.</p>
       </s2>
 
       <s2 name="Contributions">
-      <p>Contributors already started to work. Many thanks to all of them.</p>
+      <p>Contributors also started to work. Many thanks to all of them.</p>
       <ul>
         <li>Fernando Rocha and Jose Carlos Waeny developed
         a GUI prototype based on the current admin interface:
@@ -53,10 +54,6 @@
         <li>Jeff Mesnil provided us with an insight of what administration
         looks like when based on JMX:
         <a href="../download/adminJMX.zip">try it !</a></li>
-      </ul>
-      <ul>
-        <li>A first sketch of the administration interface is also available
-        <a href="../download/AdminItf.java">there</a> .</li>
       </ul>
       </s2>
 

@@ -39,12 +39,13 @@
 
     <s1 name="Other documentation" anchor="other">
   
-      <subtitle>Administration refactoring</subtitle>
+      <subtitle>JORAM 3.3 tutorial</subtitle>
       <ul>
-	<li>JORAM's administration is currently being completely
-        re-architectured.
-        A <a href="../current/doc/admin.pdf">PDF document</a>
-        is available.</li>
+	<li>JORAM 3.3 is available under CVS. It implements new administration
+        protocol and interfaces and the corresponding tutorial is available
+        as a 
+        <a href="../current/doc/newTutorial.pdf">PDF document</a>
+        .</li>
       </ul>
 
       <subtitle>JORAM's brochure</subtitle>
