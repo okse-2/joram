@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLDomain</code> describes an agent server domain read
  * from the A3CML configuration file.
@@ -50,13 +44,13 @@ public class A3CMLDomain {
    */
   public short gateway = -1;
 
-  A3CMLDomain(Attributes atts) throws SAXException {
-    name = atts.getValue(A3CMLHandler.ATT_NAME);
+  A3CMLDomain(String name, String network) throws Exception {
     if (name.equals("transient") || name.equals("local"))
-      throw new SAXException("Domain name \"" + name + "\" is reserved.");
-    network = atts.getValue(A3CMLHandler.ATT_NETWORK);
+      throw new Exception("Domain name \"" + name + "\" is reserved.");
+    this.name = name;
     if ((network == null) || network.equals(""))
-      network = "fr.dyade.aaa.agent.SingleCnxNetwork";
+      this.network = "fr.dyade.aaa.agent.SingleCnxNetwork";
+    this.network = network;
   }
   
   void addServer(A3CMLPServer server) {

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -82,17 +83,13 @@ public class Connection implements javax.jms.Connection
   private long messagesC = 0;
   /** Subscriptions counter. */
   private long subsC = 0;
-  /** Buffer of destinations accessible for READ operations. */
-  private Vector readables;
-  /** Buffer of destinations accessible for WRITE operations. */
-  private Vector writables;
-  /** Buffer of deleted destinations. */
-  private Vector deleteds;
 
   /** The factory's configuration object. */
   FactoryConfiguration factoryConfiguration;
   /** <code>true</code> if the connection is started. */
   boolean started = false;
+  /** <code>true</code> if the connection is closing. */
+  boolean closing = false;
   /** <code>true</code> if the connection is closed. */
   boolean closed = false;
   /** Vector of the connection's sessions. */
@@ -138,10 +135,6 @@ public class Connection implements javax.jms.Connection
     requestsTable = new Hashtable();
     repliesTable = new Hashtable();
     
-    readables = new Vector();
-    writables = new Vector();
-    deleteds = new Vector();
-
     if (factoryConfiguration.txTimer != 0)
       transactimer = new fr.dyade.aaa.util.Timer();
 
@@ -421,15 +414,15 @@ public class Connection implements javax.jms.Connection
    * API method for closing the connection; even if the connection appears
    * to be broken, closes the sessions.
    *
-   * @exception IllegalStateException  If the connection is broken.
+   * @exception JMSException  Actually never thrown.
    */
   public void close() throws JMSException
   {
-    IllegalStateException isE = null;
-
     // Ignoring the call if the connection is closed:
     if (closed)
       return;
+
+    closing = true;
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this 
@@ -444,9 +437,7 @@ public class Connection implements javax.jms.Connection
       stop();
     }
     // Catching a JMSException if the connection is broken:
-    catch (IllegalStateException caughtISE) {
-      isE = caughtISE;
-    }
+    catch (JMSException jE) {}
 
     // Closing the sessions:
     Session session;
@@ -456,9 +447,7 @@ public class Connection implements javax.jms.Connection
         session.close();
       }
       // Catching a JMSException if the connection is broken:
-      catch (IllegalStateException caughtISE2) {
-        isE = caughtISE2;
-      }
+      catch (JMSException jE) {}
     }
 
     // Closing the connection consumers:
@@ -470,14 +459,14 @@ public class Connection implements javax.jms.Connection
       }
     }
     
-    closed = true;
-
-    // Shutting the driver down:
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
-                                 + ": stops the Driver.");
-    driver.stop();
-    driver = null;
+    // Shutting the driver down if needed:
+    if (! driver.stopping) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                   + ": stops the Driver.");
+      driver.stop();
+      driver = null;
+    }
 
     try {
       dos.close();
@@ -505,11 +494,8 @@ public class Connection implements javax.jms.Connection
     repliesTable.clear();
     repliesTable = null;
 
-    if (isE != null) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
-      throw isE;
-    }
+    closed = true;
+
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed.");
   }
@@ -551,59 +537,6 @@ public class Connection implements javax.jms.Connection
   }
   
   /**
-   * Returns <code>true</code> if the client is a READER on a destination.
-   *
-   * @exception InvalidDestinationException  If the destination no longer
-   *              exists.
-   * @exception JMSSecurityException  If the client isn't a READER on the dest.
-   * @exception IllegalStateException  If the connection is actually broken.
-   */
-  boolean isReader(String destName) throws JMSException
-  {
-    if (deleteds.contains(destName))
-      throw new InvalidDestinationException("Destination " + destName
-                                            + " no longer exists.");
-    if (readables.contains(destName))
-      return true;
-
-    boolean result = checkAccessibility(destName, 1);
-    
-    if (result)
-      readables.add(destName);
-    else
-      throw new JMSSecurityException("READ right not granted on destination "
-                                     + destName);
-    return result;
-  }
-
-  /**
-   * Returns <code>true</code> if the client is a WRITER on a destination.
-   *
-   * @exception InvalidDestinationException  If the destination no longer
-   *              exists.
-   * @exception JMSSecurityException  If the client isn't a WRITER on the dest.
-   * @exception IllegalStateException  If the connection is actually broken.
-   */
-  boolean isWriter(String destName) throws JMSException
-  {
-    if (deleteds.contains(destName))
-      throw new InvalidDestinationException("Destination " + destName
-                                            + " no longer exists.");
-    if (writables.contains(destName))
-      return true;
-    
-    boolean result = checkAccessibility(destName, 2);
-
-    if (result)
-      writables.add(destName);
-    else
-      throw new JMSSecurityException("WRITE right not granted on destination "
-                                     + destName);
-    return result;
-  }
-
-  
-  /**
    * Actually sends a synchronous request to the server and waits for its
    * answer.
    *
@@ -622,8 +555,10 @@ public class Connection implements javax.jms.Connection
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
 
-    String requestId = nextRequestId(); 
-    request.setIdentifier(requestId);
+    if (request.getRequestId() == null)
+      request.setIdentifier(nextRequestId());
+
+    String requestId = request.getRequestId();
 
     try {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -652,6 +587,8 @@ public class Connection implements javax.jms.Connection
       // ... an interrupted exchange:
       else if (e instanceof InterruptedException)
         jE = new JMSException("Interrupted request.");
+      else
+        jE = new JMSException("Exception while getting a reply.");
 
       jE.setLinkedException(e);
 
@@ -762,12 +699,20 @@ public class Connection implements javax.jms.Connection
     }
     // If the reply is an asynchronous exception, passing it:
     else if (reply instanceof MomExceptionReply) {
-      // Removing the protential consumer object from the table:
+      // Removing the potential consumer object from the table:
       if (correlationId != null)
         requestsTable.remove(correlationId);
 
       MomException mE = ((MomExceptionReply) reply).getException();
-      JMSException jE = new JMSException(mE.getMessage());
+      JMSException jE = null;
+
+      if (mE instanceof AccessException)
+        jE = new JMSSecurityException(mE.getMessage());
+      else if (mE instanceof DestinationException)
+        jE = new InvalidDestinationException(mE.getMessage());
+      else
+        jE = new JMSException(mE.getMessage());
+
       onException(jE);
     }
     // Else, if the reply is an asynchronous delivery:
@@ -910,31 +855,6 @@ public class Connection implements javax.jms.Connection
     }
   }
 
-  /**
-   * Actually checks the accessibility of a destination.
-   *
-   * @param destName  The name of the destination to check.
-   * @param right  The right to check.
-   *
-   * @return <code>true</code> if destination is accessible for this right.
-   *
-   * @exception InvalidDestinationException  If the dest no longer exists.
-   * @exception IllegalStateException  If the connection is actually broken.
-   */
-  private boolean checkAccessibility(String destName, int right)
-                throws JMSException
-  {
-    try {
-      CnxAccessRequest req = new CnxAccessRequest(destName, right);
-      CnxAccessReply rep = (CnxAccessReply) syncRequest(req);
-      return rep.getGranted();
-    }
-    catch (InvalidDestinationException iDE) {
-      deleteds.add(destName);
-      throw iDE;
-    }
-  }
-
   /** Actually denies a non deliverable delivery. */
   private void denyDelivery(ConsumerMessages delivery)
   {
@@ -953,7 +873,7 @@ public class Connection implements javax.jms.Connection
     try {
       // Sending the denying as an asynchronous request, as no synchronous
       // behaviour is expected here:
-      asyncRequest(new SessDenyRequest(delivery.comesFrom(), ids, 
+      asyncRequest(new SessDenyRequest(delivery.comesFrom(), ids,
                                        delivery.getQueueMode(), true));
     }
     // If sthg goes wrong while denying, nothing more can be done!

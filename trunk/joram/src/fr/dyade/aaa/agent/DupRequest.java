@@ -26,7 +26,7 @@ package fr.dyade.aaa.agent;
 
 public class DupRequest extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DupRequest.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DupRequest.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   public short to;
 

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,24 +22,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
-package fr.dyade.aaa.mom.jms;
+package fr.dyade.aaa.mom.excepts;
 
 /**
- * A <code>SessCreateDestReply</code> reply is used by a JMS proxy for
- * forwarding a <code>PongReply</code> destination notification, actually
- * replying to a client <code>SessCreateDestRequest</code>.
+ * A <code>MessageValueException</code> is thrown when a value carried by a
+ * message is incorrectly accessed or typed.
  */
-public class SessCreateDestReply extends AbstractJmsReply
+public class MessageValueException extends MessageException
 {
   /**
-   * Constructs a <code>SessCreateDestRep</code> instance.
+   * Constructs a <code>MessageValueException</code> instance.
    *
-   * @param pong  The forwarded destination notification.
+   * @param s  See superclass.
    */
-  public SessCreateDestReply(fr.dyade.aaa.mom.comm.PongReply pong)
+  public MessageValueException(String s)
   {
-    super(pong.getCorrelationId());
+    super(s);
   }
 }

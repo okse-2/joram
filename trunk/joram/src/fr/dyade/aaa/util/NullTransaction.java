@@ -26,7 +26,7 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public class NullTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.10 2002-10-21 08:41:14 maistrfr Exp $"; 
 
   public NullTransaction() {}
 
@@ -50,6 +50,14 @@ public class NullTransaction implements Transaction {
   }
 
   public void delete(String name) {}
+
+  public void save(Serializable obj, String dirName, String name) throws IOException {}
+
+  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+    return null;
+  }
+
+  public void delete(String dirName, String name) {}
 
   public void commit() throws IOException {}
 

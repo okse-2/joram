@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.proxies;
 
@@ -202,6 +205,7 @@ public class JmsAdminProxy extends ConnectionFactory
    *   <li><code>GetTopic</code></li>
    *   <li><code>CreateUser</code></li>
    *   <li><code>GetUser</code></li>
+   *   <li><code>SetSubTopic</code></li>
    *   <li><code>CreateCluster</code></li>
    *   <li><code>AddAdminId</code></li>
    *   <li><code>DelAdminId</code></li>
@@ -210,6 +214,9 @@ public class JmsAdminProxy extends ConnectionFactory
    *   <li><code>DismantleCluster</code></li>
    *   <li><code>DeleteUser</code></li>
    *   <li><code>DestroyDest</code></li>
+   *   <li><code>CreateDeadMQueue</code></li>
+   *   <li><code>SetDeadMQueue</code><li>
+   *   <li><code>SetThreshold</code></li>
    * </ul>
    */ 
   private void doReact(int key, JmsAdminRequest request)
@@ -230,6 +237,8 @@ public class JmsAdminProxy extends ConnectionFactory
       doReact(key, (CreateUser) request);
     else if (request instanceof GetUser)
       doReact(key, (GetUser) request);
+    else if (request instanceof SetSubTopic) 
+      doReact(key, (SetSubTopic) request);
     else if (request instanceof CreateCluster)
       doReact(key, (CreateCluster) request);
     else if (request instanceof AddAdminId)
@@ -246,6 +255,12 @@ public class JmsAdminProxy extends ConnectionFactory
       doReact(key, (DeleteUser) request);
     else if (request instanceof DestroyDest)
       doReact(key, (DestroyDest) request);
+    else if (request instanceof CreateDeadMQueue)
+      doReact(key, (CreateDeadMQueue) request);
+    else if (request instanceof SetDeadMQueue)
+      doReact(key, (SetDeadMQueue) request);
+    else if (request instanceof SetThreshold)
+      doReact(key, (SetThreshold) request);
   }
 
   /**
@@ -360,6 +375,35 @@ public class JmsAdminProxy extends ConnectionFactory
 
     sendTo(destId, new DeleteNot());
     doReply(key, req, true, "Destination " + name + " is deleted.");
+  }
+
+  /**
+   * Method implementing the admin proxy reaction to a
+   * <code>SetSubTopic</code> request requesting to set a given topic as the
+   * subtopic of an administered one.
+   * <p>
+   * The request fails if the administered topic does not exist.
+   */
+  private void doReact(int key, SetSubTopic req)
+  {
+    String topicName = req.getTopicName();
+    AgentId topicId = (AgentId) destsTable.get(topicName);
+
+    if (topicId == null) {
+      doReply(key, req, false, "Topic " + topicName + " not administered "
+                               + "by this proxy.");
+      return;
+    }
+
+    AgentId subTopicId = AgentId.fromString(req.getSubTopicId());
+
+    SetSubTopicRequest not =
+      new SetSubTopicRequest(key, req.getRequestId(), topicId, subTopicId);
+
+    sendTo(topicId, not);
+    sendTo(subTopicId, not);
+
+    doReply(key, req, true, "Topics notified of hierarchy.");
   }
 
   /**
@@ -618,6 +662,117 @@ public class JmsAdminProxy extends ConnectionFactory
     sendTo(uc.proxyId, new DeleteNot());
     
     doReply(key, req, true, "User " + name + " deleted.");
+  }
+
+  
+  /**
+   * Method implementing the admin proxy reaction to a
+   * <code>CreateDeadMQueue</code> request requesting the creation of a
+   * dead message queue.
+   * <p>
+   * The request fails if the queue name is already taken, or if the queue
+   * deployement fails.
+   */ 
+  private void doReact(int key, CreateDeadMQueue req)
+  {
+    String name = req.getName();
+
+    if (destsTable.containsKey(name))
+      doReply(key, req, false, "Can't create queue as name " + name
+              + " is already taken.");
+    else {
+      DeadMQueue queue = new DeadMQueue(this.getId());
+      try {
+        queue.deploy();
+        destsTable.put(name, queue.getId());
+        doReply(key, req, true, queue.getId().toString());
+      } 
+      catch (IOException iE) {
+        queue = null;
+        doReply(key, req, false, "Can't deploy queue " + name + ": " + iE);
+      }
+    }
+  }
+
+  /**
+   * Method implementing the admin proxy reaction to a
+   * <code>SetDeadMQueue</code> request requesting to set a DMQ.
+   * <p>
+   * The request fails if one of its parameters is incorrect.
+   */
+  private void doReact(int key, SetDeadMQueue req)
+  {
+    try {
+      String name = req.getName();
+      AgentId dmqId = AgentId.fromString(req.getDMQId());
+
+      // Default setting:
+      if (name == null)
+        DeadMQueueImpl.id = dmqId;
+      // User setting:
+      else if (req.toUser()) {
+        AgentId proxyId = AgentId.fromString(name);
+        sendTo(proxyId, new SetDMQRequest(req.getRequestId(), dmqId));
+      }
+      // Destination setting:
+      else {
+        AgentId destId = (AgentId) destsTable.get(name);
+        if (destId == null) {
+          doReply(key, req, false, "Destination " + name + " not" +
+                  " administered by this proxy.");
+        }
+        else
+          sendTo(destId, new SetDMQRequest(req.getRequestId(), dmqId));
+      }
+      doReply(key, req, true, "DMQ has been successfuly set.");
+    }
+    catch (IllegalArgumentException exc) {
+      doReply(key, req, false, "Invalid request: " + exc);
+    }
+  }
+
+  /**
+   * Method implementing the admin proxy reaction to a
+   * <code>SetThreshold</code> request requesting to set a threshold.
+   * <p>
+   * The request fails if one of its parameters is incorrect.
+   */
+  private void doReact(int key, SetThreshold req)
+  {
+    String name = req.getName();
+    Integer threshold = req.getThreshold();
+    AgentId id = null;
+
+    try {
+      // Default setting:
+      if (name == null) {
+        DeadMQueueImpl.threshold = threshold;
+        doReply(key, req, true, "Threshold has been successfuly set.");
+      }
+      else {
+        id = AgentId.fromString(name);
+
+        // User setting:
+        if (req.toUser()) {
+          sendTo(id, new SetThreshRequest(req.getRequestId(), threshold));
+          doReply(key, req, true, "Threshold has been successfuly set.");
+        }
+        // Destination setting:
+        else {
+          if (destsTable.containsValue(id)) {
+            sendTo(id, new SetThreshRequest(req.getRequestId(), threshold));
+            doReply(key, req, true, "Threshold has been successfuly set.");
+          }
+          else {
+            doReply(key, req, false, "Destination not administered by this" +
+                    " proxy.");
+          }
+        }
+      }
+    }
+    catch (IllegalArgumentException exc) {
+      doReply(key, req, false, "Invalid user proxy identifier: " + exc);
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,12 +22,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.AbstractRequest;
 import fr.dyade.aaa.task.Condition;
 
@@ -56,6 +56,7 @@ public class Queue extends Agent
   {
     queueImpl = new QueueImpl(this.getId(), creator);
   }
+
 
   /**
    * Overrides the <code>Agent.react(...)</code> method for providing

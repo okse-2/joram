@@ -27,7 +27,7 @@ import java.util.Vector;
 
 public final class A3ServersList extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $";
 
  /**
   * A3Node contains informations about an agent server.
@@ -61,5 +61,29 @@ public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.9 2002-0
     }
     strBuf.append(']');
     return strBuf.toString();
+  }
+
+  /**
+   * Returns the identifier of the agent server which name is specified.
+   *
+   * @param siteName the name of the agent server
+   *
+   * @return the identifier of the agent server
+   *
+   * @exception Exception if the server name is unknown.
+   */
+  public static short getSiteId(String siteName) throws Exception {
+    for (int i = 0; i < AgentServer.getServerNb(); i++) {
+      ServerDesc serverDesc = null;
+      try{
+        serverDesc = AgentServer.getServerDesc((short)i);
+      }catch(Exception e){
+        continue;
+      }
+      if (serverDesc.name.equals(siteName)) {
+	return serverDesc.sid;
+      }
+    }
+    throw new Exception("Unknown site name: " + siteName);
   }
 }

@@ -31,7 +31,7 @@ package fr.dyade.aaa.util;
  */
 public class StoppedQueueException extends RuntimeException
 {
-  public static final String RCS_VERSION="@(#)$Id: StoppedQueueException.java,v 1.2 2002-03-26 16:10:07 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: StoppedQueueException.java,v 1.3 2002-10-21 08:41:14 maistrfr Exp $"; 
 
   /**
    * Constructs a new <code>StoppedQueueException</code> with

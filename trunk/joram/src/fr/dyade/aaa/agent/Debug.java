@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -28,14 +29,7 @@ import java.util.*;
 import java.lang.reflect.*;
 
 import org.apache.log4j.Category;
-import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
-
-import org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory;
-
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-import org.objectweb.util.monolog.api.LoggerFactory;
 
 /**
  * This class controls the debug traces printed to the audit file.
@@ -60,6 +54,32 @@ import org.objectweb.util.monolog.api.LoggerFactory;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug extends fr.dyade.aaa.util.Debug {
+  public static final String A3Debug = "fr.dyade.aaa.agent";
+  public static final String A3Agent = A3Debug + ".Agent";
+  public static final String A3Engine = A3Debug + ".Engine";
+  public static final String A3Network = A3Debug + ".Network";
+  public static final String A3Service = A3Debug + ".Service";
+  public static final String A3Proxy = A3Agent + ".ProxyAgent";
+
+  /**
+   * Initializes the package.
+   *
+   * @param serverId	this server id
+   */
+//   static void init(short serverId) {
+//     if (factory == null) init();
+// 
+//     Category root = Category.getRoot();
+//     if (serverId >= 0) {
+//       try {
+//         // Try to create local appender if defined...
+//         FileAppender local = (FileAppender) root.getAppender("local");
+//         File auditFile = new File("server#" + serverId + ".audit");
+//         local.setFile(auditFile.getCanonicalPath());
+//       } catch (Exception exc) { }
+//     }
+//   }
+
     // sets dynamic debug variables for other packages
 //     final String dynvarMarker = "Debug.var.";
 //     int markerLength = dynvarMarker.length();
@@ -111,55 +131,4 @@ public final class Debug extends fr.dyade.aaa.util.Debug {
 // 	}
 //       }
 //     }
-
-  public static final String A3Debug = "fr.dyade.aaa.agent";
-  public static final String A3Agent = A3Debug + ".Agent";
-  public static final String A3Engine = A3Debug + ".Engine";
-  public static final String A3Network = A3Debug + ".Network";
-  public static final String A3Service = A3Debug + ".Service";
-  public static final String A3Proxy = A3Agent + ".ProxyAgent";
-
-//   static void dump(byte[] buf, int size) {
-//     int idx = 0;
-
-//     synchronized (lock) {
-//       while (idx < size) {
-// 	if (idx < 10)
-// 	  stream.print("\n [    " + idx +"] | ");
-// 	else if (idx < 100)
-// 	  stream.print("\n [   " + idx +"] | ");
-// 	else if (idx < 1000)
-// 	  stream.print("\n [  " + idx +"] | ");
-// 	else if (idx < 10000)
-// 	  stream.print("\n [ " + idx +"] | ");
-// 	else
-// 	stream.print("\n [" + idx +"] | ");
-// 	for (int i=0; i<16; i++) {
-// 	  if ((idx+i) < size) {
-// 	    if (buf[idx+i] < 0) {
-// 	      stream.print(Integer.toHexString(256 + buf[idx+i]));
-// 	    } else {
-// 	      if (buf[idx+i] < 16)
-// 		stream.print('0');
-// 	      stream.print(Integer.toHexString(buf[idx+i]));
-// 	    }
-// 	    stream.print(' ');
-// 	  } else
-// 	    stream.print("   ");
-// 	}
-// 	stream.print(" | ");
-// 	for (int i=0; i<16; i++) {
-// 	  if ((idx+i) >= size)
-// 	    stream.print(' ');
-// 	  else if (!Character.isLetterOrDigit((char) buf[idx+i]))
-// 	    stream.print('.');
-// 	  else
-// 	    stream.print((char) buf[idx+i]);
-// 	}
-// 	idx += 16;
-//       }
-//       stream.println();
-//       stream.flush();
-//     }
-//   }
 }

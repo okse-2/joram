@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -29,6 +30,10 @@ import javax.naming.spi.*;
 import javax.naming.*;
 import java.util.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+
 public class NamingContextFactory implements InitialContextFactory {
   /**
    *  This property which defines the listener port must be passed
@@ -41,6 +46,7 @@ public class NamingContextFactory implements InitialContextFactory {
    */
   public final static String HOST_PROPERTY = "java.naming.factory.host";
   
+
   /**
    *@param  env  This contains the hostname and the port.
    *@return  A JNDI initial context.

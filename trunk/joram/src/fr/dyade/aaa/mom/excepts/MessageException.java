@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,23 +22,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
-package fr.dyade.aaa.mom.jms;
+package fr.dyade.aaa.mom.excepts;
 
 /**
- * A <code>SessCreateDestRequest</code> request is sent by a
- * <code>Session</code> when requesting to "create" a destination.
+ * A <code>MessageException</code> is thrown when an error occurs while
+ * accessing a message.
  */
-public class SessCreateDestRequest extends AbstractJmsRequest
+public class MessageException extends MomException
 {
   /**
-   * Constructs a <code>SessCreateDestReq</code> instance.
+   * Constructs a <code>MessageException</code> instance.
    *
-   * @param to  See superclass.
+   * @param s  See superclass.
    */
-  public SessCreateDestRequest(String to)
+  public MessageException(String s)
   {
-    super(to);
+    super(s);
   }
 }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLNetwork</code> describes a service.
  */
@@ -40,8 +34,9 @@ public class A3CMLService {
   public String classname = null;
   public String args = null;
 
-  A3CMLService(Attributes atts) throws SAXException {
-    classname = atts.getValue(A3CMLHandler.ATT_CLASS);
-    args = atts.getValue(A3CMLHandler.ATT_ARGS);
+  A3CMLService(String classname,
+               String args) {
+    this.classname = classname;
+    this.args = args;
   }
 }

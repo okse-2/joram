@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -47,7 +48,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
   /** The message listener, if any. */
   private javax.jms.MessageListener messageListener = null;
   /** <code>true</code> for a durable subscriber. */
-  private boolean durable;
+  private boolean durableSubscriber;
   /** Pending "receive" or listener request. */
   private AbstractJmsRequest pendingReq = null;
   /**
@@ -55,10 +56,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * request.
    */
   private boolean receiving = false;
-  /**
-   * <code>true</code> if the listener failed to process a received message.
-   */
-  private boolean listenerFailed;
 
   /** The destination the consumer gets its messages from. */
   protected Destination dest;
@@ -86,7 +83,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * @param sess  The session the consumer belongs to.
    * @param dest  The destination the consumer gets messages from.
    * @param selector  Selector for filtering messages.
-   * @param subName  The durable subscription's name, if any.
+   * @param subName  The durableSubscriber subscription's name, if any.
    * @param noLocal  <code>true</code> for a subscriber not wishing to consume
    *          messages produced by its connection.
    *
@@ -109,22 +106,19 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       throw new InvalidSelectorException("Invalid selector syntax: " + sE);
     }
 
-    // Checking the user's access permission:
-    sess.cnx.isReader(dest.getName());
-
     // If the destination is a topic, the consumer is a subscriber:
     if (dest instanceof javax.jms.Topic) {
       if (subName == null) {
         subName = sess.cnx.nextSubName();
-        durable = false;
+        durableSubscriber = false;
       }
       else
-        durable = true;
+        durableSubscriber = true;
 
       sess.cnx.syncRequest(new ConsumerSubRequest(dest.getName(),
                                                   subName,
                                                   selector,
-                                                  noLocal, durable));
+                                                  noLocal, durableSubscriber));
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
@@ -203,21 +197,29 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
     // If unsetting the listener:
     if (this.messageListener != null && messageListener == null) {
-      this.messageListener = messageListener;
-      sess.msgListeners--;
-
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": unsets"
                                    + " listener request.");
 
       sess.cnx.requestsTable.remove(pendingReq.getRequestId());
-      pendingReq = null;
 
-      if (! queueMode) {
-        ConsumerUnsetListRequest unsetLR =
-          new ConsumerUnsetListRequest(targetName);
-        sess.cnx.syncRequest(unsetLR);
+      this.messageListener = messageListener;
+      sess.msgListeners--;
+
+      ConsumerUnsetListRequest unsetLR = null;
+      if (queueMode) {
+        unsetLR = new ConsumerUnsetListRequest(pendingReq.getRequestId(),
+                                               true);
       }
+      else
+        unsetLR = new ConsumerUnsetListRequest(targetName, false);
+
+      try {
+        sess.cnx.syncRequest(unsetLR);
+      } 
+      // A JMSException might be caught if the connection is broken.
+      catch (JMSException jE) {}
+      pendingReq = null;
 
       // Stopping the daemon if not needed anymore:
       if (sess.msgListeners == 0 && sess.started) {
@@ -233,8 +235,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
     else if (this.messageListener == null && messageListener != null) {
       sess.msgListeners++;
 
-      if (sess.msgListeners == 1 &&
-          (sess.started || sess.cnx.started)) {
+      if (sess.msgListeners == 1
+          && (sess.started || sess.cnx.started)) {
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": starts the"
                                      + " session daemon.");
@@ -250,8 +252,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
       sess.cnx.asyncRequest(pendingReq);
     }
-
-    listenerFailed = false;
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": MessageListener"
@@ -293,33 +293,30 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receive(long timeOut) throws JMSException
   {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": requests to receive a message.");
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed consumer.");
-
-    // Server side, infinite time to live is specified by a negative value.
-    if (timeOut == 0)
-      timeOut = -1;
-
-    if (messageListener != null) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as a"
-                                   + " listener exists for this consumer.");
-    }
-    else if (sess.msgListeners > 0) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as"
-                                   + " asynchronous consumers have already"
-                                   + " been set on the session.");
-    }
-
-    // Sending a synchronous "receive" request and synchronizing with
-    // a possible "close":
+    // Synchronizing with a possible "close".
     synchronized(this) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                   + ": requests to receive a message.");
+
+      if (closed)
+        throw new IllegalStateException("Forbidden call on a closed consumer.");
+
+      if (messageListener != null) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as a"
+                                     + " listener exists for this consumer.");
+      }
+      else if (sess.msgListeners > 0) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as"
+                                     + " asynchronous consumers have already"
+                                     + " been set on the session.");
+      }
+
       pendingReq = new ConsumerReceiveRequest(targetName, selector, timeOut,
                                               queueMode);
+      pendingReq.setIdentifier(sess.cnx.nextRequestId());
       receiving = true;
     }
 
@@ -327,16 +324,15 @@ public class MessageConsumer implements javax.jms.MessageConsumer
     ConsumerMessages reply =
      (ConsumerMessages) sess.cnx.syncRequest(pendingReq);
 
-    pendingReq = null;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
-                                 + " reply.");
-    
-    // Processing the received reply and synchronizing with a possible
-    // "close":
+    // Synchronizing again with a possible "close":
     synchronized(this) {
       receiving = false;
+      pendingReq = null;
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
+                                   + " reply.");
+    
       if (reply.getMessage() != null) {
         String msgId = reply.getMessage().getIdentifier();
         // Auto ack: acknowledging the message:
@@ -363,7 +359,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receive() throws JMSException
   {
-    return receive(-1);
+    return receive(0);
   }
 
   /** 
@@ -375,7 +371,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receiveNoWait() throws JMSException
   {
-    return receive(0);
+    return receive(-1);
   }
 
   /**
@@ -393,22 +389,36 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": closing...");
 
-    // Synchronizing with a pending "receive" or "onMessage":
+    // Synchronizig with a possible receive() or onMessage() ongoing process.
     syncro();
 
+    // Removing this resource's reference from everywhere:
+    Object lock = null;
+    if (pendingReq != null)
+      lock = sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+    sess.consumers.remove(this);
+
     // Unsetting the listener, if any:
+    try {
     if (messageListener != null) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unsetting listener.");
 
-      sess.cnx.requestsTable.remove(pendingReq.getRequestId());
-      pendingReq = null;
+      if (queueMode) {
+        ConsumerUnsetListRequest unsetLR =
+          new ConsumerUnsetListRequest(pendingReq.getRequestId(), true);
+        sess.cnx.syncRequest(unsetLR);
+      }
     }
 
-    if (! queueMode && durable)
+    if (durableSubscriber)
       sess.cnx.syncRequest(new ConsumerCloseSubRequest(targetName));
     else if (! queueMode)
       sess.cnx.syncRequest(new ConsumerUnsubRequest(targetName));
+
+    }
+    // A JMSException might be caught if the connection is broken.
+    catch (JMSException jE) {}
 
     // In the case of a pending "receive" request, replying by a null to it:
     if (receiving) {
@@ -421,7 +431,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       sess.cnx.repliesTable.put(pendingReq.getRequestId(),
                                 new ConsumerMessages(null, null, queueMode));
 
-      Object lock = sess.cnx.requestsTable.remove(pendingReq.getRequestId());
       synchronized(lock) {
         lock.notify();
       }
@@ -429,10 +438,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
     // Synchronizing again:
     syncro();
-    
-    sess.consumers.remove(this);
-    closed = true;
 
+    closed = true;
+    
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed.");
   }
@@ -498,17 +506,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                        + ": RuntimeException thrown"
                                        + " by the listener: " + rE);
 
-          // If the listener already failed, unsetting it:
-          if (listenerFailed) {
-            if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-              JoramTracing.dbgClient.log(BasicLevel.WARN, this
-                                         + ": listener malfunctionning has"
-                                           + " been removed.");
-            this.setMessageListener(null);
-          }
-          else
-            listenerFailed = true;
-            
           if (sess.autoAck && queueMode)
             sess.cnx.syncRequest(new ConsumerDenyRequest(targetName, msgId,
                                                          queueMode));
@@ -516,8 +513,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
             sess.cnx.asyncRequest(new ConsumerDenyRequest(targetName, msgId,
                                                           queueMode));
         }
-        // Sending a new request if queue mode and if listener still alive:
-        if (messageListener != null && queueMode) {
+        // Sending a new request if queue mode:
+        if (queueMode) {
           pendingReq = new ConsumerSetListRequest(targetName, selector, true);
           pendingReq.setIdentifier(sess.cnx.nextRequestId());
           sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,12 +22,13 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
-import fr.dyade.aaa.mom.messages.DestinationInfo;
-import fr.dyade.aaa.mom.messages.MessageType;
+import fr.dyade.aaa.mom.excepts.*;
+import fr.dyade.aaa.mom.messages.*;
 
 import java.util.*;
 
@@ -47,40 +48,45 @@ public class Message implements javax.jms.Message
 {
   /** The wrapped MOM message. */
   protected fr.dyade.aaa.mom.messages.Message momMsg;
-
-  /** <code>true</code> if the message properties are read-only. */
-  protected boolean ROproperties = false;
-  /** <code>true</code> if the message body is read-only. */
-  protected boolean RObody = false;
-  /** The session that consumes the message, if any. */
+  /**
+   * If the message is actually consumed, the session that consumes it, 
+   * <code>null</code> otherwise.
+   */
   protected Session sess = null;
 
-  /**
-   * <code>true</code> if this message is consumed and thus, acknowledgable. 
-   */
-  private boolean consumed = false;
-
 
   /**
-   * Constructs a <code>Message</code>.
+   * Constructs a bright new <code>Message</code>.
    */
-  Message(Session sess)
+  Message()
   {
     momMsg = new fr.dyade.aaa.mom.messages.Message();
-    this.sess = sess;
   }
 
+  /**
+   * Constructs a <code>Message</code> wrapping a MOM message consumed by a
+   * session.
+   *
+   * @param sess  The consuming session.
+   * @param momMsg  The MOM message to wrap.
+   */
+  Message(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
+  {
+    this.sess = sess;
+    this.momMsg = momMsg;
+  }
 
+  
   /**
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
-   * @exception JMSException  If the acknowledgement fails for an other
+   * @exception JMSException  If the acknowledgement fails for any other
    *              reason.
    */
   public void acknowledge() throws JMSException
   {
-    if (! consumed
+    if (sess == null
         || sess.transacted
         || sess.acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE)
       return;
@@ -98,7 +104,7 @@ public class Message implements javax.jms.Message
    */
   public void clearBody() throws JMSException
   {
-    RObody = false;
+    momMsg.clearBody();
   }
 
   /**
@@ -108,11 +114,7 @@ public class Message implements javax.jms.Message
    */
   public void clearProperties() throws JMSException
   {
-    if (momMsg.properties != null) {
-      momMsg.properties.clear();
-      momMsg.properties = null;
-    }
-    ROproperties = false;
+    momMsg.clearProperties();
   } 
 
   /**
@@ -122,10 +124,7 @@ public class Message implements javax.jms.Message
    */
   public boolean propertyExists(String name) throws JMSException
   {
-    if (momMsg.properties == null)
-      return false;
-
-    return (momMsg.properties.get(name) != null);
+    return momMsg.propertyExists(name);
   }
 
   /**
@@ -135,10 +134,7 @@ public class Message implements javax.jms.Message
    */
   public Enumeration getPropertyNames() throws JMSException
   {
-    if (momMsg.properties == null)
-      return (new Hashtable()).keys();
-
-    return momMsg.properties.keys();
+    return momMsg.getPropertyNames();
   }
 
  
@@ -160,7 +156,7 @@ public class Message implements javax.jms.Message
    */
   public void setJMSPriority(int priority) throws JMSException
   {
-    if (0 <= priority && priority <=9)
+    if (0 <= priority && priority <= 9)
       momMsg.setPriority(priority);
     else
       throw new JMSException("Priority of "+ priority +" is not valid"
@@ -172,25 +168,20 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void setJMSDestination(javax.jms.Destination destination)
-            throws JMSException
+  public void setJMSDestination(javax.jms.Destination dest) throws JMSException
   {
-    DestinationInfo dest = null;
+    if (dest == null)
+      momMsg.setDestination(null, true);
 
-    if (destination instanceof TemporaryQueue)
-      dest = new DestinationInfo(((Queue) destination).getQueueName(),
-                                 true, true);
-    else if (destination instanceof Queue)
-      dest = new DestinationInfo(((Queue) destination).getQueueName(),
-                                 true, false);
-    else if (destination instanceof TemporaryTopic)
-      dest = new DestinationInfo(((Topic) destination).getTopicName(),
-                                 false, true);
-    else if (destination instanceof Topic)
-      dest = new DestinationInfo(((Topic) destination).getTopicName(),
-                                 false, false);
+    if (dest instanceof Queue)
+      momMsg.setDestination(((Queue) dest).getQueueName(), true);
+    else
+      momMsg.setDestination(((Topic) dest).getTopicName(), false);
 
-    momMsg.setDestination(dest);
+    if (dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)
+      momMsg.setOptionalHeader("JMSTempDestination", new Boolean(true));
+    else
+      momMsg.setOptionalHeader("JMSTempDestination", new Boolean(false));
   }
 
   /**
@@ -220,22 +211,18 @@ public class Message implements javax.jms.Message
    */
   public void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException
   {
-    DestinationInfo dest = null;
+    if (replyTo == null)
+      momMsg.setReplyTo(null, true);
 
-    if (replyTo instanceof TemporaryQueue)
-      dest = new DestinationInfo(((Queue) replyTo).getQueueName(),
-                                 true, true);
-    else if (replyTo instanceof Queue)
-      dest = new DestinationInfo(((Queue) replyTo).getQueueName(),
-                                 true, false);
-    else if (replyTo instanceof TemporaryTopic)
-      dest = new DestinationInfo(((Topic) replyTo).getTopicName(),
-                                 false, true);
-    else if (replyTo instanceof Topic)
-      dest = new DestinationInfo(((Topic) replyTo).getTopicName(),
-                                 false, false);
+    if (replyTo instanceof Queue)
+      momMsg.setReplyTo(((Queue) replyTo).getQueueName(), true);
+    else
+      momMsg.setReplyTo(((Topic) replyTo).getTopicName(), false);
 
-    momMsg.setReplyTo(dest);
+    if (replyTo instanceof TemporaryQueue || replyTo instanceof TemporaryTopic)
+      momMsg.setOptionalHeader("JMSTempReplyTo", new Boolean(true));
+    else
+      momMsg.setOptionalHeader("JMSTempReplyTo", new Boolean(false));
   }
   
   /**
@@ -266,7 +253,7 @@ public class Message implements javax.jms.Message
   public void setJMSCorrelationIDAsBytes(byte[] correlationID)
             throws JMSException
   {
-    momMsg.userBytesHeader = correlationID;
+    momMsg.setCorrelationId(ConversionHelper.toString(correlationID));
   }
   
   /**
@@ -276,7 +263,7 @@ public class Message implements javax.jms.Message
    */
   public void setJMSType(String type) throws JMSException
   {
-    momMsg.userStringHeader = type;
+    momMsg.setOptionalHeader("JMSType", type);
   }
 
   /**
@@ -290,7 +277,7 @@ public class Message implements javax.jms.Message
 	&& deliveryMode != javax.jms.DeliveryMode.NON_PERSISTENT)
       throw new JMSException("Invalid delivery mode.");
 
-    momMsg.userIntHeader = deliveryMode;
+    momMsg.setOptionalHeader("JMSDeliveryMode", new Integer(deliveryMode));
   }
 
   /**
@@ -320,7 +307,15 @@ public class Message implements javax.jms.Message
    */
   public int getJMSDeliveryMode() throws JMSException
   {
-    return momMsg.userIntHeader;
+    try {
+      Object value = momMsg.getOptionalHeader("JMSDeliveryMode");
+      return ConversionHelper.toInt(value);
+    }
+    // If the value can't be retrieved, it might be because the sender was
+    // not a JMS client; returning the default value.
+    catch (Exception exc) {
+      return 0;
+    }
   }
 
   /**
@@ -330,19 +325,31 @@ public class Message implements javax.jms.Message
    */
   public javax.jms.Destination getJMSDestination() throws JMSException
   {
-    DestinationInfo dest = momMsg.getDestination();
+    String id = momMsg.getDestinationId();
+    boolean queue = momMsg.toQueue();
+    Object temporaryValue = null;
+    boolean temporary = false;
 
-    if (dest == null)
-      return null;
+    try {
+      temporaryValue = momMsg.getOptionalHeader("JMSTempDestination");
+      temporary = ConversionHelper.toBoolean(temporaryValue);
+    }
+    // If the value can't be retrieved, it might be because the sender is
+    // not a JMS client and did not know about temporary destinations...
+    catch (Exception exc) {}
 
-    if (dest.isQueue() && dest.isTemporary())
-      return new TemporaryQueue(dest.getName(), sess.cnx);
-    else if (dest.isQueue() && ! dest.isTemporary())
-      return new Queue(dest.getName());
-    else if (! dest.isQueue() && dest.isTemporary())
-      return new TemporaryTopic(dest.getName(), sess.cnx);
-    else
-      return new Topic(dest.getName());
+    if (queue) {
+      if (temporary)
+        return new TemporaryQueue(id, sess.cnx);
+      else
+        return new Queue(id);
+    }
+    else {
+      if (temporary)
+        return new TemporaryTopic(id, sess.cnx);
+      else
+        return new Topic(id);
+    }
   }
 
   /**
@@ -372,19 +379,34 @@ public class Message implements javax.jms.Message
    */
   public javax.jms.Destination getJMSReplyTo() throws JMSException
   {
-    DestinationInfo dest = momMsg.getReplyTo();
+    String id = momMsg.getReplyToId();
+    boolean queue = momMsg.replyToQueue();
+    Object temporaryValue = null;
+    boolean temporary = false;
 
-    if (dest == null)
+    if (id == null)
       return null;
 
-    if (dest.isQueue() && dest.isTemporary())
-      return new TemporaryQueue(dest.getName(), sess.cnx);
-    else if (dest.isQueue() && ! dest.isTemporary())
-      return new Queue(dest.getName());
-    else if (! dest.isQueue() && dest.isTemporary())
-      return new TemporaryTopic(dest.getName(), sess.cnx);
-    else
-      return new Topic(dest.getName());
+    try {
+      temporaryValue = momMsg.getOptionalHeader("JMSTempReplyTo");
+      temporary = ConversionHelper.toBoolean(temporaryValue);
+    }
+    // If the value can't be retrieved, it might be because the sender is not
+    // a JMS client...
+    catch (Exception exc) {}
+  
+    if (queue) {
+      if (temporary)
+        return new TemporaryQueue(id, sess.cnx);
+      else
+        return new Queue(id);
+    }
+    else {
+      if (temporary)
+        return new TemporaryTopic(id, sess.cnx);
+      else
+        return new Topic(id);
+    } 
   }
 
   /**
@@ -404,7 +426,8 @@ public class Message implements javax.jms.Message
    */
   public String getJMSType() throws JMSException
   {
-    return momMsg.userStringHeader;
+    Object value = momMsg.getOptionalHeader("JMSType");
+    return ConversionHelper.toString(value);
   }
 
   /**
@@ -420,13 +443,18 @@ public class Message implements javax.jms.Message
   /**
    * API method.
    *
-   * @exception JMSException  Actually never thrown.
+   * @exception MessageFormatException  In case of a problem while retrieving
+   *              the field. 
    */
   public byte[] getJMSCorrelationIDAsBytes() throws JMSException
   {
-    return momMsg.userBytesHeader;
+    try {
+      return ConversionHelper.toBytes(momMsg.getCorrelationId());
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
-
 
   /**
    * API method.
@@ -437,8 +465,7 @@ public class Message implements javax.jms.Message
   public void setBooleanProperty(String name, boolean value)
             throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Boolean(value));
+    doSetProperty(name, new Boolean(value));
   }
 
   /**
@@ -449,8 +476,7 @@ public class Message implements javax.jms.Message
    */
   public void setByteProperty(String name, byte value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Byte(value));
+    doSetProperty(name, new Byte(value));
   }
 
   /**
@@ -461,8 +487,7 @@ public class Message implements javax.jms.Message
    */
   public void setDoubleProperty(String name, double value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Double(value));
+    doSetProperty(name, new Double(value));
   }
 
   /**
@@ -473,8 +498,7 @@ public class Message implements javax.jms.Message
    */
   public void setFloatProperty(String name, float value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Float(value));
+    doSetProperty(name, new Float(value));
   }
 
   /**
@@ -485,8 +509,7 @@ public class Message implements javax.jms.Message
    */
   public void setIntProperty(String name, int value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Integer(value));
+    doSetProperty(name, new Integer(value));
   }
 
   /**
@@ -497,8 +520,7 @@ public class Message implements javax.jms.Message
    */
   public void setLongProperty(String name, long value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Long(value));
+    doSetProperty(name, new Long(value));
   }
 
   /**
@@ -510,15 +532,7 @@ public class Message implements javax.jms.Message
    */
   public void setObjectProperty(String name, Object value) throws JMSException
   {
-    checkPropSet(name);
-
-    if (value instanceof Boolean || value instanceof Number
-        || value instanceof String)
-      momMsg.properties.put(name, value);
-
-    else
-      throw new MessageFormatException("Can't set non primitive Java object"
-                                       + " as a property value.");
+    doSetProperty(name, value);
   }
 
   /**
@@ -529,8 +543,7 @@ public class Message implements javax.jms.Message
    */
   public void setShortProperty(String name, short value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new Short(value));
+    doSetProperty(name, new Short(value));
   }
 
   /**
@@ -541,8 +554,7 @@ public class Message implements javax.jms.Message
    */
   public void setStringProperty(String name, String value) throws JMSException
   {
-    checkPropSet(name);
-    momMsg.properties.put(name, new String(value));
+    doSetProperty(name, value);
   }
 
 
@@ -550,93 +562,223 @@ public class Message implements javax.jms.Message
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public boolean getBooleanProperty(String name) throws JMSException 
   {
-    return ConversionHelper.getBoolean(momMsg.properties, name);
+    try {
+      return ConversionHelper.toBoolean(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
   
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public byte getByteProperty(String name) throws JMSException 
   {
-    return ConversionHelper.getByte(momMsg.properties, name);
+    try {
+      return ConversionHelper.toByte(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public double getDoubleProperty(String name) throws JMSException
   {
-    return ConversionHelper.getDouble(momMsg.properties, name);
+    try {
+      return ConversionHelper.toDouble(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public float getFloatProperty(String name) throws JMSException
   {
-    return ConversionHelper.getFloat(momMsg.properties, name);
+    try {
+      return ConversionHelper.toFloat(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public int getIntProperty(String name) throws JMSException
   {
-    return ConversionHelper.getInt(momMsg.properties, name);
+    try {
+      return ConversionHelper.toInt(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public long getLongProperty(String name) throws JMSException
   {
-    return ConversionHelper.getLong(momMsg.properties, name);
+    try {
+      return ConversionHelper.toLong(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
-   * @exception JMSException  Actually never thrown.
+   * @exception JMSException  If the name is invalid.
    */
   public Object getObjectProperty(String name) throws JMSException
   {
-    if (momMsg.properties == null)
-      return null;
-
-    return momMsg.properties.get(name);
+    return doGetProperty(name);
   }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the property type is invalid.
+   * @exception JMSException  If the name is invalid.
    */
   public short getShortProperty(String name) throws JMSException
   {
-    return ConversionHelper.getShort(momMsg.properties, name);
+    try {
+      return ConversionHelper.toShort(doGetProperty(name));
+    }
+    catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
    * API method.
    *
-   * @exception JMSException  Actually never thrown.
+   * @exception JMSException  If the name is invalid.
    */
   public String getStringProperty(String name) throws JMSException
   {
-    return ConversionHelper.getString(momMsg.properties, name);
+    return ConversionHelper.toString(doGetProperty(name));
+  }
+
+  /**
+   * Method actually setting a new property.
+   *
+   * @param name  The property name.
+   * @param value  The property value.
+   *
+   * @exception MessageFormatException  If the property type is invalid.
+   * @exception MessageNotWriteableException  If the message is read-only.
+   * @exception JMSException  If the name is invalid.
+   * @exception IllegalArgumentException  If the name string is null or empty.
+   */
+  private void doSetProperty(String name, Object value) throws JMSException
+  {
+    if (name == null || name.equals(""))
+      throw new IllegalArgumentException("Invalid property name: " + name);
+
+    try {
+      if (name.startsWith("JMSX")) {
+        if (name.equals("JMSXGroupID"))
+          momMsg.setOptionalHeader(name, ConversionHelper.toString(value));
+        else if (name.equals("JMSXGroupSeq"))
+          momMsg.setOptionalHeader(name,
+                                   new Integer(ConversionHelper.toInt(value)));
+        else
+          throw new JMSException("Property names with prefix 'JMSX' are"
+                                 + " reserved.");
+      }
+      else if (name.startsWith("JMS_"))
+        throw new JMSException("Property names with prefix 'JMS_' are"
+                               + " reserved.");
+      else if (name.startsWith("JMS"))
+        throw new JMSException("Property names with prefix 'JMS' are"
+                               + " reserved.");
+      else if (name.equalsIgnoreCase("NULL")
+               || name.equalsIgnoreCase("TRUE")
+               || name.equalsIgnoreCase("FALSE")
+               || name.equalsIgnoreCase("NOT")
+               || name.equalsIgnoreCase("AND")
+               || name.equalsIgnoreCase("OR")
+               || name.equalsIgnoreCase("BETWEEN")
+               || name.equalsIgnoreCase("LIKE")
+               || name.equalsIgnoreCase("IN")
+               || name.equalsIgnoreCase("IS")
+               || name.equalsIgnoreCase("ESCAPE"))
+        throw new JMSException("Invalid property name: " + name + " is a"
+                               + " SQL terminal.");
+      else
+        momMsg.setObjectProperty(name, value);
+    }
+    catch (MessageException mE) {
+      if (mE instanceof MessageValueException)
+        throw new MessageFormatException(mE.getMessage());
+      if (mE instanceof MessageROException)
+        throw new MessageNotWriteableException(mE.getMessage());
+    }
+  }
+
+  /**
+   * Method actually getting a property.
+   *
+   * @param name  The property name.
+   */
+  private Object doGetProperty(String name)
+  {
+    if (name == null || name.equals(""))
+      throw new IllegalArgumentException("Invalid property name: " + name);
+
+    Object value = null;
+
+    if (name.startsWith("JMSX")) {
+      if (name.equals("JMSXDeliveryCount"))
+        value = new Integer(momMsg.deliveryCount);
+      else
+        value = momMsg.getOptionalHeader(name);
+    }
+    else if (name.startsWith("JMS_JORAM")) {
+      if (name.equals("JMS_JORAM_DELETEDDEST"))
+        value = new Boolean(momMsg.deletedDest);
+      else if (name.equals("JMS_JORAM_NOTWRITABLE"))
+        value = new Boolean(momMsg.notWritable);
+      else if (name.equals("JMS_JORAM_EXPIRED"))
+        value = new Boolean(momMsg.expired);
+      else if (name.equals("JMS_JORAM_UNDELIVERABLE"))
+        value = new Boolean(momMsg.undeliverable);
+    }
+    else
+      value = momMsg.getObjectProperty(name);
+
+    return value;
   }
 
 
@@ -644,17 +786,19 @@ public class Message implements javax.jms.Message
    * Method called by message producers for getting the wrapped MOM message
    * they actually send.
    *
-   * @exception JMSException  If the data could not be serialized.
+   * @exception MessageFormatException  If the data could not be serialized.
    */
-  fr.dyade.aaa.mom.messages.Message getMomMessage() throws JMSException
+  fr.dyade.aaa.mom.messages.Message getMomMessage()
+                                    throws MessageFormatException
   {
     try {
       prepare();
       return momMsg;
     }
     catch (Exception e) {
-      JMSException jE = new JMSException("The message body could not be"
-                                         + " serialized: " + e);
+      MessageFormatException jE =
+        new MessageFormatException("The message body could not be"
+                                   + " serialized.");
       jE.setLinkedException(e);
       throw jE;
     } 
@@ -664,9 +808,9 @@ public class Message implements javax.jms.Message
    * Wraps a given MOM message in the appropriate Joram message.
    * <p>
    * This method is actually called by a session consuming a MOM message
-   * for wrapping it in a Joram message before handing to the consumer.
+   * for wrapping it in a Joram message before handing it to the consumer.
    *
-   * @exception JMSException  If the data could not be deserialized.
+   * @exception JMSException  If an error occurs while building the message.
    */
   static Message
          wrapMomMessage(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
@@ -674,56 +818,48 @@ public class Message implements javax.jms.Message
   {
     Message msg = null;
 
-    try {
-      if (momMsg.type == MessageType.SIMPLE)
-        msg = new Message(sess);
-      else if (momMsg.type == MessageType.TEXT)
-        msg = new TextMessage(sess);
-      else if (momMsg.type == MessageType.MAP)
-        msg = new MapMessage(sess);
-      else if (momMsg.type == MessageType.OBJECT)
-        msg = new ObjectMessage(sess);
-      else if (momMsg.type == MessageType.STREAM)
-        msg = new StreamMessage(sess);
-      else if (momMsg.type == MessageType.BYTES)
-        msg = new BytesMessage(sess);
+    if (momMsg.getType() == MessageType.SIMPLE)
+      msg = new Message(sess, momMsg);
+    else if (momMsg.getType() == MessageType.TEXT)
+      msg = new TextMessage(sess, momMsg);
+    else if (momMsg.getType() == MessageType.MAP)
+      msg = new MapMessage(sess, momMsg);
+    else if (momMsg.getType() == MessageType.OBJECT)
+      msg = new ObjectMessage(sess, momMsg);
+    else if (momMsg.getType() == MessageType.STREAM)
+      msg = new StreamMessage(sess, momMsg);
+    else if (momMsg.getType() == MessageType.BYTES)
+      msg = new BytesMessage(sess, momMsg);
 
-      msg.momMsg = momMsg;
-      msg.ROproperties = true;
-      msg.RObody = true;
-      msg.consumed = true;
-      msg.restore();
-      return msg;
-    }
-    catch (Exception e) {
-      JMSException jE = new JMSException("The message body could not be"
-                                         + " deserialized: " + e);
-      jE.setLinkedException(e);
-      throw jE;
-    }
+    return msg;
   }
 
   /**
-   * Converts a non Joram JMS message into a Joram message.
+   * Converts a non-Joram JMS message into a Joram message.
    *
-   * @exception JMSException  If the Joram message creation fails.
+   * @exception JMSException  If an error occurs while building the message.
    */
-  static Message convertJMSMessage(Session sess, javax.jms.Message jmsMsg)
+  static Message convertJMSMessage(javax.jms.Message jmsMsg)
          throws JMSException
   {
     Message msg = null;
-    if (jmsMsg instanceof javax.jms.TextMessage)
-      msg = new TextMessage(sess, ((javax.jms.TextMessage) jmsMsg).getText());
-    else if (jmsMsg instanceof javax.jms.ObjectMessage)
-      msg = new ObjectMessage(sess,
-                              ((javax.jms.ObjectMessage) jmsMsg).getObject());
+    if (jmsMsg instanceof javax.jms.TextMessage) {
+      msg = new TextMessage();
+      ((javax.jms.TextMessage) msg).setText(((javax.jms.TextMessage)
+                                             jmsMsg).getText());
+    }
+    else if (jmsMsg instanceof javax.jms.ObjectMessage) {
+      msg = new ObjectMessage();
+      ((javax.jms.ObjectMessage) msg).setObject(((javax.jms.ObjectMessage)
+                                                 jmsMsg).getObject());
+    }
     else if (jmsMsg instanceof javax.jms.StreamMessage) {
-      msg = new StreamMessage(sess);
+      msg = new StreamMessage();
       ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage)
                                          jmsMsg).readObject());
     }
     else if (jmsMsg instanceof javax.jms.BytesMessage) {
-      msg = new BytesMessage(sess);
+      msg = new BytesMessage();
       try {
         while (true)
           ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage)
@@ -732,23 +868,19 @@ public class Message implements javax.jms.Message
       catch (MessageEOFException mE) {}
     }
     else if (jmsMsg instanceof javax.jms.MapMessage) {
-      msg = new MapMessage(sess);
-      try {
-        Enumeration mapNames = ((javax.jms.MapMessage) jmsMsg).getMapNames();
+      msg = new MapMessage();
+      Enumeration mapNames = ((javax.jms.MapMessage) jmsMsg).getMapNames();
 
-        String mapName;
-        while (mapNames.hasMoreElements()) {
-          mapName = (String) mapNames.nextElement();
-
-          ((javax.jms.MapMessage) msg).setObject(mapName, 
-                                                 ((javax.jms.MapMessage)
-                                                  jmsMsg).getObject(mapName));
-        }
+      String mapName;
+      while (mapNames.hasMoreElements()) {
+        mapName = (String) mapNames.nextElement();
+        ((javax.jms.MapMessage) msg).setObject(mapName, 
+                                               ((javax.jms.MapMessage)
+                                                jmsMsg).getObject(mapName));
       }
-      catch (MessageEOFException mE) {}
     }
     else
-      msg = new Message(sess);
+      msg = new Message();
 
     msg.setJMSCorrelationID(jmsMsg.getJMSCorrelationID());
     msg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
@@ -764,41 +896,19 @@ public class Message implements javax.jms.Message
   }
 
   /**
-   * Method actually serializing the wrapped data into the MOM message.
+   * Method preparing the message for sending; resets header values, and
+   * serializes the body (done in subclasses).
    *
    * @exception Exception  If an error occurs while serializing.
    */
   protected void prepare() throws Exception
-  {}
-
-  /** 
-   * Method actually deserializing the MOM body as the wrapped data.
-   *
-   * @exception Exception  If an error occurs while deserializing.
-   */
-  protected void restore() throws Exception
-  {}
-
-  /**
-   * Actually checks that a property with a given name might be set.
-   *
-   * @exception MessageNotWriteableException  If the message is read-only.
-   * @exception JMSException  If its name starts with JMS but not JMS_.
-   */
-  private boolean checkPropSet(String name) throws JMSException
   {
-    if (ROproperties)
-      throw new MessageNotWriteableException("Can't set properties on a"
-                                             + " read-only message.");
-    if (name == null || name.equals(""))
-      throw new NullPointerException("Invalid null or empty property name.");
-
-    if (name.startsWith("JMS") && ! name.startsWith("JMS_"))
-      throw new JMSException("Property name can't start with JMS.");
- 
-    if (momMsg.properties == null)
-      momMsg.properties = new Hashtable();
- 
-    return true;
+    momMsg.denied = false;
+    momMsg.consId = null;
+    momMsg.acksCounter = 0;
+    momMsg.deletedDest = false;
+    momMsg.expired = false;
+    momMsg.notWritable = false;
+    momMsg.undeliverable = false;
   }
 }  

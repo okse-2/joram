@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,10 +22,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.comm;
 
+import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.mom.messages.Message;
 
 import java.util.Vector;
@@ -36,6 +40,8 @@ public class ClientMessages extends AbstractRequest
 {
   /** Vector holding the messages sent by the client. */
   private Vector messages;
+  /** Identifier of the producer's dead message queue, if any. */
+  private AgentId producerDMQId = null;
 
 
   /**
@@ -64,10 +70,23 @@ public class ClientMessages extends AbstractRequest
     this(0, requestId, messages);
   }
 
+  
+  /** Sets the identifier of the producer's dead message queue, if any. */
+  public void setDMQId(AgentId dmqId)
+  {
+    producerDMQId = dmqId;
+  }
+
 
   /** Returns the vector of the sent messages. */
   public Vector getMessages()
   {
     return messages;
+  }
+
+  /** Returns the identifier of the producer's dead message queue, if any. */
+  public AgentId getDMQId()
+  {
+    return producerDMQId;
   }
 } 

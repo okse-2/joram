@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -45,6 +46,9 @@ class Driver extends fr.dyade.aaa.util.Daemon
   private Connection cnx;
   /** The input stream to listen to. */
   private ObjectInputStream ois;
+
+  /** <code>true</code> if the driver is stopping. */
+  boolean stopping = false;
   
   /**
    * Constructs a <code>Driver</code> daemon.
@@ -78,7 +82,7 @@ class Driver extends fr.dyade.aaa.util.Daemon
         }
         // Catching an IOException:
         catch (IOException ioE) {
-          if (! cnx.closed) {
+          if (! cnx.closing) {
             JMSException jE = new JMSException("The connection is broken,"
                                                + " the driver stops.");
             jE.setLinkedException(ioE);
@@ -98,6 +102,12 @@ class Driver extends fr.dyade.aaa.util.Daemon
                 }
               }
             }
+            // Closing the connection:
+           try {
+             stopping = true;
+             cnx.close();
+           }
+           catch (JMSException jE3) {}
           }
           canStop = true;
           break;
@@ -116,7 +126,7 @@ class Driver extends fr.dyade.aaa.util.Daemon
       cnx.onException(jE2);
     }
     finally {
-       finish();
+      finish();
     }
   } 
 
@@ -135,5 +145,8 @@ class Driver extends fr.dyade.aaa.util.Daemon
 
   /** Releases the driver's resources. */
   public void close()
-  {}
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Driver: finished."); 
+  }
 }

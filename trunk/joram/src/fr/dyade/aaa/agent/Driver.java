@@ -33,8 +33,8 @@ import org.objectweb.util.monolog.api.Logger;
  * Internal class to catch the end of the thread running the driver.
  */
 class ThreadFinalizer implements Runnable {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** driver to start */
   Driver driver;
@@ -104,8 +104,8 @@ class ThreadFinalizer implements Runnable {
  * @version	v1.1
  */
 public abstract class Driver {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.10 2002-03-26 16:08:39 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   /** separate thread running the driver */
   protected Thread thread;
@@ -136,6 +136,8 @@ public abstract class Driver {
     String classname = getClass().getName();
     logmon = Debug.getLogger(Debug.A3Proxy + '.' +
       classname.substring(classname.lastIndexOf('.') +1));
+
+    this.name = classname + '#' + id;
   }
 
   /**
@@ -151,7 +153,7 @@ public abstract class Driver {
    * be overloaded in subclass to take in account the proxy name.
    */
   public String getName() {
-    return getClass().getName() + '#' + id;
+    return name;
   }
 
   /**

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -34,14 +35,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
   * exitValue as returned by <code>Process.exitValue</code>, and
   * errorMessage as returned by <code>Process.getErrorStream</code>.
   *
-  * @author	Lacourte Serge
-  * @version	v1.0
-  *
   * @see	ProcessManager
   */
 class ProcessMonitor extends Driver implements Serializable {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */

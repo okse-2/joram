@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.8 2002-04-18 13:43:06 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.9 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -187,7 +188,14 @@ class PoolCnxNetwork extends StreamNetwork {
     /** The session's name. */
     private String name = null;
 
-    StatusMessage Ack = new StatusMessage(StatusMessage.AckStatus);
+    /**
+     * StatusMessage used to asynchronously ack message, contains the stamp
+     * of last message to acknowledge.
+     * Be careful, at boot time stamp must be -1 in order to reset other side.
+     */
+    private StatusMessage ack = new StatusMessage(StatusMessage.AckStatus);
+    /** Stamp of last message acknowledged */
+    private int lastAck = -1;
 
     /**
      *  True if a "local" connection is in progress, a local connection
@@ -315,6 +323,8 @@ class PoolCnxNetwork extends StreamNetwork {
 	ois = getInputStream(sock);
 
 	oos.writeObject(new Boot());
+// AF:
+//      oos.writeObject(ack);
 	oos.flush();
 	oos.reset();
 
@@ -327,6 +337,18 @@ class PoolCnxNetwork extends StreamNetwork {
 	// the connection directly, so we catch a ConnectException.
 	if (statusMsg.status == StatusMessage.NAckStatus)
 	  throw new ConnectException("Nack status received");
+
+        // AF: With a FIFO communication canal we can exchange a StatusMessage
+        // at boot time and clean the sendList.
+
+//      if (statusMsg.stamp == -1)
+//        ack.stamp = -1;
+//      else
+//        doAck(ack.stamp);
+
+        // The remote server has been restarted, the message order could be
+        // different, the ack counter is now invalid.
+        ack.stamp = -1;
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
@@ -392,11 +414,31 @@ class PoolCnxNetwork extends StreamNetwork {
 	// Accept this connection.
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                         getName() + ", send:" + Ack);
+                         getName() + ", send:" + ack);
 
-	oos.writeObject(Ack);
+	oos.writeObject(ack);
 	oos.flush();
 	oos.reset();
+
+        // AF: With a FIFO communication canal we can exchange a StatusMessage
+        // at boot time and clean the sendList.
+
+// 	StatusMessage statusMsg = (StatusMessage) ois.readObject();
+
+//      if (logmon.isLoggable(BasicLevel.DEBUG))
+//         logmon.log(BasicLevel.DEBUG, getName() + ", receive: " + statusMsg);
+
+//      if (statusMsg.status == StatusMessage.NAckStatus)
+// 	  throw new ConnectException("Nack status received");
+
+//      if (statusMsg.stamp == -1)
+//        ack.stamp = -1;
+//      else
+//        doAck(ack.stamp);
+
+        // The remote server has been restarted, the message order could be
+        // different, the ack counter is now invalid.
+        ack.stamp = -1;
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.sock = sock;
@@ -465,7 +507,7 @@ class PoolCnxNetwork extends StreamNetwork {
                          getName() + ", connection started");
 
       //  Try to send all waiting messages. As this.sock is no longer null
-      // so we can do a copy a waiting messages. New messages will be send
+      // so we must do a copy a waiting messages. New messages will be send
       // directly in send method.
       //  Be careful, in a very limit case a message can be sent 2 times:
       // added in sendList after sock setting and before array copy, il will
@@ -526,13 +568,46 @@ class PoolCnxNetwork extends StreamNetwork {
     }
 
     /**
+     * Removes all messages in sendList previous to the ack'ed one.
+     * Be careful, messages in sendList are not always in stamp order.
+     * Its method should not be synchronized, it scans the list from
+     * begin to end, and it removes always the first element. Other
+     * methods using sendList just adds element at the end.
+     */
+    final private void doAck(StatusMessage ack) throws IOException {
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", sendList.size=" + sendList.size());
+
+      Message msg = null;
+      do {
+         msg = (Message) sendList.firstElement();
+
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", remove msg#" + msg.update.stamp);
+
+        //  Suppress the acknowledged notification from waiting list,
+        // and deletes it.
+        sendList.removeElementAt(0);
+        AgentServer.transaction.begin();
+        msg.delete();
+        AgentServer.transaction.commit();
+        AgentServer.transaction.release();
+      } while (msg.update.stamp != ack.stamp);
+
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", sendList.size=" + sendList.size());
+    }
+
+    /**
      * Be careful, its method should not be synchronized (in that case, the
      * overall synchronization of the connection -method start- can dead-lock).
      */
     final void send(Message msg) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", send message #" + msg.update.stamp);
+                     getName() + ", send msg#" + msg.update.stamp);
+
       sendList.addElement(msg);
       if (sock == null) {
 	// If there is no connection between local and destination server,
@@ -541,22 +616,28 @@ class PoolCnxNetwork extends StreamNetwork {
       } else {
 	transmit(msg);
       }
-   }
-
-    // Should be synchronized !!
-    final private void ack(int stamp) throws IOException {
+    }
+    
+//  final private synchronized void ack(int stamp) throws IOException {
+    final private  void ack(int stamp) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", ack message #" + stamp);
+                     getName() + ", set ack msg#" + stamp);
 
-      Ack.stamp = stamp;
-      transmit(Ack);
+      ack.stamp = stamp;
     }
 
-    synchronized void transmit(Object msg) {
+    final private synchronized void transmit(Object msg) {
       last = current++;
       try {
         oos.writeObject(msg);
+        if (ack.stamp > lastAck) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ", send ack msg#" + ack.stamp);
+          oos.writeObject(ack);
+          lastAck = ack.stamp;
+        }
         oos.flush();
         oos.reset();
       } catch (IOException exc) {
@@ -608,32 +689,11 @@ class PoolCnxNetwork extends StreamNetwork {
 	  canStop = false;
 
 	  if (obj instanceof StatusMessage) {
-	    StatusMessage ack = (StatusMessage) obj;
-
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         getName() + ", ack received #" + ack.stamp);
-
-	    logmon.log(BasicLevel.DEBUG,
-		  getName() + ", sendList.size=" + sendList.size());
-
-	    for (int i=0; i<sendList.size(); i++) {
-	      Message tmpMsg = (Message) sendList.elementAt(i);
-	      if (tmpMsg.update.stamp == ack.stamp) {
-		//  Suppress the acknowledged notification from waiting list,
-		// and deletes it.
-		sendList.removeElementAt(i);
-		AgentServer.transaction.begin();
-		tmpMsg.delete();
-		AgentServer.transaction.commit();
-		AgentServer.transaction.release();
-
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG,
-                             getName() + ", ack ok #" + ack.stamp);
-		break;
-	      }
-	    }
+                         getName() +
+                         ", ack received #" + ((StatusMessage) obj).stamp);
+            doAck((StatusMessage) obj);
 	  } else if (obj instanceof Message) {
 	    //  Keep message stamp in order to acknowledge it (be careful,
 	    // the message get a new stamp to be delivered).

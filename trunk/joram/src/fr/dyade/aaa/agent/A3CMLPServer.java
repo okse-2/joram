@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLPServer</code> describes a persistent agent server.
  */
@@ -51,8 +45,10 @@ public class A3CMLPServer extends A3CMLServer{
    */
   public int port = -1;
 
-  A3CMLPServer(Attributes atts) throws SAXException {
-    super(atts);
+  A3CMLPServer(String sid,
+               String name,
+               String hostname) throws Exception {
+    super(sid, name, hostname);
     networks = new Vector();
   }
 }

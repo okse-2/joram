@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -31,13 +32,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * The <code>AgentVector</code> class. This class should be completed to
  * reflected the totally of Vector interface, then it should be public.
- *
- * @author  Andre Freyssinet
- * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.10 2002-04-18 13:40:53 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -125,12 +123,10 @@ final class AgentVector extends AgentObject {
  * </ul>
  * The AgentDeleteRequest class of notification follows a similar process
  * to remotely delete agents.
- *
- * @author  Andre Freyssinet
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.10 2002-04-18 13:40:53 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -174,6 +170,7 @@ final class AgentFactory extends Agent {
       fixedAgentIdList = new AgentVector("fixedAgentIdList");
     else
       fixedAgentIdList = (AgentVector) AgentObject.load("fixedAgentIdList");
+    AgentServer.engine.nbFixedAgents = fixedAgentIdList.vector.size();
     super.initialize(firstTime);
   }
 
@@ -195,7 +192,7 @@ final class AgentFactory extends Agent {
    */
   void removeFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.removeElement(id);
-    nbFixedAgents -= 1;
+    AgentServer.engine.nbFixedAgents -= 1;
     // If the server is transient, save it now.
     if (AgentServer.isTransient())
       fixedAgentIdList.save();
@@ -209,7 +206,7 @@ final class AgentFactory extends Agent {
    */
   void addFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.addElement(id);
-    nbFixedAgents += 1;
+    AgentServer.engine.nbFixedAgents += 1;
     // If the server is transient, save it now.
     if (AgentServer.isTransient())
       fixedAgentIdList.save();
@@ -301,7 +298,7 @@ final class AgentFactory extends Agent {
   void deleteAgent(AgentId from) throws Exception {
     Agent ag;
     try {
-      ag = Agent.load(from);
+      ag = AgentServer.engine.load(from);
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    "AgentFactory" + id +
@@ -318,7 +315,7 @@ final class AgentFactory extends Agent {
       throw new Exception("Can't delete Agent" + from);
     }
     if (ag.isFixed()) removeFixedAgentId(ag.id);
-    agents.remove(ag.getId());
+    AgentServer.engine.agents.remove(ag.getId());
   }
 
   /**
@@ -341,15 +338,17 @@ final class AgentFactory extends Agent {
     }
     // Initialize the agent
     agent.initialize(true);
-    if (agent.logmon == null) agent.logmon = xlogmon;
+    if (agent.logmon == null)
+      agent.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                                     ".#" + AgentServer.getServerId());;
     agent.save();
 
     // Memorize the agent creation and ...
-    now += 1;
-    if (agents.size() > (NbMaxAgents + nbFixedAgents))
-      garbage();
+    AgentServer.engine.now += 1;
+    if (AgentServer.engine.agents.size() > (AgentServer.engine.NbMaxAgents + AgentServer.engine.nbFixedAgents))
+      AgentServer.engine.garbage();
     
-    agents.put(agent.getId(), agent);
+    AgentServer.engine.agents.put(agent.getId(), agent);
   }
 }
 

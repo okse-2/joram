@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
@@ -48,6 +51,8 @@ public class TopicImpl extends DestinationImpl
    * <b>Object:</b> Vector of <code>SubscribeRequest</code> instances
    */
   private Hashtable subsTable;
+  /** Identifier of this topic's father, if any. */
+  private AgentId fatherId = null;
   /** Vector of cluster fellows. */
   private Vector friends;
 
@@ -62,7 +67,6 @@ public class TopicImpl extends DestinationImpl
     super(topicId, adminId);
 
     subsTable = new Hashtable();
-    friends = new Vector();
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
@@ -83,6 +87,7 @@ public class TopicImpl extends DestinationImpl
    * <li><code>ClientMessages</code> notifications,</li>
    * <li><code>SubscribeRequest</code> notifications,</li>
    * <li><code>UnsubscribeRequest</code> notifications,</li>
+   * <li><code>SetSubTopicRequest</code> notifications,</li>
    * <li><code>ClusterRequest</code> notifications,</li>
    * <li><code>UnclusterRequest</code> notifications,</li>
    * <li><code>ClusterMessages</code> notifications.</li>
@@ -105,6 +110,8 @@ public class TopicImpl extends DestinationImpl
         doReact(from, (SubscribeRequest) request);
       else if (request instanceof UnsubscribeRequest)
         doReact(from, (UnsubscribeRequest) request);
+      else if (request instanceof SetSubTopicRequest)
+        doReact(from, (SetSubTopicRequest) request);
       else if (request instanceof ClusterRequest)
         doReact(from, (ClusterRequest) request);
       else if (request instanceof UnclusterRequest)
@@ -127,33 +134,56 @@ public class TopicImpl extends DestinationImpl
    * Method implementing the topic reaction to a <code>ClientMessages</code>
    * instance holding messages sent by a client agent.
    * <p>
-   * The method may send <code>ClusterMessages</code> instances to the cluster's
-   * topics, if any, and <code>TopicMsgsReply</code> instances to the valid
-   * subscribers.
+   * The method may forward the notification to the topic father if any,
+   * to the cluster fellow topics as <code>ClusterMessages</code> instances if
+   * needed. It may finaly send <code>TopicMsgsReply</code> instances to the
+   * valid subscribers.
+   * <p>
+   * If the sender is not a writer on the topic, the messages are sent to the
+   * DMQ.
    *
    * @exception AccessException  If the sender is not a writer.
    */
   private void doReact(AgentId from, ClientMessages not) throws AccessException
   {
-    // If sender is not a writer, throwing an exception:
-    if (! super.isWriter(from))
-      throw new AccessException("The needed WRITE right is not granted"
-                                + " on topic " + destId);
-
     Vector messages = not.getMessages();
     if (messages.isEmpty())
       return;
 
+    // If sender is not a writer, sending the messages to the DMQ, and
+    // throwing an exception:
+    if (! super.isWriter(from)) {
+      for (int i = 0; i < messages.size(); i++) {
+        try {
+          ((Message) messages.get(i)).notWritable = true;
+        }
+        // Invalid message: removing it.
+        catch (ClassCastException cE) {
+          messages.remove(i);
+          i--;
+        }
+      }
+      sendToDMQ(messages, not.getDMQId());
+      throw new AccessException("The needed WRITE right is not granted"
+                                + " on topic " + destId);
+    }
+
+    // Forwarding the messages to the father, if any:
+    if (fatherId != null)
+      Channel.sendTo(fatherId, not);
+
     // Forwarding the messages to the cluster fellows, if any:
-    AgentId topicId;
-    for (int i = 0; i < friends.size(); i++) {
-      topicId = (AgentId) friends.get(i);
+    if (friends != null) {
+      AgentId topicId;
+      for (int i = 0; i < friends.size(); i++) {
+        topicId = (AgentId) friends.get(i);
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages forwarded"
-                                      + " to fellow topic " + topicId);
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages forwarded"
+                                        + " to fellow topic " + topicId);
 
-      Channel.sendTo(topicId, new ClusterMessages(from, not));
+        Channel.sendTo(topicId, new ClusterMessages(from, not));
+      }
     }
 
     // Processing the messages:
@@ -169,17 +199,19 @@ public class TopicImpl extends DestinationImpl
    *
    * @exception AccessException  If the sender is not a WRITER.
    */
-  private void doReact(AgentId from,
-                       ClusterMessages not) throws AccessException
+  private void doReact(AgentId from, ClusterMessages not)
+               throws AccessException
   {
     // If sender is not a writer, throwing an exception:
     if (! super.isWriter(from))
       throw new AccessException("The needed WRITE right is not granted"
                                 + " on topic " + destId);
 
+    // Processing the messages:
     processMessages(not.getFrom(), not.getMessages());
   }
 
+  
   /**
    * Actually processes the distribution of the received messages to the
    * valid subscriptions by sending <code>TopicMsgsReply</code> to the
@@ -201,28 +233,25 @@ public class TopicImpl extends DestinationImpl
       clientSubs = (Vector) subsTable.get(client);
       rep = new TopicMsgsReply();
 
-      // For each valid message:
+      // For each message:
       for (int i = 0; i < messages.size(); i++) {
         try {
           msg = (Message) messages.get(i);
-
-          if (msg.isValid()) {
-            subNames = new Vector();
+          subNames = new Vector();
           
-            // For each client subscription: checking the message
-            for (int j = 0; j < clientSubs.size(); j++) { 
-              sub = (SubscribeRequest) clientSubs.get(j);
+          // For each client subscription: checking the message
+          for (int j = 0; j < clientSubs.size(); j++) { 
+            sub = (SubscribeRequest) clientSubs.get(j);
 
-              // If selection works, adding the current subscription to the
-              // vector of replied subscriptions:
-              if (Selector.matches(msg, sub.getSelector()))
-                subNames.add(sub.getName());
-            }
-            // If the current message replies to subscriptions, adding it in
-            // the reply: 
-            if (! subNames.isEmpty())
-              rep.addMessage(msg, subNames);
+            // If selection works, adding the current subscription to the
+            // vector of replied subscriptions:
+            if (Selector.matches(msg, sub.getSelector()))
+              subNames.add(sub.getName());
           }
+          // If the current message replies to subscriptions, adding it in
+          // the reply: 
+          if (! subNames.isEmpty())
+            rep.addMessage(msg, subNames);
         }
         catch (ClassCastException cE) {
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
@@ -340,6 +369,28 @@ public class TopicImpl extends DestinationImpl
   } 
 
   /**
+   * Method implementing the topic reaction to a
+   * <code>SetSubTopicRequest</code> instance holding the identifiers of a
+   * topics hierarchy.
+   *
+   * @exception AccessException  If the requester is not an ADMIN.
+   */
+  private void doReact(AgentId from, SetSubTopicRequest not)
+               throws MomException
+  {
+    AgentId fatherId = not.getTopicId();
+    AgentId sonId = not.getSubTopicId();
+
+    if (! destId.equals(fatherId))
+      this.fatherId = fatherId;
+    else if (isAdministrator(from))
+      setUserRight(sonId, WRITE);
+    else
+      throw new AccessException("The needed ADMIN right is not granted"
+                                + " on topic " + destId);
+  }
+
+  /**
    * Method implementing the topic reaction to a <code>ClusterRequest</code>
    * instance, requesting the topic to be part of a cluster.
    *
@@ -352,7 +403,7 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("The needed ADMIN right is not granted"
                                 + " on topic " + destId);
-    if (! friends.isEmpty())
+    if (friends != null && ! friends.isEmpty())
       throw new RequestException("Invalid cluster request as topic " + destId
                                  + " is already part of a cluster.");
 
@@ -364,6 +415,8 @@ public class TopicImpl extends DestinationImpl
                                  + " is not part of the cluster to form.");
 
     AgentId topicId;
+    if (friends == null)
+      friends = new Vector();
 
     // Adding each new friend to the list of fellows and granting them
     // the WRITE permission:
@@ -394,7 +447,7 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("The needed ADMIN right is not granted"
                                 + " on topic " + destId);
-    if (friends.isEmpty())
+    if (friends == null || friends.isEmpty())
       throw new RequestException("Can't unclusterize this topic as it is "
                                  + "not part of a cluster.");
 
@@ -425,18 +478,20 @@ public class TopicImpl extends DestinationImpl
                                     + " topic: " + from);
     AgentId tId;
 
-    for (int i = 0; i < friends.size(); i++) {
-      tId = (AgentId) friends.get(i);
-      if (tId.equals(from)) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-          MomTracing.dbgDestination.log(BasicLevel.WARN, "Topic removed"
-                                        + " from the cluster list.");
-        try {
-          setUserRight(tId, -2);
+    if (friends != null) {
+      for (int i = 0; i < friends.size(); i++) {
+        tId = (AgentId) friends.get(i);
+        if (tId.equals(from)) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+            MomTracing.dbgDestination.log(BasicLevel.WARN, "Topic removed"
+                                          + " from the cluster list.");
+          try {
+            setUserRight(tId, -2);
+          }
+          catch (RequestException rE) {}
+          friends.remove(i);
+          break;
         }
-        catch (RequestException rE) {}
-        friends.remove(i);
-        break;
       }
     }
   }
@@ -446,7 +501,13 @@ public class TopicImpl extends DestinationImpl
    * <code>fr.dyade.aaa.agent.UnknownAgent</code> notification received
    * when trying to send messages to a deleted client.
    * <p>
-   * This method simply removes the subscriptions of the deleted client.
+   * This method simply removes the subscriptions of the deleted client, or
+   * its identifier if it is a topic part of the cluster, or sets the father
+   * identifier to null.
+   * <p>
+   * This case might also happen when sending a <code>ClientMessages</code>
+   * to a dead message queue. In that case, the invalid DMQ identifier is set
+   * to null.
    */
   public void removeDeadClient(UnknownAgent uA)
   {
@@ -458,9 +519,29 @@ public class TopicImpl extends DestinationImpl
                                     + " notified of a dead client: "
                                     + agId.toString());
 
+    Vector deadM = new Vector();
+
+    // If the dead client is in fact a dead message queue, updating its
+    // identifier to null:
+    if (dmqId != null && agId.equals(dmqId)) {
+      dmqId = null;
+      deadM.addAll(((ClientMessages) not).getMessages());
+    }
+    else if (DeadMQueueImpl.id != null && agId.equals(DeadMQueueImpl.id)) {
+      DeadMQueueImpl.id = null;
+      deadM.addAll(((ClientMessages) not).getMessages());
+    }
     // Removing the deleted client's subscriptions.
-    if (not instanceof TopicMsgsReply)
+    else if (not instanceof TopicMsgsReply)
       subsTable.remove(agId);
+    else if (not instanceof ClientMessages)
+      fatherId = null;
+    else if (not instanceof ClusterMessages && friends != null)
+      friends.remove(agId);
+
+    // Sending dead messages to the DMQ, if needed:
+    if (! deadM.isEmpty())
+      sendToDMQ(deadM, null);
   }
 
   /**
@@ -508,15 +589,17 @@ public class TopicImpl extends DestinationImpl
     subsTable = null;
 
     AgentId topicId;
-    // For each cluster fellow...
-    while (! friends.isEmpty()) {
-      topicId = (AgentId) friends.remove(0);
-      excRep = new ExceptionReply(exc);
-      Channel.sendTo(topicId, excRep);
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic " + topicId
-                                      + " notified of the topic deletion.");
+    // For each cluster fellow if any...
+    if (friends != null) {
+      while (! friends.isEmpty()) {
+        topicId = (AgentId) friends.remove(0);
+        excRep = new ExceptionReply(exc);
+        Channel.sendTo(topicId, excRep);
+            
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic " + topicId
+                                        + " notified of the topic deletion.");
+      }
     }
     deleted = true;
   }

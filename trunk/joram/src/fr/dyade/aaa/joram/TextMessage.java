@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,9 +22,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
+
+import fr.dyade.aaa.mom.excepts.*;
 
 import javax.jms.JMSException;
 import javax.jms.MessageNotWriteableException;
@@ -34,24 +39,43 @@ public class TextMessage extends Message implements javax.jms.TextMessage
 {
   /** The wrapped text. */
   private String text = null;
+  /** <code>true</code> if the message body is read-only. */
+  private boolean RObody = false;
 
   /** 
-   * Instanciates an empty <code>TextMessage</code>.
+   * Instanciates a bright new <code>TextMessage</code>.
    */
-  TextMessage(Session sess)
+  TextMessage()
   {
-    super(sess);
+    super();
   }
   
-  /**
-   * Instanciates a <code>TextMessage</code> wrapping a given string.
+  /** 
+   * Instanciates a <code>TextMessage</code> wrapping a consumed
+   * MOM message containing a text.
+   *
+   * @param sess  The consuming session.
+   * @param momMsg  The MOM message to wrap.
    */
-  TextMessage(Session sess, String text)
+  TextMessage(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
   {
-    super(sess);
-    this.text = text;
+    super(sess, momMsg);
+    text = momMsg.getText();
+    RObody = true;
   }
 
+
+  /** 
+   * API method.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void clearBody() throws JMSException
+  {
+    super.clearBody();
+    text = null;
+    RObody = false;
+  }
 
   /**
    * API method.
@@ -59,11 +83,11 @@ public class TextMessage extends Message implements javax.jms.TextMessage
    * @exception MessageNotWriteableException  When trying to set the text
    *              if the message body is read-only.
    */
-  public void setText(String text) throws JMSException
+  public void setText(String text) throws MessageNotWriteableException
   {
     if (RObody)
-      throw new MessageNotWriteableException("Message is read-only.");
-
+      throw new MessageNotWriteableException("Can't set a text as the"
+                                             + " message body is read-only.");
     this.text = text;
   }
 
@@ -78,34 +102,15 @@ public class TextMessage extends Message implements javax.jms.TextMessage
   }
 
   /**
-   * API method.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  public void clearBody() throws JMSException
-  {
-    super.clearBody();
-    text = null;
-  }
-
-  
-  /**
-   * Method actually serializing the wrapped text into the MOM message.
+   * Method actually preparing the message for sending by transfering the
+   * local body into the wrapped MOM message.
    *
    * @exception Exception  If an error occurs while serializing.
    */
   protected void prepare() throws Exception
   {
+    super.prepare();
+    momMsg.clearBody();
     momMsg.setText(text);
-  }
-
-  /** 
-   * Method actually deserializing the MOM body as the wrapped text.
-   *
-   * @exception Exception  If an error occurs while deserializing.
-   */
-  protected void restore() throws Exception
-  {
-    text = momMsg.getText();
   }
 }

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram.admin;
 
@@ -81,6 +84,70 @@ public class User
     admin.sendRequest(modU);
     admin.getReply();
     userName = newName;
+  }
+
+  /**
+   * Sets a <code>DeadMQueue</code> instance as the DMQ of this user.
+   *
+   * @param dmq  The DeadMQueue instance.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void setDMQ(DeadMQueue dmq) throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(proxyName, dmq.getQueueName(),
+                                             true);
+    admin.sendRequest(setDMQ);
+    admin.getReply();
+  }
+
+  /**
+   * Sets a threshold value of maximum authorized delivery attempts before
+   * logging a message to the DMQ, for this user.
+   *
+   * @param threshold  The number of authorized delivery attempts.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void setThreshold(int threshold) throws Exception
+  {
+    SetThreshold setT = new SetThreshold(proxyName, new Integer(threshold),
+                                         true);
+    admin.sendRequest(setT);
+    admin.getReply();
+  }
+
+  /**
+   * Sets a <code>DeadMQueue</code> instance as the DMQ of this user.
+   *
+   * @param dmq  The DeadMQueue instance.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void unsetDMQ() throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(proxyName, null, true);
+    admin.sendRequest(setDMQ);
+    admin.getReply();
+  }
+
+  /**
+   * Sets a threshold value of maximum authorized delivery attempts before
+   * logging a message to the DMQ, for this user.
+   *
+   * @param threshold  The number of authorized delivery attempts.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void unsetThreshold() throws Exception
+  {
+    SetThreshold setT = new SetThreshold(proxyName, null, true);
+    admin.sendRequest(setT);
+    admin.getReply();
   }
 
   /** 

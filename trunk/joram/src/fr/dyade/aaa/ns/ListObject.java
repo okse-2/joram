@@ -40,7 +40,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class ListObject extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: ListObject.java,v 1.6 2002-03-26 16:09:47 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: ListObject.java,v 1.7 2002-10-21 08:41:14 maistrfr Exp $";
 
   /**
    * Creates a notification to be sent.

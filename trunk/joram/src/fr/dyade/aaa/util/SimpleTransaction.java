@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.10 2002-10-21 08:41:14 maistrfr Exp $"; 
 
   private File dir = null;
 
@@ -52,7 +52,20 @@ public class SimpleTransaction implements Transaction {
   }
 
   public void save(Serializable obj, String name) throws IOException {
-    File file = new File(dir, name);
+    save(obj, null, name);
+  }
+    
+  public void save(Serializable obj, String dirName, String name) throws IOException {
+    File file;
+    if (dirName == null) {
+      file = new File(dir, name);
+    } else {
+      File parentDir = new File(dir, dirName);
+      if (!parentDir.exists()) {
+        parentDir.mkdirs();
+      }
+      file = new File(parentDir, name);
+    }
 
     // Save the current state of the object.
     FileOutputStream fos = null;
@@ -69,9 +82,19 @@ public class SimpleTransaction implements Transaction {
   }
 
   public Object load(String name) throws IOException, ClassNotFoundException {
+    return load(null, name);
+  }
+
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     Object obj;
 
-    File file = new File(dir, name);
+    File file;
+    if (dirName == null) {
+      file = new File(dir, name);
+    } else {
+      File parentDir = new File(dir, dirName);
+      file = new File(parentDir, name);
+    }
     if (file.canRead()) {
       FileInputStream fis = null;
       try {
@@ -89,12 +112,39 @@ public class SimpleTransaction implements Transaction {
   }
 
   public void delete(String name) {
-    File file = new File(dir, name);
-    if (! file.exists()) {
-      // If the File don't exists it's an error
-      // TODO: Error.
+    delete(null, name);
+  }
+
+  public void delete(String dirName, String name) {
+    File file;
+    if (dirName == null) {
+      file = new File(dir, name);
+      if (! file.exists()) {
+        // If the File don't exists it's an error
+        // TODO: Error.
+      } else {
+        file.delete();
+      }
     } else {
+      File parentDir = new File(dir, dirName);
+      file = new File(parentDir, name);
       file.delete();
+      deleteDir(parentDir);
+    } 
+  }  
+
+  /**
+   * Delete the specified directory if it is empty.
+   * Also recursively delete the parent directories if
+   * they are empty.
+   */
+  private void deleteDir(File dir) {
+    if (dir.list().length == 0) {
+      dir.delete();
+      if (dir.getAbsolutePath().length() > 
+          this.dir.getAbsolutePath().length()) {
+        deleteDir(dir.getParentFile());
+      }
     }
   }
 

@@ -31,8 +31,8 @@ import java.net.*;
  * class for stream sockets.
  */
 abstract class StreamNetwork extends CausalNetwork {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.8 2002-05-27 15:17:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.9 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** Creates a new Network component */
   StreamNetwork() {
@@ -40,10 +40,9 @@ abstract class StreamNetwork extends CausalNetwork {
   }
 
   /**
-   * Numbers of attempt to connect to a server's socket before aborting.
+   * Numbers of attempt to bind the server's socket before aborting.
    */
-  final static int CnxRetry1 = 5;
-  final static int CnxRetry2 = 20;
+  final static int CnxRetry = 20;
 
   /**
    *  This method creates and returns a socket connected to a ServerSocket at
@@ -66,16 +65,7 @@ abstract class StreamNetwork extends CausalNetwork {
   Socket createSocket(InetAddress host, int port) throws IOException {
     if (host == null)
       throw new UnknownHostException();
-    for (int i=0; ; i++) {
-      try {
-        return new Socket(host, port);
-      } catch (IOException exc) {
-        if (i > CnxRetry1) throw exc;
-        try {
-          Thread.currentThread().sleep(i * 250);
-        } catch (InterruptedException e) {}
-      }
-    }
+    return new Socket(host, port);
   }
 
   /**
@@ -94,7 +84,7 @@ abstract class StreamNetwork extends CausalNetwork {
       try {
         return new ServerSocket(port);
       } catch (BindException exc) {
-        if (i > CnxRetry2) throw exc;
+        if (i > CnxRetry) throw exc;
         try {
           Thread.currentThread().sleep(i * 250);
         } catch (InterruptedException e) {}

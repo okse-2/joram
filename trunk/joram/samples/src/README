@@ -2,13 +2,14 @@
 HOW TO RUN THE SAMPLES
 ######################
 
-Type
-        ant -projecthelp
-to have a list of available Ant targets for samples
+Type:
+ $ ant -projecthelp
+to have a list of the available Ant targets for the samples.
 
 0. COMPILING THE SAMPLES
-Simply type:
-	ant compile
+Type:
+ $ ant
+(the corresponding target is compile).
 
 1. RUNNING THE CLASSIC SAMPLES
 The classic samples aim at illustrating very basic JMS operations under
@@ -16,19 +17,19 @@ a simple and centralized architecture.
 
 a. Starting a server in centralized architecture:
 Type:
-	ant single_server
+ $ ant single_server
 
-b. Setup the configuration:
+b. Setting up the configuration:
 Type:
-	ant classic_admin
+ $ ant classic_admin
 
 c. Running the classic sender client:
 Type:
-	ant sender
+ $ ant sender
 
 d. Running the classic receiver client:
 Type:
-	ant receiver
+ $ ant receiver
 
 e. etc...
 
@@ -38,19 +39,19 @@ The chat sample also runs under a simple and centralized architecture.
 
 a. Starting a server in centralized architecture:
 Type:
-	ant single_server
+ $ ant single_server
 
-b. Setting the configuration up:
+b. Setting up the configuration:
 Type:
-	ant chat_admin
+ $ ant chat_admin
 
 c. Running the first chat client:
 Type:
-	ant chat1
+ $ ant chat1
 
 d. Running the second chat client:
 Type:
-	ant chat2
+ $ ant chat2
 
 
 3. RUNNING THE DOTCOM DEMO
@@ -60,19 +61,19 @@ a centralized server.
 
 a. Starting a server in centralized architecture:
 Type:
-	ant single_server
+ $ ant single_server
 
-b. Setting the configuration up:
+b. Setting up the configuration:
 Type:
-	ant dotcom_admin
+ $ ant dotcom_admin
 
 c. Running the servers:
 Type:
-	ant webServers
+ $ ant webServers
 
 d. Running the client server:
 Type:
-	ant webClient
+ $ ant webClient
 
 
 4. RUNNING THE CLUSTER DEMO
@@ -83,35 +84,35 @@ modify the distributed_a3servers.xml and distributed_jndi.properties files.
 
 a. Starting server0:
 Type:
-	ant server0
+ $ ant server0
 
 b. Starting server1:
 Type:
-	ant server1
+ $ ant server1
 
 c. Starting server2:
 Type:
-	ant server2
+ $ ant server2
 
 d. Running the admin:
 Type:
-	ant cluster_admin
+ $ ant cluster_admin
 
 e. Running the subscriber on server1:
 Type:
-	ant subscriber10
+ $ ant subscriber10
 
 f. Running the first subscriber on server2:
 Type:
-	ant subscriber20
+ $ ant subscriber20
 
 g. Running the second subscriber on server2:
 Type:
-	ant subscriber21
+ $ ant subscriber21
 
 h. Running the publisher:
 Type:
-	ant cluster_pub
+ $ ant cluster_pub
 
 
 5. RUNNING THE ARCHI DEMO
@@ -123,32 +124,78 @@ files.
 
 a. Starting server0:
 Type:
-	ant server0
+ $ ant server0
 
 b. Starting server1:
 Type:
-	ant server1
+ $ ant server1
 
 c. Starting server2:
 Type:
-	ant server2
+ $ ant server2
 
 d. Running the admin:
 Type:
-	ant archi_admin
+ $ ant archi_admin
 
 e. Running the receiver on server2:
 Type:
-	ant archi_receiver
+ $ ant archi_receiver
 
 f. Running the subscriber on server2:
 Type:
-	ant archi_sub
+ $ ant archi_sub
 
 g. Running the sender on server0:
 Type:
-	ant archi_sender
+ $ ant archi_sender
 
 h. Running the publisher on server0:
 Type:
-	ant archi_pub
+ $ ant archi_pub
+
+
+6. RUNNING THE TOPIC TREE DEMO
+The topic tree demo aims at illustrating the use of Joram's hierarchical
+topic. It is based on a centralized architecture. A consumer subscribes
+to the various nodes of the topic, a producer publishes messages on those
+nodes.
+
+a. Starting the server:
+Type:
+ $ ant single_server
+
+b. Running the admin:
+Type:
+ $ ant tree_admin
+
+c. Running the consumer:
+Type:
+ $ ant tree_consumer
+
+d. Running the producer:
+Type:
+ $ ant tree_producer
+
+
+7. RUNNING THE DEAD MESSAGE QUEUE DEMO
+The dead message queue demo aims at illustrating the functionning of Joram's
+dead message queue feature. It is based on a centralized architecture. A 
+client performs various operations which finally fail and result in messages
+being logged into the DMQ. A watcher consumes the message from the DMQ.
+
+a. Starting the server:
+Type:
+ $ ant single_server
+
+b. Running the admin:
+Type:
+ $ ant dmq_admin
+
+c. Running the DMQ watcher:
+Type:
+ $ ant dmq_watcher
+
+d. Running the failing client:
+Type:
+ $ ant dmq_client

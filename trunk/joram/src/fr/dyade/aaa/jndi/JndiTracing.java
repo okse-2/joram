@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2001 BULL
  * Copyright (C) 1996 - 2001 INRIA
  *

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -84,9 +85,6 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  * absolute it is interpreted from the directory where the agent server
  * has been started.
  *
- * @version	v1.0, 5 Nov 1997
- * @author	Lacourte Serge
- *
  * @see		RegisterCommand
  * @see		UnregisterCommand
  * @see		LookupCommand
@@ -97,8 +95,7 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  * @see		SimpleReport
  */
 public class NameService extends Agent {
-
-public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-26 16:09:47 joram Exp $";
+  public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.7 2002-10-21 08:41:14 maistrfr Exp $";
 
   /** initializes service only once */
   private static boolean initialized = false;
@@ -127,15 +124,19 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
    *	unspecialized exception
    */
   public static void init(String args, boolean firstTime) throws Exception {
-    if (initialized)
-      return;
+    if (initialized) return;
     initialized = true;
 
-    if (! firstTime)
-      return;
+    if (! firstTime) return;
 
     NameService nameService = new NameService();
     nameService.deploy();
+  }
+
+  /**
+   * Stop the service.
+   */
+  public static void stop () {
   }
 
   /**
@@ -296,7 +297,9 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
       } catch (Exception exc) {
 	// report error to requesting agent
 	sendTo(((SimpleCommand) not).getReport(),
-	       new SimpleReport((SimpleCommand) not, Status.FAIL, exc.toString()));
+	       new SimpleReport((SimpleCommand) not,
+                                Status.FAIL,
+                                exc.toString()));
       }
     } else {
       super.react(from, not);
@@ -319,10 +322,14 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
         if (agent instanceof AgentId) {
           AgentId client = ((SimpleCommand) not).getReport();
           if (! client.isNullId())
-            sendTo(client, new LookupReport(not, Status.DONE, null, (AgentId) agent));
+            sendTo(client, new LookupReport(not,
+                                            Status.DONE,
+                                            null,
+                                            (AgentId) agent));
           return;
         } else {
-          throw (new AlreadyBoundException (not.getName()+" already exists into the database"));
+          throw new AlreadyBoundException(not.getName() +
+                                          " already exists into the database");
         }
       }
     }
@@ -331,42 +338,45 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
     if (! client.isNullId())
       sendTo(client, new SimpleReport(not, Status.DONE, null));
   }
-    /**
-     * Reacts to <code>RegisterObject</code> notifications.
-     *
-     * @param not  notification to react to
-     *
-     * @exception Exception
-     *	unspecialized exception
-     */
-    public void doReact(RegisterObject not) throws Exception {
-	table.put(not.getName(),not.getObject());
-	AgentId client = ((SimpleCommand) not).getReport();
-	if (! client.isNullId())
-	    sendTo(client, new SimpleReport(not, Status.DONE, null));
+  /**
+   * Reacts to <code>RegisterObject</code> notifications.
+   *
+   * @param not  notification to react to
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  public void doReact(RegisterObject not) throws Exception {
+    table.put(not.getName(),not.getObject());
+    AgentId client = ((SimpleCommand) not).getReport();
+    if (! client.isNullId())
+      sendTo(client, new SimpleReport(not, Status.DONE, null));
+  }
+  /**
+   * Reacts to <code>BindObject</code> notifications.
+   *
+   * @param not  notification to react to
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  public void doReact(BindObject not) throws Exception {
+    String name = not.getName();
+    Object o = table.get(name);
+    if (o == null) {
+      table.put(name,not.getObject());
+      AgentId client = ((SimpleCommand) not).getReport();
+      if (! client.isNullId())
+        sendTo(client, new BindReportObject(not, Status.DONE, null));
+    } else {
+      AgentId client = ((SimpleCommand) not).getReport();
+      if (! client.isNullId())
+        sendTo(client,
+               new BindReportObject(not,
+                                    Status.FAIL,
+                                    name + " is already bound."));
     }
-    /**
-     * Reacts to <code>BindObject</code> notifications.
-     *
-     * @param not  notification to react to
-     *
-     * @exception Exception
-     *	unspecialized exception
-     */
-    public void doReact(BindObject not) throws Exception {
-	String name = not.getName();
-	Object o = table.get(name);
-	if (o == null) {
-	    table.put(name,not.getObject());
-	    AgentId client = ((SimpleCommand) not).getReport();
-	    if (! client.isNullId())
-		sendTo(client, new BindReportObject(not, Status.DONE, null));
-	} else {
-	    AgentId client = ((SimpleCommand) not).getReport();
-	    if (! client.isNullId())
-		sendTo(client, new BindReportObject(not, Status.FAIL, name + " is already bound."));
-	}
-    }
+  }
 
   /**
    * Reacts to <code>UnregisterCommand</code> notifications.
@@ -381,7 +391,7 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
     unregister(not.getName());
     AgentId client = ((SimpleCommand) not).getReport();
     if (! client.isNullId())
-    sendTo(client, new SimpleReport(not, Status.DONE, null));
+      sendTo(client, new SimpleReport(not, Status.DONE, null));
   }
 
   /**
@@ -397,46 +407,47 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.6 2002-03-
     AgentId agent = lookup(not.getName());
     AgentId client = ((SimpleCommand) not).getReport();
     if (! client.isNullId())
-    sendTo(client, new LookupReport(not, Status.DONE, null, agent));
+      sendTo(client, new LookupReport(not, Status.DONE, null, agent));
   }
 
-    /**
-     * Reacts to <code>LookupObject</code> notifications.
-     *
-     * @param not  notification to react to
-     *
-     * @exception Exception
-     *	unspecialized exception
-     */
-    public void doReact(LookupObject not) throws Exception {
-	Object obj = table.get(not.getName());
-	if (obj == null) 
-	    throw new IllegalArgumentException("no value for " + name);
-	AgentId client = ((SimpleCommand) not).getReport();
-	if (! client.isNullId())
-	    sendTo(client, new LookupReportObject(not, Status.DONE, null, obj));
+  /**
+   * Reacts to <code>LookupObject</code> notifications.
+   *
+   * @param not  notification to react to
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  public void doReact(LookupObject not) throws Exception {
+    Object obj = table.get(not.getName());
+    if (obj == null) {
+      throw new IllegalArgumentException("no value for " + not.getName());
     }
-    /**
-     * Reacts to <code>ListObject</code> notifications.
-     *
-     * @param not  notification to react to
-     *
-     * @exception Exception
-     *	unspecialized exception
-     */
-    public void doReact(ListObject not) throws Exception {
-	Object obj;
-	if (not.getName().length() == 0) {
-	    obj = table;
-	} else {
-	    obj = table.get(not.getName());
-	}
-	if (obj == null) 
-	    throw new IllegalArgumentException("no value for " + name);
-	AgentId client = ((SimpleCommand) not).getReport();
-	if (! client.isNullId())
-	    sendTo(client, new ListReportObject(not, Status.DONE, null, obj));
+    AgentId client = ((SimpleCommand) not).getReport();
+    if (! client.isNullId())
+      sendTo(client, new LookupReportObject(not, Status.DONE, null, obj));
+  }
+  /**
+   * Reacts to <code>ListObject</code> notifications.
+   *
+   * @param not  notification to react to
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  public void doReact(ListObject not) throws Exception {
+    Object obj;
+    if (not.getName().length() == 0) {
+      obj = table;
+    } else {
+      obj = table.get(not.getName());
     }
+    if (obj == null) 
+      throw new IllegalArgumentException("no value for " + name);
+    AgentId client = ((SimpleCommand) not).getReport();
+    if (! client.isNullId())
+      sendTo(client, new ListReportObject(not, Status.DONE, null, obj));
+  }
     
   /**
    * Registers <code>agent</code> with <code>name</code>.

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.proxies;
 
@@ -68,6 +71,18 @@ public class JmsClientProxy extends ConnectionFactory
    * <b>Object:</b> message
    */
   private Hashtable messagesTable;
+
+  /**
+   * Identifier of this proxy dead message queue, <code>null</code> for DMQ
+   * not set.
+   */
+  private AgentId dmqId = null;
+  /**
+   * Threshold value, 0 or negative for no threshold, <code>null</code> for
+   * value not set.
+   */
+  private Integer threshold = null;
+
 
   /**
    * Constructs a <code>JmsClientProxy</code> agent.
@@ -124,7 +139,7 @@ public class JmsClientProxy extends ConnectionFactory
         // Denying the non acknowledged messages:
         cnx.deny();
 
-        // Removing or desactivating the subscriptions, if any:
+        // Removing or desactivating the subscriptions:
         String subName;
         ClientSubscription sub;
         while (! cnx.activeSubs.isEmpty()) {
@@ -208,7 +223,6 @@ public class JmsClientProxy extends ConnectionFactory
    * Some of the client requests are directly forwarded by the driver to their
    * target destinations. Those requests are:
    * <ul>
-   * <li><code>SessCreateDestRequest</code></li>
    * <li><code>ProducerMessages</code></li>
    * <li><code>ConsumerReceiveRequest</code></li>
    * <li><code>ConsumerSetListRequest</code></li>
@@ -238,9 +252,7 @@ public class JmsClientProxy extends ConnectionFactory
           }
 
           // Requests directly processed by the DriverIn:
-          if (req instanceof SessCreateDestRequest)
-            driverDoFwd(key, (SessCreateDestRequest) req);
-          else if (req instanceof ProducerMessages)
+          if (req instanceof ProducerMessages)
             driverDoFwd(key, (ProducerMessages) req);
           else if (req instanceof ConsumerReceiveRequest)
             driverDoFwd(key, (ConsumerReceiveRequest) req);
@@ -255,30 +267,18 @@ public class JmsClientProxy extends ConnectionFactory
         // Catching an exception due to an invalid agent identifier to
         // forward the request to:
         catch (IllegalArgumentException iE) {
-          RequestException mE = new RequestException("Proxy could not forward"
-                                                     + " the request to"
-                                                     + " incorrectly"
-                                                     + " identified"
-                                                     + " destination: "
-                                                     + iE);
+          DestinationException dE =
+            new DestinationException("Proxy could not forward the request to"
+                                     + " incorrectly identified destination: "
+                                     + iE);
 
-          doReply(key, new MomExceptionReply(req.getRequestId(), mE));
+          doReply(key, new MomExceptionReply(req.getRequestId(), dE));
         }
       }
     }
     // This case can't happen as a proxy necessarily wraps the data read
     // on the stream in an InputNotification!!
     else {}
-  }
-
-  /**
-   * Actually forwards a <code>SessCreateDestRequest</code> as a
-   * <code>PingRequest</code> to a destination.
-   */
-  private void driverDoFwd(int key, SessCreateDestRequest req)
-  {
-    sendTo(AgentId.fromString(req.getTarget()), 
-           new PingRequest(key, req.getRequestId()));
   }
 
   /**
@@ -289,10 +289,20 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void driverDoFwd(int key, ProducerMessages req)
   {
-    sendTo(AgentId.fromString(req.getTarget()),
-           new ClientMessages(key, req.getRequestId(), req.getMessages()));
+    ClientMessages not = new ClientMessages(key, req.getRequestId(),
+                                            req.getMessages());
 
+    // Setting the producer's DMQ identifier field: 
+    if (dmqId != null)
+      not.setDMQId(dmqId);
+    else
+      not.setDMQId(DeadMQueueImpl.id);
+
+    sendTo(AgentId.fromString(req.getTarget()), not);
     doReply(key, new ServerReply(req));
+    // Flow control: gives the opportunity to other threads to consume the
+    // messages.
+    Thread.yield();
   }
 
   /**
@@ -323,7 +333,7 @@ public class JmsClientProxy extends ConnectionFactory
     if (req.getQueueMode()) {
       AgentId to = AgentId.fromString(req.getTarget());
       ReceiveRequest rr = new ReceiveRequest(key, req.getRequestId(),
-                                             req.getSelector(), -1, false);
+                                             req.getSelector(), 0, false);
       sendTo(to, rr);
     }
     else
@@ -348,7 +358,9 @@ public class JmsClientProxy extends ConnectionFactory
    * A JMS proxy reacts to:
    * <ul>
    * <li><code>fr.dyade.aaa.agent.DriverNotification</code> notifications,</li>
-   * <li><code>ProxySyncAck</code> proxy acknowledgements,</li>
+   * <li><code>SyncReply</code> proxy synchronizing notifications,</li>
+   * <li><code>SetDMQRequest</code> admin notifications,</li>
+   * <li><code>SetThreshRequest</code> admin notifications,</li>
    * <li><code>AbstractReply</code> destination replies,</li>
    * <li><code>fr.dyade.aaa.task.ConditionNot</code>,</li>
    * <li><code>fr.dyade.aaa.agent.UnknownAgent</code>,</li>
@@ -379,9 +391,14 @@ public class JmsClientProxy extends ConnectionFactory
       // InputNotification, this case can't happen!
       else {}
     }
+    // Notifications setting the DMQ and threshold parameters:
+    else if (not instanceof SetDMQRequest)
+      doReact((SetDMQRequest) not);
+    else if (not instanceof SetThreshRequest)
+      doReact((SetThreshRequest) not);
     // Notification sent by the proxy to itself for causal reasons:
-    else if (not instanceof ProxySyncAck)
-      doReact((ProxySyncAck) not);
+    else if (not instanceof SyncReply)
+      doReact((SyncReply) not);
     // Notifications sent by a destination:
     else if (not instanceof AbstractReply) 
       doFwd(from, (AbstractReply) not);
@@ -406,7 +423,6 @@ public class JmsClientProxy extends ConnectionFactory
    * The proxy accepts the following requests:
    * <ul>
    * <li><code>CnxConnectRequest</code></li>
-   * <li><code>CnxAccessRequest</code></li>
    * <li><code>CnxStartRequest</code></li>
    * <li><code>CnxStopRequest</code></li>
    * <li><code>SessCreateTQRequest</code></li>
@@ -440,8 +456,6 @@ public class JmsClientProxy extends ConnectionFactory
 
       if (request instanceof CnxConnectRequest)
         doReact(key, (CnxConnectRequest) request);
-      else if (request instanceof CnxAccessRequest)
-        doReact((CnxAccessRequest) request);
       else if (request instanceof CnxStartRequest)
         doReact((CnxStartRequest) request);
       else if (request instanceof CnxStopRequest)
@@ -512,20 +526,6 @@ public class JmsClientProxy extends ConnectionFactory
   }
 
   /**
-   * Method implementing the reaction to a <code>CnxAccessRequest</code>
-   * checking a user's right on a destination.
-   * <p>
-   * It simply forwards it as an <code>AccessRequest</code> to the
-   * destination. The reason why this simple forward does not take place
-   * directly in the driver is to preserve causality.
-   */
-  private void doReact(CnxAccessRequest req)
-  {
-    sendTo(AgentId.fromString(req.getTarget()), 
-           new AccessRequest(currKey, req.getRequestId(), req.getRight()));
-  }
-
-  /**
    * Method implementing the proxy reaction to a <code>CnxStartRequest</code>
    * requesting to start a connection.
    * <p>
@@ -590,7 +590,7 @@ public class JmsClientProxy extends ConnectionFactory
    * <p>
    * Creates the queue, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
-   * <code>ProxySyncAck</code> notification it sends to itself. This latest
+   * <code>SyncReply</code> notification it sends to itself. This latest
    * action's purpose is to preserve causality.
    *
    * @exception RequestException  If the queue could not be deployed.
@@ -610,8 +610,8 @@ public class JmsClientProxy extends ConnectionFactory
       cnx.tempDestinations.add(qId);
 
       sendTo(this.getId(),
-             new ProxySyncAck(currKey,
-                              new SessCreateTDReply(req, qId.toString())));
+             new SyncReply(currKey,
+                           new SessCreateTDReply(req, qId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary queue "
@@ -631,7 +631,7 @@ public class JmsClientProxy extends ConnectionFactory
    * <p>
    * Creates the topic, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
-   * <code>ProxySyncAck</code> notification it sends to itself. This latest
+   * <code>SyncReply</code> notification it sends to itself. This latest
    * action's purpose is to preserve causality.
    *
    * @exception RequestException  If the topic could not be deployed.
@@ -651,8 +651,8 @@ public class JmsClientProxy extends ConnectionFactory
       cnx.tempDestinations.add(tId);
 
       sendTo(this.getId(),
-             new ProxySyncAck(currKey,
-                              new SessCreateTDReply(req, tId.toString())));
+             new SyncReply(currKey,
+                           new SessCreateTDReply(req, tId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary topic"
@@ -731,7 +731,7 @@ public class JmsClientProxy extends ConnectionFactory
                                 + " created.");
     }
     // Acknowledging the request:
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -776,20 +776,26 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void doReact(ConsumerUnsetListRequest req) throws RequestException
   {
-    // Desactivating the subscription:
-    String subName = req.getTarget();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    // If the listener was listening to a queue, cancelling any pending reply:
+    if (req.queueMode())
+      cnx.cancelledRequestId = req.getId();
+    // If the listener was listening to a topic, de-activating the
+    // subscription:
+    else {
+      String subName = req.getId();
+      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
-    if (sub == null)
-      throw new RequestException("Can't unset a listener on the non existing"
-                                 + " subscription: " + subName);
+      if (sub == null)
+        throw new RequestException("Can't unset a listener on the non existing"
+                                   + " subscription: " + subName);
 
-    sub.requestId = null;
-    sub.toListener = false;
+      sub.requestId = null;
+      sub.toListener = false;
     
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Listener has been unset on"
-                              + " subscription: " + subName);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Listener has been unset on"
+                                + " subscription: " + subName);
+    }
 
     // Acknowledging the request:
     doReply(new ServerReply(req));
@@ -857,7 +863,7 @@ public class JmsClientProxy extends ConnectionFactory
     sub.delete();
 
     // Acknowledging the request:
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -880,18 +886,20 @@ public class JmsClientProxy extends ConnectionFactory
                                  + " subscription: " + subName);
 
     String reqId = req.getRequestId();
-    sub.requestId = reqId;
     sub.toListener = false;
 
     ConsumerMessages consM = null;
+    sub.requestId = reqId;
     boolean replied = false;
 
     // In the case of an immediate delivery request:
-    if (req.getTimeToLive() == 0) {
+    if (req.getTimeToLive() == -1) {
       // Getting something to deliver, or delivering an empty reply:
       consM = sub.deliver();
-      if (consM == null)
+      if (consM == null) {
+        sub.requestId = null;
         consM = new ConsumerMessages(reqId, subName, false);
+      }
       // Replying if the connection is started:
       if (cnx.started)
         doReply(consM);
@@ -961,7 +969,7 @@ public class JmsClientProxy extends ConnectionFactory
 
       // Acknowledging the request unless forbidden:
       if (! req.doNotAck())
-        sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+        sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
     }
     else {
       String subName = req.getTarget();
@@ -1031,7 +1039,7 @@ public class JmsClientProxy extends ConnectionFactory
 
       // Acknowledging the request, unless forbidden:
       if (! req.doNotAck())
-        sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+        sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
     }
     else {
       String subName = req.getTarget();
@@ -1076,7 +1084,7 @@ public class JmsClientProxy extends ConnectionFactory
     sendTo(tempId, new DeleteNot());
 
     // Acknowledging the request:
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -1188,36 +1196,43 @@ public class JmsClientProxy extends ConnectionFactory
         cnx.transactionsTable = null;
     }
 
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+  }
+
+  
+  /**
+   * Method implementing the reaction to a <code>SetDMQRequest</code>
+   * instance setting the dead message queue identifier for this proxy.
+   */
+  private void doReact(SetDMQRequest not)
+  {
+    dmqId = not.getDmqId();
   }
 
   /**
-   * Method implementing the JMS proxy reaction to a <code>ProxySyncAck</code>
-   * notification holding a JMS reply wrapped and sent by itself.
-   * <p>
-   * This method allows to actually acknowledge a client request after the
-   * reaction to this request has been commited. All this to preserve 
-   * causality. The considered replies are:
-   * <ul>
-   * <li><code>SessCreateTDReply</code></li>
-   * <li><code>ServerReply</code></li>
-   * </ul>
-   * <p>
-   * The method simply sends the wrapped reply to the external client.
+   * Method implementing the reaction to a <code>SetThreshRequest</code>
+   * instance setting the threshold value for this proxy.
    */
-  private void doReact(ProxySyncAck not)
+  private void doReact(SetThreshRequest not)
+  {
+    threshold = not.getThreshold();
+  }
+
+  /**
+   * Method implementing the JMS proxy reaction to a
+   * <code>SyncReply</code> notification sent by itself, wrapping a reply
+   * to be sent to a client.
+   */
+  private void doReact(SyncReply not)
   {
     doReply(not.key, not.reply);
   }
-
 
   /**
    * Distributes the JMS replies to the appropriate reactions.
    * <p>
    * JMS proxies react the following replies:
    * <ul>
-   * <li><code>PongReply</code></li>
-   * <li><code>AccessReply</code></li>
    * <li><code>QueueMsgReply</code></li>
    * <li><code>BrowseReply</code></li>
    * <li><code>TopicMsgsReply</code></li>
@@ -1232,11 +1247,7 @@ public class JmsClientProxy extends ConnectionFactory
                               + " with id: " + rep.getCorrelationId()
                               + " from: " + from);
 
-    if (rep instanceof PongReply)
-      doFwd((PongReply) rep);
-    else if (rep instanceof AccessReply)
-      doFwd((AccessReply) rep);
-    else if (rep instanceof QueueMsgReply)
+    if (rep instanceof QueueMsgReply)
       doFwd(from, (QueueMsgReply) rep);
     else if (rep instanceof BrowseReply)
       doFwd((BrowseReply) rep);
@@ -1252,36 +1263,6 @@ public class JmsClientProxy extends ConnectionFactory
 
 
   /**
-   * Actually forwards a <code>PongReply</code> coming from a destination
-   * as a <code>SessCreateDestReply</code> destinated to the requesting client.
-   */
-  private void doFwd(PongReply rep)
-  {
-    try {
-      // Updating the active connection:
-      setCnx(rep.getConnectionKey());
-      doReply(new SessCreateDestReply(rep));
-    }
-    // The connection is lost; nothing to do.
-    catch (ProxyException pE) {}
-  }
-
-  /**
-   * Actually forwards an <code>AccessReply</code> coming from a destination
-   * as a <code>CnxAccessReply</code> destinated to the requesting client.
-   */
-  private void doFwd(AccessReply rep)
-  {
-    try {
-      // Updating the active connection:
-      setCnx(rep.getConnectionKey());
-      doReply(new CnxAccessReply(rep));
-    }
-    // The connection is lost; nothing to do.
-    catch (ProxyException pE) {}
-  }
-
-  /**
    * Actually forwards a <code>QueueMsgReply</code> coming from a destination
    * as a <code>ConsumerMessages</code> destinated to the requesting client.
    * <p>
@@ -1293,6 +1274,23 @@ public class JmsClientProxy extends ConnectionFactory
     try {
       // Updating the active connection:
       setCnx(rep.getConnectionKey());
+
+      // If the receive request being replied has been cancelled, denying
+      // the message.
+      if (rep.getCorrelationId().equals(cnx.cancelledRequestId)) {
+        if (rep.getMessage() != null) {
+          String msgId = rep.getMessage().getIdentifier();
+
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
+            MomTracing.dbgProxy.log(BasicLevel.WARN, "Denying message: "
+                                    + msgId);
+
+          Vector ids = new Vector();
+          ids.add(msgId);
+          sendTo(from, new DenyRequest(rep.getCorrelationId(), ids));
+        }
+        return;
+      }
 
       // Building the reply and storing the wrapped message id for later
       // denying in the case of a failure:
@@ -1351,12 +1349,13 @@ public class JmsClientProxy extends ConnectionFactory
   {
     // Storing the received messages:
     messagesTable.putAll(rep.getAllMessages());
+    // Keeping the received messages identifiers:
+    Enumeration receivedKeys = rep.getAllMessages().keys();
 
+    // Browsing the target subscriptions:
     String subName;
     ClientSubscription sub;
     ConsumerMessages consM;
-
-    // Browsing the target subscriptions:
     while (rep.hasMoreSubs()) {
       subName = rep.nextSub();
       sub = (ClientSubscription) subsTable.get(subName);
@@ -1377,7 +1376,7 @@ public class JmsClientProxy extends ConnectionFactory
 
             if (cnx.started) {
               consM = sub.deliver();
-              if (consM != null)
+              if (consM != null) 
                 doReply(consM);
             }
           }
@@ -1386,14 +1385,13 @@ public class JmsClientProxy extends ConnectionFactory
         }
       }
     }
-    // Checking among the stored messages if some won't be delivered:
-    Enumeration keys = messagesTable.keys();
+    // Checking among the newly stored messages if some won't be delivered:
     String id;
     Message msg;
-    while (keys.hasMoreElements()) {
-      id = (String) keys.nextElement();
+    while (receivedKeys.hasMoreElements()) {
+      id = (String) receivedKeys.nextElement();
       msg = (Message) messagesTable.get(id);
-      // No acknowledgement expected for this message: removing it...
+      // No acknowledgement expected for this message: removing it.
       if (msg.acksCounter == 0)
         messagesTable.remove(id);
     }
@@ -1468,11 +1466,16 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to an <code>UnknownAgent</code>
-   * notification notifying that a destination has been deleted.
+   * notification notifying that a destination does not exist.
    * <p>
    * If the request was a subscribe request, the method removes the 
-   * corresponding subscriptions. For all requests, sends also an
+   * corresponding subscriptions. If the request was messages sending, the
+   * messages are sent to the DMQ. For all requests, sends also an
    * <code>JmsExceptReply</code> to the requester.
+   * <p>
+   * This case might also happen when sending a <code>ClientMessages</code>
+   * to a dead message queue. In that case, the invalid DMQ identifier is set
+   * to null.
    */
   private void doReact(UnknownAgent uA)
   {
@@ -1481,14 +1484,25 @@ public class JmsClientProxy extends ConnectionFactory
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
       MomTracing.dbgProxy.log(BasicLevel.WARN, "--- " + this
-                              + " notified of dead destination: "
+                              + " notified of invalid destination: "
                               + agId.toString());
 
     if (not instanceof AbstractRequest) {
       AbstractRequest req = (AbstractRequest) not;
 
+      // If the sent request was messages destinated to a queue, forwarding
+      // them to the DMQ:
+      if (req instanceof ClientMessages) {
+        // If the queue actually was a dead message queue, updating its
+        // identifier:
+        if (dmqId != null && agId.equals(dmqId))
+          dmqId = null;
+        if (DeadMQueueImpl.id != null && agId.equals(DeadMQueueImpl.id))
+          DeadMQueueImpl.id = null;
+        sendToDMQ(((ClientMessages) req).getMessages());
+      }
       // If the sent request was a subscribe request, removing the sub:
-      if (req instanceof SubscribeRequest) {
+      else if (req instanceof SubscribeRequest) {
         String name = ((SubscribeRequest) req).getName();
         ClientSubscription sub = (ClientSubscription) subsTable.remove(name);
         cnx.activeSubs.remove(name);
@@ -1717,6 +1731,20 @@ public class JmsClientProxy extends ConnectionFactory
     }
   }
 
+  /**
+   * Method used for sending a vector of messages to the appropriate dead
+   * message queue.
+   *
+   * @param messages  Vector of dead messages.
+   */
+  private void sendToDMQ(Vector messages)
+  {
+    if (dmqId != null)
+      sendTo(dmqId, new ClientMessages(null, messages));
+    else if (DeadMQueueImpl.id != null)
+      sendTo(DeadMQueueImpl.id, new ClientMessages(null, messages));
+  }
+
 
   /** 
    * The <code>CnxContext</code> class is used for managing objects related
@@ -1754,6 +1782,11 @@ public class JmsClientProxy extends ConnectionFactory
     private AgentId qId = null;
     /** Reference to the vector of msg ids of the currently "used" queue. */
     private Vector ids = null;
+    /**
+     * Identifier of a cancelled "receive" request, set when a listener has
+     * been unset.
+     */
+    String cancelledRequestId = null;
 
     /**
      * Constructs a <code>CnxContext</code> instance.
@@ -1862,8 +1895,13 @@ public class JmsClientProxy extends ConnectionFactory
     private Vector ids;
     /** Vector of identifiers of the messages delivered to the client. */
     private Vector deliveredIds;
-    /** Vector of identifiers of the messages denied by the client. */
-    private Vector deniedIds;
+    /**
+     * Table for keeping a record of the denied messages.
+     * <p>
+     * <b>Key:</b> message identifier<br>
+     * <b>Object:</b> number of delivery attempts
+     */
+    private Hashtable deniedMsgs;
     /**
      * Identifier of the request requesting messages, either the listener's
      * request, or a "receive" request.
@@ -1888,43 +1926,34 @@ public class JmsClientProxy extends ConnectionFactory
       active = true;
       ids = new Vector();
       deliveredIds = new Vector();
-      deniedIds = new Vector();
+      deniedMsgs = new Hashtable();
     }
 
 
     /** Adds identifiers of messages to deliver. */
     private void addIds(Vector newIds)
     {
+      // Browsing the delivered message identifiers:
       String newId;
       Message msg;
-
-      // Browsing the delivered message identifiers:
       while (! newIds.isEmpty()) {
         newId = (String) newIds.remove(0);
         msg = (Message) messagesTable.get(newId);
  
-        // If the message hasn't already been removed by an other
-        // subscription:
-        if (msg != null) {  
-          // If the message is no more valid, removing it: 
-          if (! msg.isValid())
-            messagesTable.remove(newId);
-          // Else, adding it if noLocal selection matches (messages published
-          // by the same connection as the subscriber's are recognized by the
-          // presence of the string "c<connectionKey>m" in their identifiers).
-          else if (! noLocal
-                   || (newId.indexOf("c" + connectionKey + "m")) == -1) {
-            msg.acksCounter++;
-            ids.add(newId);
+        // Adding it if noLocal selection matches (messages published
+        // by the same connection as the subscriber's are recognized by the
+        // presence of the string "c<connectionKey>m" in their identifiers).
+        if (! noLocal
+            || (newId.indexOf("c" + connectionKey + "m")) == -1) {
+          msg.acksCounter++;
+          ids.add(newId);
 
-             if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-               MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + newId
-                                       + " added in sub " + name);
-          }
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + newId
+                                    + " added in sub " + name);
         }
       }
     }
-
 
     /**
      * Returns a <code>ConsumerMessages</code> reply if there are messages to
@@ -1942,6 +1971,8 @@ public class JmsClientProxy extends ConnectionFactory
       Vector messages = new Vector();
       int prior;
       int j;
+      Integer deliveryAttempts = null;
+      Vector deadM = null;
 
       // When delivering to a listener, it is a vector of messages that may
       // be sent:
@@ -1964,13 +1995,15 @@ public class JmsClientProxy extends ConnectionFactory
                   else
                     break;
                 }
-                // Setting the message denied field:
-                if (deniedIds.contains(id)) {
+                // Setting message's deliveryCount field:
+                deliveryAttempts = (Integer) deniedMsgs.get(id);
+                if (deliveryAttempts == null)
+                  message.deliveryCount = 1;
+                else {
+                  message.deliveryCount = deliveryAttempts.intValue() + 1;
                   message.denied = true;
-                  deniedIds.remove(id);
                 }
-                else
-                  message.denied = false;
+
                 messages.insertElementAt(message, j);
                 deliveredIds.add(id);
                 i++;
@@ -1980,17 +2013,26 @@ public class JmsClientProxy extends ConnectionFactory
                                           + " added for delivery in sub "
                                           + name);
               }
-              // Removing the invalid message:
+              // Removing the invalid message, and adding it to the vector
+              // of dead messages:
               else {
                 ids.remove(id);
-                deniedIds.remove(id);
                 messagesTable.remove(id);
+                deliveryAttempts = (Integer) deniedMsgs.remove(id);
+                if (deliveryAttempts != null) {
+                  message.deliveryCount = deliveryAttempts.intValue();
+                  message.denied = true;
+                }
+                if (deadM == null)
+                  deadM = new Vector();
+                message.expired = true;
+                deadM.add(message);
               }
             }
-            // If the message has been removed, clearing the vector:
+            // If the message has been removed, clearing the resources:
             else {
               ids.remove(id);
-              deniedIds.remove(id);
+              deniedMsgs.remove(id);
             }
           }
           else
@@ -2017,17 +2059,25 @@ public class JmsClientProxy extends ConnectionFactory
                 }
                 i++;
               }
-              // Removing the invalid message:
+              // Removing the invalid message, and adding it to the vector
+              // of dead messages:
               else {
                 ids.remove(id);
-                deniedIds.remove(id);
                 messagesTable.remove(id);
+                deliveryAttempts = (Integer) deniedMsgs.remove(id);
+                if (deliveryAttempts != null) {
+                  message.deliveryCount = deliveryAttempts.intValue();
+                  message.denied = true;
+                }
+                deadM = new Vector();
+                message.expired = true;
+                deadM.add(message);
               }
             }
-            // If the message has been removed, clearing the vectors:
+            // If the message has been removed, clearing the resources:
             else {
               ids.remove(id);
-              deniedIds.remove(id);
+              deniedMsgs.remove(id);
             }
           }
           else 
@@ -2035,12 +2085,14 @@ public class JmsClientProxy extends ConnectionFactory
         }
         // Putting the kept message in the vector:
         if (keptMsg != null) {
-          if (deniedIds.contains(keptMsg.getIdentifier())) {
+          deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getIdentifier());
+          if (deliveryAttempts == null)
+            keptMsg.deliveryCount = 1;
+          else {
+            keptMsg.deliveryCount = deliveryAttempts.intValue() + 1;
             keptMsg.denied = true;
-            deniedIds.remove(keptMsg.getIdentifier());
           }
-          else
-            keptMsg.denied = false;
+
           messages.add(keptMsg);
           deliveredIds.add(keptMsg.getIdentifier());
 
@@ -2051,12 +2103,17 @@ public class JmsClientProxy extends ConnectionFactory
         }
       }
 
+      // Sending the dead messages to the DMQ, if any:
+      if (deadM != null)
+        sendToDMQ(deadM);
+
       // Finally, returning the reply or null:
       if (! messages.isEmpty()) {
         ConsumerMessages consM = new ConsumerMessages(requestId, messages,
                                                       name, false);
         if (! toListener)
           requestId = null;
+
         return consM;
       }
       return null;
@@ -2070,31 +2127,24 @@ public class JmsClientProxy extends ConnectionFactory
      */
     private void acknowledge(Vector ackIds)
     {
+      // Browsing the acknowledged messages:
       String ackId;
       Message msg;
-
-      // Browsing the acknowledged messages:
       while (! ackIds.isEmpty()) {
         ackId = (String) ackIds.remove(0);
         ids.remove(ackId);
         deliveredIds.remove(ackId);
+        deniedMsgs.remove(ackId);
         msg = (Message) messagesTable.get(ackId);
-        // If message still exists, checking its validity:
+        // If message still exists, and if no more ack is expected,
+        // removing it:
         if (msg != null) {
-          // If still valid, decreasing its acknowledgements counter,
-          // and if no more ack is expected, removing it:
-          if (msg.isValid()) {
-            msg.acksCounter--;
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + ackId
+                                    + " acknowledged in sub " + name);
 
-            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + ackId
-                                      + " acknowledged in sub " + name);
-
-            if (msg.acksCounter == 0)
-              messagesTable.remove(ackId);
-          }
-          // If no more valid, removing it:
-          else
+          msg.acksCounter--;
+          if (msg.acksCounter == 0)
             messagesTable.remove(ackId);
         }
       }  
@@ -2110,6 +2160,8 @@ public class JmsClientProxy extends ConnectionFactory
     {
       String denyId;
       Message msg;
+      Vector deadM = new Vector();
+      int deliveryAttempts = 1;
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Messages denied in sub "
@@ -2121,24 +2173,54 @@ public class JmsClientProxy extends ConnectionFactory
         deliveredIds.remove(denyId);
         msg = (Message) messagesTable.get(denyId);
         if (msg != null) {
-          // If message invalid, removing it:
+          // If message invalid, removing it, and adding it to the vector
+          // of dead messages:
           if (! msg.isValid()) {
             ids.remove(denyId);
             messagesTable.remove(denyId);
+            Integer value = (Integer) deniedMsgs.remove(denyId);
+            if (value != null)
+              deliveryAttempts = value.intValue() + 1;
+            msg.deliveryCount = deliveryAttempts;
+            msg.expired = true;
+            deadM.add(msg);
           }
-          // Else, adding it to the vector of denied message identifiers:
+          // Message is valid:
           else {
-            deniedIds.add(denyId);
+            // Getting its number of delivery attempts:
+            Integer value = (Integer) deniedMsgs.get(denyId);
+            if (value != null)
+              deliveryAttempts = value.intValue() + 1;
 
-            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + denyId
-                                      + " denied in sub " + name);
+            // If maximum delivery attempts reached, removing the message:
+            if (isUndeliverable(deliveryAttempts)) {
+              ids.remove(denyId);
+              deniedMsgs.remove(denyId);
+              msg.deliveryCount = deliveryAttempts;
+              msg.undeliverable = true;
+              deadM.add(msg);
+              msg.acksCounter--;
+            }
+            // Else, adding a new entry for it:
+            else {
+              deniedMsgs.put(denyId, new Integer(deliveryAttempts));
+
+              if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+                MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + denyId
+                                        + " denied in sub " + name);
+            }
           }
         }
         // If message already removed:
-        else if (msg == null)
+        else if (msg == null) {
           ids.remove(denyId);
+          deniedMsgs.remove(denyId);
+        }
       }  
+
+      // Sending dead messages to the DMQ, if needed:
+      if (! deadM.isEmpty())
+        sendToDMQ(deadM);
     }
 
 
@@ -2159,14 +2241,28 @@ public class JmsClientProxy extends ConnectionFactory
         id = (String) ids.remove(0);
         msg = (Message) messagesTable.get(id);
 
-        // If message still exists:
+        // If message still exists, decreasing its acknowledgement counter:
         if (msg != null) {
+          msg.acksCounter--;
           // If this subscription acknowledgement was the last expected for it,
           // removing it:
-          if (msg.acksCounter == 1 || ! msg.isValid())
+          if (msg.acksCounter == 0)
             messagesTable.remove(id);
         }
       }
+    }
+
+    /**
+     * Returns <code>true</code> if a given value matches the threshold value
+     * for this user.
+     */
+    private boolean isUndeliverable(int deliveryAttempts)
+    {
+      if (threshold != null)
+        return deliveryAttempts == threshold.intValue();
+      else if (DeadMQueueImpl.threshold != null)
+        return deliveryAttempts == DeadMQueueImpl.threshold.intValue();
+      return false;
     }
   }
 }

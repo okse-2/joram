@@ -30,7 +30,7 @@ import java.io.*;
  * A role wraps an AgentId. It is identified by a name.
  */
 public class Role implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: Role.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: Role.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $";
     /**
      * The wrapped <code>AgentId</code>.
      */

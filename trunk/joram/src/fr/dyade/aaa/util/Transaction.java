@@ -26,7 +26,7 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.10 2002-10-21 08:41:14 maistrfr Exp $"; 
 
   static final String separator = "_";
 
@@ -40,6 +40,10 @@ public interface Transaction {
   void save(Serializable obj, String name) throws IOException;
   Object load(String name) throws IOException, ClassNotFoundException;
   void delete(String name);
+
+  void save(Serializable obj, String dirName, String name) throws IOException;
+  Object load(String dirName, String name) throws IOException, ClassNotFoundException;
+  void delete(String dirName, String name);
 
   void commit() throws IOException;
   void rollback() throws IOException;

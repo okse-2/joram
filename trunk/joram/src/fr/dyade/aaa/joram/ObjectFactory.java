@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,12 +22,14 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): Frederic Maistre (INRIA)
  */
 package fr.dyade.aaa.joram;
 
-import java.util.Hashtable;
+import fr.dyade.aaa.joram.admin.DeadMQueue;
 
+import java.util.Hashtable;
 import javax.naming.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -46,6 +48,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
   String xatcfClassName = "fr.dyade.aaa.joram.XATopicConnectionFactory";
   String qClassName = "fr.dyade.aaa.joram.Queue";
   String tClassName = "fr.dyade.aaa.joram.Topic";
+  String dmqClassName = "fr.dyade.aaa.joram.admin.DeadMQueue";
 
   /** Returns the looked up object. */
   public Object getObjectInstance(Object obj, Name name, Context ctx,
@@ -199,6 +202,18 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
                                      + t + " retrieved by naming service.");
       return t;
+    }
+    else if (ref.getClassName().equals(dmqClassName)) {
+      String dmqName = (String) ref.get("dest.name").getContent();
+      DeadMQueue dmq = (DeadMQueue) Destination.getInstance(dmqName);
+
+      if (dmq == null)
+        dmq = new DeadMQueue(dmqName);
+      else
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + dmq + " retrieved by naming service.");
+      return dmq;
     }
     else
       return null;

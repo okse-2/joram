@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLServer</code> describes an agent server read from
  * the A3CML configuration file.
@@ -43,19 +37,18 @@ public class A3CMLServer {
   public String hostname = null;
   public Vector services = null;
 
-  A3CMLServer(Attributes atts) throws SAXException {
-    String attribute = atts.getValue(A3CMLHandler.ATT_ID);
+  A3CMLServer(String sid,
+              String name,
+              String hostname) throws Exception {
     try {
-      sid = Short.parseShort(attribute);
+      this.sid = Short.parseShort(sid);
     } catch (NumberFormatException exc) {
-      throw new SAXException("bad value \"" +
-			     attribute +
-			     "\" for attribute \"" + 
-			     A3CMLHandler.ATT_ID);
+      throw new Exception("bad value \"" + sid + "\" for attribute \"" +
+                          A3CMLHandler.ATT_ID + "\"");
     }
-    name = atts.getValue(A3CMLHandler.ATT_NAME);
-    hostname = atts.getValue(A3CMLHandler.ATT_HOSTNAME);
-    services = new Vector();
+    this.name = name;
+    this.hostname = hostname;
+    this.services = new Vector();
   }
 
   public String toString() {

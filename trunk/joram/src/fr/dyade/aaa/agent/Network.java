@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.Arrays;
 
 abstract class Network implements MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.10 2002-05-27 15:17:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** Time between two activation of watch-dog thread (default 10 seconds) */
   final static long WDActivationPeriod = 10000L; // 10 seconds

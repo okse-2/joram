@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLNetwork</code> describes a network component.
  */
@@ -40,17 +34,14 @@ public class A3CMLNetwork {
   public String domain = null;
   public int port = -1;
 
-  A3CMLNetwork(Attributes atts) throws SAXException {
-    domain = atts.getValue(A3CMLHandler.ATT_DOMAIN);
-
-    String attribute = atts.getValue(A3CMLHandler.ATT_PORT);
+  A3CMLNetwork(String domain,
+               String port) throws Exception {
+    this.domain = domain;
     try {
-      port = Integer.parseInt(attribute);
+      this.port = Integer.parseInt(port);
     } catch (NumberFormatException exc) {
-      throw new SAXException("bad value \"" +
-			     attribute +
-			     "\" for attribute \"" + 
-			     A3CMLHandler.ATT_PORT);
+      throw new Exception("bad value \"" + port + "\" for attribute \"" + 
+                          A3CMLHandler.ATT_PORT + "\"");
     }
   }
 }

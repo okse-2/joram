@@ -24,9 +24,19 @@
 package fr.dyade.aaa.agent;
 
 final class Boot implements java.io.Serializable {
-  short sid;
+  transient short sid;
 
   Boot() {
     this.sid = AgentServer.getServerId();
+  }
+
+  private void writeObject(java.io.ObjectOutputStream out)
+    throws java.io.IOException {
+    out.writeShort(sid);
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+    throws java.io.IOException, ClassNotFoundException {
+    sid = in.readShort();
   }
 }

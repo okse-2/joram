@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -195,7 +196,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new Message(this);
+    return new Message();
   }
 
   /**
@@ -208,7 +209,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new TextMessage(this);
+    return new TextMessage();
   }
 
   /**
@@ -221,8 +222,10 @@ public class Session implements javax.jms.Session
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
-    
-    return new TextMessage(this, text);
+   
+    TextMessage message =  new TextMessage();
+    message.setText(text);
+    return message;
   }
 
   /**
@@ -236,7 +239,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new BytesMessage(this);
+    return new BytesMessage();
   }
 
   /**
@@ -250,7 +253,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
 
-    return new MapMessage(this);
+    return new MapMessage();
   }
 
   /**
@@ -264,7 +267,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new ObjectMessage(this);
+    return new ObjectMessage();
   }
 
   /**
@@ -277,8 +280,10 @@ public class Session implements javax.jms.Session
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
-    
-    return new ObjectMessage(this, obj);
+   
+    ObjectMessage message = new ObjectMessage(); 
+    message.setObject(obj);
+    return message;
   }
 
   /**
@@ -292,7 +297,7 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new StreamMessage(this);
+    return new StreamMessage();
   }
 
   /**
@@ -438,40 +443,29 @@ public class Session implements javax.jms.Session
     return new TopicSubscriber(this, (Topic) topic, name, null, false);
   }
 
-
   /**
    * API method.
    *
-   * @exception IllegalStateException  If the session is closed or if the
-   *              connection is broken.
-   * @exception InvalidDestinationException  If the queue does not exist.
-   * @exception JMSException  If the request fails for any other reason.
+   * @exception IllegalStateException  If the session is closed.
    */
   public javax.jms.Queue createQueue(String queueName) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
 
-    SessCreateDestRequest req = new SessCreateDestRequest(queueName);
-    SessCreateDestReply rep = (SessCreateDestReply) cnx.syncRequest(req);
     return new Queue(queueName);
   }
 
   /**
    * API method.
    *
-   * @exception IllegalStateException  If the session is closed or if the
-   *              connection is broken.
-   * @exception InvalidDestinationException  If the topic does not exist.
-   * @exception JMSException  If the request fails for any other reason.
+   * @exception IllegalStateException  If the session is closed.
    */
   public javax.jms.Topic createTopic(String topicName) throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
 
-    SessCreateDestRequest req = new SessCreateDestRequest(topicName);
-    SessCreateDestReply rep = (SessCreateDestReply) cnx.syncRequest(req);
     return new Topic(topicName);
   }
 
@@ -734,9 +728,6 @@ public class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": closing..."); 
 
-    while (! browsers.isEmpty())
-      ((QueueBrowser) browsers.get(0)).close();
-
     // Emptying the current pending deliveries:
     try {
       repliesIn.stop();
@@ -753,12 +744,15 @@ public class Session implements javax.jms.Session
       deny();
       
     // Closing the session's resources:
+    while (! browsers.isEmpty())
+      ((QueueBrowser) browsers.get(0)).close();
     while (! consumers.isEmpty())
       ((MessageConsumer) consumers.get(0)).close();
     while (! producers.isEmpty())
       ((MessageProducer) producers.get(0)).close();
 
     cnx.sessions.remove(this);
+
     closed = true;
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -816,14 +810,9 @@ public class Session implements javax.jms.Session
    * the <code>start()</code> method, or by the <code>Session.close()</code>
    * and <code>Connection.stop()</code> methods, which first empty the
    * session's deliveries and forbid any further push.
-   *
-   * @exception IllegalStateException  If the session is closed.
    */
-  void stop() throws IllegalStateException
+  void stop()
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
     // Ignoring the call if the session is already stopped:
     if (! started)
       return;
@@ -856,10 +845,10 @@ public class Session implements javax.jms.Session
    * Method called by message producers when producing a message for
    * preparing the session to later commit it.
    *
-   * @param name  Name of the destination the message is destinated to.
+   * @param dest  The destination the message is destinated to.
    * @param msg  The message.
    */
-  void prepareSend(String name, fr.dyade.aaa.mom.messages.Message msg)
+  void prepareSend(Destination dest, fr.dyade.aaa.mom.messages.Message msg)
   {
     boolean rearmTimer = false;
     if (transactask != null) {
@@ -867,10 +856,10 @@ public class Session implements javax.jms.Session
       rearmTimer = true;
     }
 
-    ProducerMessages pM = (ProducerMessages) sendings.get(name);
+    ProducerMessages pM = (ProducerMessages) sendings.get(dest.getName());
     if (pM == null) {
-      pM = new ProducerMessages(name);
-      sendings.put(name, pM);
+      pM = new ProducerMessages(dest.getName());
+      sendings.put(dest.getName(), pM);
     }
     pM.addMessage(msg);
 
