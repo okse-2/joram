@@ -11,7 +11,7 @@
   </properties>
 
   <body>
-    <s1 name="joram CVS Version, no tag">
+    <s1 name="CVS base, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: April 6, 2004)">
