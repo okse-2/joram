@@ -224,7 +224,7 @@ public class OutboundConnection implements javax.jms.Connection
     // Closing the sessions:
     Session session;
     org.objectweb.joram.client.jms.Connection cnx = 
-      (org.objectweb.joram.client.jms.XAConnection) xac;
+      (org.objectweb.joram.client.jms.Connection) xac;
     while (cnx.sessions != null && 
            ! cnx.sessions.isEmpty()) {
       session = (Session) cnx.sessions.elementAt(0);
