@@ -25,6 +25,7 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
+import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -228,7 +229,28 @@ public class SimpleNetwork extends StreamNetwork {
                 
                 // Open the connection.
                 try {
-                  socket = createSocket(server);
+                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
+
+                  for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
+                    fr.dyade.aaa.util.SocketAddress sa = 
+                      (fr.dyade.aaa.util.SocketAddress) e.nextElement();
+                    try {
+                      server.moveToFirst(sa);
+                      socket = createSocket(server);
+                    } catch (IOException ioexc) {
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", connection refused with addr=" + server.getAddr()+
+                                      " port=" +  server.getPort() +", try next element");
+                      continue;
+                    }
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+                    break;
+                  }
+                  
+                  if (socket == null)
+                    socket = createSocket(server);
                 } catch (IOException exc) {
                   this.logmon.log(BasicLevel.WARN,
                                   this.getName() + ", connection refused", exc);
@@ -348,7 +370,29 @@ public class SimpleNetwork extends StreamNetwork {
             // Open the connection.
             Socket socket = null;
             try {
-              socket = createSocket(server);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", try to connect");
+              
+              for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
+                fr.dyade.aaa.util.SocketAddress sa = 
+                  (fr.dyade.aaa.util.SocketAddress) e.nextElement();
+                try {
+                  server.moveToFirst(sa);
+                  socket = createSocket(server);
+                } catch (IOException ioexc) {
+                  this.logmon.log(BasicLevel.DEBUG,
+                                  this.getName() + ", connection refused with addr=" + server.getAddr()+
+                                  " port=" +  server.getPort() +", try next element");
+                  continue;
+                }
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+                break;
+              }
+              
+              if (socket == null) 
+                socket = createSocket(server);
               // The connection is ok, reset active and retry flags.
               server.active = true;
               server.retry = 0;

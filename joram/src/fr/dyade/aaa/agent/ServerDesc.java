@@ -25,7 +25,7 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
-import java.net.*;
+import java.net.InetAddress;
 import java.util.Vector;
 import java.util.Enumeration;
 
@@ -162,8 +162,10 @@ public final class ServerDesc implements Serializable {
    * component of the HA configuration.
    */
   void moveToFirst(SocketAddress addr) {
-    sockAddrs.insertElementAt(addr, 0);
-    sockAddrs.remove(addr);
+    if (sockAddrs.indexOf(addr) > 0) {
+      if (sockAddrs.remove(addr))
+        sockAddrs.insertElementAt(addr,0);
+    }
   }
 
   /**
