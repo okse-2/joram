@@ -74,29 +74,6 @@
       updated.</p>
       <p>Enjoy!</p>
 
-      <subtitle>November 7, 2003: the first major
-      contribution from JORAM ever growing community</subtitle>
-      <p>JORAM 3.7 includes the long expected graphical tool for
-      administering and monitoring the state of a JORAM platform.
-      Thanks to Alexander Fedorowicz, an active contributor, this tool is
-      made available to the whole JORAM community.</p>
-      <p>The tool allows to administer and monitor a JORAM platform made of
-      one or many interconnected JORAM servers. It allows to create and delete
-      destinations, users, and also to bind them to JORAM's naming server.</p>
-      <p>Many thanks to Alexander for providing this useful tool often
-      requested on JORAM's mailing lists.</p>
-      <p><img src="images/joram-gui.jpg" alt="JORAM GUI screenshot" height="240"
-           width="450" border="0" hspace="2" align="middle"/></p>
-      <p>The tool sources are available in CVS and in the sources package. It
-      is provided as an independent library in the binary distribution. Check
-      the <a href="download/index.html">download area</a>.
-      </p>
-      <p>This latest release is also available through a CVS checkout, tag
-        <strong>joram3_7_0</strong>.</p>
-      <p>The installation, administration and samples guides have been updated.
-      An user manual for the new tool has been provided by Alexander, and
-      is reachable from the <a href="doc/index.html">documentation area</a>.
-      Enjoy!</p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
