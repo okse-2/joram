@@ -59,7 +59,7 @@
   <target name="check"
 	  description="Check xml files">    
 
-    <xmlvalidate failonerror="no" lenient="no" warn="yes"
+    <xmlvalidate failonerror="yes" lenient="no" warn="yes"
 		 classname="org.apache.xerces.parsers.SAXParser">
 
       <classpath refid="externals.classpath"/> 

@@ -14,8 +14,8 @@
 
     <s1 name="Xerces download">
 
-	<form>
-	  <textarea rows="30" name="Agreement" cols="90" wrap="soft">
+	<form action="">
+	  <textarea rows="30" cols="90">
 The Apache Software License, Version 1.1
 				
 Copyright(c) 1999-2000 The Apache Software Foundation.  All rights 
