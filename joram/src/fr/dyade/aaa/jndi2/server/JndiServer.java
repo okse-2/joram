@@ -97,13 +97,15 @@ public class JndiServer extends ServerAgent {
   }
 
   public void initialize(boolean firstTime) throws Exception {
-    this.transaction = AgentServer.getTransaction();
+    // The transaction is the factory's reaction transaction.
+    initialize(AgentServer.getTransaction());    
+  }
+
+  public void initialize(Transaction transaction) throws Exception {
+    this.transaction = transaction;
     this.impl = new ServerImpl(transaction);
-    if (firstTime) {
-      // The transaction is the factory's reaction transaction.
-      impl.initialize();
-    }
-    super.initialize(firstTime);
+    impl.initialize();
+    super.initialize(true);
   }
 
   /**

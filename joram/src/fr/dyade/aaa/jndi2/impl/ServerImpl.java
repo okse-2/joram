@@ -48,7 +48,10 @@ public class ServerImpl {
   
   public void initialize() throws NamingException {
     // Create the root naming context.
-    createNamingContext(new CompositeName());
+    CompositeName rootName = new CompositeName();
+    if (loadNamingContext(rootName) == null) {
+      createNamingContext(rootName);
+    }
   }
 
   public void bind(CompositeName path, Object obj) throws NamingException {
