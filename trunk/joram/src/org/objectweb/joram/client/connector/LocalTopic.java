@@ -74,5 +74,6 @@ public class LocalTopic implements LocalTopicMBean
   {
     topic.delete();
     JoramAdapter.unregister(this);
+    JoramAdapter.unbind(topic.getAdminName());
   }
 }
