@@ -16,7 +16,7 @@
 
       <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
       available in the CVS distribution.</subtitle>
-      <p>This new version provides a totally refactored <em>administration</em> 
+      <p>This new version provides a refactored <em>administration</em> 
       protocol. Administration is now based on JMS communication and is much
       more flexible than the past implementation. Hopefully it will make
       contributing easier; JORAM's administration still misses graphical tools
