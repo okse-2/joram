@@ -36,8 +36,8 @@ import fr.dyade.aaa.agent.management.MXWrapper;
  * Sun RI. An HTTP adaptor is launch to access management functions in running
  * agent servers.
  * <p>
- * The <code>JMXRIService</code> service needs an argument: the TCP port. By
- * default port 8082 is used.
+ * The <code>JMXRIHttpService</code> service needs an argument: the TCP port.
+ * By default port 8082 is used.
  */
 public class JMXRIHttpService {
   static HtmlAdaptorServer adapterServer = null;
@@ -62,8 +62,7 @@ public class JMXRIHttpService {
       adapterServer.setPort(port);
       MXWrapper.registerMBean(adapterServer,
                               "JMXRIHttpService",
-                              "htmladapter",
-                              "port=" + port);
+                              "name=htmladapter,port=" + port);
 
       startService();
     } catch (Exception exc) {

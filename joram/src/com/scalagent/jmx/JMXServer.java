@@ -52,17 +52,12 @@ public class JMXServer implements MXServer {
 
   public void registerMBean(Object bean,
                             String domain,
-                            String name,
-                            String type,
-                            String desc) throws Exception {
+                            String name) throws Exception {
     if (mxserver == null) return;
 
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain);
-    strbuf.append(":name=").append(name);
-    strbuf.append(",type=").append(type);
-    if (desc != null)
-      strbuf.append(',').append(desc);
+    strbuf.append(':').append(name);
 
     try {
       mxserver.registerMBean(bean, new ObjectName(strbuf.toString()));
@@ -82,25 +77,13 @@ public class JMXServer implements MXServer {
     }
   }
 
-  public void registerMBean(Object bean,
-                            String name,
-                            String type,
-                            String desc) throws Exception {
-    registerMBean(bean, domain, name, type, desc);
-  }
-
   public void unregisterMBean(String domain,
-                              String name,
-                              String type,
-                              String desc) throws Exception {
+                              String name) throws Exception {
     if (mxserver == null) return;
 
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain);
-    strbuf.append(":name=").append(name);
-    strbuf.append(",type=").append(type);
-    if (desc != null)
-      strbuf.append(',').append(desc);
+    strbuf.append(':').append(name);
 
     try {
       mxserver.unregisterMBean(new ObjectName(strbuf.toString()));
@@ -115,11 +98,5 @@ public class JMXServer implements MXServer {
       // Wraps a java.lang.IllegalArgumentException
       throw exc;
     }
-  }
-
-  public void unregisterMBean(String name,
-                              String type,
-                              String desc) throws Exception {
-    unregisterMBean(domain, name, type, desc);
   }
 }
