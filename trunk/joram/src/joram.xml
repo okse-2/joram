@@ -15,18 +15,20 @@
 
     <!-- Defines specific fileset to compile -->
     <patternset id="specific.compile.sources" >
-      <!-- include name="com/scalagent/jmx/*.java"/ -->
-      <include name="fr/dyade/aaa/agent/conf/*.java"/>
-      <include name="fr/dyade/aaa/agent/management/*.java"/>
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
       <include name="fr/dyade/aaa/agent/Engine.java"/>
       <include name="fr/dyade/aaa/agent/TransactionEngine.java"/>
       <include name="fr/dyade/aaa/agent/GCTransactionEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
       <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+      <include name="fr/dyade/aaa/agent/management/*.java"/>
+      <!-- include name="com/scalagent/jmx/*.java"/ -->
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
@@ -34,36 +36,7 @@
       <include name="fr/dyade/aaa/util/AFastTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
       <include name="org/objectweb/joram/**/*.java"/>
-      <!-- Exclude KXML Wrapper (requires kxml.jar) -->
-      <exclude name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
     </patternset>
-
-    <!-- Base classpath needed for execution -->
-    <path id="base.class.path">
-      <pathelement path="${java.class.path}/"/>
-      <fileset dir="${lib.dir}">
-        <include name="activation.jar"/>
-        <include name="connector-1_5.jar"/>
-        <include name="jakarta-regexp-1.2.jar"/>
-        <include name="JCup.jar"/>
-        <include name="jms.jar"/>
-        <include name="jmxri.jar"/>
-        <include name="jmxtools.jar"/>
-        <include name="jndi.jar"/>
-        <include name="jta.jar"/>
-        <include name="mail.jar"/>
-	<include name="ow_monolog.jar" />
-        <include name="soap.jar"/>
-        <include name="xerces.jar"/>
-      </fileset>
-    </path>
-
-    <!-- Project classpath needed for compilation -->
-    <path id="project.class.path">
-      <path refid="base.class.path"/>
-      <pathelement path="${obj.dir}"/>
-      <pathelement path="${additional.path}"/>
-    </path>
 
     <!-- Specific classpath needed for compilation -->
     <path id="specific.class.path">
