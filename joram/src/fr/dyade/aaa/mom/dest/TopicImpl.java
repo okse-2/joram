@@ -27,7 +27,12 @@
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
@@ -150,25 +155,34 @@ public class TopicImpl extends DestinationImpl
    * cluster with a given topic.
    *
    * @exception AccessException  If the requester is not an administrator.
-   * @exception RequestException  If this topic is part of a hierarchy, or
-   *              if the joining topic is already part of the cluster.
    */
   protected void doReact(AgentId from, ClusterRequest req)
-                 throws MomException
+                 throws AccessException
   {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if (fatherId != null)
-      throw new RequestException("Topic part of a hierarchy");
+    if (fatherId != null) {
+      String info = "Request [" + req.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: topic part of a hierarchy";
+      Channel.sendTo(from, new AdminReply(req, false, info));
+      return;
+    }
 
     AgentId newFriendId = req.getTopicId();
 
     if (friends == null)
      friends = new Vector();
 
-    if (friends.contains(newFriendId) || destId.equals(newFriendId))
-      throw new RequestException("Joining topic already part of cluster");
+    if (friends.contains(newFriendId) || destId.equals(newFriendId)) {
+      String info = "Request [" + req.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: joining topic already"
+                    + " part of cluster";
+      Channel.sendTo(from, new AdminReply(req, false, info));
+      return;
+    }
 
     ClusterTest not = new ClusterTest(req, from);
     Channel.sendTo(newFriendId, not);
@@ -217,12 +231,12 @@ public class TopicImpl extends DestinationImpl
    */ 
   protected void doReact(AgentId from, ClusterAck ack)
   { 
-    // Forwarding the notification to the original requester.
-    Channel.sendTo(ack.requester, ack);
-
     // The topic does not accept to join the cluster: doing nothing.
-    if (! ack.ok)
+    if (! ack.ok) {
+      Channel.sendTo(ack.requester,
+                     new AdminReply(ack.request, false, ack.info));
       return;
+    }
   
     AgentId fellowId;
     ClusterNot fellowNot;
@@ -237,10 +251,14 @@ public class TopicImpl extends DestinationImpl
     }
     friends.add(from);
 
+    String info = "Request [" + ack.request.getClass().getName()
+                  + "], sent to Topic [" + destId
+                  + "], successful [true]: topic ["
+                  + from + "] joined cluster";
+    Channel.sendTo(ack.requester, new AdminReply(ack.request, true, info));
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
-                                    + from.toString() + " added in "
-                                    + "cluster.");
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -263,7 +281,6 @@ public class TopicImpl extends DestinationImpl
    * instance requesting this topic to leave the cluster it is part of.
    *
    * @exception AccessException  If the requester is not an administrator.
-   * @exception RequestException  If the topic is not part of a cluster.
    */
   protected void doReact(AgentId from, UnclusterRequest request)
                  throws MomException
@@ -271,8 +288,13 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if (friends == null || friends.isEmpty())
-      throw new RequestException("Topic not part of any cluster");
+    if (friends == null || friends.isEmpty()) {
+      String info = "Request [" + request.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: topic not part of a cluster";
+      Channel.sendTo(from, new AdminReply(request, false, info));
+      return;
+    }
 
     UnclusterNot not = new UnclusterNot();
     AgentId fellowId;
@@ -283,9 +305,13 @@ public class TopicImpl extends DestinationImpl
     }
     friends = null;
 
+    String info = "Request [" + request.getClass().getName()
+                  + "], sent to Topic [" + destId
+                  + "], successful [true]: topic left the cluster";
+    Channel.sendTo(from, new AdminReply(request, true, info));
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Fellows notified of"
-                                    + " topic leave.");
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
  
   /**
@@ -302,7 +328,7 @@ public class TopicImpl extends DestinationImpl
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
                                     + from.toString() + " removed from"
-                                    + " fellows.");
+                                    + " cluster.");
   }
 
   /**
@@ -310,8 +336,6 @@ public class TopicImpl extends DestinationImpl
    * instance notifying this topic it is part of a hierarchy as a son.
    *
    * @exception AccessException  If the requester is not an administrator.
-   * @exception RequestException  If the topic is already part of a hierarchy,
-   *              or of a cluster.
    */
   protected void doReact(AgentId from, SetFatherRequest request)
                  throws MomException
@@ -319,11 +343,23 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if (fatherId != null)
-      throw new RequestException("Topic already part of a hierarchy");
+    if (fatherId != null) {
+      String info = "Request [" + request.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: topic already part"
+                    + " of a hierarchy";
+      Channel.sendTo(from, new AdminReply(request, false, info));
+      return;
+    }
 
-    if (friends != null)
-      throw new RequestException("Topic already part of a cluster");
+    if (friends != null) {
+      String info = "Request [" + request.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: topic already part"
+                    + " of a cluster";
+      Channel.sendTo(from, new AdminReply(request, false, info));
+      return;
+    }
 
     Channel.sendTo(request.getFatherId(), new FatherTest(request, from));
   }
@@ -353,21 +389,24 @@ public class TopicImpl extends DestinationImpl
    */ 
   protected void doReact(AgentId from, FatherAck not)
   {
-    // Forwarding the notification to the original requester.
-    Channel.sendTo(not.requester, not);
-
     // The topic does not accept to join the hierarchy: doing nothing.
-    if (! not.ok)
+    if (! not.ok) {
+      Channel.sendTo(not.requester,
+                     new AdminReply(not.request, false, not.info));
       return;
+    }
   
-
     // The topic accepts to be a father: setting it.
     fatherId = from;
+  
+    String info = "Request [" + not.request.getClass().getName()
+                  + "], sent to Topic [" + destId
+                  + "], successful [true]: topic ["
+                  + from + "] set as father";
+    Channel.sendTo(not.requester, new AdminReply(not.request, true, info));
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
-                                    + from.toString()
-                                    + " set as a father.");
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -375,7 +414,6 @@ public class TopicImpl extends DestinationImpl
    * instance notifying this topic to leave its father.
    *
    * @exception AccessException  If the requester is not an administrator.
-   * @exception RequestException  If the topic is not a son.
    */
   protected void doReact(AgentId from, UnsetFatherRequest request)
                  throws MomException
@@ -383,13 +421,23 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if (fatherId == null)
-      throw new RequestException("Topic is not a son");
+    if (fatherId == null) {
+      String info = "Request [" + request.getClass().getName()
+                    + "], sent to Topic [" + destId
+                    + "], successful [false]: topic is not a son";
+      Channel.sendTo(from, new AdminReply(request, false, info));
+      return;
+    }
 
     fatherId = null;
 
+    String info = "Request [" + request.getClass().getName()
+                  + "], sent to Topic [" + destId
+                  + "], successful [true]: father unset";
+    Channel.sendTo(from, new AdminReply(request, true, info));
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Father unset.");
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -585,14 +633,14 @@ public class TopicImpl extends DestinationImpl
       ClusterTest cT = (ClusterTest) not;
       String info = "Topic [" + agId + "] can't join cluster "
                     + "as it does not exist";
-      Channel.sendTo(cT.requester, new ClusterAck(cT, false, info));
+      Channel.sendTo(cT.requester, new AdminReply(cT.request, false, info));
     }
     // Deleted topic was requested as a father: notifying the requester:
     else if (not instanceof FatherTest) {
       FatherTest fT = (FatherTest) not;
       String info = "Topic [" + agId + "] can't join hierarchy "
                     + "as it does not exist";
-      Channel.sendTo(fT.requester, new FatherAck(fT, false, info));
+      Channel.sendTo(fT.requester, new AdminReply(fT.request, false, info));
     }
     else {
       // Removing the deleted client's subscriptions, if any.
