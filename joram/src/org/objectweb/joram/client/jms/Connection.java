@@ -43,8 +43,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class Connection implements javax.jms.Connection
 {
   /** Timer provided by the <code>Connection</code> class */
-  private static fr.dyade.aaa.util.Timer sessionsTimer = 
-      new fr.dyade.aaa.util.Timer();
+  private fr.dyade.aaa.util.Timer sessionsTimer;
 
   /** Actual connection linking the client and the JORAM platform. */
   private ConnectionItf connectionImpl;
@@ -136,6 +135,9 @@ public class Connection implements javax.jms.Connection
       proxyId = rep.getProxyId();
       key = rep.getCnxKey();
 
+      sessionsTimer =
+        new fr.dyade.aaa.util.Timer();
+      
       if (factoryParameters.cnxPendingTimer > 0) {
         pingTask = new PingTask();
         try {
