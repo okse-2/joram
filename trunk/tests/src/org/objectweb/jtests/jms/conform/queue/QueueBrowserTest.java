@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * Test the <code>javax.jms.QueueBrowser</code> features.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: QueueBrowserTest.java,v 1.1 2002-03-19 16:32:27 joram Exp $
+ * @version $Id: QueueBrowserTest.java,v 1.2 2002-04-02 12:13:46 joram Exp $
  */
 public class QueueBrowserTest extends PTPTestCase {
 
@@ -146,9 +146,9 @@ public class QueueBrowserTest extends PTPTestCase {
 
   public void tearDown() {
     try {
-      super.tearDown();
       receiverBrowser.close();
       senderBrowser.close();
+      super.tearDown();
     } catch (JMSException e) {
       e.printStackTrace();
     } finally {
