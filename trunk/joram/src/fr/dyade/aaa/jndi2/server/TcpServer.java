@@ -37,16 +37,21 @@ public class TcpServer {
 
   private Monitor monitors[];  
 
+  private int timeout;
+
   private AgentId serverId;
 
   public TcpServer(ServerSocket listen,
-                   int nbm,
+                   int poolSize,
+                   int timeout,
                    AgentId serverId) {
     this.listen = listen;
-    this.monitors = new Monitor[nbm];
+    this.timeout = timeout;
+    this.monitors = new Monitor[poolSize];
     this.serverId = serverId;
     for (int i = 0; i < monitors.length; i++) {
-      monitors[i] = new Monitor("JndiServer.Monitor#" + i, this);
+      monitors[i] = new Monitor(
+        "JndiServer.Monitor#" + i, timeout, this);
       monitors[i].setDaemon(true);
       monitors[i].setThreadGroup(AgentServer.getThreadGroup());
     }
@@ -81,11 +86,15 @@ public class TcpServer {
 
   public static class Monitor extends Daemon {
 
+    private int timeout;
+
     private TcpServer tcpServer;
 
     protected Monitor(String name,
+                      int timeout,
                       TcpServer tcpServer) {
       super(name);
+      this.timeout = timeout;
       this.tcpServer = tcpServer;
     }
     
@@ -100,7 +109,7 @@ public class TcpServer {
             if (listen != null) {
               socket = listen.accept();
               socket.setTcpNoDelay(true);
-              socket.setSoTimeout(0);
+              socket.setSoTimeout(timeout);
               socket.setSoLinger(true, 1000);
               canStop = false;
             } else {

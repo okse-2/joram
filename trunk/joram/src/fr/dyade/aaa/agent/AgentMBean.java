@@ -27,14 +27,11 @@ public interface AgentMBean {
   public String getName();
 
   /**
-   * Returns the global unique identifier of the agent. Each agent is
-   * identified by a unique identifier allowing the agent to be found.
-   * The identifiers format is detailed in <a href="AgentId.html">AgentId</a>
-   * class.
+   * Returns the global unique identifier of the agent.
    *
    * @return the global unique identifier of the agent.
    */
-  public AgentId getId();
+  public String getAgentId();
 
 //   /**
 //    * Returns log topic for the agent.

@@ -54,14 +54,14 @@ public class Message implements Cloneable, Serializable
   transient long timestamp;
   /** The message destination identifier. */
   transient String toId = null;
-  /** <code>true</code> if the message destination is a queue. */
-  transient boolean toQueue;
+  /** The message destination type. */
+  transient String toType;
   /** The correlation identifier field. */
   transient String correlationId = null;
   /** The reply to destination identifier. */
   transient String replyToId = null;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  transient boolean replyToQueue;
+  transient String replyToType;
 
   /**
    * Table holding header fields that may be required by particular
@@ -164,12 +164,11 @@ public class Message implements Cloneable, Serializable
    * Sets the message destination.
    *
    * @param id  The destination identifier.
-   * @param queue  <code>true</code> if the destination is a queue.
+   * @param type The type of the destination.
    */
-  public void setDestination(String id, boolean queue)
-  {
+  public void setDestination(String id, String type) {
     this.toId = id;
-    this.toQueue = queue;
+    this.toType = type;
   }
 
   /** Sets the message correlation identifier. */
@@ -182,12 +181,12 @@ public class Message implements Cloneable, Serializable
    * Sets the destination to which a reply should be sent.
    *
    * @param id  The destination identifier.
-   * @param queue  <code>true</code> if the destination is a queue.
+   * @param type The destination type.
    */
-  public void setReplyTo(String id, boolean queue)
+  public void setReplyTo(String id, String type)
   {
     this.replyToId = id;
-    this.replyToQueue = queue;
+    this.replyToType = type;
   }
 
   /**
@@ -247,33 +246,33 @@ public class Message implements Cloneable, Serializable
   }
 
   /** Returns the message destination identifier. */
-  public String getDestinationId()
+  public final String getDestinationId()
   {
     return toId;
   }
 
   /** Returns <code>true</code> if the destination is a queue. */
-  public boolean toQueue()
+  public final String toType()
   {
-    return toQueue;
+    return toType;
   }
 
   /** Returns the message correlation identifier. */
-  public String getCorrelationId()
+  public final String getCorrelationId()
   {
     return correlationId;
   }
 
   /** Returns the destination id the reply should be sent to. */
-  public String getReplyToId()
+  public final String getReplyToId()
   {
     return replyToId;
   }
 
   /** Returns <code>true</code> if the reply to destination is a queue. */
-  public boolean replyToQueue()
+  public final String replyToType()
   {
-    return replyToQueue;
+    return replyToType;
   }
 
   /**
@@ -780,12 +779,12 @@ public class Message implements Cloneable, Serializable
     fieldsTb.put("expiration", new Long(expiration));
     fieldsTb.put("timestamp", new Long(timestamp));
     fieldsTb.put("toId", toId);
-    fieldsTb.put("toQueue", new Boolean(toQueue));
+    fieldsTb.put("toType", toType);
     if (correlationId != null)
       fieldsTb.put("correlationId", correlationId);
     if (replyToId != null) {
       fieldsTb.put("replyToId", replyToId);
-      fieldsTb.put("replyToQueue", new Boolean(replyToQueue));
+      fieldsTb.put("replyToType", replyToType);
     }
     if (body_bytes != null)
       fieldsTb.put("body_bytes", body_bytes);
@@ -835,12 +834,11 @@ public class Message implements Cloneable, Serializable
       msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
       msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
       msg.toId = (String) fieldsTb.get("toId");
-      msg.toQueue = ConversionHelper.toBoolean(fieldsTb.get("toQueue"));
+      msg.toType = (String)fieldsTb.get("toType");
       msg.correlationId = (String) fieldsTb.get("correlationId");
       msg.replyToId = (String) fieldsTb.get("replyToId");
       if (msg.replyToId != null) {
-        msg.replyToQueue =
-          ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
+        msg.replyToType = (String)fieldsTb.get("replyToType");
       }
       msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
       msg.body_map = (HashMap) fieldsTb.get("body_map");
@@ -930,10 +928,10 @@ public class Message implements Cloneable, Serializable
     os.writeLong(expiration);
     os.writeLong(timestamp);
     writeString(os, toId);
-    os.writeBoolean(toQueue);
+    writeString(os, toType);
     writeString(os, correlationId);
     writeString(os, replyToId);
-    os.writeBoolean(replyToQueue);
+    writeString(os, replyToType);
 
     os.writeObject(optionalHeader);
 
@@ -984,10 +982,10 @@ public class Message implements Cloneable, Serializable
     expiration = is.readLong();
     timestamp = is.readLong();
     toId = readString(is);
-    toQueue = is.readBoolean();
+    toType = readString(is);
     correlationId = readString(is);
     replyToId = readString(is);
-    replyToQueue = is.readBoolean();
+    replyToType = readString(is);
 
     optionalHeader = (Hashtable) is.readObject();
 
@@ -1028,7 +1026,14 @@ public class Message implements Cloneable, Serializable
 
   public String toString() {
     return '(' + super.toString() +
+      ",type=" + type +
       ",id=" + id + 
-      ",body_bytes=" + body_bytes + ')';
+      ",body_map=" + body_map +
+      ",body_text=" + body_text +
+      ",toId=" + toId + 
+      ",toType=" + toType +
+      ",replyToId=" + replyToId + 
+      ",replyToType=" + replyToType +
+      ')';
   }
 }

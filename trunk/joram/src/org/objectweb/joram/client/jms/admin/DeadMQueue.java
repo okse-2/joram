@@ -24,6 +24,7 @@
 package org.objectweb.joram.client.jms.admin;
 
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Destination;
 
 import java.net.ConnectException;
 
@@ -32,34 +33,13 @@ import java.net.ConnectException;
  * The <code>DeadMQueue</code> class allows administrators to manipulate
  * dead message queues.
  */
-public class DeadMQueue extends org.objectweb.joram.client.jms.Queue
-{
-  /**
-   * Constructs a <code>DeadMQueue</code> instance.
-   *
-   * @param agentId  Identifier of the dead message queue agent.
-   */
-  public DeadMQueue(String agentId)
-  {
-    super(agentId);
-  }
+public class DeadMQueue extends org.objectweb.joram.client.jms.Queue {
 
-  /**
-   * Constructs a <code>DeadMQueue</code> instance.
-   *
-   * @param agentId  Identifier of the dead message queue agent.
-   * @param name     Name set by administrator.
-   */
-  public DeadMQueue(String agentId, String name)
-  {
-    super(agentId, name);
-  }
+  private final static String DMQ_TYPE = "queue.dmq";
 
-  public String toString()
-  {
-    return "DeadMQueue:" + agentId;
+  public static boolean isDeadMQueue(String type) {
+    return Destination.isAssignableTo(type, DMQ_TYPE);
   }
-
 
   /**
    * Admin method creating and deploying a dead message queue on a given
@@ -76,11 +56,14 @@ public class DeadMQueue extends org.objectweb.joram.client.jms.Queue
   public static Queue create(int serverId)
                 throws ConnectException, AdminException
   {
-    String queueId =  doCreate(serverId,
-                              null,
-                              "org.objectweb.joram.mom.dest.DeadMQueue",
-                              null);
-    return new DeadMQueue(queueId);
+    DeadMQueue dmq = new DeadMQueue();
+    doCreate(serverId,
+             null,
+             "org.objectweb.joram.mom.dest.DeadMQueue",
+             null,
+             dmq,
+             DMQ_TYPE);
+    return dmq;
   }
 
   /**
@@ -94,6 +77,17 @@ public class DeadMQueue extends org.objectweb.joram.client.jms.Queue
    */
   public static Queue create() throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer());
+    return create(AdminModule.getLocalServerId());
+  }
+
+  // Used by jndi2 SoapObjectHelper
+  public DeadMQueue() {}
+  
+  public DeadMQueue(String name) {
+    super(name, DMQ_TYPE);
+  }
+
+  public String toString() {
+    return "DeadMQueue:" + agentId;
   }
 }

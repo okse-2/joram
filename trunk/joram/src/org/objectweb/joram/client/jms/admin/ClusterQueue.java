@@ -81,11 +81,4 @@ public class ClusterQueue extends ClusterDestination implements javax.jms.Queue
   {
     return getName();
   }
-
-  /**
-   * Decodes a <code>Queue</code> which traveled through the SOAP protocol.
-   */ 
-  public Object decode(Hashtable h) {
-    return new ClusterQueue((Hashtable) h.get("cluster"));
-  }
 }

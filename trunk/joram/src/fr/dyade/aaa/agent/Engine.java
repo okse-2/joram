@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -130,6 +130,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   int NbMaxAgents = 100;
 
   /**
+   * Returns the number of agent's reaction since last boot.
+   *
+   * @return	the number of agent's reaction since last boot
+   */
+  public long getNbReactions() {
+    return now;
+  }
+
+  /**
    * Returns the maximum number of agents loaded in memory.
    *
    * @return	the maximum number of agents loaded in memory
@@ -138,8 +147,54 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     return NbMaxAgents;
   }
 
+  /**
+   * Sets the maximum number of agents that can be loaded simultaneously
+   * in memory.
+   *
+   * @parama NbMaxAgents	the maximum number of agents
+   */
+  public void setNbMaxAgents(int NbMaxAgents) {
+    this.NbMaxAgents = NbMaxAgents;
+  }
+
+  /**
+   * Returns the number of agents actually loaded in memory.
+   *
+   * @return	the maximum number of agents actually loaded in memory
+   */
+  public int getNbAgents() {
+    return agents.size();
+  }
+
+  /**
+   * Gets the number of messages posted to this engine since creation.
+   *
+   *  return	the number of messages.
+   */
+  public int getNbMessages() {
+    return stamp;
+  }
+
+  /**
+   * Gets the number of waiting messages in this engine.
+   *
+   *  return	the number of waiting messages.
+   */
+  public int getNbWaitingMessages() {
+    return qin.size();
+  }
+
   /** Vector containing id's of all fixed agents. */
   Vector fixedAgentIdList = null;
+
+  /**
+   * Returns the number of fixed agents.
+   *
+   * @return	the number of fixed agents
+   */
+  public int getNbFixedAgents() {
+    return fixedAgentIdList.size();
+  }
 
   /**
    * The current agent running.
@@ -320,7 +375,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         // Creates factory
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(AgentId.factoryId, factory);
-        factory.agentInitialize(true);
         factory.save();
         logmon.log(BasicLevel.WARN, getName() + ", factory created");
       }
@@ -373,10 +427,22 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @exception Exception
    *	unspecialized exception
    */
-  void createAgent(AgentId id, Agent agent) throws Exception {
+  final void createAgent(AgentId id, Agent agent) throws Exception {
     agent.id = id;
     agent.deployed = true;
     agent.agentInitialize(true);
+    createAgent(agent);
+  }
+
+  /**
+   * Creates and initializes an agent.
+   *
+   * @param agent	agent object to create
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  final void createAgent(Agent agent) throws Exception {
     if (agent.isFixed()) {
       // Subscribe the agent in pre-loading list.
       addFixedAgentId(agent.getId());
@@ -553,7 +619,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         // for sendTo during agentInitialize (We assume that only Engine
         // use this method).
         agent = ag;
-        ag.agentInitialize(false); // initializes agent
+        ag.agentInitialize(false);
       } catch (Throwable exc) {
         agent = null;
         // AF: May be we have to delete the agent or not to allow

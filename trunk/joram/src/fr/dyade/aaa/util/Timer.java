@@ -153,7 +153,7 @@ class TimerDaemon extends Daemon {
                 canStop = false;
               } else {
                 // wait for some time till the next planned waking up. 
-                logmon.log(BasicLevel.WARN,
+                logmon.log(BasicLevel.DEBUG,
                            getName() + ", run and wait("+sleepPeriod+")");
                 task.waiting = true;
                 timer.wait(sleepPeriod);

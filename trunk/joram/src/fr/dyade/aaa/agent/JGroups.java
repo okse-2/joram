@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2004 - France Telecom R&D
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -56,7 +56,7 @@ final class JGroups
   private Address myAddr = null;
   private Address coordinatorAddr = null;
   private String channelName = null;
-  HATransactionEngine engine = null;
+  HAEngine engine = null;
   SimpleNetwork network = null; // AF: to replace with HANetwork
   Object lock;
 
@@ -168,7 +168,7 @@ final class JGroups
     return coordinatorAddr;
   }
 
-  void setEngine(HATransactionEngine engine) {
+  void setEngine(HAEngine engine) {
     logmon.log(BasicLevel.DEBUG, "setEngine");
     this.engine = engine;
   }

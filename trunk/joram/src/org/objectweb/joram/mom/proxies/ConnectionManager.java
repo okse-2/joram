@@ -51,11 +51,13 @@ public class ConnectionManager {
    */
   private static fr.dyade.aaa.util.Timer timer;
 
-
   /**
    * Returns the timer provided by the connection manager.
    */
   public final static fr.dyade.aaa.util.Timer getTimer() {
+    if (timer == null) {
+      timer = new fr.dyade.aaa.util.Timer();
+    }
     return timer;
   }
 
@@ -75,8 +77,6 @@ public class ConnectionManager {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "ConnectionManager.init(" + args + ',' + firstTime + ')');    
-
-    timer = new fr.dyade.aaa.util.Timer();
 
     if (! firstTime) return;
 
@@ -105,7 +105,7 @@ public class ConnectionManager {
       }
 
       if (initialAdminName != null && initialAdminPass != null) {
-        UserAgent userAgent = new UserAgent(11);
+        UserAgent userAgent = new UserAgent(AgentId.JoramAdminPxStamp);
         userAgent.deploy();
 
         AdminNotification adminNot =
@@ -127,6 +127,7 @@ public class ConnectionManager {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "ConnectionManager.stop()");
-    timer.cancel();
+    if (timer != null)
+      timer.cancel();
   }
 }

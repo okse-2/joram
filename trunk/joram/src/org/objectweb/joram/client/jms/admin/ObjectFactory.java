@@ -114,14 +114,6 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
     String id = null;
     Object adminObj = null;
 
-    try {
-      id = (String) ref.get("adminObj.id").getContent();
-      adminObj = AdministeredObject.getInstance(id);
-    } catch (Exception exc) {}
-
-    if (adminObj != null)
-      return adminObj;
-
     if (ref.getClassName().equals(tcpCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
@@ -284,7 +276,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
                 i++;
               }
             }
-            ((ClusterDestination) dest).init(h);
+            ((ClusterDestination) dest).setCluster(h);
             return dest;
           }
         }

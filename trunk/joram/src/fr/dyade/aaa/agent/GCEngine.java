@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,12 +32,12 @@ import fr.dyade.aaa.util.*;
  *  Implementation of Engine that used Group-Commit in order to improve 
  * performance.
  */
-final class GCTransactionEngine extends Engine {
+final class GCEngine extends Engine {
 
   int loop = 0;
   int NbMaxLoop = 50;
 
-  GCTransactionEngine() throws Exception {
+  GCEngine() throws Exception {
     super();
 
     NbMaxLoop = Integer.getInteger("NbMaxLoop", NbMaxLoop).intValue();

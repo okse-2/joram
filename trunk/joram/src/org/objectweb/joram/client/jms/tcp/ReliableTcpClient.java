@@ -62,10 +62,13 @@ public class ReliableTcpClient {
 
   private Vector addresses;
 
+  private boolean reconnect;
+
   public ReliableTcpClient(
     FactoryParameters params, 
     String name,
-    String password) {
+    String password,
+    boolean reconnect) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
@@ -74,6 +77,7 @@ public class ReliableTcpClient {
     this.params = params;
     this.name = name;
     this.password = password;
+    this.reconnect = reconnect;
     addresses = new Vector();
     key = -1;
     setStatus(INIT);
@@ -89,19 +93,35 @@ public class ReliableTcpClient {
     this.status = status;
   }
 
-  public synchronized void connect() throws JMSException {
+  public void connect() throws JMSException {
+    connect(false);
+  }
+
+  public synchronized void connect(boolean reconnect) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
-        "ReliableTcpClient[" + name + ',' + key + "].connect()");
+        "ReliableTcpClient[" + name + ',' + key + 
+        "].connect(" + reconnect + ')');
     
-    if (status != INIT) throw new JMSException("Connect: state error");
+    if (status != INIT) 
+      throw new IllegalStateException("Connect: state error");
 
     long startTime = System.currentTimeMillis();
-    long endTime = startTime + params.connectingTimer * 1000;
+    
+    long connectionTime;
+    if (reconnect) {
+      connectionTime = 2 * params.cnxPendingTimer;
+    } else {
+      connectionTime = params.connectingTimer * 1000;
+    }
+
+    long endTime = startTime + connectionTime;
     int attemptsC = 0;
     long nextSleep = 100;
     while (true) {
+      if (status == CLOSE) 
+        throw new IllegalStateException("Closed connection");
       attemptsC++;
       for (int i = 0; i < addresses.size(); i++) {
         ServerAddress sa = (ServerAddress)addresses.elementAt(i);
@@ -149,9 +169,13 @@ public class ReliableTcpClient {
         
         // Sleeping for a while:
         try {
-          Thread.sleep(nextSleep);
-        }
-        catch (InterruptedException intExc) {}          
+          wait(nextSleep);
+        } catch (InterruptedException intExc) {
+          IllegalStateException jmsExc =
+            new IllegalStateException("Could not open the connection"
+                                      + " with "
+                                      + addresses + ": interrupted");
+        }          
 
         // Trying again!
         nextSleep = nextSleep * 2;
@@ -298,7 +322,9 @@ public class ReliableTcpClient {
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, "ReliableTcpClient[" + 
             name + ',' + key + "]", exc);
-        reconnect();
+        if (reconnect ||
+            params.cnxPendingTimer > 0) reconnect();
+        else throw exc;
       }
     }
   }
@@ -337,7 +363,7 @@ public class ReliableTcpClient {
       setStatus(INIT);
     case INIT:
       try {
-	connect();
+	connect(true);
       } catch (JMSException exc) {
 	setStatus(ERROR);
 	error = exc;

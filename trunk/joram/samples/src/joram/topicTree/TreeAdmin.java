@@ -44,9 +44,9 @@ public class TreeAdmin
     Topic sports = (Topic) Topic.create(0);
     Topic tennis = (Topic) Topic.create(0);
 
-    AdminHelper.setHierarchicalLink(news, business);
-    AdminHelper.setHierarchicalLink(news, sports);
-    AdminHelper.setHierarchicalLink(sports, tennis);
+    business.setParent(news);
+    sports.setParent(news);
+    tennis.setParent(sports);
 
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);

@@ -26,18 +26,18 @@ package org.objectweb.joram.shared.admin;
 public class AddServerRequest extends AdminRequest {
   private String serverName;
   private String hostName;
-  private short serverId;
+  private int serverId;
   private String domainName;
   private int port;
 
-  public AddServerRequest(String serverName,
+  public AddServerRequest(int serverId,
                           String hostName,
-                          short serverId,
                           String domainName,
-                          int port) {
-    this.serverName = serverName;
-    this.hostName = hostName;
+                          int port,
+                          String serverName) {
     this.serverId = serverId;
+    this.hostName = hostName;
+    this.serverName = serverName;
     this.domainName = domainName;
     this.port = port;
   }
@@ -50,7 +50,7 @@ public class AddServerRequest extends AdminRequest {
     return hostName;
   }
 
-  public final short getServerId() {
+  public final int getServerId() {
     return serverId;
   }
 

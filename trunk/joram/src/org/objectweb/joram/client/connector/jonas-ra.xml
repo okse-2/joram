@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding = "UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
  JORAM: Java(TM) Open Reliable Asynchronous Messaging
@@ -20,24 +20,61 @@
  USA.
 -->
 
-<jonas-connector xmlns="http://www.objectweb.org/jonas/ns" 
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
- xsi:schemaLocation="http://www.objectweb.org/jonas/ns 
- http://www.objectweb.org/jonas/ns/jonas-connector_4_0.xsd" >
+<jonas-connector xmlns="http://www.objectweb.org/jonas/ns"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.objectweb.org/jonas/ns
+ http://www.objectweb.org/jonas/ns/jonas-connector_4_2.xsd" >
+  <jndi-name>JOnASJDBC_DM</jndi-name>
   <rarlink></rarlink>
-  <native-lib></native-lib>
   <log-enabled>false</log-enabled>
   <log-topic></log-topic>
   <pool-params>
     <pool-init>0</pool-init>
     <pool-min>0</pool-min>
-    <pool-max>-1</pool-max>
+    <pool-max>100</pool-max>
     <pool-max-age>0</pool-max-age>
-    <pstmt-max>10</pstmt-max>
+    <pstmt-max>0</pstmt-max>
+    <pool-max-opentime>0</pool-max-opentime>
+    <pool-max-waiters>0</pool-max-waiters>
+    <pool-max-waittime>0</pool-max-waittime>
+    <pool-sampling-period>30</pool-sampling-period>
   </pool-params>
   <jdbc-conn-params>
     <jdbc-check-level>0</jdbc-check-level>
+    <jdbc-test-statement></jdbc-test-statement>
   </jdbc-conn-params>
+  <jonas-config-property>
+    <jonas-config-property-name>dsClass</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>URL</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>user</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>password</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>loginTimeout</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>isolationLevel</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>mapperName</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>logTopic</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
   <jonas-config-property>
     <jonas-config-property-name>CollocatedServer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
@@ -123,3 +160,4 @@
     <jndi-name>joramActivationSpec</jndi-name>
   </jonas-activationspec>
 </jonas-connector>
+

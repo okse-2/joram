@@ -93,6 +93,10 @@ public class TcpConnection {
     this.closeConnection = closeConnection;
   }
 
+  public final AgentId getProxyId() {
+    return proxyId;
+  }
+
   public final int getKey() {
     return key;
   }

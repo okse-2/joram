@@ -143,6 +143,32 @@ public abstract class Agent implements AgentMBean, Serializable {
   transient AgentId id;
   /** Symbolic name of the agent */
   public transient String name;
+
+  /**
+   * Returns this <code>Agent</code>'s name.
+   *
+   * @return this <code>Agent</code>'s name.
+   */
+  public String getName() {
+    if ((name == null) || (name == nullName)) {
+      return getClass().getName() + id.toString();
+    } else {
+      return name;
+    }
+  }
+
+  /**
+   * Sets this <code>Agent</code>'s name.
+   *
+   * @return the <code>Agent</code>'s name.
+   */
+  public void setName(String name) {
+    if (name == null)
+      this.name = nullName;
+    else
+      this.name = name;
+  }
+
   /**
    * Some agents must be loaded at any time, this can be enforced by this
    * member variable. If <code>true</code> agent is pinned in memory.
@@ -160,7 +186,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
-  private static String nullName = "";
+  protected static final String nullName = "";
 
   /**
    *  the <code>last</code> variable contains the virtual time of the
@@ -424,19 +450,6 @@ public abstract class Agent implements AgentMBean, Serializable {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, this.toString() + " deployed");
   }
- 
-  /**
-   * Returns this <code>Agent</code>'s name.
-   *
-   * @return this <code>Agent</code>'s name.
-   */
-  public String getName() {
-    if (name == null) {
-      return getClass().getName() + id.toString();
-    } else {
-      return name;
-    }
-  }
 
   /**
    * Returns a string representation of this agent, including the agent's
@@ -454,6 +467,15 @@ public abstract class Agent implements AgentMBean, Serializable {
     strbuf.append(')');
 
     return strbuf.toString();
+  }
+
+  /**
+   * Returns String format of the global unique identifier of the agent.
+   *
+   * @return the global unique identifier of the agent.
+   */
+  public final String getAgentId() {
+    return id.toString();
   }
 
   /**
@@ -505,9 +527,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     this.updated = true;
 
     try {
-      MXWrapper.registerMBean(this,
-                              "AgentServer",
-                              "server=" + AgentServer.getName() + ",cons=Engine#" + getId().getTo() + ",agent=" + getName());
+      MXWrapper.registerMBean(this, "AgentServer", getMBeanName());
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
@@ -516,6 +536,14 @@ public abstract class Agent implements AgentMBean, Serializable {
       logmon.log(BasicLevel.DEBUG,
                  "Agent" + id + " [" + name +
                  (firstTime?"] , first initialized":"] , initialized"));
+  }
+
+  private String getMBeanName() {
+    return new StringBuffer()
+      .append("server=").append(AgentServer.getName())
+      .append(",cons=Engine#").append(getId().getTo())
+      .append(",agent=").append((name == nullName)?getId().toString():name)
+      .toString();
   }
 
   /**
@@ -645,8 +673,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   public void agentFinalize(boolean lastTime) {
     try {
-      MXWrapper.unregisterMBean("AgentServer",
-                                "server=" + AgentServer.getName() + ",cons=Engine#" + getId().getTo() + ",agent=" + getName());
+      MXWrapper.unregisterMBean("AgentServer", getMBeanName());
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }

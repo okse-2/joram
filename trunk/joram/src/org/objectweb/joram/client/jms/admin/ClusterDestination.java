@@ -47,7 +47,7 @@ public abstract class ClusterDestination extends Destination {
    * @param cluster  Hashtable of the cluster agent destination.
    */ 
   public ClusterDestination(Hashtable cluster) {
-    init(cluster);
+    this.cluster = cluster;
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
                                  this + ": cluster = " + cluster);
@@ -58,12 +58,8 @@ public abstract class ClusterDestination extends Destination {
    */ 
   public ClusterDestination() {}
 
-  public void init(Hashtable cluster) {
+  public void setCluster(Hashtable cluster) {
     this.cluster = cluster;
-    if (cluster != null) {
-      id = this.getClass().getName() + ":" + cluster.toString();
-      instancesTable.put(id,this);
-    }
   }
 
   /** return the appropriate destination of cluster */
@@ -84,7 +80,6 @@ public abstract class ClusterDestination extends Destination {
       new Reference(this.getClass().getName(),
                     "org.objectweb.joram.client.jms.admin.ObjectFactory",
                     null);
-    ref.add(new StringRefAddr("adminObj.id", id));
     int i = 0;
     for (Enumeration e = cluster.keys(); e.hasMoreElements(); ) {
       String key = (String) e.nextElement();
@@ -121,5 +116,9 @@ public abstract class ClusterDestination extends Destination {
     Hashtable h = super.code();
     h.put("cluster",cluster);
     return h;
+  }
+
+  public void decode(Hashtable h) {
+    cluster = (Hashtable) h.get("cluster");
   }
 }

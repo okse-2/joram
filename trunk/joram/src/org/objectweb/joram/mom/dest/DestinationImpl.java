@@ -29,6 +29,7 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.agent.AgentServer;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.shared.excepts.*;
@@ -46,7 +47,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>DestinationImpl</code> class implements the common behaviour of
  * MOM destinations.
  */
-public abstract class DestinationImpl implements java.io.Serializable {
+public abstract class DestinationImpl implements java.io.Serializable, DestinationImplMBean {
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
@@ -54,7 +55,7 @@ public abstract class DestinationImpl implements java.io.Serializable {
   private boolean deletable = false;
 
   /** Identifier of the destination's administrator. */
-  protected AgentId adminId;
+  private AgentId adminId;
   /** Identifier of the agent hosting the destination. */
   protected AgentId destId;
 
@@ -323,6 +324,39 @@ public abstract class DestinationImpl implements java.io.Serializable {
     Channel.sendTo(from, new Monit_GetUsersRep(not, writers));
   }
 
+  public static String[] _rights = {":R;", ";W;", ":RW;"};
+
+  public String[] getRights() {
+    String rigths[] = new String[clients.size()];
+
+    AgentId key;
+    int right;
+
+    int i=0;
+    for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
+      key = (AgentId) keys.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+      rigths[i] = key.toString() + _rights[right -1];
+    }
+
+    return rigths;
+  }
+
+  public String getRight(String userid) {
+    AgentId key = AgentId.fromString(userid);
+    if (key == null) return userid + ":bad user;";
+    Integer right = (Integer) clients.get(key);
+    if (right == null) return userid + ":unknown;";
+
+    return userid + _rights[right.intValue() -1];
+  }
+
+  public void setRight(String userid, String right) {
+    AgentId key = AgentId.fromString(userid);
+
+    // To be continued
+  }
+
   /**
    * Method implementing the reaction to a <code>Monit_FreeAccess</code>
    * notification requesting the free access status of this destination.
@@ -401,7 +435,7 @@ public abstract class DestinationImpl implements java.io.Serializable {
    */
   protected void doReact(AgentId from, UnknownAgent not)
   {
-    if (not.agent.equals(adminId)) {
+    if (isAdministrator(not.agent)) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
             MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                           "Admin of dest "
@@ -520,7 +554,8 @@ public abstract class DestinationImpl implements java.io.Serializable {
    * @param client  AgentId of the client requesting an admin permission.
    */
   protected boolean isAdministrator(AgentId client) {
-    return client.equals(adminId);
+    return client.equals(adminId) ||
+      client.equals(AdminTopic.getDefault(AgentServer.getServerId()));
   }
 
   /**
@@ -531,16 +566,24 @@ public abstract class DestinationImpl implements java.io.Serializable {
    *          <code>null</code> if not provided.
    */
   protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId) {
-    // Sending the dead messages to the provided DMQ:
-    if (dmqId != null)
-      Channel.sendTo(dmqId, deadMessages);
-    // Sending the dead messages to the destination's DMQ:
-    else if (this.dmqId != null)
-      Channel.sendTo(this.dmqId, deadMessages);
-    // Sending the dead messages to the server's default DMQ:
-    else if (DeadMQueueImpl.id != null) {
-      Channel.sendTo(DeadMQueueImpl.id, deadMessages);
+    AgentId destDmqId = null;
+    if (dmqId != null) {
+      // Sending the dead messages to the provided DMQ
+      destDmqId = dmqId;
+    } else if (this.dmqId != null) {
+      // Sending the dead messages to the destination's DMQ
+      destDmqId = this.dmqId;
+    } else if (DeadMQueueImpl.id != null) {
+      // Sending the dead messages to the server's default DMQ
+      destDmqId = DeadMQueueImpl.id;
     }
+
+    if (destDmqId != null &&
+        destDmqId.equals(destId)) {
+      Channel.sendTo(destDmqId, deadMessages);
+    }
+    // Else it means that the dead message queue is
+    // the queue itself: drop the messages.
   }
 
   /**
@@ -570,5 +613,33 @@ public abstract class DestinationImpl implements java.io.Serializable {
     clients = (Hashtable)in.readObject();
     dmqId = (AgentId)in.readObject();
     strbuf = new StringBuffer();
+  }
+
+  // JMX
+
+  public String getDestinationId() {
+    return destId.toString();
+  }
+
+  public boolean isFreeReading() {
+    return freeReading;
+  }
+
+  public boolean isFreeWriting() {
+    return freeWriting;
+  }
+
+  public void setFreeReading(boolean on) {
+    freeReading = on;
+  }
+
+  public void setFreeWriting(boolean on) {
+    freeWriting = on;
+  }
+
+  public String getDMQId() {
+    if (dmqId != null) 
+      return dmqId.toString();
+    return null;
   }
 }

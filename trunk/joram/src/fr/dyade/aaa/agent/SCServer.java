@@ -21,6 +21,8 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.util.Enumeration;
+
 import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.agent.conf.*;
 
@@ -53,5 +55,27 @@ public class SCServer implements SCServerMBean {
 
   public String getStatusInfo() {
     return AgentServer.getStatusInfo();
+  }
+
+  public String[] getServers() {
+    Enumeration e = AgentServer.elementsServerDesc();
+    String[] servers = new String[AgentServer.getServerNb()];
+    StringBuffer strBuf = new StringBuffer();
+    for (int i=0; e.hasMoreElements(); i++) {
+      ServerDesc server = (ServerDesc) e.nextElement();
+      strBuf.append("sid=").append(server.sid);
+      strBuf.append(",name=").append(server.name);
+      if (server.gateway == -1) {
+        strBuf.append(",gateway=").append(server.gateway);
+      } else {
+        strBuf.append(",host=").append(server.getHostname())
+          .append(':').append(server.getPort());
+        strBuf.append(",active=").append(server.active);
+        strBuf.append(",last=").append(server.last);
+      }
+      servers[i] = strBuf.toString();
+      strBuf.setLength(0);
+    }
+    return servers;
   }
 }

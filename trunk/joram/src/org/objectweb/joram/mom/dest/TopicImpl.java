@@ -59,6 +59,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
 public class TopicImpl extends DestinationImpl
+    implements TopicImplMBean
 {
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
@@ -142,6 +143,8 @@ public class TopicImpl extends DestinationImpl
         doReact(from, (UnsubscribeRequest) not);
       else if (not instanceof TopicForwardNot)
         doReact(from, (TopicForwardNot) not);
+      else if (not instanceof DestinationAdminRequestNot)
+        doReact(from, (DestinationAdminRequestNot) not);
       else
         super.react(from, not);
     }
@@ -586,6 +589,59 @@ public class TopicImpl extends DestinationImpl
     processMessages(not.messages);
   }
 
+  private void doReact(AgentId from, DestinationAdminRequestNot not) {
+    org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
+      not.getRequest();
+    if (adminRequest instanceof GetSubscriberIds) {
+      doReact((GetSubscriberIds)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
+    }
+  }
+
+  private void doReact(GetSubscriberIds request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
+    GetSubscriberIdsRep reply = 
+      new GetSubscriberIdsRep(getSubscriberIds());
+    replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
+  }
+
+  public String[] getSubscriberIds() {
+    String[] res = new String[subscribers.size()];
+    for (int i = 0; i < res.length; i++) {
+      AgentId aid = (AgentId)subscribers.elementAt(i);
+      res[i] = aid.toString();
+    }
+    return res;
+  }
+
+  private void replyToTopic(
+    org.objectweb.joram.shared.admin.AdminReply reply,
+    AgentId replyTo,
+    String requestMsgId,
+    String replyMsgId) {
+    Message message = new Message();
+    message.setCorrelationId(requestMsgId);
+    message.setTimestamp(System.currentTimeMillis());
+    message.setDestination(replyTo.toString(), 
+                           Topic.TOPIC_TYPE);
+    message.setIdentifier(replyMsgId);
+    try {
+      message.setObject(reply);
+      Vector messages = new Vector();
+      messages.add(message);
+      ClientMessages clientMessages = 
+        new ClientMessages(-1, -1, messages);
+      Channel.sendTo(replyTo, clientMessages);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      throw new Error(exc.getMessage());
+    }
+  }
 
   /**
    * The <code>DestinationImpl</code> class calls this method for passing

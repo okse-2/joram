@@ -38,6 +38,13 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  * @see TopicImpl
  */
 public class Topic extends Destination {
+
+  public static final String TOPIC_TYPE = "topic";
+  
+  public static String getDestinationType() {
+    return TOPIC_TYPE;
+  }
+
   /**
    * Empty constructor for newInstance(). 
    */ 

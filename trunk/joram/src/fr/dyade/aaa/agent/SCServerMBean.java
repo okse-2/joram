@@ -30,4 +30,6 @@ public interface SCServerMBean {
 
   public int getStatus();
   public String getStatusInfo();
+
+  public String[] getServers();
 }

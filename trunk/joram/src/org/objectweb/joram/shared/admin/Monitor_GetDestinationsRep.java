@@ -32,84 +32,30 @@ import java.util.Vector;
  * destinations monitoring request, and holds the destinations on a given
  * server.
  */
-public class Monitor_GetDestinationsRep extends Monitor_Reply
-{
-  /** Queues identifiers. */
-  private Vector queues;
-  /** Dead message queues identifiers. */
-  private Vector dmqs;
-  /** Topics identifiers. */
-  private Vector topics;
+public class Monitor_GetDestinationsRep extends Monitor_Reply {
 
-  /** Destinations' names, if any. */
-  private Hashtable names;
+  private String[] ids;
+  private String[] names;
+  private String[] types;
 
-
-
-  /** Adds a queue identifier to the reply. */
-  public void addQueue(String id)
-  {
-    if (queues == null)
-      queues = new Vector();
-    queues.add(id);
+  public Monitor_GetDestinationsRep(
+    String[] ids,
+    String[] names,
+    String[] types) {
+    this.ids = ids;
+    this.names = names;
+    this.types = types;
   }
 
-  /** Adds a dead message queue identifier to the reply. */
-  public void addDeadMQueue(String id)
-  {
-    if (dmqs == null)
-      dmqs = new Vector();
-    dmqs.add(id);
+  public String[] getIds() {
+    return ids;
   }
 
-  /** Adds a topic identifier to the reply. */
-  public void addTopic(String id)
-  {
-    if (topics == null)
-      topics = new Vector();
-    topics.add(id);
+  public String[] getNames() {
+    return names;
   }
 
-  /** Sets destinations' names, if any. */
-  public void setNames(Hashtable names)
-  {
-    if (names == null)
-      return;
-
-    this.names = new Hashtable();
-    Enumeration keys = names.keys();
-    Object key;
-    Object value;
-    while (keys.hasMoreElements()) {
-      key = keys.nextElement();
-      value = names.get(key);
-      this.names.put(value.toString(), key);
-    }
-  }
-  
-  /** Returns the queues identifiers. */
-  public Vector getQueues()
-  {
-    return queues;
-  }
-
-  /** Returns the dmqs identifiers. */
-  public Vector getDeadMQueues()
-  {
-    return dmqs;
-  } 
-
-  /** Returns the topics identifiers. */
-  public Vector getTopics()
-  {
-    return topics;
-  }
-
-  /** Returns a destination name. */
-  public String getName(String id)
-  {
-    if (names == null)
-      return null;
-    return (String) names.get(id);
+  public String[] getTypes() {
+    return types;
   }
 }

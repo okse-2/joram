@@ -141,6 +141,8 @@ public class QueueImpl extends DestinationImpl {
         doReact(from, (DenyRequest) not);
       else if (not instanceof AbortReceiveRequest)
         doReact(from, (AbortReceiveRequest) not);
+      else if (not instanceof DestinationAdminRequestNot)
+        doReact(from, (DestinationAdminRequestNot) not);
       else
         super.react(from, not);
 
@@ -527,6 +529,134 @@ public class QueueImpl extends DestinationImpl {
     }
   }
 
+  private void doReact(AgentId from,
+                       DestinationAdminRequestNot not) {
+    org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
+      not.getRequest();
+    if (adminRequest instanceof GetQueueMessageIds) {
+      doReact((GetQueueMessageIds)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
+    } else if (adminRequest instanceof GetQueueMessage) {
+      doReact((GetQueueMessage)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
+    } else if (adminRequest instanceof DeleteQueueMessage) {
+      doReact((DeleteQueueMessage)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
+    } else if (adminRequest instanceof ClearQueue) {
+      doReact((ClearQueue)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
+    }
+  }
+
+  private void doReact(GetQueueMessageIds request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
+    String[] res = new String[messages.size()];
+    for (int i = 0; i < messages.size(); i++) {
+      Message msg = (Message)messages.elementAt(i);
+      res[i] = msg.getIdentifier();
+    }
+    GetQueueMessageIdsRep reply = 
+      new GetQueueMessageIdsRep(res);
+    replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
+  }
+
+  private void doReact(GetQueueMessage request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
+    Message msg = null;
+    for (int i = 0; i < messages.size(); i++) {
+      msg = (Message)messages.elementAt(i);
+      if (msg.getIdentifier().equals(request.getMessageId())) {
+        break;
+      }
+    }
+    if (msg != null) {
+      replyToTopic(
+        new GetQueueMessageRep(msg),
+        replyTo, requestMsgId, replyMsgId);
+    } else {
+      replyToTopic(
+        new org.objectweb.joram.shared.admin.AdminReply(
+          false, "Message not found: " + msg.getIdentifier()),
+        replyTo, requestMsgId, replyMsgId);
+    }
+  }
+
+  private void doReact(DeleteQueueMessage request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
+    for (int i = 0; i < messages.size(); i++) {
+      Message msg = (Message)messages.elementAt(i);
+      if (msg.getIdentifier().equals(request.getMessageId())) {
+        messages.removeElementAt(i);
+        ClientMessages deadMessages = new ClientMessages();
+        deadMessages.addMessage(msg);
+        sendToDMQ(deadMessages, null);
+        break;
+      }
+    }
+    replyToTopic(
+      new org.objectweb.joram.shared.admin.AdminReply(
+        true, null),
+      replyTo, requestMsgId, replyMsgId);
+  }
+
+  private void doReact(ClearQueue request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
+    if (messages.size() > 0) {
+      ClientMessages deadMessages = new ClientMessages();
+      for (int i = 0; i < messages.size(); i++) {
+        Message msg = (Message)messages.elementAt(i);
+        deadMessages.addMessage(msg);
+      }
+      sendToDMQ(deadMessages, null);
+      messages.clear();
+    }
+    replyToTopic(
+      new org.objectweb.joram.shared.admin.AdminReply(
+        true, null),
+      replyTo, requestMsgId, replyMsgId);
+  }
+
+  private void replyToTopic(
+    org.objectweb.joram.shared.admin.AdminReply reply,
+    AgentId replyTo,
+    String requestMsgId,
+    String replyMsgId) {
+    Message message = new Message();
+    message.setCorrelationId(requestMsgId);
+    message.setTimestamp(System.currentTimeMillis());
+    message.setDestination(replyTo.toString(),
+                           Topic.TOPIC_TYPE);
+    message.setIdentifier(replyMsgId);
+    try {
+      message.setObject(reply);
+      Vector messages = new Vector();
+      messages.add(message);
+      ClientMessages clientMessages = 
+        new ClientMessages(-1, -1, messages);
+      Channel.sendTo(replyTo, clientMessages);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      throw new Error(exc.getMessage());
+    }
+  }
+
   /**
    * The <code>DestinationImpl</code> class calls this method for passing
    * notifications which have been partly processed, so that they are
@@ -743,51 +873,44 @@ public class QueueImpl extends DestinationImpl {
     else if (samePriorities && priority != message.getPriority())
       samePriorities = false;
 
-    // Constant priorities: no need to insert the message according to
-    // its priority.
     if (samePriorities) {
-      // Message being received: adding it at the end of the queue.
-      if (receiving)
-      messages.add(message);
-      // Denying or recovery: adding the message according to its original
-      // arrival order.
-      else {
+      // Constant priorities: no need to insert the message according to
+      // its priority.
+      if (receiving) {
+        // Message being received: adding it at the end of the queue.
+        messages.add(message);
+      } else {
+        // Denying or recovery: adding the message according to its original
+        // arrival order.
         long currentO;
         int i = 0;
-        for (Enumeration enum = messages.elements();
-             enum.hasMoreElements();) {
-          currentO = ((Message) enum.nextElement()).order;
-
-          if (currentO > message.order)
-            break;
-
+        for (Enumeration e = messages.elements(); e.hasMoreElements();) {
+          currentO = ((Message) e.nextElement()).order;
+          if (currentO > message.order) break;
           i++;
         }
         messages.insertElementAt(message, i);
       }
-    }
-    // Non constant priorities: inserting the message according to its 
-    // priority.
-    else {
-      Message currentMsg;
+    } else {
+      // Non constant priorities: inserting the message according to its 
+      // priority.
+         Message currentMsg;
       int currentP;
       long currentO;
       int i = 0;
-      for (Enumeration enum = messages.elements(); enum.hasMoreElements();) {
-        currentMsg = (Message) enum.nextElement();
+      for (Enumeration e = messages.elements(); e.hasMoreElements();) {
+        currentMsg = (Message) e.nextElement();
         currentP = currentMsg.getPriority();
         currentO = currentMsg.order;
 
-        // Message denied or recovered, priorities are equal: inserting the
-        // message according to its original arrival order.
         if (! receiving && currentP == message.getPriority()) {
-          if (currentO > message.order)
-            break;
-        }
-        // Current priority lower than the message to store: inserting it.
-        else if (currentP < message.getPriority())
+          // Message denied or recovered, priorities are equal: inserting the
+          // message according to its original arrival order.
+          if (currentO > message.order) break;
+        } else if (currentP < message.getPriority()) {
+          // Current priority lower than the message to store: inserting it.
           break;
-
+        }
         i++;
       }
       messages.insertElementAt(message, i);

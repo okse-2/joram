@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -36,7 +36,7 @@ import fr.dyade.aaa.util.*;
  * stored in chronological order. The Channel object is responsible for
  * localizing the target agent.
  */
-abstract public class Channel {
+public class Channel {
   static Channel channel = null;
 
   /**
@@ -46,7 +46,7 @@ abstract public class Channel {
    */
   static Channel newInstance() throws Exception {
     String cname = System.getProperty("Channel",
-                                      "fr.dyade.aaa.agent.TransactionChannel");
+                                      "fr.dyade.aaa.agent.Channel");
     Class cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;
@@ -145,7 +145,7 @@ abstract public class Channel {
    * Be careful, this method must only be used during a transaction in
    * order to ensure the mutual exclusion.
    *
-   * @see TransactionEngine#commit()
+   * @see Engine#commit()
    */
   static final void validate() {
     for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
@@ -169,31 +169,6 @@ abstract public class Channel {
    *
    * @exception IOException
    *	error when accessing the local persistent storage
-   */
-  abstract void
-  directSendTo(AgentId from,
-	       AgentId to,
-	       Notification not);
-}
-
-final class TransactionChannel extends Channel {
-  /**
-   * Constructs a new <code>TransactionChannel</code> object. this method
-   * must only be used by <a href="Channel.html#newInstance()">static channel
-   * allocator</a>.
-   */
-  TransactionChannel() {
-    super();
-  }
-
-  /**
-   *  Sends an immediately validated notification to an agent. Normally
-   * used uniquely in <a href="#sendTo(AgentId, Notification)"><code>
-   * sendTo</code></a> method and in TransientProxy to forward messages.
-   *
-   * @param   from   source agent.
-   * @param   to     destination agent.
-   * @param   not    notification.
    */
   void directSendTo(AgentId from,
 		    AgentId to,
@@ -236,14 +211,13 @@ final class TransactionChannel extends Channel {
   }
 
   /**
-   * Returns a string representation of this <code>TransactionChannel</code>
-   * object.
+   * Returns a string representation of this <code>Channel</code> object.
    *
    * @return	A string representation of this object. 
    */
   public final String toString() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append("TransactionChannel#").append(AgentServer.getServerId());
+    strbuf.append("Channel#").append(AgentServer.getServerId());
     return strbuf.toString();
   }
 }

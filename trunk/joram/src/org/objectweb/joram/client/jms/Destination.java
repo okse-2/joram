@@ -41,6 +41,8 @@ import java.util.Vector;
 
 import javax.naming.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * Implements the <code>javax.jms.Destination</code> interface and provides
  * JORAM specific administration and monitoring methods.
@@ -51,45 +53,19 @@ public abstract class Destination
 {
   /** Identifier of the agent destination. */
   protected String agentId;
+
   /** Name given by the administrator. */
   protected String adminName;
 
-  /**
-   * Constructs a destination.
-   *
-   * @param agentId  Identifier of the agent destination.
-   */ 
-  public Destination(String agentId)
-  {
-    super(agentId);
-    this.agentId = agentId;
+  private String type;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+  // Used by jndi2 SoapObjectHelper
+  public Destination() {}
+
+  protected Destination(String name, String type) {
+    agentId = name;
+    this.type = type;
   }
-
-  /**
-   * Constructs a destination.
-   *
-   * @param agentId  Identifier of the agent destination.
-   * @param name     Name set by administrator.
-   */ 
-  public Destination(String agentId, String name)
-  {
-    super(agentId);
-    this.agentId = agentId;
-    this.adminName = name;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
-  }
-
-  /**
-   * Constructs an empty destination.
-   */ 
-  public Destination()
-  {}
-
 
   /** Returns the name of the destination. */
   public String getName()
@@ -98,9 +74,13 @@ public abstract class Destination
   }
 
   /** Returns the admin name of the destination. */
-  public String getAdminName()
+  public final String getAdminName()
   {
     return adminName;
+  }
+
+  public final String getType() {
+    return type;
   }
 
   /**
@@ -127,9 +107,13 @@ public abstract class Destination
    * SOAP protocol.
    */
   public Hashtable code() {
-    Hashtable h = super.code();
+    Hashtable h = new Hashtable();
     h.put("agentId",getName());
     return h;
+  }
+  
+  public void decode(Hashtable h) {
+    agentId = (String) h.get("agentId");
   }
 
   /** Sets the naming reference of a destination. */
@@ -157,18 +141,33 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static String doCreate(int serverId, 
-                                String name, 
-                                String className, 
-                                Properties prop)
-         throws ConnectException, AdminException
-  {
+  protected static void doCreate(
+    int serverId, 
+    String name, 
+    String className, 
+    Properties props,
+    Destination dest,
+    String expectedType)
+    throws ConnectException, AdminException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "Destination.doCreate(" + 
+        serverId + ',' + name + ',' + 
+        className + ',' + props + ',' + 
+        dest + ',' + expectedType + ')');
+
     CreateDestinationRequest cdr =
-      new CreateDestinationRequest(serverId, name, className);
-    cdr.setProperties(prop);
+      new CreateDestinationRequest(serverId, 
+                                   name, 
+                                   className,
+                                   props,
+                                   expectedType);
     CreateDestinationReply reply =
       (CreateDestinationReply) AdminModule.doRequest(cdr);
-    return reply.getDestId();
+    dest.agentId = reply.getId();
+    dest.adminName = name;
+    dest.type = reply.getType();
   }
 
   /**
@@ -422,9 +421,44 @@ public abstract class Destination
     Monitor_GetDMQSettingsRep reply;
     reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
     
-    if (reply.getDMQName() == null)
+    if (reply.getDMQName() == null) {
       return null;
-    else
+    } else {
       return new DeadMQueue(reply.getDMQName());
+    }
+  }
+
+  public static Destination newInstance(
+    String id, 
+    String name, 
+    String type) throws AdminException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "Destination.newInstance(" + 
+        id + ',' + name + ',' + type + ')');
+    Destination dest;
+    if (Queue.isQueue(type)) {
+      if (TemporaryQueue.isTemporaryQueue(type)) {
+        dest = new TemporaryQueue(id, null);
+      } else if (DeadMQueue.isDeadMQueue(type)) {
+        dest = new DeadMQueue(id);
+      } else {
+        dest = new Queue(id);
+      }
+    } else if (Topic.isTopic(type)) {
+      if (TemporaryTopic.isTemporaryTopic(type)) {
+        dest = new TemporaryTopic(id, null);
+      } else {
+        dest = new Topic(id);
+      }
+    } else throw new AdminException("Unknown destination type");
+    dest.adminName = name;
+    return dest;
+  }
+
+  public static boolean isAssignableTo(String realType,
+                                       String resultingType) {
+    return realType.startsWith(resultingType);
   }
 }

@@ -38,11 +38,12 @@ public class CreateDestinationRequest extends AdminRequest
   private String name;
 
   /** Name of the class to be instanciated. */
-  private String className = null;
+  private String className;
  
   /** Properties needed to create destination object. */
-  private Properties prop = null;
+  private Properties props;
 
+  private String expectedType;
 
   /**
    * Constructs a <code>CreateDestinationRequest</code> instance.
@@ -53,46 +54,37 @@ public class CreateDestinationRequest extends AdminRequest
    */
   public CreateDestinationRequest(int serverId,
                                   String name,
-                                  String className) {
+                                  String className,
+                                  Properties props,
+                                  String expectedType) {
     this.serverId = serverId;
     this.name = name;
     this.className = className;
-  }
-
-  /**
-   * Constructs a <code>CreateDestinationRequest</code> instance.
-   *
-   * @param serverId   The id of the server where deploying the destination.
-   * @param className  Name of the class to be instanciated.
-   */
-  public CreateDestinationRequest(int serverId,
-                                  String className) {
-    this(serverId, null, className);
+    this.props = props;
+    this.expectedType = expectedType;
   }
 
   /** Returns the id of the server where deploying the destination. */
-  public int getServerId() {
+  public final int getServerId() {
     return serverId;
   }
 
   /** Returns the name attributed to the destination. */
-  public String getDestinationName()
-  {
+  public final String getDestinationName() {
     return name;
   }
 
   /** Returns the class name of destination (queue, topic, ...). */
-  public String getClassName() {
+  public final String getClassName() {
     return className;
   }
 
-  /** Sets the destination properties. */
-  public void setProperties(Properties prop) {
-    this.prop = prop;
+  /** Returns the destination properties. */
+  public final Properties getProperties() {
+    return props;
   }
 
-  /** Returns the destination properties. */
-  public Properties getProperties() {
-    return prop;
+  public final String getExpectedType() {
+    return expectedType;
   }
 }

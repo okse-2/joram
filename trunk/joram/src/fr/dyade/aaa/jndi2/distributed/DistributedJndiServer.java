@@ -72,9 +72,18 @@ public class DistributedJndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
+    int poolSize = Integer.getInteger(
+      JndiServer.POOL_SIZE_PROP, 
+      JndiServer.DEFAULT_POOL_SIZE).intValue();
+
+    int timeout = Integer.getInteger(
+      JndiServer.SO_TIMEOUT_PROP,
+      JndiServer.DEFAULT_SO_TIMEOUT).intValue();
+
     tcpServer = new TcpServer(
       serverSocket,
-      3,
+      poolSize, 
+      timeout,
       getDefault());
     tcpServer.start();
 

@@ -25,6 +25,7 @@
 package fr.dyade.aaa.agent;
 
 import java.util.*;
+import java.io.*;
 
 import fr.dyade.aaa.util.Transaction;
 
@@ -56,6 +57,8 @@ public class ConfigController {
   }
 
   private short serverCounter;
+
+  private A3CMLConfig currentA3cmlConfig;
 
   private A3CMLConfig a3cmlConfig;
 
@@ -91,7 +94,7 @@ public class ConfigController {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  " -> serverCounter = " + serverCounter);
-
+    
     setStatus(Status.FREE);
   }
 
@@ -109,7 +112,22 @@ public class ConfigController {
       } catch (InterruptedException exc) {
       }
     }
-    a3cmlConfig = AgentServer.getConfig();
+    
+    currentA3cmlConfig = AgentServer.getConfig();
+    
+    // Copy the configuration in order to enable rollback.
+    // Use serialization. The rollback could also 
+    // be done with an "undo script".
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectOutputStream oos = new ObjectOutputStream(baos);
+    oos.writeObject(currentA3cmlConfig);
+    oos.flush();
+    oos.close();
+    byte[] bytes = baos.toByteArray();
+    ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+    ObjectInputStream ois = new ObjectInputStream(bais);
+    a3cmlConfig = (A3CMLConfig)ois.readObject();
+    
     newServers = new Vector();
     startScript = new Vector();
     stopScript = new Vector();
@@ -122,30 +140,64 @@ public class ConfigController {
                  "ConfigController.commitConfig()");
     checkStatus(Status.CONFIG);
 
+    AgentServer.setConfig(a3cmlConfig, true);
+
     try {
       A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
       a3cmlConfig.configure((A3CMLPServer) root);
       
       stop();
       
-      AgentServer.setConfig(a3cmlConfig, true);
-
-      Transaction transaction = AgentServer.getTransaction();
-      transaction.begin();
-
-      a3cmlConfig.save();
-      transaction.save(
-        new Short(serverCounter), 
-        SERVER_COUNTER);
-
-      transaction.commit();
-      transaction.release();
-      
       addNewServers();
 
       start();
-      
+
+      commit();
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc); 
+      rollback();
+      throw exc;
     } finally {
+      setStatus(Status.FREE);
+      notify();
+    }
+  }
+
+  private void commit() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ConfigController.commit()");
+
+    try {
+      Transaction transaction = AgentServer.getTransaction();
+      transaction.begin();
+      a3cmlConfig.save();
+      transaction.save(
+        new Short(serverCounter),
+        SERVER_COUNTER);      
+      transaction.commit();
+      transaction.release();
+    } catch (Exception exc) {
+      throw new Error(exc.toString());
+    }
+  }
+
+  private void rollback() throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ConfigController.rollback()");
+    
+    for (int i = 0; i < newServers.size(); i++) {
+      ServerDesc sd = (ServerDesc)newServers.elementAt(i);
+      AgentServer.removeServerDesc(sd.sid);
+    }
+
+    AgentServer.setConfig(currentA3cmlConfig, true);
+  }
+
+  public synchronized void release() {
+    if (status == Status.CONFIG) {
       setStatus(Status.FREE);
       notify();
     }
@@ -176,30 +228,58 @@ public class ConfigController {
       AgentServer.addServerDesc(sd);
     }
   }
-
+  
   private void start() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.start()");
-    for (int i = 0; i < startScript.size(); i++) {
-      Object cmd = startScript.elementAt(i);
-      if (cmd instanceof StartNetworkCmd) {
-        exec((StartNetworkCmd)cmd);
-      } else if (cmd instanceof StartServiceCmd) {
-        exec((StartServiceCmd)cmd);
-      } else if (cmd instanceof ReconfigureClientNetworkCmd) {
-        exec((ReconfigureClientNetworkCmd)cmd);
-      } else if (cmd instanceof ReconfigureServerNetworkCmd) {
-        exec((ReconfigureServerNetworkCmd)cmd);
+    int i = 0;
+    try {
+      for (i = 0; i < startScript.size(); i++) {
+        Object cmd = startScript.elementAt(i);
+        if (cmd instanceof StartNetworkCmd) {
+          exec((StartNetworkCmd)cmd);
+        } else if (cmd instanceof StartServiceCmd) {
+          exec((StartServiceCmd)cmd);
+        } else if (cmd instanceof ReconfigureClientNetworkCmd) {
+          exec((ReconfigureClientNetworkCmd)cmd);
+        } else if (cmd instanceof ReconfigureServerNetworkCmd) {
+          exec((ReconfigureServerNetworkCmd)cmd);
+        }
       }
+    } catch (Exception exc) {
+      int size = i + 1;
+      for (int j = 0; j < size; j++) {
+        Object cmd = startScript.elementAt(j);
+        if (cmd instanceof StartNetworkCmd) {
+          rollback((StartNetworkCmd)cmd);
+        } else if (cmd instanceof StartServiceCmd) {
+          rollback((StartServiceCmd)cmd);
+        } else if (cmd instanceof ReconfigureClientNetworkCmd) {
+          rollback((ReconfigureClientNetworkCmd)cmd);
+        } else if (cmd instanceof ReconfigureServerNetworkCmd) {
+          rollback((ReconfigureServerNetworkCmd)cmd);
+        }
+      }
+      throw exc;
     }
     
-    // 'Start server' implies that the consumers
+    // 'Start server' implies that the consumers    
     // have been added (done by 'start network').
-    for (int i = 0; i < startScript.size(); i++) {
-      Object cmd = startScript.elementAt(i);
-      if (cmd instanceof StartServerCmd) {
-        exec((StartServerCmd)cmd);
+    try {
+      for (i = 0; i < startScript.size(); i++) {
+        Object cmd = startScript.elementAt(i);
+        if (cmd instanceof StartServerCmd) {
+          exec((StartServerCmd)cmd);
+        }
+      }
+    } catch (Exception exc) {
+      int size = i + 1;
+      for (int j = 0; j < size; j++) {
+        Object cmd = startScript.elementAt(j);
+        if (cmd instanceof StartServerCmd) {
+          rollback((StartServerCmd)cmd);
+        }
       }
     }
   }
@@ -228,6 +308,27 @@ public class ConfigController {
                              cmd.port);
   }
 
+  private void rollback(StartServerCmd cmd) throws Exception {
+    ServerDesc servDesc = AgentServer.getServerDesc(cmd.sid);
+    deleteServer(servDesc);
+  }
+
+  private void rollback(StartNetworkCmd cmd) throws Exception {
+    stopNetwork(cmd.domainName);
+  }
+
+  private void rollback(StartServiceCmd cmd) throws Exception {
+    stopService(cmd.serviceClassName);
+  }
+
+  private void rollback(ReconfigureClientNetworkCmd cmd) throws Exception {
+    // Do nothing
+  }
+  
+  private void rollback(ReconfigureServerNetworkCmd cmd) throws Exception {
+    // Do nothing
+  }
+
   private void checkStatus(int expectedStatus) 
     throws Exception {
     if (status != expectedStatus) {
@@ -242,11 +343,7 @@ public class ConfigController {
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.addDomain(" + name + ',' + className + ')');
     checkStatus(Status.CONFIG);
-    try {
-      a3cmlConfig.addDomain(new A3CMLDomain(name, className));
-    } catch (Exception exc) {
-      // idempotent
-    }
+    a3cmlConfig.addDomain(new A3CMLDomain(name, className));
   }
 
   public void addServer(String name, String hostName, short id) 
@@ -276,8 +373,9 @@ public class ConfigController {
         -1);
       serverDesc.gateway = id;
       newServers.addElement(serverDesc);
+    } else {
+      throw new Exception("Server already added: " + name + ')');
     }
-    // else idempotent
     
     if (id != AgentServer.getServerId()) {
       startScript.addElement(
@@ -321,8 +419,21 @@ public class ConfigController {
                  serverName + ',' + 
                  domainName + ',' + 
                  port + ')');
+    short sid = a3cmlConfig.getServerIdByName(serverName);
+    addNetwork(sid, domainName, port);
+  }
+
+  public void addNetwork(short serverId,
+                         String domainName,
+                         int port) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ConfigController.addNetwork(" + 
+                 serverId + ',' + 
+                 domainName + ',' + 
+                 port + ')');
     checkStatus(Status.CONFIG);
-    A3CMLPServer server = (A3CMLPServer)a3cmlConfig.getServer(serverName);
+    A3CMLPServer server = (A3CMLPServer)a3cmlConfig.getServer(serverId);
     A3CMLNetwork newNetwork = new A3CMLNetwork(domainName, port);    
     try {
       server.addNetwork(newNetwork);
@@ -333,11 +444,7 @@ public class ConfigController {
       // Idempotent
     }
     
-    short sid = a3cmlConfig.getServerIdByName(serverName);
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 " -> sid = " + sid);
-    if (sid == AgentServer.getServerId()) {
+    if (serverId == AgentServer.getServerId()) {
       startScript.add(
         new StartNetworkCmd(domainName));
     }
@@ -477,25 +584,55 @@ public class ConfigController {
   public void removeServer(String serverName) throws Exception {
     checkStatus(Status.CONFIG);
     try {
-      A3CMLPServer server = (A3CMLPServer) a3cmlConfig.getServer(serverName);
+      A3CMLServer server = (A3CMLPServer) a3cmlConfig.getServer(serverName);
       ServerDesc servDesc = AgentServer.getServerDesc(server.sid);
-      if (servDesc.domain instanceof Network)
-        ((Network) servDesc.domain).delServer(server.sid);
-      AgentServer.removeServerDesc(server.sid);
-      for (Enumeration e = AgentServer.elementsServerDesc(); 
-           e.hasMoreElements(); ) {
-        ServerDesc sd = (ServerDesc)e.nextElement();
-        if (sd.gateway == server.sid) {
-          sd.gateway = -1;
-          sd.domain = null;
-        }
-      }
-      a3cmlConfig.removeServer(server.sid);
+      removeServer(servDesc);
     } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
       // The server has already been removed.
       // This may happen e.g. if the domain used 
       // to communicate with it has been deleted.
       // Idempotent: do nothing
+    }
+  }
+
+  public void removeServer(short serverId) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ConfigController.removeServer(" + 
+                 serverId + ')'); 
+    try {
+      checkStatus(Status.CONFIG);
+      ServerDesc servDesc = AgentServer.getServerDesc(serverId);
+      removeServer(servDesc);
+    } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
+      // The server has already been removed.
+      // This may happen e.g. if the domain used 
+      // to communicate with it has been deleted.
+      // Idempotent: do nothing
+    }
+  }
+
+  private void removeServer(ServerDesc servDesc) throws Exception {
+    if (servDesc.sid != AgentServer.getServerId()) {
+      deleteServer(servDesc);
+      a3cmlConfig.removeServer(servDesc.sid);
+    } else {
+      // else don't remove the local server
+      throw new Exception("Can't remove local server");
+    }
+  }
+
+  private void deleteServer(ServerDesc servDesc) throws Exception {
+    if (servDesc.domain instanceof Network)
+      ((Network) servDesc.domain).delServer(servDesc.sid);
+    AgentServer.removeServerDesc(servDesc.sid);
+    for (Enumeration e = AgentServer.elementsServerDesc(); 
+         e.hasMoreElements(); ) {
+      ServerDesc sd = (ServerDesc)e.nextElement();
+      if (sd.gateway == servDesc.sid) {
+        sd.gateway = -1;
+        sd.domain = null;
+      }
     }
   }
   

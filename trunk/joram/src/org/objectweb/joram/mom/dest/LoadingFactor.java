@@ -366,8 +366,8 @@ public class LoadingFactor implements Serializable {
       msgGive.setClientMessages(cm);
       Channel.sendTo(id,msgGive);
       
-      for (Enumeration enum = cm.getMessages().elements(); enum.hasMoreElements(); ) {
-        Message msg = (Message) enum.nextElement();
+      for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+        Message msg = (Message) e.nextElement();
         clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
         clusterQueueImpl.deletePersistenceMessage(msg);
       }
@@ -382,17 +382,15 @@ public class LoadingFactor implements Serializable {
         AgentId id = (AgentId) e.nextElement();
         
         for (int i = 0; i < givePerQueue; i++) {
-          if (! clusterQueueImpl.messagesIsEmpty()) {
-            Message msg = clusterQueueImpl.removeMessage(0);
-            cm.addMessage(msg);
-          } else 
-            break;
+          if (clusterQueueImpl.messagesIsEmpty()) break;
+          Message msg = clusterQueueImpl.removeMessage(0);
+          cm.addMessage(msg);
         }
         msgGive.setClientMessages(cm);
         Channel.sendTo(id,msgGive);
 
-        for (Enumeration enum = cm.getMessages().elements(); enum.hasMoreElements(); ) {
-          Message msg = (Message) enum.nextElement();
+        for (Enumeration e2 = cm.getMessages().elements(); e2.hasMoreElements(); ) {
+          Message msg = (Message) e2.nextElement();
           clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
           clusterQueueImpl.deletePersistenceMessage(msg);
         }
@@ -459,8 +457,8 @@ public class LoadingFactor implements Serializable {
     Channel.sendTo(to,cycle);
 
     ClientMessages cm = cycle.getClientMessages();
-    for (Enumeration enum = cm.getMessages().elements(); enum.hasMoreElements(); ) {
-      Message msg = (Message) enum.nextElement();
+    for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+      Message msg = (Message) e.nextElement();
       clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
       clusterQueueImpl.deletePersistenceMessage(msg);
     }

@@ -41,34 +41,24 @@ import javax.naming.NamingException;
  * Implements the <code>javax.jms.Queue</code> interface and provides
  * JORAM specific administration and monitoring methods.
  */
-public class Queue extends Destination implements javax.jms.Queue
-{
-  /** 
-   * Constructs a queue.
-   *
-   * @param agentId  Identifier of the queue agent.
-   */
-  public Queue(String agentId)
-  {
-    super(agentId);
+public class Queue extends Destination implements javax.jms.Queue {
+
+  private final static String QUEUE_TYPE = "queue";
+
+  public static boolean isQueue(String type) {
+    return Destination.isAssignableTo(type, QUEUE_TYPE);
   }
 
-  /** 
-   * Constructs a queue.
-   *
-   * @param agentId  Identifier of the queue agent.
-   * @param name     Name set by administrator.
-   */
-  public Queue(String agentId, String name)
-  {
-    super(agentId, name);
+  // Used by jndi2 SoapObjectHelper
+  public Queue() {}
+
+  public Queue(String name) {
+    super(name, QUEUE_TYPE);
   }
 
-  /** 
-   * Constructs an empty queue.
-   */
-  public Queue()
-  {}
+  protected Queue(String name, String type) {
+    super(name, type);
+  }
 
   /** Returns a String image of the queue. */
   public String toString()
@@ -87,14 +77,6 @@ public class Queue extends Destination implements javax.jms.Queue
   {
     return getName();
   }
-
-  /**
-   * Decodes a <code>Queue</code> which traveled through the SOAP protocol.
-   */ 
-  public Object decode(Hashtable h) {
-    return new Queue((String) h.get("agentId"));
-  }
-
 
   /**
    * Admin method creating and deploying (or retrieving) a queue on a given
@@ -117,8 +99,10 @@ public class Queue extends Destination implements javax.jms.Queue
                              Properties prop)
                 throws ConnectException, AdminException
   {
-    String queueId = doCreate(serverId, name, className, prop);
-    return new Queue(queueId, name);
+    Queue queue = new Queue();
+    doCreate(serverId, name, className, 
+             prop, queue, QUEUE_TYPE);
+    return queue;
   }
 
   /**
@@ -193,7 +177,7 @@ public class Queue extends Destination implements javax.jms.Queue
   public static Queue create(String name)
                 throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer(),
+    return create(AdminModule.getLocalServerId(),
                   name,
                   "org.objectweb.joram.mom.dest.Queue",
                   null);
@@ -226,8 +210,11 @@ public class Queue extends Destination implements javax.jms.Queue
    */
   public static Queue create() throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer());
+    return create(AdminModule.getLocalServerId());
   }
+
+  
+
 
   /**
    * Admin method setting or unsetting the threshold for this queue.
@@ -303,5 +290,85 @@ public class Queue extends Destination implements javax.jms.Queue
       (Monitor_GetNumberRep) AdminModule.doRequest(request);
 
     return reply.getNumber();
+  }
+
+  public String[] getMessageIds(javax.jms.Queue queue) 
+    throws AdminException, ConnectException {
+    GetQueueMessageIdsRep reply = 
+      (GetQueueMessageIdsRep)AdminModule.doRequest(
+        new GetQueueMessageIds(agentId));
+    return reply.getMessageIds();
+  }
+  
+  public javax.jms.Message readMessage(
+    String msgId)
+    throws AdminException, ConnectException, JMSException {
+    GetQueueMessageRep reply = 
+      (GetQueueMessageRep)AdminModule.doRequest(
+        new GetQueueMessage(agentId, msgId));
+    return Message.wrapMomMessage(null, reply.getMessage());
+  }
+
+  public void deleteMessage(
+    String msgId)
+    throws AdminException, ConnectException {
+    AdminModule.doRequest(new DeleteQueueMessage(agentId, msgId));
+  }
+
+  public void clear() 
+    throws AdminException, ConnectException {
+    AdminModule.doRequest(new ClearQueue(agentId));
+  }
+
+  /**
+   * Adds a queue into the cluster this queue belongs to.
+   * If this queue doesn't belong to a cluster then a cluster is
+   * created by clustering this queue with the added queue.
+   * <p>
+   * The request fails if one or both of the queues are deleted, or
+   * can't belong to a cluster.
+   *
+   * @param addedQueue queue added to the cluster
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void addClusteredQueue(Queue addedQueue)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(
+      new AddQueueCluster(agentId, addedQueue.getName()));
+  }
+
+  /**
+   * Removes a queue from the cluster this queue belongs to.
+   * <p>
+   * The request fails if the queue does not exist or is not part of any 
+   * cluster.
+   *
+   * @param removedQueue queue removed from the cluster
+   * 
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void removeClusteredQueue(Queue removedQueue)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(
+      new RemoveQueueCluster(agentId, removedQueue.getName()));
+  }
+
+  /**
+   * Returns the reference of the queues that belong to the cluster.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public String[] getQueueClusterElements()
+    throws ConnectException, AdminException {
+    AdminReply reply = AdminModule.doRequest(
+      new ListClusterQueue(agentId));
+    Vector list = (Vector)reply.getReplyObject();
+    String[] res = new String[list.size()];
+    list.copyInto(res);
+    return res;
   }
 }

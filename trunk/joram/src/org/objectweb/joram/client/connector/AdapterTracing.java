@@ -31,8 +31,7 @@ import org.objectweb.util.monolog.api.Logger;
 /**
  * Utility class for logging.
  */
-class AdapterTracing
-{
+public class AdapterTracing {
   public static Logger dbgAdapter = null;
   private static boolean initialized = false;
 

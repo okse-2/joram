@@ -115,9 +115,9 @@ public abstract class Driver extends com.scalagent.kjoram.util.Daemon
 
             Integer reqId;
             Object obj;
-            for (Enumeration enum = cnx.requestsTable.keys();
-                 enum.hasMoreElements();) {
-              reqId = (Integer) enum.nextElement();
+            for (Enumeration e = cnx.requestsTable.keys();
+                 e.hasMoreElements();) {
+              reqId = (Integer) e.nextElement();
               obj = cnx.requestsTable.remove(reqId);
               if (obj instanceof Lock) {
                 synchronized(obj) {

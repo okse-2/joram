@@ -48,7 +48,6 @@ public abstract class ConnectionFactory
    * @param port  Server's listening port.
    */
   public ConnectionFactory(String host, int port) {
-    super(host + ":" + port);
     params = new FactoryParameters(host, port);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -59,7 +58,6 @@ public abstract class ConnectionFactory
    * Constructs an empty <code>ConnectionFactory</code>.
    */
   public ConnectionFactory() {}
-
 
   /** Returns a string view of the connection factory. */
   public String toString() {
@@ -137,6 +135,9 @@ public abstract class ConnectionFactory
     ref.add(
       new StringRefAddr("cFactory.txT",
                         (new Integer(params.txPendingTimer)).toString()));
+    ref.add(new StringRefAddr("cFactory.soapCnxT",
+                              (new Integer(params.cnxPendingTimer))
+                              .toString()));
     return ref;
   }
 
@@ -146,7 +147,7 @@ public abstract class ConnectionFactory
    * through the SOAP protocol.
    */
   public Hashtable code() {
-    Hashtable h = super.code();
+    Hashtable h = new Hashtable();
     h.put("host",params.getHost());
     h.put("port",new Integer(params.getPort()));
     h.put("connectingTimer",new Integer(params.connectingTimer));
@@ -162,7 +163,10 @@ public abstract class ConnectionFactory
    * Actual implementation of the method is located in the 
    * tcp and soap sub classes.
    */
-  public Object decode(Hashtable h) {
-    return null;
+  public void decode(Hashtable h) {
+    params = new FactoryParameters((String)h.get("host"),
+                                   ((Integer)h.get("port")).intValue());
+    params.connectingTimer = ((Integer)h.get("connectingTimer")).intValue();
+    params.cnxPendingTimer = ((Integer)h.get("cnxPendingTimer")).intValue();
   }
 }

@@ -34,10 +34,9 @@ import org.objectweb.joram.shared.client.AbstractJmsReply;
  * @see org.objectweb.joram.shared.tcp.JmsProxy
  * @see org.objectweb.joram.shared.soap.SoapProxy
  */
-public interface ProxyAgentItf
-{
+public interface ProxyAgentItf {
   /** Returns the proxy's <code>AgentId</code> identifier. */
-  public AgentId getAgentId();
+  public AgentId getId();
 
   /** Sends a notification to a given agent. */ 
   public void sendNot(AgentId to, Notification not);

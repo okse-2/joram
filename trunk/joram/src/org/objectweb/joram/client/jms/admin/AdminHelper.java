@@ -51,6 +51,7 @@ public class AdminHelper
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void setClusterLink(Topic clusterTopic, Topic joiningTopic)
          throws ConnectException, AdminException
@@ -69,6 +70,7 @@ public class AdminHelper
    * 
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void unsetClusterLink(Topic topic)
          throws ConnectException, AdminException
@@ -87,6 +89,7 @@ public class AdminHelper
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void setHierarchicalLink(Topic father, Topic son)
          throws ConnectException, AdminException
@@ -104,6 +107,7 @@ public class AdminHelper
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void unsetHierarchicalLink(Topic topic)
          throws ConnectException, AdminException 
@@ -124,6 +128,7 @@ public class AdminHelper
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void setQueueCluster(Queue clusterQueue, Queue joiningQueue)
     throws ConnectException, AdminException {
@@ -149,6 +154,7 @@ public class AdminHelper
    * 
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static void leaveQueueCluster(Queue clusterQueue, Queue leaveQueue)
     throws ConnectException, AdminException {
@@ -163,6 +169,7 @@ public class AdminHelper
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
+   * @deprecated
    */
   public static AdminReply listQueueCluster(Queue clusterQueue)
     throws ConnectException, AdminException {

@@ -82,7 +82,7 @@ public class UserAgent extends Agent
    * @see ConnectionManager
    */
   public UserAgent(int stamp) {
-    super("AdminProxy", true, stamp);
+    super("JoramAdminProxy", true, stamp);
     init();
   }
 
@@ -94,11 +94,30 @@ public class UserAgent extends Agent
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "UserAgent.agentInitialize(" + 
-        firstTime + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "UserAgent.agentInitialize(" +  firstTime + ')');
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
+    MXWrapper.registerMBean(proxyImpl, "Joram", getMBeanName());
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize(boolean lastTime) {
+    try {
+      MXWrapper.unregisterMBean("Joram", getMBeanName());
+    } catch (Exception exc) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, "", exc);
+    }
+    super.agentFinalize(lastTime);
+  }
+
+  private String getMBeanName() {
+    return new StringBuffer()
+      .append("type=User")
+      .append(",name=").append((name==nullName)?getId().toString():name)
+      .toString();
   }
 
   /**
@@ -347,14 +366,6 @@ public class UserAgent extends Agent
     setNoSave();
     sendToClient(
       not.getKey(), new ServerReply(not.getRequest()));
-  }
-
-  /**
-   * Returns the agent identifier
-   * of this agent.
-   */
-  public AgentId getAgentId() {
-    return getId();
   }
   
   /**

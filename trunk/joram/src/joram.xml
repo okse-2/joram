@@ -17,9 +17,11 @@
     <patternset id="specific.compile.sources" >
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
       <include name="fr/dyade/aaa/agent/Engine.java"/>
-      <include name="fr/dyade/aaa/agent/GCTransactionEngine.java"/>
+      <include name="fr/dyade/aaa/agent/GCEngine.java"/>
+      <include name="fr/dyade/aaa/agent/HAEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
       <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
@@ -34,7 +36,13 @@
       <include name="fr/dyade/aaa/util/ATransaction.java"/>
       <include name="fr/dyade/aaa/util/AFastTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
-      <include name="org/objectweb/joram/**/*.java"/>
+      <include name="org/objectweb/joram/shared/selectors/*.java"/>
+      <include name="org/objectweb/joram/shared/admin/**/*.java"/>
+      <include name="org/objectweb/joram/shared/client/**/*.java"/>
+      <include name="org/objectweb/joram/shared/excepts/**/*.java"/>
+      <include name="org/objectweb/joram/shared/messages/**/*.java"/>
+      <include name="org/objectweb/joram/client/**/*.java"/>
+      <include name="org/objectweb/joram/mom/**/*.java"/>
     </patternset>
 
     <!-- Specific classpath needed for compilation -->
@@ -69,6 +77,7 @@
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
         <include name="fr/dyade/aaa/agent/management/*.class"/>
         <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/ha/*.class"/>
         <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
         <include name="fr/dyade/aaa/jndi2/server/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
@@ -85,6 +94,7 @@
     <jar jarfile="${build.dir}/joram-client.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/haclient/*.class"/>
         <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapExt_*.class"/>
         <include name="org/objectweb/joram/client/jms/*.class"/>
@@ -99,7 +109,21 @@
     </jar>
     <jar jarfile="${build.dir}/joram-connector.jar">
       <fileset dir="${obj.dir}">
-        <include name="org/objectweb/joram/client/connector/*.class"/>
+        <include name="org/objectweb/joram/client/connector/**/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-raconfig.jar">
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/agent/conf/*.class"/>
+        <include name="fr/dyade/aaa/agent/Debug.class"/>
+        <include name="fr/dyade/aaa/util/Debug.class"/>
+        <include name="org/objectweb/joram/client/connector/utils/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-config.jar">
+      <fileset dir="${src.dir}/org/objectweb/joram/client/connector/">
+        <include name="a3debug.cfg"/>
+        <include name="a3servers.xml"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-gui.jar">
@@ -167,6 +191,8 @@
     <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-config.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-raconfig.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-kclient.jar" todir="${ship.dir}/lib"/>
     <mkdir dir="${ship.dir}/licenses"/>
     <copy todir="${ship.dir}/licenses" flatten="yes">
@@ -178,8 +204,17 @@
     </copy>
   </target>
 
+  <!-- Ships a JORAM JCA 1.5 adapter bin -->
+  <target name="ship.adapter.bin">
+    <mkdir dir="${ship.dir}/bin"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/utils/raconfig.sh"
+          todir="${ship.dir}/bin"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/utils/raconfig.bat"
+          todir="${ship.dir}/bin"/>
+  </target>
+
   <!-- Ships a JORAM JCA 1.5 adapter -->
-  <target name="ship.adapter" depends="build.joram"
+  <target name="ship.adapter" depends="ship.joram,ship.adapter.bin"
           description="--> Ships a JORAM JCA adapter">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -187,6 +222,7 @@
       <fileset dir="${build.dir}">
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
+        <include name="joram-config.jar"/>
         <include name="joram-mom.jar"/>
         <include name="joram-shared.jar"/>
         <include name="META-INF/ra.xml"/>
@@ -202,7 +238,7 @@
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter for non collocated use -->
-  <target name="ship.remoteadapter" depends="build.joram"
+  <target name="ship.remoteadapter" depends="ship.joram,ship.adapter.bin"
           description="--> Ships a JORAM JCA adapter for non collocated use">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -211,6 +247,7 @@
         <include name="joram-shared.jar"/>
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
+        <include name="joram-config.jar"/>
         <include name="META-INF/ra.xml"/>
       </fileset>
       <fileset dir="${lib.dir}">
@@ -221,8 +258,8 @@
     <delete file="${build.dir}/META-INF/ra.xml"/>
   </target>
 
-  <!-- Ships a JORAM JCA 1.5 adapter for JOnAS -->
-  <target name="ship.jonasadapter" depends="ship.joram"
+  <!-- Ships a JORAM JCA 1.5 adapter for JOnAS joram_for_jonas_ra.rar -->
+  <target name="ship.jonasadapter" depends="ship.joram,ship.adapter.bin"
           description="--> Ships a JORAM JCA adapter for JOnAS">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -230,7 +267,17 @@
           tofile="${build.dir}/META-INF/jonas-ra.xml"/>
     <jar jarfile="${ship.dir}/lib/joram_for_jonas_ra.rar">
       <fileset dir="${build.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-config.jar"/>
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
         <include name="META-INF/*.xml"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="jakarta-regexp-1.2.jar"/>
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
       </fileset>
     </jar>
     <delete file="${build.dir}/META-INF/ra.xml"/>

@@ -33,21 +33,13 @@ import org.objectweb.util.monolog.api.Logger;
 public class TcpRequestContext 
     extends RequestContext {
   
-  private transient Socket socket;
-
-  private transient ObjectInputStream receiver;
-
-  private transient SerialOutputStream sender;
+  private transient IOControl ioCtrl;
 
   private JndiRequest request;
 
   public TcpRequestContext(Socket socket) throws Exception {
-    this.socket = socket;
-    sender = 
-      new SerialOutputStream(socket.getOutputStream());
-    receiver = 
-      new ObjectInputStream(socket.getInputStream());      
-    request = (JndiRequest)receiver.readObject();
+    ioCtrl = new IOControl(socket);
+    request = (JndiRequest)ioCtrl.readObject();
   }
 
   public JndiRequest getRequest() {
@@ -58,31 +50,15 @@ public class TcpRequestContext
   }
 
   public void reply(JndiReply reply) {
-    if (sender != null) {
-      try {
-        sender.writeObject(reply);
-      } catch (Exception exc) {
-        Trace.logger.log(BasicLevel.ERROR, "", exc);
-      }
+    try {
+      ioCtrl.writeObject(reply);
+    } catch (Exception exc) {
+      Trace.logger.log(BasicLevel.ERROR, "", exc);
+    } finally {
+      ioCtrl.close();
     }
   }
   
-  private void close() {
-    // Closes the connection
-    try {
-      socket.getInputStream().close();
-    } catch (Exception exc) {}
-    try {
-      socket.getOutputStream().flush();
-      socket.getOutputStream().close();
-    } catch (Exception exc) {}
-    try {
-      socket.close();
-    } catch (Exception exc) {}
-    socket = null;
-    sender = null;
-  }
-
   public String toString() {
     return '(' + super.toString() +
       ",request=" + request + ')';

@@ -20,13 +20,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA), Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Contributor(s): ScalAgent DT
  */
 package org.objectweb.joram.client.jms.admin;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
+import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.shared.admin.*;
@@ -41,6 +43,8 @@ import java.util.Vector;
 
 import javax.jms.*;
 
+import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>AdminModule</code> class allows to set an administrator
@@ -49,6 +53,11 @@ import javax.jms.*;
  */
 public class AdminModule
 {
+  public static final String REQUEST_TIMEOUT_PROP = 
+      "org.objectweb.joram.client.jms.admin.requestTimeout";
+
+  public static final long DEFAULT_REQUEST_TIMEOUT = 120000;
+
   /** The identifier of the server the module is connected to. */
   private static int localServer;
   /** The host name or IP address this client is connected to. */
@@ -58,12 +67,9 @@ public class AdminModule
 
   /** The connection used to link the administrator and the platform. */
   private static TopicConnection cnx = null;
-  /** The session in which the administrator works. */
-  private static TopicSession sess;
-  /** The admin topic to send admin requests to. */
-  private static javax.jms.Topic topic;
+
   /** The requestor for sending the synchronous requests. */
-  private static TopicRequestor requestor;
+  private static AdminRequestor requestor;
 
   /** ObjectMessage sent to the platform. */
   private static ObjectMessage requestMsg;
@@ -72,7 +78,12 @@ public class AdminModule
 
   /** Reply object received from the platform. */
   protected static AdminReply reply;
-  
+
+  private static int requestCounter;
+
+  private static long requestTimeout = 
+      Long.getLong(REQUEST_TIMEOUT_PROP, 
+                   DEFAULT_REQUEST_TIMEOUT).longValue();
 
   /**
    * Opens a connection dedicated to administering with the Joram server
@@ -97,11 +108,7 @@ public class AdminModule
     
     try {
       cnx = cnxFact.createTopicConnection(name, password);
-      sess = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-      
-      topic = sess.createTopic("#AdminTopic");
-      
-      requestor = new TopicRequestor(sess, topic);
+      requestor = new AdminRequestor(cnx);
       
       cnx.start();
      
@@ -118,13 +125,7 @@ public class AdminModule
       localPort = params.getPort();
       
       // Getting the id of the local server:
-      try {
-        String topicName = topic.getTopicName();
-        int ind0 = topicName.indexOf(".");
-        int ind1 = topicName.indexOf(".", ind0 + 1);
-        localServer = Integer.parseInt(topicName.substring(ind0 + 1, ind1));
-      }
-      catch (JMSException exc) {}
+      localServer = requestor.getLocalServerId();
     }
     catch (JMSSecurityException exc) {
       throw new AdminException(exc.getMessage());
@@ -260,49 +261,48 @@ public class AdminModule
   /**
    * Adds a server to the platform.
    *
-   * @param serverName  Name of the added server
-   * @param hostName Address of the added server
-   * @param serverId Identifier of the added server
+   * @param serverId Id of the added server
+   * @param hostName Address of the host where the added server is started
    * @param domainName Name of the domain where the server is added
    * @param port Listening port of the server in the specified domain
+   * @param serverName Name of the added server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void addServer(String serverName,
+  public static void addServer(int sid,
                                String hostName,
-                               short serverId,
                                String domainName,
-                               int port)
+                               int port,
+                               String serverName)
     throws ConnectException, AdminException {
     doRequest(new AddServerRequest(
-      serverName,
+      sid,
       hostName,
-      serverId,
       domainName,
-      port));
+      port,
+      serverName));
   }
 
   /**
    * Removes a server from the platform.
    *
-   * @param serverName  Name of the added server
+   * @param sid Id of the removed server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void removeServer(String serverName)
+  public static void removeServer(int sid)
     throws ConnectException, AdminException {
-    doRequest(new RemoveServerRequest(
-      serverName));
+    doRequest(new RemoveServerRequest(sid));
   }
 
   /**
    * Adds a domain to the platform.
    *
    * @param domainName Name of the added domain
-   * @param serverName Name of the router server that
-   *                   gives access to the added domain
+   * @param sid Id of the router server that
+   *            gives access to the added domain
    * @param port Listening port in the added domain of the
    *             router server
    *
@@ -310,12 +310,12 @@ public class AdminModule
    * @exception AdminException  If the request fails.
    */
   public static void addDomain(String domainName,
-                               String serverName,
+                               int sid,
                                int port)
     throws ConnectException, AdminException {
     doRequest(new AddDomainRequest(
       domainName,
-      serverName,
+      sid,
       port));
   }
 
@@ -418,11 +418,80 @@ public class AdminModule
    */
   public static List getServersIds() throws ConnectException, AdminException
   {
+    return getServersIds(null);
+  }
+
+  /**
+   * Returns the list of the servers' identifiers that belong
+   * to the specified domain
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static List getServersIds(String domainName) 
+    throws ConnectException, AdminException {
     Monitor_GetServersIds request =
-      new Monitor_GetServersIds(AdminModule.getLocalServer());
+      new Monitor_GetServersIds(
+        AdminModule.getLocalServerId(),
+        domainName);
     Monitor_GetServersIdsRep reply =
       (Monitor_GetServersIdsRep) doRequest(request);
-    return reply.getIds();
+    int[] serverIds = reply.getIds();
+    Vector res = new Vector();
+    for (int i = 0; i < serverIds.length; i++) {
+      res.addElement(new Integer(serverIds[i]));
+    }
+    return res;
+  }
+
+  public static Server[] getServers() 
+    throws ConnectException, AdminException {
+      return getServers(null);
+    }
+
+  public static Server[] getServers(String domainName) 
+    throws ConnectException, AdminException {
+    Monitor_GetServersIds request =
+     new Monitor_GetServersIds(
+       AdminModule.getLocalServerId(),
+       domainName);
+    Monitor_GetServersIdsRep reply =
+      (Monitor_GetServersIdsRep) doRequest(request);
+    int[] serverIds = reply.getIds();
+    String[] serverNames = reply.getNames();
+    String[] serverHostNames = reply.getHostNames();
+    Server[] servers = new Server[serverIds.length];
+    for (int i = 0; i < serverIds.length; i++) {
+      servers[i] = new Server(serverIds[i],
+                              serverNames[i],
+                              serverHostNames[i]);
+    }
+    return servers;
+  }
+
+  public static Server getLocalServer() 
+    throws ConnectException, AdminException {
+    GetLocalServerRep reply =  (GetLocalServerRep)doRequest(
+      new GetLocalServer());
+    return new Server(reply.getId(),
+                      reply.getName(),
+                      reply.getHostName());
+  }
+
+  /**
+   * Returns the list of the domain names that
+   * contains the specified server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static String[] getDomainNames(int serverId) 
+    throws ConnectException, AdminException {
+    GetDomainNames request =
+      new GetDomainNames(serverId);
+    GetDomainNamesRep reply =
+      (GetDomainNamesRep) doRequest(request);
+    return reply.getDomainNames();
   }
 
   /** 
@@ -509,37 +578,13 @@ public class AdminModule
     Monitor_GetDestinationsRep reply =
       (Monitor_GetDestinationsRep) doRequest(request);
 
-    Vector dests;
     Vector list = new Vector();
-
-    // Adding the queues, if any:
-    dests = reply.getQueues();
-    String id;
-    String name;
-    if (dests != null) {
-      for (int i = 0; i < dests.size(); i++) {
-        id = (String) dests.get(i);
-        name = reply.getName(id);
-        list.add(new org.objectweb.joram.client.jms.Queue(id, name));
-      }
-    }
-    // Adding the dead messages queues, if any:
-    dests = reply.getDeadMQueues();
-    if (dests != null) {
-      for (int i = 0; i < dests.size(); i++) {
-        id = (String) dests.get(i);
-        name = reply.getName(id);
-        list.add(new DeadMQueue(id, name));
-      }
-    }
-    // Adding the topics, if any:
-    dests = reply.getTopics();
-    if (dests != null) {
-      for (int i = 0; i < dests.size(); i++) {
-        id = (String) dests.get(i);
-        name = reply.getName(id);
-        list.add(new org.objectweb.joram.client.jms.Topic(id, name));
-      }
+    String[] ids = reply.getIds();
+    String[] names = reply.getNames();
+    String[] types = reply.getTypes();    
+    for (int i = 0; i < types.length; i++) {
+      list.addElement(Destination.newInstance(
+        ids[i], names[i], types[i]));
     }
     return list;
   }
@@ -599,7 +644,7 @@ public class AdminModule
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public static int getLocalServer() throws ConnectException
+  public static int getLocalServerId() throws ConnectException
   {
     if (cnx == null)
       throw new ConnectException("Administrator not connected.");
@@ -632,7 +677,7 @@ public class AdminModule
 
     return localPort;
   }
- 
+
   /**
    * Method actually sending an <code>AdminRequest</code> instance to
    * the platform and getting an <code>AdminReply</code> instance.
@@ -642,14 +687,17 @@ public class AdminModule
    *              the request failed.
    */  
   public static AdminReply doRequest(AdminRequest request)
-         throws AdminException, ConnectException
-  {
+         throws AdminException, ConnectException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "AdminModule.doRequest(" + request + ')');
+    
     if (cnx == null)
       throw new ConnectException("Admin connection not established.");
 
     try {
-      requestMsg = sess.createObjectMessage(request);
-      replyMsg = (ObjectMessage) requestor.request(requestMsg);
+      replyMsg = (ObjectMessage) requestor.request(
+        request, requestTimeout);
       reply = (AdminReply) replyMsg.getObject();
 
       if (! reply.succeeded())
@@ -658,10 +706,100 @@ public class AdminModule
       return reply;
     }
     catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(
+          BasicLevel.ERROR, "", exc);
       throw new ConnectException("Connection failed: " + exc.getMessage());
     }
     catch (ClassCastException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(
+          BasicLevel.ERROR, "", exc);
       throw new AdminException("Invalid server reply: " + exc.getMessage());
+    }
+  }
+
+  public static void abortRequest() throws JMSException {
+    if (requestor != null) {
+      requestor.abort();
+    } else throw new JMSException("Not connected");
+  }
+
+  public static class AdminRequestor {
+    private javax.jms.TopicConnection cnx;
+    private javax.jms.TopicSession sess;
+    private javax.jms.Topic topic;
+    private TemporaryTopic tmpTopic;
+    private MessageProducer producer;
+    private MessageConsumer consumer;
+
+    public AdminRequestor(javax.jms.TopicConnection cnx) 
+      throws JMSException {
+      this.cnx = cnx;
+      sess = cnx.createTopicSession(
+        false, Session.AUTO_ACKNOWLEDGE);
+      topic = sess.createTopic("#AdminTopic");
+      producer = sess.createProducer(topic);
+      tmpTopic = sess.createTemporaryTopic();
+      consumer = sess.createConsumer(tmpTopic);
+    }
+
+    public javax.jms.Message request(AdminRequest request,
+                                     long timeout) throws JMSException {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, 
+          "AdminModule.AdminRequestor.request(" + 
+          request + ',' + timeout + ')');
+
+      requestMsg = sess.createObjectMessage(request);
+      requestMsg.setJMSReplyTo(tmpTopic);
+      producer.send(requestMsg);
+      String correlationId = requestMsg.getJMSMessageID();
+      while (true) {
+        javax.jms.Message reply = consumer.receive(timeout);
+        if (reply == null) {
+          throw new JMSException("Interrupted request");
+        } else {
+          if (correlationId.equals(
+            reply.getJMSCorrelationID())) {
+            return reply;
+          } else {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(
+                BasicLevel.DEBUG, 
+                "reply id (" + reply.getJMSCorrelationID() +
+                ") != request id (" + correlationId + ")");
+            continue;
+          }
+        }
+      }
+    }
+
+    public void abort() throws JMSException {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "AdminModule.AdminRequestor.abort()");      
+      consumer.close();
+      consumer = sess.createConsumer(tmpTopic);
+    }
+
+    public int getLocalServerId() {
+      try {
+        String topicName = topic.getTopicName();
+        int ind0 = topicName.indexOf(".");
+        int ind1 = topicName.indexOf(".", ind0 + 1);
+        return Integer.parseInt(topicName.substring(ind0 + 1, ind1));
+      } catch (JMSException exc) {
+        return -1;
+      }
+    }
+
+    public void close() throws JMSException {
+      consumer.close();
+      producer.close();
+      tmpTopic.delete();
+      sess.close();
     }
   }
 } 

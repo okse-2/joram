@@ -171,8 +171,8 @@ public class Debug {
     /**
      * It retrieves the Handler type
      */
-    public byte getType() {
-      return CONSOLE_HANDLER_TYPE;
+    public String getType() {
+      return "console";
     }
 
     /**

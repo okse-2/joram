@@ -24,14 +24,21 @@ package org.objectweb.joram.client.tools.admin;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Enumeration;
 import java.net.ConnectException;
 import javax.naming.*;
+import javax.swing.*;
+import java.awt.event.*;
 import javax.swing.tree.*;
 import javax.jms.*;
 
 import org.objectweb.joram.client.jms.admin.*;
 import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.Destination;
 
+import org.objectweb.util.monolog.api.*;
 
 public class AdminController
 {
@@ -41,13 +48,14 @@ public class AdminController
   private ControllerEventListener gui;
 
   private DefaultTreeModel adminTreeModel;
-  private MutableTreeNode adminRoot;
+  private PlatformTreeNode adminRoot;
   
   private DefaultTreeModel jndiTreeModel;
   private MutableTreeNode jndiRoot;
 
   private String namedCtx = "";
   private Context ctx = null;
+
   private boolean jndiConnected = false;
 
   public static final String DEFAULT_ADMIN_HOST = "localhost";
@@ -66,7 +74,7 @@ public class AdminController
 
   public AdminController()
   {
-    adminRoot = new DefaultMutableTreeNode(STR_ADMIN_DISCONNECTED);
+    adminRoot = new PlatformTreeNode(this, STR_ADMIN_DISCONNECTED);
     adminTreeModel = new DefaultTreeModel(adminRoot, true);
 
     jndiRoot = new DefaultMutableTreeNode(STR_JNDI_DISCONNECTED);
@@ -137,77 +145,177 @@ public class AdminController
     return null;
   }
 
-  public void connectAdmin(String host, int port, String user, String passwd) throws Exception
-  {
-  	try
-  	{
-  	  disconnectAdmin();
-  	}
-  	catch (Exception exc) {}
+  public void connectAdmin(final String host, 
+                           final int port, 
+                           final String user, 
+                           final String passwd) 
+    throws Exception {
+    try {
+      disconnectAdmin();
+    }
+    catch (Exception exc) {}
 
-  	AdminModule.connect(host, port, user, passwd, 30);
-  	adminConnected = true;
-  	adminConnectionStr = "//" + host + ":" + port;
-
+    AdminModule.connect(host, port, user, passwd, 4);
+    adminConnected = true;
+    adminConnectionStr = "//" + host + ":" + port;
     adminRoot.setUserObject("Active Config");
     adminTreeModel.nodeChanged(adminRoot);
-    refreshAdminData();
-  	gui.adminControllerEvent(new ControllerEvent(ControllerEvent.ADMIN_CONNECTED));
+
+    AdminTool.invokeLater(new CommandWorker() {
+        public void run() throws Exception {
+          refreshAdminData();
+          gui.adminControllerEvent(
+            new ControllerEvent(ControllerEvent.ADMIN_CONNECTED));
+        }
+      });
   }
 
-  public void refreshAdminData() throws ConnectException
-  {
-    cleanupAdminTree();
-
-    List destList = null;
-    List userList = null;
-
-		List servers = null;
-		try {
-			servers = AdminModule.getServersIds();
-		}
-		catch (Exception exc) {
-			System.err.println("Failed to get server list: " + exc);
-			return;
-		}
-
-		for (Iterator it = servers.iterator(); it.hasNext();) {
-			int server = ((Short) it.next()).intValue();		
-
-      try {
-        destList = AdminModule.getDestinations(server);
-        userList = AdminModule.getUsers(server);
-      }
-      catch (AdminException exc) {
-        System.err.println("Failed to get user and destination lists for server #" +
-        	server + ": " + exc);
-        break;
-      }
-
-      ServerTreeNode serverNode = new ServerTreeNode(this, server);
-      adminTreeModel.insertNodeInto(serverNode, adminRoot, adminRoot.getChildCount());
-
-      for (Iterator i = destList.iterator(); i.hasNext();) {
-        Destination dest = (Destination) i.next();
-        DestinationTreeNode destNode = new DestinationTreeNode(this, dest);
-        adminTreeModel.insertNodeInto(destNode, serverNode.getDestinationRoot(),
-                                      serverNode.getDestinationRoot().getChildCount());
-      }
-
-      for (Iterator i = userList.iterator(); i.hasNext();) {
-        User user = (User) i.next();
-        UserTreeNode userNode = new UserTreeNode(this, user);
-        adminTreeModel.insertNodeInto(userNode, serverNode.getUserRoot(),
-                                      serverNode.getUserRoot().getChildCount());
+  /**
+   * First refreshing step. Doesn't block.
+   */
+  private void refreshAdminData1(ServerTreeNode serverTreeNode) 
+    throws ConnectException, AdminException {
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, 
+                     "AdminController.refreshAdminData(" + 
+                     serverTreeNode + ')');
+    String[] domainNames = AdminModule.getDomainNames(
+      serverTreeNode.getServerId());
+    TreeNode parentTreeNode = serverTreeNode.getParent();
+    String parentDomainName = null;
+    if (parentTreeNode instanceof DomainTreeNode) {
+      DomainTreeNode dtn = (DomainTreeNode)parentTreeNode;
+      parentDomainName = dtn.getDomainName();
+    }
+    for (int i = 0; i < domainNames.length; i++) {
+      if (! domainNames[i].equals(parentDomainName)) {
+        DomainTreeNode dtn = 
+          new DomainTreeNode(this, domainNames[i]);
+        adminTreeModel.insertNodeInto(
+          dtn, 
+          serverTreeNode.getDomainRoot(),
+          serverTreeNode.getDomainRoot().getChildCount());
+        
+        Server[] servers = AdminModule.getServers(domainNames[i]);
+        for (int j = 0; j < servers.length; j++) {
+          if (servers[j].getId() != 
+              serverTreeNode.getServerId()) {
+            ServerTreeNode stn = 
+              new ServerTreeNode(this, servers[j]);
+            adminTreeModel.insertNodeInto(
+              stn, dtn, 
+              dtn.getChildCount());
+            refreshAdminData1(stn);
+          }
+        }
       }
     }
-}
+  }
 
-  public void disconnectAdmin() throws Exception
-  {
-  	if (adminConnected) {
+  void updateDestinations(int serverId, 
+                          MutableTreeNode destinationRoot) 
+    throws ConnectException, AdminException {
+    List destList = AdminModule.getDestinations(serverId);
+    for (Iterator i = destList.iterator(); i.hasNext();) {
+      Destination dest = (Destination) i.next();
+      DestinationTreeNode destNode;
+      if (dest instanceof Topic) {
+        destNode = new TopicTreeNode(this, (Topic)dest);
+      } else if (dest instanceof Queue) {
+        destNode = new QueueTreeNode(this, (Queue)dest);
+      } else if (dest instanceof TemporaryQueue) {
+        destNode = new TopicTreeNode(this, (Topic)dest);
+      } else if (dest instanceof TemporaryTopic) {
+        destNode = new QueueTreeNode(this, (Queue)dest);
+      } else {
+        destNode = new DestinationTreeNode(this, dest);
+      }
+      adminTreeModel.insertNodeInto(
+        destNode, 
+        destinationRoot,
+        destinationRoot.getChildCount());
+    }
+  }
+
+  void updateUsers(int serverId, 
+                   MutableTreeNode userRoot) 
+    throws ConnectException, AdminException {
+    List userList = AdminModule.getUsers(serverId);
+    for (Iterator i = userList.iterator(); i.hasNext();) {
+      User user = (User) i.next();
+      UserTreeNode userNode = new UserTreeNode(this, user);
+      adminTreeModel.insertNodeInto(
+        userNode, 
+        userRoot,
+        userRoot.getChildCount());
+    }
+  }
+
+  /**
+   * Second refreshing step. May block.
+   */
+  private void refreshAdminData2(ServerTreeNode serverTreeNode) 
+    throws ConnectException, AdminException {
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, 
+                     "AdminController.refreshAdminData(" + 
+                     serverTreeNode + ')');
+    List destList;
+    List userList;
+    try {
+      updateDestinations(
+        serverTreeNode.getServerId(),
+        serverTreeNode.getDestinationRoot());
+      updateUsers(
+        serverTreeNode.getServerId(),
+        serverTreeNode.getUserRoot());
+    } catch (AdminException exc) {
+      if (Log.logger.isLoggable(BasicLevel.WARN))
+        Log.logger.log(BasicLevel.WARN, "", exc);
+      return;
+    } catch (ConnectException ce) {
+      if (Log.logger.isLoggable(BasicLevel.WARN))
+        Log.logger.log(BasicLevel.WARN, "", ce);
+      return;
+    }
+
+    Enumeration e = serverTreeNode.getDomainRoot().children();
+    while (e.hasMoreElements()) {
+      DomainTreeNode dtn = (DomainTreeNode)e.nextElement();
+      Enumeration e2 = dtn.children();
+      while (e2.hasMoreElements()) {
+        ServerTreeNode stn = (ServerTreeNode)e2.nextElement();
+        refreshAdminData2(stn);
+      }
+    }
+  }
+
+  public void refreshAdminData() 
+    throws ConnectException, AdminException {
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, 
+                     "AdminController.refreshAdminData()");
+    cleanupAdminTree();
+
+    // Get the local server id
+    Server localServer = AdminModule.getLocalServer();
+    ServerTreeNode localServerNode = 
+      new ServerTreeNode(
+        this, 
+        localServer);
+    adminTreeModel.insertNodeInto(
+      localServerNode, adminRoot, 
+      adminRoot.getChildCount());
+    
+    // Recursively browse the servers configuration
+    refreshAdminData1(localServerNode);
+    refreshAdminData2(localServerNode);
+  }
+
+  public void disconnectAdmin() throws Exception {
+    if (adminConnected) {
       AdminModule.disconnect();
-  	}
+    }
 
     adminRoot.setUserObject(STR_ADMIN_DISCONNECTED);
     adminTreeModel.nodeChanged(adminRoot);
@@ -217,12 +325,20 @@ public class AdminController
     adminConnectionStr = "Not connected";
   	gui.adminControllerEvent(new ControllerEvent(ControllerEvent.ADMIN_DISCONNECTED));
   }
+  
+  public void stopServer(ServerTreeNode stn) throws Exception {
+    AdminModule.stopServer(stn.getServerId());
+  }
 
-	public void stopServer(ServerTreeNode stn) throws Exception
-	{
-		AdminModule.stopServer(stn.getServerId());
-		adminTreeModel.removeNodeFromParent(stn);
-	}
+  public void deleteServer(ServerTreeNode stn) throws Exception {
+    AdminModule.removeServer(stn.getServerId());
+    adminTreeModel.removeNodeFromParent(stn);
+  }
+
+  public void deleteDomain(DomainTreeNode dtn) throws Exception {
+    AdminModule.removeDomain(dtn.getDomainName());
+    adminTreeModel.removeNodeFromParent(dtn);
+  }
 
   public void createConnectionFactory(String host, int port,
     String name, String type) throws Exception
@@ -305,25 +421,83 @@ public class AdminController
     jndiTreeModel.removeNodeFromParent(node);
   }
 
-  public void createUser(ServerTreeNode serverNode, String name, String passwd) throws Exception
-  {
+  public void createUser(ServerTreeNode serverNode, String name, String passwd) 
+    throws Exception {
     User user = User.create(name, passwd, serverNode.getServerId());
     UserTreeNode userNode = new UserTreeNode(this, user);
-    adminTreeModel.insertNodeInto(userNode, serverNode.getUserRoot(),
+    adminTreeModel.insertNodeInto(userNode, 
+                                  serverNode.getUserRoot(),
                                   serverNode.getUserRoot().getChildCount());
   }
 
-  public void updateUser(UserTreeNode userNode, String name, String passwd) throws Exception
-  {
+  public void createDomain(ServerTreeNode serverNode, String domainName, int port) 
+    throws Exception {
+    AdminModule.addDomain(domainName, (short)serverNode.getServerId(), port);
+    DomainTreeNode dtn = new DomainTreeNode(this, domainName);
+    adminTreeModel.insertNodeInto(dtn, 
+                                  serverNode.getDomainRoot(),
+                                  serverNode.getDomainRoot().getChildCount());
+  }
+
+  public void updateUser(UserTreeNode userNode, String name, String passwd) 
+    throws Exception {
     userNode.getUser().update(name, passwd);
     adminTreeModel.nodeChanged(userNode);
   }
 
-  public void deleteUser(UserTreeNode node) throws Exception
-  {
+  public void deleteUser(UserTreeNode node) 
+    throws Exception {
     node.getUser().delete();
-
     adminTreeModel.removeNodeFromParent(node);
+  }
+
+  public void deleteMessage(MessageTreeNode msgTn) 
+    throws Exception {
+    DefaultMutableTreeNode parentTn = 
+      (DefaultMutableTreeNode)msgTn.getParent();
+    if (parentTn instanceof SubscriptionTreeNode) {
+      SubscriptionTreeNode subTn = 
+        (SubscriptionTreeNode)parentTn;
+      SubscriptionRootTreeNode subRootTn = 
+        (SubscriptionRootTreeNode)subTn.getParent();
+      UserTreeNode userTn = 
+        (UserTreeNode)subRootTn.getParent();
+      ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+      userTn.getUser().deleteMessage(
+        subTn.getSubscription().getName(),
+        msgTn.getMessageId());
+    } else {
+      MessageRootTreeNode msgRootTn = 
+        (MessageRootTreeNode)parentTn;
+      QueueTreeNode queueTreeNode = 
+        (QueueTreeNode)msgRootTn.getParent();
+      queueTreeNode.getQueue().deleteMessage(
+        msgTn.getMessageId());
+    }
+    adminTreeModel.removeNodeFromParent(msgTn);
+  }
+
+  public void clearSubscription(SubscriptionTreeNode subTn) 
+    throws Exception {
+    SubscriptionRootTreeNode subRootTn = 
+      (SubscriptionRootTreeNode)subTn.getParent();
+    UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
+    ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+    userTn.getUser().clearSubscription(
+      subTn.getSubscription().getName());
+    while(subTn.getChildCount() > 0) {
+      MessageTreeNode msgTn = (MessageTreeNode)subTn.getChildAt(0);
+      adminTreeModel.removeNodeFromParent(msgTn);
+    }
+  }
+
+  public void clearQueue(QueueTreeNode queueTn) throws Exception {
+    queueTn.getQueue().clear();
+    MessageRootTreeNode msgRootTn = queueTn.getMessageRootTreeNode();
+    while(msgRootTn.getChildCount() > 0) {
+      MessageTreeNode msgTn = (MessageTreeNode)msgRootTn.getChildAt(0);
+      adminTreeModel.removeNodeFromParent(msgTn);
+    }
   }
 
   public int getPendingMessages(Queue q) throws Exception
@@ -554,4 +728,6 @@ public class AdminController
   	if (gui != null)
   	  gui.adminControllerEvent(e);
   }
+
+  
 }

@@ -87,8 +87,8 @@ public class A3CML {
     
   public static final void toXML(A3CMLConfig config,
                                  PrintWriter out) throws Exception {
-    out.write("<?xml version=\"1.0\"?>\n");
-    out.write("<!DOCTYPE config SYSTEM \"a3config.dtd\">\n");
+    // out.write("<?xml version=\"1.0\"?>\n");
+//     out.write("<!DOCTYPE config SYSTEM \"a3config.dtd\">\n");
     out.write("\n<" + ELT_CONFIG + ">\n\n");
 
     // write all property
@@ -142,9 +142,9 @@ public class A3CML {
         out.write("\">\n");
 
         // write all cluster property
-        for (Enumeration enum = cluster.properties.elements();
-             enum.hasMoreElements();) {
-          A3CMLProperty p = (A3CMLProperty) enum.nextElement();
+        for (Enumeration e2 = cluster.properties.elements();
+             e2.hasMoreElements();) {
+          A3CMLProperty p = (A3CMLProperty) e2.nextElement();
           out.write(TAB +
                     "<" + ELT_PROPERTY + " " +
                     ATT_NAME + "=\"");
@@ -156,9 +156,9 @@ public class A3CML {
         }
         out.write("\n");
         
-        for (Enumeration enum = cluster.servers.elements();
-             enum.hasMoreElements();) {
-          Object o = enum.nextElement();
+        for (Enumeration e2 = cluster.servers.elements();
+             e2.hasMoreElements();) {
+          Object o = e2.nextElement();
           if (o instanceof A3CMLPServer)
             writeToXMLServer(o,out);
         }
@@ -192,9 +192,9 @@ public class A3CML {
 
       // write all property
       if (server.properties != null) {
-        for (Enumeration enum = server.properties.elements();
-             enum.hasMoreElements();) {
-          A3CMLProperty p = (A3CMLProperty) enum.nextElement();
+        for (Enumeration e = server.properties.elements();
+             e.hasMoreElements();) {
+          A3CMLProperty p = (A3CMLProperty) e.nextElement();
           out.write(TAB2 + "<" + ELT_PROPERTY + " " + ATT_NAME + "=\"");
           out.write(p.name);
           out.write("\" " + ATT_VALUE + "=\"");
@@ -205,9 +205,9 @@ public class A3CML {
 
       // write all Nat
       if (server.nat != null) {
-        for (Enumeration enum = server.nat.elements();
-             enum.hasMoreElements();) {
-          A3CMLNat n = (A3CMLNat) enum.nextElement();
+        for (Enumeration e = server.nat.elements();
+             e.hasMoreElements();) {
+          A3CMLNat n = (A3CMLNat) e.nextElement();
           out.write(TAB2 + "<" + ELT_NAT + " " + ATT_SID + "=\"");
           out.write(Short.toString(n.sid));
           out.write("\" " + ATT_HOSTNAME + "=\"");
@@ -220,9 +220,9 @@ public class A3CML {
 
       // network
       if (server.networks != null) {
-        for (Enumeration enum = server.networks.elements();
-             enum.hasMoreElements();) {
-          A3CMLNetwork n = (A3CMLNetwork) enum.nextElement();
+        for (Enumeration e = server.networks.elements();
+             e.hasMoreElements();) {
+          A3CMLNetwork n = (A3CMLNetwork) e.nextElement();
           out.write(TAB2 + "<" + ELT_NETWORK + " " + ATT_DOMAIN + "=\"");
           out.write(n.domain);
           out.write("\" " + ATT_PORT + "=\"");
@@ -233,9 +233,9 @@ public class A3CML {
 
       //service
       if (server.services != null) {
-        for (Enumeration enum = server.services.elements();
-             enum.hasMoreElements();) {
-          A3CMLService service = (A3CMLService) enum.nextElement();
+        for (Enumeration e = server.services.elements();
+             e.hasMoreElements();) {
+          A3CMLService service = (A3CMLService) e.nextElement();
           out.write(TAB2 + "<" + ELT_SERVICE + " " + ATT_CLASS + "=\"");
           out.write(service.classname);
           out.write("\" " + ATT_ARGS + "=\"");

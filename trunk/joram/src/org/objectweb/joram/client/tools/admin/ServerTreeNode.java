@@ -32,71 +32,102 @@ class ServerTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
   private AdminController c;
-  private int serverId;
-  private MutableTreeNode destRoot = null;
-  private MutableTreeNode userRoot = null;
-  
-  public ServerTreeNode(AdminController c, int serverId)
-  {
-  	super("Server #" + serverId);
-  	this.c = c;
-  	this.serverId = serverId;
+  private Server serverDesc;
+  private DestinationRootTreeNode destRoot;
+  private UserRootTreeNode userRoot;
+  private DomainRootTreeNode domainRoot;
 
-    destRoot = new DefaultMutableTreeNode("Destinations");
+  public ServerTreeNode(AdminController c, 
+                        Server serverDesc) {
+    super(toString(serverDesc));
+    this.c = c;
+    this.serverDesc = serverDesc;
+    
+    destRoot = new DestinationRootTreeNode(this);
     add(destRoot);
-    userRoot = new DefaultMutableTreeNode("Users");
+    userRoot = new UserRootTreeNode(this);
     add(userRoot);
+    domainRoot = new DomainRootTreeNode(this);
+    add(domainRoot);
   }
 
-  public void refresh(DefaultTreeModel treeModel)
-  {
+  public void refresh(DefaultTreeModel treeModel) {
   }
 
-  public String getDescription()
-  {
+  public String getDescription() {
     StringBuffer sb = new StringBuffer();
     sb.append("<font face=Arial><b>Server #");
-    sb.append(serverId);
+    sb.append(toString(serverDesc));
     sb.append("</b><br></font>");
     return sb.toString();
   }
-
-  public JPopupMenu getContextMenu()
-  {
+  
+  public JPopupMenu getContextMenu() {
     JPopupMenu popup = new JPopupMenu("Server");
-
+    
     CreateDestinationAction cda = new CreateDestinationAction();
-    if (!c.isJndiConnected() || !c.isAdminConnected())
+    if (! c.isJndiConnected() || !c.isAdminConnected())
       cda.setEnabled(false);
     popup.add(new JMenuItem(cda));
-
+    
     CreateUserAction cua = new CreateUserAction();
-    if (!c.isAdminConnected())
+    if (! c.isAdminConnected())
       cua.setEnabled(false);
     popup.add(new JMenuItem(cua));
 
-		popup.addSeparator();
+    popup.addSeparator();
 
-		StopServerAction ssa = new StopServerAction();
-		if (!c.isAdminConnected())
-			ssa.setEnabled(false);
-		popup.add(new JMenuItem(ssa));
+    CreateDomainAction cdoma = new CreateDomainAction();
+    if (! c.isAdminConnected())
+      cdoma.setEnabled(false);
+    popup.add(new JMenuItem(cdoma));
+    
+    popup.addSeparator();
+    
+    StopServerAction ssa = new StopServerAction();
+    if (!c.isAdminConnected())
+      ssa.setEnabled(false);
+    popup.add(new JMenuItem(ssa));
 
+    DeleteServerAction dsa = new DeleteServerAction();
+    if (getDomainRoot().getChildCount() != 0 ||
+        ! c.isAdminConnected())
+      dsa.setEnabled(false);
+    popup.add(new JMenuItem(dsa));
+    
     return popup;
   }
-
-  public ImageIcon getImageIcon()
-  {
+  
+  public ImageIcon getImageIcon() {
     return AdminToolConstants.serverIcon;
   }
+  
+  public int getServerId() {
+    return serverDesc.getId();
+  }
 
-  public int getServerId() { return serverId; }
+  public final DestinationRootTreeNode getDestinationRoot() { 
+    return destRoot; 
+  }
 
-  public MutableTreeNode getDestinationRoot() { return destRoot; }
+  public final UserRootTreeNode getUserRoot() {
+    return userRoot; 
+  }
 
-  public MutableTreeNode getUserRoot() { return userRoot; }
+  public final DomainRootTreeNode getDomainRoot() {
+    return domainRoot;
+  }
 
-  public String toString() { return "Server #" + serverId; }
+  public String toString() {
+    return toString(serverDesc);
+  }
+
+  public static String toString(Server serverDesc) {
+    return "Server #" + 
+      serverDesc.getId() + ": " + 
+      serverDesc.getName() + " (" + 
+      serverDesc.getHostName() + ')';
+  }
 
   public List getDeadMessageQueues() {
     List rs = new Vector();
@@ -127,94 +158,147 @@ class ServerTreeNode extends DefaultMutableTreeNode
     return rs;
   }
 
-  private class CreateDestinationAction extends AbstractAction
-  {
-    public CreateDestinationAction()
-    {
+  private class CreateDestinationAction extends AbstractAction {
+    public CreateDestinationAction() {
       super("Create Destination...");
     }
-
-    public void actionPerformed(java.awt.event.ActionEvent e)
-    {
-      try
-      {
-  	    CreateDestinationDialog cdd = CreateDestinationDialog.showDialog();
-
-        if (!cdd.getActionCancelled())
-          c.createDestination(ServerTreeNode.this, cdd.getDestinationName(), cdd.getDestinationType());
-      }
-      catch (Exception x) {
-      	x.printStackTrace();
-        JOptionPane.showMessageDialog(null, x.getMessage());
-      }
-    }
-  }
-
-	private class StopServerAction extends AbstractAction
-	{
-		public StopServerAction()
-		{
-			super("Stop Server", AdminToolConstants.stopIcon);
-		}
-
-		public void actionPerformed(java.awt.event.ActionEvent e)
-		{
-			try
-			{
-				Object[] options = { "OK", "CANCEL" };
-				int conf = JOptionPane.showOptionDialog(AdminTool.getInstance(), "You are about to stop this server. Please click OK to proceed.",
-					"Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
-
-				if (conf == 0)
-					c.stopServer(ServerTreeNode.this);
-			}
-			catch (Exception x) {
-				x.printStackTrace();
-				JOptionPane.showMessageDialog(null, x.getMessage());
-			}
-		}
-	}
-
-  private class CreateUserAction extends AbstractAction
-  {
-    public CreateUserAction()
-    {
-      super("Create User...");
-    }
-
-    public void actionPerformed(java.awt.event.ActionEvent e)
-    {
-      try
-      {
-        while (true) {
-          CreateUserDialog cud = CreateUserDialog.showDialog();
-
-          if (cud.getActionCancelled()) {
-            break;
-          }
-          else {
-          	String msg = "";
-
-            if (cud.getUserName().length() == 0)
-              msg = "The user name is mandatory to create a new user. Please click OK to make corrections.";
-          	else if (cud.getPassword().length() == 0)
-              msg = "A password is mandatory to create a new user. Please click OK to make corrections.";
-            else if (!cud.getPassword().equals(cud.getConfirmationPassword()))
-              msg = "The two passwords that you have entered do not match. Please click OK to make corrections.";
-            else {
-              c.createUser(ServerTreeNode.this, cud.getUserName(), cud.getPassword());
-              break;
-            }
-
-            Object[] options = { "OK" };
-            JOptionPane.showOptionDialog(AdminTool.getInstance(), msg,
-            	"Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
-          }
+    
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      try {
+        final CreateDestinationDialog cdd = CreateDestinationDialog.showDialog();
+        
+        if (! cdd.getActionCancelled()) {
+          AdminTool.invokeLater(new CommandWorker() {
+              public void run() throws Exception {
+                c.createDestination(ServerTreeNode.this, 
+                                    cdd.getDestinationName(), 
+                                    cdd.getDestinationType());
+              }
+            });
         }
       }
       catch (Exception x) {
         x.printStackTrace();
         JOptionPane.showMessageDialog(null, x.getMessage());
+      }
+    }
+  }
+
+  private class StopServerAction extends AbstractAction
+  {
+    public StopServerAction()
+      {
+        super("Stop Server", AdminToolConstants.stopIcon);
+      }
+
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      Object[] options = { "OK", "CANCEL" };
+      int conf = JOptionPane.showOptionDialog(
+        AdminTool.getInstance(), 
+        "You are about to stop this server. Please click OK to proceed.",
+          "Warning", JOptionPane.DEFAULT_OPTION, 
+        JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+      
+      if (conf == 0) {
+        AdminTool.invokeLater(new CommandWorker() {
+            public void run() throws Exception {
+              c.stopServer(ServerTreeNode.this);
+            }
+          });
+      }
+    }
+  }
+
+  private class CreateUserAction extends AbstractAction {
+    public CreateUserAction() {
+      super("Create User...");
+    }
+    
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      while (true) {
+        final CreateUserDialog cud = CreateUserDialog.showDialog();
+        
+        if (cud.getActionCancelled()) {
+          break;
+        }
+        else {
+          String msg = "";
+          
+          if (cud.getUserName().length() == 0)
+            msg = "The user name is mandatory to create a new user. Please click OK to make corrections.";
+          else if (cud.getPassword().length() == 0)
+            msg = "A password is mandatory to create a new user. Please click OK to make corrections.";
+          else if (!cud.getPassword().equals(cud.getConfirmationPassword()))
+            msg = "The two passwords that you have entered do not match. Please click OK to make corrections.";
+          else {
+            AdminTool.invokeLater(new CommandWorker() {
+                public void run() throws Exception {
+                  c.createUser(ServerTreeNode.this, cud.getUserName(), cud.getPassword());
+                } 
+              });
+            break;
+          }
+          
+          Object[] options = { "OK" };
+          JOptionPane.showOptionDialog(AdminTool.getInstance(), msg,
+                                       "Error", JOptionPane.DEFAULT_OPTION, 
+                                       JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+        }
+      }
+    }
+  }
+
+  private class CreateDomainAction extends AbstractAction {
+    public CreateDomainAction() {
+      super("Create Domain...");
+    }
+    
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      while (true) {
+        final CreateDomainDialog cdd = CreateDomainDialog.showDialog();
+        
+        if (cdd.getActionCancelled()) {
+          break;
+        } else {
+          AdminTool.invokeLater(new CommandWorker() {
+              public void run() throws Exception {
+                c.createDomain(ServerTreeNode.this, 
+                               cdd.getName(), 
+                               cdd.getPort());
+              } 
+            });
+          break;
+        }
+      }
+    }
+  }
+
+  private class DeleteServerAction extends AbstractAction {
+    public DeleteServerAction() {
+      super("Delete Server");
+    }
+    
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      if (domainRoot.getChildCount() != 0) {
+        JOptionPane.showMessageDialog(AdminTool.getInstance(), 
+                                      "Can't remove a server that owns domains.",
+                                      "Remove server",
+                                      JOptionPane.ERROR_MESSAGE);
+      } else {
+        Object[] options = { "OK", "CANCEL" };
+        int conf = JOptionPane.showOptionDialog(
+          AdminTool.getInstance(), 
+          "You are about to delete this server. Please click OK to proceed.",
+          "Warning", JOptionPane.DEFAULT_OPTION, 
+          JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+        
+        if (conf == 0) {
+          AdminTool.invokeLater(new CommandWorker() {
+              public void run() throws Exception {
+                c.deleteServer(ServerTreeNode.this);
+              } 
+            });
+        }
       }
     }
   }

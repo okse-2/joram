@@ -290,6 +290,9 @@ public class RequestMultiplexer {
         onException(jmsExc);
       }
     } else {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> rl = " + rl + ')');
       if (rl != null) {
         try {
           if (rl.replyReceived(reply)) {
