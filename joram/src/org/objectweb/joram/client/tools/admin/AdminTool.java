@@ -792,20 +792,22 @@ public class AdminTool extends JFrame
     private void maybeShowPopup(MouseEvent e) {
       if (e.isPopupTrigger()) {
         TreePath tp;
-        if (tabbedPane.getSelectedIndex() == 0)
-          tp = configTree.getPathForLocation(e.getPoint().x, e.getPoint().y);
-        else
-          tp = jndiTree.getPathForLocation(e.getPoint().x, e.getPoint().y);
-
-        Object o = tp.getLastPathComponent();
-        
-        if (o instanceof AdminTreeNode)
-          {
+        if (tabbedPane.getSelectedIndex() == 0) {
+          tp = configTree.getPathForLocation(
+            e.getPoint().x, e.getPoint().y);
+        } else {
+          tp = jndiTree.getPathForLocation(
+            e.getPoint().x, e.getPoint().y);
+        }
+        if (tp != null) {
+          Object o = tp.getLastPathComponent();
+          if (o instanceof AdminTreeNode) {
             JPopupMenu popup = ((AdminTreeNode) o).getContextMenu();
-          
-            if (popup != null)
+            if (popup != null) {
               popup.show(e.getComponent(), e.getX(), e.getY());
+            }
           }
+        }
       }
     }
   }
