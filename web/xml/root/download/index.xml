@@ -53,33 +53,22 @@
 	  <tr>
 	    <td align="right" valign="top">Release: </td>
 	    <td>
-	      <input type="radio" name="file" value="joram-3.0.1.tgz" checked="checked"/>JORAM 3.0.1 jars (tgz)<br/>
-	      <input type="radio" name="file" value="joram-3.0.1.zip"/>JORAM 3.0.1 jars (zip)<br/>
-	      
-	      <input type="radio" name="file" value="joram-3.0.1-src.tgz"/>JORAM 3.0.1 sources (tgz)<br/>
-	      <input type="radio" name="file" value="joram-3.0.1-src.zip"/>JORAM 3.0.1 sources (zip)
-	    </td>
-	  </tr>
+	      <select name="file" size="4">
+		<option value="joram-3.0.1.tgz" selected="selected">JORAM 3.0.1 jars (tgz)</option>
+		<option value="joram-3.0.1.zip">JORAM 3.0.1 jars (zip)</option>
+		<option value="joram-3.0.1-src.tgz">JORAM 3.0.1 sources (tgz)</option>
+		<option value="joram-3.0.1-src.zip">JORAM 3.0.1 sources (zip)</option>
+		
+		<option value="joram-3.0.0.tgz">JORAM 3.0.0 jars (tgz)</option>
+		<option value="joram-3.0.0.zip">JORAM 3.0.0 jars (zip)</option>
+		<option value="joram-3.0.0-src.tgz">JORAM 3.0.0 sources (tgz)</option>
+		<option value="joram-3.0.0-src.zip">JORAM 3.0.0 sources (zip)</option>
 
-	  <tr>
-	    <td align="right" valign="top">Release: </td>
-	    <td>
-	      <input type="radio" name="file" value="joram-3.0.0.tgz" checked="checked"/>JORAM 3.0.0 jars (tgz)<br/>
-	      <input type="radio" name="file" value="joram-3.0.0.zip"/>JORAM 3.0.0 jars (zip)<br/>
-	      
-	      <input type="radio" name="file" value="joram-3.0.0-src.tgz"/>JORAM 3.0.0 sources (tgz)<br/>
-	      <input type="radio" name="file" value="joram-3.0.0-src.zip"/>JORAM 3.0.0 sources (zip)
-	    </td>
-	  </tr>
-	  
-	  <tr>
-	    <td align="right" valign="top">&#160;</td>
-	    <td>
-	      <input type="radio" name="file" value="joram-2.2.tar.gz"/>JORAM 2.2 jars (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.2.zip"/>JORAM 2.2 jars (zip)<br/>
-	      
-	      <input type="radio" name="file" value="joram-2.2-src.tar.gz"/>JORAM 2.2 sources (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.2-src.zip"/>JORAM 2.2 sources (zip)
+		<option value="joram-2.2.tar.gz">JORAM 2.2 jars (tar.gz)</option>
+		<option value="joram-2.2.zip">JORAM 2.2 jars (zip)</option>
+		<option value="joram-2.2-src.tar.gz">JORAM 2.2 sources (tar.gz)</option>
+		<option value="joram-2.2-src.zip">JORAM 2.2 sources (zip)</option>
+	      </select>
 	    </td>
 	  </tr>
 	  
@@ -89,9 +78,10 @@
 	  
 	  <tr>
 	    <td align="right">Download site: </td>
-	    <td><select name="site" size="1">
-		<option value="http://www.objectweb.org/joram/download/">HTTP download from France</option>
-		<option value="http://objectweb.cs.rice.edu/joram/download/">HTTP download from United States</option>
+	    <td><select name="site" size="2">
+		<option
+	    value="http://www.objectweb.org/joram/download/" selected="selected">HTTP download from France</option>
+		<option value="http://objectweb.cs.rice.edu/joram/download/">HTTP download from United Stated</option>
 	      </select>
 	    </td>
 	  </tr>
