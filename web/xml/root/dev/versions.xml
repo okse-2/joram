@@ -11,7 +11,7 @@
   </properties>
 
   <body>
-    <s1 name="JORAM 4.2 RC1 (January 7, 2005)">
+    <s1 name="JORAM 4.2 RC1 (January 10, 2005)">
       <p>The Joram 4.2 release candidate 1 is available in the CVS repository with the tag JORAM_4_2_RC1. 
          It provides  new features as high-avaibility, dynamic configuration, and a lot of fixes
          and improvements.</p>
