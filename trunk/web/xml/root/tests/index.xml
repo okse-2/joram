@@ -23,6 +23,8 @@
       information, see the <a href="doc.html">documentation</a>
       </p>
       
+      <hr />
+      
       <subtitle>23rd April 2002: Pramati supports the Test
         Suite</subtitle>
       <p>Thanks to <a href="mailto:rajdeep@pramati.com">Rajdeep
@@ -35,6 +37,9 @@
         implementation. For more information, see the <a
           href="doc.html">documentation</a>
       </p>
+
+      <hr />
+
       <subtitle>15th April 2002: Test Suite web pages and package available</subtitle>
       <p>The Test Suite has now its own web pages. Any feedback is
         welcome</p>
@@ -48,7 +53,7 @@
       </p>
       <p>Technically, the administration step is done through a simple interface
         that any provider can implement. For the moment, we provide
-        implementations for</p>
+        implementations for:</p>
       <ul>
         <li><a href="http://www.objectweb.org/joram">JORAM</a></li>
         <li><a href="http://www.pramati.com">Pramati</a></li>
