@@ -37,8 +37,13 @@ import java.util.*;
  * MOM agent server for allowing connections with external clients.
  */
 public class ConnectionManager {
-
-  /** Incoming messages flow (msgs/s) requested, if any (-1 if none). */
+  /**
+   *  Limit of incoming messages flow (msgs/s) requested if any, default
+   * value is -1 (no limitation).
+   *  This value can be adjusted by setting <tt>ConnectionManager.inFlow</tt>
+   * property. This property can be fixed either from <code>java</code>
+   * launching command, or in <code>a3servers.xml</code> configuration file.
+   */
   public static int inFlow = -1;
 
   /**
@@ -56,9 +61,8 @@ public class ConnectionManager {
 
   /**
    * Initializes the connection manager as a service.
-   * Creates and deploys the aministration topic, the
-   * connection manager agent and if requested the 
-   * administration user proxy.
+   * Creates and deploys the aministration topic, the connection manager
+   * agent and if requested the  administration user proxy.
    *
    * @param args name and password of the administrator (optional).
    * @param firstTime  <code>true</code> when the agent server starts.
@@ -79,6 +83,8 @@ public class ConnectionManager {
     AdminTopic adminTopic = new AdminTopic();
     adminTopic.deploy();
 
+    inFlow = Integer.getInteger("ConnectionManager.inFlow", inFlow).intValue();
+
     if (args != null) {
       String initialAdminName = null;
       String initialAdminPass = null;
@@ -89,6 +95,7 @@ public class ConnectionManager {
         initialAdminPass = st.nextToken();        
       }
       
+      // AF: deprecated, will be deleted.
       if (st.hasMoreTokens()) {
         try {
           inFlow = Integer.parseInt(st.nextToken());
