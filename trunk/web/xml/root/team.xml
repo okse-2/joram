@@ -17,11 +17,11 @@
  
       <p>Currently, the JORAM project team is composed of:</p>
       <ul>
-	<li>Andre Freyssinet (<a href="http://www.bull.com/">Bull</a>),</li>
-	<li>Serge Lacourte (<a href="http://www.bull.com/">Bull</a>),</li>
-	<li>Frederic Maistre (<a href="http://www.scalagent.com/">Scalagent</a>),</li>
-	<li>Jean-Frédéric Mesnil (<a href="http://www.inria.fr/">INRIA</a>),</li>
-	<li>Nicolas Tachker (<a href="http://www.inria.fr/">INRIA</a>).</li>
+	<li>Andre Freyssinet (<a href="http://www.bull.com/">Bull</a>)</li>
+	<li>Serge Lacourte (<a href="http://www.bull.com/">Bull</a>)</li>
+	<li>Frederic Maistre (<a href="http://www.scalagent.com/">Scalagent</a>)</li>
+	<li>Jean-Frédéric Mesnil (<a href="http://www.inria.fr/">INRIA</a>)</li>
+	<li>Nicolas Tachker (<a href="http://www.inria.fr/">INRIA</a>)</li>
       </ul>
 
       <subtitle>Contributors</subtitle>
@@ -30,14 +30,15 @@
       contributed to JORAM:</p>
 
       <ul>
-	<li>Cyril Araud (<a href="http://www.inria.fr/">INRIA</a>),</li>
-	<li>Luc Bellissard (<a href="http://www.inpg.fr/">INPG</a>),</li>
-	<li>Laurent Chauvirey (<a href="http://www.inpg.fr/">INPG</a>),</li>
-	<li>Xavier Etchevers (<a href="http://www.bull.com/">Bull</a>),</li>
-	<li>David Feliot (<a href="http://www.scalagent.com/">Scalagent</a>),</li>
-	<li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>),</li>
-	<li>Philippe Laumay (Schlumberger),</li>
-	<li>Richard Mathis.</li>
+	<li>Cyril Araud (<a href="http://www.inria.fr/">INRIA</a>)</li>
+	<li>Luc Bellissard (<a href="http://www.inpg.fr/">INPG</a>)</li>
+	<li>Laurent Chauvirey (<a href="http://www.inpg.fr/">INPG</a>)</li>
+	<li>Xavier Etchevers (<a href="http://www.bull.com/">Bull</a>)</li>
+	<li>David Feliot (<a href="http://www.scalagent.com/">Scalagent</a>)</li>
+	<li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>)</li>
+	<li>Philippe Laumay (Schlumberger)</li>
+	<li>Richard Mathis</li>
+	<li>JC Waeny</li>
       </ul>
 
       <p>We apologize if we miss someone. Please <a
