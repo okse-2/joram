@@ -1,4 +1,71 @@
 ###############################################################################
+# 2005/03/11 | Joram 4.2.0 RC2 release.
+###############################################################################
++==============================================================================
+| 2005/03/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Add util to configure the joram adatder resource.
+ create new jar joram-config.jar and joram-raconfig.jar.
+ modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
+ update jonas-ra.xml.
++==============================================================================
+| 2005/02/28 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix, call server.moveToFirst(SocketAddress) until find the good socket 
+ (juste for cluster use).
++==============================================================================
+| 2005/02/24 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ A destination is typed by a string, e.g. "queue.dmq" for a dead message queue.
+ This string is defined both in the class of the "stub" destination object 
+ from the client side and the class of the runtime destination instance from 
+ the server side.
++==============================================================================
+| 2005/02/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: no longer initialize 'Bag' agent in setState (HATransactionEngine).
+ JMX improvment:
+        - Servers list and status in SCServer.
+        - Right management in Joram's destinations.
++==============================================================================
+| 2005/02/14 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: HA.
+ Test cluster.properties.size() in the cluster configuration phase, 
+ in AgentServer.java
+ Replace serverCluster by server in a3config.dtd and
+ update sample a3config.dtd.
++==============================================================================
+| 2005/02/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Many improvments and bug-fixes in NGNetwork.
++==============================================================================
+| 2005/02/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ selector : add joramSelector directory in org/objectweb/joram/shared/selector
+ read joramselector.doc (HowTo generate the joram selector)
++==============================================================================
+| 2005/02/03 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: selector.
+ Encoded string literals as UNICODE.
++==============================================================================
+| 2005/01/28 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Joram client: fix automatic reconnection policy.
+ Administration module: new operations to read/delete messages from 
+subscriptions and queues.
++==============================================================================
+| 2005/01/15 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: JNDI connection closure.
+ Administration GUI: platform dynamic configuration.
++==============================================================================
+| 2005/01/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ JDK1.5 compatibility.
+ JMX enhancements.
+###############################################################################
 # 2005/01/10 | Joram 4.2.0 RC1 release.
 ###############################################################################
 +==============================================================================
