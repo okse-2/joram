@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +24,6 @@ import java.io.*;
 import java.util.*;
 
 public class JTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.14 2003-09-11 09:54:24 fmaistre Exp $";
-
   public static final String EMPTY_STRING = new String();
 
   private File dir = null;
@@ -74,6 +73,20 @@ public class JTransaction implements Transaction {
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
+
+    // Saves the transaction classname in order to prevent use of a
+    // different one after restart (see AgentServer.init).
+    DataOutputStream dos = null;
+    try {
+      File tfc = new File(dir, "TFC");
+      if (! tfc.exists()) {
+        dos = new DataOutputStream(new FileOutputStream(tfc));
+        dos.writeUTF(getClass().getName());
+        dos.flush();
+      }
+    } finally {
+      if (dos != null) dos.close();
+    }
 
     // Read the log, then...
     int oldPhase = FREE;

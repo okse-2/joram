@@ -138,6 +138,20 @@ public final class ATransaction implements Transaction, Runnable {
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
 
+    // Saves the transaction classname in order to prevent use of a
+    // different one after restart (see AgentServer.init).
+    DataOutputStream dos = null;
+    try {
+      File tfc = new File(dir, "TFC");
+      if (! tfc.exists()) {
+        dos = new DataOutputStream(new FileOutputStream(tfc));
+        dos.writeUTF(getClass().getName());
+        dos.flush();
+      }
+    } finally {
+      if (dos != null) dos.close();
+    }
+
     restart(PLOG);
     restart(LOG);
 
@@ -367,9 +381,9 @@ public final class ATransaction implements Transaction, Runnable {
     log.clear();
   }
 
-  private final static int NBC = 100;
-  private final static int NBO = 300;
-  private final static int NBS = 100000;
+  private final static int NBC = 150;
+  private final static int NBO = 600;
+  private final static int NBS = 2000000;
 
   public synchronized void release() throws IOException {
     if ((phase != COMMIT) && (phase != ROLLBACK))
