@@ -330,7 +330,7 @@ public class QueueSession extends Session implements javax.jms.QueueSession
                                    + " message.");
      
       try { 
-        cnx.syncRequest(new QRecDenyRequest(momMsg.getDestination(),
+        cnx.syncRequest(new QRecDenyRequest(momMsg.getDestination().getName(),
                                             momMsg.getIdentifier()));
       }
       catch (JMSException jE) {}
