@@ -33,7 +33,7 @@ import java.util.Properties;
  * @author	Noel De Palma
  */
 public final class A3Node implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: A3Node.java,v 1.4 2001-05-04 14:54:47 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: A3Node.java,v 1.5 2001-05-14 16:26:36 tachkeni Exp $"; 
 
   /**  Node name. */
   private String Name;

@@ -28,8 +28,8 @@ import java.util.*;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.6 2001-05-04 14:54:52 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.7 2001-05-14 16:26:41 tachkeni Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -343,8 +343,12 @@ public abstract class ProxyAgent extends Agent {
 
         if (dMonitor != null) {
           if (dMonitor.ois != null || dMonitor.oos != null) {
-            (dMonitor.ois).close();
-            (dMonitor.oos).close();
+	    try {
+	      (dMonitor.ois).close();
+	    } catch (IOException exc) {}
+	    try {
+	      (dMonitor.oos).close();
+	    } catch (IOException exc) {}
   
             stop(key.intValue());
   
@@ -432,14 +436,14 @@ public abstract class ProxyAgent extends Agent {
         case DRIVER_IN:
           try {
             ois.close();
-          } catch (Exception e) {}
+          } catch (IOException e) {}
           ois = null;
           drvIn = null;
           break;
         case DRIVER_OUT:
           try {
             oos.close();
-          } catch (Exception e) {}
+          } catch (IOException e) {}
           oos = null;
           drvOut = null;
           break;
@@ -453,20 +457,16 @@ public abstract class ProxyAgent extends Agent {
       if (dMonitor != null) {
         switch (not.getDriver()) {
           case DRIVER_IN:
-            try {
-              if (dMonitor.drvIn != null)
-              (dMonitor.drvIn).close();
-            } catch (Exception e) {}
-            dMonitor.ois = null;
-            dMonitor.drvIn = null;
+	    if (dMonitor.drvIn != null)
+	      (dMonitor.drvIn).close();
+	    dMonitor.ois = null;
+	    dMonitor.drvIn = null;
             break;
           case DRIVER_OUT:
-            try {
-              if (dMonitor.drvOut != null)
-              (dMonitor.drvOut).close();
-            } catch (Exception e) {}
-            dMonitor.oos = null;
-            dMonitor.drvOut = null;
+	    if (dMonitor.drvOut != null)
+	      (dMonitor.drvOut).close();
+	    dMonitor.oos = null;
+	    dMonitor.drvOut = null;
             break;
         }
         // When both drivers have been closed, remove the entry

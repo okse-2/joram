@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.joram;
 
 import java.net.*;
@@ -32,169 +31,179 @@ import javax.jms.*;
  * XATopicConnectionFactory allows an application program to create new
  * XATopicConnections to a JMS PTP proxy.
  */
-
 public class XATopicConnectionFactory extends XAConnectionFactory implements javax.jms.XATopicConnectionFactory {
 
-    /** Socket use to create New Topic (or delete Topic)*/
-    protected Socket sock = null;
-    /** ObjectOutputStream */
-    protected ObjectOutputStream oos = null; 
-    /** ObjectInputStream */
-    protected ObjectInputStream ois = null;
+  /** Socket use to create New Topic (or delete Topic)*/
+  protected Socket sock = null;
+  /** ObjectOutputStream */
+  protected ObjectOutputStream oos = null; 
+  /** ObjectInputStream */
+  protected ObjectInputStream ois = null;
     
-    /**
-     * Creates a new XATopicConnectionFactory
-     * @param proxyAgentURLString the URL string of the JMS proxy agent
-     */
-    public XATopicConnectionFactory(String proxyAgentURLString) {
-	super(proxyAgentURLString);
-    }
+  /**
+   * Creates a new XATopicConnectionFactory
+   * @param proxyAgentURLString the URL string of the JMS proxy agent
+   */
+  public XATopicConnectionFactory(String proxyAgentURLString) {
+    super(proxyAgentURLString);
+  }
 
-    /**
-     * Constructs a new XATopicConnectionFactory.
-     */
-    public XATopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
-	super(agentClient, addrProxy, portProxy);
-    }
-
-
-    /**
-     * Create an XA topic connection with default user identity.
-     */
-    public javax.jms.XATopicConnection createXATopicConnection() throws JMSException {
-	return (new XATopicConnection(proxyAgentIdString,
-				      proxyAddress, proxyPort,
-				      "anonymous", "anonymous"));
-    }
-
-    /**
-     * Create an XA topic connection with specific user identity.
-     */
-    public javax.jms.XATopicConnection createXATopicConnection(String userName, String password) throws JMSException {
-	return (new XATopicConnection(proxyAgentIdString,
-				      proxyAddress, proxyPort,
-				      userName, password));
-    }
-
-    /**
-     * Create a topic connection with default user identity.
-     */
-    public javax.jms.TopicConnection createTopicConnection() throws JMSException {
-	return (new TopicConnection(proxyAgentIdString,
-				    proxyAddress, proxyPort,
-				    "anonymous", "anonymous"));
-    }
+  /**
+   * Constructs a new XATopicConnectionFactory.
+   */
+  public XATopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
+    super(agentClient, addrProxy, portProxy);
+  }
 
 
-    /**
-     * Create a topic connection with specified user identity.
-     */
-    public javax.jms.TopicConnection createTopicConnection(String userName, String password) throws JMSException {
-	return (new TopicConnection(proxyAgentIdString,
-				    proxyAddress, proxyPort,
-				    userName,
-				    password));
-    }
-    /** Create New Topic 
-     * @see #delete(javax.jms.Topic)
-     */
-    public javax.jms.Topic createNewTopic () throws javax.jms.JMSException {
-	try {
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->XATopicConnectionFactory : createNewTopic (Protocol=" + proxyAgentURL.getProtocol() +
-				       ", Host=" + proxyAgentURL.getHost() +
-				       ", Port=" + proxyAgentURL.getPort() +
-				       ", AgentId=" + proxyAgentURL.getAgentId() + ")");
+  /**
+   * Create an XA topic connection with default user identity.
+   */
+  public javax.jms.XATopicConnection createXATopicConnection() throws JMSException {
+    return (new XATopicConnection(proxyAgentIdString,
+				  proxyAddress, proxyPort,
+				  "anonymous", "anonymous"));
+  }
+
+  /**
+   * Create an XA topic connection with specific user identity.
+   */
+  public javax.jms.XATopicConnection createXATopicConnection(String userName, String password) throws JMSException {
+    return (new XATopicConnection(proxyAgentIdString,
+				  proxyAddress, proxyPort,
+				  userName, password));
+  }
+
+  /**
+   * Create a topic connection with default user identity.
+   */
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
+    return (new TopicConnection(proxyAgentIdString,
+				proxyAddress, proxyPort,
+				"anonymous", "anonymous"));
+  }
+
+
+  /**
+   * Create a topic connection with specified user identity.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String userName, String password) throws JMSException {
+    return (new TopicConnection(proxyAgentIdString,
+				proxyAddress, proxyPort,
+				userName,
+				password));
+  }
+  /** Create New Topic 
+   * @see #delete(javax.jms.Topic)
+   */
+  public javax.jms.Topic createNewTopic () throws javax.jms.JMSException {
+    try {
+      if (Debug.debug)
+	if (Debug.admin)
+	  System.out.println("->XATopicConnectionFactory : createNewTopic (Protocol=" + proxyAgentURL.getProtocol() +
+			     ", Host=" + proxyAgentURL.getHost() +
+			     ", Port=" + proxyAgentURL.getPort() +
+			     ", AgentId=" + proxyAgentURL.getAgentId() + ")");
 	    
-	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
-		sock = new Socket(proxyAddress, proxyPort);
-		if ( sock != null ) {
-		    sock.setTcpNoDelay(true);
-		    sock.setSoTimeout(0);
-		    sock.setSoLinger(true,1000);
+      if ( proxyAgentURL.getProtocol().equals("joram") ) {
+	sock = new Socket(proxyAddress, proxyPort);
+	if ( sock != null ) {
+	  sock.setTcpNoDelay(true);
+	  sock.setSoTimeout(0);
+	  sock.setSoLinger(true,1000);
 		
-		    /* send the name of the agentClient */
-		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-		    dos.writeUTF(proxyAgentIdString);
-		    dos.flush();
-		    /* creation of the objectinputStream and ObjectOutputStream */
-		    oos = new ObjectOutputStream(sock.getOutputStream());
-		    ois = new ObjectInputStream(sock.getInputStream());
+	  /* send the name of the agentClient */
+	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+	  dos.writeUTF(proxyAgentIdString);
+	  dos.flush();
+	  /* creation of the objectinputStream and ObjectOutputStream */
+	  oos = new ObjectOutputStream(sock.getOutputStream());
+	  ois = new ObjectInputStream(sock.getInputStream());
 	    
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateTopic(1, proxyAgentIdString,null);
-		    if (oos != null) {
-			oos.writeObject(msgMOM);
-			oos.flush();
-			oos.reset();
-		    }
-		    if (ois != null) {
-			fr.dyade.aaa.mom.MessageAdminCreateTopic msg = (fr.dyade.aaa.mom.MessageAdminCreateTopic) ois.readObject();
-			if (Debug.debug)
-			    if (Debug.admin)
-				System.out.println("<-XATopicConnectionFactory : createNewTopic  msg=" + msg.toString());
-			oos.close();
-			ois.close();
-			sock.close();
-			return new fr.dyade.aaa.joram.Topic(proxyAgentURL.getProtocol() +
-							    "://" + proxyAgentURL.getHost() +
-							    ":" + proxyAgentURL.getPort() +
-							    "/" + msg.getTopicName());
-		    } 
-		}
-	    }
-	    oos.close();
-	    ois.close();
-	    sock.close();
-	    return null;
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("Exception=XATopicConnectionFactory : createNewTopic");
-	    except.setLinkedException(exc);
-	    throw(except);
+	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateTopic(1, proxyAgentIdString,null);
+	  if (oos != null) {
+	    oos.writeObject(msgMOM);
+	    oos.flush();
+	    oos.reset();
+	  }
+	  if (ois != null) {
+	    fr.dyade.aaa.mom.MessageAdminCreateTopic msg = (fr.dyade.aaa.mom.MessageAdminCreateTopic) ois.readObject();
+	    if (Debug.debug)
+	      if (Debug.admin)
+		System.out.println("<-XATopicConnectionFactory : createNewTopic  msg=" + msg.toString());
+
+	    return new fr.dyade.aaa.joram.Topic(proxyAgentURL.getProtocol() +
+						"://" + proxyAgentURL.getHost() +
+						":" + proxyAgentURL.getPort() +
+						"/" + msg.getTopicName());
+	  } 
 	}
+      }
+
+      return null;
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("Exception=XATopicConnectionFactory : createNewTopic");
+      except.setLinkedException(exc);
+      throw(except);
+    } finally {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
     }
+  }
 
-    /** delete Topic */
-    public void delete(javax.jms.Topic topic) throws javax.jms.JMSException {
-	try {
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->XATopicConnectionFactory : delete  Topic" + topic.getTopicName());
-	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
-		sock = new Socket(proxyAddress, proxyPort);
-		if ( sock != null ) {
-		    sock.setTcpNoDelay(true);
-		    sock.setSoTimeout(0);
-		    sock.setSoLinger(true,1000);
+  /** delete Topic */
+  public void delete(javax.jms.Topic topic) throws javax.jms.JMSException {
+    try {
+      if ((Debug.debug) && (Debug.admin))
+	System.out.println("->XATopicConnectionFactory : delete  Topic" + topic.getTopicName());
+      if ( proxyAgentURL.getProtocol().equals("joram") ) {
+	sock = new Socket(proxyAddress, proxyPort);
+	if ( sock != null ) {
+	  sock.setTcpNoDelay(true);
+	  sock.setSoTimeout(0);
+	  sock.setSoLinger(true,1000);
 
-		    /* send the name of the agentClient */
-		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-		    dos.writeUTF(proxyAgentIdString);
-		    dos.flush();
+	  /* send the name of the agentClient */
+	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+	  dos.writeUTF(proxyAgentIdString);
+	  dos.flush();
 		    
-		    /* creation of the objectinputStream and ObjectOutputStream */
-		    oos = new ObjectOutputStream(sock.getOutputStream());
-		    ois = new ObjectInputStream(sock.getInputStream());
+	  /* creation of the objectinputStream and ObjectOutputStream */
+	  oos = new ObjectOutputStream(sock.getOutputStream());
+	  ois = new ObjectInputStream(sock.getInputStream());
 
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminDeleteTopic(1, proxyAgentIdString,topic.getTopicName());
-		    if (oos != null) {
-			oos.writeObject(msgMOM);
-			oos.flush();
-			oos.reset();
-		    }
-		    oos.close();
-		    ois.close();
-		    sock.close();
-		}
-	    }
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("<-XATopicConnectionFactory : delete");
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("Exception XATopicConnectionFactory : delete");
-	    except.setLinkedException(exc);
-	    throw(except);
+	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminDeleteTopic(1, proxyAgentIdString,topic.getTopicName());
+	  if (oos != null) {
+	    oos.writeObject(msgMOM);
+	    oos.flush();
+	    oos.reset();
+	  }
 	}
-    }        
+      }
+      if ((Debug.debug) && (Debug.admin))
+	  System.out.println("<-XATopicConnectionFactory : delete");
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("Exception XATopicConnectionFactory : delete");
+      except.setLinkedException(exc);
+      throw(except);
+    } finally {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
+    }
+  }        
 
 } // XATopicConnectionFactory

@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.*;
  */
 public abstract class AgentObject implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $"; 
 
   transient String name;
   /**

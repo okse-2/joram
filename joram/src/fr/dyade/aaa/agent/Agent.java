@@ -66,7 +66,7 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.4 2001-05-04 14:54:48 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.5 2001-05-14 16:26:37 tachkeni Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.

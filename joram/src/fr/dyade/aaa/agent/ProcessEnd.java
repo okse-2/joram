@@ -38,7 +38,7 @@ import java.io.*;
  */
 public class ProcessEnd extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: ProcessEnd.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ProcessEnd.java,v 1.5 2001-05-14 16:26:41 tachkeni Exp $"; 
 
 
   private int exitValue;	/** as returned by <code>Process.exitValue</code> */

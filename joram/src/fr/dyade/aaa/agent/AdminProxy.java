@@ -39,7 +39,7 @@ import java.lang.reflect.*;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.1 2001-05-04 15:04:04 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.2 2001-05-14 16:26:37 tachkeni Exp $"; 
 
   static AdminProxy proxy = null;
 

@@ -34,8 +34,8 @@ import java.util.*;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -129,7 +129,7 @@ final class AgentVector extends AgentObject {
 public final class AgentFactory extends Agent {
 
   /** RCS version number of this file: $$ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -236,7 +236,9 @@ public final class AgentFactory extends Agent {
 	    new ByteArrayInputStream(
 	      cnot.agentState, 0, cnot.agentState.length));
 	Agent ag = (Agent) ois.readObject();
-	ois.close();
+	try {
+	  ois.close();
+	} catch (IOException exc) {}
 
 	createAgent(ag);
 

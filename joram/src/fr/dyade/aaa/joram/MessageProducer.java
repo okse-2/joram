@@ -67,7 +67,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
 		/* initialization of attributes by default */
 		disableMessageID = false;
 		disableMessageTimestamp = false;
-		deliveryMode = fr.dyade.aaa.mom.Message.NON_PERSISTENT;
+		deliveryMode = fr.dyade.aaa.mom.Message.PERSISTENT;
 		priority = 4;
 		timeToLive = 0;
 	}

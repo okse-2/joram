@@ -69,8 +69,7 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
       try {
 	listenPort = Integer.parseInt(args);
       } catch (NumberFormatException exc) {
-	throw new IllegalArgumentException("Bad port number for NWTcpServer: " +
-					   args);
+	throw new IllegalArgumentException("Bad port number: " + args);
       }
     }
     // creates the server

@@ -107,8 +107,8 @@ public class Topic extends fr.dyade.aaa.mom.Destination
       }
 
       // Delivering an agreement to the client if message is persistent.
-      if (not.msg.getJMSDeliveryMode() == Message.PERSISTENT)
-        deliveryAgreement(from, not);
+      //if (not.msg.getJMSDeliveryMode() == Message.PERSISTENT)
+        //deliveryAgreement(from, not);
 
     } catch (MOMException exc) { 
       deliveryException (from, not, exc);

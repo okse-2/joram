@@ -60,8 +60,10 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
         sessionCounter = sessionCounter - 1;
         throw (new javax.jms.JMSException("Error when creating the TopicSession"));
       }
-      else 
+      else {
+        sessions.put(new Long(sessionCounterNew), session);
         return session;
+      }
 
     } catch (JMSException jE) {
       throw(jE);
@@ -88,6 +90,8 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
     String messageSelector, javax.jms.ServerSessionPool sessionPool, int maxMessages)
     throws JMSException
   {
+    if (this.connectionConsumer != null)
+      throw (new JMSException("A ConnectionConsumer already exists for this Connection"));
     if (sessionPool == null)
       throw (new JMSException("ServerSessionPool parameter is null!"));
 
@@ -97,6 +101,7 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       // Building the connectionConsumer.
       this.connectionConsumer = doCreateConnectionConsumer(topic, messageSelector,
         sessionPool, maxMessages, durable, subName);
+      connectionConsumer.setConnection(this);
     } catch (JMSException jE) {
       throw(jE);
     }
@@ -130,6 +135,7 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       // Building the connectionConsumer.
       this.connectionConsumer = doCreateConnectionConsumer(topic, messageSelector,
         sessionPool, maxMessages, durable, subscriptionName);
+      connectionConsumer.setConnection(this);
     } catch (JMSException jE) {
       throw(jE);
     }

@@ -38,7 +38,7 @@ import java.util.*;
  */
 public class RoleMultiple implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: RoleMultiple.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: RoleMultiple.java,v 1.5 2001-05-14 16:26:42 tachkeni Exp $"; 
 
 
   private String name;

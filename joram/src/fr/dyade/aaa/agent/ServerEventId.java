@@ -28,7 +28,7 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 
 public class ServerEventId implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: ServerEventId.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ServerEventId.java,v 1.5 2001-05-14 16:26:42 tachkeni Exp $";
 
   public final static int MAX_TYPE = 10000;
   /**

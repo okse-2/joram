@@ -29,8 +29,8 @@ import java.util.*;
 import fr.dyade.aaa.util.*;
 
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.2 2001-05-04 14:54:52 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.3 2001-05-14 16:26:41 tachkeni Exp $";
 
   static final class StatusMessage implements Serializable {
     transient byte status;

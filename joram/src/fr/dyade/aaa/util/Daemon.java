@@ -75,7 +75,7 @@ public abstract class Daemon implements Runnable {
    */
   protected volatile boolean canStop;
   /** The active component of this daemon. */ 
-  Thread thread = null;
+  protected Thread thread = null;
   /** The <code>daemon</code>'s name. */ 
   private String name;
   /** The <code>daemon</code>'s nature. */

@@ -154,6 +154,12 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
       messageListener = null;
     }
     else if (listener != null && messageListener == null) {
+      if (refSession.listener == null) {
+        refSession.listener = new SessionListener(new Long(refSession.sessionID),
+          refConnection, refSession);
+        refSession.listener.setDaemon(true);
+        refSession.listener.start();
+      }
       long requestID = refConnection.getMessageMOMID();
       Long requestKey = new Long(requestID);
       refSession.listenersTable.put(consumerID, listener); 

@@ -21,218 +21,234 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.joram;
 
 import java.net.*;
 import java.io.*;
 import javax.jms.*;
 
-
 /**
  * A client uses a TopicConnectionFactory to create TopicConnections
  * with a JMS Pub/Sub provider.
  */
-
 public class TopicConnectionFactory extends ConnectionFactory implements javax.jms.TopicConnectionFactory {
     
-    /** Socket use to create New Topic (or delete Topic)*/
-    protected Socket sock = null;
-    /** ObjectOutputStream */
-    protected ObjectOutputStream oos = null; 
-    /** ObjectInputStream */
-    protected ObjectInputStream ois = null;
+  /** Socket use to create New Topic (or delete Topic)*/
+  protected Socket sock = null;
+  /** ObjectOutputStream */
+  protected ObjectOutputStream oos = null; 
+  /** ObjectInputStream */
+  protected ObjectInputStream ois = null;
 
-    /**
-     * Constructs a new TopicConnectionFactory.
-     */
-    public TopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
-	super(agentClient, addrProxy, portProxy);
-    }
+  /**
+   * Constructs a new TopicConnectionFactory.
+   */
+  public TopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
+    super(agentClient, addrProxy, portProxy);
+  }
 
-    /**
-     * Constructs a new TopicConnectionFactory.
-     */
-    public TopicConnectionFactory(String stringURL) {
-	super(stringURL);
-    }
+  /**
+   * Constructs a new TopicConnectionFactory.
+   */
+  public TopicConnectionFactory(String stringURL) {
+    super(stringURL);
+  }
 
-    /**
-     * Create a topic connection with default user identity.
-     */
-    public javax.jms.TopicConnection createTopicConnection() throws JMSException {
-	return new TopicConnection(agentClient, addrProxy, portProxy, login, passwd);
-    }
+  /**
+   * Create a topic connection with default user identity.
+   */
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
+    return new TopicConnection(agentClient, addrProxy, portProxy, login, passwd);
+  }
     
     
-    /**
-     * Create a topic connection with specified user identity.
-     */
-    public javax.jms.TopicConnection createTopicConnection(String userName, String password) throws JMSException {
-	this.login = userName;
-	this.passwd = password;
-	return createTopicConnection();
-    }
+  /**
+   * Create a topic connection with specified user identity.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String userName, String password) throws JMSException {
+    this.login = userName;
+    this.passwd = password;
+    return createTopicConnection();
+  }
 
-    /** Create New Topic 
-     * @see #delete(javax.jms.Topic)
-     */
-    public javax.jms.Topic createNewTopic () throws javax.jms.JMSException {
-	try {
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->TopicConnectionFactory : createNewTopic (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=" + url.getAgentId() + ")");
+  /** Create New Topic 
+   * @see #delete(javax.jms.Topic)
+   */
+  public javax.jms.Topic createNewTopic () throws javax.jms.JMSException {
+    try {
+      if (Debug.debug)
+	if (Debug.admin)
+	  System.out.println("->TopicConnectionFactory : createNewTopic (Protocol=" + url.getProtocol() +
+			     ", Host=" + url.getHost() +
+			     ", Port=" + url.getPort() +
+			     ", AgentId=" + url.getAgentId() + ")");
 	    
-	    if ( url.getProtocol().equals("joram") ) {
-		sock = new Socket(addrProxy, portProxy);
-		if ( sock != null ) {
-		    sock.setTcpNoDelay(true);
-		    sock.setSoTimeout(0);
-		    sock.setSoLinger(true,1000);
+      if ( url.getProtocol().equals("joram") ) {
+	sock = new Socket(addrProxy, portProxy);
+	if ( sock != null ) {
+	  sock.setTcpNoDelay(true);
+	  sock.setSoTimeout(0);
+	  sock.setSoLinger(true,1000);
 		
-		    /* send the name of the agentClient */
-		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-		    dos.writeUTF(agentClient);
-		    dos.flush();
-		    /* creation of the objectinputStream and ObjectOutputStream */
-		    oos = new ObjectOutputStream(sock.getOutputStream());
-		    ois = new ObjectInputStream(sock.getInputStream());
+	  /* send the name of the agentClient */
+	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+	  dos.writeUTF(agentClient);
+	  dos.flush();
+	  /* creation of the objectinputStream and ObjectOutputStream */
+	  oos = new ObjectOutputStream(sock.getOutputStream());
+	  ois = new ObjectInputStream(sock.getInputStream());
 	    
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateTopic(1, agentClient,null);
-		    if (oos != null) {
-			oos.writeObject(msgMOM);
-			oos.flush();
-			oos.reset();
-		    }
-		    if (ois != null) {
-			fr.dyade.aaa.mom.MessageAdminCreateTopic msg = (fr.dyade.aaa.mom.MessageAdminCreateTopic) ois.readObject();
-			if (Debug.debug)
-			    if (Debug.admin)
-				System.out.println("<-TopicConnectionFactory : createNewTopic  msg=" + msg.toString());
-			oos.close();
-			ois.close();
-			sock.close();
-			return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
-							    "://" + url.getHost() +
-							    ":" + url.getPort() +
-							    "/" + msg.getTopicName());
-		    } 
-		}
-	    }
-	    oos.close();
-	    ois.close();
-	    sock.close();
-	    return null;
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewTopic");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-    /** Create New Specific Topic
-     * your Class className must extends fr.dyade.aaa.mom.Topic
-     * @see #delete(javax.jms.Topic)
-     */
-    public javax.jms.Topic createNewSpecificTopic(String className) throws javax.jms.JMSException {
-	try {
+	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateTopic(1, agentClient,null);
+	  if (oos != null) {
+	    oos.writeObject(msgMOM);
+	    oos.flush();
+	    oos.reset();
+	  }
+	  if (ois != null) {
+	    fr.dyade.aaa.mom.MessageAdminCreateTopic msg = (fr.dyade.aaa.mom.MessageAdminCreateTopic) ois.readObject();
 	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->TopicConnectionFactory : createNewSpecificTopic (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=" + url.getAgentId() + ")");
+	      if (Debug.admin)
+		System.out.println("<-TopicConnectionFactory : createNewTopic  msg=" + msg.toString());
+
+	    return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
+						"://" + url.getHost() +
+						":" + url.getPort() +
+						"/" + msg.getTopicName());
+	  } 
+	}
+      }
+
+      return null;
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewTopic");
+      except.setLinkedException(exc);
+      throw(except);
+    } finally {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
+    }
+  }
+
+  /** Create New Specific Topic
+   * your Class className must extends fr.dyade.aaa.mom.Topic
+   * @see #delete(javax.jms.Topic)
+   */
+  public javax.jms.Topic createNewSpecificTopic(String className) throws javax.jms.JMSException {
+    try {
+      if (Debug.debug)
+	if (Debug.admin)
+	  System.out.println("->TopicConnectionFactory : createNewSpecificTopic (Protocol=" + url.getProtocol() +
+			     ", Host=" + url.getHost() +
+			     ", Port=" + url.getPort() +
+			     ", AgentId=" + url.getAgentId() + ")");
 	    
-	    if ( url.getProtocol().equals("joram") ) {
-		sock = new Socket(addrProxy, portProxy);
-		if ( sock != null ) {
-		    sock.setTcpNoDelay(true);
-		    sock.setSoTimeout(0);
-		    sock.setSoLinger(true,1000);
+      if ( url.getProtocol().equals("joram") ) {
+	sock = new Socket(addrProxy, portProxy);
+	if ( sock != null ) {
+	  sock.setTcpNoDelay(true);
+	  sock.setSoTimeout(0);
+	  sock.setSoLinger(true,1000);
 		
-		    /* send the name of the agentClient */
-		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-		    dos.writeUTF(agentClient);
-		    dos.flush();
-		    /* creation of the objectinputStream and ObjectOutputStream */
-		    oos = new ObjectOutputStream(sock.getOutputStream());
-		    ois = new ObjectInputStream(sock.getInputStream());
+	  /* send the name of the agentClient */
+	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+	  dos.writeUTF(agentClient);
+	  dos.flush();
+	  /* creation of the objectinputStream and ObjectOutputStream */
+	  oos = new ObjectOutputStream(sock.getOutputStream());
+	  ois = new ObjectInputStream(sock.getInputStream());
 	    
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateSpecific(1, agentClient,className);
-		    if (oos != null) {
-			oos.writeObject(msgMOM);
-			oos.flush();
-			oos.reset();
-		    }
-		    if (ois != null) {
-			fr.dyade.aaa.mom.MessageAdminCreateSpecific msg = (fr.dyade.aaa.mom.MessageAdminCreateSpecific) ois.readObject();
-			if (Debug.debug)
-			    if (Debug.admin)
-				System.out.println("<-TopicConnectionFactory : createNewSpecificTopic  msg=" + msg.toString());
-			oos.close();
-			ois.close();
-			sock.close();
-			return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
-							    "://" + url.getHost() +
-							    ":" + url.getPort() +
-							    "/" + msg.getID());
-		    } 
-		}
-	    }
-	    oos.close();
-	    ois.close();
-	    sock.close();
-	    return null;
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewSpecificTopic");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-
-    /** delete Topic */
-    public void delete(javax.jms.Topic topic) throws javax.jms.JMSException {
-	try {
+	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateSpecific(1, agentClient,className);
+	  if (oos != null) {
+	    oos.writeObject(msgMOM);
+	    oos.flush();
+	    oos.reset();
+	  }
+	  if (ois != null) {
+	    fr.dyade.aaa.mom.MessageAdminCreateSpecific msg = (fr.dyade.aaa.mom.MessageAdminCreateSpecific) ois.readObject();
 	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->TopicConnectionFactory : delete  Topic" + topic.getTopicName());
-	    if ( url.getProtocol().equals("joram") ) {
-		sock = new Socket(addrProxy, portProxy);
-		if ( sock != null ) {
-		    sock.setTcpNoDelay(true);
-		    sock.setSoTimeout(0);
-		    sock.setSoLinger(true,1000);
+	      if (Debug.admin)
+		System.out.println("<-TopicConnectionFactory : createNewSpecificTopic  msg=" + msg.toString());
 
-		    /* send the name of the agentClient */
-		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-		    dos.writeUTF(agentClient);
-		    dos.flush();
+	    return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
+						"://" + url.getHost() +
+						":" + url.getPort() +
+						"/" + msg.getID());
+	  } 
+	}
+      }
+
+      return null;
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewSpecificTopic");
+      except.setLinkedException(exc);
+      throw(except);
+    } finally {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
+    }
+  }
+
+  /** delete Topic */
+  public void delete(javax.jms.Topic topic) throws javax.jms.JMSException {
+    try {
+      if (Debug.debug)
+	if (Debug.admin)
+	  System.out.println("->TopicConnectionFactory : delete  Topic" + topic.getTopicName());
+      if ( url.getProtocol().equals("joram") ) {
+	sock = new Socket(addrProxy, portProxy);
+	if ( sock != null ) {
+	  sock.setTcpNoDelay(true);
+	  sock.setSoTimeout(0);
+	  sock.setSoLinger(true,1000);
+
+	  /* send the name of the agentClient */
+	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+	  dos.writeUTF(agentClient);
+	  dos.flush();
 		    
-		    /* creation of the objectinputStream and ObjectOutputStream */
-		    oos = new ObjectOutputStream(sock.getOutputStream());
-		    ois = new ObjectInputStream(sock.getInputStream());
+	  /* creation of the objectinputStream and ObjectOutputStream */
+	  oos = new ObjectOutputStream(sock.getOutputStream());
+	  ois = new ObjectInputStream(sock.getInputStream());
 
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminDeleteTopic(1, agentClient,topic.getTopicName());
-		    if (oos != null) {
-			oos.writeObject(msgMOM);
-			oos.flush();
-			oos.reset();
-		    }
-		    oos.close();
-		    ois.close();
-		    sock.close();
-		}
-	    }
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("<-TopicConnectionFactory : delete");
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("Exception TopicConnectionFactory : delete");
-	    except.setLinkedException(exc);
-	    throw(except);
+	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminDeleteTopic(1, agentClient,topic.getTopicName());
+	  if (oos != null) {
+	    oos.writeObject(msgMOM);
+	    oos.flush();
+	    oos.reset();
+	  }
 	}
-    }        
+      }
+      if ((Debug.debug) && (Debug.admin))
+	System.out.println("<-TopicConnectionFactory : delete");
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("Exception TopicConnectionFactory : delete");
+      except.setLinkedException(exc);
+      throw(except);
+    } finally {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
+    }
+  }        
 
 } // TopicConnectionFactory

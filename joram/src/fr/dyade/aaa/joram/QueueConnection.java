@@ -36,6 +36,8 @@ import javax.jms.*;
  */
 public class QueueConnection extends Connection implements javax.jms.QueueConnection
 {
+  protected QueueConnectionListener queueConnectionListener = null;
+
   /** Constructor. */
   public QueueConnection(String proxyAgentIdString, InetAddress proxyAddress,
     int proxyPort, String login, String passwd) throws javax.jms.JMSException
@@ -60,8 +62,10 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
          sessionCounter = sessionCounter - 1;
          throw (new javax.jms.JMSException("Error when creating the QueueSession"));
        }
-       else
+       else {
+         sessions.put(new Long(sessionCounterNew), session);
          return session;
+       }
 
     } catch (JMSException jE) {
       throw (jE);
@@ -89,18 +93,35 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
     String messageSelector, javax.jms.ServerSessionPool sessionPool, int maxMessages)
     throws JMSException
   {
+    if (this.connectionConsumer != null)
+      throw (new JMSException("A ConnectionConsumer already exists for this Connection"));
     if (sessionPool == null)
       throw (new JMSException("ServerSessionPool parameter is null!"));
 
     // Building the connectionConsumer.
-    ConnectionConsumer connectionConsumer = 
+    this.connectionConsumer =
       new ConnectionConsumer(queue, messageSelector, sessionPool, maxMessages);
+
+    connectionConsumer.setConnection(this);
 
     // Launching the listening thread which gets the messages from the queue.
     queueConnectionListener = new QueueConnectionListener(this,
       connectionConsumer, queue, messageSelector);
+    queueConnectionListener.setDaemon(true);
+    queueConnectionListener.start();
+
+    connectionConsumer.setConnection(this);
 
     return (javax.jms.ConnectionConsumer) connectionConsumer;
+  }
+
+  /** Closing method. */
+  public void close() throws JMSException
+  {
+    if (queueConnectionListener != null)
+      queueConnectionListener.stop();
+
+    super.close();
   }
 
 }

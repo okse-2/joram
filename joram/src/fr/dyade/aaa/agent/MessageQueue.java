@@ -42,8 +42,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.5 2001-05-14 16:26:40 tachkeni Exp $";
 
   /**
    * The <code>Vector</code> into which <code>Message</code> objects are

@@ -61,9 +61,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     /** counter of consumerId for identify the not durable subscription */
     protected long counterConsumerID;
 	
-    /** The efficient thread */
-    protected java.lang.Thread threadDeliver;
-	
     /** the vector of the last delivered messages for implicit reception */
     Vector lastNotAckVector;
 	
@@ -117,7 +114,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 
     protected Hashtable listenersTable;
     protected fr.dyade.aaa.util.Queue listenersRequests;
-    protected SessionListener listener;
+    protected SessionListener listener = null; 
 
     /** Constructor */
     public Session(boolean transacted, int acknowlegdeMode, long sessionID, fr.dyade.aaa.joram.Connection refConnection) {
@@ -154,9 +151,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	}
     listenersTable = new Hashtable();
     listenersRequests = new fr.dyade.aaa.util.Queue();
-    /*listener = new SessionListener(new Long(sessionID), refConnection, this);
-    listener.setDaemon(true);
-    listener.start();*/
     }
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
@@ -334,10 +328,9 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
     public void close() throws javax.jms.JMSException {
-    if (listener != null) {
+    if (listener!= null)
       listener.stop();
-      listener = null;
-    }
+    refConnection.sessions.remove(new Long(sessionID));
 	System.gc();
     }
 	

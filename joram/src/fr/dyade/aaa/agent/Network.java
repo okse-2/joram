@@ -27,8 +27,8 @@ import java.io.*;
 import java.util.Vector;
 
 abstract class Network implements MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.5 2001-05-14 16:26:40 tachkeni Exp $";
 
   /** Time between two activation of watch-dog thread (default 10 seconds) */
   final static long WDActivationPeriod = 10000L; // 10 seconds

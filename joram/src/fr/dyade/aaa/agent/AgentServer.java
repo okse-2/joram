@@ -138,7 +138,7 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public class AgentServer {
-public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -953,6 +953,9 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.4 2001-05-
     for (int i=0; i<consumers.length; i++) {
       if (consumers[i] != null) consumers[i].stop();
     }
+    // Stop all services.
+    ServiceManager.stop();
+    // Stop the transaction manager.
     if (transaction != null) transaction.stop();
     Debug.trace("AgentServer#" + serverId + " stopped", false);
   }

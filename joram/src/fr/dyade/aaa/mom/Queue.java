@@ -140,8 +140,8 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 
       // Delivering an agreement to the client if the message is persistent.
       // --------> to be done in AgentClient !!
-      if(not.msg.getJMSDeliveryMode() ==fr.dyade.aaa.mom.Message.PERSISTENT)
-        deliveryAgreement(from, not);
+      //if(not.msg.getJMSDeliveryMode() ==fr.dyade.aaa.mom.Message.PERSISTENT)
+        //deliveryAgreement(from, not);
 
       // DEBUG
       if(Debug.debug) 

@@ -30,7 +30,7 @@ package fr.dyade.aaa.joram;
  *
  * @author Frederic Maistre
  */
-class QueueConnectionListener implements java.lang.Runnable
+class QueueConnectionListener extends fr.dyade.aaa.util.Daemon
 {
   /** The connection this listener is listening to. */
   private Connection connection;
@@ -40,10 +40,6 @@ class QueueConnectionListener implements java.lang.Runnable
   private fr.dyade.aaa.mom.QueueNaming queue = null;
   /** The selector for filtering the messages. */
   private String selector;
-  /** The listening thread. */
-  private java.lang.Thread connectionListenerThread;
-  /** Boolean for stopping the listening thread. */
-  private boolean stopped = false;
 
   /**
    * Constructor used by <code>QueueConnection</code>s when creating
@@ -58,24 +54,22 @@ class QueueConnectionListener implements java.lang.Runnable
     ConnectionConsumer connectionConsumer, javax.jms.Queue queue,
     String selector)
   {
+    super(connection.toString());
     this.connection = connection;
     this.connectionConsumer = connectionConsumer;
     this.queue = (fr.dyade.aaa.mom.QueueNaming) queue; 
     this.selector = selector;
-    // Creating and starting the thread.
-    connectionListenerThread = new Thread(this);
-    connectionListenerThread.setDaemon(true);
-    connectionListenerThread.start();
   }
 
 
   public void run()
   {
-    while (true) {
-      try {
-        if (stopped)
-          break;
+    try {
+      while (isRunning) {
+        canStop = true; 
+        fr.dyade.aaa.mom.MessageMOMExtern momMsg;
 
+        try {
           long requestID = connection.getMessageMOMID();
           Long longRequestID = new Long(requestID);
 
@@ -90,23 +84,29 @@ class QueueConnectionListener implements java.lang.Runnable
             lock.wait();
           }
 
-          fr.dyade.aaa.mom.MessageMOMExtern momMsg = (fr.dyade.aaa.mom.MessageMOMExtern)
+          momMsg = (fr.dyade.aaa.mom.MessageMOMExtern)
             connection.messageJMSMOMTable.remove(longRequestID);
-
-          if (momMsg instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
-            connectionConsumer.getMessage(momMsg);
-          }
-      } catch (Exception e) {
-        if (e instanceof InterruptedException) 
-          break;
-        else
-          System.out.println("Exception caught in QueueConnectionListener: " + e);
+        } catch (InterruptedException iE) {
+          continue;
+        }
+        canStop = false;
+        if (momMsg instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
+          connectionConsumer.getMessage(momMsg);
+        }
       }
+    } catch (Exception e) {
+    } finally {
+      isRunning = false;
     }
   } 
 
-  public void stop()
+  public void shutdown()
   {
-    stopped = true;
+    while (thread.isAlive()) {
+      try {
+        thread.sleep(1);
+      } catch (InterruptedException iE) {}
+    }
+    thread = null;
   }
 }

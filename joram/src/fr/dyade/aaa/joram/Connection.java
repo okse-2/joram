@@ -107,18 +107,14 @@ public abstract class Connection implements javax.jms.Connection {
   protected ConnectionConsumer connectionConsumer = null;
 
   /**
-   * Listener distributing the incoming messages to the
-   * <code>QueueReceiver</code>'s <code>MessageListener</code>s.
-   */ 
-  QueueConnectionListener queueConnectionListener = null;
-
-  /**
    * <code>FifoQueue</code> in which messages to be passed to
    * <code>MessageListener</code>s are stored.
    */
   protected FifoQueue messagesToDeliver;
 
   protected Hashtable sessionsTable;
+
+  protected Hashtable sessions;
 
 
     public Connection(String agentClient,
@@ -171,6 +167,7 @@ public abstract class Connection implements javax.jms.Connection {
 	    driver = new Driver(this, ois);
 
         sessionsTable = new Hashtable();
+        sessions = new Hashtable();
 
 	} catch (IOException exc) {
 	    fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("IOException Error Sending Message: ",JMSAAAException.ERROR_CONNECTION_MOM);
@@ -185,60 +182,60 @@ public abstract class Connection implements javax.jms.Connection {
 
     public Connection() {}
   
-    /**
-     * Close the connection and run garbage collection.
-     */
-    public void close() throws javax.jms.JMSException {
-	try {
-	    if (!isClosed) {
-		driver.stop();
-		oos.close();
-		ois.close();
-		socket.close();
-		socket = null;
-		messageJMSMOMTable.clear();
-		waitThreadTable.clear();
-		subscriptionListenerTable.clear();
-        if (queueConnectionListener != null)
-          queueConnectionListener.stop();
-          queueConnectionListener = null;
-	    }
-		System.gc();
-		isClosed = true;
+  /**
+   * Close the connection and run garbage collection.
+   */
+  public void close() throws JMSException {
+  try {
+    if (!isClosed) {
+        Enumeration sessionsKeys = sessions.keys();
+        while (sessionsKeys.hasMoreElements()) {
+          Object key = sessionsKeys.nextElement();
+          Session session = (Session) sessions.get(key);
+          if (session.listener != null) 
+            session.listener.stop();
+          sessions.remove(key);
+        }
+      driver.stop();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	socket.close();
+      } catch (IOException exc) {}
+      socket = null;
+      messageJMSMOMTable.clear();
+      waitThreadTable.clear();
+      subscriptionListenerTable.clear();
+    System.gc();
+    isClosed = true;
+    }
 	} catch (Exception exc) {
 	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
 	    except.setLinkedException(exc);
 	    throw(except);
 	}
-    }
+  }
 	
     /**
      * Get the client identifier for this connection.
      * @return the unique client identifier.
      */
-    public java.lang.String getClientID() throws javax.jms.JMSException {
-	try {
-	    return clientID;
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
+    public java.lang.String getClientID() throws JMSException {
+      return clientID;
     }
  
     /**
      * Set the client identifier for this connection.
      * @param clientID the unique client identifier.
      */
-    public void setClientID(java.lang.String clientID) throws javax.jms.JMSException {
-	try {
-	    this.clientID = clientID;
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
+  public void setClientID(java.lang.String clientID) throws javax.jms.JMSException
+  {
+    throw new javax.jms.IllegalStateException("ClientID is administratively set by JORAM.");
+  }
 	
     /**
      * Get the meta data for this connection.

@@ -154,7 +154,13 @@ public class TopicSubscriber extends fr.dyade.aaa.joram.MessageConsumer implemen
      if (listener != null && messageListener != null)
       throw (new javax.jms.JMSException("A listener has already been set"));
 
-		try {	
+		try {
+            if (refSession.listener == null) {
+              refSession.listener = new SessionListener(new Long(refSession.sessionID),
+                refConnection, refSession, true);
+              refSession.listener.setDaemon(true);
+              refSession.listener.start();
+            }
 			Object obj = new Object();
 			long messageJMSMOMID = refConnection.getMessageMOMID();
 			Long longMsgID = new Long(messageJMSMOMID);

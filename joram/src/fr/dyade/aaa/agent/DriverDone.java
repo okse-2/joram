@@ -33,7 +33,7 @@ package fr.dyade.aaa.agent;
  */
 public class DriverDone extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.4 2001-05-04 14:54:50 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.5 2001-05-14 16:26:39 tachkeni Exp $"; 
 
 
   protected int driver;		/** identifies the terminated driver (OUT or IN) */

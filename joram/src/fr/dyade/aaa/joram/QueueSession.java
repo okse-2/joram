@@ -41,9 +41,6 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
   
     public QueueSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
 	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
-    listener = new SessionListener(new Long(sessionID), refConnection, this);
-    listener.setDaemon(true);
-    listener.start();
     }
     
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
@@ -277,6 +274,8 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
   
     /**overwrite the methode from MessageConsumer  */
     public void close()  throws javax.jms.JMSException {
+      if (listener != null)
+        listener.stop();
 	  messageConsumerTable.clear();
       super.close() ;
     }

@@ -50,9 +50,6 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	
     public TopicSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
 	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
-    listener = new SessionListener(new Long(sessionID), refConnection, this, true);
-    listener.setDaemon(true);
-    listener.start();
 		
 	/* in the creation no subscription is taken*/
 	numberNotDurableTopicSubscriber = 0;
@@ -175,23 +172,21 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	    throw(except);
 	}
     }
-	
-    /** the name must respect this syntax :
-     *	topicId_theme_ownName
-     *	where ownName is the real name given by the client
-     *	No other choice because the client can unsubscribe  without 
-     *	creating a TopicSubscriber 	
-     *
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications 
-     */
-    public void unsubscribe(java.lang.String name)  throws javax.jms.JMSException {
-	try {
-	    /* get the parts of the name */
+
+
+  /**
+   *
+   * @author  Frederic Maistre
+   */
+  public void unsubscribe(java.lang.String name) throws javax.jms.JMSException
+  {
+    try {
+        /* get the parts of the name */
 	    java.util.StringTokenizer st = new java.util.StringTokenizer(name,"_",false);
 	    String topic = st.nextToken();
 	    String theme = st.nextToken();
 	    String nameSubClient = st.nextToken();
-			
+
 	    Object obj = new Object();
 	    long messageJMSMOMID = refConnection.getMessageMOMID();
 	    Long longMsgID = new Long(messageJMSMOMID);
@@ -369,10 +364,8 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
     /** overwrite the method from MessageConsumer  */
     public void close() throws javax.jms.JMSException {
 	try {
-	    /* stop the Thread of the Session */
-	    if(threadDeliver!=null)
-		threadDeliver.stop();
-			
+        if (listener != null)
+          listener.stop();
 	    /* remove all elements of the messageConsumer table */	
 	    this.discardEntryTopicSubscriber();
 	    messageConsumerTable.clear();
