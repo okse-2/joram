@@ -14,15 +14,25 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
-      <s2 name="Modifications (latest: April 2003, 28th)">
+      <s2 name="Modifications (latest: May 2003, 5th)">
       <ul>
+      <li>Following
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00000.html">
+      Knut's</a> feedback, the setting of JNDI's URL has evolved:
+      <code>java.naming.provider.url</code> might be set 
+      as <code>host:port</code> and not only as <code>joram://host:port</code>.
+      The impacted class is <code>NamingContextFactory</code> in the
+      <code>fr.dyade.aaa.jndi2.client</code> package.</li>
       <li>Bug in serial sending of a message with a transacted session:
       clearing an already sent (but not commited) message's properties,
       was actually clearing the properties (instead of clearing only the
       properties for the sending to come). The impacted class is
       <code>Message</code> in the <code>fr.dyade.aaa.mom.messages</code>
       package.</li>
-      <li>JNDI bug corrected: serializable objects may be bound in a server
+      <li>Following 
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-04/msg00016.html">
+      Doug's</a> feedback, a JNDI bug has been corrected: serializable objects
+      may now be bound in a server
       without the need for the server to "know" the objects' classes. The
       following packages should be updated: <code>fr.dyade.aaa.agent</code>,
       <code>fr.dyade.aaa.ip</code>, <code>fr.dyade.aaa.jndi2</code>.</li>
