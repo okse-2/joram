@@ -477,4 +477,28 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+  <!-- Runs the bridge administration -->
+  <target name="bridge_admin" depends="init"
+    description="--> Runs the BRIDGE sample administration">
+    <java classname="bridge.BridgeAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge sender -->
+  <target name="bridge_producer" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.BridgeProducer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="bridge_consumer" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.BridgeConsumer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
 </project>
