@@ -111,7 +111,8 @@
 
   <!-- Ships a JORAM distribution -->
   <target name="ship.joram" depends="ship"/>
-  <target name="ship" depends="build.joram"
+
+  <target name="ship" depends="build.joram,javadoc"
     description="--> Creates a Joram shipment.">
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
@@ -140,6 +141,21 @@
         <include name="LGPL_HEADER.TXT"/>
       </fileset>
     </copy>
+    <mkdir dir="${ship.dir}/samples"/>
+    <copy todir="${ship.dir}/samples">
+      <fileset dir="${samples.dir}">
+        <include name="bin/*"/>
+        <include name="config/*"/>
+        <include name="src/joram/**"/>
+      </fileset>
+    </copy>
+    <mkdir dir="${ship.dir}/apidoc"/>
+    <copy todir="${ship.dir}/apidoc">
+      <fileset dir="${doc.dir}">
+        <include name="**"/>
+      </fileset>
+    </copy>
+
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter -->
@@ -208,7 +224,7 @@
              destdir="${doc.dir}"
              classpathref="project.class.path"
              overview="overview.html"
-             access="private"
+             access="protected"
              version="false"
              author="false"
              use="false"
