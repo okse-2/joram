@@ -568,7 +568,7 @@ public class QueueImpl extends DestinationImpl
    * Internal method for getting the indexes of the messages matching the
    * given parameters.
    *
-   * @param consumer  AgentId of client acknowledging or denying messages.
+   * @param requester  AgentId of client acknowledging or denying messages.
    * @param msgIds  Vector of message identifiers.
    *
    * @exception RequestException  If the requester is not the consumer of
@@ -592,7 +592,7 @@ public class QueueImpl extends DestinationImpl
         // If the current message matches the sent identifier:
         if (msgId.equals(msg.getIdentifier())) {
           // If the requester matches the consumer, adding it to the list:
-          if (msg.consId.equals(requester))
+          if (msg.consId != null && msg.consId.equals(requester))
             indexes.add(new Integer(index));
           // Else, throwing an exception:
           else
