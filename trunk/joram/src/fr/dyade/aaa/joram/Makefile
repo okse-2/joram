@@ -35,6 +35,7 @@ joram.jar_CLASSES = \
 	TemporaryQueue \
 	Connection \
 	QueueConnection \
+	QueueConnectionListener \
 	TopicConnection \
 	Connection@Driver \
 	MessageConsumer \
@@ -43,6 +44,7 @@ joram.jar_CLASSES = \
 	QueueSender \
 	FifoQueue \
 	Session \
+	SessionListener \
 	QueueSession \
 	TopicSession \
 	TopicPublisher \
@@ -64,7 +66,8 @@ joram.jar_CLASSES = \
 	XAConnectionFactory \
 	XAQueueConnectionFactory \
 	XATopicConnectionFactory \
-	XidTable
+	XidTable \
+    ConnectionConsumer
 
 LIBS = a3mom.jar:jms.jar:jndi.jar:jta-spec1_0_1.jar
 

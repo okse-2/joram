@@ -21,35 +21,14 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.util;
 
 import java.io.*;
 import java.util.*;
 
-final class TOperation implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.3 2000-10-05 15:21:06 tachkeni Exp $";
-  static final int SAVE = 1;
-  static final int DELETE = 2;
-  static final int COMMIT = 3;
- 
-  int type;
-  String name;
-  byte[] value;
-
-  TOperation(int type, String name) {
-    this.type = type;
-    this.name = name;
-  }
-
-  TOperation(int type, String name, byte[] value) {
-    this.type = type;
-    this.name = name;
-    this.value = value;
-  }
-}
-
 public final class ATransaction implements Transaction, Runnable {
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.4 2001-05-04 14:55:03 tachkeni Exp $";
+
   // State of the transaction monitor.
   private int phase;
 
@@ -61,13 +40,57 @@ public final class ATransaction implements Transaction, Runnable {
   static private final int GARBAGE = 5;	  // A garbage phase start
   static private final int FINALIZE = 6;  // During last garbage.
 
+  class Operation implements Serializable {
+    static final int SAVE = 1;
+    static final int DELETE = 2;
+    static final int COMMIT = 3;
+ 
+    int type;
+    String name;
+    byte[] value;
+
+    Operation(int type, String name) {
+      this.type = type;
+      this.name = name;
+    }
+
+    Operation(int type, String name, byte[] value) {
+      this.type = type;
+      this.name = name;
+      this.value = value;
+    }
+  }
+
+//   class DbgHashtable extends Hashtable {
+//     DbgHashtable() {
+//       super();
+//       System.out.println("#" + fr.dyade.aaa.agent.AgentServer.getServerId() + " initialize context" + " [" + Thread.currentThread() + "]");
+//     }
+//     protected void finalize() throws Throwable {
+//       System.out.println("#" + fr.dyade.aaa.agent.AgentServer.getServerId() + " finalize context " + this + " [" + Thread.currentThread() + "]");
+//     }
+//   }
+
+  class Context extends ThreadLocal {
+    protected Object initialValue() {
+      return new Hashtable();
+    }
+  }
   /**
-   *  Log of all operations do by the current transaction. Its log is
-   * only used by the "users" Thread during the transaction. On commit, its
-   * content is added to current log (clog, memory + disk), then it is
-   * freed.
+   *  ThreadLocal variable used to get the log to associate state with each
+   * thread. The log contains all operations do by the current thread since
+   * the last <code>commit</code>. On commit, its content is added to current
+   * log (clog, memory + disk), then it is freed.
    */
-  private Hashtable log = null;
+  private Context ctx = null;
+//   /**
+//    *  Log of all operations do by the current transaction. Its log is
+//    * only used by the "users" Thread during the transaction. On commit, its
+//    * content is added to current log (clog, memory + disk), then it is
+//    * freed.
+//    */
+//   private Hashtable log = null;
+
   /**
    *  Log of all operations already commited but not reported on disk
    * by the "garbage" Thread. On event (at least previous log plog must
@@ -99,7 +122,6 @@ public final class ATransaction implements Transaction, Runnable {
   static final void trace(String BPT) {
     if (debug) {
       System.out.println(BPT + " [" + Thread.currentThread() + "]");
-      new Throwable().printStackTrace();
     }
   }
 
@@ -117,7 +139,8 @@ public final class ATransaction implements Transaction, Runnable {
     restart(PLOG);
     restart(LOG);
 
-    log = new Hashtable(20);
+//     log = new Hashtable(20);
+    ctx = new Context();
     clog = new Hashtable(151);
     // the object created here will never be used.
     plog = new Hashtable(11);
@@ -143,14 +166,14 @@ public final class ATransaction implements Transaction, Runnable {
 	while (true) {
 	  int op;
 	  String name;
-	  while ((op = logFile.read()) != TOperation.COMMIT) {
+	  while ((op = logFile.read()) != Operation.COMMIT) {
 	    name = logFile.readUTF();
-	    if (op == TOperation.SAVE) {
+	    if (op == Operation.SAVE) {
 	      byte buf[] = new byte[logFile.readInt()];
 	      logFile.readFully(buf);
-	      log.put(name, new TOperation(op, name, buf));
+	      log.put(name, new Operation(op, name, buf));
 	    } else {
-	      log.put(name, new TOperation(op, name));
+	      log.put(name, new Operation(op, name));
 	    }
 	  }
 	  commit(log);
@@ -199,34 +222,33 @@ public final class ATransaction implements Transaction, Runnable {
     oos.writeObject(obj);
     oos.flush();
 
-    if (phase == RUN) {
-      // We are during a transaction put the new state in the log.
-      log.put(name, new TOperation(TOperation.SAVE,
-				   name,
-				   bos.toByteArray()));
-    } else {
-      // Save the new state on the disk.
+// AF: TO REMOVE
+//     if (phase == RUN) {
+    Hashtable log = (Hashtable) ctx.get();
+    // We are during a transaction put the new state in the log.
+    log.put(name, new Operation(Operation.SAVE,
+				name,
+				bos.toByteArray()));
+//     } else {
+//       // Save the new state on the disk.
 //       FileOutputStream fos = new FileOutputStream(new File(dir, name));
-//       fos.write(bobj);
+//       fos.write(bos.toByteArray());
 //       fos.close();
-      clog.put(name, new TOperation(TOperation.SAVE,
-				    name,
-				    bos.toByteArray()));
-    }
+//     }
   }
 
   private final Object getFromLog(Hashtable log, String name)
     throws IOException, ClassNotFoundException {
     // Searchs in the log a new value for the object.
-    TOperation op = (TOperation) log.get(name);
+    Operation op = (Operation) log.get(name);
     if (op != null) {
-      if (op.type == TOperation.SAVE) {
+      if (op.type == Operation.SAVE) {
 	ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
 	ObjectInputStream ois = new ObjectInputStream(bis);
 	  
 	return ois.readObject();
-      } else if (op.type == TOperation.DELETE) {
-	// l'objet a *t* d*truit.
+      } else if (op.type == Operation.DELETE) {
+	// The object was deleted.
 	return null;
       }
     }
@@ -237,9 +259,12 @@ public final class ATransaction implements Transaction, Runnable {
     Object obj;
 
     // First searchs in the logs a new value for the object.
-    if ((phase == RUN) && ((obj = getFromLog(log, name)) != null)) {
+// AF: TO REMOVE
+//     if (phase == RUN) {
+    Hashtable log = (Hashtable) ctx.get();
+    if ((obj = getFromLog(log, name)) != null)
       return obj;
-    }
+//     }
 
     if (((obj = getFromLog(clog, name)) != null) ||
 	((obj = getFromLog(plog, name)) != null)) {
@@ -265,14 +290,15 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   public void delete(String name) {
-    if (phase != RUN) {
-      throw new IllegalStateException("Can not delete object " +
-				      name +
-				      " outside of a transaction.");
-    }
-     
+// AF: TO REMOVE
+//     if (phase == RUN) {
     // We are during a transaction mark the object deleted in the log.
-    log.put(name, new TOperation(TOperation.DELETE, name));
+    Hashtable log = (Hashtable) ctx.get();
+    log.put(name, new Operation(Operation.DELETE, name));
+//   } else {
+//       File file = new File(dir, name);
+//       file.delete();
+//     }
   }
 
   int nbc = 0; // Number of commited transaction in clog.
@@ -284,8 +310,9 @@ public final class ATransaction implements Transaction, Runnable {
       throw new IllegalStateException("Can not commit.");
     
     nbc += 1; // AF: Monitoring
+    Hashtable log = (Hashtable) ctx.get();
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-      TOperation op = (TOperation) e.nextElement();
+      Operation op = (Operation) e.nextElement();
       nbo += 1; // AF: Monitoring
 
       // Reports all committed operation in clog
@@ -294,13 +321,13 @@ public final class ATransaction implements Transaction, Runnable {
       // Save the log to disk
       logFile.writeByte(op.type);
       logFile.writeUTF(op.name);
-      if (op.type == TOperation.SAVE) {
+      if (op.type == Operation.SAVE) {
 	logFile.writeInt(op.value.length);
 	logFile.write(op.value);
 	nbs += op.value.length; // AF: Monitoring
       }
     }
-    logFile.writeByte(TOperation.COMMIT);
+    logFile.writeByte(Operation.COMMIT);
     logFD.sync();
 
     log.clear();
@@ -312,6 +339,7 @@ public final class ATransaction implements Transaction, Runnable {
     if (phase != RUN)
       throw new IllegalStateException("Can not rollback.");
     setPhase(ROLLBACK);
+    Hashtable log = (Hashtable) ctx.get();
     log.clear();
   }
 
@@ -349,15 +377,15 @@ public final class ATransaction implements Transaction, Runnable {
   private void commit(Hashtable log) throws IOException { 
     // Reports all operation on disk...
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-      TOperation op = (TOperation) e.nextElement();
+      Operation op = (Operation) e.nextElement();
 
-      if (op.type == TOperation.SAVE) {
+      if (op.type == Operation.SAVE) {
 	trace("Save " + op.name);
 	FileOutputStream fos = new FileOutputStream(new File(dir, op.name));
 	fos.write(op.value);
 	fos.getFD().sync();
 	fos.close();
-      } else if (op.type == TOperation.DELETE) {
+      } else if (op.type == Operation.DELETE) {
 	trace("Delete " + op.name);
 	new File(dir, op.name).delete();
       }
@@ -365,21 +393,20 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   public final synchronized void stop() {
-    // Waits the transaction subsystem is free.
     synchronized (lock) {
       while (phase != FREE) {
+	// Waits the transaction subsystem is free.
 	try {
 	  wait();
 	} catch (InterruptedException exc) {
 	}
-
-	// Change the transaction state.
-	setPhase(FINALIZE);
-	isRunning =  false;
-
-	garbage = true;
-	lock.notify();
       }
+      // Change the transaction state.
+      setPhase(FINALIZE);
+      isRunning =  false;
+      garbage = true;
+      // Wake-up the garbage thread.
+      lock.notify();
     }
   }
 
@@ -426,9 +453,10 @@ public final class ATransaction implements Transaction, Runnable {
       }
     } catch (IOException exc) {
       // TODO: ?
-      trace(this.toString() + " exits.");
-      isRunning = false;
       exc.printStackTrace();
+    } finally {
+      isRunning = false;
+      trace(this.toString() + " exits.");
     }
   }
 }

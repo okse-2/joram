@@ -23,22 +23,32 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT config (host | property)*>
-<!ATTLIST config name CDATA "">
-<!ELEMENT host (server | transient)*>
-<!ATTLIST host hostname CDATA #REQUIRED>
-<!ELEMENT server (service | property)*>
-<!ATTLIST server id CDATA #REQUIRED
+<!ELEMENT config (domain | server | transient | property)*>
+<!ATTLIST config name CDATA "default">
+<!ELEMENT domain EMPTY>
+<!ATTLIST domain
+	name CDATA #REQUIRED
+	network CDATA "fr.dyade.aaa.agent.SingleCnxNetwork">
+<!ELEMENT server (network | service | property)*>
+<!ATTLIST server
+	id CDATA #REQUIRED
 	name CDATA ""
-	port CDATA #REQUIRED
-	tport CDATA "">
+	hostname CDATA #REQUIRED>
 <!ELEMENT transient (service | property)*>
-<!ATTLIST transient id CDATA #REQUIRED
+<!ATTLIST transient
+	id CDATA #REQUIRED
 	name CDATA ""
+	hostname CDATA #REQUIRED
 	server CDATA #REQUIRED>
+<!ELEMENT network EMPTY>
+<!ATTLIST network
+	domain CDATA "local"
+	port CDATA #REQUIRED>
 <!ELEMENT service EMPTY>
-<!ATTLIST service class CDATA #REQUIRED
+<!ATTLIST service
+	class CDATA #REQUIRED
 	args CDATA "">
 <!ELEMENT property EMPTY>
-<!ATTLIST property name  CDATA #REQUIRED
-	      	   value CDATA #REQUIRED>
+<!ATTLIST property
+	name  CDATA #REQUIRED
+	value CDATA #REQUIRED>

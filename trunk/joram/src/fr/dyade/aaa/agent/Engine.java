@@ -21,9 +21,9 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
+import java.io.IOException;
 import fr.dyade.aaa.util.*;
 
 /**
@@ -46,7 +46,7 @@ import fr.dyade.aaa.util.*;
  *   qin.pop();
  *   channel.dispatch();
  *   agent.save();
- *   <COMIT TRANSACTION>
+ *   <COMMIT TRANSACTION>
  * }
  * </pre></blockquote>
  * <p>
@@ -61,56 +61,71 @@ import fr.dyade.aaa.util.*;
  * additional operations to resynchronize the database and the memory
  * objects, and to allow the main program to continue.
  * </ul>
+ * <p><hr>
+ * <b>Handling errors.</b><p>
+ * Two types of errors may occur: errors of first type are detected in the
+ * source code and signaled by an <code>Exception</code>; serious errors lead
+ * to an <code>Error</code> being raised then the engine exits. In the first
+ * case the exception may be handled at any level, even partially. Most of
+ * them are signaled up to the engine loop. Two cases are then distinguished
+ * depending on the recovery policy:<ul>
+ * <li>if <code>recoveryPolicy</code> is set to <code>RP_EXC_NOT</code>
+ * (default value) then the agent state and the message queue are restored
+ * (ROLLBACK); an <code>ExceptionNotification</code> notification is sent
+ * to the sender and the engine may then proceed with next notification;
+ * <li>if <code>recoveryPolicy</code> is set to <code>RP_EXIT</code> the engine
+ * stops the agent server.
+ * </ul>
  *
  * @author  Andre Freyssinet
  */
-abstract class Engine implements Runnable {
-
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
+abstract class Engine implements Runnable, MessageConsumer {
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.4 2001-05-04 14:54:50 tachkeni Exp $";
 
   /**
-   * Temporary queue used to store all notifications sent during a
-   * reaction.
-   */
-  protected Queue mq;
-  /**
-   * 
+   * Queue of messages to be delivered to local agents.
    */ 
   protected MessageQueue qin;
-  /**
-   * 
-   */ 
-  protected MessageQueue qout;
 
   /**
-   * Boolean variable used to stop the engine.
-   */ 
+   * Boolean variable used to stop the engine properly. The engine tests
+   * this variable between each reaction, and stops if it is false.
+   */
+  protected volatile boolean isRunning;
+
+  /**
+   * Boolean variable used to stop the engine properly. If this variable
+   * is true then the engine is waiting and it can interupted, else it
+   * handles a notification and it will exit after (the engine tests the
+   * <code><a href="#isRunning">isRunning</a></code> variable between
+   * each reaction)
+   */
   protected volatile boolean canStop;
 
   /**
-   * 
+   * The current agent running.
    */ 
   Agent agent = null;
 
   /**
-   * 
+   * The message in progress.
    */ 
   Message msg = null;
 
   /**
-   * 
+   * The active component of this engine.
    */ 
   Thread thread = null;
 
   /**
-   * send <code>ExceptionNotification</code> notification in case of exception
+   * Send <code>ExceptionNotification</code> notification in case of exception
    * in agent specific code.
    * Constant value for the <code>recoveryPolicy</code> variable.
    */
   static final int RP_EXC_NOT = 0;
   /**
-   * stop agent server in case of exception in agent specific code.
+   * Stop agent server in case of exception in agent specific code.
    * Constant value for the <code>recoveryPolicy</code> variable.
    */
   static final int RP_EXIT = 1;
@@ -128,27 +143,86 @@ abstract class Engine implements Runnable {
    */
   int recoveryPolicy = RP_EXC_NOT;
 
-  static Engine newInstance(Queue mq,
-			    MessageQueue qin,
-			    MessageQueue qout) {
-    if (Server.isTransient(Server.getServerId()))
-      return new TransientEngine(mq, qin, qout);
+  private String name;
+
+  /**
+   * Returns this <code>Engine</code>'s name.
+   *
+   * @return this <code>Engine</code>'s name.
+   */
+  public final String getName() {
+    return name;
+  }
+
+  /**
+   * Creates a new instance of Engine (real class depends of server type).
+   *
+   * @param isTransient	the transactionnal type of server.
+   * @return		the corresponding <code>engine</code>'s instance.
+   */
+  static Engine newInstance(boolean isTransient) throws Exception {
+    if (isTransient)
+      return new TransientEngine();
     else
-      return new TransactionEngine(mq, qin, qout);
+      return new TransactionEngine();
   }
 
-  protected Engine(Queue mq,
-		   MessageQueue qin,
-		   MessageQueue qout) {
+  /**
+   * Initializes a new <code>Engine</code> object (can only be used by
+   * subclasses).
+   */
+  protected Engine() {
+    name = "Engine#" + AgentServer.getServerId();
+
+    if (Debug.debug && Debug.A3Server)
+      Debug.trace(getName() + " created.", false);
+
+    qin = new MessageQueue();
+
+    isRunning = false;
     canStop = false;
-    this.mq = mq;
-    this.qin = qin;
-    this.qout =qout ;    
-    thread = new Thread(this, "Engine#" + Server.serverId);
-    thread.setDaemon(false);
+    thread = null;   
   }
 
-  void start() {
+  /**
+   * Insert a message in the <code>MessageQueue</code>.
+   * This method is used during initialisation to restore the component
+   * state from persistent storage.
+   *
+   * @param msg		the message
+   */
+  public void insert(Message msg) {
+    qin.insert(msg);
+  }
+
+  /**
+   * Validates all messages pushed in queue during transaction session.
+   */
+  public void validate() {
+    qin.validate();
+  }
+
+  /**
+   * Invalidates all messages pushed in queue during transaction session.
+   */
+  public void invalidate() {
+    qin.invalidate();
+  }
+
+  /**
+   * Causes this engine to begin execution.
+   *
+   * @see stop
+   */
+  public void start() {
+    if (isRunning) return;
+
+    thread = new Thread(this, name);
+    thread.setDaemon(false);
+
+    if (Debug.debug && Debug.A3Server)
+      Debug.trace(getName() + " starting.", false);
+
     String rp = Debug.properties.getProperty("Engine.recoveryPolicy");
     if (rp != null) {
       for (int i = rpStrings.length; i-- > 0;) {
@@ -158,30 +232,195 @@ abstract class Engine implements Runnable {
 	}
       }
     }
+    isRunning = true;
     canStop = true;
     thread.start();
+
+    if (Debug.debug && Debug.A3Server)
+      Debug.trace(getName() + " started.", false);
   }
   
-  void stop() {
-    if (canStop) thread.stop();
+  /**
+   * Forces the engine to stop executing.
+   *
+   * @see start
+   */
+  public void stop() {
+    isRunning = false;
+
+    if (Debug.debug && Debug.A3Server)
+      Debug.trace(getName() + " stopped", false);
+
+    if (thread == null)
+      // The session is idle.
+      return;
+
+    if (canStop) thread.interrupt();
   }
 
-  abstract public void run();
+  /**
+   * Get this engine's <code>MessageQueue</code> qin.
+   *
+   * @return this <code>Engine</code>'s queue.
+   */
+  public MessageQueue getQueue() {
+    return qin;
+  }
 
+  /**
+   * Tests if the engine is alive.
+   *
+   * @return	true if this <code>MessageConsumer</code> is alive; false
+   * 		otherwise.
+   */
+  public boolean isRunning() {
+    return isRunning;
+  }
+
+  /**
+   * Main loop of agent server <code>Engine</code>.
+   */
+  public void run() {
+    try {
+      main_loop:
+      while (isRunning) {
+	agent = null;
+	canStop = true;
+
+	// Get a notification, then execute the right reaction.
+	try {
+	  msg = (Message) qin.get();
+	} catch (InterruptedException exc) {
+	  continue;
+	}
+	
+	canStop = false;
+	if (! isRunning) break;
+
+	try {
+	  agent = Agent.load(msg.to);
+	} catch (UnknownAgentException exc) {
+	  if ((Debug.engineLoop) || (Debug.error))
+	    //  The destination agent don't exists, send an error
+	    // notification to sending agent.
+	    Debug.trace(getName() + ": UnknownAgent[" + msg.to + "].react(" +
+			msg.from + ", " + msg.not + ")",
+			false);
+	  agent = null;
+	  Channel.channel.sendTo(AgentId.nullId,
+				 msg.from,
+				 new UnknownAgent(msg.to, msg.not));
+	} catch (Exception exc) {
+	  if ((Debug.engineLoop) || (Debug.error))
+	    //  Can't load agent then send an error notification
+	    // to sending agent.
+	    Debug.trace(getName() + ": BadAgent[" + msg.to + "].react(" +
+			msg.from + ", " + msg.not + ")",
+			false);
+	  agent = null;
+	  switch (recoveryPolicy) {
+	  case RP_EXC_NOT:
+	  default:
+	    Channel.channel.sendTo(AgentId.nullId,
+				   msg.from,
+				   new ExceptionNotification(msg.to,
+							     msg.not,
+							     exc));
+	    break;
+	  case RP_EXIT:
+	    AgentServer.stop();
+	    break main_loop;
+	  }
+	}
+
+	if (agent != null) {
+	  if (Debug.engineLoop)
+	    Debug.trace(getName() + ": " + agent + ".react(" +
+			msg.from + ", " + msg.not + ")",
+			false);
+	  try {
+	    if(AgentServer.MONITOR_AGENT) {
+	      if(agent.monitored) {
+	        agent.notifyInputListeners(msg.not);
+	      }
+	    }
+	    try {
+	      agent.react(msg.from, msg.not);
+	    } catch (Error err) {
+	      Debug.trace(getName() + ": Error in " +
+			  agent + ".react(" + msg.from + ", " + msg.not + ")",
+			  err);
+	      throw new Exception(err.toString());
+	    }
+	    if(AgentServer.MONITOR_AGENT) {
+	      if(agent.monitored) {
+		agent.onReactionEnd();
+	      }
+	    }
+	  } catch (Exception exc) {
+	    if ((Debug.engineLoop) || (Debug.error))
+	      Debug.trace(getName() + ": Exception in " +
+			  agent + ".react(" + msg.from + ", " + msg.not + ")",
+			  exc);
+	    switch (recoveryPolicy) {
+	    case RP_EXC_NOT:
+	    default:
+	      // In case of unrecoverable error during the reaction we have
+	      // to rollback.
+	      abort(exc);
+	      // then continue.
+	      continue;
+	    case RP_EXIT:
+	      AgentServer.stop();
+	      break main_loop;
+	    }
+	  }
+	}
+
+	// Commit all changes then continue.
+	commit();
+      }
+    } catch (Throwable exc) {
+      //  There is an unrecoverable exception during the transaction
+      // we must exit from server.
+      Debug.trace(getName() + ": Fatal error", exc);
+      canStop = false;
+      AgentServer.stop();
+    }
+
+    if (Debug.debug && Debug.A3Server)
+      Debug.trace(getName() + ": Stopped.", false);
+  }
+
+  /**
+   * Commit the agent reaction in case of rigth termination.
+   */
+  abstract void commit() throws IOException;
+
+  /**
+   * Abort the agent reaction in case of error during execution.
+   */
+  abstract void abort(Exception exc) throws Exception;
+
+  /**
+   * Returns a string representation of this engine. 
+   *
+   * @return	A string representation of this agent. 
+   */
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append(getClass().getName());
-    strbuf.append(" ");
-    strbuf.append(thread.getName());
-    if (agent == null) {
-      strbuf.append(" is waiting new message.\n");
+    strbuf.append(getName());
+    if (! isRunning) {
+      strbuf.append(" is stopped.");
+    } else if (agent == null) {
+      strbuf.append(" is waiting new message.");
     } else {
-      strbuf.append(" is running:\n");
+      strbuf.append(" is running, qin[").append(qin.size()).append("].\n");
       strbuf.append("Agent [");
       strbuf.append(agent);
-      strbuf.append("] reacts to Notification [");
+      strbuf.append("]\nNotification [");
       strbuf.append(msg.not);
-      strbuf.append("] from Agent");
+      strbuf.append("]\nFrom Agent");
       strbuf.append(msg.from);
     }
     return strbuf.toString();
@@ -189,256 +428,161 @@ abstract class Engine implements Runnable {
 }
 
 final class TransactionEngine extends Engine {
-  TransactionEngine(Queue mq,
-		    MessageQueue qin,
-		    MessageQueue qout) {
-    super(mq, qin, qout);
+  /** Logical timestamp information for messages in "local" domain. */
+  int stamp;
+  /** True if the timestamp is modified since last save. */
+  boolean modified = false;
+
+  TransactionEngine() throws Exception {
+    super();
+    restore();
+    if (modified) save();
   }
 
-/**
- *
- * <p><hr>
- * <b>Handling errors.</b><p>
- * Two types of errors may occur: errors of first type are detected in the
- * source code and signaled by an <code>Exception</code>; serious errors lead
- * to an <code>Error</code> being raised then the engine exits. In the first
- * case the exception may be handled at any level, even partially. Most of them
- * are signaled up to the ngine loop. Two cases are then distinguished depending
- * on the recovery policy:
- * <ul>
- * <li>if <code>recoveryPolicy</code> is set to <code>RP_EXC_NOT</code> (default
- * value) then the agent state and the message queue are restored (ROLLBACK); an
- * <code>ExceptionNotification</code> notification is sent to the sender and the
- * engine may then proceed with next notification;
- * <li>if <code>recoveryPolicy</code> is set to <code></code> the engine stops
- * agent server.
- * </ul>
- */
-  public void run() {
-    try {
-      main_loop:
-      while (Server.isRunning) {
-	agent = null;
-	canStop = true;
-
-	// Get a notification, then execute the right reaction.
-	msg = (Message) qin.get();
-	
-	canStop = false;
-	if (! Server.isRunning) break;
-
-	try {
-	  agent = Agent.load(msg.to);
-	} catch (UnknownAgentException exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  The destination agent don't exists, send an error
-	    // notification to sending agent.
-	    Debug.trace("Engine: UnknownAgent[" + msg.to + "].react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  agent = null;
-	  Server.channel.sendTo(msg.from,
-				 new UnknownAgent(msg.to, msg.not));
-	} catch (Exception exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  Can't load agent then send an error notification
-	    // to sending agent.
-	    Debug.trace("Engine: BadAgent[" + msg.to + "].react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  agent = null;
-	  switch (recoveryPolicy) {
-	  case RP_EXC_NOT:
-	  default:
-	    break;
-	  case RP_EXIT:
-	    Server.stop();
-	    break main_loop;
-	  }
-	  Server.channel.sendTo(msg.from,
-				new ExceptionNotification(msg.to,
-							  msg.not,
-							  exc));
-	}
-
-	if (agent != null) {
-	  if (Debug.engineLoop)
-	    Debug.trace("Engine: " + agent + ".react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  try {
-	    if(Server.MONITOR_AGENT) {
-	      if(agent.monitored) {
-	        agent.notifyInputListeners(msg.not);
-	      }
-	    }
-	    agent.react(msg.from, msg.not);
-	    if(Server.MONITOR_AGENT) {
-	      if(agent.monitored) {
-		agent.onReactionEnd();
-	      }
-	    }
-	  } catch (Exception exc) {
-	    if ((Debug.engineLoop) || (Debug.error))
-	      Debug.trace("Engine: Exception in " +
-			  agent + ".react(" + msg.from + ", " + msg.not + ")",
-			  exc);
-	    switch (recoveryPolicy) {
-	    case RP_EXC_NOT:
-	    default:
-	      break;
-	    case RP_EXIT:
-	      Server.stop();
-	      break main_loop;
-	    }
-	    //  In case of unrecoverable error during the reaction we have
-	    // to rollback:
-	    Server.transaction.begin();
-	    //	=> reload the state of agent.
-	    agent = Agent.reload(msg.to);
-	    //	=> remove the failed notification.
-	    qin.pop();
-	    msg.delete();
-	    //	=> clean the Channel queue of all pushed notifications.
-	    Server.channel.clean();
-	    //	=> send an error notification to client agent.
-	    Server.channel.sendTo(msg.from,
-				   new ExceptionNotification(msg.to, msg.not, exc));
-	    Server.channel.dispatch();
-	    Server.transaction.commit();
-	    // The transaction has commited, then validate the sending message.
-	    qin.validate();
-	    qout.validate();
-	    Server.transaction.release();
-	    //	=> continue.
-	    continue;
-	  }
-	}
-
-	Server.transaction.begin();
-	//  Suppress the processed notification from message queue,
-	// then deletes it.
-	qin.pop();
-	msg.delete();
-	// Push all new notifications in qin and qout, then saves changes.
-	Server.channel.dispatch();
-	// Saves the agent state then commit the transaction.
-	if (agent != null) agent.save();
-	Server.transaction.commit();
-	// The transaction has commited, then validate the sending messages.
-	qin.validate();
-	qout.validate();
-	Server.transaction.release();
-      }
-    } catch (Throwable exc) {
-      //  There is an unrecoverable exception during the transaction
-      // we must exit from server.
-      Debug.trace("Engine: Fatal error", exc);
-      canStop = false;
-      Server.stop();
+  /**
+   * Saves logical clock information to persistent storage.
+   */
+  public void save() throws IOException {
+    if (modified) {
+      AgentServer.transaction.save(new Integer(stamp), getName());
+      modified = false;
     }
+  }
+
+  /**
+   * Restores logical clock information from persistent storage.
+   */
+  public void restore() throws Exception {
+    Integer obj = (Integer) AgentServer.transaction.load(getName());
+    if (obj == null) {
+      stamp = 0;
+      modified = true;
+    } else {
+      stamp = obj.intValue();
+      modified = false;
+    }
+  }
+
+  /**
+   *  Adds a message in "ready to deliver" list. This method allocates a
+   * new time stamp to the message ; be Careful, changing the stamp imply
+   * the filename change too.
+   */
+  public void post(Message msg) throws IOException {
+    modified = true;
+    msg.update = new Update(AgentServer.getServerId(),
+			    AgentServer.getServerId(),
+			    ++stamp);
+    msg.save();
+    qin.push(msg);
+  }
+
+  /**
+   * Commit the agent reaction in case of rigth termination:<ul>
+   * <li>suppress the processed notification from message queue,
+   * then deletes it ;
+   * <li>push all new notifications in qin and qout, and saves them ;
+   * <li>saves the agent state ;
+   * <li>then commit the transaction to validate all changes.
+   * </ul>
+   */
+  void commit() throws IOException {
+    AgentServer.transaction.begin();
+    //  Suppress the processed notification from message queue,
+    // then deletes it.
+    qin.pop();
+    msg.delete();
+    // Push all new notifications in qin and qout, then saves changes.
+    Channel.dispatch();
+    // Saves the agent state then commit the transaction.
+    if (agent != null) agent.save();
+    AgentServer.transaction.commit();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
+    AgentServer.transaction.release();
+  }
+
+  /**
+   * Abort the agent reaction in case of error during execution. In case
+   * of unrecoverable error during the reaction we have to rollback:<ul>
+   * <li>reload the previous state of agent ;
+   * <li>remove the failed notification ;
+   * <li>clean the Channel queue of all pushed notifications ;
+   * <li>send an error notification to the sender ;
+   * <li>then commit the transaction to validate all changes.
+   * </ul>
+   */
+  void abort(Exception exc) throws Exception {
+    AgentServer.transaction.begin();
+    // Reload the state of agent.
+    agent = Agent.reload(msg.to);
+    // Remove the failed notification.
+    qin.pop();
+    msg.delete();
+    // Clean the Channel queue of all pushed notifications.
+    Channel.clean();
+    // Send an error notification to client agent.
+    Channel.channel.sendTo(AgentId.nullId,
+			   msg.from,
+			   new ExceptionNotification(msg.to, msg.not, exc));
+    Channel.dispatch();
+    AgentServer.transaction.commit();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
+    AgentServer.transaction.release();
   }
 }
 
 final class TransientEngine extends Engine {
-  TransientEngine(Queue mq,
-		  MessageQueue qin,
-		  MessageQueue qout) {
-    super(mq, qin, qout);
+  TransientEngine() {
+    super();
   }
 
-  public void run() {
-    try {
-      main_loop:
-      while (Server.isRunning) {
-	agent = null;
-	canStop = true;
+  /**
+   * Saves logical clock information to persistent storage.
+   */
+  public void save() {}
 
-	// Get a notification, then execute the right reaction.
-	msg = (Message) mq.get();
-	
-	canStop = false;
-	if (! Server.isRunning) break;
+  /**
+   * Restores logical clock information from persistent storage.
+   */
+  public void restore() {}
 
-	try {
-	  agent = Agent.load(msg.to);
-	} catch (UnknownAgentException exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  The destination agent don't exists, send an error
-	    // notification to sending agent.
-	    Debug.trace("Engine: UnknownAgent.react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  agent = null;
-	  Server.channel.sendTo(msg.from,
-				 new UnknownAgent(msg.to, msg.not));
-	} catch (Exception exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  Can't load agent then send an error notification
-	    // to sending agent.
-	    Debug.trace("Engine: BadAgent[" + msg.to + "].react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  agent = null;
-	  switch (recoveryPolicy) {
-	  case RP_EXC_NOT:
-	  default:
-	    break;
-	  case RP_EXIT:
-	    Server.stop();
-	    break main_loop;
-	  }
-	  Server.channel.sendTo(msg.from,
-				 new ExceptionNotification(msg.to,
-							   msg.not,
-							   exc));
-	}
+  /**
+   *  Adds a message in "ready to deliver" list. There is no need to allocate
+   * a time stamp to the message as there is no persistent storage.
+   */
+  public void post(Message msg) {
+    qin.push(msg);
+  }
 
-	if (agent != null) {
-	  if (Debug.engineLoop) 
-	    Debug.trace("Engine: " + agent + ".react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
-	  try {
-	    if(Server.MONITOR_AGENT) {
-	      if(agent.monitored) {
-	        agent.notifyInputListeners(msg.not);
-	      }
-	    }
-	    agent.react(msg.from, msg.not);
-	    if(Server.MONITOR_AGENT) {
-	      if(agent.monitored) {
-		agent.onReactionEnd();
-	      }
-	    }
-	  } catch(Exception exc) {
-	    if ((Debug.engineLoop) || (Debug.error))
-	    if ((Debug.engineLoop) || (Debug.error))
-	      Debug.trace("Engine: Exception in " +
-			  agent + ".react(" + msg.from + ", " + msg.not + ")",
-			  exc);
-	    switch (recoveryPolicy) {
-	    case RP_EXC_NOT:
-	    default:
-	      break;
-	    case RP_EXIT:
-	      Server.stop();
-	      break main_loop;
-	    }
-	    Server.channel.sendTo(msg.from,
-				   new ExceptionNotification(msg.to, msg.not, exc));
-	  }
-	}
+  /**
+   * Commit the agent reaction in case of rigth termination.
+   */
+  void commit() throws IOException {
+    // Suppress the processed notification from message queue,
+    // then deletes it.
+    qin.pop();
+    // Push all new notifications in qin and qout, then saves changes.
+    Channel.dispatch();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
+  }
 
-	mq.pop();
-	Server.channel.dispatch();
-      }
-    } catch (Throwable exc) {
-      //  There is an unrecoverable exception during the transaction
-      // we must exit from server.
-      Debug.trace("Engine: Fatal error", exc);
-      canStop = false;
-      Server.stop();
-    }
+  /**
+   * Abort the agent reaction in case of error during execution.
+   */
+  void abort(Exception exc) throws Exception {
+    // Remove the failed notification.
+    qin.pop();
+    // Clean the Channel queue of all pushed notifications.
+    Channel.clean();
+    // Send an error notification to client agent.
+    Channel.channel.sendTo(AgentId.nullId,
+			   msg.from,
+			   new ExceptionNotification(msg.to, msg.not, exc));
+    Channel.dispatch();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
   }
 }

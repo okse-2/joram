@@ -92,7 +92,7 @@ public class HttpProxy extends TcpProxy {
     super.initialize(firstTime);
 
     // registers this agent so that the client may connect
-    File file = new File("server" + Server.getServerId() + "HttpProxy.cnx");
+    File file = new File("server" + AgentServer.getServerId() + "HttpProxy.cnx");
     if (file.exists()) {
       // remove previous registration
       if (! file.delete())
@@ -127,7 +127,7 @@ public class HttpProxy extends TcpProxy {
     if (! firstTime)
       return;
     if (args.length()!=0){
-	HttpProxy httpproxy = new HttpProxy(Server.getServerId(),"HttpProxy",Integer.parseInt(args));
+	HttpProxy httpproxy = new HttpProxy(AgentServer.getServerId(),"HttpProxy",Integer.parseInt(args));
 	httpproxy.deploy();
     }else{
 	throw new IllegalStateException("You must specify a port as an argument in the a3servers.xml for the HttpProxy service.");

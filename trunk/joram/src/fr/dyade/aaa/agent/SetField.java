@@ -26,7 +26,7 @@ package fr.dyade.aaa.agent;
 
 public class SetField extends Notification {
 
-  public static final String RCS_VERSION="@(#)$Id: SetField.java,v 1.3 2000-10-05 15:15:23 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SetField.java,v 1.4 2001-05-04 14:54:53 tachkeni Exp $"; 
 
   public String name;	// Name of field to set.
   public Object value;
@@ -43,6 +43,18 @@ public class SetField extends Notification {
     this.name = name;
     this.value = value;
     this.reply = reply;
+  }
+  /**
+   * Returns a string representation of this notification.
+   *
+   * @return	A string representation of this notification. 
+   */
+  public String toString() {
+    return "(" + super.toString() +
+      ",name=" + name +
+      ",value=" + value +
+      ",reply=" + reply +
+      ")";
   }
 }
 

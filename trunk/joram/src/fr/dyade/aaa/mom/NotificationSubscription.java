@@ -21,42 +21,65 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 import java.lang.*; 
- 
+
 /** 
- *	NotificationSubscription allows a client to subscribe to a Topic 
+ * A <code>NotificationSubscription</code> wraps a subscription
+ * query to a Topic.
  * 
- *	@see	fr.dyade.aaa.mom.Topic 
- *	@see	fr.dyade.aaa.mom.Theme
- *	@see	fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
+ * @see  fr.dyade.aaa.mom.Theme
+ * @see  fr.dyade.aaa.mom.AgentClient 
  */ 
- 
-public class NotificationSubscription extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	/** the name of the subscription given by the agentClient */
-	public String nameSubscription;
-	
-	/** path and name of a theme in a Topic  */ 
-	public String theme; 
-	 
-	/** the agentClient choses if he wants to receive its own meseage  
-	 *	true means not 
-	 */ 
-	public boolean noLocal;  
-	 
-	/** the selector of the request */ 
-	public String selector;  
-	
-	public NotificationSubscription(long messageID, String nameSubscriptionNew, String themeNew, boolean noLocalNew, String selectorNew) { 
-		super(messageID);
-		nameSubscription = nameSubscriptionNew;
-		theme = themeNew; 
-		noLocal = noLocalNew; 
-		selector = selectorNew ;
-	} 
- 
+public class NotificationSubscription
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The subscription name.  */
+  public String nameSubscription;
+  /** Path and name of the subscribed theme. */ 
+  public String theme; 
+  /** 
+   * If true, the client won't receive its own
+   * published messages.    
+   */ 
+  public boolean noLocal;  
+  /** The selector of the request. */ 
+  public String selector;  
+  /** The nature of the subscription. */
+  public boolean durable;
+
+  public int ackMode;
+  public String sessionID;
+
+  public boolean connectionConsumer;
+  
+  /** Constructor used for durable subscriptions. */
+  public NotificationSubscription(SubscriptionMessageMOMExtern msgSub)
+  {
+    super(msgSub.getMessageMOMExternID(), msgSub.getDriverKey());
+    this.nameSubscription = msgSub.nameSubscription;
+    this.theme = msgSub.topic.getTheme(); 
+    this.noLocal = msgSub.noLocal; 
+    this.selector = msgSub.selector;
+    this.ackMode = msgSub.ackMode;
+    this.sessionID = msgSub.sessionID;
+    this.connectionConsumer = msgSub.connectionConsumer;
+    this.durable = true;
+  }
+
+  /** Constructor used for non durable subscriptions. */
+  public NotificationSubscription(SubscriptionNoDurableMOMExtern msgSub)
+  {
+    super(msgSub.getMessageMOMExternID(), msgSub.getDriverKey());
+    this.nameSubscription = msgSub.nameSubscription;
+    this.theme = msgSub.topic.getTheme(); 
+    this.noLocal = msgSub.noLocal; 
+    this.selector = msgSub.selector;
+    this.ackMode = msgSub.ackMode;
+    this.sessionID = msgSub.sessionID;
+    this.connectionConsumer = msgSub.connectionConsumer;
+    this.durable = false ;
+  }
 }

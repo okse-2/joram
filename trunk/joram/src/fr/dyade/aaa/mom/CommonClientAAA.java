@@ -21,132 +21,135 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom;
 
-import java.lang.*;
 import java.util.*; 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.joram.*;
 
-/**	generic behaviour for all the clients in the MOM-AAA
- *
- *	@see	fr.dyade.aaa.mom.AgentClient
- */
+public class CommonClientAAA implements java.io.Serializable
+{
+  /** delivery mode which allows duplication messages. */ 
+  public static final int TRANSACTED = 0; 
+
+  /** delivery mode which allows duplication messages. */ 
+  public static final int DUPS_OK_ACKNOWLEDGE  = javax.jms.Session.DUPS_OK_ACKNOWLEDGE; 
+
+  /** automatic acknowledege delivery mode. */ 
+  public static final int AUTO_ACKNOWLEDGE  = javax.jms.Session.AUTO_ACKNOWLEDGE; 
+
+  /** delivery mode which allows client to acknowledge messages himself. */ 
+  public static final int CLIENT_ACKNOWLEDGE  =  javax.jms.Session.CLIENT_ACKNOWLEDGE; 
+
+  /** reference to an AgentClient */
+  protected AgentClientItf agentClient; 
+	
+  /** counter for message identifier */
+  private String stringID;
+  private static long msgCounter = 0;
+	
+  /** vector containing all of the Temporary Queue or Topic
+   *	created by the agentClient;
+   */
+  private Vector temporaryQueueTopicVector;
+
+  /** if a client has an ExceptionListener */
+  protected Hashtable exceptionModeTable;
+
+  /** 
+   * Hashtable holding the state of each connection of
+   * this <code>AgentClient</code>.
+   * <ul>
+   * <li>Key: driver key.</li>
+   * <li>Object: <code>Boolean</code>.</li>
+   * </ul>
+   */
+  protected Hashtable startModeTable;
+
+  /** 
+   * Hashtable holding the state of each connection of
+   * this <code>AgentClient</code>.
+   * <ul>
+   * <li>Key: driver key.</li>
+   * <li>Object: <code>Boolean</code>.</li>
+   * </ul>
+   */
+  protected Hashtable connectModeTable;
+	
+  /** the connectionMetaData whivh contians all the informations
+   *	about the MOM
+   */
+  private fr.dyade.aaa.mom.MetaData metaData;
+	
+  /** 
+   * Hashtable holding sessions ID per connections.
+   * <ul>
+   * <li>Key: driver key.</li>
+   * <li>Object: <code>String</code> sessionID.</li>
+   * </ul>
+   */
+  private Hashtable connectionSessTable;
+  private Hashtable connectionConsumerKeyTable;
+
+  /** 
+   * Hashtable holding the <code>ClientSubscription</code>s
+   * of the clients connected to this <code>AgentClient</code>.
+   * <ul>
+   * <li>Key: <code>ClientSubscriptionKey</code>.</li>
+   * <li>Object: <code>ClientSubscription</code>.</li>
+   * </ul>
+   */
+  protected Hashtable subscriptionTable;
+
+  /** 
+   * Hashtable holding <code>KeySubscription</code>s
+   * per driver key - sessionID pair.
+   * <ul>
+   * <li>Key: driverKey_sessionID .</li>
+   * <li>Object: <code>KeySubscription</code>.</li>
+   * </ul>
+   */
+  private Hashtable sessionSubTable;
+	
+  /** vector of messages from the Queue which were'nt able to
+   *	be delivered because the client is in stopMode
+   *	ie vector which contains MessageQueueDeliverMOMExtern
+   */
+  private Vector messageSynchroRecVector;
+
+  /** Vector of the agentId of all the Queue asked at least one time by the client
+   *	will allow to check if the name of the Queue exist
+   */
+  private Vector queueAgentIdAskedVector;
+
+  /**
+   * Object storing the messages and the acks received from the client
+   * during an XA transaction and waiting for a commit.
+   */
+  private fr.dyade.aaa.joram.XidTable xidTable;
 
 
-public class CommonClientAAA implements java.io.Serializable {
-	
-    /** delivery mode which allows duplication messages. */ 
-    public static final int TRANSACTED = 0; 
-	
-    /** delivery mode which allows duplication messages. */ 
-    public static final int DUPS_OK_ACKNOWLEDGE  = javax.jms.Session.DUPS_OK_ACKNOWLEDGE; 
- 
-    /** automatic acknowledege delivery mode. */ 
-    public static final int AUTO_ACKNOWLEDGE  = javax.jms.Session.AUTO_ACKNOWLEDGE; 
-
-    /** delivery mode which allows client to acknowledge messages himself. */ 
-    public static final int CLIENT_ACKNOWLEDGE  =  javax.jms.Session.CLIENT_ACKNOWLEDGE; 
-	
-    /** reference to an AgentClient */
-    protected AgentClientItf agentClient; 
-	
-    /** counter for message identifier */
-    private String stringID;
-	
-    /** hashtable with all of the subscriptions of the client 
-     *	key		:	KeyClientSubscription
-     *	object	:	SubscriptionClient
-     */
-    protected Hashtable subscriptionTable;
-	
-    /** vector containing all of the Temporary Queue or Topic
-     *	created by the agentClient;
-     */
-    private Vector temporaryQueueTopicVector;
-	
-    /** if a client has an ExceptionListener */
-    protected boolean exceptionMode;
-	
-    /** if the clients is ready to receive message or not */
-    protected boolean startMode;
-	
-    /** if the client is connected or not */
-    protected boolean connectMode;
-	
-    /** the connectionMetaData whivh contians all the informations
-     *	about the MOM
-     */
-    private fr.dyade.aaa.mom.MetaData metaData;
-	
-    /** this hashtable contains the temporary subscriptions of the client
-     *	by sesion so as to discard temporary subscription in case of
-     *	closing of the Session
-     *	key		:	sessionID	
-     *	object	:	SessionSubscription (vector of KeyClientSubscription, ...)
-     */
-    protected Hashtable sessionTemporarySubscriptionTable;
-	
-    /** this hashtable contains the durable subscriptions of the client
-     *	by session so as to stop delivery of the messages
-     *	key		:	sessionID	
-     *	object	:	SessionSubscription (vector of KeyClientSubscription, ...)
-     */
-    protected Hashtable sessionDurableSubscriptionTable;
-	
-    /**	this hashtable contains the requests of subscriptions of the client
-     *	not yet acccepted. These table allows to refind if the subscription 
-     *	is durable or temporary. 
-     *	If this table didn't exist, the only solution would have been to
-     *	add a new entry to 1 of the "subscription" Table without knowing 
-     *	if the sub was accepted by the Topic. It must be avoided.
-     *	Moreover we have to know the mode of acknowledgment of the session
-     *	An other solution would have to add the sessionID to the notification of
-     *	subscription, but we have to take into account rate.
-     *	key		:	longrequestID	
-     *	object	:	NotYetSubRecordObject = (sessionID, subDurable)
-     */
-    private Hashtable notYetSubscriptionRecordTable;
-	
-    /** vector of messages from the Queue which were'nt able to
-     *	be delivered because the client is in stopMode
-     *	ie vector which contains MessageQueueDeliverMOMExtern
-     */
-    private Vector messageSynchroRecVector;
-	
-    /** Vector of the agentId of all the Queue asked at least one time by the client
-     *	will allow to check if the name of the Queue exist
-     */
-    private Vector queueAgentIdAskedVector;
-	
-    /**
-     * Object storing the messages and the acks received from the client
-     * during an XA transaction and waiting for a commit.
-     */
-    private XidTable xidTable;
-
-
-    public CommonClientAAA(AgentClientItf agentClient) {
-	stringID = "a";
-	this.agentClient = agentClient;
-	subscriptionTable = new Hashtable();
-	exceptionMode = false;
-	startMode = false;
-	connectMode = false;
-	metaData = new fr.dyade.aaa.mom.MetaData();
-	sessionTemporarySubscriptionTable = new Hashtable();
-	sessionDurableSubscriptionTable = new Hashtable();
-	notYetSubscriptionRecordTable =  new Hashtable();
-	temporaryQueueTopicVector = new Vector();
-	messageSynchroRecVector = new Vector();
-	queueAgentIdAskedVector = new Vector();
-	xidTable = new XidTable();
-    }
+  public CommonClientAAA(AgentClientItf agentClient) {
+    stringID = "a";
+    this.agentClient = agentClient;
+    subscriptionTable = new Hashtable();
+    exceptionModeTable = new Hashtable();
+    startModeTable = new Hashtable();
+    connectModeTable = new Hashtable();
+    exceptionModeTable.put(new Integer(1), new Boolean(false));
+    startModeTable.put(new Integer(1), new Boolean(false));
+    connectModeTable.put(new Integer(1), new Boolean(false));
+    metaData = new fr.dyade.aaa.mom.MetaData();
+    connectionSessTable = new Hashtable();
+    connectionConsumerKeyTable = new Hashtable();
+    sessionSubTable = new Hashtable();
+    temporaryQueueTopicVector = new Vector();
+    messageSynchroRecVector = new Vector();
+    queueAgentIdAskedVector = new Vector();
+    xidTable = new fr.dyade.aaa.joram.XidTable();
+  }
 
     /** notification of exception sent by a Queue or a Topic */
-    protected void notificationMOMException(AgentId from, NotificationMOMException not) {
+    protected void reactToMOMException(AgentId from, NotificationMOMException not) {
 	/* print of notification type and the exception*/
 	if(Debug.debug)
 	    if(Debug.clientTest)
@@ -155,30 +158,32 @@ public class CommonClientAAA implements java.io.Serializable {
 	/* treatment of exception */
 	if(not.typeNotification instanceof NotificationQueueSend) {
 	    fr.dyade.aaa.mom.NotificationQueueSend notQueue = (NotificationQueueSend) not.typeNotification;
-	    fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern(notQueue.notMOMID, not.except, notQueue.msg);
+	    fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern(notQueue.notMOMID, not.except, notQueue.msg, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	} else if(not.typeNotification instanceof NotificationTopicSend) {
 	    fr.dyade.aaa.mom.NotificationTopicSend notTopic = (NotificationTopicSend) not.typeNotification;
-	    fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern(notTopic.notMOMID, not.except, notTopic.msg);
+	    fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern(notTopic.notMOMID, not.except, notTopic.msg, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	} else if(not.typeNotification instanceof NotificationSubscription) {
 	    fr.dyade.aaa.mom.NotificationSubscription notSub = (NotificationSubscription) not.typeNotification;
 			
 	    /* discard the entry in the temporary notYetSubscriptionRecordTable table */
-	    notYetSubscriptionRecordTable.remove(new Long(notSub.notMOMID));
+	    //notYetSubscriptionRecordTable.remove(new Long(notSub.notMOMID));
 				
 	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(notSub.notMOMID, not.except);
+	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(notSub.notMOMID, not.except, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	} else {
 	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(not.typeNotification.notMOMID, not.except);
+	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(not.typeNotification.notMOMID, not.except, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	}
     }
 	
     /** notification which contains a message sent by a Queue */
-    protected void notificationMessageDeliver(AgentId from, NotificationMessageDeliver not) throws Exception {
+    protected void reactToQueueMsgSending(AgentId from, NotifMessageFromQueue not) throws Exception {
+     Boolean startMode = (Boolean) startModeTable.get(new Integer(not.driverKey));
+     Boolean connectMode = (Boolean) connectModeTable.get(new Integer(not.driverKey));
 	/* tests for agentClient */
 	if(Debug.debug)
 	    if(Debug.clientTest && (not.msg instanceof fr.dyade.aaa.mom.TextMessage)) {
@@ -193,10 +198,10 @@ public class CommonClientAAA implements java.io.Serializable {
 		} else
 		    System.out.println("\n"+((Agent)agentClient).getId().toString()+" le message recu est null : ");
 	    }
-		
-	if(connectMode) {
-	    fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msgQueueDeliver = new fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern(not.notMOMID, not.msg);		
-	    if(startMode) {
+	if(connectMode.booleanValue()) {
+	    fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msgQueueDeliver = new fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern(not.notMOMID, not.msg, new QueueNaming(from.toString()), not.selector, not.driverKey);		
+        msgQueueDeliver.toListener = not.toListener;
+	    if(startMode.booleanValue()) {
 				/* constructs a QueueDeliverMessage and send to the client */
 		agentClient.sendMessageMOMExtern(msgQueueDeliver);
 	    } else {
@@ -207,7 +212,7 @@ public class CommonClientAAA implements java.io.Serializable {
     }
 	
     /** notification which contains an enumeration of messages presents in a Queue */ 
-    protected void notificationReadDeliver(AgentId from, NotificationReadDeliver not) {
+    protected void reactToQueueEnumSending(AgentId from, NotifMessageEnumFromQueue not) {
 	if(Debug.debug)
 	    if(Debug.clientTest) {
 		try {
@@ -228,68 +233,113 @@ public class CommonClientAAA implements java.io.Serializable {
 	    }
 			
 	/* constructs a ReadDeliverMessage and send to the client */
-	fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern msgReadDeliver = new fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern(not.notMOMID, not.messageEnumerate);
+	fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern msgReadDeliver = new fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern(not.notMOMID, not.messageEnumerate, not.driverKey);
 	agentClient.sendMessageMOMExtern(msgReadDeliver);
     } 
-	
-    /** notification which contains a message sent by a Theme of a Topic */ 
-    protected void notificationTopicMessageDeliver(AgentId from, NotificationTopicMessageDeliver not) throws Exception {
-	fr.dyade.aaa.mom.SubscriptionClient sub ;
-	fr.dyade.aaa.mom.TopicNaming topic = (fr.dyade.aaa.mom.TopicNaming) not.msg.getJMSDestination();
-	fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(not.nameSubscription, from, not.theme);
-		
-	if(Debug.debug)
-	    if(Debug.clientSub && (not.msg instanceof fr.dyade.aaa.mom.TextMessage)) {
-		try {
-		    System.out.println("absolute name : "+from.toString()+"_"+not.theme+" sanmeSub : "+not.nameSubscription);
-		    Debug.printKeysSubscription(((Agent)agentClient).getId().toString()+" ",subscriptionTable);
-		    System.out.println("Topic "+((Agent)agentClient).getId().toString()+": "+((fr.dyade.aaa.mom.TextMessage)not.msg).getText());
-		} catch (Exception exc) {
-		    System.err.println("notificationTopicMessageDeliver"+((Agent)agentClient).getId().toString()+" "+exc);
-		}
-	    }
-			
-	if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))==null) 
-	    throw(new MOMException("Delivery Message NotAccepted : Subscription doesn't exist ",MOMException.MSG_RECEIVED_WITHOUT_SUBSCRIPTION));
-		
-	/* add message in the specific queue */
-	sub.putMessageInAgentClient(not.msg);
-			
-	if(connectMode && startMode) {
-	    /* add the message in the queue of autoAck Session if any */
-	    String sessionID = sub.getSessionID();
-	    if(sessionID!=null) { 
-		SessionSubscription sessionSub = null;		
-		if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sessionID))==null) {
-		    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sessionID);
-		}
 
-		if(sessionSub==null) 
-		    throw(new MOMException("No Session corresponds to the Message delivered by the Topic",MOMException.NO_SUCH_SESSION_EXIST));
-				
-				
-		if(sessionSub.ackMode!=AUTO_ACKNOWLEDGE) {
-		    /* delivers the message if the client arose a messageListener */
-		    if(sub.getMessageListener()) {
-			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, not.nameSubscription, not.msg, not.theme);
-			agentClient.sendMessageMOMExtern(msgDeliver);
-		    }
-		} else {
-		    /* add the message in the queue of messages to deliver */
-		    sessionSub.addDeliveredMessage(sub, 1);
-		    /* delivers the message if possible */
-		    fr.dyade.aaa.mom.Message msgAuto;
-		    if((msgAuto = sessionSub.deliveryMessage())!=null) {
-			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, not.nameSubscription, msgAuto, not.theme);
-			agentClient.sendMessageMOMExtern(msgDeliver);
-		    }
-		} 
-	    }
-	}
+
+  /** 
+   * Method reacting to a <code>NotificationMessageFromTopic</code>
+   * wrapping a message sent by a <code>Topic</code>.
+   *
+   * @param from  the id of the topic sender of the notification.
+   * @param not  the notification sent by the topic.
+   *
+   * @see  AgentClient
+   * @see  Topic
+   *
+   * @author Frederic Maistre
+   */
+  protected void reactToTopicMsgSending(AgentId from,
+    NotifMessageFromTopic not) throws Exception
+  {
+    int drvKey = not.driverKey;
+    fr.dyade.aaa.mom.TopicNaming topic =
+      (fr.dyade.aaa.mom.TopicNaming) not.msg.getJMSDestination();
+
+    // Retrieving the corresponding non-durable ClientSubscription.
+    ClientSubscriptionKey key =
+      new ClientSubscriptionKey(not.nameSubscription, drvKey, false);
+    ClientSubscription sub = (ClientSubscription) subscriptionTable.get(key) ;
+
+    // If it doesn't exist, it might be a durable ClientSubscription.
+    if (sub == null) {
+      key = new ClientSubscriptionKey(not.nameSubscription, drvKey, true);
+      sub = (ClientSubscription) subscriptionTable.get(key) ;
+
+      // If it still does not exist, throwing an exception.
+      if (sub == null)
+        throw (new MOMException("Message coming from Topic for a non existing subscription", 
+          MOMException.MSG_RECEIVED_WITHOUT_SUBSCRIPTION));
+
+      // Update the connection key in case the durable subscriber reconnected.
+      drvKey = sub.getDriverKey();
     }
+
+    // If the connection is started, as well as the message listener,
+    // sending the message to the client.
+    Boolean connectMode = (Boolean) connectModeTable.get(new Integer(drvKey));
+    Boolean startMode = (Boolean) startModeTable.get(new Integer(drvKey));
+    boolean msgListener = sub.getMessageListener();
+    if (!sub.isConnectionConsumer()) {
+    if (connectMode.booleanValue() && startMode.booleanValue()) {
+	  sub.putMsgInClientSub(not.msg);
+      if (msgListener) {
+	    Message msgToSend = sub.deliveryMessage();
+        if (msgToSend != null) {
+          MessageTopicDeliverMOMExtern msgDeliver =
+            new MessageTopicDeliverMOMExtern((long) -1, not.nameSubscription,
+            msgToSend, not.theme, drvKey);
+
+          agentClient.sendMessageMOMExtern(msgDeliver);
+        }
+      }
+      else {
+        // If no messageListener has been set, retrieving an eventual
+        // synchronous request.
+        Message msgToSend = sub.deliveryMessage(); 
+        if (msgToSend != null) {
+          SynchronousReceptionRequestMsg reqMsg = sub.getRequest();
+          if (reqMsg != null &&
+            (reqMsg.timeOut < 0 ||
+            (reqMsg.timeOut - System.currentTimeMillis()) > 0)) {
+ 
+            // If the request is still alive, delivering the message.
+            MessageTopicDeliverMOMExtern msgDeliver =
+              new MessageTopicDeliverMOMExtern(reqMsg.getMessageMOMExternID(),
+              not.nameSubscription, msgToSend, not.theme, drvKey);
+
+            msgDeliver.toListener = false;
+  
+            agentClient.sendMessageMOMExtern(msgDeliver);
+          }
+        }
+      }
+    }
+    else if (key.durable)
+	  sub.putMsgInClientSub(not.msg);
+
+    }
+    else {
+    if (connectMode.booleanValue() && startMode.booleanValue()) {
+      sub.putMsgInClientSub(not.msg);
+	  Message msgToSend = sub.deliveryMessage();
+      if (msgToSend != null) {
+        MessageTopicDeliverMOMExtern msgDeliver =
+          new MessageTopicDeliverMOMExtern((long) -1, not.nameSubscription,
+          msgToSend, not.theme, drvKey, sub.isConnectionConsumer());
+
+        agentClient.sendMessageMOMExtern(msgDeliver);
+      }
+    } 
+    else if (key.durable) {
+	  sub.putMsgInClientSub(not.msg);
+    }
+    }
+  } 
 	
     /** notification which holds a serious exception from a Queue or a Topic */ 
-    protected void notificationEngineException(AgentId from, ExceptionNotification not) {
+    protected void reactToException(AgentId from, ExceptionNotification not) {
 	if(Debug.debug)
 	    if(Debug.clientTest) {
 		if (not.exc instanceof MOMException) 
@@ -303,153 +353,160 @@ public class CommonClientAAA implements java.io.Serializable {
 	    /* exception due to an ack */
 	    /* this exception is treated hier so as to do only 1 pass in the Queue */
 	    fr.dyade.aaa.mom.NotificationAck notAck = (NotificationAck) not.not;
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(notAck.notMOMID, not.exc);
+	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(notAck.notMOMID, not.exc, notAck.driverKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	} else {
-	    deliverAlienException(not.exc);
+	    //deliverAlienException(not.exc);
 	}
     }
 	
-    /** treatment of the agreement sent by the Queue or the Topic (on request of the client) */
-    protected void notificationRequestAgree(AgentId from, NotificationAgreeAsk not) throws Exception {
-	if (not.typeNotification instanceof NotificationQueueSend) {
-	    /* sending to a Queue agreement */
-	    fr.dyade.aaa.mom.NotificationQueueSend notQueue = (NotificationQueueSend) not.typeNotification;
-	    fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgAgree = new fr.dyade.aaa.mom.SendingBackMessageMOMExtern(notQueue.notMOMID, notQueue.msg);
-	    agentClient.sendMessageMOMExtern(msgAgree);
+  /** 
+   * Method processing an agreement sent by a Queue or a Topic.  
+   */
+  protected void reactToDestinationAcknowledgement(AgentId from, 
+    NotifAckFromDestination not) throws Exception
+  {
+    if (not.typeNotification instanceof NotificationQueueSend) {
+	  fr.dyade.aaa.mom.NotificationQueueSend notQueue = 
+        (NotificationQueueSend) not.typeNotification;
+
+      fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgAgree = 
+        new fr.dyade.aaa.mom.SendingBackMessageMOMExtern(notQueue.notMOMID, 
+        notQueue.msg, not.driverKey);
+
+      agentClient.sendMessageMOMExtern(msgAgree);
 	} else if (not.typeNotification instanceof NotificationTopicSend) {
 	    /* sending to a Topic agreement */
 	    fr.dyade.aaa.mom.NotificationTopicSend notTopic = (NotificationTopicSend) not.typeNotification;
-	    fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgAgree = new fr.dyade.aaa.mom.SendingBackMessageMOMExtern(notTopic.notMOMID, notTopic.msg);
+	    fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgAgree = new fr.dyade.aaa.mom.SendingBackMessageMOMExtern(notTopic.notMOMID, notTopic.msg, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
 	} else if (not.typeNotification instanceof NotificationAck) {
 	    /* acknowledge agreement */
 	    fr.dyade.aaa.mom.NotificationAck notAck = (NotificationAck) not.typeNotification;
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notAck.notMOMID);
+	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notAck.notMOMID, notAck.driverKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
-	} else if (not.typeNotification instanceof NotificationSubscription) {
-	    treatmentSubscriptionAgreement(from, (NotificationSubscription) not.typeNotification);
+    } else if (not.typeNotification instanceof NotificationSubscription) {
+        treatmentSubscriptionAgreement(from, (NotificationSubscription) not.typeNotification);
 	} else if (not.typeNotification instanceof NotificationUnsubscription) {
-	    treatmentUnsubscriptionAgreement(from, (NotificationUnsubscription) not.typeNotification);
+	    treatmentUnsubscriptionAgreement(from, (NotificationUnsubscription) not.typeNotification, not.driverKey);
 	} else if (not.typeNotification instanceof NotificationRecover) {
 	    /* acknowledge agreement */
 	    fr.dyade.aaa.mom.NotificationRecover notRecover = (NotificationRecover) not.typeNotification;
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notRecover.notMOMID);
+	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notRecover.notMOMID, not.driverKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
 	} else if (not.typeNotification instanceof NotificationUpdateSubscription) {
 	    treatmentUpdateSubscrptionAgreement(from, (NotificationUpdateSubscription) not.typeNotification);	
 	} else {
 	    /* would never past but costs nothing to treat */
-	    deliverAlienException(new MOMException("Subclass of NotificationAgreeAskknown Unknown",MOMException.DEFAULT_MOM_ERROR));
+	    deliverAlienException(new MOMException("Subclass of NotifDestinationAcknowledgementknown Unknown",MOMException.DEFAULT_MOM_ERROR), not.driverKey);
 	}
     } 
-	
-    /* treatment of the subscription agreement */
-    protected void treatmentSubscriptionAgreement(AgentId from, NotificationSubscription notSub) {
-	fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(notSub.nameSubscription, from, notSub.theme);
-			
-	if(subscriptionTable.containsKey(key)) {
-	    /* I don't know how it would be possible */
-	    MOMException exc = new MOMException("Subscription already exist in AgentClient",MOMException.SUBSCRIPTION_ALREADY_EXIST);
+
+
+  /**
+   * Method processing a subscription agreement sent by a
+   * <code>Topic</code> after it registered the subscription.
+   * Allows the subscription to be registered by the <code>
+   * AgentClient</code>.
+   *
+   * @param from  topic which sent the agreement.
+   * @param notSub  notification wrapping the agreement.
+   *
+   * @author Frederic Maistre
+   */
+  protected void treatmentSubscriptionAgreement(AgentId from, 
+    NotificationSubscription notSub)
+  {
+    // Building the key.
+    fr.dyade.aaa.mom.ClientSubscriptionKey key =
+      new ClientSubscriptionKey(notSub.nameSubscription,
+      notSub.driverKey, notSub.durable);
+
+    // If the key is already used for an existing subscription, throwing an
+    // exception.
+    if(subscriptionTable.containsKey(key)) {
+      MOMException exc =
+        new MOMException("AgentClient can't agree an already existing subscription.",
+        MOMException.SUBSCRIPTION_ALREADY_EXIST);
 				
-	    /* warning sent to the administrator*/
-	    warningAdministrator(exc);
-	}
-		
-	/* add the subscription either in the durable table or the temporary */
-	NotYetSubRecordObject objRecord;
-	if((objRecord = (NotYetSubRecordObject) notYetSubscriptionRecordTable.remove(new Long(notSub.notMOMID)))!=null) {
-	    SessionSubscription sessionSub = null;
-				
-	    if(objRecord.subDurable) {	
-				/* checks if already a durable subscription exists for the session */
-		if((sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(objRecord.sessionID))==null) {
-		    /* no entry */
-		    sessionSub = new fr.dyade.aaa.mom.SessionSubscription(objRecord.ackMode);
-		    sessionSub.subSessionVector.addElement(key);
-		    sessionDurableSubscriptionTable.put(objRecord.sessionID, sessionSub);
-		} else {
-		    /* already at least 1 entry */
-		    sessionSub.subSessionVector.addElement(key);
-		}
-	    } else if(connectMode) {
-				/* checks if already a no durable subscribtion exists */
-		if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(objRecord.sessionID))==null) {
-		    /* no entry */
-		    sessionSub = new fr.dyade.aaa.mom.SessionSubscription(objRecord.ackMode);
-		    sessionSub.subSessionVector.addElement(key);
-		    sessionTemporarySubscriptionTable.put(objRecord.sessionID, sessionSub);
-		} else {
-		    /* already at least 1 entry */
-		    sessionSub.subSessionVector.addElement(key);
-		}
-	    }
-			
-	    if(objRecord.subDurable || connectMode) {
-				/* construction and record of the subscription in the agentClient */
-		fr.dyade.aaa.mom.SubscriptionClient sub = new fr.dyade.aaa.mom.SubscriptionClient(notSub.noLocal, notSub.selector, from, notSub.theme, objRecord.sessionID);
-		subscriptionTable.put(key, sub);
-				
-				/* add the subscription to the delivery of the message  */
-		if(connectMode && (sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE))
-		    sessionSub.addDeliveredMessage(sub, sub.queueThemeMessage.size());
-	    }
-	}	
-			
-		
-	if(Debug.debug)
-	    if(Debug.clientSub) 
-		Debug.printKeysSubscription("AgentClient "+((Agent)agentClient).getId().toString()+" ",subscriptionTable);
-		
-	/* send the agreement to the client */
-	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notSub.notMOMID);
-	agentClient.sendMessageMOMExtern(msgAgree);	
+      // Sending warning to the administrator (??? TO BE CHECKED).
+      warningAdministrator(exc);
     }
-	
-    /* treatment of the unsubscription agreement */
-    protected void treatmentUnsubscriptionAgreement(AgentId from, NotificationUnsubscription notUnsub) throws Exception{
-	fr.dyade.aaa.mom.SubscriptionClient sub ;
-	fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(notUnsub.nameSubscription, from, notUnsub.theme);
+		
+    // Building and registering the subscription.
+    ClientSubscription sub = new ClientSubscription(notSub.noLocal, notSub.selector,
+      from, notSub.theme, notSub.driverKey, notSub.connectionConsumer);
+
+    subscriptionTable.put(key, sub);
+
+
+    if (notSub.connectionConsumer)
+      connectionConsumerKeyTable.put(new Integer(notSub.driverKey), key);
+    else {
+      Vector keyVec = (Vector) connectionSessTable.get(new Integer(notSub.driverKey));
+      if (keyVec == null)
+        keyVec = new Vector();
+      keyVec.addElement(notSub.sessionID);
+      connectionSessTable.put(new Integer(notSub.driverKey), keyVec);
+
+      keyVec = (Vector) sessionSubTable.get(new Integer(notSub.driverKey) + "_" +
+        notSub.sessionID);
+      if (keyVec == null)
+        keyVec = new Vector();
+      keyVec.addElement(key);
+      sessionSubTable.put(new Integer(notSub.driverKey) + "_" + notSub.sessionID, keyVec);
+    }
+				
+    // Sending an agreement to the client.
+    RequestAgreeMOMExtern msgAgree = new RequestAgreeMOMExtern(notSub.notMOMID,
+      notSub.driverKey);
+    agentClient.sendMessageMOMExtern(msgAgree);	
+  }
+
+  /* treatment of the unsubscription agreement */
+  protected void treatmentUnsubscriptionAgreement(AgentId from, NotificationUnsubscription notUnsub, int driversKey) throws Exception{
+	fr.dyade.aaa.mom.ClientSubscription sub ;
+	fr.dyade.aaa.mom.ClientSubscriptionKey key = new fr.dyade.aaa.mom.ClientSubscriptionKey(notUnsub.nameSubscription, driversKey, false);
 			
 	/* remove the entry in the hashtable of the agentClient */
-	if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.remove(key))==null) {
-	    /* I don't know how it would be possible */
+	if((sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.remove(key))==null) {
 	    MOMException exc = new MOMException("Remove Impossible : Subscription doesn't exist in AgentClient",MOMException.SUBSCRIPTION_NO_EXIST);
 				
-	    /* warning sent to the administrator*/
+	    /* warning sent to the administrator */
 	    warningAdministrator(exc);
 	}
 		
 	/* remove the durable subscription either in the durable table or the temporary */
-	NotYetSubRecordObject objRecord;
-	if((objRecord = (NotYetSubRecordObject) notYetSubscriptionRecordTable.remove(new Long(notUnsub.notMOMID)))!=null) {
+	//NotYetSubRecordObject objRecord;
+	//if((objRecord = (NotYetSubRecordObject) notYetSubscriptionRecordTable.remove(new Long(driversKey + notUnsub.notMOMID)))!=null) {
 		
-	    SessionSubscription sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(objRecord.sessionID);
+	    /*SessionSubscription sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(driversKey + "_" + notUnsub.sessionID);
 	    if(sessionSub!=null) {
-				/* asynchronous mode => closeConnexion before this method (if) */
+				/* asynchronous mode => closeConnexion before this method (if) 
 		if(sessionSub.subSessionVector!=null) {
 		    sessionSub.subSessionVector.removeElement(key);
 			
-		    /* releases the ressource if any */
+		    /* releases the ressource if any 
 		    if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
 			sessionSub.removeSubFromDelivery(sub);
 		}
 	    }
 	} 
-			
-	if(connectMode) {
+    Boolean connectMode = (Boolean) connectModeTable.get(new Integer(driversKey));
+	if(connectMode.booleanValue()) {
 	    /* send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notUnsub.notMOMID);
+	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(notUnsub.notMOMID, driversKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
-	}
     }
 	
     /* treatment of the updating of a subscription agreement */
     protected void treatmentUpdateSubscrptionAgreement(AgentId from, NotificationUpdateSubscription not) throws Exception {
-	fr.dyade.aaa.mom.SubscriptionClient sub ;
-	fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(not.nameSubscription, from, not.theme);			
+    int drvKey = not.driverKey;
+	fr.dyade.aaa.mom.ClientSubscription sub ;
+	fr.dyade.aaa.mom.ClientSubscriptionKey key = 
+      new fr.dyade.aaa.mom.ClientSubscriptionKey(not.nameSubscription, drvKey, true);			
 			
-	if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))==null){
+	if((sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key))==null){
 	    /* I don't know how it would be possible */
 	    MOMException exc = new MOMException("Remove Impossible : Subscription doesn't exist in AgentClient",MOMException.SUBSCRIPTION_NO_EXIST);
 				
@@ -461,18 +518,24 @@ public class CommonClientAAA implements java.io.Serializable {
 	sub.updateSubscription(((Agent)agentClient).getId(), not.noLocal, not.selector);
 		
 	/* send the agreement to the client */
-	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(not.notMOMID);
+	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(not.notMOMID, drvKey);
 	agentClient.sendMessageMOMExtern(msgAgree);	
     }
 	
     /** treatment of the requests of the extern client */
-    protected void treatmentExternRequest(NotificationInputMessage not) throws MOMException {
+    protected void reactToProxyNotification(ProxyNotification pNot) throws MOMException {
+    NotificationInputMessage not = (NotificationInputMessage) pNot.getNotification();
+    int drvKey = pNot.getDriverKey();
 	try {
 	    if(Debug.debug)
 		if(Debug.clientTest)
 		    System.out.println("CommonClient: Message Extern"+not.msgMOMExtern.getClass().getName());	 
-			
-	    if (not.msgMOMExtern instanceof ReceptionMessageMOMExtern) { 
+        (not.msgMOMExtern).setDriverKey(drvKey);
+		
+        if (not.msgMOMExtern instanceof SynchronousReceptionRequestMsg) {
+        this.reactToSynchronousReceptionRequest((SynchronousReceptionRequestMsg)
+          not.msgMOMExtern);	
+	    } else if (not.msgMOMExtern instanceof ReceptionMessageMOMExtern) { 
 		this.notificationReceiveSync((ReceptionMessageMOMExtern) not.msgMOMExtern); 
 	    } else if (not.msgMOMExtern instanceof ReadOnlyMessageMOMExtern) { 
 		this.notificationReadOnly((ReadOnlyMessageMOMExtern) not.msgMOMExtern); 
@@ -546,7 +609,7 @@ public class CommonClientAAA implements java.io.Serializable {
 		adminCreatespecific((MessageAdminCreateSpecific) not.msgMOMExtern);
 	    } else {
 		/* would never past but costs nothing to treat */
-		deliverAlienException(new MOMException("Subclass of NotificationInputMessage Unknown",MOMException.DEFAULT_MOM_ERROR));
+		deliverAlienException(new MOMException("Subclass of NotificationInputMessage Unknown",MOMException.DEFAULT_MOM_ERROR), drvKey);
 	    }
 	} catch (Exception exc) {
 	    if(Debug.debug)
@@ -554,7 +617,7 @@ public class CommonClientAAA implements java.io.Serializable {
 		    System.err.println(exc);
 				
 	    /* send the error to the client extern */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(not.msgMOMExtern.getMessageMOMExternID(), exc);
+	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(not.msgMOMExtern.getMessageMOMExternID(), exc, drvKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 			
 	    /* canceling previous actions due to an ack of tha Topic which didn't exist */
@@ -566,7 +629,81 @@ public class CommonClientAAA implements java.io.Serializable {
 	    }
 	}	
     } 
-	
+
+
+  /**
+   * Method reacting to a synchronous reception request from a 
+   * <code>fr.dyade.aaa.joram.TopicSubscriber</code>.
+   *
+   * @param reqMsg  The request.
+   *
+   * @author Frederic Maistre
+   */
+  protected void reactToSynchronousReceptionRequest(SynchronousReceptionRequestMsg reqMsg)
+    throws Exception
+  {
+    int driverKey = reqMsg.getDriverKey();
+    long requestId = reqMsg.getMessageMOMExternID();
+
+    // Getting connection status.
+    Boolean connectMode = (Boolean) connectModeTable.get(new Integer(driverKey));
+    Boolean startMode = (Boolean) startModeTable.get(new Integer(driverKey));
+
+      String subscriptionName = reqMsg.subscriptionName;
+  
+      // Trying to find the correspondant non durable subscription. 
+      ClientSubscriptionKey subKey = new ClientSubscriptionKey(subscriptionName, 
+        driverKey, false);
+
+      ClientSubscription sub = (ClientSubscription) subscriptionTable.get(subKey);
+
+      if (sub == null) {
+        // The subscription might be durable.
+        subKey = new ClientSubscriptionKey(subscriptionName, driverKey, true);
+        sub = (ClientSubscription) subscriptionTable.get(subKey);
+        
+        if (sub == null)
+          throw new MOMException("Can't find subscription corresponding to request");
+      }
+
+      if (connectMode.booleanValue() && startMode.booleanValue()) {
+        Message subMessage = sub.deliveryMessage(); 
+        if (subMessage != null && 
+          (reqMsg.timeOut == 0 || reqMsg.timeOut < 0 ||
+          (reqMsg.timeOut - System.currentTimeMillis()) > 0)) {
+
+          // If message available in subscription and request still alive,
+          // delivering the message.
+          MessageTopicDeliverMOMExtern msgToSend =
+            new MessageTopicDeliverMOMExtern(requestId, subscriptionName,
+            subMessage, sub.getTheme(), driverKey);
+
+          msgToSend.toListener = false;
+
+          agentClient.sendMessageMOMExtern(msgToSend);
+        }
+        else if (subMessage == null) {
+          if (reqMsg.timeOut == 0) {
+            // If no message in subscription and request is immediate, delivering
+            // a null message.
+            MessageTopicDeliverMOMExtern msgToSend =
+              new MessageTopicDeliverMOMExtern(requestId, subscriptionName,
+              subMessage, sub.getTheme(), driverKey);
+
+            msgToSend.toListener = false;
+
+            agentClient.sendMessageMOMExtern(msgToSend);
+          }
+          else if (reqMsg.timeOut < 0 ||
+            // If no message in subscription and request still alive, storing
+            // it in subscription.
+            (reqMsg.timeOut - System.currentTimeMillis()) > 0)
+
+	        sub.addRequest(reqMsg);
+        }
+      }
+  }
+
     /** Get agentClient with the admin tools */
     protected void adminGetAgentClient(MessageAdminGetAgentClient msg) throws Exception {
 	if (Debug.debug)
@@ -597,7 +734,7 @@ public class CommonClientAAA implements java.io.Serializable {
 	    if (Debug.admin)
 		System.out.println("->CommonClientAAA : adminCleanDriver = " + msg.toString() + 
 				   "\n  agentClient " + agentClient);
-	((ProxyAgent) agentClient).cleanDriverOut();
+	((ProxyAgent) agentClient).cleanDriverOut(msg.getDriverKey());
 	//agentClient.sendNotification(((Agent)agentClient).getId(),new fr.dyade.aaa.agent.DriverDone(msg.getDriver()));
 	if (Debug.debug)
 	    if (Debug.admin)
@@ -691,20 +828,23 @@ public class CommonClientAAA implements java.io.Serializable {
 	if (Debug.debug)
 	    if (Debug.transacted)
 		System.out.println("->CommonClientAAA : notificationTransactedVectorSend  msgVector=" + msgVector.toString());
+    int drvKey = msgVector.getDriverKey();
 
 	Vector vect = msgVector.getVector();
 	while(!vect.isEmpty()) {
 	    Object msgInVect =  vect.firstElement();
 	    if (msgInVect instanceof  SendingMessageQueueMOMExtern) {
+        ((SendingMessageQueueMOMExtern) msgInVect).setDriverKey(drvKey);
 		notificationQueueSend((SendingMessageQueueMOMExtern) msgInVect);
 		vect.removeElementAt(0);
 	    } else {
+        ((SendingMessageTopicMOMExtern) msgInVect).setDriverKey(drvKey);
 		notificationTopicSend((SendingMessageTopicMOMExtern) msgInVect);
 		vect.removeElementAt(0);
 	    }
 	}
 	/* Now, we can send an ACK to the client */
-	MessageAckTransactedVector msgAgree = new MessageAckTransactedVector(msgVector.getMessageMOMExternID());
+	MessageAckTransactedVector msgAgree = new MessageAckTransactedVector(msgVector.getMessageMOMExternID(), drvKey);
 	agentClient.sendMessageMOMExtern(msgAgree);
 	if (Debug.debug)
 	    if (Debug.transacted)
@@ -717,11 +857,14 @@ public class CommonClientAAA implements java.io.Serializable {
 	    if (Debug.transacted)
 		System.out.println("->CommonClientAAA : notificationTransactedRollback  msgVect=" + msgVect.toString());
 
+    int drvKey = msgVect.getDriverKey();
+
 	Vector vect = msgVect.getVector();
 	if (msgVect.isTopicRollback()) {
 	    /* for Topic */
 	    while (!vect.isEmpty()) {
 		AckTopicMessageMOMExtern msgInVect = (AckTopicMessageMOMExtern) vect.firstElement();
+        msgInVect.setDriverKey(drvKey);
 		notificationTransactedRollbackTopicAck(msgInVect);
 		vect.removeElementAt(0);
 	    }
@@ -732,14 +875,13 @@ public class CommonClientAAA implements java.io.Serializable {
 
 		DestinationNaming dest = (DestinationNaming) msgInVect.getJMSDestination();
 		AgentId to = AgentId.fromString(dest.getDestination());
-
-		NotificationRollback notMsg = new NotificationRollback(msgInVect.getMessageMOMExternID(), msgInVect.getJMSMessageID(),msgInVect.getJMSSessionID());
+		NotificationRollback notMsg = new NotificationRollback(msgInVect.getMessageMOMExternID(), msgInVect.getJMSMessageID(),msgInVect.getJMSSessionID(), drvKey);
 		agentClient.sendNotification(to, notMsg);
 		vect.removeElementAt(0);
 	    }
 	}
 	/* Now, we can send an ACK to the client */
-	MessageAckTransactedRollback msgAck = new MessageAckTransactedRollback(msgVect.getMessageMOMExternID());
+	MessageAckTransactedRollback msgAck = new MessageAckTransactedRollback(msgVect.getMessageMOMExternID(), drvKey);
 	agentClient.sendMessageMOMExtern(msgAck);
 	  
 	if (Debug.debug)
@@ -749,24 +891,25 @@ public class CommonClientAAA implements java.io.Serializable {
 
     /** send all msg again to the client after a topic Transacted Rollback  */
     protected void notificationTransactedRollbackTopicAck(AckTopicMessageMOMExtern msgMOMAck) throws Exception {
+    int drvKey = msgMOMAck.getDriverKey();
 	try {
 	    AgentId topic = AgentId.fromString(msgMOMAck.topic.getTopicName());
-	    SubscriptionClient sub;
-	    KeyClientSubscription key = new KeyClientSubscription(msgMOMAck.nameSubscription, topic, msgMOMAck.topic.getTheme());	
+	    ClientSubscription sub;
+	    ClientSubscriptionKey key = new ClientSubscriptionKey(msgMOMAck.nameSubscription, drvKey, true);	
       
 	    /* checks if the subscription exists */
-	    if((sub = (SubscriptionClient) subscriptionTable.get(key))==null)
+	    if((sub = (ClientSubscription) subscriptionTable.get(key))==null)
 		throw (new MOMException("Impossible : Subscription doesn't exist in AgentClient",MOMException.TOPIC_MESSAGEID_NO_EXIST));
       
 	    Message msg = null;
 	    while((msg = sub.deliveryMessage())!=null) {
-		MessageTopicDeliverMOMExtern msgDeliver = new MessageTopicDeliverMOMExtern((long) -1, msgMOMAck.nameSubscription, msg, sub.getNameTheme());
+		MessageTopicDeliverMOMExtern msgDeliver = new MessageTopicDeliverMOMExtern((long) -1, msgMOMAck.nameSubscription, msg, sub.getTheme(), drvKey, sub.isConnectionConsumer());
 		agentClient.sendMessageMOMExtern(msgDeliver);
 	    }
 	    
 	} catch (MOMException exc) {
 	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(msgMOMAck.getMessageMOMExternID(), exc);
+	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(msgMOMAck.getMessageMOMExternID(), exc, drvKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
 	}
     }
@@ -788,15 +931,16 @@ public class CommonClientAAA implements java.io.Serializable {
 	/* checking the message */
 	checking(msg);
 		
-	fr.dyade.aaa.mom.NotificationQueueSend notMsgSend = new fr.dyade.aaa.mom.NotificationQueueSend(msgSendMOMExtern.getMessageMOMExternID(), msg);
+	fr.dyade.aaa.mom.NotificationQueueSend notMsgSend = new fr.dyade.aaa.mom.NotificationQueueSend(msgSendMOMExtern.getMessageMOMExternID(), msg, msgSendMOMExtern.getDriverKey());
 	agentClient.sendNotification(to, notMsgSend);
     }
 
-    /** notification for sending a message to a Queue */
+    /** notification for sending a message to a Topic */
     protected void notificationTopicSend(SendingMessageTopicMOMExtern msgSendMOMExtern) throws Exception { 
 	fr.dyade.aaa.mom.TopicNaming topic = (fr.dyade.aaa.mom.TopicNaming) msgSendMOMExtern.message.getJMSDestination();
 	AgentId to = AgentId.fromString(topic.getTopicName());
 	fr.dyade.aaa.mom.Message msg = msgSendMOMExtern.message;
+    int drvKey = msgSendMOMExtern.getDriverKey();
 			
 	/* set of the identifier of the Message */
 	msg.setJMSMessageID(calculateMessageID());
@@ -804,25 +948,30 @@ public class CommonClientAAA implements java.io.Serializable {
 	/* checking the message */
 	checking(msg);
 		
-	fr.dyade.aaa.mom.NotificationTopicSend notMsgSend = new fr.dyade.aaa.mom.NotificationTopicSend(msgSendMOMExtern.getMessageMOMExternID(), msg);
+	fr.dyade.aaa.mom.NotificationTopicSend notMsgSend = new fr.dyade.aaa.mom.NotificationTopicSend(msgSendMOMExtern.getMessageMOMExternID(), msg, drvKey);
 	agentClient.sendNotification(to, notMsgSend);
     }
+
 	
-    /** notification to acknowledge 1 or more messages in a Queue */ 
-    protected void notificationQueueAck(AckQueueMessageMOMExtern msgMOMAck) { 
-	AgentId to = AgentId.fromString(msgMOMAck.queue.getQueueName());
-			
-	/* send the acknowledgment to the Queue */
-	fr.dyade.aaa.mom.NotificationAck notMsgAck = new fr.dyade.aaa.mom.NotificationAck(msgMOMAck.getMessageMOMExternID(), msgMOMAck.messageID, msgMOMAck.ackMode, msgMOMAck.sessionID);
-	agentClient.sendNotification(to, notMsgAck);
-    }
+  /** Method acknowledging one or more messages in a Queue. */ 
+  protected void notificationQueueAck(AckQueueMessageMOMExtern msgMOMAck) { 
+    AgentId to = AgentId.fromString(msgMOMAck.queue.getQueueName());
+    int drvKey = msgMOMAck.getDriverKey();
+
+    // Sending the acknowledgement to the Queue. */
+    fr.dyade.aaa.mom.NotificationAck notMsgAck = 
+      new fr.dyade.aaa.mom.NotificationAck(msgMOMAck.getMessageMOMExternID(), 
+      msgMOMAck.messageID, msgMOMAck.ackMode, msgMOMAck.sessionID, drvKey);
+    agentClient.sendNotification(to, notMsgAck);
+  }
+
 	
     /** notification to receive an enumeration of messages presents in a Queue */ 
     protected void notificationReadOnly(ReadOnlyMessageMOMExtern msgMOMExtern) { 
 	AgentId to = AgentId.fromString(msgMOMExtern.queue.getQueueName());
 		
 	/* send the request to the Queue */
-	fr.dyade.aaa.mom.NotificationReadOnly notMsgReadOnly = new fr.dyade.aaa.mom.NotificationReadOnly(msgMOMExtern.getMessageMOMExternID(), msgMOMExtern.selector);
+	fr.dyade.aaa.mom.NotificationReadOnly notMsgReadOnly = new fr.dyade.aaa.mom.NotificationReadOnly(msgMOMExtern.getMessageMOMExternID(), msgMOMExtern.selector, msgMOMExtern.getDriverKey());
 	agentClient.sendNotification(to, notMsgReadOnly);
     }
 	
@@ -831,137 +980,176 @@ public class CommonClientAAA implements java.io.Serializable {
 	AgentId to = AgentId.fromString(msgMOMExtern.queue.getQueueName());
 		
 	/* send the request to the Queue */
-	fr.dyade.aaa.mom.NotificationReceiveSync notRecSync = new fr.dyade.aaa.mom.NotificationReceiveSync(msgMOMExtern.getMessageMOMExternID(), msgMOMExtern.timeOut, msgMOMExtern.selector, msgMOMExtern.sessionID); 
+	fr.dyade.aaa.mom.NotificationReceiveSync notRecSync = new fr.dyade.aaa.mom.NotificationReceiveSync(msgMOMExtern.getMessageMOMExternID(), msgMOMExtern.timeOut, msgMOMExtern.selector, msgMOMExtern.sessionID,  msgMOMExtern.getDriverKey()); 
+    notRecSync.toListener = msgMOMExtern.toListener;
 	agentClient.sendNotification(to, notRecSync);
     }
-	
-    /** notification to susbcribe to a theme of a Topic */
-    protected void notificationSubscription(SubscriptionMessageMOMExtern msgSub) {
-	AgentId to = AgentId.fromString(msgSub.topic.getTopicName());
-	fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(msgSub.nameSubscription, to, msgSub.topic.getTheme());
-	fr.dyade.aaa.mom.SubscriptionClient sub;
-    
-	if((sub = (SubscriptionClient) subscriptionTable.get(key))!=null) {
-      
-	    if(Debug.debug)
-		if(Debug.clientClose)
-		    Debug.printSubMessage("sub retaken ", sub.queueThemeMessage); 
-      
-	    /* add the subscription in the current durableSubscription */
-	    SessionSubscription sessionSub = null;
-	    /* checks if already a durable subscription exists for the session */
-	    if((sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(msgSub.sessionID))==null) {
-		/* no entry */
-		sessionSub = new fr.dyade.aaa.mom.SessionSubscription(msgSub.ackMode);
-		sessionSub.subSessionVector.addElement(key);
-		sessionDurableSubscriptionTable.put(msgSub.sessionID, sessionSub);
-	    } else {
-		/* already at least 1 entry */
-		sessionSub.subSessionVector.addElement(key);
-	
-	    }
-      
-	    /** add the identifier of the session to the subscription */
-	    sub.setSessionID(msgSub.sessionID);
-      
-	    /* add the subscription to the delivery of the message  */
-	    if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
-		sessionSub.addDeliveredMessage(sub, sub.queueThemeMessage.size());
-      
-	    /* reconnexion to the Topic after interruption of the session or Connection */
-	    /* send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgSub.getMessageMOMExternID());
-	    agentClient.sendMessageMOMExtern(msgAgree);
-	} else {
-	    /* 	preparation of a new durable subscription, which will be effective
-	     *	in reception of the agreement of the Topic
-	     */
-	    NotYetSubRecordObject objRecord = new NotYetSubRecordObject(msgSub.sessionID, true, msgSub.ackMode);
-	    notYetSubscriptionRecordTable.put(new Long(msgSub.getMessageMOMExternID()), objRecord);
-      
-	    /* subscribe in the Topic */
-	    fr.dyade.aaa.mom.NotificationSubscription notSub = new fr.dyade.aaa.mom.NotificationSubscription(msgSub.getMessageMOMExternID(), msgSub.nameSubscription, msgSub.topic.getTheme(), msgSub.noLocal, msgSub.selector);
-	    agentClient.sendNotification(to, notSub);
-	}
+
+
+  /** 
+   * Method processing a notification to subscribe durably to a Topic theme.
+   */
+  protected void notificationSubscription(SubscriptionMessageMOMExtern msgSub)
+  {
+    int drvKey = msgSub.getDriverKey();
+    AgentId to = AgentId.fromString(msgSub.topic.getTopicName());
+
+    ClientSubscriptionKey key =
+      new ClientSubscriptionKey(msgSub.nameSubscription, drvKey, true);
+
+    ClientSubscription sub = (ClientSubscription) subscriptionTable.get(key);
+
+    if (sub != null) {
+      // If the subscription already exists, just updating the sessionID and
+      // driverKey parameters, and register the subscription again.
+      //sub.setSessionID(msgSub.sessionID);
+      sub.setDriverKey(drvKey);
+
+      if (!msgSub.connectionConsumer) {
+        Vector keyVec = (Vector) sessionSubTable.get(new Integer(drvKey) + "_" + msgSub.sessionID);
+        if (keyVec == null)
+          keyVec = new Vector();
+        keyVec.addElement(key);
+        sessionSubTable.put(new Integer(drvKey) + "_" + msgSub.sessionID, keyVec);
+
+        keyVec = (Vector) connectionSessTable.get(new Integer(drvKey));
+        if (keyVec == null)
+          keyVec = new Vector();
+        keyVec.addElement(msgSub.sessionID);
+        connectionSessTable.put(new Integer(drvKey), keyVec);
+        
+        // Sending an agreement to the client request.
+        RequestAgreeMOMExtern msgAgree =
+          new RequestAgreeMOMExtern(msgSub.getMessageMOMExternID(), drvKey);
+        agentClient.sendMessageMOMExtern(msgAgree);
+      }
+      else 
+        connectionConsumerKeyTable.put(new Integer(drvKey), key);
+    } 
+    else {
+      // If sub is null, the subscription is new.
+      NotificationSubscription notSub = new fr.dyade.aaa.mom.NotificationSubscription(msgSub);
+      agentClient.sendNotification(to, notSub);
     }
+  }
+
+
 	
     /** notification to unsusbcribe to a theme of a Topic */
     protected void notificationUnsubscription(UnsubscriptionMessageMOMExtern msgUnsub) { 
+    int drvKey = msgUnsub.getDriverKey();
 	AgentId to = AgentId.fromString(msgUnsub.topic.getTopicName());
 		
 	/* 	preparation of a new durable unsubscription, which will be effective
 	 *	in reception of the agreement of the Topic (o know the sessionID
 	 */
-	NotYetSubRecordObject objRecord = new NotYetSubRecordObject(msgUnsub.sessionID, true, msgUnsub.ackMode);
-	notYetSubscriptionRecordTable.put(new Long(msgUnsub.getMessageMOMExternID()), objRecord);
+	//NotYetSubRecordObject objRecord = new NotYetSubRecordObject(msgUnsub.sessionID, true, msgUnsub.ackMode);
+	//notYetSubscriptionRecordTable.put(new Long(msgUnsub.getMessageMOMExternID()), objRecord);
 			
 	/* remove subscription in the Topic */
-	fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgUnsub.getMessageMOMExternID(), msgUnsub.nameSubscription, msgUnsub.topic.getTheme());
+	//fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgUnsub.getMessageMOMExternID(), msgUnsub.nameSubscription, msgUnsub.topic.getTheme(), drvKey);
+	fr.dyade.aaa.mom.NotificationUnsubscription notUnsub =
+      new fr.dyade.aaa.mom.NotificationUnsubscription(msgUnsub);
 	agentClient.sendNotification(to, notUnsub);
     }
 	
     /** notification to update a susbcription to a theme of a Topic */
     protected void notificationUpdateSubscription(UpdatingSubscriptionMOMExtern msgUpdate) {
 	AgentId to = AgentId.fromString(msgUpdate.topic.getTopicName());
+    int drvKey = msgUpdate.getDriverKey();
 		
 	/* update subscription in the Topic */
-	fr.dyade.aaa.mom.NotificationUpdateSubscription notUpdateSub = new fr.dyade.aaa.mom.NotificationUpdateSubscription(msgUpdate.getMessageMOMExternID(), msgUpdate.nameSubscription, msgUpdate.topic.getTheme(), msgUpdate.noLocal, msgUpdate.selector);
+	fr.dyade.aaa.mom.NotificationUpdateSubscription notUpdateSub = new fr.dyade.aaa.mom.NotificationUpdateSubscription(msgUpdate.getMessageMOMExternID(), msgUpdate.nameSubscription, msgUpdate.topic.getTheme(), msgUpdate.noLocal, msgUpdate.selector, drvKey);
 	agentClient.sendNotification(to, notUpdateSub);
     }
 	
-    /** notification of a no durable susbcription to a theme of a Topic */
-    protected void notificationNoDurableSub(SubscriptionNoDurableMOMExtern msgSub) {
-	AgentId to = AgentId.fromString(msgSub.topic.getTopicName());
-		
-	/* 	preparation of a new durable subscription, which will be effective
-	 *	in reception of the agreement of the Topic
-	 */
-	NotYetSubRecordObject objRecord = new NotYetSubRecordObject(msgSub.sessionID, false, msgSub.ackMode);
-	notYetSubscriptionRecordTable.put(new Long(msgSub.getMessageMOMExternID()), objRecord);
-		
-	/* then same behavour as a durable subscription */
-	fr.dyade.aaa.mom.NotificationSubscription notSub = new fr.dyade.aaa.mom.NotificationSubscription(msgSub.getMessageMOMExternID(), msgSub.nameSubscription, msgSub.topic.getTheme(), msgSub.noLocal, msgSub.selector);
-	agentClient.sendNotification(to, notSub);
-    }		
-				
-    /** allows the delivery of the message to the (external) client  */
-    protected void notificationSettingListener(SettingListenerMOMExtern msgSetMOM) throws Exception{
-	try {
-	    AgentId topic = AgentId.fromString(msgSetMOM.topic.getTopicName());
+ 
+  /** 
+   * Method processing a non durable subscription to Topic theme.  
+   */
+  protected void notificationNoDurableSub(SubscriptionNoDurableMOMExtern msgSub) 
+  {
+    int drvKey = msgSub.getDriverKey();
 
-	    fr.dyade.aaa.mom.SubscriptionClient sub ;
-	    fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(msgSetMOM.nameSubscription, topic, msgSetMOM.topic.getTheme());	
+    AgentId to = AgentId.fromString(msgSub.topic.getTopicName());
+
+    NotificationSubscription notSub = new NotificationSubscription(msgSub);
+    notSub.durable = false;
+
+	agentClient.sendNotification(to, notSub);
+  }
+
+
+  /** 
+   * Method reacting to a <code>SettingListenerMOMExtern</code>
+   * message sent by a client setting a listener through the
+   * <code>TopicSubscriber.setListener()</code> method.
+   *
+   * @param msgSetMOM  the message sent by a client.
+   *
+   * @see  AgentClient
+   *
+   * @author Frederic Maistre
+   */
+  protected void notificationSettingListener(SettingListenerMOMExtern msgSetMOM) 
+    throws Exception
+  {
+    int drvKey = msgSetMOM.getDriverKey();
+    try {
+      AgentId topic = AgentId.fromString(msgSetMOM.topic.getTopicName());
+
+      // Retrieving the corresponding non-durable ClientSubscription. 
+      ClientSubscriptionKey key = new ClientSubscriptionKey(msgSetMOM.nameSubscription, drvKey, false);	
+      ClientSubscription sub = (ClientSubscription) subscriptionTable.get(key);	
+
+      // If it does not exist, it might be durable.
+      if (sub == null) {
+        key = new ClientSubscriptionKey(msgSetMOM.nameSubscription, drvKey, true);
+        sub = (ClientSubscription) subscriptionTable.get(key);	
+
+        if (sub == null)
+          throw (new MOMException("Setting listener impossible : subscription does not exist",
+            MOMException.SUBSCRIPTION_NO_EXIST));
+      }
+
+      // Setting the MessageListener.
+      sub.setMessageListener(msgSetMOM.messageListener);
+
+      // Sending request agreement to the client.
+      RequestAgreeMOMExtern msgAgree =
+        new RequestAgreeMOMExtern(msgSetMOM.getMessageMOMExternID(), drvKey);
+	  agentClient.sendMessageMOMExtern(msgAgree);
+
+      // Getting the connection state.
+      Boolean startMode = (Boolean) startModeTable.get(new Integer(drvKey));
+      Boolean connectMode = (Boolean) connectModeTable.get(new Integer(drvKey));
+      boolean msgListener = sub.getMessageListener();
 		
-	    /* checks if the subscription exists */
-	    if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))==null)
-		throw (new MOMException("Delivery Impossible : Subscription no exist",MOMException.SUBSCRIPTION_NO_EXIST));
+      if (startMode.booleanValue() && connectMode.booleanValue() && msgListener) {
+        Message msg = null;
+        while ((msg = sub.deliveryMessage()) != null) {
+
+          MessageTopicDeliverMOMExtern msgDeliver =
+            new MessageTopicDeliverMOMExtern((long) -1,
+            msgSetMOM.nameSubscription, msg, sub.getTheme(), drvKey);
+
+          agentClient.sendMessageMOMExtern(msgDeliver);
+        }
+      }
 		
-	    /* set the MessageListener */
-	    sub.setMessageListener(msgSetMOM.messageListener);
-		
-	    if(Debug.debug)
-		if(Debug.clientSub)
-		    System.out.println("settingListener "+msgSetMOM.messageListener+" OK, startmode : "+startMode);	 
-		
-		
-	    if(startMode) {
-				/* delivery the message presents in the queue if any present */
-		fr.dyade.aaa.mom.Message msg = null;
-		
-				/* add the message in the queue of autoAck Session if any */
-		String sessionID = sub.getSessionID();
+		/*String sessionID = sub.getSessionID();
 		if(sessionID==null) 
 		    throw(new MOMException("2 No Session corresponds to the Message delivered by the Topic",MOMException.NO_SUCH_SESSION_EXIST));
 				
 		SessionSubscription sessionSub = null;		
-		if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sessionID))==null) 
-		    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sessionID);
+		if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(drvKey + "_" + sessionID))==null) 
+		    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(drvKey + "_" + sessionID);
 			
 		if(sessionSub==null) 
 		    throw(new MOMException("3 No Session corresponds to the Message delivered by the Topic",MOMException.NO_SUCH_SESSION_EXIST));
 				
 		if(sessionSub.ackMode!=AUTO_ACKNOWLEDGE) {
-		    /*	delivers the message if the client arose a messageListener */
+		    /*	delivers the message if the client arose a messageListener 
 		    while((msg = sub.deliveryMessage())!=null) {
 			if(Debug.debug)
 			    if(Debug.clientSub && msg instanceof fr.dyade.aaa.mom.TextMessage) {
@@ -973,167 +1161,221 @@ public class CommonClientAAA implements java.io.Serializable {
 				}
 			    }
 					
-			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, msgSetMOM.nameSubscription, msg, sub.getNameTheme());
+			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, msgSetMOM.nameSubscription, msg, sub.getNameTheme(), drvKey);
+System.out.println("CommonClientAAA: calling sendMessageMOMExtern, 27");
 			agentClient.sendMessageMOMExtern(msgDeliver);
 		    }
 		} else {
-		    /* delivers the message if possible */
+		    /* delivers the message if possible 
 		    if((msg = sessionSub.deliveryMessage())!=null) {
-			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, msgSetMOM.nameSubscription, msg, sub.getNameTheme());
+			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, msgSetMOM.nameSubscription, msg, sub.getNameTheme(), drvKey);
+System.out.println("CommonClientAAA: calling sendMessageMOMExtern, 28");
 			agentClient.sendMessageMOMExtern(msgDeliver);
 		    }
-		}
-	    }
-			
-	    /* send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgSetMOM.getMessageMOMExternID());
-	    agentClient.sendMessageMOMExtern(msgAgree);
+		}*/
 		
-	} catch (MOMException exc) {
-	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(msgSetMOM.getMessageMOMExternID(), exc);
-	    agentClient.sendMessageMOMExtern(msgExc);
+    } catch (MOMException exc) {
+      ExceptionMessageMOMExtern msgExc =
+        new ExceptionMessageMOMExtern(msgSetMOM.getMessageMOMExternID(), exc, drvKey);
+      agentClient.sendMessageMOMExtern(msgExc);
 	} 
+  }
+
+
+  /**
+   * Method reacting to an <code>AckTopicMessageMOMExtern</code>
+   * acknowledging a message sent by a <code>Topic</code>.
+   *
+   * @param msgMOMAck  the acknowledgement.
+   *
+   * @author Frederic Maistre.
+   */
+  protected void notificationTopicAck(AckTopicMessageMOMExtern msgMOMAck) throws Exception
+  {
+    int drvKey = msgMOMAck.getDriverKey();
+    try {
+      AgentId topic = AgentId.fromString(msgMOMAck.topic.getTopicName());
+
+      // Retrieving the corresponding non durable subscription.
+      ClientSubscriptionKey key = new ClientSubscriptionKey(msgMOMAck.nameSubscription,
+        drvKey, false);	
+      ClientSubscription sub = (ClientSubscription) subscriptionTable.get(key);
+
+      // If it does not exist, it might be durable. 
+      if (sub == null) {
+        key = new ClientSubscriptionKey(msgMOMAck.nameSubscription,
+          drvKey, true);
+        sub = (ClientSubscription) subscriptionTable.get(key);
+
+        if (sub == null)
+          throw (new MOMException("notificationTopicAck: subscription does not exist",
+            MOMException.TOPIC_MESSAGEID_NO_EXIST));
+      }
+      sub.removeMessage(msgMOMAck.messageID);	
+
+      // Acknowledging the client's request.		
+      RequestAgreeMOMExtern msgAgree =
+        new RequestAgreeMOMExtern(msgMOMAck.getMessageMOMExternID(), drvKey);
+      agentClient.sendMessageMOMExtern(msgAgree);		
+
+    } catch (MOMException exc) {
+        ExceptionMessageMOMExtern msgExc =
+          new ExceptionMessageMOMExtern(msgMOMAck.getMessageMOMExternID(), exc, drvKey);
+        agentClient.sendMessageMOMExtern(msgExc);
+    } 
+  }
+
+
+  /**
+   * Method reacting to an <code>AckMSPMessageMOMExtern</code> sent
+   * by a client to acknowledge a group of messages.
+   *
+   * @param msgAckMSP  the multiple acknowledgement.
+   *
+   * @author Nicolas Tachker
+   */
+  protected void notificationMSPAck(AckMSPMessageMOMExtern msgAckMSP) throws Exception
+  {
+
+    for(int i = 0; i < msgAckMSP.ackTab.length; i++) {
+
+      // Acknowledging messages sent by a topic.
+      if(msgAckMSP.ackTab[i] instanceof AckTopicMessageMOMExtern) {
+        // Setting the driverKey parameter of each acknowledgement. 
+        (msgAckMSP.ackTab[i]).setDriverKey(msgAckMSP.getDriverKey());
+        // Acknowledging messages one by one.
+        notificationTopicAck((AckTopicMessageMOMExtern) msgAckMSP.ackTab[i]);
+
+      // Acknowledging messages sent by a .
+      } else if(msgAckMSP.ackTab[i] instanceof AckQueueMessageMOMExtern) {
+        // Setting the driverKey parameter of each acknowledgement. 
+        (msgAckMSP.ackTab[i]).setDriverKey(msgAckMSP.getDriverKey());
+        // Acknowledging messages one by one.
+        notificationQueueAck((AckQueueMessageMOMExtern) msgAckMSP.ackTab[i]);
+      }
     }
-	
-    /** method to remove a message from a subscription */
-    protected void notificationTopicAck(AckTopicMessageMOMExtern msgMOMAck) throws Exception {
-	try {
-	    AgentId topic = AgentId.fromString(msgMOMAck.topic.getTopicName());
-		
-	    fr.dyade.aaa.mom.SubscriptionClient sub ;
-	    fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(msgMOMAck.nameSubscription, topic, msgMOMAck.topic.getTheme());	
-		
-	    /* checks if the subscription exists */
-	    if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))==null)
-		throw (new MOMException("Ack Impossible : Subscription doesn't exist in AgentClient",MOMException.TOPIC_MESSAGEID_NO_EXIST));
-		
-	    /* remove 1 or more messages */
-	    sub.removeMessage(msgMOMAck.messageID);	
-		
-		
-	    if(Debug.debug)
-		if(Debug.clientAck)
-		    Debug.printMessageSubscription(((Agent)agentClient).getId().toString()+" ",sub.getThemeMessage());
-		
-		
-	    if(msgMOMAck.ackMode!=CommonClientAAA.AUTO_ACKNOWLEDGE) {
-				/* sends an acknowledge to the client */
-				/* send the agreement to the client */
-		fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgMOMAck.getMessageMOMExternID());
-		agentClient.sendMessageMOMExtern(msgAgree);		
-	    } else {
-				/* autoacknowledgment mode */
-		String sessionID = sub.getSessionID();
-		if(sessionID==null) 
-		    throw(new MOMException("4 No Session corresponds to the Message delivered by the Topic",MOMException.NO_SUCH_SESSION_EXIST));
-				
-		SessionSubscription sessionSub = null;		
-		if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sessionID))==null) {
-		    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sessionID);
-		}
-				
-				/* ack the message to the sessionSubscription in autoack */
-		sessionSub.ackDeliveredMessage();
-				
-		if(startMode) {
-		    /* add the message in the queue of autoAck Session if any */
-		    fr.dyade.aaa.mom.Message msgAuto;
-		    if((msgAuto = sessionSub.deliveryMessage())!=null) {
-			fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, msgMOMAck.nameSubscription, msgAuto, sub.getNameTheme());
-			agentClient.sendMessageMOMExtern(msgDeliver);
-		    }
-		}
-	    }
-	} catch (MOMException exc) {
-	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(msgMOMAck.getMessageMOMExternID(), exc);
-	    agentClient.sendMessageMOMExtern(msgExc);
-	} 
-    }
-	
-    /** method to remove a set of messages frome multiples Queues and Topics */
-    protected void notificationMSPAck(AckMSPMessageMOMExtern msgAckMSP) throws Exception {
-		
-	if(Debug.debug)
-	    if(Debug.clientAck)
-		System.out.println("length : "+msgAckMSP.ackTab.length);
-	for(int i = 0; i < msgAckMSP.ackTab.length; i++) {
-	    if(msgAckMSP.ackTab[i] instanceof AckTopicMessageMOMExtern) {
-		notificationTopicAck((AckTopicMessageMOMExtern) msgAckMSP.ackTab[i]);
-	    } else if(msgAckMSP.ackTab[i] instanceof AckQueueMessageMOMExtern) {
-		notificationQueueAck((AckQueueMessageMOMExtern) msgAckMSP.ackTab[i]);
-	    }
-	}
-    }
-	
-    /** method to start or stop the delivery of message */
-    protected void notificationStateListen(StateListenMessageMOMExtern msgListen) throws Exception{
-	try {
-	    startMode = msgListen.startMode;
-			
-	    /* redelivered the messages */
-	    if(startMode) {
-				/* messages from topic */
-		Enumeration e = subscriptionTable.elements();
-		Enumeration keys = subscriptionTable.keys();
-		fr.dyade.aaa.mom.SubscriptionClient sub ;
-		fr.dyade.aaa.mom.KeyClientSubscription key;
-		fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver;
-		fr.dyade.aaa.mom.Message msg;
-				
-				/* enumeration of the hashtable */
-		while(e.hasMoreElements()) {
-		    sub = (fr.dyade.aaa.mom.SubscriptionClient) e.nextElement();
-		    key = (fr.dyade.aaa.mom.KeyClientSubscription) keys.nextElement();
-				
+  }
+
+
+  /** 
+   * Method reacting to a <code>StateListenMessageMOMExtern</code>
+   * message sent by a client starting a connection.
+   *
+   * @param msgListen  the start message sent by a client.
+   *
+   * @see  AgentClient
+   *
+   * @author Frederic Maistre
+   */
+  protected void notificationStateListen(StateListenMessageMOMExtern msgListen)
+    throws Exception
+  {
+    int drvKey = msgListen.getDriverKey();
+
+    try {
+      Boolean startMode = new Boolean(msgListen.startMode);
+      startModeTable.put(new Integer(drvKey), startMode);
+
+      // Sending the request agreement to the client.
+      RequestAgreeMOMExtern msgAgree =
+        new RequestAgreeMOMExtern(msgListen.getMessageMOMExternID(), drvKey);
+      agentClient.sendMessageMOMExtern(msgAgree);
+
+      Boolean connectMode = (Boolean) connectModeTable.get(new Integer(drvKey));
+
+      if(connectMode.booleanValue() && msgListen.startMode) { 
+        ClientSubscriptionKey subKey;
+        ClientSubscription clientSub ;
+        MessageTopicDeliverMOMExtern msgDeliver;
+        Message msg;
+
+        // Getting the vector of ClientSubscriptionKeys for this driverKey.
+        Vector sessionVec = (Vector) connectionSessTable.get(new Integer(drvKey));
+        if (sessionVec != null) {
+        for (int i = 0; i < sessionVec.size(); i++) {
+          String sessionID = (String) sessionVec.elementAt(i);
+          Vector subVec = (Vector) sessionSubTable.get(new Integer(drvKey) + "_" + sessionID);
+          if (subVec != null) {
+          for (int j = 0; j < subVec.size(); j++) {
+            subKey = (ClientSubscriptionKey) subVec.elementAt(j);
+            clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+
+            // Delivering the messages if any, and if there is a message
+            // listener for this subscription.
+            if (clientSub != null && clientSub.getMessageListener()) {
+              while ((msg = clientSub.deliveryMessage()) != null) {
+                msgDeliver = new MessageTopicDeliverMOMExtern((long) -1,
+                  subKey.subscriptionName, msg, clientSub.getTheme(),
+                  clientSub.getDriverKey());
+
+                agentClient.sendMessageMOMExtern(msgDeliver);
+              }
+            }
+          }}
+        }}
+ 
+        subKey = (ClientSubscriptionKey) connectionConsumerKeyTable.get(new Integer(drvKey));
+        if (subKey != null) {
+          clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+          if (clientSub != null) {
+            while ((msg = clientSub.deliveryMessage()) != null) {
+              msgDeliver = new MessageTopicDeliverMOMExtern((long) -1, subKey.subscriptionName,
+                msg, clientSub.getTheme(), clientSub.getDriverKey(),
+                clientSub.isConnectionConsumer());
+
+              agentClient.sendMessageMOMExtern(msgDeliver);
+            }
+          } 
+        }
+
+
 		    /* add the message in the queue of autoAck Session if any 
 		     *	sessionID can be Null, if durable sub exists (last connexion)
-		     */
 		    String sessionID = sub.getSessionID();
 		    if(sessionID!=null) {
 						
 			SessionSubscription sessionSub = null;		
-			if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sessionID))==null) {
-			    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sessionID);
+			if((sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sub.getDriverKey() + "_" + sessionID))==null) {
+			    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sub.getDriverKey() + "_" + sessionID);
 			}
 				
 			if(sessionSub==null) 
 			    throw(new MOMException("6 No Session corresponds to the Message delivered by the Topic",MOMException.NO_SUCH_SESSION_EXIST));
 				
 			if(sessionSub.ackMode!=AUTO_ACKNOWLEDGE) {
-			    /*  enumeration of the messages */
-			    while((msg = sub.deliveryMessage())!=null) {
-				msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.nameSubscription, msg, sub.getNameTheme());
+			    /*  enumeration of the messages 
+               while((msg = sub.deliveryMessage())!=null) {
+				msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.nameSubscription, msg, sub.getNameTheme(), sub.getDriverKey());
+               System.out.println("CommonClientAAA: calling sendMessageMOMExtern, 34");
 				agentClient.sendMessageMOMExtern(msgDeliver);
 			    }
 			} else {
-			    /* delivers the message if possible */
+                System.out.println("SessionSub: " + sessionSub);
+			    /* delivers the message if possible 
 			    if((msg = sessionSub.deliveryMessage())!=null) {
-				msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.nameSubscription, msg, sub.getNameTheme());
+            System.out.println("----------> Sub name: " + key.nameSubscription);
+				msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.nameSubscription, msg, sub.getNameTheme(), sub.getDriverKey());
+System.out.println("CommonClientAAA: calling sendMessageMOMExtern, 35");
 				agentClient.sendMessageMOMExtern(msgDeliver);
 			    }
 			}
 		    }
-		}
-			
-				/* messages from Queue */
-		Enumeration eQueue = messageSynchroRecVector.elements();
-		while(eQueue.hasMoreElements()) {
-		    agentClient.sendMessageMOMExtern((fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) eQueue.nextElement());
-		}
-		messageSynchroRecVector.removeAllElements();
-	    }
-		
-	    /* send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgListen.getMessageMOMExternID());
-	    agentClient.sendMessageMOMExtern(msgAgree);
-	} catch (MOMException exc) {
-	    /* constructs an ExceptionMessage and send to the client */
-	    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionMessageMOMExtern(msgListen.getMessageMOMExternID(), exc);
-	    agentClient.sendMessageMOMExtern(msgExc);
-	} 	
-    }
+		}*/
+
+        // 
+        Enumeration qMessages = messageSynchroRecVector.elements();
+        if (qMessages != null) {
+        while (qMessages.hasMoreElements())
+          agentClient.sendMessageMOMExtern((MessageQueueDeliverMOMExtern) qMessages.nextElement());
+        messageSynchroRecVector.removeAllElements();
+        }
+      }
+    } catch (MOMException exc) {
+      ExceptionMessageMOMExtern msgExc =
+        new ExceptionMessageMOMExtern(msgListen.getMessageMOMExternID(), exc, drvKey);
+      agentClient.sendMessageMOMExtern(msgExc);
+    } 	
+  }
 	
     /** create a Temporary Queue */
     protected void notificationCreationTemporaryQueue(CreationTemporaryQueueMOMExtern msgCreation) throws MOMException {
@@ -1150,7 +1392,7 @@ public class CommonClientAAA implements java.io.Serializable {
 			
 	    /*	send the agreement to the client */
 	    fr.dyade.aaa.mom.QueueNaming queue = new fr.dyade.aaa.mom.QueueNaming(idAgent.toString());
-	    fr.dyade.aaa.mom.CreationBackDestinationMOMExtern msgAgree = new fr.dyade.aaa.mom.CreationBackDestinationMOMExtern(msgCreation.getMessageMOMExternID(), queue);
+	    fr.dyade.aaa.mom.CreationBackDestinationMOMExtern msgAgree = new fr.dyade.aaa.mom.CreationBackDestinationMOMExtern(msgCreation.getMessageMOMExternID(), queue, msgCreation.getDriverKey());
 	    agentClient.sendMessageMOMExtern(msgAgree);
 			
 	} catch (java.io.IOException exc) {
@@ -1176,7 +1418,7 @@ public class CommonClientAAA implements java.io.Serializable {
 			
 	    /*	send the agreement to the client */
 	    fr.dyade.aaa.mom.TopicNaming topic = new fr.dyade.aaa.mom.TopicNaming(idAgent.toString(), ".");
-	    fr.dyade.aaa.mom.CreationBackDestinationMOMExtern msgAgree = new fr.dyade.aaa.mom.CreationBackDestinationMOMExtern(msgCreation.getMessageMOMExternID(), topic);
+	    fr.dyade.aaa.mom.CreationBackDestinationMOMExtern msgAgree = new fr.dyade.aaa.mom.CreationBackDestinationMOMExtern(msgCreation.getMessageMOMExternID(), topic, msgCreation.getDriverKey());
 	    agentClient.sendMessageMOMExtern(msgAgree);
 			
 	} catch (java.io.IOException exc) {
@@ -1188,112 +1430,151 @@ public class CommonClientAAA implements java.io.Serializable {
     /** close a no durable subscription */
     protected void notificationCloseSubscriber(CloseSubscriberMOMExtern msgCloseSub) throws Exception{
 	AgentId to = AgentId.fromString(msgCloseSub.topic.getTopicName());
-	SessionSubscription sessionSub = null;
+	//SessionSubscription sessionSub = null;
+    int drvKey = msgCloseSub.getDriverKey();
 			
 	if(msgCloseSub.subDurable) {
-	    sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(msgCloseSub.sessionID);
+	    /*sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(drvKey + "_" + msgCloseSub.sessionID);
 	    if(sessionSub!=null) {
-		if(sessionSub.subSessionVector!=null) {
-		    fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(msgCloseSub.nameSubscription, to, msgCloseSub.topic.getTheme()) ;
-		    sessionSub.subSessionVector.removeElement(key);
+		if(sessionSub.subSessionVector!=null) {*/
+    ClientSubscriptionKey key = new ClientSubscriptionKey(msgCloseSub.nameSubscription, drvKey, true) ;
+		    //sessionSub.subSessionVector.removeElement(key);
 			
 		    /* stop the delivery of the message*/
-		    fr.dyade.aaa.mom.SubscriptionClient sub ;
-		    if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))!=null) {
+		    fr.dyade.aaa.mom.ClientSubscription sub ;
+		    if((sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key))!=null) {
 			sub.setMessageListener(false);
 						
 			/* no session bound to the subscription */
-			sub.setSessionID(null);
-			sub.replaceRedeliveredMsg();
+			//sub.setSessionID(null);
+			sub.putBackNonAckMessages();
 		    }
 					
-		    /* releases the ressource if any */
+		    /* releases the ressource if any 
 		    if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
 			sessionSub.removeSubFromDelivery(sub);
-		}
-	    }
+		}*/
 	    /*	send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgCloseSub.getMessageMOMExternID());
+	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgCloseSub.getMessageMOMExternID(), drvKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
 				
 	} else {
-	    /* remove the entry of the no durable subscription */
-	    sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(msgCloseSub.sessionID);
+	    /* remove the entry of the no durable subscription 
+	    sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(drvKey + msgCloseSub.sessionID);
 			
 	    if(sessionSub!=null) {
-		if(sessionSub.subSessionVector!=null) {
-		    fr.dyade.aaa.mom.KeyClientSubscription key = new fr.dyade.aaa.mom.KeyClientSubscription(msgCloseSub.nameSubscription, to, msgCloseSub.topic.getTheme()) ;
-		    sessionSub.subSessionVector.removeElement(key);
+		if(sessionSub.subSessionVector!=null) {*/
+		    fr.dyade.aaa.mom.ClientSubscriptionKey key = new fr.dyade.aaa.mom.ClientSubscriptionKey(msgCloseSub.nameSubscription, drvKey, true);
+//		    sessionSub.subSessionVector.removeElement(key);
 					
 		    /* releases the ressource if any */
-		    fr.dyade.aaa.mom.SubscriptionClient sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key);
-		    if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
-			sessionSub.removeSubFromDelivery(sub);
-		}
+		    fr.dyade.aaa.mom.ClientSubscription sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key);
+/*		    if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
+			sessionSub.removeSubFromDelivery(sub);*/
 	    }
 	    /* remove subscription in the Topic */
-	    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgCloseSub.getMessageMOMExternID(), msgCloseSub.nameSubscription, msgCloseSub.topic.getTheme());
+	    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgCloseSub.getMessageMOMExternID(), msgCloseSub.nameSubscription, msgCloseSub.topic.getTheme(), drvKey);
 	    agentClient.sendNotification(to, notUnsub);
-	}
     }
+
+    
 	
-    /** close multiple no durable subscription */
-    protected void	notificationCloseTopicSession(CloseTopicSessionMOMExtern msgCloseSub) throws Exception{
-	fr.dyade.aaa.mom.KeyClientSubscription key;
-	SessionSubscription sessionSub = null;
+  protected void notificationCloseTopicSession(CloseTopicSessionMOMExtern msgCloseSub)
+    throws Exception
+  {
+    int drvKey = msgCloseSub.getDriverKey();
+    String sessionID = msgCloseSub.sessionID;
+
+    Vector sessionSubKeys = (Vector) sessionSubTable.remove(new Integer(drvKey) + "_" + sessionID);
+
+    if (sessionSubKeys != null) {
+    while (sessionSubKeys.size() > 0) {
+      ClientSubscriptionKey subKey = (ClientSubscriptionKey) sessionSubKeys.remove(0);
+
+      // Removing the subscription from the table and in the topic if it is not durable.
+      if (!subKey.durable) {
+        ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+        NotificationUnsubscription notUnsub =
+          new NotificationUnsubscription(msgCloseSub.getMessageMOMExternID(),
+          subKey.subscriptionName, clientSub.getTheme(), drvKey);
+
+        agentClient.sendNotification(clientSub.getTopicID(), notUnsub);
+      }
+      // Stoping delivery of messages if the subscription is durable.
+      else {
+        ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+        clientSub.setMessageListener(false);
+        //clientSub.setSessionID(null);
+        clientSub.putBackNonAckMessages();
+      }
+    }}
+
+/*
+fr.dyade.aaa.mom.ClientSubscriptionKey key;
+SessionSubscription sessionSub = null;
 		
-	/* removes the temporary subscriptions */ 
-	sessionSub= (SessionSubscription) sessionTemporarySubscriptionTable.remove(msgCloseSub.sessionID);
+	/* removes the temporary subscriptions 
+   
+	sessionSub= (SessionSubscription) sessionTemporarySubscriptionTable.remove(drvKey + "_" + msgCloseSub.sessionID);
 	if(sessionSub!=null) {
+    System.out.println("---------------------------------"); 
+    System.out.println("Removing sessionSub from sessionTempSubscriptionTable, key " + (drvKey + "_" + msgCloseSub.sessionID));
+    System.out.println("---------------------------------"); 
 	    if(sessionSub.subSessionVector!=null) {
 		Vector v = sessionSub.subSessionVector;
 		while(!v.isEmpty()) {
-		    /* remove the entry of the no durable subscription */
-		    key = (fr.dyade.aaa.mom.KeyClientSubscription) v.firstElement();
+		    /* remove the entry of the no durable subscription 
+		    key = (fr.dyade.aaa.mom.ClientSubscriptionKey) v.firstElement();
 		    v.removeElementAt(0);
 			
-		    /* remove subscription in the Topic */
-		    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgCloseSub.getMessageMOMExternID(), key.nameSubscription, key.theme);
+		    /* remove subscription in the Topic 
+		    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription(msgCloseSub.getMessageMOMExternID(), key.nameSubscription, key.theme, drvKey);
+    System.out.println("CommonClientAAA: send notification, 15");
 		    agentClient.sendNotification(key.topic, notUnsub);
 		}
 				
-				/* autoAck : removes the list of the message to deliver*/
+				/* autoAck : removes the list of the message to deliver
 		if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
 		    sessionSub.removeAllSubFromDelivery();
 	    }
 	} 
 		
-	/* stops the delivery of message of the durable subscriptions */
-	sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.remove(msgCloseSub.sessionID);
+	/* stops the delivery of message of the durable subscriptions 
+	sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.remove(drvKey + "_" + msgCloseSub.sessionID);
 	if(sessionSub!=null) {
+        System.out.println("CommonClientAAA.closeTopicSession: removing sessionSub from table with key " + (msgCloseSub.sessionID));
 	    if(sessionSub.subSessionVector!=null) {
 		Enumeration e = sessionSub.subSessionVector.elements();
-		fr.dyade.aaa.mom.SubscriptionClient sub;
+		fr.dyade.aaa.mom.ClientSubscription sub;
 		while(e.hasMoreElements()) {
-		    /* MessageListener is put to false */
-		    key = (fr.dyade.aaa.mom.KeyClientSubscription) e.nextElement();
-		    if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))!=null) {
+		    /* MessageListener is put to false 
+		    key = (fr.dyade.aaa.mom.ClientSubscriptionKey) e.nextElement();
+		    if((sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key))!=null) {
 			sub.setMessageListener(false);
 						
-			/* no session bound to the subscription */
+			/* no session bound to the subscription 
 			sub.setSessionID(null);
-			sub.replaceRedeliveredMsg();
+			sub.putBackNonAckMessages();
 		    }
 		}
 				
-				/* autoAck : removes the list of the message to deliver*/
+				/* autoAck : removes the list of the message to deliver
 		if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
 		    sessionSub.removeAllSubFromDelivery();
 	    }
-	}
+	}*/
 		
-	/*	send the agreement to the client */
-	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgCloseSub.getMessageMOMExternID());
-	agentClient.sendMessageMOMExtern(msgAgree);
-    }	
+    // Sending an agreement to the client's request.
+    RequestAgreeMOMExtern msgAgree =
+      new RequestAgreeMOMExtern(msgCloseSub.getMessageMOMExternID(), drvKey);
+    agentClient.sendMessageMOMExtern(msgAgree);
+  }	
+
+
 	
     /** close a temporary destination */
     protected void notificationCloseDestination(CloseDestinationMOMExtern msgCloseDest) throws MOMException {
+    int drvKey = msgCloseDest.getDriverKey();
 	AgentId to = AgentId.fromString(msgCloseDest.destination.getDestination());
 		
 	/* checks if the subscription exists */
@@ -1301,24 +1582,25 @@ public class CommonClientAAA implements java.io.Serializable {
 	    throw (new MOMException("Destruction impossible : Destination Object no exists",MOMException.NO_SUCH_TEMPORARY_DESTINATION_EXIST));
 			
 	/* remove subscription in the Topic */
-	fr.dyade.aaa.mom.NotificationCloseDestination notClose = new fr.dyade.aaa.mom.NotificationCloseDestination(msgCloseDest.getMessageMOMExternID());
+	fr.dyade.aaa.mom.NotificationCloseDestination notClose = new fr.dyade.aaa.mom.NotificationCloseDestination(msgCloseDest.getMessageMOMExternID(), drvKey);
 	agentClient.sendNotification(to, notClose);
 		
 	/*	send the agreement to the client 
 	 *	agreement is sent before efficient action because after a delete, no message
 	 *	can't be sent
 	 */
-	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgCloseDest.getMessageMOMExternID());
+	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgCloseDest.getMessageMOMExternID(), drvKey);
 	agentClient.sendMessageMOMExtern(msgAgree);
     }
 	
+
     /** close all the temporary destinations and the temporary subscriptions */
-    protected void notificationCloseConnection() {
+    protected void reactToClosingConnection(int driversKey) {
 	try {
 	    /* stop the delivery of the messages */
-	    startMode = false;
-	    exceptionMode = false;
-	    connectMode = false;
+	    startModeTable.put(new Integer(driversKey), new Boolean(false));
+	    exceptionModeTable.put(new Integer(driversKey), new Boolean(false));
+	    connectModeTable.put(new Integer(driversKey), new Boolean(false));
 		
 	    /* close of the destinations */
 	    Enumeration e = temporaryQueueTopicVector.elements();
@@ -1326,90 +1608,165 @@ public class CommonClientAAA implements java.io.Serializable {
 		AgentId to = (AgentId) e.nextElement();
 				/* remove subscription in the Topic */
 				/* (long) -1 has means nothing*/
-		fr.dyade.aaa.mom.NotificationCloseDestination notClose = new fr.dyade.aaa.mom.NotificationCloseDestination((long) -1);
+		fr.dyade.aaa.mom.NotificationCloseDestination notClose = new fr.dyade.aaa.mom.NotificationCloseDestination((long) 0, driversKey);
 		agentClient.sendNotification(to, notClose);
 	    }
 	    temporaryQueueTopicVector.removeAllElements();
-		
-	    /* unsubscribe to the Topic the temporary subscription of the client */
-	    Enumeration eTemp = sessionTemporarySubscriptionTable.elements();
+
+
+    Vector sessions = (Vector) connectionSessTable.remove(new Integer(driversKey));
+    if (sessions != null) {
+    while (sessions.size() > 0) {
+      String sessionID = (String) sessions.remove(0);
+      Vector subVec = (Vector) sessionSubTable.remove(new Integer(driversKey) + "_" + sessionID);
+      
+      if (subVec != null) {
+        while (subVec.size() > 0) {
+          ClientSubscriptionKey subKey = (ClientSubscriptionKey) subVec.remove(0);
+      
+          // Removing the subscription from the table and in the topic if it is not durable.
+          if (!subKey.durable) {
+            ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+            NotificationUnsubscription notUnsub =
+              new NotificationUnsubscription((long) -1,
+              subKey.subscriptionName, clientSub.getTheme(), driversKey);
+
+            agentClient.sendNotification(clientSub.getTopicID(), notUnsub);
+          }
+          // Stoping delivery of messages if the subscription is durable.
+          else {
+            ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+            clientSub.setMessageListener(false);
+            //clientSub.setSessionID(null);
+            clientSub.putBackNonAckMessages();
+          }
+        }
+      }
+    }}
+
+    ClientSubscriptionKey subKey =
+      (ClientSubscriptionKey) connectionConsumerKeyTable.remove(new Integer(driversKey));
+
+    if (subKey != null) {
+      ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
+      if (clientSub != null) {
+        if (!subKey.durable) {
+          NotificationUnsubscription notUnsub = new NotificationUnsubscription((long) -1,
+            subKey.subscriptionName, clientSub.getTheme(), driversKey);
+    
+          agentClient.sendNotification(clientSub.getTopicID(), notUnsub);
+        }
+        else
+          clientSub.putBackNonAckMessages();
+      }
+    }
+
+
+
+	    /* unsubscribe to the Topic the temporary subscription of the client 
+        Enumeration eTemp = sessionTemporarySubscriptionTable.keys();
+	    //Enumeration eTemp = sessionTemporarySubscriptionTable.elements();
 	    while(eTemp.hasMoreElements()) {
-		fr.dyade.aaa.mom.KeyClientSubscription key;
-		SessionSubscription sessionSub = (SessionSubscription) eTemp.nextElement();
+        String sKey = (String) eTemp.nextElement();
+		fr.dyade.aaa.mom.ClientSubscriptionKey key;
+		//SessionSubscription sessionSub = (SessionSubscription) eTemp.nextElement();
+		SessionSubscription sessionSub = (SessionSubscription) sessionTemporarySubscriptionTable.get(sKey);
 		if(sessionSub!=null) {
 		    if(sessionSub.subSessionVector!=null) {
 			Vector v = sessionSub.subSessionVector;
-				
-			while(!v.isEmpty()) {
-			    /* remove the entry of the no durable subscription */
-			    key = (fr.dyade.aaa.mom.KeyClientSubscription) v.firstElement();
-			    v.removeElementAt(0);
-			
-			    /* remove subscription in the Topic */
-			    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription((long) -1, key.nameSubscription, key.theme);
-			    agentClient.sendNotification(key.topic, notUnsub);
-			}
+
+	            //while(!v.isEmpty()) {
+                for (int i = 0; i < v.size(); i++) {
+			    /* remove the entry of the no durable subscription 
+			    //key = (fr.dyade.aaa.mom.ClientSubscriptionKey) v.firstElement();
+			    key = (fr.dyade.aaa.mom.ClientSubscriptionKey) v.get(i);
+              
+                if (key.driversKey == driversKey) { 
+			      //v.removeElementAt(0);
+                  sessionTemporarySubscriptionTable.remove(sKey);
+			      v.removeElementAt(i);
+                  i--;
+    			    /* remove subscription in the Topic 
+    			    fr.dyade.aaa.mom.NotificationUnsubscription notUnsub = new fr.dyade.aaa.mom.NotificationUnsubscription((long) -1, key.nameSubscription, key.theme, driversKey);
+                    System.out.println("CommonClientAAA: send notification, 2");
+     			    agentClient.sendNotification(key.topic, notUnsub);
+	      		}
 						
-			/* autoAck : removes the list of the message to deliver*/
-			if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
-			    sessionSub.removeAllSubFromDelivery();
-		    }
-		}
+		    	/* autoAck : removes the list of the message to deliver
+	    		if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
+    			    sessionSub.removeAllSubFromDelivery();
+    		    }
+          }
 	    }
-	    sessionTemporarySubscriptionTable.clear();
+        } 
+	    //sessionTemporarySubscriptionTable.clear();
 		
-	    /* stops the delivery of message of the durable subscriptions */
+	    /* stops the delivery of message of the durable subscriptions 
 	    Enumeration eDurable = sessionDurableSubscriptionTable.elements();
+	    //Enumeration eDurable = sessionDurableSubscriptionTable.keys();
 	    while(eDurable.hasMoreElements()) {
-		fr.dyade.aaa.mom.KeyClientSubscription key;
+		fr.dyade.aaa.mom.ClientSubscriptionKey key;
+        //String sKey = (String) eDurable.nextElement();
 		SessionSubscription sessionSub = (SessionSubscription) eDurable.nextElement();
-		fr.dyade.aaa.mom.SubscriptionClient sub ;
+		//SessionSubscription sessionSub = (SessionSubscription) sessionDurableSubscriptionTable.get(sKey) ;
+		fr.dyade.aaa.mom.ClientSubscription sub ;
 			
 		if(sessionSub!=null) {
 		    if(sessionSub.subSessionVector!=null) {
 			Vector v = sessionSub.subSessionVector;
 				
-			while(!v.isEmpty()) {
+			//while(!v.isEmpty()) {
+            for (int i = 0; i < v.size(); i++) {
 			    /* MessageListener is put to false */
-			    key = (fr.dyade.aaa.mom.KeyClientSubscription) v.firstElement();
-			    if((sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key))!=null) {
-				/* put the messageListener to false */
+			    /*key = (fr.dyade.aaa.mom.ClientSubscriptionKey) v.firstElement();
+			    key = (fr.dyade.aaa.mom.ClientSubscriptionKey) v.get(i);
+			    if((sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key))!=null
+                  && key.driversKey == driversKey ) {
+				/* put the messageListener to false 
 				sub.setMessageListener(false);
 								
-				/* no session bound to the subscription */
+				/* no session bound to the subscription 
 				sub.setSessionID(null);
 								
 				/*	put the field of the Message JMSRedelivered to TRUE for messages 
 				 *	delivered but not acknowledged
-				 */
-				sub.replaceRedeliveredMsg();
+				 
+				sub.putBackNonAckMessages();
 								
 				if(Debug.debug)
 				    if(Debug.clientClose)
 					Debug.printSubMessage("Durable Sub ", sub.queueThemeMessage) ;
 			    }
-			    v.removeElementAt(0);
+			    //v.removeElementAt(0);
+			    v.removeElementAt(i);
+                //sessionDurableSubscriptionTable.remove(sKey);
+                sessionDurableSubscriptionTable.remove(driversKey + "_" + sub.getSessionID());
+
+			/* autoAck : removes the list of the message to deliver 
+			if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
+			    sessionSub.removeSubFromDelivery(sub);
+		    }
 			}
 						
-			/* autoAck : removes the list of the message to deliver*/
+			/* autoAck : removes the list of the message to deliver
 			if(sessionSub.ackMode==CommonClientAAA.AUTO_ACKNOWLEDGE)
 			    sessionSub.removeAllSubFromDelivery();
 		    }
 		}
 	    }
-	    sessionDurableSubscriptionTable.clear();
+	    //sessionDurableSubscriptionTable.clear();
+        */
 		
-	    /* we put back the message no delivered to the client in their Queue from */
+	    // we put back the message no delivered to the client in their Queue from 
 	    Enumeration eQueue = queueAgentIdAskedVector.elements();
-	    fr.dyade.aaa.mom.NotificationCloseReception notClose = new fr.dyade.aaa.mom.NotificationCloseReception(-1);
+	    fr.dyade.aaa.mom.NotificationCloseReception notClose = new fr.dyade.aaa.mom.NotificationCloseReception(-1, driversKey);
 	    while(eQueue.hasMoreElements()) {
 		agentClient.sendNotification((AgentId)eQueue.nextElement(), notClose);
 	    }
-	    queueAgentIdAskedVector.removeAllElements();
+	    //queueAgentIdAskedVector.removeAllElements();
 			
-	    /* clear the message (synchronous reception) in waiting of delivery */
-	    messageSynchroRecVector.removeAllElements();
-			
+	    // clear the message (synchronous reception) in waiting of delivery 
+	    //messageSynchroRecVector.removeAllElements();
 	} catch (Exception exc) {
 	    warningAdministrator(exc);
 	}
@@ -1417,13 +1774,15 @@ public class CommonClientAAA implements java.io.Serializable {
 	
     /** set or unset the exceptionMode chosen by the client */
     protected void notificationSettingExcListener(SettingExcListenerMOMExtern msgSetExcListener) {
-	this.exceptionMode = msgSetExcListener.exceptionMode;
+      int drvKey = msgSetExcListener.getDriverKey();
+	  exceptionModeTable.put(new Integer(drvKey),  new Boolean(msgSetExcListener.exceptionMode));
     }
 	
     /** record the name of the Queues where the client is working */
     protected void notificationCreationWorkerQueue(CreationWorkerQueueMOMExtern msgWorkQueue) {
 	Enumeration e = queueAgentIdAskedVector.elements();
 	AgentId agentID = AgentId.fromString(msgWorkQueue.queue.getQueueName());
+    int drvKey = msgWorkQueue.getDriverKey();
 		
 	/* research of presence of the name of this Queue in the vector */
 	while(e.hasMoreElements()) {
@@ -1436,14 +1795,14 @@ public class CommonClientAAA implements java.io.Serializable {
 	    queueAgentIdAskedVector.addElement(agentID);
 	
 	/* send the agreement to the client */
-	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgWorkQueue.getMessageMOMExternID());
+	fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgWorkQueue.getMessageMOMExternID(), drvKey);
 	agentClient.sendMessageMOMExtern(msgAgree);
     }						
 	
     /** sends a metaData object to the client */
     protected void notificationMetaData(MetaDataRequestMOMExtern msgMetaDataReq) {
 	/* send the response to the client */
-	fr.dyade.aaa.mom.MetaDataMOMExtern msgMetaData = new fr.dyade.aaa.mom.MetaDataMOMExtern(msgMetaDataReq.getMessageMOMExternID(), this.metaData);
+	fr.dyade.aaa.mom.MetaDataMOMExtern msgMetaData = new fr.dyade.aaa.mom.MetaDataMOMExtern(msgMetaDataReq.getMessageMOMExternID(), this.metaData, msgMetaDataReq.getDriverKey());
 	agentClient.sendMessageMOMExtern(msgMetaData);
     }
 			
@@ -1452,9 +1811,10 @@ public class CommonClientAAA implements java.io.Serializable {
      *	an exception ExceptionUnkonwnObjMOMExtern resent to the client
      *	 the name of the agent given by the client is incorrect
      */
-    protected void notificationUnkownAgent(fr.dyade.aaa.agent.UnknownAgent not) throws Exception {
+    protected void reactToUnknownAgentExcept(fr.dyade.aaa.agent.UnknownAgent not) throws Exception {
 	fr.dyade.aaa.agent.UnknownAgent unknownNot = (fr.dyade.aaa.agent.UnknownAgent) not;
 	fr.dyade.aaa.mom.NotificationMOMRequest notMOM = (fr.dyade.aaa.mom.NotificationMOMRequest) unknownNot.not;
+    int drvKey = notMOM.driverKey;
 				
 	/* constructs the exception */
 	fr.dyade.aaa.mom.MOMException exc = new fr.dyade.aaa.mom.MOMException("Incorrect name of agent Queue or Topic ",MOMException.INCORRECT_NAME_OF_AGENT);
@@ -1473,20 +1833,23 @@ public class CommonClientAAA implements java.io.Serializable {
 	    dest = new fr.dyade.aaa.mom.QueueNaming(unknownNot.agent.toString());
 			
 	/*send the exception to the client */
-	fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern excUnknownAgent= new fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern(notMOM.notMOMID, exc, dest);
+	fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern excUnknownAgent= new fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern(notMOM.notMOMID, exc, dest, drvKey);
 	agentClient.sendMessageMOMExtern(excUnknownAgent);
     }
 	
     /** set the connectionMode to true : the Connection between the client
      *	and the agentClient is begining
      */	
-    public void notificationBeginingConnection() {
-	connectMode = true;
+    public void reactToOpeningConnection(int drvKey) {
+	connectModeTable.put(new Integer(drvKey), new Boolean(true));
+	exceptionModeTable.put(new Integer(drvKey), new Boolean(false));
+	startModeTable.put(new Integer(drvKey), new Boolean(false));
     }
 	
     /** notification to recover a set of messages from a session */
     protected void notificationRecover(RecoverMsgMOMExtern msgRecover) throws Exception{ 
 	int i = 0;
+    int drvKey = msgRecover.getDriverKey();
 	AgentId to ;
 	if(msgRecover.rollbackTab instanceof fr.dyade.aaa.mom.RecoverQueue[]) {
 	    /* message from queue */
@@ -1495,41 +1858,55 @@ public class CommonClientAAA implements java.io.Serializable {
 	    /* treatment of all the messages to rollback */
 	    for(i=0;i<rollbackTab.length;i++) {
 		to = AgentId.fromString(rollbackTab[i].queue.getQueueName());
-		fr.dyade.aaa.mom.NotificationRecover notRec = new fr.dyade.aaa.mom.NotificationRecover(msgRecover.getMessageMOMExternID() ,rollbackTab[i].messageID);
+		fr.dyade.aaa.mom.NotificationRecover notRec = new fr.dyade.aaa.mom.NotificationRecover(msgRecover.getMessageMOMExternID() ,rollbackTab[i].messageID, drvKey);
 		agentClient.sendNotification(to, notRec);
 	    }
 	} else {
 	    /* message from Topic */
 	    fr.dyade.aaa.mom.RecoverTopic[] rollbackTab = (fr.dyade.aaa.mom.RecoverTopic[]) msgRecover.rollbackTab;
 				
-	    fr.dyade.aaa.mom.SubscriptionClient sub ;
-	    fr.dyade.aaa.mom.KeyClientSubscription key ;
+	    fr.dyade.aaa.mom.ClientSubscription sub ;
+	    fr.dyade.aaa.mom.ClientSubscriptionKey key ;
 	    /* treatment of all the messages to rollback */
 	    for(i=0;i<rollbackTab.length;i++) {
 		to = AgentId.fromString(rollbackTab[i].topic.getTopicName());
-		key = new fr.dyade.aaa.mom.KeyClientSubscription(rollbackTab[i].nameSubscription, to, rollbackTab[i].topic.getTheme());
-		sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key);
+		key = new fr.dyade.aaa.mom.ClientSubscriptionKey(rollbackTab[i].nameSubscription, drvKey, false);
+		sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key);
+       
+        if (sub == null) {
+		  key = new fr.dyade.aaa.mom.ClientSubscriptionKey(rollbackTab[i].nameSubscription, drvKey, true);
+		  sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key);
+        } 
 				
 				/* set the message as Redelivered */
-		sub.recoverDeliveredMsg(rollbackTab[i].messageID);
+		sub.putBackNonAckMessage(rollbackTab[i].messageID);
 	    }
 			
 	    /*	send the agreement to the client */
-	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgRecover.getMessageMOMExternID());
+	    fr.dyade.aaa.mom.RequestAgreeMOMExtern msgAgree = new fr.dyade.aaa.mom.RequestAgreeMOMExtern(msgRecover.getMessageMOMExternID(), drvKey);
 	    agentClient.sendMessageMOMExtern(msgAgree);
 	
 	    /* delivers the message to set as redelivered if possible */
-	    if(startMode) {
+        Boolean startMode = (Boolean) startModeTable.get(new Integer(drvKey));
+	    if(startMode.booleanValue()) {
 		fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgDeliver;
 		fr.dyade.aaa.mom.Message msg;
 		for(i=0;i<rollbackTab.length;i++) {
 		    to = AgentId.fromString(rollbackTab[i].topic.getTopicName());
-		    key = new fr.dyade.aaa.mom.KeyClientSubscription(rollbackTab[i].nameSubscription, to, rollbackTab[i].topic.getTheme());
-		    sub = (fr.dyade.aaa.mom.SubscriptionClient) subscriptionTable.get(key);
+		    key = new fr.dyade.aaa.mom.ClientSubscriptionKey(rollbackTab[i].nameSubscription, drvKey, false);
+		    sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key);
+            if (sub == null) {
+		      key = new fr.dyade.aaa.mom.ClientSubscriptionKey(rollbackTab[i].nameSubscription, drvKey, true);
+		      sub = (fr.dyade.aaa.mom.ClientSubscription) subscriptionTable.get(key);
+            }
 				
 		    while((msg = sub.deliveryMessage())!=null) {
-			msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.nameSubscription, msg, sub.getNameTheme());
+            if (sub.isConnectionConsumer())
+			msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.subscriptionName, msg, sub.getTheme(), sub.getDriverKey(), sub.isConnectionConsumer());
+            else {
+			msgDeliver = new fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern((long) -1, key.subscriptionName, msg, sub.getTheme(), sub.getDriverKey());
 			agentClient.sendMessageMOMExtern(msgDeliver);
+            }
 		    }
 		}
 	    }
@@ -1541,12 +1918,16 @@ public class CommonClientAAA implements java.io.Serializable {
      * Stores a set of messages waiting for the transaction's commit.
      */
     protected void notificationXAPrepare(MessageXAPrepare msgPrepare) throws Exception {
+      int drvKey = msgPrepare.getDriverKey();
 	if (msgPrepare.ackVector != null) xidTable.setAckToSendXid(msgPrepare.xid, msgPrepare.ackVector);
 	if (msgPrepare.msgVector != null) xidTable.setMessageToSendXid(msgPrepare.xid, msgPrepare.msgVector);
-	xidTable.setXidStatus(msgPrepare.xid, XidTable.PREPARED);
+
+	xidTable.setXidStatus(msgPrepare.xid, fr.dyade.aaa.joram.XidTable.PREPARED);
 
 	// Send an ack back to the client
-	agentClient.sendMessageMOMExtern(new MessageAckXAPrepare(msgPrepare.getMessageMOMExternID()));
+    MessageMOMExtern msgMOM = new MessageAckXAPrepare(msgPrepare.getMessageMOMExternID());
+    msgMOM.setDriverKey(drvKey);
+	agentClient.sendMessageMOMExtern(msgMOM);
     }
 
 
@@ -1555,6 +1936,7 @@ public class CommonClientAAA implements java.io.Serializable {
      */
     protected void notificationXACommit(MessageXACommit msgCommit) throws Exception {
 	try {
+        int drvKey = msgCommit.getDriverKey();
 	    Vector msgVector = xidTable.getMessageToSendXid(msgCommit.xid);
 	    Vector ackVector = xidTable.getMessageToAckXid(msgCommit.xid);
 
@@ -1563,8 +1945,10 @@ public class CommonClientAAA implements java.io.Serializable {
 		while (!msgVector.isEmpty()) {
 		    Object msg = msgVector.remove(0);
 		    if (msg instanceof SendingMessageQueueMOMExtern) {
+            ((SendingMessageQueueMOMExtern) msg).setDriverKey(drvKey);
 			notificationQueueSend((SendingMessageQueueMOMExtern) msg);
 		    } else if (msg instanceof SendingMessageTopicMOMExtern) {
+            ((SendingMessageTopicMOMExtern) msg).setDriverKey(drvKey);
 			notificationTopicSend((SendingMessageTopicMOMExtern) msg);
 		    } else {
 			throw new Exception();
@@ -1577,8 +1961,10 @@ public class CommonClientAAA implements java.io.Serializable {
 		while (!ackVector.isEmpty()) {
 		    Object ack = ackVector.remove(0);
 		    if (ack instanceof AckQueueMessageMOMExtern) {
+            ((AckQueueMessageMOMExtern) ack).setDriverKey(drvKey);
 			notificationQueueAck((AckQueueMessageMOMExtern) ack);
 		    } else if (ack instanceof AckTopicMessageMOMExtern) {
+            ((AckTopicMessageMOMExtern) ack).setDriverKey(drvKey);
 			notificationTopicAck((AckTopicMessageMOMExtern) ack);
 		    } else {
 			throw new Exception();
@@ -1587,10 +1973,12 @@ public class CommonClientAAA implements java.io.Serializable {
 	    }
 
 	    // Remove the messages and the acks from the xid
-	    xidTable.setXidStatus(msgCommit.xid, XidTable.COMMITTED);
+	    xidTable.setXidStatus(msgCommit.xid, fr.dyade.aaa.joram.XidTable.COMMITTED);
 
 	    // Send an ack back to the client
-	    agentClient.sendMessageMOMExtern(new MessageAckXACommit(msgCommit.getMessageMOMExternID()));
+        MessageMOMExtern msgMOM = new MessageAckXACommit(msgCommit.getMessageMOMExternID());
+        msgMOM.setDriverKey(drvKey);
+	    agentClient.sendMessageMOMExtern(msgMOM);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    throw new Exception();
@@ -1600,11 +1988,12 @@ public class CommonClientAAA implements java.io.Serializable {
 
     protected void notificationXARollback(MessageXARollback msgRollback) throws Exception {
 	Vector msgVector = msgRollback.msgToRollbackVector;
+    int drvKey = msgRollback.getDriverKey();
 
 	if (msgVector == null) {
 	    // No messages to rollback, delete the messages and put the Xid in ROLLBACKED mode
 	    xidTable.removeXid(msgRollback.xid);
-	    xidTable.setXidStatus(msgRollback.xid, XidTable.ROLLBACKED);
+	    xidTable.setXidStatus(msgRollback.xid, fr.dyade.aaa.joram.XidTable.ROLLBACKED);
 	} else {
 	    // We have to push back the messages to the source to signal a rollback
 	    while (!msgVector.isEmpty()) {
@@ -1614,7 +2003,7 @@ public class CommonClientAAA implements java.io.Serializable {
 		    MessageRollbackMOMExtern currentMsg = (MessageRollbackMOMExtern) msg;
 		    AgentId to = AgentId.fromString(((DestinationNaming) currentMsg.getJMSDestination()).getDestination());
 		    NotificationRollback not = new NotificationRollback(currentMsg.getMessageMOMExternID(), currentMsg.getJMSMessageID(),
-									currentMsg.getJMSSessionID());
+									currentMsg.getJMSSessionID(), drvKey);
 		    agentClient.sendNotification(to, not);
 		} else if (msg instanceof AckTopicMessageMOMExtern) {
 		    // Topic
@@ -1622,18 +2011,27 @@ public class CommonClientAAA implements java.io.Serializable {
 		}
 	    }
 	}
-	agentClient.sendMessageMOMExtern(new MessageAckXARollback(msgRollback.getMessageMOMExternID()));
+    MessageMOMExtern msgMOM = new MessageAckXARollback(msgRollback.getMessageMOMExternID());
+    msgMOM.setDriverKey(drvKey);
+	agentClient.sendMessageMOMExtern(msgMOM);
     }
 
 
     protected void notificationXARecover(MessageXARecover msgRecover) throws Exception {
-	agentClient.sendMessageMOMExtern(new MessageAckXARecover(msgRecover.getMessageMOMExternID(), xidTable.getXidList()));
+      int drvKey = msgRecover.getDriverKey();
+      MessageMOMExtern msgMOM = new MessageAckXARecover(msgRecover.getMessageMOMExternID(), 
+        xidTable.getXidList());
+      msgMOM.setDriverKey(drvKey);
+	agentClient.sendMessageMOMExtern(msgMOM);
     }
 
 
+    private String calculateMessageID() {
+      return (new Long(msgCounter++)).toString();
+    }
     /** incrementation of the counter with the syntax
      *	a,b,c,...,z,aa,ab,ac,...,az,ba,... 
-     */
+
     private String calculateMessageID() {
 	String MessageID;
 	char[] chtmp;
@@ -1659,7 +2057,7 @@ public class CommonClientAAA implements java.io.Serializable {
 	    stringID = (new String(chtmp));
 		
 	return MessageID;
-    }
+    }*/
 	
     /** checking the message and add the field missing */
     private void checking(fr.dyade.aaa.mom.Message msg) {
@@ -1674,14 +2072,16 @@ public class CommonClientAAA implements java.io.Serializable {
     /** delivers the exception to the administrator and 
      *	to the client if it has an ExceptionListener
      */
-    protected void deliverAlienException(Exception exc) {
-	if(exceptionMode) {
-	    /* client arises an exceptionlistener */
-	    fr.dyade.aaa.mom.ExceptionListenerMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionListenerMOMExtern(exc);
+    protected void deliverAlienException(Exception exc, int drvKey) {
+    Boolean exceptionMode = (Boolean) exceptionModeTable.get(new Integer(drvKey));
+	if(exceptionMode.booleanValue()) {
+	    // client arises an exceptionlistener 
+	    fr.dyade.aaa.mom.ExceptionListenerMOMExtern msgExc = new fr.dyade.aaa.mom.ExceptionListenerMOMExtern(exc, drvKey);
 	    agentClient.sendMessageMOMExtern(msgExc);
+     
 	}
 		
-	/* warning to the administrator*/
+	// warning to the administrator
 	warningAdministrator(exc);
     }
 	

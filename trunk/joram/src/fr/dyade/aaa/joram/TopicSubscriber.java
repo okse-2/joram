@@ -151,6 +151,9 @@ public class TopicSubscriber extends fr.dyade.aaa.joram.MessageConsumer implemen
 	
 	/** overwrite the methode  */
 	public void setMessageListener(javax.jms.MessageListener listener) throws javax.jms.JMSException {
+     if (listener != null && messageListener != null)
+      throw (new javax.jms.JMSException("A listener has already been set"));
+
 		try {	
 			Object obj = new Object();
 			long messageJMSMOMID = refConnection.getMessageMOMID();
@@ -202,4 +205,92 @@ public class TopicSubscriber extends fr.dyade.aaa.joram.MessageConsumer implemen
 			throw(except);
 		}
 	}
+
+
+  /**
+   * Method used for synchronous reception. 
+   *
+   * @param timeOut  Time-to-live attribute of the reception request in MOM
+   * (ms).
+   *
+   * @author Frederic Maistre
+   */
+  public javax.jms.Message receive(long timeOut) throws javax.jms.JMSException
+  {
+    long requestID = refConnection.getMessageMOMID();
+    Long longRequestID = new Long(requestID);
+
+    // Building the request.
+    fr.dyade.aaa.mom.SynchronousReceptionRequestMsg requestMsg = 
+      new fr.dyade.aaa.mom.SynchronousReceptionRequestMsg(requestID, timeOut);
+    requestMsg.setSubName(nameSubscription);
+
+    Object lock = new Object();
+
+    // Sending the request and waiting for an answer.
+    try {
+      synchronized (lock) {
+        refConnection.waitThreadTable.put(longRequestID, lock);
+        refSession.sendToConnection(requestMsg);
+        lock.wait();
+      }
+    } catch (InterruptedException iE) {
+      javax.jms.JMSException jE =
+        new javax.jms.JMSException("Error while waiting for MOM's answer.");
+      jE.setLinkedException(iE);
+      throw(jE);
+    }
+    
+    if (!refConnection.messageJMSMOMTable.containsKey(longRequestID))
+      throw new javax.jms.JMSException("MOM's answer does not match the request!");
+
+    fr.dyade.aaa.mom.MessageMOMExtern momMsg = (fr.dyade.aaa.mom.MessageMOMExtern)
+      refConnection.messageJMSMOMTable.remove(longRequestID);
+
+    // Acknowledging the answer.
+    if (momMsg instanceof fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) {
+      fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msg =
+        (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) momMsg;
+      if (msg.message != null) {
+        if (!refSession.transacted) {
+          if (refSession.acknowledgeMode ==
+            fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
+            
+            fr.dyade.aaa.mom.AckTopicMessageMOMExtern ackMsg =
+              new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(),
+              topic, nameSubscription, msg.message.getJMSMessageID(),
+              fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
+            
+            refSession.sendToConnection(ackMsg);
+          }
+          else {
+            refSession.lastNotAckVector.addElement(msg);
+            msg.message.setRefSessionItf(refSession);
+          }
+        }
+        else {
+          synchronized(refSession.transactedSynchroObject) {
+            refSession.transactedMessageToAckVector.addElement(msg);
+          }
+        }
+      }
+      refSession.resetMessage(msg.message);
+      return msg.message;
+    }
+
+    // Processing the exception cases.
+    else if (momMsg instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
+      fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc =
+        (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) momMsg;
+
+      javax.jms.JMSException except = new javax.jms.JMSException("MOM internal error"); 
+      except.setLinkedException(msgExc.exception);
+      throw(except);
+    }
+    else {
+      javax.jms.JMSException except = new javax.jms.JMSException("MOM internal error"); 
+      throw(except);
+    }
+  }
+
 }

@@ -21,12 +21,18 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
-public class MessageAckTransactedRollback extends MessageMOMExtern { 
-    public MessageAckTransactedRollback(long requestID) {
-	super(requestID);
-    }
+/**
+ * A <code>MessageAckTransactedRollback</code> is an
+ * acknowledgement to a transacted rollback.
+ */
+public class MessageAckTransactedRollback extends MessageMOMExtern
+{ 
+  /** Constructor. */
+  public MessageAckTransactedRollback(long requestID, int driversKey)
+  {
+    super(requestID, driversKey);
+  }
+
 }

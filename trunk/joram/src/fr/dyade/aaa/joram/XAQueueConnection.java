@@ -37,6 +37,8 @@ import javax.jms.*;
  */
 
 public class XAQueueConnection extends XAConnection implements javax.jms.XAQueueConnection {
+
+  private QueueConnection qc;
     
     /**
      * Construct an <code>XAQueueConnection</code>. The difference with
@@ -46,7 +48,7 @@ public class XAQueueConnection extends XAConnection implements javax.jms.XAQueue
     public XAQueueConnection(String proxyAgentIdString,
 			     InetAddress proxyAddress, int proxyPort,
 			     String login, String passwd) throws javax.jms.JMSException {
-	super(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
+	qc = new QueueConnection(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
     }
 
     /**
@@ -54,7 +56,7 @@ public class XAQueueConnection extends XAConnection implements javax.jms.XAQueue
      */
     public javax.jms.XAQueueSession createXAQueueSession() throws JMSException {
 	long sessionID = getNextSessionID();
-	return new XAQueueSession(sessionID, this);
+	return new XAQueueSession(sessionID, qc);
     }
 
     /**
@@ -63,7 +65,7 @@ public class XAQueueConnection extends XAConnection implements javax.jms.XAQueue
     public javax.jms.QueueSession createQueueSession(boolean transacted,
 						     int acknowledgeMode) throws JMSException {
 	  long sessionID = getNextSessionID();
-	  return new QueueSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, this);
+	  return new QueueSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, qc);
     }
 
     /*
@@ -74,7 +76,41 @@ public class XAQueueConnection extends XAConnection implements javax.jms.XAQueue
 								 String messageSelector,
 								 javax.jms.ServerSessionPool sessionPool,
 								 int maxMessages) throws JMSException {
-	throw new JMSException("Not implemented");
+      return qc.createConnectionConsumer(queue, messageSelector, sessionPool, maxMessages);
     }
+
+    public void close() throws JMSException
+    {
+      qc.close();
+    }
+    public void start() throws JMSException
+    {
+      qc.start();
+    }
+    public void stop() throws JMSException
+    {
+      qc.stop();
+    }
+    public String getClientID() throws JMSException 
+    {
+      return qc.getClientID();
+    }
+    public void setClientID(String clientID) throws JMSException
+    {
+      qc.setClientID(clientID);
+    }
+    public javax.jms.ConnectionMetaData getMetaData() throws JMSException
+    {
+      return qc.getMetaData();
+    }
+    public ExceptionListener getExceptionListener() throws JMSException
+    {
+      return qc.getExceptionListener();
+    }
+    public void setExceptionListener(ExceptionListener listener) throws JMSException
+    {
+      qc.setExceptionListener(listener);
+    } 
+
 
 } // XAQueueConnection

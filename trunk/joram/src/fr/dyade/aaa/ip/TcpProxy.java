@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.ip;
 
 import java.io.*;
@@ -39,7 +37,7 @@ import fr.dyade.aaa.agent.*;
   */
 public abstract class TcpProxy extends ProxyAgent {
 
-public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.3 2000-10-05 15:15:38 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.4 2001-05-04 14:54:55 tachkeni Exp $"; 
 
 
   protected int localPort = -1;		/** in server: required listening port, may be 0 */
@@ -53,7 +51,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.3 2000-10-05 
     * Creates a TCP server with unknown port.
     */
   public TcpProxy() {
-    this(Server.getServerId(), 0);
+    this(AgentServer.getServerId(), 0);
   }
 
   /**
@@ -72,7 +70,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.3 2000-10-05 
     * @param localPort	port number > 0, or 0 for any port
     */
   public TcpProxy(int localPort) {
-    this(Server.getServerId(), localPort);
+    this(AgentServer.getServerId(), localPort);
   }
 
   /**
@@ -90,7 +88,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.3 2000-10-05 
     * Creates a local TCP client.
     */
   public TcpProxy(String remoteHost, int remotePort) {
-    this(Server.getServerId(), remoteHost, remotePort);
+    this(AgentServer.getServerId(), remoteHost, remotePort);
   }
 
   /**

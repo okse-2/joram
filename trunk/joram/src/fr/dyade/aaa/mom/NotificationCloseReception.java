@@ -36,7 +36,7 @@ package fr.dyade.aaa.mom;
  
 public class NotificationCloseReception extends fr.dyade.aaa.mom.NotificationMOMRequest { 
  
-	public NotificationCloseReception(long messageID) { 
-		super(messageID);
+	public NotificationCloseReception(long messageID, int driverKey) { 
+		super(messageID, driverKey);
 	} 
  }

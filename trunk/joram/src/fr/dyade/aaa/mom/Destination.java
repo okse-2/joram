@@ -21,80 +21,62 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
-
 package fr.dyade.aaa.mom; 
  
 import java.lang.*; 
 import java.util.*; 
 import fr.dyade.aaa.agent.*;
- 
+
 /** 
- *	a Destination wrapps methos used by Queue and Topic
- *	it's for easier management of Queue and Topic 
+ * A <code>Destination</code> holds methods used by 
+ * both Queue and Topic agents.
  * 
- *	@see         fr.dyade.aaa.mom.Topic 
- *	@see         fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
+ * @see  fr.dyade.aaa.mom.AgentClient 
  */ 
- 
 public class Destination extends fr.dyade.aaa.agent.Agent { 
 
-	
-	/* Constructor */
-	public Destination() {}
+  public void react(AgentId from, Notification not) throws Exception { 
+    if (not instanceof NotificationCloseDestination) { 
+      notificationCloseDestination(from, (NotificationCloseDestination) not); 
+    } else { 
+      super.react(from, not); 
+    } 
+  }
 
-	public void react(AgentId from, Notification not) throws Exception { 
-		if (not instanceof NotificationCloseDestination) { 
-			notificationCloseDestination(from, (NotificationCloseDestination) not); 
-		} else { 
-			super.react(from, not); 
-		} 
-	}
+
+  /** allows to notify to a Queue or a Topic to delete itself */
+  protected void notificationCloseDestination(AgentId from, NotificationCloseDestination not) {
+    super.delete();
+  }	
 	
-	/** allows to notify to a Queue or a Topic to delete itself */
-	protected void notificationCloseDestination(AgentId from, NotificationCloseDestination not) {
-		super.delete();
-	}	
 	
-	/** checks if all the fields of the messages are completed
-	 *	used before distribute messages on agentClients
-	 */
-	protected boolean checkFieldsMessage(fr.dyade.aaa.mom.Message msg) {
-		return true;
-	}
-	
-	/** checks if message is OK with option 
-	 *	public and not protected due tu the Object SubscriptionClient
-	 */
-	public static boolean checkMessage(fr.dyade.aaa.mom.Message msg) throws Exception {
-		/* check the expiration field and other */
-		
-		if(msg.getJMSExpiration()!=0) {
-			if(System.currentTimeMillis()-msg.getJMSExpiration()>=0) 
-				return false;
-			else
-				return true;
-		} else {
-			/* message not expired */
-			return true;
-		}
-	}
+  /** Method checking if message is OK. */
+  public static boolean checkMessage(fr.dyade.aaa.mom.Message msg) throws Exception {
+    if(msg.getJMSExpiration() != 0) {
+      if((System.currentTimeMillis() - msg.getJMSExpiration()) >= 0) 
+        return false;
+      else
+        return true;
+    } else {
+      return true;
+    }
+  }
+
 	
 	/** send an exception to an agentClient */
 	protected void deliveryException (AgentId to, NotificationMOMRequest not, MOMException exc) {
 		/* construction of the exception notification except in auto-acknowledge */ 
-		fr.dyade.aaa.mom.NotificationMOMException notException = new fr.dyade.aaa.mom.NotificationMOMException(not, exc); 
+		fr.dyade.aaa.mom.NotificationMOMException notException = new fr.dyade.aaa.mom.NotificationMOMException(not, exc, not.driverKey); 
 		sendTo(to, notException);
 	}
 
-	/** send an agreement to a request of an agentClient */
-	protected void deliveryAgreement (AgentId to, NotificationMOMRequest not) {
-		/* construction of the exception notification except in auto-acknowledge */ 
-		fr.dyade.aaa.mom.NotificationAgreeAsk notAgree = new fr.dyade.aaa.mom.NotificationAgreeAsk(not); 
-		sendTo(to, notAgree);
-	}
 
+  /** Method sending an acknowledgement to an AgentClient's request. */
+  protected void deliveryAgreement (AgentId to, NotificationMOMRequest not) {
+    fr.dyade.aaa.mom.NotifAckFromDestination notAgree = 
+      new fr.dyade.aaa.mom.NotifAckFromDestination(not, not.driverKey); 
+
+    sendTo(to, notAgree);
+  }
 }
- 
- 

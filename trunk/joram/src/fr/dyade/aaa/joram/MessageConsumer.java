@@ -85,24 +85,22 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
 	public void setMessageListener(javax.jms.MessageListener listener) throws javax.jms.JMSException {
 		throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
 	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Message receive()  throws javax.jms.JMSException {
-		throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-	
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Message receive(long timeOut)  throws javax.jms.JMSException {
-		throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-	
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Message receiveNoWait()  throws javax.jms.JMSException {
-		throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-	
-	}
+
+  public javax.jms.Message receive() throws javax.jms.JMSException
+  {
+    return receive((long) -1);
+  }
+
+  public javax.jms.Message receiveNoWait() throws javax.jms.JMSException
+  {
+    return receive(0);
+  }
+
+  public javax.jms.Message receive(long timeOut) throws javax.jms.JMSException
+  {
+    throw (new javax.jms.JMSException("Not implemented at this level"));
+  }
+
 	
 	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
 	public void close()  throws javax.jms.JMSException {

@@ -342,7 +342,8 @@ public class XAResource implements javax.transaction.xa.XAResource {
  	if (refSession.xidTable.getXidStatus(xid) == XidTable.ACTIVE)
  	    throw new XAException("Cannot rollback an active transaction");
 	
-	refSession.msgNoDeliveredQueue.remove();
+	refSession.messagesToDeliver.remove();
+	refSession.ccMessages.remove();
 	
 	if (refSession.xidTable.getXidStatus(xid) == XidTable.PREPARED) {
 	    try {
@@ -352,7 +353,6 @@ public class XAResource implements javax.transaction.xa.XAResource {
 		e.printStackTrace();
 		throw new XAException();
 	    }
-	    System.out.println(msgToRollbackVector);
 	    
 	    // Send a message to the proxy
 	    try {

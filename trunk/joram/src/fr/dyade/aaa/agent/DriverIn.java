@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -33,8 +31,8 @@ import java.io.*;
  */
 class DriverIn extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.5 2001-05-04 14:54:50 tachkeni Exp $";
 
   /** id of agent to forward notifications to */
   protected AgentId proxy;
@@ -50,7 +48,16 @@ class DriverIn extends Driver {
 
   /** number of <code>FlowControl</code>s sent and not received by proxy */
   int nbFlowControl = 0;
-  
+
+  /**
+   * Identifies the <code>DriverIn</code> in a
+   * multi-connections context.
+   */
+  private int key;
+  /** True for multi-connections context. */
+  private boolean multiConn = false;
+ 
+ 
   /**
    * Constructor.
    *
@@ -64,6 +71,24 @@ class DriverIn extends Driver {
     this.maxNotSent = maxNotSent;
     this.proxy = proxy;
     this.in = in;
+  }
+
+  /**
+   * Constructor called by a <code>ProxyAgent</code>
+   * managing multiple connections.
+
+   * @param id  identifier local to the driver creator
+   * @param proxy  id of agent to forward notifications to
+   * @param in  stream to read notifications from
+   * @param maxNotSent  max number of notifications between <code>FlowControl</code>s
+   * @param key key identifying the connection.
+   */
+  DriverIn(int id, AgentId proxy, NotificationInputStream in, 
+    int maxNotSent, int key)
+  {
+    this(id, proxy, in, maxNotSent);
+    this.key = key;
+    this.multiConn = true;
   }
 
   /**
@@ -98,6 +123,7 @@ class DriverIn extends Driver {
     this(proxy, in, 100);
   }
 
+
   /**
    * Provides a string image for this object.
    *
@@ -105,20 +131,27 @@ class DriverIn extends Driver {
    */
   public String toString() {
     return "(" + super.toString() +
+      ",multi-connections=" + multiConn +
+      ",key=" + key +
       ",nbNotSent=" + nbNotSent +
       ",maxNotSent=" + maxNotSent +
       ",nbFlowControl=" + nbFlowControl + ")";
   }
 
+
   synchronized void sendFlowControl() throws IOException {
     nbFlowControl += 1;
     if (Debug.driversControl)
       Debug.trace("in driver sendFlowControl#" + nbFlowControl, false);
-    sendTo(proxy, new FlowControlNot(id));
+    if (multiConn)
+      sendTo(proxy, new FlowControlNot(id, key));
+    else
+      sendTo(proxy, new FlowControlNot(id));
     while (nbFlowControl > 1) {
       try { wait(); } catch (InterruptedException e) {}
     }
   }
+
 
   synchronized void recvFlowControl(FlowControlNot not) {
     nbFlowControl -= 1;
@@ -127,48 +160,61 @@ class DriverIn extends Driver {
     notify();
   }
 
-    public void run() {
-	Notification m;
-    mainLoop:
-	while (isRunning) {
-	    m = null;
-	    canStop = true;
-	    try {
-		if (nbNotSent > maxNotSent) {
-		    try {
-			sendFlowControl();
-		    } catch (IOException exc) {
-			if (Debug.error)
-			    Debug.trace("in driver read sendFlowControl", exc);
-			break mainLoop;
-		    }
-		    nbNotSent = 0;
-		}
-		m = in.readNotification();
-	    } catch (EOFException exc) {
-		// End of input flow.
-		break mainLoop;
-	    } catch (Exception exc) {
-		if (Debug.error)
-		    Debug.trace("error in " + in + ".readNotification", exc);
-		break mainLoop;
-	    }
-	    canStop = false;
 
-	    if (m != null) {
-		if (Debug.driversData)
-		    Debug.trace("in driver read " + m, false);
-		try {
-		    react(m);
-		    nbNotSent += 1;
-		} catch (IOException exc) {
-		    if (Debug.error)
-			Debug.trace("in driver read " + m, exc);
-		    break mainLoop;
-		}
-	    }
-	}
+  public void run() {
+    Notification m;
+    ProxyNotification pm;
+    mainLoop:
+    while (isRunning) {
+      m = null;
+      pm = null;
+      canStop = true;
+      try {
+        if (nbNotSent > maxNotSent) {
+          try {
+            sendFlowControl();
+          } catch (IOException exc) {
+            if (Debug.error)
+              Debug.trace("in driver read sendFlowControl", exc);
+            break mainLoop;
+          }
+          nbNotSent = 0;
+        }
+        m = in.readNotification();
+
+        // In a multi-connections context, wrapping the Notification
+        // in a ProxyNotification.
+        if (multiConn)
+          pm = new ProxyNotification(m, key);
+
+      } catch (EOFException exc) {
+        // End of input flow.
+        break mainLoop;
+      } catch (Exception exc) {
+        if (Debug.error)
+          Debug.trace("error in " + in + ".readNotification", exc);
+        break mainLoop;
+      }
+      canStop = false;
+
+      if (m != null) {
+        if (Debug.driversData)
+          Debug.trace("in driver read " + m, false);
+        try {
+          if (multiConn)
+            react(pm);
+          else
+            react(m);
+          nbNotSent += 1;
+        } catch (IOException exc) {
+          if (Debug.error)
+            Debug.trace("in driver read " + m, exc);
+          break mainLoop;
+        }
+      }
     }
+  }
+
 
   /**
    * Reacts to a notification from the input stream.
@@ -181,6 +227,7 @@ class DriverIn extends Driver {
     sendTo(proxy, not);
   }
 
+
   /**
    * Finalizes the driver.
    *
@@ -190,17 +237,27 @@ class DriverIn extends Driver {
   protected void end() {
     // report end to proxy
     try {
-      sendTo(proxy, new DriverDone(id));
+      if (! multiConn) 
+        // Single connection context.
+        sendTo(proxy, new DriverDone(id));  
+
+      else
+        // In a multi-connections context, flagging the DriverDone
+        // notification with the key so that it is known which 
+        // DriverIn to close.
+        sendTo(proxy, new DriverDone(id, key));
+
     } catch (IOException exc) {
       if (Debug.error)
-	Debug.trace("error in reporting end of DriverIn", exc);
+        Debug.trace("error in reporting end of DriverIn", exc);
     }
   }
+
 
   /**
    * Close the OutputStream.
    */
-    public void close() {
+  public void close() {
     try {
       in.close();
     } catch (Exception exc) {}

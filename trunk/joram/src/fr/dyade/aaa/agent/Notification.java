@@ -21,15 +21,16 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
 
+/**
+ * Class Notification is the root of the notifications hierarchy. Every
+ * notification's class has Notification as a superclass.
+ */
 public class Notification implements Serializable, Cloneable {
-
-public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $"; 
 
   /**
    * Returns a clone of this notification.

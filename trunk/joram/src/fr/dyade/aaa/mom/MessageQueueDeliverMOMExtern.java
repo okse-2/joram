@@ -21,26 +21,34 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
 /** 
- *	a MessageQueueDeliverMOMExtern allows a TCP Proxy to
- *	deliver a message to a client on its request
+ * A <code>MessageQueueDeliverMOMExtern</code> is sent by
+ * a <code>Queue</code> to an external client.
  * 
- *	@see         subclasses
+ * @see MessageMOMExtern
+ * @see Queue
+ * @see CommonClientAAA
  */ 
  
-public class MessageQueueDeliverMOMExtern extends MessageMOMExtern { 
-	
-	/** the message to  send */
-	public fr.dyade.aaa.mom.Message message;
-	
-	public MessageQueueDeliverMOMExtern(long requestIdNew, fr.dyade.aaa.mom.Message messageNew) {
-		super(requestIdNew);
-		message = messageNew;
-	}
-	
-	
+public class MessageQueueDeliverMOMExtern extends MessageMOMExtern
+{ 
+  /** The wrapped message. */
+  public fr.dyade.aaa.mom.Message message;
+  public fr.dyade.aaa.mom.QueueNaming queue;
+  public String selector;
+  public boolean toListener;
+
+  /** Constructor. */
+  public MessageQueueDeliverMOMExtern(long requestId, 
+    fr.dyade.aaa.mom.Message message, fr.dyade.aaa.mom.QueueNaming queue,
+    String selector, int driversKey)
+  {
+    super(requestId, driversKey);
+    this.queue = queue;
+    this.message = message;
+    this.selector = selector;
+  }
+
 }

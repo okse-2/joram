@@ -21,44 +21,36 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
+import java.io.*;
+import java.util.*;
+
+import org.xml.sax.XMLReader;
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.XMLReaderFactory;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
- * Notification which is sent by a transient agent server to its
- * <code>TransientManager</code> agent when it starts.
- *
- * @author	Lacourte Serge
- * @version	v1.0
- *
- * @see		TransientManager
+ * The class <code>A3CMLNetwork</code> describes a network component.
  */
-public class TransientConfig extends Notification {
+public class A3CMLNetwork {
+  public String domain = null;
+  public int port = -1;
 
-public static final String RCS_VERSION="@(#)$Id: TransientConfig.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $"; 
+  A3CMLNetwork(Attributes atts) throws SAXException {
+    domain = atts.getValue(A3CMLHandler.ATT_DOMAIN);
 
-
-  /** id of transient agent server */
-  short serverId;
-
-  /**
-   * Constructor.
-   *
-   * @param serverId	id of transient agent server
-   */
-  public TransientConfig(short serverId) {
-    this.serverId = serverId;
-  }
-
-  /**
-   * Provides a string image for this object.
-   *
-   * @return	printable image of this object
-   */
-  public String toString() {
-    return "(" + super.toString() +
-      ",serverId=" + serverId + ")";
+    String attribute = atts.getValue(A3CMLHandler.ATT_PORT);
+    try {
+      port = Integer.parseInt(attribute);
+    } catch (NumberFormatException exc) {
+      throw new SAXException("bad value \"" +
+			     attribute +
+			     "\" for attribute \"" + 
+			     A3CMLHandler.ATT_PORT);
+    }
   }
 }

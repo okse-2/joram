@@ -36,8 +36,8 @@ package fr.dyade.aaa.mom;
 public class ExceptionListenerMOMExtern extends ExceptionMessageMOMExtern { 
 	
 	/** Constructor */
-	public ExceptionListenerMOMExtern(java.lang.Exception exception) {
-		super((long) -1, exception);
+	public ExceptionListenerMOMExtern(java.lang.Exception exception, int drvKey) {
+		super((long) -1, exception, drvKey);
 	}
 	
 }

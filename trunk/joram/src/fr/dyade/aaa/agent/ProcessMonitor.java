@@ -21,12 +21,9 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
-
 
 /**
   * Object which monitors in a separate thread the execution of a process,
@@ -41,9 +38,8 @@ import java.io.*;
   * @see	ProcessManager
   */
 class ProcessMonitor extends Driver implements Serializable {
-
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.5 2001-05-04 14:54:52 tachkeni Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */
@@ -86,7 +82,7 @@ class ProcessMonitor extends Driver implements Serializable {
 	  errorMessage += (char) c;
 	}
       }
-      Channel.channel.directSendTo(agent, new ProcessEnd(exitValue, errorMessage));
+      sendTo(agent, new ProcessEnd(exitValue, errorMessage));
       ProcessManager.processManager.unregister(this);
     } catch (Exception exc) {
       Debug.trace("failure in ProcessMonitor.run(): " + exc, false);

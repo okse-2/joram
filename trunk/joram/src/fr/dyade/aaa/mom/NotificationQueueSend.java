@@ -21,26 +21,29 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
   
 /** 
- *	NotificationSend allows a agentclient to send a message to a Queue 
+ * A <code>NotificationQueueSend</code> wraps a message sent to a
+ * <code>Queue</code>.
  * 
- * @see		fr.dyade.aaa.mom.Topic 
- * @see		fr.dyade.aaa.mom.CommonClientAAA
- * @see		fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
+ * @see  fr.dyade.aaa.mom.CommonClientAAA
+ * @see  fr.dyade.aaa.mom.AgentClient 
  */ 
- 
-public class NotificationQueueSend extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	/** message sent by a client to a Queue  */ 
-	public fr.dyade.aaa.mom.Message msg ; 
-	 
-	public NotificationQueueSend(long messageID, fr.dyade.aaa.mom.Message msgNew) { 
-		super(messageID);
-		msg = msgNew; 
-	} 
+public class NotificationQueueSend
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The wrapped message. */ 
+  public fr.dyade.aaa.mom.Message msg ; 
+
+
+  /** Constructor. */
+  public NotificationQueueSend(long messageID,
+    fr.dyade.aaa.mom.Message msg, int driverKey)
+  { 
+    super(messageID, driverKey);
+    this.msg = msg; 
+  } 
  
 } 

@@ -21,14 +21,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.util;
 
 import java.io.*;
 
 public class NullTransaction implements Transaction {
-
-public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.3 2000-10-05 15:21:08 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.4 2001-05-04 14:55:04 tachkeni Exp $"; 
 
   public NullTransaction(String path) throws IOException {
   }
@@ -56,4 +54,6 @@ public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.3 2000
   public void rollback() throws IOException {}
 
   public void release() throws IOException {}
+
+  public final void stop() {}
 }

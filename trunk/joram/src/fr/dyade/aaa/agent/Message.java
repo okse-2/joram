@@ -21,35 +21,61 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+import java.util.Date;
 import fr.dyade.aaa.util.*;
 
-public class Message implements Serializable {
-
-public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $"; 
+/**
+ * 
+ */
+class Message implements Serializable {
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $"; 
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
+  /** <code>AgentId</code> of sender. */
   transient AgentId from;
+  /** <code>AgentId</code> of destination agent. */
   transient AgentId to;
+  /** The notification. */
   transient Notification not;
+  /** The logical date of sending specified by the update of matrix clock. */
   transient Update update;
  
+  /**
+   * The deadline of current message specified in number of milliseconds
+   * since the standard base time known as "the epoch".
+   */
+  transient long deadline;
+
   /**
    * Returns a string representation for this object.
    *
    * @return	A string representation of this object. 
    */
   public String toString() {
-    return "(" + getClass().getName() +
-      ",from=" + from + ",to=" + to +
-      ",not=" + not + ")";
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append("(from=");
+    strbuf.append(from).append(",to=");
+    strbuf.append(to).append(",not=[");
+    strbuf.append(not).append("],update=[");
+    strbuf.append(update).append(']');
+    if (deadline != -1L) {
+      strbuf.append(",deadline=").append(new Date(deadline));
+    }
+    strbuf.append(')');
+    
+    return strbuf.toString();
   }
 
+  /**
+   *  The writeObject method is responsible for writing the state of the
+   * object for its particular class so that the corresponding readObject
+   * method can restore it. 
+   */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
     out.writeShort(from.from);
@@ -58,9 +84,9 @@ public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 1
     out.writeShort(to.from);
     out.writeShort(to.to);
     out.writeInt(to.stamp);
+    out.writeLong(deadline);
     out.writeObject(not);
-    // TODO: in order to optimize the serialization, we have to
-    // serialize each update...
+    // In order to optimize the serialization, we serialize each update...
     Update next = update;
     while (next != null) {
       out.writeShort(next.l);
@@ -71,10 +97,15 @@ public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 1
     out.writeShort(-1);
   }
     
+  /**
+   *  The readObject method is responsible for reading from the stream and
+   * restoring the classes fields.
+   */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
     from = new AgentId(in.readShort(), in.readShort(), in.readInt());
     to = new AgentId(in.readShort(), in.readShort(), in.readInt());
+    deadline = in.readLong();
     not = (Notification) in.readObject();
     short l;
     while ((l = in.readShort()) != -1) {
@@ -89,10 +120,10 @@ public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 1
    *  Saves the object state on persistent storage.
    */
   void save() throws IOException {
-    Server.transaction.save(this,
+    AgentServer.transaction.save(this,
 			    "@" +
-			    update.l + Server.transaction.separator +
-			    update.c + Server.transaction.separator +
+			    update.l + Transaction.separator +
+			    update.c + Transaction.separator +
 			    update.stamp);
   }
 
@@ -106,16 +137,16 @@ public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 1
    */
   static Message
   load(String name) throws IOException, ClassNotFoundException {
-    return (Message) Server.transaction.load(name);
+    return (Message) AgentServer.transaction.load(name);
   }
 
   /**
    * Deletes the current object in persistent storage.
    */
   void delete()  throws IOException {
-    Server.transaction.delete("@" +
-			      update.l + Server.transaction.separator +
-			      update.c + Server.transaction.separator +
+    AgentServer.transaction.delete("@" +
+			      update.l + Transaction.separator +
+			      update.c + Transaction.separator +
 			      update.stamp);
   }
 
@@ -130,5 +161,19 @@ public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.3 2000-10-05 1
       this.from = (AgentId) from.clone();
     this.to = (AgentId) to.clone();
     this.not = (Notification) not.clone();
+    this.deadline = -1L;
   }
+
+  /**
+   * Construct a new message with a deadline.
+   * @param from	id of source Agent.
+   * @param to    	id of destination Agent.
+   * @param not    	Notification to be signaled.
+   * @param deadline	Deadline.
+   */
+  public Message(AgentId from, AgentId to, Notification not, long deadline) {
+    this(from, to, not);
+    this.deadline = deadline;
+  }
+
 }

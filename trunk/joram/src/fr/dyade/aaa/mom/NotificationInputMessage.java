@@ -21,25 +21,21 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom;
 
-/**	the messages sent by the JMS Client are carried by its notification
+/**	
+ * A <code>NotificationInputMessage</code> wraps
+ * a message sent by a JMS client.
  *
- *	@see  fr.dyade.aaa.mom.MessageMOMExtern    
+ * @see  fr.dyade.aaa.mom.MessageMOMExtern    
  */
+public class NotificationInputMessage extends fr.dyade.aaa.agent.Notification
+{
+  public MessageMOMExtern msgMOMExtern;
 
+  public NotificationInputMessage(MessageMOMExtern msgMOMExtern)
+  {
+    this.msgMOMExtern = msgMOMExtern;
+  }
 
-public class NotificationInputMessage extends fr.dyade.aaa.agent.Notification  {
-
-	/** the inputStream which contains the ObjectInputStream,
-	 *	ie the MessageJMSMOM
-	 */
-	public fr.dyade.aaa.mom.MessageMOMExtern msgMOMExtern;
-
-	/** Constructor of the NotificationMOMInputStream */
-	public NotificationInputMessage(fr.dyade.aaa.mom.MessageMOMExtern msgMOMExternNew) {
-		msgMOMExtern = msgMOMExternNew;
-	}
 }

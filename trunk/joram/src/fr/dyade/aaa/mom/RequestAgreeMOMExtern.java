@@ -21,21 +21,28 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 /** 
- *	allows an agentClient to agree a request of the client
+ * A <code>RequestAgreeMOMExtern</code> is a 
+ * <code>MessageMOMExtern</code> acknowledging a
+ * client request.
  * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see  fr.dyade.aaa.mom.MessageMOMExtern 
  */ 
- 
-public class RequestAgreeMOMExtern extends MessageMOMExtern { 
-	
-	/** constructor */ 
-	public RequestAgreeMOMExtern(long messageAgreeID) {
-		super(messageAgreeID);
-	}
-	
+public class RequestAgreeMOMExtern extends MessageMOMExtern
+{ 
+  /** constructor. 
+  public RequestAgreeMOMExtern(long messageAgreeID)
+  {
+  super(messageAgreeID);
+  }*/
+
+  /** Constructor. */
+  public RequestAgreeMOMExtern(long messageAgreeID,
+    int driverKey)
+  {
+    super(messageAgreeID, driverKey);
+  }
+
 }

@@ -21,25 +21,26 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 /** 
- *	contains an exception thrown in the MOM
+ * An <code>ExceptionMessageMOMExtern</code> is a
+ * <code>MessageMOMExtern</code> wrapping an exception
+ * and sent to the client.
  * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see  fr.dyade.aaa.mom.MessageMOMExtern 
  */ 
- 
-public class ExceptionMessageMOMExtern extends MessageMOMExtern { 
-	
-	/** the message to  send */
-	public java.lang.Exception exception;
-	
-	/** constructor for exception on request of the clients */
-	public ExceptionMessageMOMExtern(long requestIDNew, java.lang.Exception exception) {
-		super(requestIDNew);
-		this.exception = exception;
-	}
+public class ExceptionMessageMOMExtern extends MessageMOMExtern
+{
+  /** The wrapped exception. */
+  public java.lang.Exception exception;
+
+  /** Constructor with driverKey parameter. */
+  public ExceptionMessageMOMExtern(long requestID, 
+    java.lang.Exception exception, int driverKey)
+  {
+    super(requestID, driverKey);
+    this.exception = exception;
+  }
 
 }

@@ -41,6 +41,9 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
   
     public QueueSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
 	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
+    listener = new SessionListener(new Long(sessionID), refConnection, this);
+    listener.setDaemon(true);
+    listener.start();
     }
     
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
@@ -62,6 +65,10 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
      */
     public  javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue, java.lang.String messageSelector) throws javax.jms.JMSException {
 	try {
+        
+        if (super.messageListener != null)
+          throw new javax.jms.JMSException("Canno't create a receiver in a session that has a messageListener set");
+
 	    Object obj = new Object();
 	    long messageJMSMOMID = refConnection.getMessageMOMID();
 	    Long longMsgID = new Long(messageJMSMOMID);
@@ -91,6 +98,7 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	    msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
 	    if(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
 		fr.dyade.aaa.joram.QueueReceiver queueReceiver = new fr.dyade.aaa.joram.QueueReceiver( new Long(counterConsumerID).toString(), refConnection, this, queue, messageSelector);
+        counterConsumerID ++;
 		if(queueReceiver==null)
 		    throw (new fr.dyade.aaa.joram.JMSAAAException("Internal Error during creation QueueReceiver",JMSAAAException.ERROR_CREATION_MESSAGECONSUMER));
 	
@@ -273,11 +281,6 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
       super.close() ;
     }
 
-
-    /** QueueSession as a thread is never started */
-    public void run() {}
-
-	
     /** prepares the messages to acknowledge so as to decrease the overhead 
      */
     protected Vector preparesHandlyAck(String messageID, long messageJMSMOMID) throws javax.jms.JMSException{

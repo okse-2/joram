@@ -28,8 +28,8 @@ package fr.dyade.aaa.agent;
  * <code>Agent</code> used for remote administration of each A3 server.
  */
 public final class AgentAdmin extends Agent {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.4 2001-05-04 14:54:48 tachkeni Exp $";
 
   /**
    * the Proxy needed for Administred Server
@@ -43,7 +43,7 @@ public final class AgentAdmin extends Agent {
     // TODO: try to set class modifier to package (idem for AgentFactory)...
     //  Be careful: We have to create the local AgentAdmin the first
     // time we run the engine.
-    super("AgentAdmin#" + Server.serverId,
+    super("AgentAdmin#" + AgentServer.getServerId(),
 	  true,
 	  AgentId.adminId);
   }
@@ -72,17 +72,17 @@ public final class AgentAdmin extends Agent {
 	sendTo(from, new A3ServerProperties());
 	break;
       default:
-	if (Server.ADMINISTRED) {
-	  // send the notification to the udpAgentAdmin
-	  if (udpAgentAdminId == null) {
-	    // the udpAgentAdmin is not launch (the server is not administred)
-	    // send an error notification to the sender
-	    if (Debug.admin)
-	      Debug.trace(name + ": error, UdpAgentAdmin not launch", false);
-	  } else {
-	    sendTo(udpAgentAdminId,n);
-	  }
-	}
+// 	if (AgentServer.ADMINISTRED) {
+// 	  // send the notification to the udpAgentAdmin
+// 	  if (udpAgentAdminId == null) {
+// 	    // the udpAgentAdmin is not launch (the server is not administred)
+// 	    // send an error notification to the sender
+// 	    if (Debug.admin)
+// 	      Debug.trace(name + ": error, UdpAgentAdmin not launch", false);
+// 	  } else {
+// 	    sendTo(udpAgentAdminId,n);
+// 	  }
+// 	}
 	break;
       }
     } else { 

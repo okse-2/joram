@@ -152,13 +152,13 @@ public final class Debug implements java.io.Serializable  {
 	/** print the subscription in the agentClient */
 	public static void printSubscription(String whoIam,Hashtable table) {
 		Enumeration e = table.elements();
-		fr.dyade.aaa.mom.SubscriptionClient sub ;
+		fr.dyade.aaa.mom.ClientSubscription sub ;
 		int i=0;
 		
 		System.out.println(whoIam+" : table souscription ");
 		while(e.hasMoreElements()){
-			sub = (fr.dyade.aaa.mom.SubscriptionClient) e.nextElement();
-			System.out.println("abonnement "+i+" : "+sub.getTopicID()+" "+sub.getNameTheme());
+			sub = (fr.dyade.aaa.mom.ClientSubscription) e.nextElement();
+			System.out.println("abonnement "+i+" : "+sub.getTopicID()+" "+sub.getTheme());
 			i++;
 		}
 	}
@@ -170,8 +170,8 @@ public final class Debug implements java.io.Serializable  {
 		
 		System.out.println(whoIam+" : table souscription ");
 		while(e.hasMoreElements()){
-			KeyClientSubscription key = (KeyClientSubscription) e.nextElement(); 
-			System.out.println(key.nameSubscription);
+			ClientSubscriptionKey key = (ClientSubscriptionKey) e.nextElement(); 
+			System.out.println(key.subscriptionName);
 			i++;
 		}
 	}

@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -33,144 +32,160 @@ import fr.dyade.aaa.util.*;
  * @author	Andre Freyssinet
  */
 class MatClockElt {
-  /**
-   * Element value.
-   */
+  /** Element value. */
   int stamp;
-  /**
-   * Source node of last modification.
-   */
+  /** Source node of last modification. */
   short node; 
   /**
-   * State value when last modified.
-   */
+   * State value when last modified. */
   int status;
 }
 
 /**
  * Matrix clock realization. 
- * @version	1.1, 02/04/98
+ * @version	2.0, 22/09/2000
  * @author	Andre Freyssinet
  */
 class MatrixClock implements Serializable {
-
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
 
-  private transient int size;
+  /** True if the matrix is modified since last save, false otherwise. */
+  private transient boolean modified = false;
+  /**
+   * List of id. for all servers in the domain, this list is sorted and
+   * is used as index for status and matrix arrays. Be careful, this array
+   * is shared with the <code>Network</code> components (may be it should
+   * be saved by this component).
+   */
+  private transient short[] servers;
+  /** Index of local server in status and matrix arrays. */
+  private transient int idxLS;
+  /** */
   private transient int status[];
+  /** */
+  private transient MatClockElt matrix[][];
 
-  private transient MatClockElt matClock[][];
-
-  public String toString() {
-    StringBuffer strBuf = new StringBuffer();
-
-    strBuf.append("(");
-    for (int i=0; i<size; i++) {
-      strBuf.append(status[i]).append(" ");
-    }
-    strBuf.append(")\n\n");
-    for (int i=0; i<size; i++) {
-      strBuf.append("(");
-      for (int j=0; j<size; j++) {
-	strBuf.append("(").append(matClock[i][j].stamp).append(", ");
-	strBuf.append(matClock[i][j].node).append(", ");
-	strBuf.append(matClock[i][j].status).append(")");
-      }
-      strBuf.append(")\n");
-    }
-
-    return strBuf.toString();
-  }
-
+ /**
+  * The writeObject method is responsible for writing the state of the
+  * <code>MatrxiClock</code> object so that the corresponding readObject
+  * method can restore it. For performance reasons, all fields are declared
+  * transient, and the state of <code>MatClockElt</code> objects are
+  * directly handled in this serialization method.
+  *
+  * @param out	The <code>ObjectOutputStream</code> object.
+  */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
+    int size = status.length;
     out.writeInt(size);
     for (int i=0; i<size; i++)
       out.writeInt(status[i]);
     for (int i=0; i<size; i++) {
       for (int j=0; j<size; j++) {
-	out.writeInt(matClock[i][j].stamp);
-	out.writeShort(matClock[i][j].node);
-	out.writeInt(matClock[i][j].status);
+	out.writeInt(matrix[i][j].stamp);
+	out.writeShort(matrix[i][j].node);
+	out.writeInt(matrix[i][j].status);
       }
     }
   }
 
+ /**
+  * The readObject method is responsible for reading from the stream and
+  * restoring the <code>MatrxiClock</code> fields.
+  *
+  * @see	#writeObject
+  *
+  * @param in	The <code>ObjectInputStream</code> object.
+  */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
-    size = in.readInt();
+    int size = in.readInt();
     status = new int[size];
-    matClock = new MatClockElt[size][size];
+    matrix = new MatClockElt[size][size];
     for (int i=0; i<size; i++)
       status[i] = in.readInt();
     for (int i=0; i<size; i++) {
       for (int j=0; j<size; j++) {
-	matClock[i][j] = new MatClockElt();
-	matClock[i][j].stamp = in.readInt();
-	matClock[i][j].node = in.readShort();
-	matClock[i][j].status = in.readInt();
+	matrix[i][j] = new MatClockElt();
+	matrix[i][j].stamp = in.readInt();
+	matrix[i][j].node = in.readShort();
+	matrix[i][j].status = in.readInt();
       }
     }
   }
 
-  MatrixClock(short sid) {
-    size = sid +1;
-    status = new int[size];
-    matClock = new MatClockElt[size][size];
+  /**
+   * Creates a new matrix clock. Be careful, the list of servers must be
+   * sorted into ascending numerical order, this list must be also used in
+   * Network component.
+   *
+   * @param name	Name of domain.
+   * @param servers	List of domain's server id.
+   */
+  private MatrixClock(String name, short[] servers) throws IOException {
+    AgentServer.transaction.save(servers, name + "Servers");
+    this.servers = servers;
+    idxLS = index(AgentServer.getServerId());
 
-    for (int i=0; i<size; i++)
-      for (int j=0; j<size; j++)
-	matClock[i][j] = new MatClockElt();
+    status = new int[servers.length];
+    matrix = new MatClockElt[servers.length][servers.length];
+    // Immediatly allocates all elements
+    for (int i=0; i<servers.length; i++)
+      for (int j=0; j<servers.length; j++)
+	matrix[i][j] = new MatClockElt();
+    save(name);
   }
   
   /**
    * Saves the object state on persistent storage.
+   *
+   * @param name	Name of domain.
    */
-  void save() throws IOException {
-    Server.transaction.save(this, "MatrixClock");
+  void save(String name) throws IOException {
+    if (modified) {
+      AgentServer.transaction.save(this, name);
+      modified = false;
+    }
   }
 
   /**
-   * Restores the object state from the persistent storage.
+   * Restores the object state from the persistent storage. If servers
+   * is null, then we have just to restore the matrix, else it's the
+   * first loading at initialization time and we have to restore the
    *
-   * @return	The restored matrix clock.
+   * @param name	Name of domain.
+   * @param servers	List of domain's server id.
+   * @return		The restored matrix clock.
    */
   static MatrixClock
-  load() throws IOException, ClassNotFoundException {
-    return (MatrixClock) Server.transaction.load("MatrixClock");
+  load(String name, 
+       short[] servers)throws IOException, ClassNotFoundException {
+    // Loads the matrix clock.
+    MatrixClock mc = (MatrixClock) AgentServer.transaction.load(name);
+    if (mc == null) {
+      // Creates a new Matrix and save it.
+      mc = new MatrixClock(name, servers);
+    } else {
+      // Join with the new domain configuration:
+      mc.servers = (short[]) AgentServer.transaction.load(name + "Servers");
+      mc.idxLS = mc.index(AgentServer.getServerId());
+      if (!java.util.Arrays.equals(mc.servers, servers)) {
+	// TODO: Insert or suppress corresponding elements in matrix...
+	throw new IOException("Bad configuration");
+      }
+    }
+    return mc;
   }
 
   /**
-   *  Adjust matrix clock and status table. It should only be
-   * used in testRecvUpdate and getSendUpdate, so there is no
-   * need of synchronisation.
+   * Returns the index of the specified server.
    */
-  private void grow(short sid) {
-    int newSize = sid +1;
-    int newStatus[] = new int[newSize];
-    MatClockElt newMatClock[][] = new MatClockElt[newSize][newSize];
-
-    // Copy matrix clock and status table in the right sized table.
-    int i, j;
-    for (i=0; i<size; i++) {
-      for (j=0; j<size; j++)
-	newMatClock[i][j] = matClock[i][j];
-      for (; j<newSize; j++)
-	newMatClock[i][j] = new MatClockElt();
-      newStatus[i] = status[i];
-    }
-    for (; i<newSize; i++) {
-      for (j=0; j<newSize; j++)
-	newMatClock[i][j] = new MatClockElt();
-      newStatus[i] = 0;
-    }
-    size = newSize;
-    status = newStatus;
-    matClock = newMatClock;
+  private final int index(short id) {
+    return java.util.Arrays.binarySearch(servers, id);
   }
 
   /** The message can be delivered. */
@@ -194,44 +209,27 @@ class MatrixClock implements Serializable {
    * 			or <code>WAIT_TO_DELIVER</code> code.
    */
   synchronized int testRecvUpdate(Update update) {
-    // History: Field from is no longer need, we can use the first
-    // element of the update to know the source server.
-    short from = update.l;
-
-// AF: I think that now (use of 1st element of update), "from" is always
-// the server id. of incoming message.
-
-    // Get real from serverId.
-    if (Server.isTransient(from))
-      from = Server.transientProxyId(from).to;
+    short from = update.getFromId();
+    int fromIdx = index(from);
 
     if (Debug.dumpMatrixClock)
       Debug.trace("testRecvUpdate(" + from + ", " + update + ") <" + this + '>', false);
 
-// AF: Actually this code is useless.
-
-    // Update the matrix size if necessary.
-    Update ptr = update;
-    do {
-      if (ptr.l >= size) grow(ptr.l);
-      if (ptr.c >= size) grow(ptr.c);
-      ptr = ptr.next;
-    } while (ptr != null);
-
     // The 1st element of update is always: HM[from, to]
-    ptr = update;
-    if ((matClock[from][Server.serverId].stamp +1) < ptr.stamp) {
+    Update ptr = update;
+    if ((matrix[fromIdx][idxLS].stamp +1) < ptr.stamp) {
       // There is other messages from the same node to deliver before this one.
       if (Debug.dumpMatrixClock)
 	Debug.trace("testRecvUpdate return WAIT_TO_DELIVER", false);
 
       return WAIT_TO_DELIVER;
-    } else if ((matClock[from][Server.serverId].stamp +1) == ptr.stamp) {
+    } else if ((matrix[fromIdx][idxLS].stamp +1) == ptr.stamp) {
       // Verify that all messages to be delivered to this node and known by
-      // by this one are already be delivered.
+      // by this message are already be delivered.
       ptr = ptr.next;
       while (ptr != null) {
-	if ((ptr.c == Server.serverId) && (ptr.stamp > matClock[ptr.l][ptr.c].stamp))
+	if ((ptr.c == AgentServer.getServerId()) &&
+	    (ptr.stamp > matrix[index(ptr.l)][index(ptr.c)].stamp))
 	  break;
 	ptr = ptr.next;
       }
@@ -255,10 +253,12 @@ class MatrixClock implements Serializable {
       // The message is ready to be delivered, so updates the matrix clock.
       ptr = update;
       do {
-	if (matClock[ptr.l][ptr.c].stamp < ptr.stamp) {
-	  matClock[ptr.l][ptr.c].stamp = ptr.stamp;
-	  matClock[ptr.l][ptr.c].node = from;
-	  matClock[ptr.l][ptr.c].status = status[Server.serverId];
+	int idxl = index(ptr.l);
+	int idxc = index(ptr.c);
+	if (matrix[idxl][idxc].stamp < ptr.stamp) {
+	  matrix[idxl][idxc].stamp = ptr.stamp;
+	  matrix[idxl][idxc].node = from;
+	  matrix[idxl][idxc].status = status[idxLS];
 	}
 	ptr = ptr.next;
       } while (ptr != null);
@@ -266,6 +266,7 @@ class MatrixClock implements Serializable {
       if (Debug.dumpMatrixClock)
 	Debug.trace("testRecvUpdate return DELIVER <" + this + '>', false);
 
+      modified = true;
       return DELIVER;
     }
   }
@@ -278,36 +279,37 @@ class MatrixClock implements Serializable {
    * @return	The message matrix clock (list of update).
    */
   synchronized Update getSendUpdate(short to) {
-// AF: Actually this code is useless.
-
-    // Update the matrix size if necessary.
-    if (to >= size) grow(to);
+    int toIdx = index(to);
 
     if (Debug.dumpMatrixClock)
       Debug.trace("getSendUpdate(" + to + ") <" + this + '>', false);
 
-    matClock[Server.serverId][to].stamp += 1;
-    matClock[Server.serverId][to].status = status[Server.serverId];
-    matClock[Server.serverId][to].node = to;
+    matrix[idxLS][toIdx].stamp += 1;
+    matrix[idxLS][toIdx].status = status[idxLS];
+    matrix[idxLS][toIdx].node = to;
     // The 1st element of update is always (from, to, stamp), its property
     // is used in testRecvUpdate.
-    Update update = new Update(Server.serverId, to, matClock[Server.serverId][to].stamp);
-    if (to != Server.serverId) {
+    Update update = new Update(AgentServer.getServerId(),
+			       to,
+			       matrix[idxLS][toIdx].stamp);
+    if (to != AgentServer.getServerId()) {
       // If the message is remote there is need of matrix clock update.
-      for (short i=0; i<matClock.length; i++) {
-	for (short j=0; j<matClock[i].length; j++) {
-	  if ((matClock[i][j].status > status[to]) && (matClock[i][j].node != to) &&
-	      ((i != Server.serverId) || (j != to)))
-	    new Update(i, j, matClock[i][j].stamp, update);
+      for (short i=0; i<matrix.length; i++) {
+	for (short j=0; j<matrix[i].length; j++) {
+	  if ((matrix[i][j].status > status[toIdx]) &&
+	      (matrix[i][j].node != to) &&
+	      ((i != idxLS) || (j != toIdx)))
+	    new Update(servers[i], servers[j], matrix[i][j].stamp, update);
 	}
       }
-      status[to] = status[Server.serverId];
-      status[Server.serverId] += 1;
+      status[toIdx] = status[idxLS];
+      status[idxLS] += 1;
     }
 
     if (Debug.dumpMatrixClock)
       Debug.trace("getSendUpdate return " + update + '<' + this + '>', false);
 
+    modified = true;
     return update;
   }
 
@@ -321,9 +323,8 @@ class MatrixClock implements Serializable {
    * @return	The number of messages.
    */ 
   synchronized Update getNetU1(short to) {
-    if (to >= size) grow(to);
-    return new Update(Server.serverId, to,
-		      matClock[Server.serverId][to].stamp);
+    return new Update(AgentServer.getServerId(), to,
+		      matrix[idxLS][index(to)].stamp);
   }
 
   /**
@@ -336,9 +337,8 @@ class MatrixClock implements Serializable {
    * @return	The number of messages.
    */ 
  synchronized Update getNetU2(short to) {
-    if (to >= size) grow(to);
-    return new Update(to, Server.serverId,
-		      matClock[to][Server.serverId].stamp);
+    return new Update(to, AgentServer.getServerId(),
+		      matrix[index(to)][idxLS].stamp);
   }
 
   /**
@@ -357,12 +357,44 @@ class MatrixClock implements Serializable {
    * @return	true if the matrix clocks of two nodes are coherent.
    */ 
  synchronized boolean testNU(Update u1, Update u2) {
-// AF: Actually this code is useless.
-    if (u1.l >= size) grow(u1.l);
-    if (u2.c >= size) grow(u2.c);
+    return ((u1.stamp < matrix[index(u1.l)][idxLS].stamp) ||
+	    (u2.stamp > matrix[idxLS][index(u2.c)].stamp));
+  }
 
-    return ((u1.stamp < matClock[u1.l][Server.serverId].stamp) ||
-	    (u2.stamp > matClock[Server.serverId][u2.c].stamp));
+  /**
+   * Returns a string representation of this <code>MatrixClock</code> object
+   * in the form of a set of entries, enclosed in braces and separated by the
+   * String ", " (characters comma and space).
+   *
+   * @return String representation of this <code>MatrixClock</code> object.
+   */
+  public String toString() {
+    int size = status.length;
+    StringBuffer strBuf = new StringBuffer();
+
+    strBuf.append("(");
+    for (int i=0; i<size; i++) {
+      strBuf.append(servers[i]).append(" ");
+    }
+    strBuf.append(")\n\n");
+
+    strBuf.append("(");
+    for (int i=0; i<size; i++) {
+      strBuf.append(status[i]).append(" ");
+    }
+    strBuf.append(")\n\n");
+
+    for (int i=0; i<size; i++) {
+      strBuf.append("(");
+      for (int j=0; j<size; j++) {
+	strBuf.append("(").append(matrix[i][j].stamp).append(", ");
+	strBuf.append(matrix[i][j].node).append(", ");
+	strBuf.append(matrix[i][j].status).append(")");
+      }
+      strBuf.append(")\n");
+    }
+
+    return strBuf.toString();
   }
 }
 

@@ -21,65 +21,86 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.joram;
 
 import java.net.*;
 import javax.jms.*;
 
 /**
- * A QueueConnection is an active connection to a JMS PTP provider.
- * A client uses a QueueConnection to create one or more QueueSessions
- * for producing and consuming messages.
+ * A <code>QueueConnection</code> is an active connection to a JMS PTP
+ * provider.<br>
+ * A client uses a <code>QueueConnection</code> to create one or more
+ * <code>QueueSession</code>s for producing and consuming messages.
  *
- * @author Laurent Chauvirey
- * @version 1.0
+ * @author Frederic Maistre
  */
+public class QueueConnection extends Connection implements javax.jms.QueueConnection
+{
+  /** Constructor. */
+  public QueueConnection(String proxyAgentIdString, InetAddress proxyAddress,
+    int proxyPort, String login, String passwd) throws javax.jms.JMSException
+  {
+    super(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
+  }
 
-public class QueueConnection extends Connection implements javax.jms.QueueConnection {
 
-    /**
-     * Construct a <code>QueueConnection</code>.
-     */
-    public QueueConnection(String proxyAgentIdString,
-			   InetAddress proxyAddress, int proxyPort,
-			   String login, String passwd) throws javax.jms.JMSException {
-	super(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
+  /** Method creating a <code>QueueSession</code>. */
+  public javax.jms.QueueSession createQueueSession(boolean transacted,
+    int acknowledgeMode) throws JMSException
+  {
+    try {
+      long sessionCounterNew = sessionCounter;
+      sessionCounter = calculateMessageID(sessionCounter);
+
+      fr.dyade.aaa.joram.QueueSession session =
+        new fr.dyade.aaa.joram.QueueSession(transacted, acknowledgeMode,
+        sessionCounter,this);
+
+       if (session == null) {
+         sessionCounter = sessionCounter - 1;
+         throw (new javax.jms.JMSException("Error when creating the QueueSession"));
+       }
+       else
+         return session;
+
+    } catch (JMSException jE) {
+      throw (jE);
+    } catch (Exception e) {
+      javax.jms.JMSException jE = new JMSException("Internal error");
+      jE.setLinkedException(e);
+      throw(jE);
     }
-
-    /**
-     * Create a QueueSession.
-     */
-    public javax.jms.QueueSession createQueueSession(boolean transacted, int acknowledgeMode) throws JMSException {
-	try {
-	    long sessionCounterNew = sessionCounter;
-	    sessionCounter = calculateMessageID(sessionCounter);
-	    fr.dyade.aaa.joram.QueueSession session = new fr.dyade.aaa.joram.QueueSession(transacted, acknowledgeMode, sessionCounter,this);
-	    if (session == null) {
-		sessionCounter = sessionCounter - 1;
-		throw (new fr.dyade.aaa.joram.JMSAAAException("Internal error during creation QueueSession",JMSAAAException.ERROR_CREATION_SESSION));
-	    } else {
-		return session;
-	    }
-	} catch (JMSException jmse) {
-	    throw(jmse);
-	} catch (Exception e) {
-	    JMSException jmse = new JMSException("Internal error");
-	    jmse.setLinkedException(e);
-	    throw(jmse);
-	}
-    }
+  }
 
 
-    /**
-     * Create a connection consumer for this connection (optional operation).
-     * This is an expert facility not used by regular JMS clients.
-     */
-    public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Queue queue,
-								 String messageSelector,
-								 javax.jms.ServerSessionPool sessionPool,
-								 int maxMessages) throws JMSException {
-	throw (new JMSAAAException("Not yet available", JMSAAAException.NOT_YET_AVAILABLE));
-    }
+  /**
+   * Method creating a <code>ConnectionConsumer</code> on this connection.
+   * <br>
+   * This is an expert facility not used by regular JMS clients.
+   *
+   * @param queue  The Queue which messages will be consumed by this consumer.
+   * @param messageSelector  The selector to filter the consumed messages.
+   * @param sessionPool  The pool from which Sessions are got.
+   * @param maxMessages  The number of messages passed to a given Session.
+   *
+   * @author Frederic Maistre
+   */
+  public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Queue queue,
+    String messageSelector, javax.jms.ServerSessionPool sessionPool, int maxMessages)
+    throws JMSException
+  {
+    if (sessionPool == null)
+      throw (new JMSException("ServerSessionPool parameter is null!"));
 
-} // QueueConnection
+    // Building the connectionConsumer.
+    ConnectionConsumer connectionConsumer = 
+      new ConnectionConsumer(queue, messageSelector, sessionPool, maxMessages);
+
+    // Launching the listening thread which gets the messages from the queue.
+    queueConnectionListener = new QueueConnectionListener(this,
+      connectionConsumer, queue, messageSelector);
+
+    return (javax.jms.ConnectionConsumer) connectionConsumer;
+  }
+
+}

@@ -40,7 +40,7 @@ import java.util.Date;
  * @see		FlowControlDxOutputStream
  */
 public class FlowControlDuplexStream {
-public static final String RCS_VERSION="@(#)$Id: FlowControlDuplexStream.java,v 1.3 2000-10-05 15:21:07 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: FlowControlDuplexStream.java,v 1.4 2001-05-04 14:55:04 tachkeni Exp $";
 
   /** default window size value, which is 8000 */
   public static final int WINDOW_SIZE = 8000;

@@ -21,17 +21,15 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+import java.util.*;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-
-public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-20 13:56:14 tachkeni Exp $"; 
-
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.6 2001-05-04 14:54:52 tachkeni Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -46,18 +44,35 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
   protected transient Queue qout;
 
   /** manage input stream */
-  private transient DriverIn drvIn;
+  private transient DriverIn drvIn = null;
   /** manage output stream */
-  private transient DriverOut drvOut;
+  private transient DriverOut drvOut = null;
   /** manage connection step, optional */
   private transient DriverConnect drvCnx;
+
+  /** Set as true for managing multi-connections. */
+  protected boolean multiConn = false;
+  /** 
+   * Table holding the <code>DriverMonitor</code> objects,
+   * each holding a connection set (a pair of drivers, a qout,
+   * ois, oos, ...). For multi-connections management.
+   *
+   * @see  DriverMonitor
+   */
+  protected transient Hashtable driversTable;
+  /**
+   * Used in multi-connections context for identifying each
+   * connection.
+   */
+  private int driversKey ;
+
 
   public ProxyAgent() {
     this(null);
   }
 
   public ProxyAgent(String n) {
-    this(Server.serverId, n);
+    this(AgentServer.getServerId(), n);
   }
 
   public ProxyAgent(short to, String n) {
@@ -81,7 +96,6 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
     drvCnx = null;
   }
 
-
   /**
    * Provides a string image for this object.
    *
@@ -92,8 +106,28 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
       ",blockingCnx=" + blockingCnx +
       ",multipleCnx=" + multipleCnx +
       ",inFlowControl=" + inFlowControl +
-      ",qout=" + qout + ")";
+      ", multiConn=" + multiConn +
+      ",qout=" + qout +
+      ",driversKey=" + driversKey + ")";
   }
+
+  
+  /**
+   * Method setting the <code>ProxyAgent</code> as
+   * multiConn, and creating the driversTable for
+   * holding the connection sets. Should be called
+   * after the <code>ProxyAgent</code> creation.
+   */
+  public void setMultiConn() {
+    multiConn = true;
+  }
+
+
+  /** Method returning the current key. */
+  protected int getProxyDriversKey() {
+    return driversKey;
+  }
+
 
   /**
    * Initializes the transient members of this agent.
@@ -110,19 +144,47 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
    */
   protected void initialize(boolean firstTime) throws Exception {
     super.initialize(firstTime);
-    qout = new Queue();
+
+    if (!multiConn)
+      // In single connection mode, qout is created once.
+      qout = new Queue();
+    else {
+      // In multi connections mode, creating the driversTable 
+      // and initializing the driversKey.
+      driversKey = 1;
+      driversTable = new Hashtable();
+    }
+
     reinitialize();
   }
 
   /**
    * Reinitializes the agent, that is reconnects its input and output.
-   * This function may be called only when all drivers are null.
+   * This function may be called only when all drivers are null
+   * if the <code>ProxyAgent</code> manages only one connection at a time.
+   * Otherwise, a multiConn <code>ProxyAgent</code> will reinitialize
+   * even if the current drivers are not null.
    */
   protected void reinitialize() throws IOException {
-    if (drvIn != null || drvOut != null)
-      throw new IllegalStateException();
+    if (drvIn != null || drvOut != null) {
+      if (!multiConn)
+        throw new IllegalStateException();
+    }
+
     drvCnx = new DriverConnect(this, blockingCnx, multipleCnx);
     drvCnx.start();
+
+    // If the ProxyAgent manages multi-connections, stores 
+    // the connection set in a DriverMonitor and put it in 
+    // the driversTable.
+    if (multiConn) {
+      DriverMonitor dMonitor = new DriverMonitor(drvIn, drvOut, 
+        qout, ois, oos, drvCnx);
+
+      driversTable.put(new Integer(driversKey), dMonitor);
+      driversKey++;
+    }
+
   }
 
   /** input stream, created by subclass during connect */
@@ -147,12 +209,13 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
    */
   public abstract void disconnect() throws Exception;
 
+
   /**
    * Connects the streams provided by the user to this proxy agent
-   * via two created drivers. The streams must be created by the
+   * to two created drivers. The streams must be created by the
    * <code>connect</code> function defined in derived classes.
    * <p>
-   * If the connection step may block, then this function is executed
+   * If the connection step blocks, this function is executed
    * in a separate thread controled by <code>drvCnx</code> (see
    * <code>Initialize</code>).
    */
@@ -162,39 +225,102 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
     } catch (Exception exc) {
       Debug.trace(toString() + ".createDrivers()", exc);
     }
-
-    if (ois != null) {
-      drvIn = new DriverIn(DRIVER_IN, getId(), ois, inFlowControl);
-      drvIn.start();
+    if (!multiConn) {  
+      if (ois != null) {
+        drvIn = new DriverIn(DRIVER_IN, getId(), ois, inFlowControl);
+        drvIn.start();
+      }
+      if (oos != null) {
+        drvOut = new DriverOut(DRIVER_OUT, getId(), qout, oos);
+        drvOut.start();
+      }
     }
-    if (oos != null) {
-      drvOut = new DriverOut(DRIVER_OUT, getId(), qout, oos);
-      drvOut.start();
+
+    // If the ProxyAgent is multiConn, creating drvIn and drvOut
+    // with the additionnal driversKey parameter and also creating
+    // a new qout.
+    else {
+      if (ois != null) {
+        drvIn = new DriverIn(DRIVER_IN, getId(), ois, inFlowControl, driversKey);
+        drvIn.start();
+      }
+      if (oos != null) {
+        qout = new Queue(); 
+        drvOut = new DriverOut(DRIVER_OUT, getId(), qout, oos, driversKey);
+        drvOut.start();
+      }
     }
   }
 
+
   /**
-   * Stops all drivers.
+   * Stops all drivers (non multiConn mode).
    * May be multiply called.
    */
   protected void stop() {
-    if (drvCnx != null) {
-      drvCnx.stop();
-      drvCnx = null;
-    }
-    if (drvIn != null) {
-      drvIn.stop();
-      drvIn = null;
-    }
-    if (drvOut != null) {
-      drvOut.stop();
-      drvOut = null;
+    if (! multiConn) {
+      if (drvCnx != null) {
+        drvCnx.stop();
+        drvCnx = null;
+      }
+      if (drvIn != null) {
+        drvIn.stop();
+        drvIn = null;
+      }
+      if (drvOut != null) {
+        drvOut.stop();
+        drvOut = null;
+      }
+    } 
+  }
+
+  /**
+   * Method stopping the specified connection set (multi-connections mode). 
+   *
+   * @param drvKey  key identifying the connection set to stop.
+   */
+  protected void stop(int drvKey) {
+    DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+    if (dMonitor != null) {
+      if (dMonitor.drvCnx != null) {
+        (dMonitor.drvCnx).stop();
+        dMonitor.drvCnx = null;
+      }
+      if (dMonitor.drvIn != null) {
+        (dMonitor.drvIn).stop();
+        dMonitor.drvIn = null;
+      }
+      if (dMonitor.drvOut != null) {
+        (dMonitor.drvOut).stop();
+        dMonitor.drvOut = null;
+      }
     }
   }
 
-    public void cleanDriverOut() {
-	drvOut.clean();
+
+  /** Method cleaning DriverOut. Single connection mode only. */
+  public void cleanDriverOut() {
+    if (! multiConn) {
+      if (drvOut != null)
+        drvOut.clean();
     }
+  }
+
+
+  /**
+   * Method cleaning the <code>DriverOut</code> specified
+   * by the key parameter (multi-connections mode).
+   *
+   * @param  drvKey key identifying the connection set.
+   */ 
+  public void cleanDriverOut(int drvKey) {
+    DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+    if (dMonitor != null) {
+      if (dMonitor.drvOut != null)
+        (dMonitor.drvOut).clean();
+    }
+  }
+
 
   /**
    * Finalizes this proxy agent execution. Calls <code>disconnect</code>
@@ -203,9 +329,33 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
    * @exception Throwable
    *	unspecialized exception
    */
-  protected final void finalize() throws Throwable {
-    if (ois == null && oos == null)
-      return;
+  protected final void finalize() throws Throwable
+  {
+    if (! multiConn) {
+      if (ois == null && oos == null)
+        return;
+    }
+    else {
+      Enumeration keys = driversTable.keys();
+      while (keys.hasMoreElements()) {
+        Integer key = (Integer) keys.nextElement();
+        DriverMonitor dMonitor = (DriverMonitor) driversTable.get(key);
+
+        if (dMonitor != null) {
+          if (dMonitor.ois != null || dMonitor.oos != null) {
+            (dMonitor.ois).close();
+            (dMonitor.oos).close();
+  
+            stop(key.intValue());
+  
+            dMonitor.ois = null;
+            dMonitor.oos = null;
+            dMonitor.qout = null;
+          }
+        }
+      }
+      driversTable.clear();
+    }
 
     try {
       disconnect();
@@ -216,13 +366,14 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
     stop();
 
     qout = null;
-    
     ois = null;
     oos = null;
+
   }
 
+
   /**
-   * Reacts to notifications.
+   * Reacts to notifications.<br>
    * Assumes notifications from nullId come from drvIn; let derive classes
    * handle them. Forwards notifications coming from an identified agent
    * onto the outgoing connection.
@@ -236,24 +387,35 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
   public void react(AgentId from, Notification not) throws Exception {
     try {
       if (not instanceof DriverDone) {
-	driverDone((DriverDone) not);
-      } else if (not instanceof FlowControlNot) {
-	// Received a FlowControlNot then allows "in driver" to read more data.
-	drvIn.recvFlowControl((FlowControlNot) not);
-      } else if (! from.isNullId()) {
-	qout.push(not);
-      } else {
-	super.react(from, not);
+        driverDone((DriverDone) not);
+      } 
+      else if (not instanceof FlowControlNot) {
+        // Allowing drvIn to read more data
+        if (multiConn) {
+          int drvKey = ((FlowControlNot) not).driverKey;
+          DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+	      (dMonitor.drvIn).recvFlowControl((FlowControlNot) not);
+        }
+        else
+	      drvIn.recvFlowControl((FlowControlNot) not);
+      } 
+      else if (! from.isNullId()) {
+        if (!multiConn)
+          qout.push(not);
+      } 
+      else {
+        super.react(from, not);
       }
     } catch (Exception exc) {
-      if ((Debug.drivers) || (Debug.error))
-	Debug.trace("ProxyAgent: Exception in " +
-		    this + ".react(" + from + "," + not + ")",
-		    exc);
+      if ((Debug.drivers) || (Debug.error)) {
+	    Debug.trace("ProxyAgent: Exception in " +
+		  this + ".react(" + from + "," + not + ")", exc);
+      }
       stop();
-      // the proxy agent may eventually restart
+      // the proxy agent may restart
     }
   }
+
 
   /**
    * Reacts to end of driver execution.
@@ -264,55 +426,55 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-2
    * to cope with a call to <code>close</code> when some resources may have
    * been released.
    */
-  protected void driverDone(DriverDone not) throws IOException {
-    switch (not.getDriver()) {
-    case DRIVER_IN:
-      try {
-	ois.close();
-      } catch (Exception e) {}
-      ois = null;
-      drvIn = null;
-      break;
-    case DRIVER_OUT:
-	try {
-	    oos.close();
-	} catch (Exception e) {}
-	oos = null;
-	drvOut = null;
-	break;
+  protected void driverDone(DriverDone not) throws IOException { 
+    if (!multiConn) {
+      switch (not.getDriver()) {
+        case DRIVER_IN:
+          try {
+            ois.close();
+          } catch (Exception e) {}
+          ois = null;
+          drvIn = null;
+          break;
+        case DRIVER_OUT:
+          try {
+            oos.close();
+          } catch (Exception e) {}
+          oos = null;
+          drvOut = null;
+          break;
+      }
     }
+    // In case of multiConn, the driver to close is identified
+    // in the DriverDone notification.
+    else {
+      int drvKey = not.getDriverKey();
+      DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+      if (dMonitor != null) {
+        switch (not.getDriver()) {
+          case DRIVER_IN:
+            try {
+              if (dMonitor.drvIn != null)
+              (dMonitor.drvIn).close();
+            } catch (Exception e) {}
+            dMonitor.ois = null;
+            dMonitor.drvIn = null;
+            break;
+          case DRIVER_OUT:
+            try {
+              if (dMonitor.drvOut != null)
+              (dMonitor.drvOut).close();
+            } catch (Exception e) {}
+            dMonitor.oos = null;
+            dMonitor.drvOut = null;
+            break;
+        }
+        // When both drivers have been closed, remove the entry
+        // corresponding to their pair from the driversTable.
+        if (dMonitor.drvIn == null && dMonitor.drvOut == null)
+          driversTable.remove(new Integer(drvKey));
+      }
+    } 
   }
-}
 
-class DriverConnect extends Driver {
-
-  protected ProxyAgent proxy = null;
-  protected boolean blockingCnx;
-  protected boolean multipleCnx;
-
-  DriverConnect(ProxyAgent proxy,
-		boolean blockingCnx,
-		boolean multipleCnx) {
-    this.proxy = proxy;
-    this.blockingCnx = blockingCnx;
-    this.multipleCnx = multipleCnx;
-  }
-
-  public void start() {
-    if (! blockingCnx) {
-      run();
-    } else {
-      super.start();
-    }
-  }
-
-  public void run() {
-    if (Debug.drivers)
-      Debug.trace("cnx driver start", false);
-    do {
-      proxy.createDrivers();
-    } while (multipleCnx);
-  }
-
-  public void close() {}
 }

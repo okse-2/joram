@@ -40,7 +40,7 @@ public class NotificationMOMInputStream implements NotificationInputStream {
    * ie the MessageJMSMOM
    */
   private ObjectInputStream in;
-  
+
   /** Constructor of the NotificationMOMInputStream */
   public NotificationMOMInputStream(InputStream in) throws IOException{
     this.in = new ObjectInputStream(new BufferedInputStream(in));
@@ -59,7 +59,7 @@ public class NotificationMOMInputStream implements NotificationInputStream {
     } else 
       throw new StreamCorruptedException("Message read is not a MessageJMSMOM");
   }
-  
+ 
   /**
    * Closes the stream.
    */

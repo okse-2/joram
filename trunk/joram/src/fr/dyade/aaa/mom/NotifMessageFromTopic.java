@@ -21,35 +21,40 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
+package fr.dyade.aaa.mom; 
+ 
+import java.lang.*; 
+ 
+/** 
+ * A <code>NotifMessageFromTopic</code> wraps a message sent
+ * by a <code>Topic</code> and destinated to a client.
+ *	
+ * @see  fr.dyade.aaa.mom.Topic 
+ */ 
+public class NotifMessageFromTopic extends fr.dyade.aaa.agent.Notification
+{ 
+  /** The subscription name. */
+  public String nameSubscription;
 
+  /** The wrapped message. */ 
+  public fr.dyade.aaa.mom.Message msg ;
 
-package fr.dyade.aaa.agent;
+  /** The subscription theme. */
+  public String theme;
 
-/**
- * Thrown by ... 
- *
- * @author  Andr* Freyssinet
- * @version 1.3, 01/08/97
- */
-public class NullIdException extends Exception {
+  public int driverKey;
 
-public static final String RCS_VERSION="@(#)$Id: NullIdException.java,v 1.3 2000-10-05 15:15:22 tachkeni Exp $"; 
+  public NotifMessageFromTopic(String nameSubscription,
+    fr.dyade.aaa.mom.Message msg, String theme, int driverKey)
+  { 
+    this.nameSubscription = nameSubscription;
+    this.msg = msg;
+    this.theme = theme;
+    this.driverKey = driverKey;
+  } 
 
-  /**
-   *  Constructs a new <code>NullIdException</code> with no
-   * detail message.
-   */
-  public NullIdException() {
-    super();
+  public int getDriverKey() {
+    return driverKey;
   }
 
-  /**
-   *  Constructs a new <code>NullIdException</code> with the
-   * specified  detail message. 
-   *
-   * @param   s   the detail message.
-   */
-  public NullIdException(String s) {
-    super(s);
-  }
 }

@@ -21,15 +21,13 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.util;
 
 import java.io.*;
 import java.util.*;
 
 public class FSTransaction implements Transaction {
-
-public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.3 2000-10-05 15:21:07 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.4 2001-05-04 14:55:04 tachkeni Exp $"; 
 
   private File dir = null;
 
@@ -298,4 +296,6 @@ public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.3 2000-1
     setPhase(FREE);
     notify();
   }
+
+  public final void stop() {}
 }

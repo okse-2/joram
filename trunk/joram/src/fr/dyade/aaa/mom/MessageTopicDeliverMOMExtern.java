@@ -21,38 +21,44 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
 import java.lang.*; 
  
 /** 
- *	a MessageTopicDeliverMOMExtern is as JMS specifications 
- * 
- *	@see         subclasses
+ * A <code>MessageTopicDeliverMOMExtern</code> contains the
+ * message sent by a <code>Topic</code> to a client subscriber.
  */ 
- 
-public class MessageTopicDeliverMOMExtern extends MessageMOMExtern { 
-	
-	/** the name of a the subscription given by the agentClient */
-	public String nameSubscription;
-	
-	/** the message to  send */
-	public fr.dyade.aaa.mom.Message message;
-	
-	/** the theme of the subscription of theagentClient
-	 *	the information in the Message is not available becausewe can post
-	 *	in a subNode of the subscription
-	 */
-	public String theme;
+public class MessageTopicDeliverMOMExtern extends MessageMOMExtern
+{ 
+  /** The subscription name. */
+  public String nameSubscription;
 
+  /** The message. */
+  public fr.dyade.aaa.mom.Message message;
 
-	public MessageTopicDeliverMOMExtern(long requestID, String nameSubscription, fr.dyade.aaa.mom.Message message, String theme) {
-		super(requestID);
-		this.nameSubscription = nameSubscription;
-		this.message = message;
-		this.theme = theme;
-	}
+  /** The subscription theme. */
+  public String theme;
+
+  public boolean connectionConsumer = false;
+
+  public boolean toListener = true;
+
+  /** Constructor. */
+  public MessageTopicDeliverMOMExtern(long requestID, String nameSubscription, 
+    fr.dyade.aaa.mom.Message message, String theme, int driversKey)
+  {
+    super(requestID, driversKey);
+    this.nameSubscription = nameSubscription;
+    this.message = message;
+    this.theme = theme;
+  }
+  public MessageTopicDeliverMOMExtern(long requestID, String nameSubscription, 
+    fr.dyade.aaa.mom.Message message, String theme, int driversKey,
+    boolean connectionConsumer)
+  {
+  this(requestID, nameSubscription, message, theme, driversKey);
+  this.connectionConsumer = connectionConsumer;
+  }
 	
 }

@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -39,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 class AgentIdStamp implements Serializable {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
@@ -74,7 +73,7 @@ class AgentIdStamp implements Serializable {
    *  Saves the object state on persistent storage.
    */
   void save() throws IOException {
-    Server.transaction.save(this, "AgentIdStamp");
+    AgentServer.transaction.save(this, "AgentIdStamp");
   }
 
   /**
@@ -82,7 +81,7 @@ class AgentIdStamp implements Serializable {
    */
   static AgentIdStamp
   load() throws IOException, ClassNotFoundException {
-    return (AgentIdStamp) Server.transaction.load("AgentIdStamp");
+    return (AgentIdStamp) AgentServer.transaction.load("AgentIdStamp");
   }
 
   /**
@@ -116,15 +115,15 @@ class AgentIdStamp implements Serializable {
    * @param to	The target agent server
    */
   synchronized int newStamp(short to) {
-    int current = (to == Server.serverId)?(++local):(++remote);
     try {
+      int current = (to == AgentServer.getServerId())?(++local):(++remote);
       save();
+      return current;
     } catch (IOException exc) {
-     exc.printStackTrace(System.err);
-     return -1;
-   }
-   return current;
- }
+      Debug.trace("Problem during stamp allocation", exc);
+      return 0;
+    }
+  }
 }
 
 /**
@@ -168,17 +167,17 @@ public final class AgentId implements Serializable, Cloneable {
   // description of each during serialization.
 
   /** The identification of the agent server hosting the creating agent. */
-  public transient short from;
+  transient short from;
   /** The identification of the agent server hosting the created agent. */
-  public transient short to;
+  transient short to;
   /** The stamp, local to the agent server hosting the creating agent. */
-  public transient int stamp;
+  transient int stamp;
 
   /**
    * A temporary string representation of object in order to improve
    * performances.
    */
-  public transient String str;
+  transient String str;
 
   /**
    * The <code>writeObject</code> method is responsible for writing the
@@ -214,15 +213,13 @@ public final class AgentId implements Serializable, Cloneable {
   // ***** ***** ***** *****
 
   /** Reserved stamp for NullId. */
-  public static int NullIdStamp = 0;
+  public static final int NullIdStamp = 0;
   /** Reserved stamp for factory <code>AgentId</code>. */
-  public static int FactoryIdStamp = 1;
+  public static final int FactoryIdStamp = 1;
   /** Reserved stamp for admin <code>AgentId</code>. */
-  public static int AdminIdStamp = 2;
-  /** Reserved stamp for transient proxy <code>AgentId</code>. */
-  public static int TransientProxyIdStamp = 3;
+  public static final int AdminIdStamp = 2;
   /** Maximum reserved stamp for system services. */
-  public static int MaxSystemIdStamp = 3;
+  public static final int MaxSystemIdStamp = 2;
 
   // ***** ***** ***** *****
   // Reserved stamps for well known services.
@@ -244,7 +241,9 @@ public final class AgentId implements Serializable, Cloneable {
   // ***** ***** ***** *****
 
   /** null <code>AgentId</code>. */
-  public static AgentId nullId;
+  public final static AgentId nullId = new AgentId((short) 0,
+						   (short) 0,
+						   NullIdStamp);
   /**
    * Used by channel to send messages without source agent (from proxy
    * or engine). The from field does not be nullId because the destination
@@ -253,7 +252,7 @@ public final class AgentId implements Serializable, Cloneable {
    * @see Engine
    * @see Channel#sendTo(AgentId, Notification)
    */
-  public static AgentId localId;
+  static AgentId localId;
   /**
    * <code>AgentId</code> for local factory agent.
    * @see AgentFactory
@@ -264,12 +263,6 @@ public final class AgentId implements Serializable, Cloneable {
    * @see AgentAdmin
    */
   static AgentId adminId;
-  /**
-   * <code>AgentId</code> for local transient proxy.
-   * @see TransientManager
-   * @see TransientServer
-   */
-  static AgentId transientProxyId;
 
   /**
    * Statically initializes <code>AgentId</code> class.
@@ -277,21 +270,18 @@ public final class AgentId implements Serializable, Cloneable {
   static void init()
     throws IOException, ClassNotFoundException {
     // Initialize well known ids
-    nullId = new AgentId((short) 0,
-			 (short) 0,
-			 NullIdStamp);
-    localId = new AgentId(Server.serverId,
-			  Server.serverId,
+//     nullId = new AgentId((short) 0,
+// 			 (short) 0,
+// 			 NullIdStamp);
+    localId = new AgentId(AgentServer.getServerId(),
+			  AgentServer.getServerId(),
 			  NullIdStamp);
-    factoryId = new AgentId(Server.serverId,
-			    Server.serverId,
+    factoryId = new AgentId(AgentServer.getServerId(),
+			    AgentServer.getServerId(),
 			    FactoryIdStamp);
-    adminId = new AgentId(Server.serverId,
-			    Server.serverId,
+    adminId = new AgentId(AgentServer.getServerId(),
+			    AgentServer.getServerId(),
 			    AdminIdStamp);
-    transientProxyId = new AgentId(Server.serverId,
-			    Server.serverId,
-			    TransientProxyIdStamp);
     // Initialize stamp values
     AgentIdStamp.init();
   }
@@ -300,8 +290,8 @@ public final class AgentId implements Serializable, Cloneable {
    * Allocates an <code>AgentId</code> object for a new agent hosted by
    * this agent server.
    */ 
-  AgentId() {
-    this(Server.serverId);
+  AgentId() throws IOException {
+    this(AgentServer.getServerId());
   }
 
   /**
@@ -311,7 +301,7 @@ public final class AgentId implements Serializable, Cloneable {
    * @param to 	The identification of the agent server hosting the agent.
    */ 
   AgentId(short to) {
-    this(Server.serverId, to, AgentIdStamp.stamp.newStamp(to));
+    this(AgentServer.getServerId(), to, AgentIdStamp.stamp.newStamp(to));
   }
 
   /**
@@ -331,12 +321,24 @@ public final class AgentId implements Serializable, Cloneable {
   }
 
   /**
-   * Returns a string representation of this <code>AgentId</code> object.
-   *
-   * @return	A string representation of this object. 
+   * 
    */
-  public final String toString() {
-    return str;
+  public final short getFrom() {
+    return from;
+  }
+
+  /**
+   * 
+   */
+  public final short getTo() {
+    return to;
+  }
+
+  /**
+   * 
+   */
+  public final int getStamp() {
+    return stamp;
   }
 
   /**
@@ -367,6 +369,15 @@ public final class AgentId implements Serializable, Cloneable {
   }
 
   /**
+   * Returns a string representation of this <code>AgentId</code> object.
+   *
+   * @return	A string representation of this object. 
+   */
+  public final String toString() {
+    return str;
+  }
+
+  /**
    * Returns a hashcode for this <code>AgentId</code> object.
    *
    * @return	a hash code value for this object, equal to the primitive
@@ -381,7 +392,7 @@ public final class AgentId implements Serializable, Cloneable {
    * @return	<code>true</code> if this id is equals to NullId;
    *	<code>false</code> otherwise.
    */
-  public boolean isNullId() {
+  public final boolean isNullId() {
     return (stamp == NullIdStamp);
   }
 

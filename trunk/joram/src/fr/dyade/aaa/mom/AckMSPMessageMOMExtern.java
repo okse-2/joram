@@ -21,25 +21,25 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 /** 
- *	an AckMSPMessageMOMExtern allows a client to acknowledge multiple 
- *	messages in 1 time
+ * An <code>AckMSPMessageMOMExtern</code> is sent
+ * by a client for acknowledging multiple messages.
  * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see  fr.dyade.aaa.mom.MessageMOMExtern
  */ 
- 
-public class AckMSPMessageMOMExtern extends MessageMOMExtern { 
-	
-	/** the array which contains all the acknowledgment */
-	public fr.dyade.aaa.mom.MessageMOMExtern[] ackTab;
-	
-	public AckMSPMessageMOMExtern(long requestID, fr.dyade.aaa.mom.MessageMOMExtern[] ackTab) {
-		super(requestID);
-		this.ackTab = ackTab;
-	}
+public class AckMSPMessageMOMExtern extends MessageMOMExtern
+{ 
+  /** The array containing the acknowledgments. */
+  public fr.dyade.aaa.mom.MessageMOMExtern[] ackTab;
+
+  /** Constructor. */
+  public AckMSPMessageMOMExtern(long requestID,
+    fr.dyade.aaa.mom.MessageMOMExtern[] ackTab)
+  {
+    super(requestID);
+    this.ackTab = ackTab;
+  }
 	
 }

@@ -48,17 +48,16 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     /** the mode of transaction 
      * for present time only not transated mode is implemented
      */
-    protected boolean transacted;
+    boolean transacted;
 
     /** the mode of acknowledge */
-    protected int acknowledgeMode ;
+    int acknowledgeMode ;
 	
     /** identifier of session : sessionID */
     protected long sessionID;
 	
     /** The boolean that shows the session's status */
     protected boolean isClosed;
-
     /** counter of consumerId for identify the not durable subscription */
     protected long counterConsumerID;
 	
@@ -66,11 +65,13 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     protected java.lang.Thread threadDeliver;
 	
     /** the vector of the last delivered messages for implicit reception */
-    protected Vector lastNotAckVector;
+    Vector lastNotAckVector;
 	
     /** vector of no delivered messages for implicit reception */
-    protected fr.dyade.aaa.joram.FifoQueue msgNoDeliveredQueue;
-	
+    protected fr.dyade.aaa.joram.FifoQueue messagesToDeliver;
+
+    protected fr.dyade.aaa.joram.FifoQueue ccMessages;
+
     /**
      * Hashtable which contains all the MessageConsumer created by the
      * Session.<br><br>
@@ -86,7 +87,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
      * key : fr.dyade.aaa.mom.QueueNaming.<br>
      * Object : vector of fr.dyade.aaa.joram.MessageConsumer.<br>
      */
-    protected Hashtable messageConsumerTable;
+    Hashtable messageConsumerTable;
 	
     /** indicates that a recover methods is working */
     protected boolean recoverySet = false ;
@@ -95,7 +96,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     protected Vector transactedMessageToSendVector = null;
 	
     /** vector of message delivered to the client but waiting for the commit */
-    protected Vector transactedMessageToAckVector = null;
+    Vector transactedMessageToAckVector = null;
 
     /**	synchro to avoid the client commits before the message
      *	be added to the vector of delivered messages
@@ -106,9 +107,21 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
      *	the rollback
      */
     protected boolean transactedRollback = false;
-									
+
+    /**
+     * <code>MessageListener</code> for getting messages from a 
+     * <code>ConnectionConsumer</code>.<br>
+     * To be used by application servers only.
+     */
+    protected javax.jms.MessageListener messageListener = null;
+
+    protected Hashtable listenersTable;
+    protected fr.dyade.aaa.util.Queue listenersRequests;
+    protected SessionListener listener;
+
     /** Constructor */
     public Session(boolean transacted, int acknowlegdeMode, long sessionID, fr.dyade.aaa.joram.Connection refConnection) {
+
 	this.refConnection = refConnection;
 	this.transacted = transacted;
 	this.sessionID = sessionID;
@@ -117,9 +130,10 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	counterConsumerID = 1;
 
 	messageConsumerTable = new Hashtable();
-		
+
 	/* initialisation of object using for delivery */
-	msgNoDeliveredQueue = new fr.dyade.aaa.joram.FifoQueue();
+	messagesToDeliver = new fr.dyade.aaa.joram.FifoQueue();
+	ccMessages = new fr.dyade.aaa.joram.FifoQueue();
 		
 	/* this object must be always initialized because it avoids a test 
 	 * if the session is transacted or not in the RUN of the TopicSession
@@ -138,6 +152,11 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	    transactedMessageToAckVector = new Vector();		
 	    this.acknowledgeMode = fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED;
 	}
+    listenersTable = new Hashtable();
+    listenersRequests = new fr.dyade.aaa.util.Queue();
+    /*listener = new SessionListener(new Long(sessionID), refConnection, this);
+    listener.setDaemon(true);
+    listener.start();*/
     }
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
@@ -291,7 +310,8 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 		    /* lock the delivery of the message */
 		    this.transactedRollback = true;
 		    if (transactedMessageToAckVector.size()!=0) {
-			msgNoDeliveredQueue.remove();
+			messagesToDeliver.remove();
+			ccMessages.remove();
 		    }
 		    /* rollback delivery message */
 		    rollbackDeliveryMsg();
@@ -314,6 +334,10 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
     public void close() throws javax.jms.JMSException {
+    if (listener != null) {
+      listener.stop();
+      listener = null;
+    }
 	System.gc();
     }
 	
@@ -393,20 +417,26 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	    throw(except); 
 	}
     }
-	
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications 
-     *	for serverSessionPool
-     */
-    public javax.jms.MessageListener getMessageListener() throws javax.jms.JMSException {
-	throw (new fr.dyade.aaa.joram.JMSAAAException("available in TopicSubscriber",JMSAAAException.NOT_YET_AVAILABLE));
-    }
-	
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications  
-     *	for serverSessionPool
-     */
-    public void setMessageListener(javax.jms.MessageListener listener) throws javax.jms.JMSException {
-	throw (new fr.dyade.aaa.joram.JMSAAAException("available in TopicSubscriber",JMSAAAException.NOT_YET_AVAILABLE));
-    }
+
+
+  /** Method returning the MessageListener, if any. */	
+  public javax.jms.MessageListener getMessageListener()
+    throws javax.jms.JMSException
+  {
+    if (messageListener == null)
+      throw (new javax.jms.JMSException("Session's MessageListener is null"));
+    return messageListener;
+  }
+
+  /** Method setting the MessageListener. */	
+  public void setMessageListener(javax.jms.MessageListener listener)
+    throws javax.jms.JMSException
+  {
+    if (listener == null)
+      throw (new javax.jms.JMSException("Listener parameter is null"));
+      
+    this.messageListener = listener;
+  }
 	
     /** a session defines a serial order do the messages it consumes and the
      *	messages it produces
@@ -441,7 +471,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 		/* send the ack outside the synchronized object to avoid to stand
 		 * a long time in this portion of code
 		 */
-		
 		fr.dyade.aaa.mom.AckMSPMessageMOMExtern msgAck = new fr.dyade.aaa.mom.AckMSPMessageMOMExtern(messageJMSMOMID, ackTab);
 		/* synchronization because it could arrive that the notify was
 		 * called before the wait 
@@ -451,11 +480,10 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 		    refConnection.waitThreadTable.put(longMsgID,new ResponseAckObject(obj, size));
 		    /* get the messageJMSMOM identifier */
 		    this.sendToConnection(msgAck);
-					
 		    obj.wait();
 		}
 				
-		/* the clients wakes up */
+		// the clients wakes up 
 		fr.dyade.aaa.mom.MessageMOMExtern msgResponse;
 		
 		/* tests if the key exists 
@@ -467,7 +495,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 		/* get the the message back or the exception*/
 		msgResponse = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
 		if(msgResponse instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-		    /* OK */ 
+		    /* OK */
 		} else if(msgResponse instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
 		    /* exception sent back to the client */
 		    fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgResponse;
@@ -581,7 +609,8 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	
     /** prepares the messages to recover the messages of the session */
     protected abstract fr.dyade.aaa.mom.RecoverObject[] preparesRecover() throws javax.jms.JMSException;
-	
+
+
     /** sends a fr.dyade.aaa.mom.SendQueueMessage or SendTopicMessage 
      *	and waits the requestAgree or the Exception
      */
@@ -657,8 +686,93 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     }
 	
     /** add a new message in the queue of the session for implicit receptions */
-    protected void addNewMessage(fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgMOM) {
-	msgNoDeliveredQueue.push(msgMOM);
+    protected void addNewMessage(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) {
+	messagesToDeliver.push(msgMOM);
     }
+    protected void addCCMessage(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) {
+    ccMessages.push(msgMOM);
+    }
+
+
+  /**
+   * Used by application servers only!
+   * <br>
+   * Passes the incoming messages to the messageListener's
+   * <code>onMessage()<code> methode, and acknowledges them.
+   */
+  public void run() {
+    fr.dyade.aaa.mom.MessageMOMExtern momMsg;
+    fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern topicMsg;
+    fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern queueMsg;
+
+    while (true) {
+      try {
+        momMsg = (fr.dyade.aaa.mom.MessageMOMExtern) ccMessages.pop();
+        if (momMsg == null)
+          break;
+          
+        if (momMsg instanceof fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) {
+          topicMsg = (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) momMsg;
+
+          fr.dyade.aaa.mom.TopicNaming topic =
+            new fr.dyade.aaa.mom.TopicNaming(((fr.dyade.aaa.mom.TopicNaming)
+            topicMsg.message.getJMSDestination()).getTopicName(), topicMsg.theme);
+
+          fr.dyade.aaa.mom.AckTopicMessageMOMExtern msgAck;
+
+          if (messageListener != null) {
+            if (transacted) {
+              synchronized (transactedSynchroObject) {
+                transactedMessageToAckVector.addElement(topicMsg);
+              }
+            }
+            else {
+              if (acknowledgeMode != fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE)
+                lastNotAckVector.addElement(topicMsg);
+
+              else {
+                msgAck =
+                  new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(),
+                  topic, topicMsg.nameSubscription, topicMsg.message.getJMSMessageID(),
+                  fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
+
+                this.sendToConnection(msgAck);
+              }
+            }
+            messageListener.onMessage(topicMsg.message);
+          }
+        } 
+        else if (momMsg instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
+          queueMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) momMsg;
+
+          if (messageListener != null) {
+            if (transacted) {
+              synchronized (transactedSynchroObject) {
+                transactedMessageToAckVector.addElement(queueMsg);
+              }
+            }
+            else {
+              if (acknowledgeMode != fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
+                lastNotAckVector.addElement(queueMsg);
+  			    queueMsg.message.setRefSessionItf(this);
+              }
+              else {
+                fr.dyade.aaa.mom.AckQueueMessageMOMExtern msgAck =
+                  new fr.dyade.aaa.mom.AckQueueMessageMOMExtern(refConnection.getMessageMOMID(),
+                  queueMsg.queue, queueMsg.message.getJMSMessageID(),
+                  fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE,
+                  new Long(sessionID).toString());
+  
+                this.sendToConnection(msgAck);
+              }
+            }
+            resetMessage(queueMsg.message);
+            messageListener.onMessage(queueMsg.message); 
+          }   
+        }
+      } catch (javax.jms.JMSException exc) {}	
+    } 
+  }
+
 }
 

@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom;
 
 import java.lang.*;
@@ -36,10 +34,8 @@ import fr.dyade.aaa.agent.*;
  * @see	fr.dyade.aaa.mom.CommonClientAAA	
  * @see	fr.dyade.aaa.mom.Queue
  * @see	fr.dyade.aaa.mom.Topic
- * @see	fr.dyade.aaa.mom.SubscriptionClient
+ * @see	fr.dyade.aaa.mom.ClientSubscription
  */
-
-
 public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
   /** Well known port for this agent to listen to */
   static final int WKNPort = 16010;
@@ -55,7 +51,7 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
     	super();
 	super.newClient = false;
     }	
-    
+
   /**
    * Initializes the proxy as a service.
    *

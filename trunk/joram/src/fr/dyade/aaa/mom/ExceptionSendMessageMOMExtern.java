@@ -21,26 +21,30 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom;
 
 /** 
- *	contains an exception on send method thrown in the MOM
- *	and consequently the message of the client
+ * An <code>ExceptionSendMessageMOMExtern</code> contains an exception 
+ * that occured after a client sending.<br>
+ * It is sent by an <code>AgentClient</code> when it receives a
+ * <code>NotificationMOMException</code>.
  * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see  fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see  fr.dyade.aaa.mom.CommonClientAAA
  */ 
- 
-public class ExceptionSendMessageMOMExtern extends ExceptionMessageMOMExtern { 
+public class ExceptionSendMessageMOMExtern
+  extends ExceptionMessageMOMExtern
+{ 
+  /** The message that produced the exception. */
+  public fr.dyade.aaa.mom.Message message;
 	
-	/** the message sent and completed */
-	public fr.dyade.aaa.mom.Message message;
-	
-	/** Constructor */
-	public ExceptionSendMessageMOMExtern(long requestIDNew, java.lang.Exception exceptionNew, fr.dyade.aaa.mom.Message messageNew) {
-		super(requestIDNew, exceptionNew);
-		message = messageNew;
-	}
+  /** Constructor. */
+  public ExceptionSendMessageMOMExtern(long requestID, 
+    java.lang.Exception exception,
+    fr.dyade.aaa.mom.Message message, int driverOutKey)
+  {
+    super(requestID, exception, driverOutKey);
+    this.message = message;
+  }
 	
 }

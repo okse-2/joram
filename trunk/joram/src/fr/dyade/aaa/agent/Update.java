@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -32,9 +31,8 @@ import java.io.*;
  * @author	Andr* Freyssinet
  */
 final class Update implements Serializable {
-
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: Update.java,v 1.3 2000-10-05 15:15:25 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: Update.java,v 1.4 2001-05-04 14:54:54 tachkeni Exp $";
 
   //  Declares all fileds transient in order to avoid useless
   // description of each during serialization.
@@ -57,26 +55,33 @@ final class Update implements Serializable {
   transient Update next;
 
   public String toString() {
-    String strBuf;
+    StringBuffer strbuf = new StringBuffer();
     
-    strBuf = "[" + l + ", " + c + ", " + stamp + "] -> " + next;
+    Update update = this;
+    while (update != null) {
+      strbuf.append('(').append(update.l).append(',')
+	.append(update.c).append(',')
+	.append(update.stamp).append(')');
+      update = update.next;
+    }
 
-    return strBuf;
+    return strbuf.toString();
   }
 
-  private void writeObject(java.io.ObjectOutputStream out)
-       throws IOException {
-    out.writeShort(l);
-    out.writeShort(c);
-    out.writeInt(stamp);
-  }
+// TODO: To delete
+//   private void writeObject(java.io.ObjectOutputStream out)
+//        throws IOException {
+//     out.writeShort(l);
+//     out.writeShort(c);
+//     out.writeInt(stamp);
+//   }
 
-  private void readObject(java.io.ObjectInputStream in)
-       throws IOException, ClassNotFoundException {
-    l = in.readShort();
-    c = in.readShort();
-    stamp = in.readInt();
-  }
+//   private void readObject(java.io.ObjectInputStream in)
+//        throws IOException, ClassNotFoundException {
+//     l = in.readShort();
+//     c = in.readShort();
+//     stamp = in.readInt();
+//   }
 
   /**
    * Creates an element in a new empty list.
@@ -108,6 +113,24 @@ final class Update implements Serializable {
     } else {
       this.next = null;
     }
+  }
+
+  /**
+   * Return the source server of the message associated with this stamp.
+   *
+   * @return the source server id.
+   */
+  public short getFromId() {
+    return l;
+  }
+
+  /**
+   * Return the destination server of the message associated with this stamp.
+   *
+   * @return the destination server id.
+   */
+  public short getToId() {
+    return c;
   }
 }
 

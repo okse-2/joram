@@ -21,19 +21,15 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
 import fr.dyade.aaa.util.*;
 
-
 /**
  * Internal class to catch the end of the thread running the driver.
  */
 class ThreadFinalizer implements Runnable {
-
   /** driver to start */
   Driver driver;
 
@@ -102,9 +98,8 @@ class ThreadFinalizer implements Runnable {
  * @version	v1.1
  */
 public abstract class Driver {
-
-public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $"; 
-
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.5 2001-05-04 14:54:50 tachkeni Exp $"; 
 
   /** separate thread running the driver */
   protected Thread thread;
@@ -135,7 +130,6 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.4 2000-10-20 13
     this(0);
     isRunning =true;
   }
-
 
   /**
    * Provides a string image for this object.
@@ -171,7 +165,8 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.4 2000-10-20 13
    * Starts the driver execution.
    */
   public void start() {
-    thread = new Thread(new ThreadFinalizer(this));
+    thread = new Thread(new ThreadFinalizer(this),
+			getClass().getName() + '#' + id);
     thread.setDaemon(true);
     thread.start();
   }
@@ -202,13 +197,13 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.4 2000-10-20 13
    * Sends a notification to an agent.
    * <p>
    * Provides a similar function as the <code>sendTo</code> function in
-   * <code>Agent</code> class, except that <code>directSendTo</code> from
-   * <code>Channel</code> is used instead of <code>sendTo</code>.
+   * <code>Agent</code> class, except that the notification is sent directly
+   * via a <code>directSendTo</code> method.
    *
    * @param to		target agent
    * @param not		notification to send
    */
   protected final void sendTo(AgentId to, Notification not) throws IOException {
-    Channel.channel.directSendTo(to, not);
+    Channel.sendTo(to, not);
   }
 }

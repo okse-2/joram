@@ -21,25 +21,25 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
- 
 package fr.dyade.aaa.mom; 
  
 /** 
- *	contains an MetaData object (one of its subclasses) which will
- *	be analized by the client
+ * A <code>MetaDataMOMExtern</code> is a message sent to a
+ * client containing a <code>MetaData</code> object.
  * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * @see fr.dyade.aaa.mom.MetaData
  */ 
- 
-public class MetaDataMOMExtern extends MessageMOMExtern { 
-	
-	/** the metaData to send */
-	public fr.dyade.aaa.mom.MetaData metaData;
-	
-	public MetaDataMOMExtern(long requestId, fr.dyade.aaa.mom.MetaData metaData) {
-		super(requestId);
-		this.metaData = metaData;
-	}
-	
+public class MetaDataMOMExtern extends MessageMOMExtern
+{ 
+  /** The sent MetaData. */
+  public fr.dyade.aaa.mom.MetaData metaData;
+
+  /** Constructor. */
+  public MetaDataMOMExtern(long requestId,
+    fr.dyade.aaa.mom.MetaData metaData, int drvKey)
+  {
+    super(requestId, drvKey);
+    this.metaData = metaData;
+  }
+
 }

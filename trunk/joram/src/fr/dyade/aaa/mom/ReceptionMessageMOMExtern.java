@@ -49,6 +49,8 @@ public class ReceptionMessageMOMExtern extends MessageMOMExtern {
 	
 	/** the mode of acknowledge */
 	public int acknowledgeMode ;
+
+    public boolean toListener = false;
 	
 	public ReceptionMessageMOMExtern(long requestID, fr.dyade.aaa.mom.QueueNaming queue, String selector, long timeOut, int acknowledgeMode, String sessionID) {
 		super(requestID);

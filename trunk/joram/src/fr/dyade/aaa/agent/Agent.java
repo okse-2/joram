@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -67,7 +66,7 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.4 2001-05-04 14:54:48 tachkeni Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -92,8 +91,8 @@ public abstract class Agent implements Serializable {
     agents = new Hashtable();
 
     // Initialize 
-    if ((Server.isTransient(Server.getServerId())) ||
-	(Server.transaction instanceof NullTransaction)) {
+    if ((AgentServer.isTransient()) ||
+	(AgentServer.transaction instanceof NullTransaction)) {
       // in order to avoid swap-out.
       NbMaxAgents = Integer.MAX_VALUE;
     } else {
@@ -109,9 +108,6 @@ public abstract class Agent implements Serializable {
       // Initializes factory
       factory.initialize(false);
 
-      // initializes the configured services
-      initServices(Server.services, false);
-
       // loads all fixed agents
       for (Enumeration e = factory.getFixedAgentIdList() ;
 	   e.hasMoreElements() ;) {
@@ -119,7 +115,7 @@ public abstract class Agent implements Serializable {
 	try {
 	  Agent ag = Agent.load(id);
 	} catch (UnknownAgentException exc) {
-	  // Should never happen
+	  Debug.trace("Can't restore fixed agent#" + id, exc);
 	  factory.removeFixedAgentId(id);
 	}
       }
@@ -131,62 +127,7 @@ public abstract class Agent implements Serializable {
       factory.initialize(true);
       AgentAdmin admin = new AgentAdmin();
       factory.createAgent(admin);
-
-      if (Server.isTransient(Server.getServerId())) {
-	TransientServer transientServer = new TransientServer();
-	factory.createAgent(transientServer);
-      } else if (Server.networkServers[Server.getServerId()].transientPort != -1) {
-	TransientManager transientManager = new TransientManager();
-	factory.createAgent(transientManager);
-      }
-
-      // creates the configured services
-      initServices(Server.services, true);
-
-      // creates a DebugProxy agent when A3DEBUG_PROXY variable is true
-      if (System.getProperty("A3DEBUG_PROXY", "false").equals("true")) {
-	// creates the object indirectly so that no dependency against the
-	// ip package is created
-	try {
-	  Class debugProxyClass = Class.forName("fr.dyade.aaa.ip.DebugProxy");
-	  Agent debugProxy = (Agent) debugProxyClass.newInstance();
-	  factory.createAgent(debugProxy);
-	} catch (Exception exc) {
-	  Debug.trace("cannot create DebugProxy agent", exc);
-	}
-      }
       factory.save();
-    }
-  }
-
-  /**
-   * Initializes services described as <code>ServiceDesc</code> objects.
-   * Calls the <code>init</code> static function of the service class with
-   * the service parameters.
-   *
-   * @param services		the list of services
-   * @param firstTime		true when agent server is starting anew
-   *
-   * @exception Exception
-   *	unspecialized exception
-   */
-  static void initServices(ServiceDesc services[], boolean firstTime) throws Exception {
-    if (services == null)
-      return;
-    Class ptypes[] = new Class[2];
-    ptypes[0] = Class.forName("java.lang.String");
-    ptypes[1] = Boolean.TYPE;
-    Object args[] = new Object[2];
-    args[1] = new Boolean(firstTime);
-    for (int i = 0; i < services.length; i ++) {
-      try {
-	Class srvClass = Class.forName(services[i].className);
-	Method srvInit = srvClass.getMethod("init", ptypes);
-	args[0] = services[i].parameters;
-	srvInit.invoke(null, args);
-      } catch (Exception exc) {
-	Debug.trace("cannot create service " + services[i].className, exc);
-      }
     }
   }
 
@@ -243,7 +184,7 @@ public abstract class Agent implements Serializable {
       if (agents.size() > (NbMaxAgents + nbFixedAgents))
 	garbage();
       
-      if ((ag = (Agent) Server.transaction.load(id.toString())) != null) {
+      if ((ag = (Agent) AgentServer.transaction.load(id.toString())) != null) {
 	agents.put(ag.id, ag);
 	if (Debug.loadAgent)
 	  Debug.trace("Agent load " + ag, false);
@@ -276,7 +217,7 @@ public abstract class Agent implements Serializable {
    */
   static Agent reload(AgentId id)
     throws IOException, ClassNotFoundException, Exception {
-    Agent ag = (Agent) Server.transaction.load(id.toString());
+    Agent ag = (Agent) AgentServer.transaction.load(id.toString());
     if (ag  != null) {
       agents.put(ag.id, ag);
       if (Debug.loadAgent)
@@ -292,7 +233,7 @@ public abstract class Agent implements Serializable {
   }
 
   void save() throws IOException {
-    Server.transaction.save(this, id.toString());
+    AgentServer.transaction.save(this, id.toString());
     if (Debug.saveAgent)
 	  Debug.trace("Agent save " + this, false);
   }
@@ -344,7 +285,7 @@ public abstract class Agent implements Serializable {
       out.writeInt(id.stamp);
       out.writeUTF(name);
       out.writeBoolean(fixed);
-      if(Server.MONITOR_AGENT) {
+      if(AgentServer.MONITOR_AGENT) {
 	  out.writeBoolean(monitored);
 	  if(monitored) out.writeObject(mListeners);
       }      
@@ -356,7 +297,7 @@ public abstract class Agent implements Serializable {
       if ((name = in.readUTF()).equals(nullName))
 	name = nullName;
       fixed = in.readBoolean();
-      if(Server.MONITOR_AGENT) {
+      if(AgentServer.MONITOR_AGENT) {
 	  monitored = in.readBoolean();
 	  if(monitored) mListeners = (Hashtable)in.readObject();
       }
@@ -365,7 +306,8 @@ public abstract class Agent implements Serializable {
   /**
    * Allocates a new Agent object. The resulting object <b>is not an agent</b>;
    * before it can react to a notification you must deploy it. This constructor
-   * has the same effect as <code>Agent(Server.serverId, null, false)</code>.
+   * has the same effect as
+   * <code>Agent(AgentServer.getServerId(), null, false)</code>.
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
    * @see #deploy()
@@ -376,7 +318,7 @@ public abstract class Agent implements Serializable {
 
   /**
    * Allocates a new Agent object. This constructor has the same effect
-   * as <code>Agent(Server.serverId, null, fixed)</code>.
+   * as <code>Agent(AgentServer.getServerId(), null, fixed)</code>.
    * 
    * @param fixed if <code>true</code> agent is pinned in memory
    *
@@ -388,7 +330,7 @@ public abstract class Agent implements Serializable {
 
   /**
    * Allocates a new Agent object. This constructor has the same effect
-   * as <code>Agent(Server.serverId, name, false)</code>.
+   * as <code>Agent(AgentServer.getServerId(), name, false)</code>.
    * 
    * @param name  symbolic name
    *
@@ -400,7 +342,7 @@ public abstract class Agent implements Serializable {
 
   /**
    * Allocates a new Agent object. This constructor has the same effect
-   * as <code>Agent(Server.serverId, name, fixed)</code>.
+   * as <code>Agent(AgentServer.getServerId(), name, fixed)</code>.
    * 
    * @param name  symbolic name
    * @param fixed if <code>true</code> agent is pinned in memory
@@ -408,7 +350,7 @@ public abstract class Agent implements Serializable {
    * @see Agent#Agent(short, java.lang.String, boolean)
    */
   public Agent(String name, boolean fixed) {
-    this(Server.serverId, name, fixed);
+    this(AgentServer.getServerId(), name, fixed);
   }
 
   /**
@@ -563,7 +505,9 @@ public abstract class Agent implements Serializable {
       throw new IllegalArgumentException(
 	"well known service stamp out of range: " + stamp);
 
-    this.id = new AgentId(Server.serverId, Server.serverId, stamp);
+    this.id = new AgentId(AgentServer.getServerId(),
+			  AgentServer.getServerId(),
+			  stamp);
     if (name == null)
       this.name = nullName;
     else
@@ -620,9 +564,9 @@ public abstract class Agent implements Serializable {
     if (deployed)
       throw new IOException("Already exist");
     //  If we use sendTo agent's method the from field is the agent id, and
-    // on reception the from node (from.to) can be false (see NetServerIn).
-    Channel.channel.sendTo(new AgentId(id.to, id.to, AgentId.FactoryIdStamp),
-			     new AgentCreateRequest(this, reply));
+    // on reception the from node (from.to) can be false.
+    Channel.sendTo(new AgentId(id.to, id.to, AgentId.FactoryIdStamp),
+		   new AgentCreateRequest(this, reply));
     deployed = true;
   }
 
@@ -688,6 +632,12 @@ public abstract class Agent implements Serializable {
   /**
    * This method sends a notification to the agent which id is given in
    * parameter.
+   * <p>
+   * Be careful to never use this method outside of an agent reaction,
+   * otherwise its behavior is undefined. If you needs to send notification
+   * outside of a reaction you must use <code>Channel.sendTo</code> method.
+   *
+   * @see Channel#sendTo
    *
    * @param to   the unique id. of destination <code>Agent</code>.
    * @param not  the notification to send.
@@ -705,13 +655,13 @@ public abstract class Agent implements Serializable {
    * @param not   the notification to send.
    */
   protected final void sendTo(Role role, Notification not) {
-      if(role == null) return;
-      if(Server.MONITOR_AGENT) {
-	  if(monitored) {
-	      notifyOutputListeners(role.getName(),not);
-	  }
+    if (role == null) return;
+    if (AgentServer.MONITOR_AGENT) {
+      if (monitored) {
+	notifyOutputListeners(role.getName(), not);
       }
-      sendTo(role.getListener(),not);
+    }
+    sendTo(role.getListener(), not);
   }
  
   /**
@@ -723,10 +673,9 @@ public abstract class Agent implements Serializable {
    */
   protected final void
   sendTo(RoleMultiple role, Notification not) {
-    if (role == null)
-      return;
-    if(Server.MONITOR_AGENT) {
-      if(monitored) {
+    if (role == null) return;
+    if (AgentServer.MONITOR_AGENT) {
+      if (monitored) {
 	notifyOutputListeners(role.getName(),not);
       }
     }
@@ -734,7 +683,7 @@ public abstract class Agent implements Serializable {
     if (to == null)
       return;
     while (to.hasMoreElements())
-      Channel.channel.sendTo(id, (AgentId) to.nextElement(), not);
+      sendTo((AgentId) to.nextElement(), not);
   }
 
   /**
@@ -867,7 +816,7 @@ public abstract class Agent implements Serializable {
     } else if (not instanceof GetStatusNot) {
 	doReact(from,(GetStatusNot)not);
     } else if (not instanceof UnknownAgent) {
-      if (Server.MONITOR_AGENT) {
+      if (AgentServer.MONITOR_AGENT) {
 	doReact((UnknownAgent)not);
       }
       if (Debug.agentError)
@@ -899,7 +848,7 @@ public abstract class Agent implements Serializable {
     throws IOException, ClassNotFoundException, Exception {
     Agent ag = (Agent) agents.get(id);
     if (ag == null) {
-      ag = (Agent) Server.transaction.load(id.toString());
+      ag = (Agent) AgentServer.transaction.load(id.toString());
       if (ag == null) return "Agent" + id + " unknown";
       return "Agent" + id + " on disk = " + ag;
     }
@@ -934,7 +883,7 @@ public abstract class Agent implements Serializable {
       not = new EventNot(name);
       // Send the notification now in order to have a causal order.
       // Notice that this notification is not monitored.
-      sendTo(id,not);
+      sendTo(id, not);
       // Keep the notification if we have more events to send
       // to the listener.
       eventNots.put(id,not);      
@@ -970,7 +919,7 @@ public abstract class Agent implements Serializable {
    * @param report a monitoring report associated with the event.
    */
   protected final void notifyStatusListeners(String status, Serializable report) {
-    if(Server.MONITOR_AGENT) {
+    if(AgentServer.MONITOR_AGENT) {
       if(!monitored) return;
       String key = getStatusEventKey(status);
       RoleMultiple listeners = getListeners(key);
@@ -1044,7 +993,7 @@ public abstract class Agent implements Serializable {
    * Dispatch the <code>SubscribeNot</code> notifications. 
    */
   private void doReact(AgentId from,SubscribeNot not) {
-    if(Server.MONITOR_AGENT) {
+    if(AgentServer.MONITOR_AGENT) {
       if(not instanceof InputSubscribeNot) {        
 	doReact(from,(InputSubscribeNot)not);     
       }
@@ -1059,9 +1008,10 @@ public abstract class Agent implements Serializable {
       }
     }
     else {
-      Exception exc = new IllegalStateException("The agent server " + Server.getServerId() + 
-						" is not monitored (Server.MONITOR_AGENT=false).");
-      sendTo(from,new ExceptionNotification(getId(),not,exc));
+      Exception exc = new IllegalStateException("The agent server " +
+						AgentServer.getServerId() + 
+						" is not monitored (AgentServer.MONITOR_AGENT=false).");
+      sendTo(from, new ExceptionNotification(getId(),not,exc));
     }
   }    
 
@@ -1088,7 +1038,7 @@ public abstract class Agent implements Serializable {
   }
 
   private void doReact(AgentId from,GetStatusNot not) {
-    sendTo(from,new StatusNot(new StatusReport(not.statusName,
+    sendTo(from, new StatusNot(new StatusReport(not.statusName,
 					       getStatus(not.statusName))));
   }
 

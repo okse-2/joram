@@ -45,7 +45,7 @@ public class XATopicSession extends XASession implements javax.jms.XATopicSessio
     /**
      * Creates a new XATopicSession.
      */
-    public XATopicSession(long sessionID, XAConnection refConnection) {
+    public XATopicSession(long sessionID, TopicConnection refConnection) {
 	super(sessionID, refConnection);
 	this.sessionID = sessionID;
 	this.refConnection = refConnection;
