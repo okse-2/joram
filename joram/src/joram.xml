@@ -135,6 +135,7 @@
     <jar jarfile="${lib.dir}/joram-client.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapExt_*.class"/>
         <include name="org/objectweb/joram/client/jms/*.class"/>
         <include name="org/objectweb/joram/client/jms/admin/*.class"/>
@@ -176,26 +177,48 @@
           todir="${lib.dir}/META-INF"/>
     <jar jarfile="${lib.dir}/joram.rar">
       <fileset dir="${lib.dir}">
+        <include name="jakarta-regexp-1.2.jar"/>
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+        <include name="xerces.jar"/>
+        <include name="META-INF/ra.xml"/>
+      </fileset>
+    </jar>
+    <delete dir="${lib.dir}/META-INF"/>
+  </target>
+
+  <!-- Builds a JORAM adapter for non collocated use. -->
+  <target name="ship.remoteadapter" depends="ship.connector"
+          description="--> Builds JORAM adapter for non collocated use.">
+    <mkdir dir="${lib.dir}/META-INF"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
+          tofile="${lib.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${lib.dir}/joram.rar">
+      <fileset dir="${lib.dir}">
         <include name="joram-shared.jar"/>
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
-        <include name="META-INF/*.xml"/>
+        <include name="META-INF/ra.xml"/>
       </fileset>
     </jar>
     <delete dir="${lib.dir}/META-INF"/>
   </target>
 
   <!-- Builds a JORAM adapter for JOnAS. -->
-  <target name="ship.Jadapter" depends="ship.connector"
+  <target name="ship.jonasadapter" depends="ship.connector"
           description="--> Builds JORAM adapter for JOnAS.">
     <mkdir dir="${lib.dir}/META-INF"/>
-    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-collocated.xml"
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${lib.dir}/META-INF/ra.xml"/>
     <jar jarfile="${lib.dir}/joram.rar">
       <fileset dir="${lib.dir}">
-        <include name="META-INF/*.xml"/>
+        <include name="META-INF/ra.xml"/>
       </fileset>
     </jar>
     <delete dir="${lib.dir}/META-INF"/>

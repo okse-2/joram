@@ -212,6 +212,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     // Starting an admin session...
     try {
       adminConnect();
+      serverId = (new Integer(AdminModule.getLocalServer())).shortValue();
     }
     catch (Exception exc) {
       debugWARN("  - JORAM server not administerable: " + exc);
