@@ -14,8 +14,22 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: May 2003, 15th)">
+      <s2 name="Modifications (latest: May 2003, 20th)">
       <ul>
+      <li>Introduction of a monitoring interface and reference implementation.
+      A first set of methods allow to list the destinations, users of a given
+      server, the readers, writers on a given destination, etc. Documentation
+      will be updated. Impacted packages are
+      <code>fr.dyade.aaa.mom.admin</code>, <code>fr.dyade.aaa.mom.comm</code>,
+      <code>fr.dyade.aaa.mom.dest</code>,
+      <code>fr.dyade.aaa.mom.proxies</code> and
+      <code>fr.dyade.aaa.joram.admin</code>.</li>
+      <li>New administration method for stopping a server (
+      <code>AdminItf.stopServer(int serverId)</code>). This method allows to
+      stop a given server from a connected administrator. Impacted packages are
+      <code>fr.dyade.aaa.mom.admin</code>, 
+      <code>fr.dyade.aaa.mom.dest</code> and
+      <code>fr.dyade.aaa.joram.admin</code>.</li>
       <li>Modification of the administration methods: they are now all
       synchronous, for improving the return of errors to the administrator.
       Impacted packages are: <code>fr.dyade.aaa.joram.admin</code>,
