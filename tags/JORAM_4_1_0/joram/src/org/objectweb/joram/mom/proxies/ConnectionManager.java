@@ -1,0 +1,125 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France-Telecom R&D
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ */
+package org.objectweb.joram.mom.proxies;
+
+import fr.dyade.aaa.agent.*;
+
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.mom.proxies.AdminNotification;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import java.util.*;
+
+/**
+ * A <code>ConnectionManager</code> is started as a service in each
+ * MOM agent server for allowing connections with external clients.
+ */
+public class ConnectionManager {
+
+  /** Incoming messages flow (msgs/s) requested, if any (-1 if none). */
+  public static int inFlow = -1;
+
+  /**
+   * Timer provided by the connection manager.
+   */
+  private static fr.dyade.aaa.util.Timer timer;
+
+
+  /**
+   * Returns the timer provided by the connection manager.
+   */
+  public final static fr.dyade.aaa.util.Timer getTimer() {
+    return timer;
+  }
+
+  /**
+   * Initializes the connection manager as a service.
+   * Creates and deploys the aministration topic, the
+   * connection manager agent and if requested the 
+   * administration user proxy.
+   *
+   * @param args name and password of the administrator (optional).
+   * @param firstTime  <code>true</code> when the agent server starts.
+   * @exception Exception  Thrown when processing the String argument
+   *   or in case of a problem when deploying the ConnectionFactory.
+   */
+  public static void init(String args, boolean firstTime) 
+    throws Exception {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ConnectionManager.init(" + args + ',' + firstTime + ')');    
+
+    timer = new fr.dyade.aaa.util.Timer();
+
+    if (! firstTime) return;
+
+    AdminTopic adminTopic = new AdminTopic();
+    adminTopic.deploy();
+
+    if (args != null) {
+      String initialAdminName = null;
+      String initialAdminPass = null;
+      StringTokenizer st = new StringTokenizer(args);
+
+      if (st.countTokens() >= 2) {
+        initialAdminName = st.nextToken();
+        initialAdminPass = st.nextToken();        
+      }
+      
+      if (st.hasMoreTokens()) {
+        try {
+          inFlow = Integer.parseInt(st.nextToken());
+        } catch (Exception exc) {
+          inFlow = -1;
+        }
+      }
+
+      if (initialAdminName != null && initialAdminPass != null) {
+        UserAgent userAgent = new UserAgent(11);
+        userAgent.deploy();
+
+        AdminNotification adminNot =
+          new AdminNotification(
+            userAgent.getId(),
+            initialAdminName,
+            initialAdminPass);
+
+        Channel.sendTo(adminTopic.getId(), adminNot);
+      }
+    }
+  }
+
+  /**
+   * Stops the <code>ConnectionManager</code> service.
+   */ 
+  public static void stopService() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ConnectionManager.stop()");
+    timer.cancel();
+  }
+}
