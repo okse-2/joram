@@ -21,8 +21,7 @@
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
                width="287" border="0" hspace="2"/></td>
-	  <td valign="middle"><p>Current packaged release: 4.1.2</p>
-	                      <p>Latest CVS tag: JORAM_4_1_4</p></td>
+	  <td valign="middle"></td>
 	</tr>
       </table>
       
@@ -52,7 +51,7 @@
           <li>Hierarchical topics</li>
           <li>Message selection</li>
           <li>Message prioritization</li>
-					<li>A JCA 1.5 Resource Adapter</li>
+	  <li>A JCA 1.5 Resource Adapter</li>
         </ul>
         <p>JORAM also includes the following extra-features:</p>
         <ul>
@@ -65,6 +64,13 @@
           <li>Client libraries allowing J2ME applications to
           access the JORAM platform in a JMS 1.1 "way"</li>
           <li>A graphical administration and monitoring tool</li>
+	  <li>High Availability through active replication of JORAM clients, 
+          JORAM servers and ScalAgent servers. It transparently handles network handover and server 
+          failover. This version currently relies on JGroups.</li>
+	  <li>Dynamic Configuration, provides a runtime mechanism enabling to 
+          remotely add and remove Joram servers dynamically, at runtime, through the Administration API of JORAM.
+          This great feature, combined with updated JMX implementation, initiates a new set of management facilities in JORAM
+          </li>
         </ul>
       </s2>
 

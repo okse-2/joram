@@ -11,15 +11,54 @@
   </properties>
 
   <body>
+    <s1 name="JORAM 4.2 RC1 (January 7, 2005)">
+      <p>The Joram 4.2 release candidate 1 is available in the CVS repository with the tag JORAM_4_2_RC1. 
+         It provides  new features as high-avaibility, dynamic configuration, and a lot of fixes
+         and improvements.</p>
+      <p>The updated documentation, packaged version for download and more detailed announcement will be 
+         available soon on  Joram web site.</p>
+      <s2 name="New Features ">
+	<ul>
+	  <li><strong>High Availability</strong> This version provides the active replication of JORAM clients, 
+          JORAM servers and ScalAgent servers. It transparently handles network handover and server 
+          failover. This version currently relies on JGroups.</li>
+	  <li><strong>Dynamic Configuration</strong> This version provides a runtime mechanism enabling to 
+          remotely add and remove Joram servers dynamically, at runtime, through the Administration API of JORAM.
+          This great feature, combined with updated JMX implementation, initiates a new set of management facilities in JORAM
+          </li>
+	  <li><strong>Architecture and Performance improvements</strong>. This version packages a whole set of deep
+          changes within the JORAM and ScalAgent architectures that lead to performance improvements compared to the 4.1 
+          version. Those changes partially concern communication protocols and thus prevent backward compatibility with previous
+          Joram versions. </li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<p>JMS message improvement, numerous bug fixes.</p>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM_4_1_5 (January 7, 2005)">
+      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_5.
+         It provides minors new features as dynamic configuration of logging and support for Java 1.5 or JMX.
+         Except an important failure it should be the last 4.1.x version, the next release will be the 4.2 RC1 
+         with high-avaibility and numerous improvments.</p>
+      <s2 name="Feature improvments">
+	<ul>
+	  <li>JDK1.5 compatibility.</li>
+	  <li>Add JMX management: server, engine, network, agent...</li>
+	  <li>Transaction: Factorize definition in interface, allows to release a non-commited transaction</li>
+	  <li>Configuration of logging might be changed dynamically at runtime.</li>
+	  <li>Adds configuration of connection in ra-remote.xml</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM_4_1_4 (December 22, 2004)">
       <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_4.  
 	This release contains some minor features and bug fixes (see below the history file).</p>
       <p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
       <s2 name="Configuration improvments">
 	<ul>
-	  <li>JDK1.5 compatibility.</li>
-	  <li>Add JMX management: server, engine, network, agent...</li>
-	  <li>Transaction: Factorize definition in interface, allows to release a non-commited transaction</li>
 	  <li>Add configuration of connectingTimer, cnxPendingTimer and txPendingTimer in the connector.</li>
 	  <li>Defines provider metadata in a unique class.</li>
 	  <li> Set default transaction manager NTransaction in the connector.</li>
