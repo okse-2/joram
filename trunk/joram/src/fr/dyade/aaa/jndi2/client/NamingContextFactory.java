@@ -54,37 +54,49 @@ public class NamingContextFactory implements InitialContextFactory {
    */
   public Context getInitialContext(Hashtable env)
     throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "NamingContextFactory.getInitialContext(" + env + ')');
     try {
       String host = null;
       String portStr = null;
 
-      // URL should be as: joram://host:port, or as: host:port
-      String url = System.getProperty(Context.PROVIDER_URL,null);
-      if (url == null)
+      // URL should be as: joram://host:port, or as: host:port      
+      String url = null;
+      if (env != null) {
         url = (String) env.get(Context.PROVIDER_URL);
+      }      
+      if (url == null)
+        url = System.getProperty(Context.PROVIDER_URL, null);
 
       if (url != null) {
-        int indexOfHost = url.indexOf("//") == -1 ? 0 : url.indexOf("//") + 2; 
-        int indexOfPort = url.indexOf(":", indexOfHost) + 1;
-
-        host = url.substring(indexOfHost, indexOfPort - 1);
-        portStr = url.substring(indexOfPort);
+        if (url.startsWith("scn")) {
+          int indexOfHost = url.indexOf("//") == -1 ? 0 : url.indexOf("//") + 2; 
+          int indexOfPort = url.indexOf(":", indexOfHost) + 1;
+          
+          host = url.substring(indexOfHost, indexOfPort - 1);
+          portStr = url.substring(indexOfPort);
+        }
       }
 
+      if (host == null && env != null)
+        host = (String) env.get(HOST_PROPERTY);
       if (host == null)
-        host = System.getProperty(HOST_PROPERTY,null);
-      if (host == null)
-        host = (String) env.get(HOST_PROPERTY);	  
-      if (host == null)
-        host = "localhost";//default host
+        host = System.getProperty(HOST_PROPERTY, null);
+      if (host == null) {
+        //default host
+        host = "localhost";
+      }
 
-      if (portStr == null)
-        portStr = System.getProperty(PORT_PROPERTY,null);
-      if (portStr == null)
+      if (portStr == null && env != null)
         portStr = (String) env.get(PORT_PROPERTY);
       if (portStr == null)
-        portStr = "16400";//default port
-
+        portStr = System.getProperty(PORT_PROPERTY, null);
+      if (portStr == null) {
+        //default port
+        portStr = "16400";
+      }
       int port = Integer.parseInt(portStr);
 
       return new fr.dyade.aaa.jndi2.client.NamingContextImpl(

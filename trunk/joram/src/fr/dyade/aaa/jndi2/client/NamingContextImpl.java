@@ -41,6 +41,9 @@ public class NamingContextImpl implements Context {
 
   public NamingContextImpl(NamingConnection connection,
                            CompositeName contextPath) throws NamingException { 
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.<init>(" + 
+                       connection + ',' + contextPath + ')');
     this.connection = connection;
     this.contextPath = contextPath;
   }
@@ -168,8 +171,9 @@ public class NamingContextImpl implements Context {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.listBindings(" + 
                        name + ')');
+    CompositeName queryPath = merge(contextPath, name);
     JndiReply reply = connection.invoke(
-      new ListBindingsRequest(merge(contextPath, name)));    
+      new ListBindingsRequest(queryPath));
     if (reply instanceof JndiError) {
       NamingException exc = ((JndiError)reply).getException();
       exc.fillInStackTrace();
@@ -180,11 +184,11 @@ public class NamingContextImpl implements Context {
       // 1- resolve contexts
       Binding[] bindings = lbr.getContexts();
       for (int i = 0; i < bindings.length; i++) {
-        CompositeName ctxName = (CompositeName)contextPath.clone();
-        ctxName.add(bindings[i].getName());
+        CompositeName subCtxPath = (CompositeName)queryPath.clone();
+        subCtxPath.add(bindings[i].getName());
         bindings[i].setObject(new NamingContextImpl(
           new NamingConnection(connection.getHostName(),
-                               connection.getPort()), ctxName));
+                               connection.getPort()), subCtxPath));
       }
 
       // 2- resolve references
@@ -294,5 +298,11 @@ public class NamingContextImpl implements Context {
       }
     }
     return name;
+  }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",connection=" + connection + 
+      ",contextPath=" + contextPath + ')';
   }
 }

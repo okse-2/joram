@@ -134,4 +134,10 @@ class NamingConnection {
     return env;
   }
 
+  public String toString() {
+    return '(' + super.toString() +
+      ",hostname=" + hostName +
+      ",port=" + port + ')';
+  }
+
 }
