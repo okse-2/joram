@@ -624,6 +624,9 @@ class ClientSubscription implements java.io.Serializable
     Message msg;
     ClientMessages deadMessages = null;
     int deliveryAttempts = 1;
+    int i;
+    String currentId;
+    long currentO;
 
     while (denies.hasMoreElements()) {
       id = (String) denies.nextElement();
@@ -659,10 +662,22 @@ class ClientSubscription implements java.io.Serializable
             persistenceModule.delete(msg);
         }
       }
-      // Else, putting it back to the deliverables vector, and adding a
-      // new entry for it in the denied messages table.
+      // Else, putting it back to the deliverables vector according to its
+      // original delivery order, and adding a new entry for it in the
+      // denied messages table.
       else {
-        messageIds.add(id);
+        i = 0;
+        for (Enumeration enum = messageIds.elements();
+             enum.hasMoreElements();) {
+          currentId = (String) enum.nextElement();
+          currentO = ((Message) messagesTable.get(currentId)).order;
+
+          if (currentO > msg.order)
+            break;
+       
+          i++;
+        }
+        messageIds.insertElementAt(id, i);
         deniedMsgs.put(id, new Integer(deliveryAttempts));
       }
     }
@@ -670,7 +685,6 @@ class ClientSubscription implements java.io.Serializable
     // Sending dead messages to the DMQ, if needed:
     if (deadMessages != null)
       sendToDMQ(deadMessages);
-
   }
 
   /**
