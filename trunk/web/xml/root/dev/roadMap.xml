@@ -15,22 +15,21 @@
   <s1 name="Road map">
   
     <subtitle>Joram 3.8 (December 2003)</subtitle>
-    <p>It is planned for this release to provide a new client/server
-    communication protocol. Today, in the case of collocated client and server,
-    their communication still goes through a TCP connection. This is clearly a
-    waste of resources and a brake to performances.</p>
-    <p>The new "local" protocol consists in optimizing the communication in
-    this collocated case.</p>
+    <p>This release will provide:</p>
+    <ul>
+      <li>Clustering features for Load Balancing and Fail Over</li>
+      <li>A new JNDI server distributed and replicated implementation</li>
+    </ul>
 
     <subtitle>Joram 4.0 (1st quarter of 2004)</subtitle>
     <p>The move to release 4.0 will introduce:</p>
     <ul>
-      <li>a completely new sources architecture, which main branches will be
-      <code>org.objectweb.joram</code> and <code>com.scalagent.aaa</code>;</li>
-      <li>clustering features providing High Availability and Load Balancing
-      for Queue and Topic destinations;</li>
-      <li>a JCA 1.5 standard Resource Adapter for plugging Joram into any
-      JCA compliant platform.</li>
+      <li>A completely new sources architecture, which main branches will be
+      <code>org.objectweb.joram</code> and <code>com.scalagent.aaa</code></li>
+      <li>A JCA 1.5 standard Resource Adapter for plugging Joram into any
+      JCA compliant platform</li>
+      <li>Optimised connections for collocated clients and servers</li>
+      <li>Clustering features providing High Availability</li>
     </ul>
 
   </s1>
