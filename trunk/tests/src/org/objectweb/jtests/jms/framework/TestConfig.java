@@ -25,11 +25,25 @@
 package org.objectweb.jtests.jms.framework;
 import java.util.Properties;
 
+/**
+ * Class used to provide configurable options in a convenient way
+ *
+ * @author Jeff Mesnil (jmesnil@inrialpes.fr)
+ * @version $Id: TestConfig.java,v 1.2 2002-04-16 11:35:39 joram Exp $
+ */
 public class TestConfig {
 
-    public static final long TIMEOUT;
-    private static final String PROP_NAME = "timeout";
+    // name of the configuration file
     private static final String PROP_FILE_NAME = "test.properties";
+
+    // name of the timeout property
+    private static final String PROP_NAME = "timeout";
+
+    /**
+     * timeout value used by <code>receive</code> method in the tests. 
+     * the value is specified in the <code>config/test.properties</code> file.
+     */
+    public static final long TIMEOUT;
     
     static {
 	// load tests.properties	 
