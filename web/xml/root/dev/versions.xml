@@ -17,7 +17,9 @@
       <s2 name="Corrected bugs (latest: December 18, 2003)">
       <ul>
         <li>Automatic deny request sent to already deleted temporary queue, 
-        found by Gerald Schröder. This bug had no influence on a server's
+        found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00042.html">
+        Gerald Schröder</a>. This bug had no influence on a server's
         operations, however it generated the logging of ERROR messages. It
         is corrected, the class to update is
         <code>fr.dyade.aaa.mom.proxies.ClientContext</code>.</li>
