@@ -110,9 +110,6 @@ class XAResourceMngr
       if (! transactions.containsKey(xid))
         throw new XAException("Can't resume unknown transaction.");
 
-      if (getStatus(xid) != SUSPENDED)
-        throw new XAException("Can't resume non suspended transaction.");
-
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                    "--- "
@@ -189,8 +186,8 @@ class XAResourceMngr
   synchronized void prepare(Xid xid) throws XAException
   {
     try {
-      if (getStatus(xid) != SUCCESS)
-        throw new XAException("Can't prepare non successful transaction.");
+      if (getStatus(xid) == ROLLBACK_ONLY)
+        throw new XAException("Can't prepare resource in ROLLBACK_ONLY state.");
 
       XAContext xaC = (XAContext) transactions.get(xid);
 
