@@ -62,13 +62,13 @@ public class NamingContextFactory implements InitialContextFactory {
       String host = null;
       String portStr = null;
 
-      // URL should be as: joram://host:port
+      // URL should be as: joram://host:port, or as: host:port
       String url = System.getProperty(Context.PROVIDER_URL,null);
       if (url == null)
         url = (String) env.get(Context.PROVIDER_URL);
 
       if (url != null) {
-        int indexOfHost = url.indexOf("//") + 2;
+        int indexOfHost = url.indexOf("//") == -1 ? 0 : url.indexOf("//") + 2; 
         int indexOfPort = url.indexOf(":", indexOfHost) + 1;
 
         host = url.substring(indexOfHost, indexOfPort - 1);
