@@ -20,8 +20,8 @@
 
     <menu>
       <connect href="tests/index.xml">Test Suite</connect>
-      <menuitem><connect href="tests/doc.xml">Documentation</connect></menuitem>
       <menuitem><connect href="tests/download.xml">Download</connect></menuitem>
+      <menuitem><connect href="tests/doc.xml">Documentation</connect></menuitem>
       <menuitem><a href="current/javadoc/tests/index.html">Javadoc</a></menuitem>
       <menuitem><connect href="tests/license.xml">License</connect></menuitem>
     </menu>
