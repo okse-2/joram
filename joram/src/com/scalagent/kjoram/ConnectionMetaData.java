@@ -32,7 +32,7 @@ public class ConnectionMetaData
 {
   private static int jmsMajorVersion = 1;
   private static int jmsMinorVersion = 1;
-  private static String jmsProviderName = "Joram";
+  private static String jmsProviderName = "kJoram";
   private static String jmsVersion = "1.1";
   private static int providerMajorVersion = 3;
   private static int providerMinorVersion = 6;
