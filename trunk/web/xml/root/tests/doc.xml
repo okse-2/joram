@@ -13,8 +13,7 @@
   <body>
     <s1 name="Test Suite documentation">
       <p>To use the Test Suite, have a look at its <a
-	  href="../current/doc/tests/index.html">documentation</a> (<a
-	  href="../current/doc/tests.pdf">PDF</a>).
+	  href="../current/doc/tests/index.html">documentation</a>.
       </p>
       <p>You can also browse the Test Suite <a
           href="../current/javadoc/tests/index.html">Javadoc</a>.
