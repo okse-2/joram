@@ -15,13 +15,13 @@
     <s1 name="Latest News">
       <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
       <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
-      JORAM platform to <em>heterogenous</em> client applications. Where
-      JORAM 3.4, with the support of SOAP as client communication protocol,
-      opened the platform to non-Java applications, the 3.6 release, with
-      its new kJORAM libraries, allows J2ME applications to use JORAM messaging
-      functionnalities. A J2ME application is a lightweight Java application
-      deployed and running on a mobile device such as a PDA or a smart
-      phone.</p>
+      JORAM platform to <strong>heterogenous</strong> client applications.
+      Where JORAM 3.4, with the support of SOAP as client communication
+      protocol, opened the platform to non-Java applications, the 3.6 release,
+      with its new kJORAM libraries, allows J2ME applications to use JORAM
+      messaging functionnalities. A J2ME application is a lightweight Java
+      application deployed and running on a mobile device such as a PDA or a
+      smart phone.</p>
       <p>In the
       <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
       download area</a> you will find the usual JORAM sources and jars-only
@@ -36,15 +36,15 @@
             sample.</li>
       </ul>
       <p>JORAM and kJORAM are also available through a CVS checkout, tag
-        <em>joram3_6_0</em>.</p>
+        <strong>joram3_6_0</strong>.</p>
       <p>The installation and samples guides have been updated to help you
       having an easy and quick first go with kJORAM. Enjoy!</p>
       <subtitle>June 24th, 2003: JORAM 3.5 is available under the
                 LGPL licence!</subtitle>
       <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
       as packaged. This version is based on the 3.4 release and
-      includes the <em>SOAP</em> proxy. On top of that, it provides a totally
-      refactored <em>message persistence</em> management.
+      includes the <strong>SOAP</strong> proxy. On top of that, it provides
+      a totally refactored <strong>message persistence</strong> management.
       </p>
       <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
       <p>The details of all the modifications and bug corrections which occured
@@ -54,7 +54,7 @@
       Particularly, a comparison between the 3.4 and the 3.5 releases
       performances may be found.</p>
       <p>
-      JORAM is now released under the <em>LGPL</em> licence.</p>
+      JORAM is now released under the <strong>LGPL</strong> licence.</p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
@@ -70,22 +70,24 @@
       </table>
       
       <p><strong>JORAM</strong> incorporates a 100% pure Java
-      implementation of <em>JMS</em> (Java Message Service API
+      implementation of <strong>JMS</strong> (Java Message Service API
       released by Sun Microsystem, Inc.). It provides access to a MOM
       (Message Oriented Middleware), built on top of the <a
       href="http://www.scalagent.com/">ScalAgent</a> agents based
-      distributed platform. JORAM is a <em>free</em>, <em>open
-      source</em> initiative.</p>
+      distributed platform.</p>
+      <p> JORAM, the MOM it gives access to and the Scalagent
+      platform are <strong>open source</strong> softwares and released under
+      the <strong>LGPL</strong> license.</p>
       </s2>
 
       <s2 name="Specification">
 
-        <p>JORAM provides full support to <em>JMS 1.1</em>:</p>
+        <p>JORAM provides full support to <strong>JMS 1.1</strong>:</p>
         <ul>
           <li>Unified interfaces for the Point-to-Point (PTP) and
             Publish/Subscribe (Pub/Sub) messaging models</li>
-          <li><em>AND</em> still the semantically specific PTP and Pub/Sub
-            interfaces</li>
+          <li><strong>AND</strong> still the semantically specific PTP and
+            Pub/Sub interfaces</li>
           <li>Full backward compatibility with JMS 1.0.2b compliant
             applications</li>
           <li>TCP and SOAP (HTTP/XML) client-server communication
@@ -109,8 +111,8 @@
       <s2 name="Getting Involved">
 	
 	<p>Any input or personal view for improving and/or developing
-	JORAM is welcome. JORAM, as an <em>open source</em> project,
-	also welcomes <em>external contributions</em>. Interested?
+	JORAM is welcome. JORAM, as an <strong>open source</strong> project,
+	also welcomes <strong>external contributions</strong>. Interested?
 	Contact <a
 	href="mailto:joram-team@objectweb.org">us</a> or check the
         <a href="dev/corner.html">developer's corner</a>.
