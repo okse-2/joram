@@ -127,16 +127,14 @@ public class Debug {
   }
 
   public static Logger getLogger(String topic) {
-    if (factory == null) {
-      try {
-        init();
-      } catch (Exception exc) {
-        if (logger == null)
-          logger = new PrivateLogger();
-        return logger;
-      }
+    try {
+      if (factory == null) init();
+      return factory.getLogger(topic);
+    } catch (Exception exc) {
     }
-    return factory.getLogger(topic);
+    if (logger == null)
+      logger = new PrivateLogger();
+    return logger;
   }
 
   public static void setLoggerLevel(String topic, int level) {
@@ -152,7 +150,13 @@ public class Debug {
   }
 
   private static class PrivateLogger implements Logger {
-    PrivateLogger() {}
+    PrivateLogger() {
+      BasicLevel.FATAL = 1000;
+      BasicLevel.ERROR = 800;
+      BasicLevel.WARN = 600;
+      BasicLevel.INFO = 400;
+      BasicLevel.DEBUG = 200;
+    }
 
     // Interface Handler
 
@@ -222,7 +226,7 @@ public class Debug {
      * @return    The CurrentIntLevel value
      */
     public int getCurrentIntLevel() {
-      return BasicLevel.DEBUG;
+      return BasicLevel.ERROR;
     }
 
     /**
@@ -240,8 +244,10 @@ public class Debug {
      * @param  l  Description of Parameter
      * @return    The Loggable value
      */
-    public boolean isLoggable(int l) {
-      return true;
+    public boolean isLoggable(int level) {
+      if (level >= BasicLevel.ERROR)
+        return true;
+      return false;
     }
 
     /**
@@ -251,7 +257,9 @@ public class Debug {
      * @return    The Loggable value
      */
     public boolean isLoggable(Level l) {
-      return true;
+      if (l.getIntValue() >= BasicLevel.ERROR)
+        return true;
+      return false;
     }
 
     /**
@@ -269,7 +277,8 @@ public class Debug {
      * given message is treated
      */
     public void log(int level, Object o) {
-      System.err.println(o.toString());
+      if (level >= BasicLevel.ERROR)
+        System.err.println(o.toString());
     }
     /**
      * Log a message, with no arguments.
@@ -277,7 +286,8 @@ public class Debug {
      * given message is treated
      */
     public void log(Level l, Object o) {
-      System.err.println(o.toString());
+      if (l.getIntValue() >= BasicLevel.ERROR)
+        System.err.println(o.toString());
     }
 
     /**
@@ -285,14 +295,16 @@ public class Debug {
      * error or a context..
      */
     public void log(int level, Object o, Throwable t) {
-      System.err.println(o.toString() + ":" + t.toString());
+      if (level >= BasicLevel.ERROR)
+        System.err.println(o.toString() + ":" + t.toString());
     }
     /**
      * Log a message, with a throwable arguments which can represent an 
      * error or a context..
      */
     public void log(Level l, Object o, Throwable t) {
-      System.err.println(o.toString() + ":" + t.toString());
+      if (l.getIntValue() >= BasicLevel.ERROR)
+        System.err.println(o.toString() + ":" + t.toString());
     }
 
 
@@ -304,8 +316,9 @@ public class Debug {
      * represents the method name.
      */
     public void log(int level, Object o, Object location, Object method) {
-      System.err.println(location.toString() + "." + method.toString() + "(...) :"
-                         + o.toString());
+      if (level >= BasicLevel.ERROR)
+        System.err.println(location.toString() + "." + method.toString() +
+                           "(...) :" + o.toString());
     }
     /**
      * Log a message, with a location and method arguments. The location
@@ -316,8 +329,9 @@ public class Debug {
      */
     public void log(Level l, Object o, Object location,
                     Object method) {
-      System.err.println(location.toString() + "." + method.toString() + "(...) :"
-                         + o.toString());
+      if (l.getIntValue() >= BasicLevel.ERROR)
+        System.err.println(location.toString() + "." + method.toString() +
+                           "(...) :" + o.toString());
     }
 
     /**
@@ -329,8 +343,9 @@ public class Debug {
      * The throwable parameter permits to log an Exception. 
      */
     public void log(int level, Object o, Throwable t, Object location, Object method) {
-      System.err.println(location.toString() + "." + method.toString() + "(...) :"
-                         + o.toString() + " " + t.toString());
+      if (level >= BasicLevel.ERROR)
+        System.err.println(location.toString() + "." + method.toString() +
+                           "(...) :" + o.toString() + " " + t.toString());
     }
     /**
      * Log a message, with a location, method and throwable arguments. 
@@ -342,8 +357,9 @@ public class Debug {
      */
     public void log(Level l, Object o, Throwable t, Object location,
                     Object method) {
-      System.err.println(location.toString() + "." + method.toString() + "(...) :"
-                         + o.toString() + " " + t.toString());
+      if (l.getIntValue() >= BasicLevel.ERROR)
+        System.err.println(location.toString() + "." + method.toString() +
+                           "(...) :" + o.toString() + " " + t.toString());
     }
 
     /** Enables this logger */
