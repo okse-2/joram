@@ -345,6 +345,10 @@ public final class NTransaction implements Transaction {
   }
   
   public final void delete(String dirName, String name) {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "NTransaction, delete(" + dirName + ", " + name + ")");
+
     Object key = OperationKey.newKey(dirName, name);
 
     Hashtable log = ((Context) perThreadContext.get()).log;
