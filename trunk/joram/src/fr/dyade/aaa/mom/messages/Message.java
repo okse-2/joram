@@ -46,6 +46,9 @@ public class Message implements Cloneable, Serializable
   /** The message type (SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES). */
   int type;
 
+  /** <code>true</code> if the message must be persisted. **/
+  boolean persistent = true;
+
   /** The message identifier. */
   String id = null;
   /** The message priority (from 0 to 9, 9 being the highest). */
@@ -76,12 +79,7 @@ public class Message implements Cloneable, Serializable
   /** <code>true</code> if the body is read-only. */
   boolean bodyRO = false;
 
-  /**
-   * The message properties table.
-   * <p>
-   * <b>Key:</b> property name<br>
-   * <b>Object:</b> property (native objects)
-   */
+  /** The message properties table. */
   Hashtable properties = null;
   /** <code>true</code> if the properties are read-only. */
   boolean propertiesRO = false;
@@ -127,6 +125,12 @@ public class Message implements Cloneable, Serializable
   public void setIdentifier(String id)
   {
     this.id = id;
+  }
+
+  /** Sets the message persistence mode. */
+  public void setPersistent(boolean persistent)
+  {
+    this.persistent = persistent;
   }
 
   /**
@@ -213,6 +217,12 @@ public class Message implements Cloneable, Serializable
   public String getIdentifier()
   {
     return id;
+  }
+
+  /** Returns <code>true</code> if the message is persistent. */
+  public boolean getPersistent()
+  {
+    return persistent;
   }
 
   /** Returns the message priority. */
@@ -755,49 +765,20 @@ public class Message implements Cloneable, Serializable
   {
     try {
       Message clone = (Message) super.clone();
-      clone.optionalHeader = new Hashtable();
-      clone.optionalHeader.putAll(optionalHeader);
-      clone.properties = new Hashtable();
-      clone.properties.putAll(properties);
+      if (optionalHeader != null) {
+        clone.optionalHeader = new Hashtable();
+        clone.optionalHeader.putAll(optionalHeader);
+      }
+      if (properties != null) {
+        clone.properties = new Hashtable();
+        clone.properties.putAll(properties);
+      }
       return clone;
     }
     catch (CloneNotSupportedException cE) {
       return null;
     }
   }
-
-  /**
-   * Method actually preparing the setting of a new property.
-   *
-   * @param name  The property name.
-   *
-   * @exception MessageROException  If the message properties are read-only.
-   */
-  private void preparePropSetting(String name) throws MessageROException
-  {
-    if (propertiesRO) {
-      throw new MessageROException("Can't set property as the message "
-                                   + "properties are READ-ONLY.");
-    }
-
-    if (name == null || name.equals(""))
-      throw new IllegalArgumentException("Invalid property name: " + name);
-
-    if (properties == null)
-      properties = new Hashtable();
-  }
-
-  /**
-   * Specializes the serialization method for protecting the message's
-   * properties and body as soon as it is sent.
-   */
-  private void writeObject(ObjectOutputStream s) throws IOException
-  {
-    s.defaultWriteObject();
-    bodyRO = true;
-    propertiesRO = true;
-  }
-
 
   /**
    * Transforms this message into a vector of primitive values that can
@@ -812,6 +793,7 @@ public class Message implements Cloneable, Serializable
 
     fieldsTb.put("type", new Integer(type));
     fieldsTb.put("id", id);
+    fieldsTb.put("persistent", new Boolean(persistent));
     fieldsTb.put("priority", new Integer(priority));
     fieldsTb.put("expiration", new Long(expiration));
     fieldsTb.put("timestamp", new Long(timestamp));
@@ -863,6 +845,7 @@ public class Message implements Cloneable, Serializable
     try {
       msg.type = ConversionHelper.toInt(fieldsTb.get("type"));
       msg.id = (String) fieldsTb.get("id");
+      msg.persistent = ConversionHelper.toBoolean(fieldsTb.get("persistent"));
       msg.priority = ConversionHelper.toInt(fieldsTb.get("priority"));
       msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
       msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
@@ -895,5 +878,37 @@ public class Message implements Cloneable, Serializable
     catch (MessageValueException exc) {}
   
     return msg;
+  }
+ 
+  /**
+   * Method actually preparing the setting of a new property.
+   *
+   * @param name  The property name.
+   *
+   * @exception MessageROException  If the message properties are read-only.
+   */
+  private void preparePropSetting(String name) throws MessageROException
+  {
+    if (propertiesRO) {
+      throw new MessageROException("Can't set property as the message "
+                                   + "properties are READ-ONLY.");
+    }
+
+    if (name == null || name.equals(""))
+      throw new IllegalArgumentException("Invalid property name: " + name);
+
+    if (properties == null)
+      properties = new Hashtable();
+  }
+
+  /**
+   * Specializes the serialization method for protecting the message's
+   * properties and body as soon as it is sent.
+   */
+  private void writeObject(ObjectOutputStream s) throws IOException
+  {
+    s.defaultWriteObject();
+    bodyRO = true;
+    propertiesRO = true;
   }
 }
