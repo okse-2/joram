@@ -29,11 +29,12 @@
 			 </li>
 			 <li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
 			  exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
-				as will be the next High-Availability Joram server to be released in the next version. </li>
+				as will be the future High-Availability Joram server to be released in the next version. </li>
 			 </ul>
 			 <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
 			 concerning JMS in this TCK.</p>
-			 <p>The new packages are available in the download area. The CVS tag is joram4_1_0 (CVS repository).</p>
+			 <p>The new packages are available in the <a href="download/index.html">download area</a>. The CVS tag is 
+			 joram4_1_0 (<a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a>).</p>
 			 <p>The documentation has also been deeply updated with a new all-in-one manual.</p>
 		
 			<subtitle>October 20-21: JORAM Training Session, Grenoble, France</subtitle>
