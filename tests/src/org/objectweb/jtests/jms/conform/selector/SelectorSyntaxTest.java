@@ -35,9 +35,193 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.4 2002-04-08 15:32:28 joram Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.5 2002-05-15 09:25:09 jmesnil Exp $
  */
 public class SelectorSyntaxTest extends PTPTestCase {
+
+    /**
+     * Test that identifiers that start with a valid Java identifier start character are valid.
+     * A valid identifier means that the method <code>Character.isJavaIdentifierStart</code> returns 
+     * <code>true</code> for this identifier first character.
+     * 
+     * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/lang/Character.html#isJavaIdentifierStart(char)">Character.isJavaIdentifierStart(char)</a>
+     */
+    public void testValidIdentifiersStart() {
+        String identifier = null;
+        try {
+            identifier = "_correct";
+            assertTrue(identifier +" starts with an invalid Java identifier start character",
+                       Character.isJavaIdentifierStart(identifier.charAt(0)));
+            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
+
+            identifier = "$correct";
+            assertTrue(identifier +" starts with an invalid Java identifier start character",
+                       Character.isJavaIdentifierStart(identifier.charAt(0)));
+            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
+
+            identifier = "£correct";
+            assertTrue(identifier +" starts with an invalid Java identifier start character",
+                       Character.isJavaIdentifierStart(identifier.charAt(0)));
+            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
+        } catch (JMSException e) {
+            fail(identifier +" is a correct identifier. \n" +e);
+        }
+    }  
+ 
+    /**
+     * Test that identifiers that start with an invalid Java identifier start character are invalid.       
+     * 
+     * @see #testValidIdentifiersStart()
+     */
+    public void testInvalidIdentifiersStart() {
+        String identifier = null;
+        try {
+            identifier = "1uncorrect";
+
+            assertTrue(identifier +" starts with an invalid Java identifier start character",
+                       !Character.isJavaIdentifierStart(identifier.charAt(0)));
+            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
+            fail(identifier +" starts with an invalid Java identifier start character");
+        } catch (JMSException e) {
+        }
+
+        try {
+            identifier = "%uncorrect";
+            
+            assertTrue(identifier +" starts with an invalid Java identifier start character",
+                       !Character.isJavaIdentifierStart(identifier.charAt(0)));
+            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
+            fail(identifier +" starts with an invalid Java identifier start character");
+        } catch (JMSException e) {
+        }
+
+    }   
+
+    /**
+     * Test that identifiers can't be <code>NULL</code>.
+     */
+    public void testIdentifierNULL() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "NULL > 0");
+            fail("NULL is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+    /**
+     * Test that identifiers can't be <code>TRUE</code>.
+     */
+    public void testIdentifierTRUE() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "TRUE > 0");
+            fail("TRUE is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+    /**
+     * Test that identifiers can't be <code>FALSE</code>.
+     */
+    public void testIdentifierFALSE() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "FALSE > 0");
+            fail("FALSE is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+    /**
+     * Test that identifiers can't be <code>NOT</code>.
+     */
+    public void testIdentifierNOT() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "NOT > 0");
+            fail("NOT is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+    /**
+     * Test that identifiers can't be <code>AND</code>.
+     */
+    public void testIdentifierAND() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "AND > 0");
+            fail("AND is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+    /**
+     * Test that identifiers can't be <code>OR</code>.
+     */
+    public void testIdentifierOR() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "OR > 0");
+            fail("OR is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+
+    /**
+     * Test that identifiers can't be <code>BETWEEN</code>.
+     */
+    public void testIdentifierBETWEEN() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "BETWEEN > 0");
+            fail("BETWEEN is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+
+    /**
+     * Test that identifiers can't be <code>LIKE</code>.
+     */
+    public void testIdentifierLIKE() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "LIKE > 0");
+            fail("LIKE is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+
+    /**
+     * Test that identifiers can't be <code>IN</code>.
+     */
+    public void testIdentifierIN() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "IN > 0");
+            fail("IN is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+
+    /**
+     * Test that identifiers can't be <code>IS</code>.
+     */
+    public void testIdentifierIS() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "IS > 0");
+            fail("IS is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
+
+
+    /**
+     * Test that identifiers can't be <code>ESCAPE</code>.
+     */
+    public void testIdentifierESCAPE() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "ESCAPE > 0");
+            fail("ESCAPE is not a valid identifier");
+        } catch (JMSException e) {
+        }
+    }
 
     /**
      * Test syntax of "<em>identifier</em> IS [NOT] NULL"
