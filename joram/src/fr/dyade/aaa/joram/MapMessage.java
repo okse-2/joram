@@ -223,6 +223,9 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid null or empty value name.");
 
+    if (value == null)
+      return;
+
     if (value instanceof Boolean || value instanceof Character 
         || value instanceof Number || value instanceof String
         || value instanceof byte[])
@@ -260,6 +263,9 @@ public class MapMessage extends Message implements javax.jms.MapMessage
                                              + " body is read-only.");
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid null or empty value name.");
+
+    if (value == null)
+      return;
 
     map.put(name, value);
   }
