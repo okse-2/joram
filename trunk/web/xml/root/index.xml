@@ -14,6 +14,17 @@
 
     <s1 name="Recent news">
 
+      <subtitle>20th March 2002: JMS Test Suite released</subtitle>
+
+      <p>A JMS Test Suite has been released under LGPL.<br />
+	This suite tests JMS features. All code of the test suite is
+	pure JMS without any dependency to JORAM.</p>
+      <p>All code is available from JORAM <a
+	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">cvs repository</a>. See the test suite
+	<a href="http://www.objectweb.org/joram/doc/tests/index.html">documentation</a> for more information.</p>
+
+      <hr/>
+
       <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
       
       <p><em>JORAM 3.0.0 is now available for <a
