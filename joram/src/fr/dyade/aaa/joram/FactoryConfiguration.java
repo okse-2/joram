@@ -32,7 +32,7 @@ package fr.dyade.aaa.joram;
  * <code>ConnectionFactory</code> or a <code>XAConnectionFactory</code>
  * configuration parameters.
  */
-class FactoryConfiguration implements java.io.Serializable
+class FactoryConfiguration
 {
   /** Address of the server. */
   java.net.InetAddress serverAddr;  
