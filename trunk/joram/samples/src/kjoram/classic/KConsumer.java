@@ -93,8 +93,9 @@ public class KConsumer extends MIDlet implements CommandListener {
   void subscribeTopic(MessageListener listener, Topic topic) {
     System.out.println("KConsumer.subscribeTopic(" + topic + ")");
     try {
-      ConnectionFactory cf = new com.scalagent.kjoram.ksoap.SoapConnectionFactory(
-        "X.X.X.X", 8080, 36000);
+      ConnectionFactory cf = 
+        new com.scalagent.kjoram.ksoap.SoapConnectionFactory(
+          "X.X.X.X", 8080, 360000);
       com.scalagent.kjoram.Connection cnx = cf.createConnection();
       Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer tConsumer = sess.createConsumer(topic);
@@ -110,8 +111,9 @@ public class KConsumer extends MIDlet implements CommandListener {
   void subscribeQueue(Queue queue) {
     System.out.println("KConsumer.subscribeQueue(" + queue + ")");
     try {
-      ConnectionFactory cf = new com.scalagent.kjoram.ksoap.SoapConnectionFactory(
-        "X.X.X.X", 8080, 36000);
+      ConnectionFactory cf = 
+        new com.scalagent.kjoram.ksoap.SoapConnectionFactory(
+          "X.X.X.X", 8080, 360000);
       com.scalagent.kjoram.Connection cnx = cf.createConnection();
       Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer qConsumer = sess.createConsumer(queue);
