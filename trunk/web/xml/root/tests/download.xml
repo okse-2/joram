@@ -22,7 +22,7 @@
       </s2>
       <s2 name="CVS Repository">
 	<p>The Test Suite is also available through CVS. To setup the
-	  CVS software, see <a href="http://www/cvshome.org">CVS website</a>
+	  CVS software, see <a href="http://www.cvshome.org">CVS website</a>
 	</p>
 	<p>To access the CVS repository in anonymous mode, simply use
 	  the following commands (if you are using a GUI CVS client,
