@@ -59,7 +59,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
     <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
     <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/> 
     <copy file="${conf.dir}/jndi.properties"
           todir="${obj.dir}"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
@@ -115,7 +115,7 @@
   <!-- Runs the classic sender client -->
   <target name="sender" depends="init"
     description="--> Start a Sender client">
-    <java classname="classic.Sender" failonerror="no" fork="no">
+    <java classname="classic.Sender" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -123,7 +123,7 @@
   <!-- Runs the classic receiver client -->
   <target name="receiver" depends="init"
     description="--> Start a Receiver client">
-    <java classname="classic.Receiver" failonerror="no" fork="no">
+    <java classname="classic.Receiver" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -131,7 +131,7 @@
   <!-- Runs the classic subscriber client -->
   <target name="subscriber" depends="init"
     description="--> Start a Subscriber client">
-    <java classname="classic.Subscriber" failonerror="no" fork="no">
+    <java classname="classic.Subscriber" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -139,7 +139,7 @@
   <!-- Runs the classic publisher client -->
   <target name="publisher" depends="init"
     description="--> Start a Publisher client">
-    <java classname="classic.Publisher" failonerror="no" fork="no">
+    <java classname="classic.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -147,7 +147,7 @@
   <!-- Runs the classic browser client -->
   <target name="browser" depends="init"
     description="--> Start a Browser client">
-    <java classname="classic.Browser" failonerror="no" fork="no">
+    <java classname="classic.Browser" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -166,7 +166,7 @@
   <!-- Runs a chat client -->
   <target name="chat1" depends="init"
     description="--> Run chat client as user1">
-    <java classname="chat.SimpleChat" failonerror="no" fork="no">
+    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
       <arg line="user1"/>
     </java>
@@ -175,7 +175,7 @@
   <!-- Runs an other chat client -->
   <target name="chat2" depends="init"
     description="--> Run chat client as user2">
-    <java classname="chat.SimpleChat" failonerror="no" fork="no">
+    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
       <arg line="user2"/>
     </java>
@@ -249,7 +249,7 @@
   <!-- Runs the archi administration -->
   <target name="archi_admin" depends="init"
     description="--> Run the distributed architecture administration">
-    <java classname="archi.ArchiAdmin" failonerror="no" fork="no">
+    <java classname="archi.ArchiAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -257,7 +257,7 @@
   <!-- Runs the archi sender client -->
   <target name="archi_sender" depends="init"
     description="--> Run the distributed architecture Sender client">
-    <java classname="archi.Sender" failonerror="no" fork="no">
+    <java classname="archi.Sender" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -265,7 +265,7 @@
   <!-- Runs the archi receiver client -->
   <target name="archi_receiver" depends="init"
     description="--> Run the distributed architecture Receiver client">
-    <java classname="archi.Receiver" failonerror="no" fork="no">
+    <java classname="archi.Receiver" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -273,7 +273,7 @@
   <!-- Runs the archi durable subscriber client -->
   <target name="archi_sub" depends="init"
     description="--> Run the distributed architecture Subscriber client">
-    <java classname="archi.DSubscriber" failonerror="no" fork="no">
+    <java classname="archi.DSubscriber" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -281,7 +281,7 @@
   <!-- Runs the archi publisher client -->
   <target name="archi_pub" depends="init"
     description="--> Run the distributed architecture Publisher client">
-    <java classname="archi.Publisher" failonerror="no" fork="no">
+    <java classname="archi.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -290,35 +290,35 @@
   <!-- Runs the cluster administration -->
   <target name="cluster_admin" depends="init"
     description="--> Run the cluster administration">
-    <java classname="cluster.ClusterAdmin" failonerror="no" fork="no">
+    <java classname="cluster.ClusterAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber10" depends="init">
-    <java classname="cluster.Subscriber10" failonerror="no" fork="no">
+    <java classname="cluster.Subscriber10" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber20" depends="init">
-    <java classname="cluster.Subscriber20" failonerror="no" fork="no">
+    <java classname="cluster.Subscriber20" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber21" depends="init">
-    <java classname="cluster.Subscriber21" failonerror="no" fork="no">
+    <java classname="cluster.Subscriber21" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs the cluster publisher -->
   <target name="cluster_pub" depends="init">
-    <java classname="cluster.Publisher" failonerror="no" fork="no">
+    <java classname="cluster.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
