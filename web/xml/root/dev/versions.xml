@@ -11,7 +11,17 @@
   </properties>
 
   <body>
-
+    <s1 name="joram CVS version, no tag">
+      <p>Getting Joram through CVS without specifying a tag allows to get
+      the latest tagged version with small corrections and updates.</p>
+      <s2 name="Modifications">
+      <ul>
+      <li><code>NGNetwork</code> class removed from
+      <code>fr.dyade.aaa.agent</code> package for allowing compilation
+      with jdk1.3.</li>
+      </ul>
+      </s2>
+    </s1>
     <s1 name="joram3_4_0"> 
       <s2 name="Support of SOAP as a client/server communication protocol">
       <p>This version is only available in CVS with tag joram3_4_0. So far, 
