@@ -340,13 +340,13 @@ public class Message implements javax.jms.Message
 
     if (queue) {
       if (temporary)
-        return new TemporaryQueue(id, sess.cnx);
+        return new TemporaryQueue(id, null);
       else
         return new Queue(id);
     }
     else {
       if (temporary)
-        return new TemporaryTopic(id, sess.cnx);
+        return new TemporaryTopic(id, null);
       else
         return new Topic(id);
     }
