@@ -30,7 +30,7 @@
 
       <subtitle>20th March 2002: JMS Test Suite released</subtitle>
 
-      <p>A JMS Test Suite has been released under LGPL.<br />
+      <p><em>A JMS Test Suite</em> has been released under LGPL.<br />
 	This suite tests JMS features. All code of the test suite is
 	pure JMS without any dependency to JORAM.</p>
       <p>All code is available from JORAM <a
