@@ -42,10 +42,13 @@ public abstract class XAConnectionFactory implements javax.jms.XAConnectionFacto
     protected InetAddress proxyAddress;
     protected int proxyPort;
 
-    protected URL proxyAgentURL;
+    protected CURL proxyAgentURL;
 
     protected String login = "anonymous";
     protected String passwd = "anonymous";
+
+    // The static table of all XAConnectionFactory (jndi)
+    private static java.util.Hashtable xacfList = new java.util.Hashtable();
 
     /**
      * Creates a new XAConnectionFactory.
@@ -60,22 +63,9 @@ public abstract class XAConnectionFactory implements javax.jms.XAConnectionFacto
 	this.proxyPort = proxyPort;
 	
 	try {
-	    try {
-		proxyAgentURL = new URL(ConfigURLStreamHandlerFactory.Joram,
-					proxyAddress.getHostName(),
-					proxyPort,
-					"/" + proxyAgentIdString);
-	    } catch (MalformedURLException mue) {
-		URL.setURLStreamHandlerFactory(new ConfigURLStreamHandlerFactory());
-		try {
-		    proxyAgentURL = new URL(ConfigURLStreamHandlerFactory.Joram,
-					    proxyAddress.getHostName(),
-					    proxyPort,
-					    "/" + proxyAgentIdString);
-		} catch (MalformedURLException mue2) {
-		    mue2.printStackTrace();
-		}
-	    }
+	    proxyAgentURL = new CURL(proxyAddress.getHostName(),
+				     proxyPort,
+				     proxyAgentIdString);
 	} catch (Exception e) {
 	    System.out.println("XAConnectionFactory error");
 	    e.printStackTrace();
@@ -89,40 +79,14 @@ public abstract class XAConnectionFactory implements javax.jms.XAConnectionFacto
      */
     public XAConnectionFactory(String proxyAgentURLString) {
 	try {
-	    proxyAgentURL = new URL(proxyAgentURLString);
-	} catch (MalformedURLException mue) {
-	    URL.setURLStreamHandlerFactory(new ConfigURLStreamHandlerFactory());
-	    try {
-		proxyAgentURL = new URL(proxyAgentURLString);
-	    } catch (MalformedURLException mue2) {
-		mue2.printStackTrace();
-	    }
-	}
-	proxyAgentIdString = "#" + proxyAgentURL.getRef();
-	try {
+	    proxyAgentURL = new CURL(proxyAgentURLString);
+	    proxyAgentIdString = proxyAgentURL.getAgentId();
 	    proxyAddress = InetAddress.getByName(proxyAgentURL.getHost());
-	} catch (UnknownHostException uhe) {
+	    proxyPort = proxyAgentURL.getPort();
+	} catch (Exception e) {
 	    System.out.println("XAConnectionFactory error");
-	    uhe.printStackTrace();
+	    e.printStackTrace();
 	}
-	proxyPort = proxyAgentURL.getPort();
-    }
-
-    /**
-     * Creates a new XAConnectionFactory.
-     * @param proxyAgentURL the URL of the JMS proxy agent
-     * (<em>joram://host:port/#x.y.z</em>)
-     */
-    public XAConnectionFactory(URL proxyAgentURL) {
-	this.proxyAgentURL = proxyAgentURL;
-	proxyAgentIdString = "#" + proxyAgentURL.getRef();
-	try {
-	    proxyAddress = InetAddress.getByName(proxyAgentURL.getHost());
-	} catch (UnknownHostException uhe) {
-	    System.out.println("XAConnectionFactory error");
-	    uhe.printStackTrace();
-	}
-	proxyPort = proxyAgentURL.getPort();
     }
 
     /**
@@ -136,21 +100,20 @@ public abstract class XAConnectionFactory implements javax.jms.XAConnectionFacto
 	return ref;
     }
 
+    // use for jndi
+    public void setXAConnectionFactoryList(String s) {
+	xacfList.put(s,this);
+    }
+    public static Object getXAConnectionFactory(String s) {
+	return xacfList.get(s);
+    }
+
     /**
      * Returns a string representation of this XAConnectionFactory,
      * actually the URL of the proxy agent.
      */
     public String toString() {
-	try {
-	    return new URL(ConfigURLStreamHandlerFactory.Joram,
-			   proxyAddress.getHostName(),
-			   proxyPort,
-			   "/" + proxyAgentIdString).toString();
-	} catch (MalformedURLException mue) {
-	    System.out.println("XAConnectionFactory error");
-	    mue.printStackTrace();
-	    return null;
-	}
+	return proxyAgentURL.toString();
     }
 
 } // XAConnectionFactory

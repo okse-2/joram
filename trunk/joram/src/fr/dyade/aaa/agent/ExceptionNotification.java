@@ -31,7 +31,7 @@ package fr.dyade.aaa.agent;
  * @see Engine
  */
 public class ExceptionNotification extends Notification {
-public static final String RCS_VERSION="@(#)$Id: ExceptionNotification.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ExceptionNotification.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $"; 
 
   /** The target agent id. */
   public AgentId agent;

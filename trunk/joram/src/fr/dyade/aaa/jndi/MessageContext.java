@@ -14,25 +14,34 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, fr.dyade.aaa.ns,
+ * fr.dyade.aaa.jndi and fr.dyade.aaa.joram, released September 11, 2000. 
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
 
+package fr.dyade.aaa.jndi;
 
-package fr.dyade.aaa.joram;
+import java.io.*;
 
-import java.net.*;
-import java.io.IOException;
+public class MessageContext implements Serializable {
+    public String name;
+    public String cmd;
+    public Object obj = null;
 
-
-public class ConfigURLStreamHandler extends URLStreamHandler {
-  /** Not implemented*/
-  protected URLConnection openConnection(URL u) throws IOException {
-    throw new IOException("Not implemented.");
-  }
+    public MessageContext(String name, String cmd) {
+	this.name = name;
+	this.cmd = cmd;
+    }
+    public MessageContext(String name, String cmd, Object obj) {
+	this.name = name;
+	this.cmd = cmd;
+	this.obj = obj;
+    }
+    public String toString() {
+	return "name=" + name + ", cmd=" + cmd + ", obj=" + obj;
+    }
 }
 

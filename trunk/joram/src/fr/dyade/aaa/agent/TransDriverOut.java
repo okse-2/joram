@@ -43,8 +43,8 @@ import java.io.*;
  */
 class TransDriverOut extends DriverOut {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransDriverOut.java,v 1.2 2000-08-01 09:13:31 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransDriverOut.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $";
 
   /**
    * Constructor.

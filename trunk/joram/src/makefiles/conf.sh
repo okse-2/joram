@@ -37,7 +37,7 @@ fi
 # //d notation, not the d: notation.
 # The value of this variable must be the output of the pwd command
 # executed in that directory. It is case sensitive.
-export ROOTDIR=//d/Users/
+export ROOTDIR=//f/joram
 
 # directory for Java source files
 export SRCDIR=${ROOTDIR}/src
@@ -63,7 +63,8 @@ export GENERAL_MK=${SRCDIR}/makefiles/general.mk
 # where java finds the language classes
 export JDKHOME="C:/java/jdk1.2.2"
 export JAVAPATH="${JDKHOME}/jre/lib/rt.jar"
-export JAVAC="${JDKHOME}/bin/javac"
+export JAVAC="c:/java/jikes/jikes.exe"
+#export JAVAC="${JDKHOME}/bin/javac.exe"
 export JAVADOC="${JDKHOME}/bin/javadoc"
 
 # doc use for -link option

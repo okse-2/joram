@@ -24,6 +24,7 @@
 
 LIBRARIES = joram.jar
 joram.jar_CLASSES = \
+	CURL \
 	Debug \
 	Topic \
 	Queue \
@@ -51,8 +52,6 @@ joram.jar_CLASSES = \
 	QueueConnectionFactory \
 	TopicConnectionFactory \
 	ConnectionMetaData \
-	ConfigURLStreamHandler \
-	ConfigURLStreamHandlerFactory \
 	Admin \
 	ObjectConnectionFactory \
 	XAResource \

@@ -45,7 +45,7 @@ import fr.dyade.aaa.agent.*;
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.2 2000-08-01 09:13:51 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 2000-10-05 15:15:38 tachkeni Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */

@@ -1,5 +1,3 @@
-<?xml encoding="US-ASCII"?>
-
 <!-- a3config.dtd 
 
  Copyright (C) 1996 - 2000 BULL
@@ -25,19 +23,22 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT config (host)*>
+<!ELEMENT config (host | property)*>
 <!ATTLIST config name CDATA "">
 <!ELEMENT host (server | transient)*>
 <!ATTLIST host hostname CDATA #REQUIRED>
-<!ELEMENT server (service)*>
+<!ELEMENT server (service | property)*>
 <!ATTLIST server id CDATA #REQUIRED
 	name CDATA ""
 	port CDATA #REQUIRED
 	tport CDATA "">
-<!ELEMENT transient (service)*>
+<!ELEMENT transient (service | property)*>
 <!ATTLIST transient id CDATA #REQUIRED
 	name CDATA ""
 	server CDATA #REQUIRED>
 <!ELEMENT service EMPTY>
 <!ATTLIST service class CDATA #REQUIRED
 	args CDATA "">
+<!ELEMENT property EMPTY>
+<!ATTLIST property name  CDATA #REQUIRED
+	      	   value CDATA #REQUIRED>

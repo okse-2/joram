@@ -42,8 +42,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.2 2000-08-01 09:13:28 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
 
   /**
    * The <code>Vector</code> into which <code>Message</code> objects are
@@ -52,8 +52,6 @@ public final class MessageQueue {
   Vector data;
   /** last validated message: last <= data.size(); */
   int last;
-  /** number of element added to the Queue */
-  protected int nbElementAdd;
 
   MessageQueue() {
     data = new Vector();
@@ -120,10 +118,6 @@ public final class MessageQueue {
     // more than one notification in a queue is the engine (as
     // the engine is also the thread that get the notification,
     // all is right...).
-    if (Server.ADMINISTRED)
-	 if (Server.admin)
-	     nbElementAdd = data.size() - last;
-    
     last = data.size();
     notify();
   }
@@ -162,5 +156,24 @@ public final class MessageQueue {
    */
   synchronized int size(){
     return data.size();
+  }
+
+  /**
+   * Returns a string representation of this <code>TransientChannel</code>
+   * object. Be careful we scan the vector without synchronization, so the
+   * result can be incoherent.
+   *
+   * @return	A string representation of this object. 
+   */
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append("(");
+    for (int i=0; i<last; i++) {
+      strbuf.append((Message) data.elementAt(i));
+    }
+    strbuf.append(")");
+    
+    return strbuf.toString();
   }
 }

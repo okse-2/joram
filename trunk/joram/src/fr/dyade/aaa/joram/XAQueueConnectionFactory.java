@@ -51,14 +51,6 @@ public class XAQueueConnectionFactory extends XAConnectionFactory implements jav
     }
 
     /**
-     * Creates a new XAQueueConnectionFactory.
-     * @param proxyAgentURL the URL of the JMS proxy agent
-     */
-    public XAQueueConnectionFactory(URL proxyAgentURL) {
-	super(proxyAgentURL);
-    }
-
-    /**
      * Constructs a new QueueConnectionFactory.
      */
     public XAQueueConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
@@ -112,9 +104,9 @@ public class XAQueueConnectionFactory extends XAConnectionFactory implements jav
 		    System.out.println("->XAQueueConnectionFactory : createNewQueue (Protocol=" + proxyAgentURL.getProtocol() +
 				       ", Host=" + proxyAgentURL.getHost() +
 				       ", Port=" + proxyAgentURL.getPort() +
-				       ", AgentId=#" + proxyAgentURL.getRef() + ")");
+				       ", AgentId=" + proxyAgentURL.getAgentId() + ")");
 
-	    if ( proxyAgentURL.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
 		sock = new Socket(proxyAddress, proxyPort);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);
@@ -167,7 +159,7 @@ public class XAQueueConnectionFactory extends XAConnectionFactory implements jav
 	    if (Debug.debug)
 		if (Debug.admin)
 		    System.out.println("->XAQueueConnectionFactory : delete  Queue" + queue.getQueueName());
-	    if ( proxyAgentURL.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
 		sock = new Socket(proxyAddress, proxyPort);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);

@@ -14,28 +14,23 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, fr.dyade.aaa.ns,
+ * fr.dyade.aaa.jndi and fr.dyade.aaa.joram, released September 11, 2000. 
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
 
+package fr.dyade.aaa.jndi;
 
-package fr.dyade.aaa.joram;
-
-import java.net.*;
-
-public class ConfigURLStreamHandlerFactory implements URLStreamHandlerFactory {
-    /** Protocol name for Joram URL. */
-    public static final String Joram = "joram";
-
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-      if(protocol.equals(Joram))
-	    return new ConfigURLStreamHandler();
-	else
-	    return null;
+public class NotificationNamingException extends fr.dyade.aaa.agent.Notification {
+    Object obj;
+    public NotificationNamingException(Object obj) {
+	this.obj = obj;
+    }
+    public Object getObject() {
+	return obj;
     }
 }
 

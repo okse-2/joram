@@ -53,29 +53,18 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory, 
     protected String login = "anonymous"; 
     protected String passwd = "anonymous";
     
-    
     /** URL for Joram naming */
-    URL url = null;
+    CURL url = null;
+
+    // The static table of all ConnectionFactory (jndi)
+    private static java.util.Hashtable cfList = new java.util.Hashtable();
 
     public ConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) { 
 	this.agentClient = agentClient;
 	this.addrProxy = addrProxy;
 	this.portProxy = portProxy;
 	try {
-	    try {
-		url = new URL(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram,
-			      addrProxy.getHostName(),
-			      portProxy,
-			      "/" + agentClient);
-	    } catch (Exception e) {
-		if (e instanceof MalformedURLException) {
-		    URL.setURLStreamHandlerFactory(new fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory());
-		    url = new URL(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram,
-				  addrProxy.getHostName(),
-				  portProxy,
-				  "/" + agentClient);
-		}
-	    }
+	    url = new CURL(addrProxy.getHostName(),portProxy,agentClient);
 	} catch (Exception e) {
 	    System.out.println("Jms ConnectionFactory");
 	    e.printStackTrace();
@@ -87,45 +76,16 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory, 
      */
     public ConnectionFactory(String stringURL) {
 	try {
-	    try {
-		url = new URL(stringURL);
-	    } catch (Exception e) {
-		if (e instanceof MalformedURLException) {
-		    URL.setURLStreamHandlerFactory(new fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory());
-		    url = new URL(stringURL);
-		}
-	    }
+	    url = new CURL(stringURL);
 	    if (Debug.debug)
 		if (Debug.admin)
 		    System.out.println("->ConnectionFactory (Protocol=" + url.getProtocol() +
 				       ", Host=" + url.getHost() +
 				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
+				       ", AgentId=" + url.getAgentId() + ")");
 	    
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
- 		this.agentClient = "#" + url.getRef();
-		this.addrProxy = InetAddress.getByName(url.getHost());
-		this.portProxy = url.getPort();
-	    }
-	} catch (Exception e) {
-	    System.out.println("ConnectionFactory Exception");
-	    e.printStackTrace();
-	}
-    }
-
-    /** constructor with Joram URL */
-    public ConnectionFactory(URL url) {
-	try {
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->ConnectionFactory (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
-
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-		this.url = url;
- 		this.agentClient = "#" + url.getRef();
+	    if ( url.getProtocol().equals("joram") ) {
+ 		this.agentClient = url.getAgentId();
 		this.addrProxy = InetAddress.getByName(url.getHost());
 		this.portProxy = url.getPort();
 	    }
@@ -149,17 +109,16 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory, 
 	return ref;
     }
 
+    // use for jndi
+    public void setConnectionFactoryList(String s) {
+	cfList.put(s,this);
+    }
+    public static Object getConnectionFactory(String s) {
+	return cfList.get(s);
+    }
+
     public String toString() {
-	try {
-	    return new URL(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram,
-			   addrProxy.getHostName(),
-			   portProxy,
-			   "/" + agentClient).toString();
-	} catch (Exception e) {
-	    System.out.println("ConnectionFactory Exception ");
-	    e.printStackTrace();
-	    return null;
-	}
+	return url.toString();
     }
 }
  

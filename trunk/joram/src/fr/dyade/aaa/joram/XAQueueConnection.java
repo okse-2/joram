@@ -62,7 +62,8 @@ public class XAQueueConnection extends XAConnection implements javax.jms.XAQueue
      */
     public javax.jms.QueueSession createQueueSession(boolean transacted,
 						     int acknowledgeMode) throws JMSException {
-	throw new JMSException("Not implemented");
+	  long sessionID = getNextSessionID();
+	  return new QueueSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, this);
     }
 
     /*

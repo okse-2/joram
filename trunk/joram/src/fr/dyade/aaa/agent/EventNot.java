@@ -33,7 +33,7 @@ import fr.dyade.aaa.util.*;
  * Each event is described by a report.
  */
 public class EventNot extends Notification {
-public static final String RCS_VERSION="@(#)$Id: EventNot.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: EventNot.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
     /**
      * The name of the agent that fires this event.
      */

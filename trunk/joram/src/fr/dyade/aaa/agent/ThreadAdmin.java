@@ -32,7 +32,7 @@ import java.util.*;
  * <code>Thread</code> used for recuperation of value on each A3 server.
  */
 public final class ThreadAdmin extends Thread {
-public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.2 2000-08-01 09:13:30 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $";
     
     /**
      * frequence of recuperation of values (in millisecond)
@@ -49,7 +49,6 @@ public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.2 2000-08-
      */
     AdminEventReactor udpAgentAdmin;
     
-    
     /**
      * construct a ThreadAdmin
      */
@@ -63,19 +62,23 @@ public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.2 2000-08-
      * running code
      */
     public void run(){
-	while (work){
-	    synchronized(this){
-		try {
-		    if (!udpAgentAdmin.hasListeners(ServerEventType.SERVER_THROUGHPUT)) this.wait(); // if no listener, the thread is stopped
-		    udpAgentAdmin.throughputEventReact(Server.getServerId(),Channel.getCounter(),Server.qin.nbElementAdd,Server.qout.nbElementAdd);
-		    Channel.resetCounter();
-		    this.sleep(sleepTime);
-		} catch (Exception e){
-		    System.out.println("Exception in ThreadAdmin");
-		    e.printStackTrace();
-		}
-	    }
-	} 
+      while (work){
+	synchronized(this){
+	  try {
+	    if (!udpAgentAdmin.hasListeners(ServerEventType.SERVER_THROUGHPUT))
+	      this.wait(); // if no listener, the thread is stopped
+// 	    udpAgentAdmin.throughputEventReact(Server.getServerId(),
+// 					       Channel.getCounter(),
+// 					       Server.qin.nbElementAdd,
+// 					       Server.qout.nbElementAdd);
+// 	    Channel.resetCounter();
+	    this.sleep(sleepTime);
+	  } catch (Exception e){
+	    System.out.println("Exception in ThreadAdmin");
+	    e.printStackTrace();
+	  }
+	}
+      } 
     }
     
     public synchronized void wakeUp(){

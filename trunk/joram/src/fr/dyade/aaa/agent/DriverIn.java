@@ -33,8 +33,8 @@ import java.io.*;
  */
 class DriverIn extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
 
   /** id of agent to forward notifications to */
   protected AgentId proxy;

@@ -164,7 +164,7 @@ class BufferedFilterItem {
  */
 public abstract class BufferedFilter {
 
-public static final String RCS_VERSION="@(#)$Id: BufferedFilter.java,v 1.2 2000-08-01 09:14:06 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: BufferedFilter.java,v 1.3 2000-10-05 15:21:06 tachkeni Exp $"; 
 
 
   /* first item, tail if empty list */

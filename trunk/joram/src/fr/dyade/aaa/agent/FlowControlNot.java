@@ -39,8 +39,8 @@ package fr.dyade.aaa.agent;
  */
 public class FlowControlNot extends Notification {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: FlowControlNot.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: FlowControlNot.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
 
   /** id of <code>DriverIn</code> agent issuing notification, when applicable */
   int driverId;

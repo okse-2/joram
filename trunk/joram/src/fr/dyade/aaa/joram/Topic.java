@@ -49,48 +49,26 @@ public class Topic extends fr.dyade.aaa.mom.TopicNaming implements javax.naming.
     /** port */
     int port;
     /** Joram URL */
-    URL url;
+    CURL url;
+    // The static table of all Topic (jndi)
+    private static Hashtable tList = new Hashtable();
 
     /* constructor of the Topic : Topic("joram://host:port/#x.y.z");*/    
     public Topic(String stringURL) {
 	super(null,".");
 	try {
-	    url = new URL(stringURL);
+	    url = new CURL(stringURL);
 	    if (Debug.debug)
 		if (Debug.topic)
 		    System.out.println("Topic (Protocol=" + url.getProtocol() +
 				       ", Host=" + url.getHost() +
 				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
+				       ", AgentId=" + url.getAgentId() + ")");
 	    
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-		agentTopic ="#" + url.getRef();
+	    if ( url.getProtocol().equals("joram") ) {
+		agentTopic = url.getAgentId();
 		host = url.getHost();
 		port = url.getPort();
-		dest = agentTopic;
-	    }
-	} catch (Exception e) {
-	    System.out.println("Topic Exception");
-	    e.printStackTrace();
-	}
-    }
-
-    /* constructor of the Topic with Joram URL */
-    public Topic(java.net.URL url) {
-	super(null,".");
-	try {
-	    if (Debug.debug)
-		if (Debug.topic)
-		    System.out.println("Topic (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
-	    
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-		this.url = url;
-		host = url.getHost();
-		port = url.getPort();
-		agentTopic ="#" + url.getRef();
 		dest = agentTopic;
 	    }
 	} catch (Exception e) {
@@ -112,6 +90,15 @@ public class Topic extends fr.dyade.aaa.mom.TopicNaming implements javax.naming.
 	ref.add(new javax.naming.StringRefAddr("topic.joramURL", url.toString()));
 	return ref;
     }
+
+    // use for jndi
+    public void setTopicList(String s) {
+	tList.put(s,this);
+    }
+    public static Topic getTopic(String s) {
+	return (Topic) tList.get(s);
+    }
+
     public String toString() {
 	try {
 	    return url.toString();

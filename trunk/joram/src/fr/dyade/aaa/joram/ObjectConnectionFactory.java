@@ -41,18 +41,62 @@ public class ObjectConnectionFactory implements javax.naming.spi.ObjectFactory {
 
     public Object getObjectInstance(Object refObj, javax.naming.Name name, javax.naming.Context nameCtx, java.util.Hashtable env) throws Exception {
 	javax.naming.Reference ref = (javax.naming.Reference) refObj;
+
 	if (ref.getClassName().equals("fr.dyade.aaa.joram.XATopicConnectionFactory")) {
-	    return new XATopicConnectionFactory((String)ref.get("xacnxfactory.joramURL").getContent());
+	    //XATopicConnectionFactory
+	    String xatcfName = (String)ref.get("xacnxfactory.joramURL").getContent();
+	    XATopicConnectionFactory xatcf = (XATopicConnectionFactory) XAConnectionFactory.getXAConnectionFactory(xatcfName);
+	    if(xatcf==null) {
+		xatcf = new XATopicConnectionFactory(xatcfName);
+		xatcf.setXAConnectionFactoryList(xatcfName);
+	    }
+	    return xatcf;
+
 	} else 	if (ref.getClassName().equals("fr.dyade.aaa.joram.XAQueueConnectionFactory")) {
-	    return new XAQueueConnectionFactory((String)ref.get("xacnxfactory.joramURL").getContent());
+	    //XAQueueConnectionFactory
+	    String xaqcfName = (String)ref.get("xacnxfactory.joramURL").getContent();
+	    XAQueueConnectionFactory xaqcf = (XAQueueConnectionFactory) XAConnectionFactory.getXAConnectionFactory(xaqcfName);
+	    if(xaqcf==null) {
+		xaqcf = new XAQueueConnectionFactory(xaqcfName);
+		xaqcf.setXAConnectionFactoryList(xaqcfName);
+	    }
+	    return xaqcf;
 	} else 	if (ref.getClassName().equals("fr.dyade.aaa.joram.TopicConnectionFactory")) {
-	    return new  TopicConnectionFactory((String)ref.get("cnxfactory.joramURL").getContent());
+	    //TopicConnectionFactory
+	    String tcfName = (String)ref.get("cnxfactory.joramURL").getContent();
+	    TopicConnectionFactory tcf = (TopicConnectionFactory) ConnectionFactory.getConnectionFactory(tcfName);
+	    if(tcf==null) {
+		tcf = new  TopicConnectionFactory(tcfName);
+		tcf.setConnectionFactoryList(tcfName);
+	    }
+	    return tcf;
 	} else 	if (ref.getClassName().equals("fr.dyade.aaa.joram.QueueConnectionFactory")) {
-	    return new  QueueConnectionFactory((String)ref.get("cnxfactory.joramURL").getContent());
+	    //QueueConnectionFactory
+	    String qcfName = (String)ref.get("cnxfactory.joramURL").getContent();
+	    QueueConnectionFactory qcf = (QueueConnectionFactory) ConnectionFactory.getConnectionFactory(qcfName);
+	    if(qcf==null) {
+		qcf = new  QueueConnectionFactory(qcfName);
+		qcf.setConnectionFactoryList(qcfName);
+	    }
+	    return qcf;
 	} else if (ref.getClassName().equals("fr.dyade.aaa.joram.Topic")) {
-	    return new Topic((String)ref.get("topic.joramURL").getContent());
+	    //Topic
+	    String topic = (String)ref.get("topic.joramURL").getContent();
+	    Topic t = Topic.getTopic(topic);
+	    if (t==null) {
+		t = new Topic(topic);
+		t.setTopicList(topic);
+	    }
+	    return t;
 	} else if (ref.getClassName().equals("fr.dyade.aaa.joram.Queue")) {
-	    return new Queue((String)ref.get("queue.joramURL").getContent());
+	    //Queue
+	    String queue = (String)ref.get("queue.joramURL").getContent();
+	    Queue q = Queue.getQueue(queue);
+	    if (q==null) {
+		q = new Queue(queue);
+		q.setQueueList(queue);
+	    }
+	    return q;
 	} else {
 	    return null;
 	}

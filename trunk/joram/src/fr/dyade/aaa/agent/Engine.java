@@ -66,8 +66,8 @@ import fr.dyade.aaa.util.*;
  */
 abstract class Engine implements Runnable {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
 
   /**
    * Temporary queue used to store all notifications sent during a
@@ -96,7 +96,12 @@ abstract class Engine implements Runnable {
   /**
    * 
    */ 
-  Thread thread;
+  Message msg = null;
+
+  /**
+   * 
+   */ 
+  Thread thread = null;
 
   /**
    * send <code>ExceptionNotification</code> notification in case of exception
@@ -162,6 +167,25 @@ abstract class Engine implements Runnable {
   }
 
   abstract public void run();
+
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(getClass().getName());
+    strbuf.append(" ");
+    strbuf.append(thread.getName());
+    if (agent == null) {
+      strbuf.append(" is waiting new message.\n");
+    } else {
+      strbuf.append(" is running:\n");
+      strbuf.append("Agent [");
+      strbuf.append(agent);
+      strbuf.append("] reacts to Notification [");
+      strbuf.append(msg.not);
+      strbuf.append("] from Agent");
+      strbuf.append(msg.from);
+    }
+    return strbuf.toString();
+  }
 }
 
 final class TransactionEngine extends Engine {
@@ -198,7 +222,7 @@ final class TransactionEngine extends Engine {
 	canStop = true;
 
 	// Get a notification, then execute the right reaction.
-	Message msg = (Message) qin.get();
+	msg = (Message) qin.get();
 	
 	canStop = false;
 	if (! Server.isRunning) break;
@@ -331,7 +355,7 @@ final class TransientEngine extends Engine {
 	canStop = true;
 
 	// Get a notification, then execute the right reaction.
-	Message msg = (Message) mq.get();
+	msg = (Message) mq.get();
 	
 	canStop = false;
 	if (! Server.isRunning) break;

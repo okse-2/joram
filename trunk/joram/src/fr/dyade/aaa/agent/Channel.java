@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  */
 abstract public class Channel {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.2 2000-08-01 09:13:26 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
 
   public static Channel channel = null;
 
@@ -160,29 +160,6 @@ abstract public class Channel {
    *
    */
   abstract void clean();
-
-  /**
-   * this method allow to reset the nbMessageSend counter.
-   */
-  protected static synchronized void resetCounter(){
-    if (Debug.admin)
-      Debug.trace("Channel: resetCounter[" + nbMessageSend  + "]", false);
-    nbMessageSend = 0;
-  }
-  
-  /**
-   * this method allow to increment the nbMessageSend counter.
-   */
-  protected static synchronized void incrCounter(){
-    nbMessageSend++;
-  }
-    
-  /**
-   * this method allow to get the nbMessageSend counter.
-   */
-  protected static synchronized int getCounter(){
-    return nbMessageSend;
-  }
 }
 
 final class TransactionChannel extends Channel {
@@ -191,8 +168,6 @@ final class TransactionChannel extends Channel {
 		     MessageQueue qout,
 		     MatrixClock mclock) {
     super(mq, qin, qout, mclock);
-    if (Server.ADMINISTRED && Server.admin)
-      resetCounter();
   }
 
   /**
@@ -224,9 +199,6 @@ final class TransactionChannel extends Channel {
     else
       msg = new Message(from, to, not);
     
-    if (Server.ADMINISTRED && Server.admin)
-      incrCounter();
-
     mq.push(msg);
   }
 
@@ -272,10 +244,9 @@ final class TransactionChannel extends Channel {
    * @param   to     .
    * @param   not    .
    */
-  void
-      directSendTo(AgentId from,
-		   AgentId to,
-		   Notification not) throws IOException {
+  void directSendTo(AgentId from,
+		    AgentId to,
+		    Notification not) throws IOException {
     Message msg;
 
     if ((to == null) || to.isNullId())
@@ -336,6 +307,28 @@ final class TransactionChannel extends Channel {
   synchronized void clean() {
     mq.removeAllElements();
   }
+
+  /**
+   * Returns a string representation of this <code>TransactionChannel</code>
+   * object.
+   *
+   * @return	A string representation of this object. 
+   */
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append("TransactionChannel#");
+    strbuf.append(Server.serverId);
+    strbuf.append("\tMatrixClock:\n");
+    strbuf.append(mclock.toString());
+    strbuf.append("\tMessageQueue qin = [");
+    strbuf.append(qin.toString());
+    strbuf.append("]\n\tMessageQueue qout = [");
+    strbuf.append(qout.toString());
+    strbuf.append("]\n");
+
+    return strbuf.toString();
+  }
 }
 
 final class TransientChannel extends Channel {
@@ -377,9 +370,6 @@ final class TransientChannel extends Channel {
 		    " to " + to +
 		    " send " + not,
 		    false);
-
-      if (Server.ADMINISTRED && Server.admin)
-	incrCounter();
 
       if (to.to == Server.serverId) {
 	mq.push(new Message(from, to, not));
@@ -429,10 +419,6 @@ final class TransientChannel extends Channel {
 		  " direct send " + not,
 		  false);
 
-    if (Server.ADMINISTRED)
-      if (Server.admin)
-	incrCounter();
-
     if (to.to == Server.serverId) {
       mq.push(new Message(from, to, not));
     } else {
@@ -443,4 +429,23 @@ final class TransientChannel extends Channel {
   }
 
   void clean() {}
+
+  /**
+   * Returns a string representation of this <code>TransientChannel</code>
+   * object.
+   *
+   * @return	A string representation of this object. 
+   */
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append("TransientChannel#");
+    strbuf.append(Server.serverId);
+    strbuf.append(":\n");
+    strbuf.append("Queue = [");
+    strbuf.append(mq.toString());
+    strbuf.append("]\n");
+
+    return strbuf.toString();
+  }
 }

@@ -45,6 +45,7 @@ a3mom.jar_CLASSES = \
 	MessageAdminCreateTopic \
 	MessageAdminCreateQueue \
 	MessageAdminDeleteTopic \
+	MessageAdminCreateSpecific \
 	MessageAdminDeleteQueue \
 	MessageAdminGetAgentClient \
 	MessageAdminDeleteAgentClient \

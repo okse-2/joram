@@ -65,12 +65,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     /** The efficient thread */
     protected java.lang.Thread threadDeliver;
 	
-    /**
-     * Object to do the synchonization between a threadDeliver and the manual
-     * acknowledgment of the client.
-     */
-    protected Object synchroLastNotAckVector;
-
     /** the vector of the last delivered messages for implicit reception */
     protected Vector lastNotAckVector;
 	
@@ -94,16 +88,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
      */
     protected Hashtable messageConsumerTable;
 	
-    /** vector to acknowledge message in auto_acknowledge mode
-     *	used for explicit reception
-     *	before to give the message to the client, ackMessage is prepared and put
-     *	in this vector that the current Thread reads and sends
-     */
-    protected Vector autoMessageToAckVector;
-	
-    /** autoAck only : the vector containing the request of the session */
-    protected Vector explicitRequestVector = null;
-	
     /** indicates that a recover methods is working */
     protected boolean recoverySet = false ;
 	
@@ -112,7 +96,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	
     /** vector of message delivered to the client but waiting for the commit */
     protected Vector transactedMessageToAckVector = null;
-	
+
     /**	synchro to avoid the client commits before the message
      *	be added to the vector of delivered messages
      */
@@ -148,15 +132,6 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
 	    /* initialisation of object using for delivery and acknowledgement*/
 	    lastNotAckVector = new Vector();
 			
-	    /* initialisation of the synchronized object */
-	    synchroLastNotAckVector = new Object();
-			
-	    /*initialisation of the autoMessageToAckVector */
-	    autoMessageToAckVector = new Vector();
-		
-	    /* the request for the explicit requests (Queue session at time) */
-	    explicitRequestVector = new Vector();
-		
 	} else {
 	    /* Transacted : the message to send */
 	    transactedMessageToSendVector = new Vector();
