@@ -28,8 +28,8 @@ import org.objectweb.util.monolog.api.Logger;
  * Input driver.
  */
 class DriverIn extends Driver {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.15 2003-09-10 13:12:13 fmaistre Exp $";
 
   /** Proxy this <code>DriverIn<code> belongs to. */
   private ProxyAgent proxy;
@@ -155,8 +155,10 @@ class DriverIn extends Driver {
           try {
             sendFlowControl();
           } catch (IOException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ", error during sendFlowControl", exc);
+            if (! proxy.finalizing) {
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ", error during sendFlowControl", exc);
+            }
             break mainLoop;
           }
           nbNotSent = 0;
@@ -166,8 +168,10 @@ class DriverIn extends Driver {
         // End of input flow.
         break mainLoop;
       } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN,
-                   getName() + ", error in readNotification", exc);
+        if (! proxy.finalizing) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", error in readNotification", exc);
+        }
         break mainLoop;
       }
       canStop = false;
