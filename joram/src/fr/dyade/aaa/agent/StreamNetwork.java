@@ -2,24 +2,20 @@
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Dyade Public License,
- * as defined by the file JORAM_LICENSE_ADDENDUM.html
- *
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Dyade web site (www.dyade.fr).
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied.
- * See the License for the specific terms governing rights and
- * limitations under the License.
- *
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released April 20, 2000.
- *
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -30,12 +26,12 @@ import java.net.*;
  *  <code>StreamNetwork</code> is a base implementation of <code>Network</code>
  * class for stream sockets.
  */
-abstract class StreamNetwork extends CausalNetwork {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.11 2003-03-19 15:16:06 fmaistre Exp $";
+public abstract class StreamNetwork extends CausalNetwork {
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $";
 
   /** Creates a new Network component */
-  StreamNetwork() {
+  public StreamNetwork() {
     super();
   }
 

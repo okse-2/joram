@@ -2,24 +2,20 @@
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): Alexander Fedorowicz  
@@ -123,10 +119,26 @@ public class MonitorImpl implements MonitorItf
   }
 
   /**
+   * Returns the list of the platform's servers' identifiers.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public List getServersIds() throws ConnectException, AdminException
+  {
+    Monitor_GetServersIds request;
+    request = new Monitor_GetServersIds(monitor.localServer);
+    Monitor_GetServersIdsRep reply;
+    reply = (Monitor_GetServersIdsRep) doRequest(request);
+
+    return reply.getIds();
+  }
+
+  /**
    * Returns the list of all <code>javax.jms.Destination</code> that
    * exist on a given server, or an empty list if none exist.
    * <p>
-   * The request never returns if the server is not part of the platform.
+   * The request fails if the target server does not belong to the platform.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -166,7 +178,7 @@ public class MonitorImpl implements MonitorItf
    * Returns the list of all <code>fr.dyade.aaa.joram.admin.User</code> that
    * exist on a given server, or an empty list if none exist.
    * <p>
-   * The request never returns if the server is not part of the platform.
+   * The request fails if the target server does not belong to the platform.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -292,7 +304,7 @@ public class MonitorImpl implements MonitorItf
    * Returns the default dead message queue for a given server, null if not
    * set.
    * <p>
-   * The method never returns if the server does not belong to the platform.
+   * The request fails if the target server does not belong to the platform.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
@@ -313,7 +325,7 @@ public class MonitorImpl implements MonitorItf
   /**
    * Returns the default threshold value for a given server, -1 if not set.
    * <p>
-   * The method never returns if the server does not belong to the platform.
+   * The request fails if the target server does not belong to the platform.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.

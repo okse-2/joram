@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -135,7 +131,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       sess.cnx.syncRequest(new ConsumerSubRequest(dest.getName(),
                                                   subName,
                                                   selector,
-                                                  noLocal, durableSubscriber));
+                                                  noLocal,
+                                                  durableSubscriber));
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
@@ -216,18 +213,20 @@ public class MessageConsumer implements javax.jms.MessageConsumer
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": unsets"
                                    + " listener request.");
 
-      sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+      sess.cnx.requestsTable.remove(pendingReq.getKey());
 
       this.messageListener = messageListener;
       sess.msgListeners--;
 
       ConsumerUnsetListRequest unsetLR = null;
       if (queueMode) {
-        unsetLR = new ConsumerUnsetListRequest(pendingReq.getRequestId(),
-                                               true);
+        unsetLR = new ConsumerUnsetListRequest(true);
+        unsetLR.setCancelledRequestId(pendingReq.getRequestId());
       }
-      else
-        unsetLR = new ConsumerUnsetListRequest(targetName, false);
+      else {
+        unsetLR = new ConsumerUnsetListRequest(false);
+        unsetLR.setTarget(targetName);
+      }
 
       try {
         sess.cnx.syncRequest(unsetLR);
@@ -264,7 +263,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       this.messageListener = messageListener;
       pendingReq = new ConsumerSetListRequest(targetName, selector, queueMode);
       pendingReq.setRequestId(sess.cnx.nextRequestId());
-      sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
+      sess.cnx.requestsTable.put(pendingReq.getKey(), this);
       sess.cnx.asyncRequest(pendingReq);
     }
 
@@ -338,7 +337,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
       // In case of a timer, scheduling the receive:
       if (timeOut > 0) {
-        replyingTask = new ConsumerReplyTask(pendingReq.getRequestId());
+        replyingTask = new ConsumerReplyTask(pendingReq);
         sess.schedule(replyingTask, timeOut);
       }
     }
@@ -358,9 +357,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
                                    + " reply.");
-   
-      if (reply.getMessage() != null) {
-        String msgId = reply.getMessage().getIdentifier();
+  
+      Vector msgs = reply.getMessages();
+      if (msgs != null && ! msgs.isEmpty()) {
+        fr.dyade.aaa.mom.messages.Message msg =
+          (fr.dyade.aaa.mom.messages.Message) msgs.get(0);
+        String msgId = msg.getIdentifier();
         // Auto ack: acknowledging the message:
         if (sess.autoAck)
           sess.cnx.asyncRequest(new ConsumerAckRequest(targetName, msgId,
@@ -369,7 +371,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
         else
           sess.prepareAck(targetName, msgId, queueMode);
 
-        return Message.wrapMomMessage(sess, reply.getMessage());
+        return Message.wrapMomMessage(sess, msg);
       }
       else
         return null;
@@ -425,7 +427,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
     // Removing this resource's reference from everywhere:
     Object lock = null;
     if (pendingReq != null)
-      lock = sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+      lock = sess.cnx.requestsTable.remove(pendingReq.getKey());
     sess.consumers.remove(this);
 
     // Unsetting the listener, if any:
@@ -436,7 +438,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
         if (queueMode) {
           ConsumerUnsetListRequest unsetLR =
-            new ConsumerUnsetListRequest(pendingReq.getRequestId(), true);
+            new ConsumerUnsetListRequest(true);
+          unsetLR.setCancelledRequestId(pendingReq.getRequestId());
           sess.cnx.syncRequest(unsetLR);
         }
       }
@@ -457,8 +460,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                    + pendingReq.getRequestId()
                                    + " with a null message.");
 
-      sess.cnx.repliesTable.put(pendingReq.getRequestId(),
-                                new ConsumerMessages(null, null, queueMode));
+      sess.cnx.repliesTable.put(pendingReq.getKey(), new ConsumerMessages());
 
       synchronized(lock) {
         lock.notify();
@@ -546,7 +548,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
         if (queueMode) {
           pendingReq = new ConsumerSetListRequest(targetName, selector, true);
           pendingReq.setRequestId(sess.cnx.nextRequestId());
-          sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
+          sess.cnx.requestsTable.put(pendingReq.getKey(), this);
           sess.cnx.asyncRequest(pendingReq);
         }
       }
@@ -566,20 +568,22 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    */
   private class ConsumerReplyTask extends TimerTask
   {
-    /** The identifier of the request to answer. */
-    private String requestId;
+    /** The request to answer. */
+    private AbstractJmsRequest request;
     /** The reply to put in the connection's table. */
     private ConsumerMessages nullReply;
 
     /**
      * Constructs a <code>ConsumerReplyTask</code> instance.
      *
-     * @param requestId  The identifier of the request to answer.
+     * @param requestId  The request to answer.
      */
-    ConsumerReplyTask(String requestId)
+    ConsumerReplyTask(AbstractJmsRequest request)
     {
-      this.requestId = requestId;
-      this.nullReply = new ConsumerMessages(requestId, targetName, queueMode);
+      this.request = request;
+      this.nullReply = new ConsumerMessages(request.getRequestId(),
+                                            targetName,
+                                            queueMode);
     }
 
     /**
@@ -593,13 +597,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer
           JoramTracing.dbgClient.log(BasicLevel.WARN, "Receive request" +
                                      " answered because timer expired");
 
-        Lock lock = (Lock) sess.cnx.requestsTable.remove(requestId);
+        Lock lock = (Lock) sess.cnx.requestsTable.remove(request.getKey());
 
         if (lock == null)
           return;
 
         synchronized (lock) {
-          sess.cnx.repliesTable.put(requestId, nullReply);
+          sess.cnx.repliesTable.put(request.getKey(), nullReply);
           lock.notify();
         }
       }

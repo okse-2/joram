@@ -3,31 +3,34 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.agent.UnknownServerException;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.admin.*;
 import fr.dyade.aaa.mom.admin.AdminRequest;
@@ -38,9 +41,14 @@ import fr.dyade.aaa.mom.messages.Message;
 import fr.dyade.aaa.mom.proxies.AdminNotification;
 import fr.dyade.aaa.mom.proxies.soap.SoapProxy;
 import fr.dyade.aaa.mom.proxies.tcp.JmsProxy;
-import fr.dyade.aaa.ns.*;
+import fr.dyade.aaa.ns.LookupReport;
+import fr.dyade.aaa.ns.NameService;
+import fr.dyade.aaa.ns.RegisterCommand;
+import fr.dyade.aaa.ns.SimpleReport;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -51,7 +59,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class AdminTopicImpl extends TopicImpl
 {
-  /** Reference of the current AdminTopicImpl instance. */
+  /** Reference of the server's local AdminTopicImpl instance. */
   public static AdminTopicImpl ref;
 
   /** Identifier of the server this topic is deployed on. */
@@ -86,14 +94,29 @@ public class AdminTopicImpl extends TopicImpl
    */
   private Hashtable soapTable;
 
-  /** Table keeping the replyTo identifiers per request. */
+  /**
+   * Table keeping the administrator's requests.
+   * <p>
+   * <b>Key:</b> request's message identifier<br>
+   * <b>Value:</b> request's message ReplyTo field
+   */
   private Hashtable requestsTable;
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
 
-  /** Identifier of the admin proxy, temporarily kept. */
+  /**
+   * Identifier of the admin proxy, kept for supporting the old
+   * ADMIN protocol.
+   */
   private AgentId adminProxId;
 
+  /**
+   * Identifier of the server's default dead message queue, kept here for
+   * persisting it.
+   */
+  private AgentId defaultDMQId;
+  /** Server's default threshold value, kept here for persisting it. */
+  private Integer defaultThreshold;
 
 
   /**
@@ -114,29 +137,26 @@ public class AdminTopicImpl extends TopicImpl
     requestsTable = new Hashtable();
   }
 
-  /** Returns a string view of this AdminTopicImpl instance. */
+
   public String toString()
   {
     return "AdminTopicImpl:" + destId.toString();
   }
 
-  /** 
-   * (Re) initialiazes the AdminTopicImpl reference, and at the first
-   * initialization, registers this topic to the NameService on server 0.
+
+  /**
+   * Initializes the administration topic by registering it to the
+   * NameService.
    */
-  public void initialize(boolean firstTime)
+  public static void initService(AgentId adminTopicId)
   {
-    ref = this;
-
-    if (! firstTime)
-      return;
-
     AgentId nsId = NameService.getDefault((new Integer(0)).shortValue());
-    Channel.sendTo(nsId, new RegisterCommand(destId,
+    Channel.sendTo(nsId, new RegisterCommand(adminTopicId,
                                              "AdminTopic#initial",
-                                             destId,
+                                             adminTopicId,
                                              false));
   }
+
 
   /**
    * Method used by <code>fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory</code>
@@ -217,8 +237,7 @@ public class AdminTopicImpl extends TopicImpl
     usersTable.put(name, pass);
     proxiesTable.put(name, adminNot.getProxyId());
 
-    readers.add(adminNot.getProxyId());
-    writers.add(adminNot.getProxyId());
+    clients.put(adminNot.getProxyId(), new Integer(READWRITE));
    
     adminProxId = adminNot.getProxyId();
 
@@ -259,8 +278,8 @@ public class AdminTopicImpl extends TopicImpl
    * <code>fr.dyade.aaa.mom.comm.AdminReply</code> notification replying to
    * an administration request.
    * <p>
-   * A reply is sent back if needed.
-   */ 
+   * A reply is sent back to the connected administrator if needed.
+   */  
   protected void doReact(AgentId from, fr.dyade.aaa.mom.comm.AdminReply not)
   {
     String requestId = not.getRequestId();
@@ -402,9 +421,9 @@ public class AdminTopicImpl extends TopicImpl
       throw new AccessException("WRITE right not granted");
 
     // Forwarding messages to the cluster.
-    forwardMessages(not.getMessages());
+    forwardMessages(not);
     // ... and processing the wrapped requests locally:
-    processAdminRequests(not.getMessages());
+    processAdminRequests(not);
   }
 
   /**
@@ -581,24 +600,28 @@ public class AdminTopicImpl extends TopicImpl
         distributeReply(replyTo, reqId, new AdminReply(false, info));
       }
     }
-    super.doProcess(uA);
+    else
+      super.doProcess(uA);
   }
 
 
   /**
-   * Method getting the administration requests from a vector of messages,
-   * and distributing them to the appropriate reactions.
+   * Method getting the administration requests from messages, and
+   * distributing them to the appropriate reactions.
    */ 
-  private void processAdminRequests(Vector messages)
+  private void processAdminRequests(ClientMessages not)
   {
+    Enumeration messages = not.getMessages().elements();
+
+    Message msg;
     String msgId = null;
     AgentId replyTo = null;
+
     AdminRequest request = null;
 
     try {
-      Message msg;
-      for (int i = 0; i < messages.size(); i++) {
-        msg = (Message) messages.get(i);
+      while (messages.hasMoreElements()) {
+        msg = (Message) messages.nextElement();
         msgId = msg.getIdentifier();
         replyTo = AgentId.fromString(msg.getReplyToId());
 
@@ -616,9 +639,7 @@ public class AdminTopicImpl extends TopicImpl
         }
         catch (Exception exc) {}
 
-        if (request instanceof StopServerRequest)
-          doProcess((StopServerRequest) request, replyTo, msgId);
-        else if (request instanceof CreateQueueRequest)
+        if (request instanceof CreateQueueRequest)
           doProcess((CreateQueueRequest) request, replyTo, msgId);
         else if (request instanceof CreateTopicRequest)
           doProcess((CreateTopicRequest) request, replyTo, msgId);
@@ -670,6 +691,8 @@ public class AdminTopicImpl extends TopicImpl
           doProcess((OldAddAdminId) request, replyTo, msgId);
         else if (request instanceof OldDelAdminId)
           doProcess((OldDelAdminId) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetServersIds)
+          doProcess((Monitor_GetServersIds) request, replyTo, msgId);
         else if (request instanceof Monitor_GetDestinations)
           doProcess((Monitor_GetDestinations) request, replyTo, msgId);
         else if (request instanceof Monitor_GetUsers)
@@ -709,6 +732,14 @@ public class AdminTopicImpl extends TopicImpl
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     }
+    // Caught when a target server is invalid.
+    catch (UnknownServerException exc) {
+      String info = "Request [" + request.getClass().getName()
+                    + "], successful [false]: "
+                    + exc.getMessage();
+
+      distributeReply(replyTo, msgId, new AdminReply(false, info));
+    }
     // Caught when a destination identifier is invalid: processed on server0.
     catch (IllegalArgumentException exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
@@ -726,39 +757,20 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /**
-   * Processes a <code>StopServerRequest</code> instance requesting to stop
-   * a given server.
-   */
-  private void doProcess(StopServerRequest request,
-                         AgentId replyTo,
-                         String msgId)
-  {
-    // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
-      return;
-
-    distributeReply(replyTo, msgId, new AdminReply(true, "Server stopped"));
-
-    new Thread() {
-      public void run()
-      {
-        AgentServer.stop();
-      }
-    }.start();
-  }
-
-  /**
    * Processes a <code>CreateQueueRequest</code> instance requesting the
    * creation of a <code>Queue</code> or a <code>DeadMQueue</code>
    * destination.
    *
+   * @exception UnknownServerException  If the target server does not exist.
    * @exception RequestException  If the queue deployement fails.
    */
-  private void doProcess(CreateQueueRequest request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(CreateQueueRequest request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
       
     Queue queue = null;
@@ -802,13 +814,16 @@ public class AdminTopicImpl extends TopicImpl
    * Processes a <code>CreateTopicRequest</code> instance requesting the
    * creation of a <code>Topic</code> destination.
    *
+   * @exception UnknownServerException  If the target server does not exist.
    * @exception RequestException  If the topic deployement failed.
    */
-  private void doProcess(CreateTopicRequest request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(CreateTopicRequest request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     Topic topic = new Topic(destId);
@@ -912,7 +927,6 @@ public class AdminTopicImpl extends TopicImpl
     if (sonId.getTo() != serverId)
       return;
 
-
     Channel.sendTo(sonId, new SetFatherRequest(msgId, fatherId));
 
     if (replyTo != null)
@@ -941,15 +955,18 @@ public class AdminTopicImpl extends TopicImpl
    * Processes a <code>CreateUserRequest</code> instance requesting the
    * creation of a <code>JmsProxy</code> agent for a given user.
    *
+   * @exception UnknownServerException  If the target server does not exist.
    * @exception RequestException  If the user already exists and is a SOAP
    *              user, or if it already exists as a TCP user but with a
    *              different password, or if the proxy deployment failed.
    */
-  private void doProcess(CreateUserRequest request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(CreateUserRequest request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     String name = request.getUserName();
@@ -1007,16 +1024,19 @@ public class AdminTopicImpl extends TopicImpl
    * Processes a <code>CreateSoapUserRequest</code> instance requesting the
    * setting of a new SOAP user on the local SOAP proxy.
    *
+   * @exception UnknownServerException  If the target server does not exist.
    * @exception RequestException  If the user already exists and is a TCP
    *              user, or if it already exists as a SOAP user but with a
    *              different password, or if the SOAP proxy service has not
    *              been started on the target server.
    */
-  private void doProcess(CreateSoapUserRequest request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(CreateSoapUserRequest request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     String name = request.getUserName();
@@ -1190,11 +1210,14 @@ public class AdminTopicImpl extends TopicImpl
   /**
    * Processes a <code>SetDefaultDMQ</code> request requesting a given
    * dead message queue to be set as the default one.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
   private void doProcess(SetDefaultDMQ request, AgentId replyTo, String msgId)
+               throws UnknownServerException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     AgentId dmqId = null;
@@ -1258,12 +1281,16 @@ public class AdminTopicImpl extends TopicImpl
   /**
    * Processes a <code>SetDefaultThreshold</code> request requesting a given
    * threshold value to be set as the default one.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
-  private void doProcess(SetDefaultThreshold request, AgentId replyTo,
+  private void doProcess(SetDefaultThreshold request,
+                         AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
     // If this server is not the target server, doing nothing.
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     DeadMQueueImpl.threshold = new Integer(request.getThreshold());
@@ -1326,12 +1353,16 @@ public class AdminTopicImpl extends TopicImpl
   /**
    * Processes an <code>UnsetDefaultDMQ</code> request requesting to unset
    * the default DMQ of a given server.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
-  private void doProcess(UnsetDefaultDMQ request, AgentId replyTo,
+  private void doProcess(UnsetDefaultDMQ request,
+                         AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId) 
+    if (! checkServerId(request.getServerId()))
       return;
 
     DeadMQueueImpl.id = null;
@@ -1386,12 +1417,16 @@ public class AdminTopicImpl extends TopicImpl
   /**
    * Processes an <code>UnsetDefaultThreshold</code> request requesting
    * to unset the default threshold value.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
-  private void doProcess(UnsetDefaultThreshold request, AgentId replyTo,
+  private void doProcess(UnsetDefaultThreshold request,
+                         AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
     // If this server is not the target server, doing nothing:
-    if (request.getServerId() != serverId) 
+    if (! checkServerId(request.getServerId()))
       return;
 
     DeadMQueueImpl.threshold = null;
@@ -1446,10 +1481,12 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /** Temporary method kept for maintaining the old administration. */
-  private void doProcess(OldAddAdminId request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(OldAddAdminId request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     String name = request.getName();
@@ -1464,10 +1501,12 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /** Temporary method kept for maintaining the old administration. */
-  private void doProcess(OldDelAdminId request, AgentId replyTo,
-                         String msgId) throws RequestException
+  private void doProcess(OldDelAdminId request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException, RequestException
   {
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     String name = request.getName();
@@ -1482,14 +1521,40 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /**
+   * Processes a <code>Monitor_GetServersIds</code> request by sending 
+   * the list of the platform servers' ids.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
+   */
+  private void doProcess(Monitor_GetServersIds request,
+                         AgentId replyTo,
+                         String msgId)
+               throws UnknownServerException
+  {
+    if (! checkServerId(request.getServerId()))
+      return;
+
+    Enumeration enum = AgentServer.getServersIds();
+    Vector ids = new Vector();
+    while (enum.hasMoreElements())
+      ids.add(enum.nextElement());
+
+    Monitor_GetServersIdsRep reply = new Monitor_GetServersIdsRep(ids);
+    distributeReply(replyTo, msgId, reply);
+  }
+
+  /**
    * Processes a <code>Monitor_GetDestinations</code> request by sending 
    * registered destinations.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
   private void doProcess(Monitor_GetDestinations request,
                          AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     Monitor_GetDestinationsRep reply = new Monitor_GetDestinationsRep();
@@ -1508,12 +1573,15 @@ public class AdminTopicImpl extends TopicImpl
   /**
    * Processes a <code>Monitor_GetUsers</code> request by sending the
    * users table.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
   private void doProcess(Monitor_GetUsers request,
                          AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
-    if (request.getServerId() != serverId)
+    if (! checkServerId(request.getServerId()))
       return;
 
     Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
@@ -1591,13 +1659,16 @@ public class AdminTopicImpl extends TopicImpl
    * Processes a <code>Monitor_GetDMQSettings</code> request either by
    * processing it and sending back the default DMQ settings, or by
    * forwarding it to its target destination or proxy.
+   *
+   * @exception UnknownServerException  If the target server does not exist.
    */
   private void doProcess(Monitor_GetDMQSettings request,
                          AgentId replyTo,
                          String msgId)
+               throws UnknownServerException
   {
     
-    if (request.getServerId() != -1 && request.getServerId() == serverId) {
+    if (request.getServerId() != -1 && checkServerId(request.getServerId())) {
       Monitor_GetDMQSettingsRep reply;
       String id = null;
       if (DeadMQueueImpl.id != null)
@@ -1716,7 +1787,32 @@ public class AdminTopicImpl extends TopicImpl
     if (replyTo != null)
       requestsTable.put(msgId, replyTo);
   }
-    
+  
+
+  /** 
+   * Returns <code>true</code> if a given server identification corresponds
+   * to the local server's.
+   *
+   * @param serverId  Server identifier.
+   *
+   * @exception UnknownServerException  If the server does not exist.
+   */
+  private boolean checkServerId(int serverId) throws UnknownServerException
+  {
+    if (serverId == this.serverId)
+      return true;
+
+    Enumeration ids = AgentServer.getServersIds();
+    while (ids.hasMoreElements()) {
+      if (((Short) ids.nextElement()).intValue() == serverId)
+        return false;
+    }
+
+    throw new UnknownServerException("Server "
+                                     + serverId
+                                     + " not part of the"
+                                     + " platform configuration.");
+  }
  
   /** 
    * Actually sends an <code>AdminReply</code> object to an identified
@@ -1748,9 +1844,29 @@ public class AdminTopicImpl extends TopicImpl
       Vector messages = new Vector();
       messages.add(message);
 
-      ClientMessages clientMessages = new ClientMessages(null, messages);
+      ClientMessages clientMessages = new ClientMessages(-1, -1, messages);
       Channel.sendTo(to, clientMessages);
     }
     catch (Exception exc) {}
+  }
+
+
+  /** Serializes an <code>AdminTopicImpl</code> instance. */
+  private void writeObject(java.io.ObjectOutputStream out)
+               throws java.io.IOException
+  {
+    defaultDMQId = DeadMQueueImpl.id;
+    defaultThreshold = DeadMQueueImpl.threshold;
+    out.defaultWriteObject();
+  }
+
+  /** Deserializes an <code>AdminTopicImpl</code> instance. */
+  private void readObject(java.io.ObjectInputStream in)
+               throws java.io.IOException, ClassNotFoundException
+  {
+    in.defaultReadObject();
+    ref = this;
+    DeadMQueueImpl.id = defaultDMQId;
+    DeadMQueueImpl.threshold = defaultThreshold;
   }
 }

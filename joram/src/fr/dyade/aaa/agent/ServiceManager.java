@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -31,6 +28,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
 
 /**
  * Object which manages services.
@@ -40,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.11 2003-03-19 15:16:06 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
@@ -100,7 +98,11 @@ public class ServiceManager implements Serializable {
    *
    * @param desc	service descriptor.
    */
-  static void start (ServiceDesc desc) throws Exception {
+  static void start(ServiceDesc desc) throws Exception {
+    xlogmon.log(BasicLevel.DEBUG,
+                "ServiceManager#" + AgentServer.getServerId() +
+                " start service " + desc);
+
     if (desc.running)
       throw new Exception("Service already running");
     Class ptypes[] = new Class[2];
@@ -114,6 +116,11 @@ public class ServiceManager implements Serializable {
     args[1] = new Boolean(! desc.isInitialized());
     init.invoke(null, args);
     desc.running = true;
+    desc.initialized = true;
+
+    xlogmon.log(BasicLevel.DEBUG,
+                "ServiceManager#" + AgentServer.getServerId() +
+                " service started");
   }
 
   /**
@@ -121,7 +128,7 @@ public class ServiceManager implements Serializable {
    *
    * @param scname	service class name.
    */
-  static void start (String scname) throws Exception {
+  static void start(String scname) throws Exception {
     ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
     if (desc == null)
       throw new NoSuchElementException("Unknown service: " + scname);
@@ -131,7 +138,7 @@ public class ServiceManager implements Serializable {
   /**
    * Starts all defined services.
    */
-  static void start() {
+  static void start() throws Exception {
     // Launch all services defined in A3CML file
     for (Enumeration e = manager.registry.elements();
 	 e.hasMoreElements() ;) {
@@ -143,6 +150,7 @@ public class ServiceManager implements Serializable {
                    "AgentServer#" + AgentServer.getServerId() +
                    ".ServiceManager, cannot start service:" +
                    desc.getClassName(), exc);
+        throw exc;
       }
     }
   }
@@ -176,12 +184,25 @@ public class ServiceManager implements Serializable {
   /**
    * Stops all running services.
    */
-  static void stop () {
+  static void stop() {
+    if ((manager == null) ||
+        (manager.registry == null)) return;
+
     for (Enumeration e = manager.registry.elements();
 	 e.hasMoreElements() ;) {
       ServiceDesc desc = (ServiceDesc) e.nextElement();
       try {
+        if (xlogmon.isLoggable(BasicLevel.DEBUG))
+          xlogmon.log(BasicLevel.DEBUG,
+                      "AgentServer#" + AgentServer.getServerId() +
+                      ".ServiceManager, stops " + desc);
+
 	if (desc.running) stop(desc);
+
+        if (xlogmon.isLoggable(BasicLevel.DEBUG))
+          xlogmon.log(BasicLevel.DEBUG,
+                      "AgentServer#" + AgentServer.getServerId() +
+                      ".ServiceManager, " + desc + " stopped");
       } catch (Throwable exc) {
         xlogmon.log(BasicLevel.WARN,
                    "AgentServer#" + AgentServer.getServerId() +
@@ -199,11 +220,16 @@ public class ServiceManager implements Serializable {
    */
   static void register(String scname, String args) {
     synchronized (manager) {
-      // Temporary fix
-      ServiceDesc desc =  new ServiceDesc(scname, args);
-      if (manager.registry.put(scname, desc) != null)
-	// It is already initialized
-	desc.setInitialized(true);
+      ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
+      xlogmon.log(BasicLevel.DEBUG,
+                  "AgentServer#" + AgentServer.getServerId() +
+                  ".ServiceManager.register " + scname + " -> " + desc);
+      if (desc == null) {
+        desc =  new ServiceDesc(scname, args);
+        manager.registry.put(scname, desc);
+      } else {
+        desc.args = args;
+      }
     }
   }
 

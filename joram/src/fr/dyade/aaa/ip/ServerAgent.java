@@ -1,5 +1,21 @@
 /*
  * Copyright (C) 2001 - SCALAGENT
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
  */
 package fr.dyade.aaa.ip;
 
@@ -20,8 +36,14 @@ import fr.dyade.aaa.agent.*;
  * port number.<p>
  */
 public abstract class ServerAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerAgent.java,v 1.3 2003-04-23 09:25:21 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerAgent.java,v 1.4 2003-06-23 13:38:18 fmaistre Exp $"; 
+  
+  /**
+   * This boolean is used to prevent error messages due to stopping the
+   * multiples monitors.
+   */
+  volatile boolean stopping = false;
 
   /** The TCP listen port */
   protected int port = -1;
@@ -98,6 +120,7 @@ public abstract class ServerAgent extends Agent {
     for (int i=0; i<monitors.length; i++) {
       monitors[i] = new Monitor(name + ".Monitor#" + i, i, logmon);
       monitors[i].setDaemon(true);
+      monitors[i].setThreadGroup(AgentServer.getThreadGroup());
     }
 
     start();
@@ -118,7 +141,7 @@ public abstract class ServerAgent extends Agent {
    * @exception Throwable
    *	unspecialized exception
    */
-  protected final void finalize() throws Throwable {
+  public void agentFinalize() {
     stop();
   }
 
@@ -140,9 +163,11 @@ public abstract class ServerAgent extends Agent {
   }
 
   public final void stop() {
+    stopping = true;
     for (int i=0; i<monitors.length; i++) {
       if (monitors[i] != null) monitors[i].stop();
     }
+    stopping = false;
   }
 
   /**
@@ -228,7 +253,9 @@ public abstract class ServerAgent extends Agent {
             socket = listen.accept();
 	    canStop = false;
 	  } catch (IOException exc) {
-	    if (running)
+	    if (stopping)
+              running = false;
+            else
               this.logmon.log(BasicLevel.ERROR,
                               this.getName() + ", error during accept", exc);
 	  }
@@ -267,6 +294,7 @@ public abstract class ServerAgent extends Agent {
     }
 
     protected void close() {
+      if (listen == null) return;
       try {
 	listen.close();
       } catch (Exception exc) {}

@@ -3,39 +3,43 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
 
 /**
  * The <code>DestinationImpl</code> class implements the common behaviour of
@@ -45,25 +49,20 @@ public abstract class DestinationImpl implements java.io.Serializable
 {
   /** Identifier of the destination's administrator. */
   private AgentId adminId;
-
+  /** <code>true</code> if the READ access is granted to everybody. */
+  private boolean freeReading = false;
+  /** <code>true</code> if the WRITE access is granted to everybody. */
+  private boolean freeWriting = false;
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
    */
   private boolean deletable = false;
 
-  /** Identifier of the agent hosting this DestinationImpl. */
+  /** Identifier of the agent hosting the destination. */
   protected AgentId destId;
-
-  /** <code>true</code> if the READ access is granted to everybody. */
-  protected boolean freeReading = false;
-  /** <code>true</code> if the WRITE access is granted to everybody. */
-  protected boolean freeWriting = false;
-  /** Vector of the destination readers ids. */
-  protected Vector readers;
-  /** Vector of the destination writers ids. */
-  protected Vector writers;
-
+  /** Table of the destination readers and writers. */
+  protected Hashtable clients;
   /**
    * Identifier of the dead message queue this destination must send its
    * dead messages to, if any.
@@ -74,33 +73,34 @@ public abstract class DestinationImpl implements java.io.Serializable
   public static int READ = 1;
   /** WRITE access value. */
   public static int WRITE = 2;
+  /** READ and WRITE access value. */
+  public static int READWRITE = 3;
 
 
   /**
    * Constructs a <code>DestinationImpl</code>.
    *
-   * @param destId  Identifier of the agent hosting the DestinationImpl.
-   * @param adminId  Identifier of the administrator of this destination.
+   * @param destId  Identifier of the agent hosting the destination.
+   * @param adminId  Identifier of the administrator of the destination.
    */ 
-  public DestinationImpl(AgentId destId, AgentId adminId) 
+  public DestinationImpl(AgentId destId, AgentId adminId)
   {
     this.destId = destId;
     this.adminId = adminId;
-
-    readers = new Vector();
-    writers = new Vector();
+    clients = new Hashtable();
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  
+
   /** Returns <code>true</code> if the destination might be deleted. */
   public boolean canBeDeleted()
   {
     return deletable;
   }
 
+  
   /**
    * Distributes the received notifications to the appropriate reactions.
    *
@@ -156,6 +156,7 @@ public abstract class DestinationImpl implements java.io.Serializable
 
     AgentId user = not.getClient();
     int right = not.getRight();
+    String info;
 
     try {
       // Setting "all" users rights:
@@ -164,10 +165,8 @@ public abstract class DestinationImpl implements java.io.Serializable
           freeReading = true;
         else if (right == WRITE)
           freeWriting = true;
-        else if (right == -READ) {
+        else if (right == -READ)
           freeReading = false;
-          specialProcess(not);
-        }
         else if (right == -WRITE)
           freeWriting = false;
         else
@@ -175,47 +174,56 @@ public abstract class DestinationImpl implements java.io.Serializable
       }
       // Setting a specific user right:
       else {
+        Integer currentRight = (Integer) clients.get(user);
         if (right == READ) {
-          if (! readers.contains(user))
-            readers.add(user);
+          if (currentRight != null && currentRight.intValue() == WRITE)
+            clients.put(user, new Integer(READWRITE));
+          else
+            clients.put(user, new Integer(READ));
         }
         else if (right == WRITE) {
-          if (! writers.contains(user))
-            writers.add(user);
+          if (currentRight != null && currentRight.intValue() == READ)
+            clients.put(user, new Integer(READWRITE));
+          else
+            clients.put(user, new Integer(WRITE));
         }
         else if (right == -READ) {
-          readers.remove(user);
-          specialProcess(not);
+          if (currentRight != null && currentRight.intValue() == READWRITE)
+            clients.put(user, new Integer(WRITE));
+          else if (currentRight != null && currentRight.intValue() == READ)
+            clients.remove(user);
         }
-        else if (right == -WRITE)
-          writers.remove(user);
+        else if (right == -WRITE) {
+          if (currentRight != null && currentRight.intValue() == READWRITE)
+            clients.put(user, new Integer(READ));
+          else if (currentRight != null && currentRight.intValue() == WRITE)
+            clients.remove(user);
+        }
         else
           throw new RequestException("Invalid right value: " + right);
       }
-      String info = "Request ["
-                    + not.getClass().getName()
-                    + "], sent to Destination ["
-                    + destId
-                    + "], successful [true]: user ["
-                    + user
-                    + "] set with right [" + right +"]";
+      specialProcess(not);
+      info = "Request ["
+             + not.getClass().getName()
+             + "], sent to Destination ["
+             + destId
+             + "], successful [true]: user ["
+             + user
+             + "] set with right [" + right +"]";
       Channel.sendTo(from, new AdminReply(not, true, info)); 
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     }
     catch (RequestException exc) {
-      String info = "Request ["
-                    + not.getClass().getName()
-                    + "], sent to Destination ["
-                    + destId
-                    + "], successful [false]: "
-                    + exc.getMessage();
+      info = "Request ["
+             + not.getClass().getName()
+             + "], sent to Destination ["
+             + destId
+             + "], successful [false]: "
+             + exc.getMessage();
       Channel.sendTo(from, new AdminReply(not, false, info));
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     }
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -241,7 +249,7 @@ public abstract class DestinationImpl implements java.io.Serializable
                   + dmqId
                   + "] set" ;
     Channel.sendTo(from, new AdminReply(not, true, info));
-
+    
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
@@ -258,6 +266,16 @@ public abstract class DestinationImpl implements java.io.Serializable
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
+    AgentId key;
+    int right;
+    Vector readers = new Vector();
+    for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
+      key = (AgentId) keys.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+
+      if (right == READ || right == READWRITE)
+        readers.add(key);
+    }
     Channel.sendTo(from, new Monit_GetUsersRep(not, readers));
   }
 
@@ -273,6 +291,16 @@ public abstract class DestinationImpl implements java.io.Serializable
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
+    AgentId key;
+    int right;
+    Vector writers = new Vector();
+    for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
+      key = (AgentId) keys.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+
+      if (right == WRITE || right == READWRITE)
+        writers.add(key);
+    }
     Channel.sendTo(from, new Monit_GetUsersRep(not, writers));
   }
 
@@ -325,25 +353,20 @@ public abstract class DestinationImpl implements java.io.Serializable
   protected void doReact(AgentId from, ClientMessages not)
                  throws AccessException
   {
-    Vector messages = not.getMessages();
-
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
     if (! isWriter(from)) {
-      for (int i = 0; i < messages.size(); i++) {
-        try {
-          ((Message) messages.get(i)).notWritable = true;
-        }
-        // Invalid message class: removing it.
-        catch (ClassCastException cE) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR, "Invalid message"
-                                          + " class: " + cE);
-          messages.remove(i);
-          i--;
-        }
+      ClientMessages deadM;
+      deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
+
+      Message msg;
+      for (Enumeration msgs = not.getMessages().elements();
+           msgs.hasMoreElements();) {
+        msg = (Message) msgs.nextElement();
+        msg.notWriteable = true;
+        deadM.addMessage(msg);
       }
-      sendToDMQ(messages, not.getDMQId());
+      sendToDMQ(deadM, not.getDMQId());
       throw new AccessException("WRITE right not granted");
     }
     specialProcess(not);
@@ -353,7 +376,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    * Method implementing the reaction to an <code>UnknownAgent</code>
    * notification.
    * <p>
-   * If the unknown agent is a DMQ, its identifier is set to null. If it
+   * If the unknown agent is the DMQ, its identifier is set to null. If it
    * is a client of the destination, it is removed. Specific processing is
    * also done in subclasses.
    */
@@ -361,17 +384,15 @@ public abstract class DestinationImpl implements java.io.Serializable
   {
     if (not.agent.equals(adminId)) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR, "Admin of dest "
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "Admin of dest "
                                           + destId
                                           + " does not exist anymore.");
     }
     else if (not.agent.equals(dmqId))
       dmqId = null;
-    else if (not.agent.equals(DeadMQueueImpl.id))
-      DeadMQueueImpl.id = null;
     else {
-      readers.remove(not.agent);
-      writers.remove(not.agent);
+      clients.remove(from);
       specialProcess(not);
     }
   }
@@ -404,7 +425,15 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected boolean isReader(AgentId client)
   {
-    return isAdministrator(client) || freeReading || readers.contains(client);
+    if (isAdministrator(client) || freeReading)
+      return true;
+
+    Integer clientRight = (Integer) clients.get(client);
+    if (clientRight == null)
+      return false;
+    else
+      return clientRight.intValue() == READ
+             || clientRight.intValue() == READWRITE;
   }
 
   /**
@@ -414,7 +443,15 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected boolean isWriter(AgentId client)
   {
-    return isAdministrator(client) || freeWriting || writers.contains(client);
+    if (isAdministrator(client) || freeWriting)
+      return true;
+
+    Integer clientRight = (Integer) clients.get(client);
+    if (clientRight == null)
+      return false;
+    else
+      return clientRight.intValue() == WRITE
+             || clientRight.intValue() == READWRITE;
   }
 
   /**
@@ -430,22 +467,21 @@ public abstract class DestinationImpl implements java.io.Serializable
   /**
    * Sends dead messages to the appropriate dead message queue.
    *
-   * @param deadMessages  The vector of dead messages.
+   * @param deadMessages  The dead messages.
    * @param dmqId  Identifier of the dead message queue to use,
    *          <code>null</code> if not provided.
    */
-  protected void sendToDMQ(Vector deadMessages, AgentId dmqId)
+  protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId)
   {
     // Sending the dead messages to the provided DMQ:
     if (dmqId != null)
-      Channel.sendTo(dmqId, new ClientMessages(null, deadMessages));
+      Channel.sendTo(dmqId, deadMessages);
     // Sending the dead messages to the destination's DMQ:
     else if (this.dmqId != null)
-      Channel.sendTo(this.dmqId, new ClientMessages(null, deadMessages));
+      Channel.sendTo(this.dmqId, deadMessages);
     // Sending the dead messages to the server's default DMQ:
     else if (DeadMQueueImpl.id != null) {
-      Channel.sendTo(DeadMQueueImpl.id,
-                     new ClientMessages(null, deadMessages));
+      Channel.sendTo(DeadMQueueImpl.id, deadMessages);
     }
   }
 

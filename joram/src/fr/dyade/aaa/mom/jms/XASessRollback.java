@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -37,19 +33,9 @@ public class XASessRollback extends AbstractJmsRequest
 {
   /** Identifier of the resource and the rolling back transaction. */
   private String id;
-  /**
-   * Table holding the identifiers of the messages to deny on queues.
-   * <p>
-   * <b>Key: </b> queue name<br>
-   * <b>Object: </b> vector of messages identifiers
-   */
+  /** Table holding the identifiers of the messages to deny on queues. */
   private Hashtable qDenyings = null;
-  /**
-   * Table holding the identifiers of the messages to deny on subscriptions.
-   * <p>
-   * <b>Key: </b> subscription name<br>
-   * <b>Object: </b> vector of messages identifiers
-   */
+  /** Table holding the identifiers of the messages to deny on subs. */
   private Hashtable subDenyings = null;
 
 
@@ -67,30 +53,16 @@ public class XASessRollback extends AbstractJmsRequest
   /**
    * Constructs an <code>XASessRollback</code> instance.
    */
-  public XASessRollback()
-  {}
-
+  public XASessRollback() {}
  
-  /** Sets the identifier. */
-  public void setId(String id)
-  {
-    this.id = id;
-  }
- 
-  /** Returns the id of the resource and the rolling back transaction. */
-  public String getId()
-  {
-    return id;
-  }
-
   /**
-   * Adds a vector of message identifiers in one of the tables.
+   * Adds a vector of denied messages' identifiers.
    *
    * @param target  Name of the queue or of the subscription where denying the
    *          messages.
    * @param ids  Vector of message identifiers.
-   * @param queueMode  <code>true</code> if the messages are to be denied on a
-   *          queue.
+   * @param queueMode  <code>true</code> if the messages have to be denied on
+   *          a queue.
    */
   public void add(String target, Vector ids, boolean queueMode)
   {
@@ -106,56 +78,43 @@ public class XASessRollback extends AbstractJmsRequest
     }
   }
 
-  /**
-   * Returns <code>true</code> if the request still contains data for queues.
-   */
-  public boolean hasMoreQueues()
+  /** Sets the identifier. */
+  public void setId(String id)
   {
-    if (qDenyings == null)
-      return false;
-    return (qDenyings.keys()).hasMoreElements();
-  }
-
-  /** Returns the next queue name. */
-  public String nextQueue()
-  {
-    if (qDenyings == null)
-      return null;
-    return (String) (qDenyings.keys()).nextElement();
+    this.id = id;
   }
   
+  
+  /** Returns the id of the resource and the rolling back transaction. */
+  public String getId()
+  {
+    return id;
+  }
+
+  /** Returns the queues enumeration. */
+  public Enumeration getQueues()
+  {
+    if (qDenyings == null)
+      return (new Hashtable()).keys();
+    return qDenyings.keys();
+  }
+
   /** Returns the vector of msg identifiers for a given queue. */
   public Vector getQueueIds(String queue)
   {
     if (qDenyings == null)
       return null;
-    return (Vector) qDenyings.remove(queue);
+    return (Vector) qDenyings.get(queue);
   }
 
-  /** Returns <code>true</code> if the request still contains data for subs. */
-  public boolean hasMoreSubs()
+  /** Returns the subscriptions enumeration. */
+  public Enumeration getSubs()
   {
     if (subDenyings == null)
-      return false;
-    return (subDenyings.keys()).hasMoreElements();
-  }
-
-  /** Returns the next subscription name. */
-  public String nextSub()
-  {
-    if (subDenyings == null)
-      return null;
-    return (String) (subDenyings.keys()).nextElement();
+      return (new Hashtable()).keys();
+    return subDenyings.keys();
   }
   
-  /** Returns the vector of msg identifiers for a given subscription. */
-  public Vector getSubIds(String sub)
-  {
-    if (subDenyings == null)
-      return null;
-    return (Vector) subDenyings.remove(sub);
-  }
-
   /** Sets the queue denyings table. */
   public void setQDenyings(Hashtable qDenyings)
   {
@@ -168,15 +127,32 @@ public class XASessRollback extends AbstractJmsRequest
     this.subDenyings = subDenyings;
   }
 
-  /** Returns the queue denyings table. */
-  public Hashtable getQDenyings()
+  /** Returns the vector of msg identifiers for a given subscription. */
+  public Vector getSubIds(String sub)
   {
-    return qDenyings;
+    if (subDenyings == null)
+      return null;
+    return (Vector) subDenyings.get(sub);
   }
- 
-  /** Returns the sub denyings table. */
-  public Hashtable getSubDenyings()
-  {
-    return subDenyings;
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (id != null)
+      h.put("id",id);
+    if (qDenyings != null)
+      h.put("qDenyings",qDenyings);
+    if (subDenyings != null)
+      h.put("subDenyings",subDenyings);
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    XASessRollback req = new XASessRollback();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setId((String) h.get("id"));
+    req.setQDenyings((Hashtable) h.get("qDenyings"));
+    req.setSubDenyings((Hashtable) h.get("subDenyings"));
+    return req;
   }
 }

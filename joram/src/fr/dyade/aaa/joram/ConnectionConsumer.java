@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -144,7 +140,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
     // Sending a listener request:
     currentReq = new ConsumerSetListRequest(targetName, selector, queueMode);
     currentReq.setRequestId(cnx.nextRequestId());
-    cnx.requestsTable.put(currentReq.getRequestId(), this);
+    cnx.requestsTable.put(currentReq.getKey(), this);
     cnx.asyncRequest(currentReq);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -203,7 +199,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
    */
   public void close() throws JMSException
   {
-    cnx.requestsTable.remove(currentReq.getRequestId());
+    cnx.requestsTable.remove(currentReq.getKey());
     ccDaemon.stop();
 
     // If the consumer is a subscriber, managing the subscription closing: 
@@ -279,16 +275,18 @@ class CCDaemon extends fr.dyade.aaa.util.Daemon
             
             // If the consumer is a queue consumer, sending a new request:
             if (queueMode) {
-              cnx.requestsTable.remove(currentReq.getRequestId());
+              cnx.requestsTable.remove(currentReq.getKey());
               currentReq = new ConsumerSetListRequest(targetName, selector,
                                                       queueMode);
               currentReq.setRequestId(cnx.nextRequestId());
-              cnx.requestsTable.put(currentReq.getRequestId(), cc);
+              cnx.requestsTable.put(currentReq.getKey(), cc);
               cnx.asyncRequest(currentReq);
             }
 
             reply = (ConsumerMessages) repliesIn.pop();
-            deliveries.addAll(reply.getMessages());
+            Vector msgs = reply.getMessages();
+            for (int i = 0; i < msgs.size(); i++)
+              deliveries.add((fr.dyade.aaa.mom.messages.Message) msgs.get(i));
 
             while (! deliveries.isEmpty()) {
               while (counter <= maxMessages && ! deliveries.isEmpty()) {

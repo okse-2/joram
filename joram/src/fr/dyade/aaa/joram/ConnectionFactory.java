@@ -3,29 +3,28 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package fr.dyade.aaa.joram;
+
+import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.jms.JMSException;
 import javax.naming.*;
@@ -58,6 +57,12 @@ public abstract class ConnectionFactory
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
+  /**
+   * Constructs an empty <code>ConnectionFactory</code>.
+   */
+  public ConnectionFactory()
+  {}
+
 
   /** Returns a string view of the connection factory. */
   public String toString()
@@ -88,14 +93,14 @@ public abstract class ConnectionFactory
     return createConnection("anonymous", "anonymous");
   }
 
-  /**
-   * Returns the factory's configuration parameters.
-   */
+
+  /** Returns the factory's configuration parameters. */
   public FactoryParameters getParameters()
   {
     return params;
   } 
 
+  
   /** Sets the naming reference of a connection factory. */
   public Reference getReference() throws NamingException
   {
@@ -110,5 +115,31 @@ public abstract class ConnectionFactory
       new StringRefAddr("cFactory.txT",
                         (new Integer(params.txPendingTimer)).toString()));
     return ref;
+  }
+
+
+  /**
+   * Codes a <code>ConnectionFactory</code> as a Hashtable for travelling
+   * through the SOAP protocol.
+   */
+  public Hashtable code() {
+    Hashtable h = super.code();
+    h.put("host",params.getHost());
+    h.put("port",new Integer(params.getPort()));
+    h.put("connectingTimer",new Integer(params.connectingTimer));
+    h.put("txPendingTimer",new Integer(params.txPendingTimer));
+    h.put("soapCnxPendingTimer",new Integer(params.soapCnxPendingTimer));
+    return h;
+  }
+
+  /**
+   * Implements the <code>decode</code> abstract method defined in the
+   * <code>fr.dyade.aaa.jndi2.soap.SoapObjectItf</code> interface.
+   * <p>
+   * Actual implementation of the method is located in the 
+   * tcp and soap sub classes.
+   */
+  public Object decode(Hashtable h) {
+    return null;
   }
 }

@@ -3,45 +3,47 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+
 
 /**
- * A <code>Topic</code> agent is an agent which behaviour is provided
- * by a <code>TopicImpl</code> instance.
+ * A <code>Topic</code> agent is an agent hosting a MOM topic, and which
+ * behaviour is provided by a <code>TopicImpl</code> instance.
  *
  * @see TopicImpl
  */
 public class Topic extends Agent
 {
   /**
-   * The reference to the <code>TopicImpl</code> object providing this
-   * agent with its behaviour.
+   * The reference of the <code>TopicImpl</code> instance providing this
+   * agent with its topic behaviour.
    */
   protected TopicImpl topicImpl;
+
 
   /**
    * Constructs a <code>Topic</code> agent. 
@@ -49,13 +51,13 @@ public class Topic extends Agent
    * @param adminId  Identifier of the agent which will be the administrator
    *          of the topic.
    */ 
-  public Topic(AgentId adminId) 
+  public Topic(AgentId adminId)
   {
-    topicImpl = new TopicImpl(this.getId(), adminId);
+    topicImpl = new TopicImpl(getId(), adminId);
   }
 
   /**
-   * Empty constructor used by subclasses.
+   * Constructs a <code>Topic</code> agent.
    *
    * @param fixed  <code>true</code> to pine agent in memory.
    */
@@ -68,18 +70,15 @@ public class Topic extends Agent
   /**
    * Reactions to notifications are implemented in the
    * <code>TopicImpl</code> class.
-   * <p>
-   * A <code>DeleteNot</code> notification is finally processed at the
-   * <code>Agent</code> level when its processing went successful in
-   * the <code>DestinationImpl</code> instance.
-   *
-   * @exception Exception  See superclass.
    */
   public void react(AgentId from, Notification not) throws Exception
   {
     try {
       topicImpl.react(from, not);
 
+      // A DeleteNot notification is finally processed at the
+      // Agent level when its processing went successful in
+      // the DestinationImpl instance.
       if (not instanceof DeleteNot && topicImpl.canBeDeleted()) 
         super.react(from, not);
     }

@@ -3,31 +3,27 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.jms;
 
-import java.util.Vector;
+import java.util.*;
 
 /**
  * An <code>XASessPrepare</code> instance is used by an <code>XASession</code>
@@ -52,17 +48,26 @@ public class XASessPrepare extends AbstractJmsRequest
    */
   public XASessPrepare(String id, Vector sendings, Vector acks)
   {
-    super(null);
+    super();
     this.id = id;
     this.sendings = sendings;
     this.acks = acks;
   }
 
+  public XASessPrepare() {
+    super(null);
+    sendings = new Vector();
+    acks = new Vector();
+  }
 
   /** Returns the identifier of the resource and the commiting transaction. */
   public String getId()
   {
     return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   /** Returns the vector of <code>ProducerMessages</code> instances. */
@@ -75,5 +80,62 @@ public class XASessPrepare extends AbstractJmsRequest
   public Vector getAcks()
   {
     return acks;
+  }
+
+  public void addProducerMessages(ProducerMessages pm) {
+    sendings.addElement(pm);
+  }
+
+  public void addSessAckRequest(SessAckRequest sar) {
+    acks.addElement(sar);
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (id != null)
+      h.put("id",id);
+    int size = sendings.size();
+    if (size > 0) {
+      Hashtable [] arrayPM = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        ProducerMessages pm = (ProducerMessages) sendings.elementAt(0);
+        sendings.removeElementAt(0);
+        arrayPM[i] = pm.soapCode();
+      }
+      if (arrayPM != null)
+        h.put("arrayPM",arrayPM);
+    }
+    size = acks.size();
+    if (size > 0) {
+      Hashtable [] arraySAR = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        SessAckRequest sar = (SessAckRequest) acks.elementAt(0);
+        acks.removeElementAt(0);
+        arraySAR[i] = sar.soapCode();
+      }
+      if (arraySAR != null)
+        h.put("arraySAR",arraySAR);
+    }
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    XASessPrepare req = new XASessPrepare();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setId((String) h.get("id"));
+    Map [] arrayPM = (Map []) h.get("arrayPM");
+    if (arrayPM != null) {
+      for (int i = 0; i<arrayPM.length; i++)
+        req.addProducerMessages(
+          (ProducerMessages) ProducerMessages.soapDecode((Hashtable) arrayPM[i]));
+    }
+    Map [] arraySAR = (Map []) h.get("arraySAR");
+    if (arraySAR != null) {
+      for (int i = 0; i<arraySAR.length; i++)
+        req.addSessAckRequest(
+          (SessAckRequest) SessAckRequest.soapDecode((Hashtable)arraySAR[i]));
+    }
+    return req;
   }
 }

@@ -3,27 +3,23 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package fr.dyade.aaa.mom.proxies.soap;
 
@@ -41,7 +37,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import java.util.Hashtable;
 import java.util.Vector;
-
+import java.lang.reflect.Method;
 
 /**
  * A <code>SoapProxy</code> is a SOAP proxy for JMS clients connecting to the
@@ -73,20 +69,10 @@ public class SoapProxy extends Agent
   /** Initial SOAP administrator's password of the local server. */
   private String initialAdminPass;
 
-  /**
-   * Table holding the alive connections.
-   * <p>
-   * <b>Key:</b> connection identifier<br>
-   * <b>Object:</b> <code>SoapCnx</code> instance
-   */
+  /** Table holding the alive connections. */
   private Hashtable cnxTable = new Hashtable();
 
-  /**
-   * Table holding the queues of replies destinated to the proxy's clients.
-   * <p>
-   * <b>Key:</b> connection identifier<br>
-   * <b>Object:</b> queue of replies
-   */
+  /** Table holding the queues of replies destinated to the proxy's clients. */
   private Hashtable repliesTable = new Hashtable();
 
   /** Connections counter. */
@@ -131,7 +117,7 @@ public class SoapProxy extends Agent
     // SoapProxy is pinned in memory...
     super(true);
 
-    proxyImpl = new ProxyImpl(this);
+    proxyImpl = new ProxyImpl();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
@@ -150,27 +136,24 @@ public class SoapProxy extends Agent
     initialAdminName = name;
     initialAdminPass = pass;
 
-    proxyImpl = new ProxyImpl(this, name, pass);
+    proxyImpl = new ProxyImpl(name, pass);
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
   }
 
 
-  /** Returns a string view of this JMS proxy. */
   public String toString()
   {
     return "SoapProxy:" + this.getId();
   }
 
 
-  /**
-   * Specializes this <code>Agent</code> method called when (re)deploying 
-   * the proxy.
-   */
+  /** (Re)initializes the agent when (re)loading. */
   public void initialize(boolean firstTime) throws Exception
   {
     super.initialize(firstTime);
+    proxyImpl.initialize(firstTime, this);
     
     ref = this;
 
@@ -181,9 +164,6 @@ public class SoapProxy extends Agent
 
     cnxTable.clear();
     repliesTable.clear();
-
-    // Reinitializing the proxy:
-    proxyImpl.reinitialize(this);
   }
 
 
@@ -202,7 +182,8 @@ public class SoapProxy extends Agent
   /**
    * Sends an <code>AbstractJmsReply</code> to a given client.
    *
-   * @param id  Identifies the connection to send the reply through.
+   * @param id  Identifies the client context within which the reply should
+   *          be sent.
    * @param reply  The reply to send to the client.
    */
   public void sendToClient(int id, AbstractJmsReply reply)
@@ -220,14 +201,6 @@ public class SoapProxy extends Agent
   /**
    * Overrides the <code>Agent</code> class <code>react</code> method for
    * providing the SOAP client proxy with its specific behaviour.
-   * <p>
-   * A SOAP proxy specifically reacts to the following notification:
-   * <ul>
-   * <li><code>DeleteNot</code></li>
-   * </ul>
-   *
-   * @exception UnknownNotificationException  If the proxy receives an
-   *              unexpected notification.
    */ 
   public void react(AgentId from, Notification not) throws Exception
   {
@@ -271,76 +244,62 @@ public class SoapProxy extends Agent
   }
 
   /**
-   * Decodes a vector containing either an <code>AbstractJmsRequest</code>
-   * or coded messages and passes the decoded request to the
-   * <code>ProxyImpl</code> for processing.
+   * Decodes a Hashtable containing an <code>AbstractJmsRequest</code>
+   * and passes the decoded request to the <code>ProxyImpl</code> for
+   * processing.
    *
    * @exception Exception  If the connection has been closed.
    */
-  void serviceReact(int cnxId, Vector vec) throws Exception
+  void serviceReact(int cnxId, Hashtable h) throws Exception
   {
     lockConnection(cnxId);
-
-    AbstractJmsRequest request = null;
-
-    if (vec.get(0) instanceof AbstractJmsRequest)
-      request = (AbstractJmsRequest) vec.remove(0);
-    else
-      request = ProducerMessages.soapDecode(vec);
-
+      
+    String className = (String) h.get("className");
+    Class clazz = Class.forName(className);
+    Class [] classParam = { new Hashtable().getClass() };
+    Method m = clazz.getMethod("soapDecode",classParam);
+    AbstractJmsRequest request = 
+      (AbstractJmsRequest) m.invoke(null,new Object[]{h});
+    
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
                               + " passes request " + request + " with id "
                               + request.getRequestId() + " to proxy's cnx "
                               + cnxId);
-
+    
     if (request instanceof CnxCloseRequest) {
       serviceDoReact(cnxId, (CnxCloseRequest) request);
       return;
     }
-
+    
     proxyImpl.reactToClientRequest(cnxId, request);
-
     releaseConnection(cnxId);
   }
 
   /**
-   * Returns a vector containing a MOM reply destinated to a given client.
+   * Returns a hashtable containing a MOM reply destinated to a given client.
    *
    * @exception Exception  If the connection has been closed.
    */
-  Vector getReply(int cnxId) throws Exception
+  Hashtable getReply(int cnxId) throws Exception
   {
     lockConnection(cnxId);
+    
+    Queue repliesQueue = getRepliesQueue(cnxId);
+    AbstractJmsReply reply = (AbstractJmsReply) repliesQueue.get();
+    repliesQueue.pop();
 
-    Vector vec = null;
-    try {
-      Queue repliesQueue = getRepliesQueue(cnxId);
-      AbstractJmsReply reply = (AbstractJmsReply) repliesQueue.get();
-      repliesQueue.pop();
-
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
-                                + " returns reply " + reply + " with id "
-                                + reply.getCorrelationId() + " to cnx "
-                                + cnxId);
-
-      if (reply instanceof ConsumerMessages)
-        vec = ((ConsumerMessages) reply).soapCode();
-      else if (reply instanceof QBrowseReply)
-        vec = ((QBrowseReply) reply).soapCode();
-      else if (reply instanceof MomExceptionReply)
-        vec = ((MomExceptionReply) reply).soapCode();
-      else {
-        vec = new Vector();
-        vec.add(reply);
-      }
-    }
-    catch (Exception exc) {throw exc;}
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
+                              + " returns reply " + reply + " with id "
+                              + reply.getCorrelationId() + " to cnx "
+                              + cnxId);
+      
+    Hashtable h = reply.soapCode();
 
     releaseConnection(cnxId);
 
-    return vec;
+    return h;
   }
 
   /**
@@ -390,7 +349,6 @@ public class SoapProxy extends Agent
   private Queue getRepliesQueue(int cnxId)
   {
     Integer key = new Integer(cnxId);
-
     Queue q = (Queue) repliesTable.get(key);
 
     if (q != null)
@@ -487,7 +445,7 @@ public class SoapProxy extends Agent
       Queue repliesQueue = getRepliesQueue(id);
       ProxyException exc = new ProxyException("Connection " + id
                                               + " is closed.");
-      repliesQueue.push(new MomExceptionReply(null, exc));
+      repliesQueue.push(new MomExceptionReply(exc));
       repliesTable.remove(new Integer(id));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))

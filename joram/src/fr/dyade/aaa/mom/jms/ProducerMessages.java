@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -28,7 +24,9 @@
 package fr.dyade.aaa.mom.jms;
 
 import fr.dyade.aaa.mom.messages.Message;
-
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Enumeration;
 import java.util.Vector;
 
 /**
@@ -37,8 +35,11 @@ import java.util.Vector;
  */
 public class ProducerMessages extends AbstractJmsRequest
 {
-  /** The produced messages. */
-  private Vector messages;
+  /** The wrapped message. */
+  private Message message = null;
+  /** The wrapped messages. */
+  private Vector messages = null;
+
 
   /**
    * Constructs a <code>ProducerMessages</code> instance.
@@ -51,65 +52,91 @@ public class ProducerMessages extends AbstractJmsRequest
     messages = new Vector();
   }
 
+  /**
+   * Constructs a <code>ProducerMessages</code> instance carrying a single
+   * message.
+   *
+   * @param dest  Name of the destination the messages are sent to.
+   * @param msg  Message to carry.
+   */
+  public ProducerMessages(String dest, Message msg)
+  {
+    super(dest);
+    message = msg;
+  }
+
+
   /** Adds a message to deliver. */
   public void addMessage(Message msg)
   {
-    messages.add(msg);
+    messages.addElement(msg);
+  }
+
+  /** set a message to deliver. */
+  public void setMessage(Message msg) {
+    message = msg;
   }
 
   /** Adds messages to deliver. */
   public void addMessages(Vector msgs)
   {
-    messages.addAll(msgs);
+    for (Enumeration e = msgs.elements(); e.hasMoreElements(); )
+      messages.addElement(e.nextElement());
   }
 
-  /** Returns the vector of sent messages. */
+  /** Returns the produced messages. */
   public Vector getMessages()
   {
+    if (message != null) {
+      Vector vec = new Vector();
+      vec.add(message);
+      return vec;
+    }
     return messages;
   }
-
-
+ 
+ 
   /**
-   * Transforms this request into a vector of primitive values that can
+   * Transforms this request into a hashtable of primitive values that can
    * be vehiculated through the SOAP protocol.
    */
-  public Vector soapCode()
-  {
-    Vector vec = new Vector();
-
-    // Coding the request fields: 
-    vec.add(getTarget());
-    vec.add(getRequestId());
-
-    // Coding and adding the messages into a vector:
-    Vector msgs = new Vector();
-    while (! messages.isEmpty())
-      msgs.add(((Message) messages.remove(0)).soapCode());
-
-    vec.add(msgs);
-
-    return vec;
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    // Coding and adding the messages into a array:
+    int size = 0;
+    if (messages != null)
+      size = messages.size();
+    if (size > 0) {
+      Hashtable [] arrayMsg = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        Message msg = (Message) messages.elementAt(0);
+        messages.removeElementAt(0);
+        arrayMsg[i] = msg.soapCode();
+      }
+      if (arrayMsg != null)
+        h.put("arrayMsg",arrayMsg);
+    } else {
+      if (message != null) {
+        h.put("singleMsg",message.soapCode());
+      }
+    }
+    return h;
   }
 
   /** 
-   * Transforms a vector of primitive values into a
+   * Transforms a hastable of primitive values into a
    * <code>ProducerMessages</code> request.
    */
-  public static ProducerMessages soapDecode(Vector vec)
-  {
-    String target = (String) vec.remove(0);
-    String requestId = (String) vec.remove(0);
-    Vector msgs = (Vector) vec.remove(0);
-
-    // Building the request:
-    ProducerMessages request = new ProducerMessages(target);
-    request.setRequestId(requestId);
-
-    // Decoding the messages:
-    while (! msgs.isEmpty())
-      request.addMessage(Message.soapDecode((Vector) msgs.remove(0)));
-
-    return request;
-  } 
+  public static Object soapDecode(Hashtable h) {
+    ProducerMessages req = new ProducerMessages(null);
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    Object [] arrayMsg = (Object []) h.get("arrayMsg");
+    if (arrayMsg != null) {
+      for (int i = 0; i<arrayMsg.length; i++)
+        req.addMessage(Message.soapDecode((Hashtable) arrayMsg[i]));
+    } else
+      req.setMessage(Message.soapDecode((Hashtable) h.get("singleMsg")));
+    return req;
+  }
 }

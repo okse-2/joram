@@ -3,40 +3,41 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
 import fr.dyade.aaa.mom.selectors.Selector;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
 
 /**
  * The <code>DeadMQueueImpl</code> class implements the MOM dead message queue
@@ -54,19 +55,20 @@ public class DeadMQueueImpl extends QueueImpl
   /**
    * Constructs a <code>DeadMQueueImpl</code> instance.
    *
-   * @param queueId  See superclass.
-   * @param adminId  See superclass.
+   * @param destId  Identifier of the agent hosting the queue.
+   * @param adminId  Identifier of the administrator of the queue.
    */
-  public DeadMQueueImpl(AgentId queueId, AgentId adminId)
+  public DeadMQueueImpl(AgentId destId, AgentId adminId)
   {
-    super(queueId, adminId);
+    super(destId, adminId);
   }
 
-  /** Returns a string view of this DeadMQueueImpl instance. */
+
   public String toString()
   {
     return "DeadMQueueImpl:" + destId.toString();
   }
+
 
   /** Static method returning the default DMQ identifier. */
   public static AgentId getId()
@@ -90,7 +92,7 @@ public class DeadMQueueImpl extends QueueImpl
                  throws AccessException
   {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + req);
   }
   
@@ -104,15 +106,21 @@ public class DeadMQueueImpl extends QueueImpl
   protected void doReact(AgentId from, ClientMessages not)
                  throws AccessException
   {
-    messages.addAll(not.getMessages());
+    // Getting and persisting the messages:
+    Message msg;
+    for (Enumeration msgs = not.getMessages().elements();
+         msgs.hasMoreElements();) {
+      msg = (Message) msgs.nextElement();
+      messages.add(msg);
+      persistenceModule.save(msg);
+    }
     // Lauching a delivery sequence:
     deliverMessages(0);
   }
 
   /**
-   * Overrides this <code>QueueImpl</code> method; the
-   * <code>SetThreshRequest</code> request actually sets the default
-   * threshold value for the local server.
+   * Overrides this <code>QueueImpl</code> method; this request is
+   * not expected by a dead message queue.
    *
    * @exception AccessException  Not thrown.
    */
@@ -120,7 +128,7 @@ public class DeadMQueueImpl extends QueueImpl
                  throws AccessException
   {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + req);
   }
 
@@ -160,22 +168,16 @@ public class DeadMQueueImpl extends QueueImpl
    * Overrides this <code>QueueImpl</code> method;
    * <code>AcknowledgeRequest</code> requests are actually not processed
    * in dead message queues.
-   *
-   * @exception RequestException  Never thrown.
    */
   protected void doReact(AgentId from, AcknowledgeRequest not)
-                 throws RequestException
   {}
  
   /**
    * Overrides this <code>QueueImpl</code> method;
    * <code>DenyRequest</code> requests are actually not processed
    * in dead message queues.
-   *
-   * @exception RequestException  Never thrown.
    */
   protected void doReact(AgentId from, DenyRequest not)
-                 throws RequestException
   {}
 
   /**
@@ -193,9 +195,15 @@ public class DeadMQueueImpl extends QueueImpl
       return;
 
     // Putting the message back in queue:
-    messages.add(((QueueMsgReply) not).getMessage());
+    Message msg = ((QueueMsgReply) not).getMessage();
+    messages.add(msg);
+    persistenceModule.save(msg);
+
     // Launching a delivery sequence:
     deliverMessages(messages.size() - 1); 
+
+    // Commiting the message persistence orders.
+    persistenceModule.commit();
   }
 
   /**
@@ -236,6 +244,7 @@ public class DeadMQueueImpl extends QueueImpl
 
           // Removing the message:
           messages.remove(j);
+          persistenceModule.delete(msg);
           // Removing the request.
           replied = true;
           requests.remove(index);

@@ -2,24 +2,20 @@
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -31,102 +27,21 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Arrays;
 
-abstract class CausalNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: CausalNetwork.java,v 1.5 2003-03-19 15:16:06 fmaistre Exp $";
-
-  /** The matrix clock associated to this network component. */
-  MatrixClock mclock;
-  /**
-   * The waiting list: it contains all messages that waiting to be delivered.
-   */
-  Vector waiting;
-
+public abstract class CausalNetwork extends Network {
   /**
    * Creates a new network component. This simple constructor is required in
    * order to use <code>Class.newInstance()</code> method during configuration.
    * The configuration of component is then done by <code>init</code> method.
    */
-  CausalNetwork() {
+  public CausalNetwork() {
     waiting = new Vector();
   }
 
-  /**
-   * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialisation to restore the component
-   * state from persistent storage.
-   *
-   * @param msg		the message
-   */
-  public final void insert(Message msg) {
-    if (msg.update.getFromId() == AgentServer.getServerId()) {
-      // The update has been locally generated, the message is ready to
-      // deliver, we have to insert it in the queue.
-      qout.insert(msg);
-    } else {
-      // The update has been generated on a remote server. If the message
-      // don't have a local update, It is waiting to be delivered. So we
-      // have to insert it in waiting list.
-      addRecvMessage(msg);
-    }
-  }
 
-  /**
-   * Adds a message in waiting list. This method is used to retain messages
-   * that cannot be delivered now. Each message in this list is evaluated
-   * (see <code>MatrixClock.testRecvUpdate()</code>) each time a new message
-   * succeed.
-   * <p><hr>
-   * This method is also used to fill the waiting list during initialisation.
-   *
-   * @param msg		the message
-   */
-  final void addRecvMessage(Message msg) {
-    waiting.addElement(msg);
-  }
-
-  /**
-   * Initializes a new network component. This method is used in order to
-   * easily creates and configure a Network component from a class name.
-   * So we can use the <code>Class.newInstance()</code> method for create
-   * (whitout any parameter) the component, then we can initialize it with
-   * this method.<br>
-   * This method initializes the logical clock for the domain.
-   *
-   * @param name	The domain name.
-   * @param port	The listen port.
-   * @param servers	The list of servers directly accessible from this
-   *			network interface.
-   */
-  public void init(String name, int port, short[] servers) throws Exception {
-    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
-    this.port = port;
-    this.servers = servers;
-
-    // Get the logging monitor from current server MonologLoggerFactory
-    // Be careful, logmon is initialized from name and not this.name !!
-    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
-    logmon.log(BasicLevel.DEBUG, name + ", initialized");
-
-    // Sorts the array of server ids into ascending numerical order.
-// 1.2    java.util.Arrays.sort(servers);
-    Arrays.sort(this.servers);
-    // then get the logical clock.
-    mclock = MatrixClock.load(this.name, this.servers);
-  }
-
-  /**
-   * Saves logical clock information to persistent storage.
-   */
-  public void save() throws IOException {
-    mclock.save(name);
-  }
-
-  /**
-   * Restores logical clock information from persistent storage.
-   */
-  public void restore() throws Exception {
-    mclock = MatrixClock.load(name, null);
+  public LogicalClock
+      createsLogicalClock(String name,
+                          short[] servers) {
+    return new MatrixClock(name, servers);
   }
 
   /**
@@ -150,8 +65,8 @@ abstract class CausalNetwork extends Network {
 
     // Test if the message can be delivered then deliver it
     // else put it in the waiting list
-    int todo = mclock.testRecvUpdate(msg.update);
-    if (todo == MatrixClock.DELIVER) {
+    int todo = clock.testRecvUpdate(msg.update);
+    if (todo == LogicalClock.DELIVER) {
       // Deliver the message then try to deliver alls waiting message.
       AgentServer.transaction.begin();
       // Allocate a local time to the message to order it in
@@ -165,7 +80,7 @@ abstract class CausalNetwork extends Network {
       while (true) {
 	for (int i=0; i<waiting.size(); i++) {
 	  Message tmpMsg = (Message) waiting.elementAt(i);
-	  if (mclock.testRecvUpdate(tmpMsg.update) == MatrixClock.DELIVER) {
+	  if (clock.testRecvUpdate(tmpMsg.update) == LogicalClock.DELIVER) {
 	    // Be Careful, changing the stamp imply the filename
 	    // change !! So we have to delete the old file.
 	    tmpMsg.delete();
@@ -190,7 +105,7 @@ abstract class CausalNetwork extends Network {
       // then commit and validate the message.
       Channel.validate();
       AgentServer.transaction.release();
-    } else if (todo == MatrixClock.WAIT_TO_DELIVER) {
+    } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
       AgentServer.transaction.begin();
       // Insert in a waiting list.
       msg.save();
@@ -205,22 +120,5 @@ abstract class CausalNetwork extends Network {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).
     }
-  }
-
-  /**
-   *  Adds a message in "ready to deliver" list. This method allocates a
-   * new timestamp to the message ; be Careful, changing the stamp imply
-   * the filename change too.
-   *
-   * @param msg		the message.
-   */
-  public void post(Message msg) throws IOException {
-    // Allocates a new timestamp. Be careful, if the message needs to be
-    // routed we have to use the next destination in timestamp generation.
-    msg.update = mclock.getSendUpdate(AgentServer.servers[msg.to.to].gateway);
-    // Saves the message.
-    msg.save();
-    // Push it in "ready to deliver" queue.
-    qout.push(msg);
   }
 }

@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -33,97 +30,90 @@ import fr.dyade.aaa.util.*;
 /**
  * An element of the matrix clock.
  */
-class MatClockElt {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $"; 
-
+class MatClockElt implements Serializable {
   /** Element value. */
   int stamp;
   /** Source node of last modification. */
   short node; 
-  /**
-   * State value when last modified. */
+  /** State value when last modified. */
   int status;
+
+  private void writeObject(java.io.ObjectOutputStream out)
+    throws IOException {
+    out.writeInt(stamp);
+    out.writeShort(node);
+    out.writeInt(status);
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+    throws IOException, ClassNotFoundException {
+    stamp = in.readInt();
+    node = in.readShort();
+    status = in.readInt();
+  }
 }
 
 /**
  * Matrix clock realization. 
  */
-class MatrixClock implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
-
-  //  Declares all fields transient in order to avoid useless
-  // description of each during serialization.
-
-  /** True if the matrix is modified since last save, false otherwise. */
-  private transient boolean modified = false;
-  /**
-   * List of id. for all servers in the domain, this list is sorted and
-   * is used as index for status and matrix arrays. Be careful, this array
-   * is shared with the <code>Network</code> components (may be it should
-   * be saved by this component).
-   */
-  private transient short[] servers;
-  /** The domain name. */
-  private transient String name;
+class MatrixClock extends LogicalClock {
   /** Index of local server in status and matrix arrays. */
-  private transient int idxLS;
+  private int idxLS;
   /** */
-  private transient int status[];
+  private int status[];
+  /** Filename for status storage */
+  private String statusFN = null;
   /** */
-  private transient MatClockElt matrix[][];
+  private MatClockElt matrix[][];
 
-  private transient Logger logmon = null;
+//  /**
+//   * The writeObject method is responsible for writing the state of the
+//   * <code>MatrxiClock</code> object so that the corresponding readObject
+//   * method can restore it. For performance reasons, all fields are declared
+//   * transient, and the state of <code>MatClockElt</code> objects are
+//   * directly handled in this serialization method.
+//   *
+//   * @param out	The <code>ObjectOutputStream</code> object.
+//   */
+//   private void writeObject(java.io.ObjectOutputStream out)
+//        throws IOException {
+//     int size = status.length;
+//     out.writeInt(size);
+//     for (int i=0; i<size; i++)
+//       out.writeInt(status[i]);
+//     for (int i=0; i<size; i++) {
+//       for (int j=0; j<size; j++) {
+// 	out.writeInt(matrix[i][j].stamp);
+// 	out.writeShort(matrix[i][j].node);
+// 	out.writeInt(matrix[i][j].status);
+//       }
+//     }
+//   }
 
- /**
-  * The writeObject method is responsible for writing the state of the
-  * <code>MatrxiClock</code> object so that the corresponding readObject
-  * method can restore it. For performance reasons, all fields are declared
-  * transient, and the state of <code>MatClockElt</code> objects are
-  * directly handled in this serialization method.
-  *
-  * @param out	The <code>ObjectOutputStream</code> object.
-  */
-  private void writeObject(java.io.ObjectOutputStream out)
-       throws IOException {
-    int size = status.length;
-    out.writeInt(size);
-    for (int i=0; i<size; i++)
-      out.writeInt(status[i]);
-    for (int i=0; i<size; i++) {
-      for (int j=0; j<size; j++) {
-	out.writeInt(matrix[i][j].stamp);
-	out.writeShort(matrix[i][j].node);
-	out.writeInt(matrix[i][j].status);
-      }
-    }
-  }
-
- /**
-  * The readObject method is responsible for reading from the stream and
-  * restoring the <code>MatrxiClock</code> fields.
-  *
-  * @see	#writeObject
-  *
-  * @param in	The <code>ObjectInputStream</code> object.
-  */
-  private void readObject(java.io.ObjectInputStream in)
-       throws IOException, ClassNotFoundException {
-    int size = in.readInt();
-    status = new int[size];
-    matrix = new MatClockElt[size][size];
-    for (int i=0; i<size; i++)
-      status[i] = in.readInt();
-    for (int i=0; i<size; i++) {
-      for (int j=0; j<size; j++) {
-	matrix[i][j] = new MatClockElt();
-	matrix[i][j].stamp = in.readInt();
-	matrix[i][j].node = in.readShort();
-	matrix[i][j].status = in.readInt();
-      }
-    }
-  }
+//  /**
+//   * The readObject method is responsible for reading from the stream and
+//   * restoring the <code>MatrxiClock</code> fields.
+//   *
+//   * @see	#writeObject
+//   *
+//   * @param in	The <code>ObjectInputStream</code> object.
+//   */
+//   private void readObject(java.io.ObjectInputStream in)
+//        throws IOException, ClassNotFoundException {
+//     int size = in.readInt();
+//     status = new int[size];
+//     matrix = new MatClockElt[size][size];
+//     for (int i=0; i<size; i++)
+//       status[i] = in.readInt();
+//     for (int i=0; i<size; i++) {
+//       for (int j=0; j<size; j++) {
+// 	matrix[i][j] = new MatClockElt();
+// 	matrix[i][j].stamp = in.readInt();
+// 	matrix[i][j].node = in.readShort();
+// 	matrix[i][j].status = in.readInt();
+//       }
+//     }
+//   }
 
   /**
    * Creates a new matrix clock. Be careful, the list of servers must be
@@ -133,18 +123,9 @@ class MatrixClock implements Serializable {
    * @param name	Name of domain.
    * @param servers	List of domain's server id.
    */
-  private MatrixClock(String name, short[] servers) throws IOException {
-    this.name = name;
-    this.servers = servers;
-    AgentServer.transaction.save(servers, name + "Servers");
-    idxLS = index(AgentServer.getServerId());
-    status = new int[servers.length];
-    matrix = new MatClockElt[servers.length][servers.length];
-    // Immediatly allocates all elements
-    for (int i=0; i<servers.length; i++)
-      for (int j=0; j<servers.length; j++)
-	matrix[i][j] = new MatClockElt();
-    save(name);
+  MatrixClock(String name, short[] servers) {
+    super(name, servers);
+    statusFN = name + "Status";
   }
   
   /**
@@ -152,9 +133,11 @@ class MatrixClock implements Serializable {
    *
    * @param name	Name of domain.
    */
-  void save(String name) throws IOException {
+  void save() throws IOException {
     if (modified) {
-      AgentServer.transaction.save(this, name);
+      // Save the Clock information.
+      AgentServer.transaction.save(status, statusFN);
+      AgentServer.transaction.save(matrix, name);
       modified = false;
     }
   }
@@ -168,78 +151,42 @@ class MatrixClock implements Serializable {
    * @param servers	List of domain's server id.
    * @return		The restored matrix clock.
    */
-  static MatrixClock
-  load(String name, 
-       short[] servers)throws IOException, ClassNotFoundException {
+  void load()throws IOException, ClassNotFoundException {
     // Loads the matrix clock.
-    MatrixClock mc = (MatrixClock) AgentServer.transaction.load(name);
-    if (mc == null) {
-      // Creates a new Matrix and save it.
-      mc = new MatrixClock(name, servers);
-      // Get the logging monitor from current server MonologLoggerFactory
-      mc.logmon = Debug.getLogger(Debug.A3Debug + ".MatrixClock." + name);
+    matrix = (MatClockElt[][]) AgentServer.transaction.load(name);
+    if (matrix == null) {
+      // Creates the new stamp, then saves it
+      status = new int[servers.length];
+      matrix = new MatClockElt[servers.length][servers.length];
+      // Immediatly allocates all elements
+      for (int i=0; i<servers.length; i++)
+        for (int j=0; j<servers.length; j++)
+          matrix[i][j] = new MatClockElt();
+      // Save the servers configuration and clock.
+      AgentServer.transaction.save(servers, serversFN);
+      modified = true;
+      save();
     } else {
-      // Get the logging monitor from current server MonologLoggerFactory
-      mc.logmon = Debug.getLogger(Debug.A3Debug + ".MatrixClock." + name);
       // Join with the new domain configuration:
-      mc.servers = (short[]) AgentServer.transaction.load(name + "Servers");
-      mc.idxLS = mc.index(AgentServer.getServerId());
-      if (!Arrays.equals(mc.servers, servers)) {
-        mc.logmon.log(BasicLevel.WARN,
-                      "MatrixClock." + name + ", updates configuration");
-	// TODO: Insert or suppress corresponding elements in matrix...
-	throw new IOException("Bad configuration");
+      short[] s = (short[]) AgentServer.transaction.load(serversFN);
+	if ((servers != null) && !Arrays.equals(servers, s)) {
+        for (int i=0; i<servers.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + servers[i]);
+        for (int i=0; i<s.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + s[i]);
+        
+	throw new IOException("Network configuration changed");
       }
+      status = (int[]) AgentServer.transaction.load(statusFN);
     }
-    return mc;
+    idxLS = index(AgentServer.getServerId());
   }
 
-  /**
-   * Returns the index of the specified server.
-   */
-  private final int index(short id) {
-//   private final int index(short id) throws UnknownServerException {
-    int idx = Arrays.binarySearch(servers, id);
-//     if (idx < 0)
-//       throw new UnknownServerException("Unknow server id. #" + id);
-    return idx;
-  }
+  synchronized void addServer(String name, short sid) throws IOException {}
 
-  /**
-   *  Adjust matrix clock and status table. It should only be
-   * used in testRecvUpdate and getSendUpdate, so there is no
-   * need of synchronisation.
-   */
-//   private void grow(short sid) {
-//     int newSize = sid +1;
-//     int newStatus[] = new int[newSize];
-//     MatClockElt newMatClock[][] = new MatClockElt[newSize][newSize];
-
-//     // Copy matrix clock and status table in the right sized table.
-//     int i, j;
-//     for (i=0; i<size; i++) {
-//       for (j=0; j<size; j++)
-// 	newMatClock[i][j] = matClock[i][j];
-//       for (; j<newSize; j++)
-// 	newMatClock[i][j] = new MatClockElt();
-//       newStatus[i] = status[i];
-//     }
-//     for (; i<newSize; i++) {
-//       for (j=0; j<newSize; j++)
-// 	newMatClock[i][j] = new MatClockElt();
-//       newStatus[i] = 0;
-//     }
-//     size = newSize;
-//     status = newStatus;
-//     matClock = newMatClock;
-//   }
-
-  /** The message can be delivered. */
-  static final int DELIVER = 0;
-  /** There is other message in the causal ordering before this.*/
-  static final int WAIT_TO_DELIVER = 1;
-  /** The message has already been delivered. */
-  static final int ALREADY_DELIVERED = 2;
+  synchronized void delServer(String name, short sid) throws IOException {}
 
   /**
    *  Test if a received message with the specified clock must be
@@ -367,54 +314,6 @@ class MatrixClock implements Serializable {
 
     modified = true;
     return update;
-  }
-
-  /**
-   * Returns the number of messages sent by local node to this one.<p>
-   * <hr>
-   * Used for a temporary Netwall fixes in order to detect a partial
-   * configuration reinstallation.
-   *
-   * @param to	The id. of remote server.
-   * @return	The number of messages.
-   */ 
-  synchronized Update getNetU1(short to) {
-    return new Update(AgentServer.getServerId(), to,
-		      matrix[idxLS][index(to)].stamp);
-  }
-
-  /**
-   * Returns the number of messages received by local node from this one.<p>
-   * <hr>
-   * Used for a temporary Netwall fixes in order to detect a partial
-   * configuration reinstallation.
-   *
-   * @param to	The id. of remote server.
-   * @return	The number of messages.
-   */ 
- synchronized Update getNetU2(short to) {
-    return new Update(to, AgentServer.getServerId(),
-		      matrix[index(to)][idxLS].stamp);
-  }
-
-  /**
-   * Verify the coherency of local matrix clock with the one of remote
-   * server. If one of the servers has been restarted after a complete
-   * installation, the other one must have a bigger history: the number
-   * of messages known as "received" by a node is bigger than the number
-   * of messages known as "sent" by the other.<p>
-   * In such a case we must refudes the connection.<p>
-   * <hr>
-   * Used for a temporary Netwall fixes in order to detect a partial
-   * configuration reinstallation.
-   *
-   * @param u1	MC_From[from, local].stamp.
-   * @param u2	MC_From[local, from].stamp.
-   * @return	true if the matrix clocks of two nodes are coherent.
-   */ 
- synchronized boolean testNU(Update u1, Update u2) {
-    return ((u1.stamp < matrix[index(u1.l)][idxLS].stamp) ||
-	    (u2.stamp > matrix[idxLS][index(u2.c)].stamp));
   }
 
   /**

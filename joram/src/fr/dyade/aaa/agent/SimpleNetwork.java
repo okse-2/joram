@@ -1,24 +1,20 @@
 /*
- * Copyright (C) 2003 SCALAGENT
+ * Copyright (C) 2003 ScalAgent Distributed Technologies
  *
- * The contents of this file are subject to the Dyade Public License,
- * as defined by the file JORAM_LICENSE_ADDENDUM.html
- *
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Dyade web site (www.dyade.fr).
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied.
- * See the License for the specific terms governing rights and
- * limitations under the License.
- *
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released April 20, 2000.
- *
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -36,10 +32,7 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class with a single connection at
  * a time.
  */
-class SimpleNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: SimpleNetwork.java,v 1.1 2003-03-19 15:16:06 fmaistre Exp $";
-
+public class SimpleNetwork extends Network {
   /**
    * FIFO list of all messages to be sent by the watch-dog thead.
    */
@@ -48,9 +41,8 @@ class SimpleNetwork extends Network {
   /**
    * Creates a new network component.
    */
-  SimpleNetwork() {
+  public SimpleNetwork() {
     super();
-    waiting = new Vector();
   }
 
   // -----+----- -----+----- -----+----- -----+----- -----+----- -----+----- 
@@ -139,7 +131,7 @@ class SimpleNetwork extends Network {
    *				input stream.
    */
   static ObjectInputStream
-  getInputStream(Socket sock) throws IOException {
+      getInputStream(Socket sock) throws IOException {
     return new ObjectInputStream(sock.getInputStream());
   }
 
@@ -155,130 +147,39 @@ class SimpleNetwork extends Network {
    *				output stream.
    */
   static ObjectOutputStream
-  getOutputStream(Socket sock) throws IOException {
+      getOutputStream(Socket sock) throws IOException {
     return new ObjectOutputStream(sock.getOutputStream());
   }
 
   // End of code from StreamNetwork class.
   // -----+----- -----+----- -----+----- -----+----- -----+----- -----+----- 
 
-  // Adaptation of caode from CausalNetwork in order to ensure FIFO
-  // ordering between nodes
-
-  /** Logical timestamp information for messages in domain, stamp[0] for
-   * messages sent, and stamp[1] for messages received.
-   */
-  protected int[][] stamp;
-  /** True if the timestamp is modified since last save. */
-  protected boolean modified = false;
-  /**
-   * The waiting list: it contains all messages that waiting to be delivered.
-   */
-  Vector waiting;
-
-  /**
-   * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialisation to restore the component
-   * state from persistent storage.
-   *
-   * @param msg		the message
-   */
-  public final void insert(Message msg) {
-    if (msg.update.getFromId() == AgentServer.getServerId()) {
-      // The update has been locally generated, the message is ready to
-      // deliver, we have to insert it in the queue.
-      qout.insert(msg);
-    } else {
-      // The update has been generated on a remote server. If the message
-      // don't have a local update, It is waiting to be delivered. So we
-      // have to insert it in waiting list.
-      addRecvMessage(msg);
-    }
+  public LogicalClock createsLogicalClock(String name, short[] servers) {
+    return new SimpleClock(name, servers);
   }
 
-  /**
-   * Adds a message in waiting list. This method is used to retain messages
-   * that cannot be delivered now. Each message in this list is evaluated
-   * (see <code>deliver()</code>) each time a new message succeed.
-   * <p><hr>
-   * This method is also used to fill the waiting list during initialisation.
-   *
-   * @param msg		the message
-   */
-  final void addRecvMessage(Message msg) {
-    waiting.addElement(msg);
-  }
-
-  /**
-   * Saves logical clock information to persistent storage.
-   */
-  public void save() throws IOException {
-    if (modified) {
-      AgentServer.transaction.save(stamp, getName());
-      modified = false;
-    }
-  }
-
-  /**
-   * Restores logical clock information from persistent storage.
-   */
-  public void restore() throws Exception {
-    stamp = (int [][]) AgentServer.transaction.load(getName());
-  }
-
-  /**
-   * Initializes a new network component. This method is used in order to
-   * easily creates and configure a Network component from a class name.
-   * So we can use the <code>Class.newInstance()</code> method for create
-   * (whitout any parameter) the component, then we can initialize it with
-   * this method.<br>
-   * This method initializes the logical clock for the domain.
-   *
-   * @param name	The domain name.
-   * @param port	The listen port.
-   * @param servers	The list of servers directly accessible from this
-   *			network interface.
-   */
-  public void init(String name, int port, short[] servers) throws Exception {
-    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
-    this.port = port;
-
-    // Get the logging monitor from current server MonologLoggerFactory
-    // Be careful, logmon is initialized from name and not this.name !!
-    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
-    logmon.log(BasicLevel.DEBUG, name + ", initialized");
-
-    // Sorts the array of server ids into ascending numerical order.
-    Arrays.sort(servers);
-    // then get the logical clock.
-    restore();
-    if (stamp ==  null) {
-      stamp = new int[2][servers.length];
-      this.servers = servers;
-      // Save the servers configuration and the logical time stamp.
-      AgentServer.transaction.save(this.servers, name + "Servers");
-      save();
-    } else {
-      // Join with the new domain configuration:
-      this.servers = (short[]) AgentServer.transaction.load(name + "Servers");
-      if (!Arrays.equals(this.servers, servers)) {
-        logmon.log(BasicLevel.WARN,
-                   "MatrixClock." + name + ", updates configuration");
-	// TODO: Insert or suppress corresponding elements in matrix...
-	throw new IOException("Bad configuration");
-      }
-    }
-  }
 
   /**
    * Try to deliver the received message to the right consumer.
    *
    * @param msg		the message.
    */
-  public void deliver(Message msg) throws Exception {
+  private void deliver(Message msg) throws Exception {
     // Get real from serverId.
     short from = msg.update.getFromId();
-    int fromIdx = index(from);
+
+    // Test if the message is really for this node (final destination or
+    // router).
+    short dest = msg.update.getToId();
+    if (dest != AgentServer.getServerId()) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", recv bad msg#" + msg.update.stamp +
+                 " really to " + dest +
+                 " by " + from);
+      throw new Exception("recv bad msg#" + msg.update.stamp +
+                          " really to " + dest +
+                          " by " + from);
+    }
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
@@ -290,9 +191,11 @@ class SimpleNetwork extends Network {
     AgentServer.getServerDesc(from).active = true;
     AgentServer.getServerDesc(from).retry = 0;
 
-    if (msg.update.stamp == (stamp[1][fromIdx] +1)) {
-      stamp[1][fromIdx] += 1;
-      modified = true;
+    // Test if the message can be delivered then deliver it
+    // else put it in the waiting list
+    int todo = clock.testRecvUpdate(msg.update);
+
+    if (todo == LogicalClock.DELIVER) {
       // Deliver the message then try to deliver alls waiting message.
       AgentServer.transaction.begin();
       // Allocate a local time to the message to order it in
@@ -307,8 +210,7 @@ class SimpleNetwork extends Network {
 	for (int i=0; i<waiting.size(); i++) {
 	  Message tmpMsg = (Message) waiting.elementAt(i);
 	  if ((tmpMsg.update.getFromId() == from) &&
-              (tmpMsg.update.stamp == (stamp[1][fromIdx] +1))) {
-            stamp[1][fromIdx] += 1;
+              (clock.testRecvUpdate(tmpMsg.update) == LogicalClock.DELIVER)) {
 	    // Be Careful, changing the stamp imply the filename
 	    // change !! So we have to delete the old file.
 	    tmpMsg.delete();
@@ -333,7 +235,7 @@ class SimpleNetwork extends Network {
       // then commit and validate the message.
       Channel.validate();
       AgentServer.transaction.release();
-    } else if (msg.update.stamp > (stamp[1][fromIdx] +1)) {
+    } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
       AgentServer.transaction.begin();
       // Insert in a waiting list.
       msg.save();
@@ -350,27 +252,6 @@ class SimpleNetwork extends Network {
     }
   }
 
-  /**
-   *  Adds a message in "ready to deliver" list. This method allocates a
-   * new time stamp to the message ; be Careful, changing the stamp imply
-   * the filename change too.
-   */
-  public void post(Message msg) throws IOException {
-    short to = AgentServer.servers[msg.to.to].gateway;
-    int toIdx = index(to);
-
-    modified = true;
-    // Allocates a new timestamp. Be careful, if the message needs to be
-    // routed we have to use the next destination in timestamp generation.
-    msg.update = new Update(AgentServer.getServerId(),
-			    AgentServer.servers[msg.to.to].gateway,
-			    ++stamp[0][toIdx]);
-    // Saves the message.
-    msg.save();
-    // Push it in "ready to deliver" queue.
-    qout.push(msg);
-  }
-
   /** Input component */
   NetServerIn netServerIn = null;
   /** Output component */
@@ -384,18 +265,19 @@ class SimpleNetwork extends Network {
   public void start() throws IOException {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
     try {
-      if (isRunning())
-	throw new IOException("Consumer already running");
-
-      sendList = new Vector();
+      if (sendList == null)
+        sendList = new Vector();
     
-      netServerIn = new NetServerIn(getName(), logmon);
-      netServerOut = new NetServerOut(getName(), logmon);
-      watchDog = new WatchDog(getName(), logmon);
+      if (netServerIn == null)
+        netServerIn = new NetServerIn(getName(), logmon);
+      if (netServerOut == null)
+        netServerOut = new NetServerOut(getName(), logmon);
+      if (watchDog == null)
+        watchDog = new WatchDog(getName(), logmon);
 
-      netServerIn.start();
-      netServerOut.start();
-      watchDog.start();
+      if (! netServerIn.isRunning()) netServerIn.start();
+      if (! netServerOut.isRunning()) netServerOut.start();
+      if (! watchDog.isRunning()) watchDog.start();
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
@@ -460,6 +342,7 @@ class SimpleNetwork extends Network {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+      this.setThreadGroup(AgentServer.getThreadGroup());
     }
     protected void close() {}
 
@@ -597,6 +480,7 @@ class SimpleNetwork extends Network {
       listen = createServerSocket();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+      this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
     protected void close() {
@@ -673,7 +557,7 @@ class SimpleNetwork extends Network {
 	    os.write((byte) 0);
 	    os.flush();	// nop !
 	  } catch (Exception exc) {
-            this.logmon.log(BasicLevel.ERROR, ", exited", exc);
+            this.logmon.log(BasicLevel.ERROR, ", closed", exc);
 	  } finally {
 	    try {
 	      os.close();
@@ -705,6 +589,7 @@ class SimpleNetwork extends Network {
       lock = new Object();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+      this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
     protected void close() {}

@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -60,13 +56,13 @@ public class Connection implements javax.jms.Connection
   private javax.jms.ExceptionListener excListener = null;
 
   /** Requests counter. */
-  private long requestsC = 0;
+  private int requestsC = 0;
   /** Sessions counter. */
-  private long sessionsC = 0;
+  private int sessionsC = 0;
   /** Messages counter. */
-  private long messagesC = 0;
+  private int messagesC = 0;
   /** Subscriptions counter. */
-  private long subsC = 0;
+  private int subsC = 0;
 
   /** Timer for closing pending sessions. */
   private fr.dyade.aaa.util.Timer sessionsTimer = null;
@@ -90,16 +86,10 @@ public class Connection implements javax.jms.Connection
   /** 
    * Table holding requests related objects, either locks of synchronous
    * requests, or asynchronous consumers.
-   * <p>
-   * <b>Key:</b> request's identifier<br>
-   * <b>Object:</b> request related object
    */
   Hashtable requestsTable;
   /**
    * Table holding the server replies to synchronous requests.
-   * <p>
-   * <b>Key:</b> reply's identifier<br>
-   * <b>Object:</b> reply object
    */
   Hashtable repliesTable;
 
@@ -133,7 +123,7 @@ public class Connection implements javax.jms.Connection
       CnxConnectRequest req = new CnxConnectRequest();
       CnxConnectReply rep = (CnxConnectReply) syncRequest(req);
       proxyId = rep.getProxyId();
-      key = rep.getKey();
+      key = rep.getCnxKey();
 
       // Transactions will be scheduled; creating a timer.
       if (factoryParameters.txPendingTimer != 0)
@@ -163,19 +153,10 @@ public class Connection implements javax.jms.Connection
    */
   public boolean equals(Object obj)
   {
-    if (! (obj instanceof Connection))
-      return false;
-
-    Connection cnx = (Connection) obj;
-
-    return toString().equals(cnx.toString());
+    return (obj instanceof Connection)
+           && toString().equals(obj.toString());
   }
 
-  /** Returns the connection's key. */
-  public int getKey()
-  {
-    return key;
-  }
 
   /**
    * API method.
@@ -480,18 +461,17 @@ public class Connection implements javax.jms.Connection
   }
 
   /** Returns a new request identifier. */
-  synchronized String nextRequestId()
+  synchronized int nextRequestId()
   {
-    if (requestsC == Long.MAX_VALUE)
+    if (requestsC == Integer.MAX_VALUE)
       requestsC = 0;
-    requestsC++;
-    return "c" + key + "r" + requestsC;
+    return requestsC++;
   }
 
   /** Returns a new session identifier. */
   synchronized String nextSessionId()
   {
-    if (sessionsC == Long.MAX_VALUE)
+    if (sessionsC == Integer.MAX_VALUE)
       sessionsC = 0;
     sessionsC++;
     return "c" + key + "s" + sessionsC;
@@ -500,7 +480,7 @@ public class Connection implements javax.jms.Connection
   /** Returns a new message identifier. */
   synchronized String nextMessageId()
   {
-    if (messagesC == Long.MAX_VALUE)
+    if (messagesC == Integer.MAX_VALUE)
       messagesC = 0;
     messagesC++;
     return "ID:" + proxyId + "c" + key + "m" + messagesC;
@@ -509,7 +489,7 @@ public class Connection implements javax.jms.Connection
   /** Returns a new subscription name. */
   synchronized String nextSubName()
   {
-    if (subsC == Long.MAX_VALUE)
+    if (subsC == Integer.MAX_VALUE)
       subsC = 0;
     subsC++;
     return "c"  + key + "sub" + subsC;
@@ -531,8 +511,6 @@ public class Connection implements javax.jms.Connection
    * Method sending a synchronous request to the server and waiting for an
    * answer.
    *
-   * @return The server reply.
-   *
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSSecurityException  When sending a request to a destination
    *              not accessible because of security.
@@ -546,10 +524,10 @@ public class Connection implements javax.jms.Connection
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
 
-    if (request.getRequestId() == null)
+    if (request.getRequestId() == -1)
       request.setRequestId(nextRequestId());
 
-    String requestId = request.getRequestId();
+    int requestId = request.getRequestId();
 
     try {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -557,8 +535,8 @@ public class Connection implements javax.jms.Connection
                                    + request.getClass().getName()
                                    + " with id: " + requestId);
 
-      Lock lock = new Lock();  
-      requestsTable.put(requestId, lock);
+      Lock lock = new Lock();
+      requestsTable.put(request.getKey(), lock);
       synchronized(lock) {
         connectionImpl.send(request);
         while (true) {
@@ -574,7 +552,7 @@ public class Connection implements javax.jms.Connection
             continue;
           }
         }
-        requestsTable.remove(requestId);
+        requestsTable.remove(request.getKey());
       }
     }
     // Catching an exception because of...
@@ -588,8 +566,8 @@ public class Connection implements javax.jms.Connection
       jE.setLinkedException(e);
 
       // Unregistering the request:
-      if (requestsTable != null && requestId != null)
-        requestsTable.remove(requestId);
+      if (requestsTable != null)
+        requestsTable.remove(request.getKey());
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, jE);
@@ -597,13 +575,14 @@ public class Connection implements javax.jms.Connection
     }
 
     // Finally, returning the reply:
-    AbstractJmsReply reply = (AbstractJmsReply) repliesTable.remove(requestId);
+    AbstractJmsReply reply =
+      (AbstractJmsReply) repliesTable.remove(request.getKey());
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply.");
 
     // If the reply is null, it means that the requester has been unlocked
-    // by the driver, because it detected a connection failure:
+    // by the driver because it detected a connection failure:
     if (reply == null)
       throw new IllegalStateException("Connection is broken.");
     // Else, if the reply notifies of an error: throwing the appropriate exc: 
@@ -633,7 +612,7 @@ public class Connection implements javax.jms.Connection
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
 
-    if (request.getRequestId() == null)
+    if (request.getRequestId() == -1)
       request.setRequestId(nextRequestId());
 
     try {
@@ -646,8 +625,7 @@ public class Connection implements javax.jms.Connection
     // In the case of a broken connection:
     catch (IllegalStateException exc) {
       // Removes the potentially stored requester:
-      if (request.getRequestId() != null)
-        requestsTable.remove(request.getRequestId());
+      requestsTable.remove(request.getKey());
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, exc);
@@ -666,20 +644,20 @@ public class Connection implements javax.jms.Connection
   void distribute(AbstractJmsReply reply)
   {
     // Getting the correlation identifier:
-    String correlationId = reply.getCorrelationId();
+    int correlationId = reply.getCorrelationId();
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply: "
-                                   + correlationId);
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 this + ": got reply: " + correlationId);
 
     Object obj = null;
-    if (correlationId != null)
-      obj = requestsTable.get(correlationId);
+    if (correlationId != -1)
+      obj = requestsTable.get(reply.getKey());
 
     // If the request is a synchronous request, putting the reply in the
     // replies table and unlocking the requester:
     if (obj instanceof Lock) {
-      repliesTable.put(correlationId, reply);
+      repliesTable.put(reply.getKey(), reply);
 
       synchronized(obj) {
         obj.notify();
@@ -688,8 +666,7 @@ public class Connection implements javax.jms.Connection
     // If the reply is an asynchronous exception, passing it:
     else if (reply instanceof MomExceptionReply) {
       // Removing the potential consumer object from the table:
-      if (correlationId != null)
-        requestsTable.remove(correlationId);
+      requestsTable.remove(reply.getKey());
 
       MomException mE = ((MomExceptionReply) reply).getException();
       JMSException jE = null;
@@ -726,15 +703,15 @@ public class Connection implements javax.jms.Connection
   {
     Vector msgs = delivery.getMessages();
     fr.dyade.aaa.mom.messages.Message msg;
-
-    if (msgs.isEmpty())
-      return;
-
     Vector ids = new Vector();
-    while (! msgs.isEmpty()) {
-      msg = (fr.dyade.aaa.mom.messages.Message) msgs.remove(0);
-      ids.addElement(msg.getIdentifier());
+
+    for (int i = 0; i < msgs.size(); i++) {
+      msg = (fr.dyade.aaa.mom.messages.Message) msgs.get(i);
+      ids.add(msg.getIdentifier());
     }
+
+    if (ids.isEmpty())
+      return;
 
     try {
       // Sending the denying as an asynchronous request, as no synchronous
