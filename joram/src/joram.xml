@@ -158,6 +158,49 @@
     </jar>
   </target>
 
+  <!-- Builds a JORAM connector jar. -->
+  <target name="ship.connector" depends="ship.joram"
+      description="--> Builds Joram connector jar.">
+    <jar jarfile="${lib.dir}/joram-connector.jar">
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/client/connector/*.class"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!-- Builds a JORAM adapter. -->
+  <target name="ship.adapter" depends="ship.connector"
+          description="--> Builds JORAM adapter.">
+    <mkdir dir="${lib.dir}/META-INF"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
+          todir="${lib.dir}/META-INF"/>
+    <jar jarfile="${lib.dir}/joram.rar">
+      <fileset dir="${lib.dir}">
+        <include name="joram-shared.jar"/>
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+        <include name="META-INF/*.xml"/>
+      </fileset>
+    </jar>
+    <delete dir="${lib.dir}/META-INF"/>
+  </target>
+
+  <!-- Builds a JORAM adapter for JOnAS. -->
+  <target name="ship.Jadapter" depends="ship.connector"
+          description="--> Builds JORAM adapter for JOnAS.">
+    <mkdir dir="${lib.dir}/META-INF"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-collocated.xml"
+          tofile="${lib.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${lib.dir}/joram.rar">
+      <fileset dir="${lib.dir}">
+        <include name="META-INF/*.xml"/>
+      </fileset>
+    </jar>
+    <delete dir="${lib.dir}/META-INF"/>
+  </target>
+
   <!-- JAVADOC --> 
   <target name="javadoc" depends="prepare"
       description="--> Generates the Javadoc.">
