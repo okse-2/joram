@@ -16,6 +16,17 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: February 16, 2004)"> 
       <ul>
+        <li>SOAP connections failures never detected, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00060.html">
+        Christian Neudorfer</a>. Despite the setting of the connection pending
+        timer, a failing SOAP connection was never detected due to an 
+        improper reconstruction of SOAP connection factories retrieved from
+        JNDI. The bug is corrected, the impacted classes are 
+        <code>org.objectweb.joram.client.jms.soap.SoapConnectionFactory</code>,
+        <code>org.objectweb.joram.client.jms.soap.QueueSoapConnectionFactory</code>,
+        and
+        <code>org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory</code>.
+        </li>
         <li>Incorrect target for launching JORAM as a SOAP service in the 
         samples <code>build.xml</code> file, found  by 
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00053.html">
