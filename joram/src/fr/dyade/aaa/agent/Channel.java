@@ -154,21 +154,6 @@ abstract public class Channel {
   }
 
   /**
-   *  Invalidates all messages previously dispatched. This method is used
-   * during abortion of reaction in <code>Engine</code>.
-   * <p><hr>
-   * Be careful, this method must only be used during a transaction in
-   * order to ensure the mutual exclusion.
-   *
-   * @see TransactionEngine#abort()
-   */
-  static final void invalidate() {
-    for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-      ((MessageConsumer) c.nextElement()).invalidate();
-    }
-  }
-
-  /**
    * Sends an immediately validated notification to an agent. Post and
    * directly dispatches the notification to the <code>MessageConsumer</code>.
    * Does not queue the notification in the local message queue.<p>
@@ -236,20 +221,8 @@ final class TransactionChannel extends Channel {
 
     try {
       AgentServer.transaction.begin();
-      try {
-        consumer.post(msg);
-        consumer.save();
-      } catch (IOException exc2) {
-        logmon.log(BasicLevel.FATAL,
-                   toString() + ", can't post message: " + msg,
-                   exc2);
-        consumer.invalidate();
-        AgentServer.transaction.rollback();
-        // Restore the matrix clock state from disk.
-	consumer.restore();
-        AgentServer.transaction.release();
-        throw exc2;
-      }
+      consumer.post(msg);
+      consumer.save();
       AgentServer.transaction.commit();
       // then commit and validate the message.
       consumer.validate();

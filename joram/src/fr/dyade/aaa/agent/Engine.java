@@ -585,13 +585,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
-   * Invalidates all messages pushed in queue during transaction session.
-   */
-  public void invalidate() {
-    qin.invalidate();
-  }
-
-  /**
    * Causes this engine to begin execution.
    *
    * @see stop
@@ -663,6 +656,13 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   public boolean isRunning() {
     return isRunning;
+  }
+
+  /**
+   * This operation always throws an IllegalStateException.
+   */
+  public void delete() throws IllegalStateException {
+    throw new IllegalStateException();
   }
 
   protected boolean needToBeCommited = false;
