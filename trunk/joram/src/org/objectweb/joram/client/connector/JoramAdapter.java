@@ -176,6 +176,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
     AdapterTracing.debugINFO("JORAM adapter starting deployment...");
+    AdapterTracing.debugINFO("Server port is " + serverPort);
 
     workManager = ctx.getWorkManager();
 
