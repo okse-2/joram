@@ -14,7 +14,17 @@
 
     <s1 name="Recent news">
 
-      <subtitle>8 February 2002: mirror site in the United States</subtitle>
+      <subtitle>March, 1st 2002: new version of JORAM to be expected soon</subtitle>
+
+      <p>A new version of JORAM will soon be available (likely next week). JORAM 3.0 is a
+      complete refactoring of JORAM with better conformance,
+      scalability and performance. It should also be integrated with
+      the next version of JOnAS. Stay tuned for future information.
+      </p>
+
+      <hr/>
+      
+      <subtitle>February, 8th 2002: mirror site in the United States</subtitle>
 
       <p>A <connect
       href="http://objectweb.cs.rice.edu/index.xml">mirror
