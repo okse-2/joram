@@ -128,6 +128,24 @@
     </javac>
   </target>
   
+  <target name="compile.ashnasoft" depends="prepare.providers"
+    description="--> Compile AshnaSoft specific classes">
+    <javac srcdir="${src.dir}:${obj.dir}"
+      destdir="${obj.dir}"
+      debug="true"
+      deprecation="${deprecation}"
+      optimize="false"
+      nowarn="${nowarn}"
+      verbose="${verbose}">
+      
+      <classpath refid="project.class.path"/>
+      
+      <include name="org/objectweb/jtests/providers/admin/AshnaMQAdmin.java"/>
+      <!-- Excludes CVS directories -->
+      <exclude name="**/CVS/**/*.java"/>
+    </javac>
+  </target>
+  
   <target name="compile.fiorano" depends="prepare.providers"
     description="--> Compile Fiorano specific classes">
     <javac srcdir="${src.dir}:${obj.dir}"
