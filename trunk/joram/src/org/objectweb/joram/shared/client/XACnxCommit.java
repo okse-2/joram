@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -26,57 +27,89 @@ package org.objectweb.joram.shared.client;
 import java.util.*;
 
 /**
- * An <code>XASessCommit</code> instance is used by an <code>XASession</code>
+ * An <code>XACnxCommit</code> instance is used by an <code>XAConnection</code>
  * for commiting the messages and acknowledgements it sent to the proxy.
  */
-public class XASessCommit extends AbstractJmsRequest
+public class XACnxCommit extends AbstractJmsRequest
 {
-  /** Identifier of the resource and the commiting transaction. */
-  private String id;
+  /** Transaction branch qualifier. */
+  private byte[] bq;
+  /** Transaction identifier format. */
+  private int fi;
+  /** Global transaction identifier. */
+  private byte[] gti;
 
 
   /**
-   * Constructs an <code>XASessCommit</code> instance.
+   * Constructs an <code>XACnxCommit</code> instance.
    *
-   * @param id  Identifier of the resource and the commiting transaction.
+   * @param bq        Transaction branch qualifier.
+   * @param fi        Transaction identifier format.
+   * @param gti       Global transaction identifier.
    */
-  public XASessCommit(String id)
+  public XACnxCommit(byte[] bq, int fi, byte[] gti)
   {
     super();
-    this.id = id;
+    this.bq = bq;
+    this.fi = fi;
+    this.gti = gti;
   }
 
   /**
-   * Constructs an <code>XASessCommit</code> instance.
+   * Constructs an <code>XACnxCommit</code> instance.
    */
-  public XASessCommit()
+  public XACnxCommit()
   {}
 
 
-  /** Sets the identifier. */
-  public void setId(String id)
+  /** Returns the transaction branch qualifier. */
+  public byte[] getBQ()
   {
-    this.id = id;
+    return bq;
   }
 
-  /** Returns the identifier of the resource and the commiting transaction. */
-  public String getId()
+  /** Returns the transaction identifier format. */
+  public int getFI()
   {
-    return id;
+    return fi;
+  }
+
+  /** Returns the global transaction identifier. */
+  public byte[] getGTI()
+  {
+    return gti;
+  }
+
+  public void setBQ(byte[] bq)
+  {
+    this.bq = bq;
+  }
+
+  public void setFI(int fi)
+  {
+    this.fi = fi;
+  }
+
+  public void setGTI(byte[] gti)
+  {
+    this.gti = gti;
   }
 
   public Hashtable soapCode() {
     Hashtable h = super.soapCode();
-    if (id != null)
-      h.put("id",id);
+    h.put("bq",bq);
+    h.put("fi", new Integer(fi));
+    h.put("gti", gti);
     return h;
   }
 
   public static Object soapDecode(Hashtable h) {
-    XASessCommit req = new XASessCommit();
+    XACnxCommit req = new XACnxCommit();
     req.setRequestId(((Integer) h.get("requestId")).intValue());
     req.setTarget((String) h.get("target"));
-    req.setId((String) h.get("id"));
+    req.setBQ((byte[]) h.get("bq"));
+    req.setFI(((Integer) h.get("fi")).intValue());
+    req.setGTI((byte[]) h.get("gti"));
     return req;
   }
 }
