@@ -3,13 +3,13 @@
 <project default="ship.joram" basedir=".">
 
   <!-- JORAM shipment target -->
-  <target name="ship.joram"
+  <target name="ship.joram" depends="clean"
           description="builds and ships Joram">
     <ant dir="." antfile="joram.xml" target="ship"/>
   </target>
 
   <!-- kJORAM shipment target -->
-  <target name="ship.kjoram"
+  <target name="ship.kjoram" depends="clean"
           description="builds and ships kJoram">
     <ant dir="." antfile="kjoram.xml" target="ship"/>
   </target>
