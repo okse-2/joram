@@ -114,4 +114,23 @@ public class TopicSoapConnectionFactory
                                 .toString()));
     return ref;
   }
+
+  /**
+   * Decodes a <code>TopicSoapConnectionFactory</code> which travelled through
+   * the SOAP protocol.
+   */
+  public Object decode(java.util.Hashtable h)
+  {
+    String host = (String) h.get("host");
+    int port = ((Integer) h.get("port")).intValue();
+    int timer = ((Integer) h.get("soapCnxPendingTimer")).intValue();
+
+    TopicSoapConnectionFactory ret =
+      new TopicSoapConnectionFactory(host, port, timer);
+    FactoryParameters params = ret.getParameters();
+    params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
+    params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
+
+    return ret;
+  }
 }
