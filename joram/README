@@ -1,6 +1,6 @@
 A lib/ directory must be created in the current directory
 and the following libraries must be added in it:
-jms.jar, jndi.jar, jta-spec1_0_1.jar
+jms.jar, jndi.jar, jta-spec1_0_1.jar, xerces.jar
 
 Edit and execute joramConfig.sh:
  - source joramConfig.sh
