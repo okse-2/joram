@@ -663,7 +663,9 @@ public final class AgentServer {
       cluster = a3config.getCluster(sid);
 
       // add cluster properties
-      if (cluster != null && cluster.properties != null) {
+      if (cluster != null 
+          && cluster.properties != null 
+          && cluster.properties.size() > 0) {
         Enumeration e = cluster.properties.elements();
         do {
           A3CMLProperty p = (A3CMLProperty) e.nextElement();
