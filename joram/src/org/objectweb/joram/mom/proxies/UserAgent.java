@@ -99,25 +99,6 @@ public class UserAgent extends Agent
         firstTime + ')');
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
-    MXWrapper.registerMBean(proxyImpl,
-                            "JORAM proxies",
-                            getId().toString(),
-                            "JmsProxy",
-                            null);
-  }
-
-  /** Finalizes the agent before it is garbaged. */
-  public void agentFinalize(boolean lastTime) {
-    try {
-      MXWrapper.unregisterMBean("JORAM proxies",
-                                getId().toString(),
-                                "JmsProxy",
-                                null);
-    } catch (Exception exc) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, "", exc);
-    }
   }
 
   /**
