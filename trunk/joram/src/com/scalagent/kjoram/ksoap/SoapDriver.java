@@ -37,6 +37,7 @@ class SoapDriver extends com.scalagent.kjoram.Driver {
   String serviceUrl = null;
   int cnxId = -1;
   HttpConnection httpConnection = null;
+  String name = null;
 
   /**
    * Constructs a <code>SoapDriver</code> daemon.
@@ -50,6 +51,7 @@ class SoapDriver extends com.scalagent.kjoram.Driver {
     this.serviceUrl = serviceUrl;
     this.cnxId = cnxId;
     httpConnection = new HttpConnection(serviceUrl);
+    name = cnx.getUserName();
   }
 
 
@@ -63,7 +65,7 @@ class SoapDriver extends com.scalagent.kjoram.Driver {
     AbstractJmsReply reply = null;
 
     try {
-      reply = httpConnection.call(new GetReply(cnxId),cnxId);
+      reply = httpConnection.call(new GetReply(name,cnxId),name,cnxId);
 
       if (reply == null) return null;
     } catch (Exception exc) {

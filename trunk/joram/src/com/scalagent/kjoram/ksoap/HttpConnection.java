@@ -61,7 +61,7 @@ public class HttpConnection {
    * @param request  The request to send.
    * @return The server reply.
    */
-  public AbstractJmsReply call(AbstractJmsRequest request,int cnxId) throws Exception {
+  public AbstractJmsReply call(AbstractJmsRequest request,String name, int cnxId) throws Exception {
       SoapObject sO;
       Object result = null;
 
@@ -74,7 +74,7 @@ public class HttpConnection {
                            "," +  cnxId + ")");
 
         // Transform JmsRequest in a SoapObject
-        sO = ConversionSoapHelper.getSoapObject(request,cnxId);
+        sO = ConversionSoapHelper.getSoapObject(request,name,cnxId);
 
         // Send the request and wait the reply
         int timer=10;

@@ -77,7 +77,7 @@ public class SoapConnectionFactory extends com.scalagent.kjoram.ConnectionFactor
                             ((Integer) h.get("port")).intValue());
     params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
     params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
-    params.soapCnxPendingTimer = ((Integer) h.get("soapCnxPendingTimer")).intValue();
+    params.soapCnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
     ret.setParameters(params);
     ret.setId(ret.getClass().getName() + ":" + 
               params.getHost()+ ":" + params.getPort());

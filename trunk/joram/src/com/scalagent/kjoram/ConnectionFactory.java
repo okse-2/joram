@@ -109,7 +109,7 @@ public abstract class ConnectionFactory
     h.put("port",new Integer(params.getPort()));
     h.put("connectingTimer",new Integer(params.connectingTimer));
     h.put("txPendingTimer",new Integer(params.txPendingTimer));
-    h.put("soapCnxPendingTimer",new Integer(params.soapCnxPendingTimer));
+    h.put("cnxPendingTimer",new Integer(params.soapCnxPendingTimer));
     return h;
   }
 

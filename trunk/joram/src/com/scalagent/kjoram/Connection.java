@@ -84,6 +84,7 @@ public class Connection
    */
   Hashtable repliesTable;
 
+  String name = null;
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -105,6 +106,7 @@ public class Connection
       repliesTable = new Hashtable();
     
       this.connectionImpl = connectionImpl;
+      name = connectionImpl.getUserName();
 
       // Creating and starting the connection's driver:
       driver = connectionImpl.createDriver(this);
@@ -128,6 +130,10 @@ public class Connection
       JoramTracing.log(JoramTracing.ERROR, jE);
       throw jE;
     }
+  }
+
+  public String getUserName() {
+    return name;
   }
 
   /** String image of the connection. */

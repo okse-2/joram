@@ -31,8 +31,11 @@ import com.scalagent.kjoram.jms.AbstractJmsRequest;
 class GetReply extends AbstractJmsRequest {
 
   int cnxId = -1;
+  String name = null;
 
-  GetReply(int cnxId) {
+  GetReply(String name,
+           int cnxId) {
+    this.name = name;
     this.cnxId = cnxId;
   }
 }

@@ -40,7 +40,9 @@ public class ConversionSoapHelper {
   /**
    * convert an AbstractJmsRequest to a SoapObject
    */
-  public static SoapObject getSoapObject(AbstractJmsRequest request, int cnxId) 
+  public static SoapObject getSoapObject(AbstractJmsRequest request, 
+                                         String name, 
+                                         int cnxId) 
     throws MessageFormatException {
     SoapObject sO = null;
 
@@ -48,6 +50,7 @@ public class ConversionSoapHelper {
       sO = getSoapObject((GetReply)request);
     } else {
       sO = new SoapObject(NAMESPACE, "send");
+      sO.addProperty("name",name);
       sO.addProperty("cnxId",new Integer(cnxId));
       Hashtable h = request.soapCode();
       if (h != null)
@@ -135,6 +138,7 @@ public class ConversionSoapHelper {
 
   static private SoapObject getSoapObject(GetReply request) {
     SoapObject sO = new SoapObject(NAMESPACE, "getReply");
+    sO.addProperty("name", request.name);
     sO.addProperty("cnxId", new Integer(request.cnxId));
     return sO;
   }
