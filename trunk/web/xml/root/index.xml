@@ -42,11 +42,6 @@
       interface. Old administration codes should go on working even if they now
       use deprecated methods. 
       </p>
-      <p>Check the <a href="doc/index.html">available documentation</a> for
-      the new JORAM tutorial and the samples for new administration code
-      examples.
-      </p>
-
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
@@ -54,7 +49,8 @@
       <table border="0">
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
-	  <td valign="middle">Current release: 3.3.1</td>
+	  <td valign="middle"><p>Current packaged release: 3.3.1</p>
+	                      <p>Latest CVS tag: 3.4.1</p></td>
 	</tr>
       </table>
       
@@ -76,11 +72,14 @@
             interfaces</li>
           <li>Full backward compatibility with JMS 1.0.2b compliant
             applications</li>
+          <li>TCP and SOAP (HTTP/XML) client-server communication
+              protocols</li>
           <li>Hierarchical topics</li>
           <li>Message selection</li>
           <li>Plus a timer for pending transacted sessions</li>
           <li>"Clusterizable" topics</li>
           <li>Configurable dead message queue feature</li>
+          <li>Monitoring methods</li>
           <li>Plus a "light" JNDI 1.1.2 implementation</li>
         </ul>
 
@@ -98,7 +97,7 @@
 	also welcomes <em>external contributions</em>. Interested?
 	Contact <a
 	href="mailto:joram-team@objectweb.org">us</a> or check the
-        <a href="dev/contrib.html">developer's corner</a>.
+        <a href="dev/corner.html">developer's corner</a>.
         </p>
 
       </s2>  
