@@ -1,0 +1,55 @@
+###############################################################################
+# 2004/11/05 | Joram 4.1.2 release.
+###############################################################################
++==============================================================================
+| 2004/11/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| fix bug (NullPointerException) in 
+| OutboundConnectionFactory.java, cxManager can be null.
+| ProxyImpl.java in setCtx(int key) if key <0 throw a StateException.
++==============================================================================
+| 2004/10/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Corrects mistakes in ra.xml and ra-remote.xml files.
+|       - Removes empty (and useless) <icon></icon> tags.
+|       - Remove spaces and eof lines in the <xxx-class> tags and
+|       <xxx-interface> tags.
+###############################################################################
+# 2004/10/13 | Joram 4.1.1 release.
+###############################################################################
+| 2004/10/11 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Allows to fix inFlow value through ConnectionManager.inFlow property.
++==============================================================================
+| 2004/10/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Allows change of default identity through JoramDfltLogin and
+| JoramDfltPassword properties.
+| Changes network architecture:
+|	- reconnection after persistancy failure,
+|	- suppression of unused components: clock, update, etc.
++==============================================================================
+| 2004/10/01 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Majors changes in network architecture:
+|       - Removes old unused components.
+|       - Adds PoolNetwork component (beta).
+|       - Allows connection of reseted (or non persistent) server.
+|       - Numerous fixes. 
+| Allows swap out of messages in message consumer (MessageVector impl.).
++==============================================================================
+| 2004/09/29 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Bug fixes in RA descriptors.
+| Uses of JAXP classes and interfaces (xerces no more needed).
++==============================================================================
+| 2004/09/22 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Bug fixes in TCP client/server connection.
++==============================================================================
+| 2004/09/15 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Minor fixes in ship and releases processus.
+###############################################################################
+# 2004/09/13 | Joram 4.1.0 release.
+###############################################################################
