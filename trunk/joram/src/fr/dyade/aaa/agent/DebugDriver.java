@@ -42,7 +42,7 @@ import java.util.*;
   * @see	fr.dyade.aaa.ip.DebugProxy
   */
 public class DebugDriver implements NotificationInputStream {
-public static final String RCS_VERSION="@(#)$Id: DebugDriver.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: DebugDriver.java,v 1.5 2001-05-14 16:26:39 tachkeni Exp $";
 
   /** token marking end of command in stream */
   static final char commandTerminator = ';';

@@ -21,18 +21,15 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
 import fr.dyade.aaa.util.*;
 
-
 class DriverOut extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.7 2001-05-04 14:54:50 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.8 2001-05-14 16:26:39 tachkeni Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;

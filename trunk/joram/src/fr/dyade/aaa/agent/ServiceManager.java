@@ -40,7 +40,7 @@ import fr.dyade.aaa.util.*;
  */
 public class ServiceManager implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.1 2001-05-04 15:04:04 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-05-14 16:26:42 tachkeni Exp $"; 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
   

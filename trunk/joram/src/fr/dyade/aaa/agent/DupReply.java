@@ -26,7 +26,7 @@ package fr.dyade.aaa.agent;
 
 public class DupReply extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DupReply.java,v 1.4 2001-05-04 14:54:50 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DupReply.java,v 1.5 2001-05-14 16:26:39 tachkeni Exp $"; 
 
   public AgentId id;
 

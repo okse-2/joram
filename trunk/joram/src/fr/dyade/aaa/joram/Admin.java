@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.joram;
 
 import java.net.*;
@@ -53,7 +51,6 @@ import javax.jms.*;
  * @see         javax.jms.QueueConnectionFactory
  * @see         javax.jms.TopicConnectionFactory
  */
-
 public class Admin {
   /** host adress */
   private InetAddress addr;
@@ -127,7 +124,15 @@ public class Admin {
       oos.writeObject(msgMOM);
       oos.flush();
       oos.reset();
-      sock.close();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
       return new fr.dyade.aaa.joram.TopicConnectionFactory(agentClient,addr,port);
     } else 
       return null;
@@ -158,7 +163,15 @@ public class Admin {
       oos.writeObject(msgMOM);
       oos.flush();
       oos.reset();
-      sock.close();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
       return new fr.dyade.aaa.joram.QueueConnectionFactory(agentClient,addr,port);
     } else 
       return null;
@@ -189,7 +202,15 @@ public class Admin {
       oos.writeObject(msgMOM);
       oos.flush();
       oos.reset();
-      sock.close();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
       return new fr.dyade.aaa.joram.XATopicConnectionFactory(agentClient,addr,port);
     } else 
       return null;
@@ -220,7 +241,15 @@ public class Admin {
       oos.writeObject(msgMOM);
       oos.flush();
       oos.reset();
-      sock.close();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
       return new fr.dyade.aaa.joram.XAQueueConnectionFactory(agentClient,addr,port);
     } else 
       return null;
@@ -243,31 +272,39 @@ public class Admin {
       oos.writeObject(msgMOM);
       oos.flush();
       oos.reset();
-      sock.close();
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      try {
+	sock.close();
+      } catch (IOException exc) {}
     }
   }
   
   /**
    * close ObjectOutputStream, ObjectInputStream and Socket
    */
-  public void close() throws JMSException {
-    try {
-      if (oos != null) {
+  public void close() {
+    if (oos != null) {
+      try {
 	oos.close();
-	oos = null;
-      }
-      if (ois != null) {
+      } catch (IOException exc) {}
+      oos = null;
+    }
+    if (ois != null) {
+      try {
 	ois.close();
-	ois = null;
-      }
-      if ( sock != null ) {
+      } catch (IOException exc) {}
+      ois = null;
+    }
+    if (sock != null) {
+      try {
 	sock.close();
-	sock = null;
-      }
-    } catch (Exception exc) {
-      javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-      except.setLinkedException(exc);
-      throw(except);
+      } catch (IOException exc) {}
+      sock = null;
     }
   }
   

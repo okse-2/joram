@@ -44,7 +44,6 @@ public class CommonClientAAA implements java.io.Serializable
   protected AgentClientItf agentClient; 
 	
   /** counter for message identifier */
-  private String stringID;
   private static long msgCounter = 0;
 	
   /** vector containing all of the Temporary Queue or Topic
@@ -129,7 +128,6 @@ public class CommonClientAAA implements java.io.Serializable
 
 
   public CommonClientAAA(AgentClientItf agentClient) {
-    stringID = "a";
     this.agentClient = agentClient;
     subscriptionTable = new Hashtable();
     exceptionModeTable = new Hashtable();
@@ -436,6 +434,7 @@ public class CommonClientAAA implements java.io.Serializable
     // Building and registering the subscription.
     ClientSubscription sub = new ClientSubscription(notSub.noLocal, notSub.selector,
       from, notSub.theme, notSub.driverKey, notSub.connectionConsumer);
+    sub.setClosedSession(false);
 
     subscriptionTable.put(key, sub);
 
@@ -1000,9 +999,11 @@ public class CommonClientAAA implements java.io.Serializable
     ClientSubscription sub = (ClientSubscription) subscriptionTable.get(key);
 
     if (sub != null) {
-      // If the subscription already exists, just updating the sessionID and
-      // driverKey parameters, and register the subscription again.
-      //sub.setSessionID(msgSub.sessionID);
+      // If the subscription already exists, checking that it is not an
+      // other client's, updating the driverKey parameter, and registering
+      // the subscription again.
+      if (sub.getClosedSession()) {
+      sub.setClosedSession(false);
       sub.setDriverKey(drvKey);
 
       if (!msgSub.connectionConsumer) {
@@ -1025,7 +1026,14 @@ public class CommonClientAAA implements java.io.Serializable
       }
       else 
         connectionConsumerKeyTable.put(new Integer(drvKey), key);
+    }
+    else {
+      MOMException exc = new MOMException("Durable subscription already exists");
+      ExceptionMessageMOMExtern msgExc =
+        new ExceptionMessageMOMExtern(msgSub.getMessageMOMExternID(), exc, drvKey);
+	  agentClient.sendMessageMOMExtern(msgExc);
     } 
+    }
     else {
       // If sub is null, the subscription is new.
       NotificationSubscription notSub = new fr.dyade.aaa.mom.NotificationSubscription(msgSub);
@@ -1504,7 +1512,7 @@ System.out.println("CommonClientAAA: calling sendMessageMOMExtern, 35");
       else {
         ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
         clientSub.setMessageListener(false);
-        //clientSub.setSessionID(null);
+        clientSub.setClosedSession(true);
         clientSub.putBackNonAckMessages();
       }
     }}
@@ -1637,7 +1645,7 @@ SessionSubscription sessionSub = null;
           else {
             ClientSubscription clientSub = (ClientSubscription) subscriptionTable.get(subKey);
             clientSub.setMessageListener(false);
-            //clientSub.setSessionID(null);
+            clientSub.setClosedSession(true);
             clientSub.putBackNonAckMessages();
           }
         }
@@ -2029,39 +2037,9 @@ SessionSubscription sessionSub = null;
     private String calculateMessageID() {
       return (new Long(msgCounter++)).toString();
     }
-    /** incrementation of the counter with the syntax
-     *	a,b,c,...,z,aa,ab,ac,...,az,ba,... 
 
-    private String calculateMessageID() {
-	String MessageID;
-	char[] chtmp;
-	int i=0;
-	int length = stringID.length();
-		
-	MessageID = ((Agent)agentClient).getId().toString()+"_"+stringID ;
-			
-	chtmp = stringID.toCharArray();
-	while(i<length) {
-	    if(chtmp[length-1-i]=='z') {
-		chtmp[length-1-i] = 'a';
-		i++;
-	    }
-	    else {
-		chtmp[length-1-i] = (char) (chtmp[length-1-i] + 1);
-		break;
-	    }
-	} 		
-	if(i==length)
-	    stringID = (new String(chtmp))+"a";
-	else
-	    stringID = (new String(chtmp));
-		
-	return MessageID;
-    }*/
-	
     /** checking the message and add the field missing */
     private void checking(fr.dyade.aaa.mom.Message msg) {
-		
     } 
 
     /** sends a warning to the administrator of the MOM */

@@ -70,6 +70,9 @@ public class ClientSubscription implements java.io.Serializable
   /** Synchronous request. */
   private SynchronousReceptionRequestMsg requestMsg = null;
 
+  /** Boolean telling if the client has disconnected(durable only). */
+  private boolean closedSession;
+
   /** Constructor. */
   public ClientSubscription(boolean noLocal, String selector,
     AgentId topicID, String theme, int drvKey,
@@ -276,6 +279,16 @@ public class ClientSubscription implements java.io.Serializable
     SynchronousReceptionRequestMsg req = requestMsg;
     requestMsg = null;
     return req;
+  }
+
+  public void setClosedSession(boolean closedSession)
+  {
+    this.closedSession = closedSession;
+  }
+
+  public boolean getClosedSession()
+  {
+    return closedSession;
   }
 
 }

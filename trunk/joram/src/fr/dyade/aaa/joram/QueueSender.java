@@ -112,7 +112,8 @@ public class QueueSender extends fr.dyade.aaa.joram.MessageProducer implements j
 		msgSend.message.setJMSDeliveryMode(1);
 		/* add the message in the vector waiting for the commit */
 		refSession.transactedMessageToSendVector.addElement(msgSend);
-	    } else if(message.getJMSDeliveryMode()==fr.dyade.aaa.mom.Message.PERSISTENT) {
+	    } else if(message.getJMSDeliveryMode()!=fr.dyade.aaa.mom.Message.PERSISTENT &&
+                  message.getJMSDeliveryMode()!=fr.dyade.aaa.mom.Message.NON_PERSISTENT) {
 				/* deliver an agreement to the client if Persistent */
 		Object obj = new Object();
 			

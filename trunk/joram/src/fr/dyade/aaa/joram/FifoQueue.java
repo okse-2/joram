@@ -65,11 +65,9 @@ public class FifoQueue extends Vector {
    *
    * @return     the object at the top of this queue. 
    */
-  public synchronized Object get() {
+  public synchronized Object get() throws InterruptedException {
     while (size() == 0) {
-      try {
 	wait();
-      } catch (InterruptedException e) {}
     }
     return elementAt(0);
   }

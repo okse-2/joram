@@ -20,9 +20,8 @@
 # portions created by Dyade are Copyright Bull and Copyright INRIA.
 # All Rights Reserved.
 #
-
-
 LIBRARIES = joram.jar
+
 joram.jar_CLASSES = \
 	CURL \
 	Debug \
@@ -67,7 +66,7 @@ joram.jar_CLASSES = \
 	XAQueueConnectionFactory \
 	XATopicConnectionFactory \
 	XidTable \
-    ConnectionConsumer
+	ConnectionConsumer
 
 LIBS = a3mom.jar:jms.jar:jndi.jar:jta-spec1_0_1.jar
 

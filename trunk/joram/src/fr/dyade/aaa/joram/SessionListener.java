@@ -28,6 +28,8 @@ package fr.dyade.aaa.joram;
  * asynchronously consuming messages destinated to
  * its Session <code>MessageConsumer</code>s.
  *
+ * @see fr.dyade.aaa.util.Daemon
+ *
  * @author Frederic Maistre
  */
 class SessionListener extends fr.dyade.aaa.util.Daemon
@@ -54,10 +56,18 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
 
   public void run()
   {
+  try {
     while (isRunning) {
-      try {
-        if (!topic) {
-        Object key = session.listenersRequests.get();  
+      canStop = true;
+      Object key;
+
+      if (!topic) {
+        try {
+          key = session.listenersRequests.get();  
+        } catch (InterruptedException iE) {
+          continue;
+        }
+        canStop = false;
 
         fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern receivedMsg = 
           (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern)
@@ -76,8 +86,8 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
                 fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE,
                 new Long(session.sessionID).toString());
 
-              //session.sendToConnection(msgAck);
-              connection.sendMsgToAgentClient(msgAck);
+              session.sendToConnection(msgAck);
+              //connection.sendMsgToAgentClient(msgAck);
             }
             else {
               session.lastNotAckVector.addElement(receivedMsg);
@@ -109,8 +119,14 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
         connection.sendMsgToAgentClient(reqMsg);
         }
         else {
-          fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern topicMsg =
-            (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) session.messagesToDeliver.get();
+          fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern topicMsg;
+          try {
+            topicMsg = (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern)
+              session.messagesToDeliver.get();
+          } catch (InterruptedException iE) {
+            continue;
+          }
+          canStop = false;
 
           fr.dyade.aaa.mom.TopicNaming topic = new fr.dyade.aaa.mom.TopicNaming
             (((fr.dyade.aaa.mom.TopicNaming) topicMsg.message.getJMSDestination()).getTopicName(),
@@ -133,7 +149,7 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
             
                 else if (session.acknowledgeMode ==
                   fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE)
-                  connection.sendMsgToAgentClient(msgAck);
+                  session.sendToConnection(msgAck);
 
                 else {
                   topicMsg.message.setRefSessionItf(session);
@@ -147,17 +163,22 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
             }
           }
         }
-      } catch (Exception e) {
-        if (e instanceof InterruptedException)
-          break;
-        else
-          System.out.println("Exception " + e);
       }
+    } catch (Exception e) {
+    } finally {
+      isRunning = false;
     }
   }
 
 
-  /** Daemon class abstract method. */
-  public void shutdown() {}
+  public void shutdown()
+  {
+    while (thread.isAlive()) {
+      try {
+        thread.sleep(1);
+      } catch (InterruptedException iE) {}
+    }
+    thread = null;
+  }
 
 }

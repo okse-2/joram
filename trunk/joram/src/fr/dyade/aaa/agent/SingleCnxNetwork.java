@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.2 2001-05-04 14:54:53 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.3 2001-05-14 16:26:42 tachkeni Exp $";
 
   Vector sendList;
 
@@ -228,9 +228,15 @@ class SingleCnxNetwork extends StreamNetwork {
 	    if (Debug.debug && Debug.message)
 	      Debug.trace("Receive ack", false);
 	
-	    oos.close();
-	    is.close();
-	    socket.close();
+	    try {
+	      oos.close();
+	    } catch (IOException exc) {}
+	    try {
+	      is.close();
+	    } catch (IOException exc) {}
+	    try {
+	      socket.close();
+	    } catch (IOException exc) {}
 	  } catch (IOException exc) {
 	    if (Debug.debug && Debug.message)
 	      Debug.trace("Move msg in watchdog list", exc);
@@ -525,9 +531,15 @@ class SingleCnxNetwork extends StreamNetwork {
 		  if (Debug.debug && Debug.message)
 		    Debug.trace("Receive ack", false);
 	    
-		  oos.close();
-		  is.close();
-		  socket.close();
+		  try {
+		    oos.close();
+		  } catch (IOException exc) {}
+		  try {
+		    is.close();
+		  } catch (IOException exc) {}
+		  try {
+		    socket.close();
+		  } catch (IOException exc) {}
 
 		  AgentServer.transaction.begin();
 		  //  Deletes the processed notification

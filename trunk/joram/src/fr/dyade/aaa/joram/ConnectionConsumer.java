@@ -47,6 +47,8 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
   private fr.dyade.aaa.joram.Session session;
   private int counter = 1;
 
+  private Connection connection;
+
 
   /** Constructor. */
   public ConnectionConsumer(Destination destination, String selector, 
@@ -57,6 +59,14 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
     this.ssp = ssp;
     this.maxMessages = maxMessages;
   }
+
+
+  /** Method setting the QueueConnectionListener, if any. */
+  public void setConnection(Connection connection)
+  {
+    this.connection = connection;
+  }
+
 
   /** Method returning the ServerSessionPool parameter. */
   public ServerSessionPool getServerSessionPool() throws JMSException
@@ -93,11 +103,19 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
       throw (e);
     }
   }
-   
+  
+ 
   /** Closing method. */ 
   public void close() 
   {
-  System.gc();
+    connection.connectionConsumer = null;
+
+    // Stopping the queueConnectionListener if needed.
+    if (connection instanceof QueueConnection) {
+      ((QueueConnection) connection).queueConnectionListener.stop();
+    }
+
+    System.gc();
   }
 
 }
