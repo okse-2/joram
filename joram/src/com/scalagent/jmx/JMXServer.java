@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,12 +15,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package com.scalagent.jmx;
 
 import java.io.*;
 import java.util.*;
 
+// For JDK1.5: import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -46,6 +50,7 @@ public class JMXServer implements MXServer {
 
   public JMXServer() {
     this.mxserver = MBeanServerFactory.createMBeanServer("AgentServer");;
+//  For JDK1.5: this.mxserver = ManagementFactory.getPlatformMBeanServer();
     this.domain = "AgentServer";
     MXWrapper.setMXServer(this);
   }
