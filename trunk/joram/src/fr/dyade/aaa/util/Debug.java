@@ -42,7 +42,7 @@ public class Debug {
   /** Property name for monolog logger factory implementation class */
   public final static String LOGGER_FACTORY_PROPERTY = "LOGGER_FACTORY";
   /** Default classname for monolog logger factory implementation */
-  public final static String DEFAULT_LOGGER_FACTORY = "org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory";
+  public final static String DEFAULT_LOGGER_FACTORY = "org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory";
   /**
    * Property name for A3 debug configuration directory.
    * If not defined, the configuration file is searched from the search
@@ -323,23 +323,28 @@ public class Debug {
 //     org.objectweb.util.monolog.wrapper.common.AbstractFactory.debug = true;
 
     try {
-      factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
-    } catch(Exception exc) {
+//       factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
+      System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
+                         debugFileName);
+      factory = org.objectweb.util.monolog.Monolog.init();
+    } catch(Throwable exc) {
       System.err.println("Unable to instantiate monolog wrapper");
       exc.printStackTrace();
     }
 
-    if (doConfiguration) {
-      Properties prop = new Properties();
-      prop.put(Configurable.LOG_CONFIGURATION_TYPE, Configurable.PROPERTY);
-      prop.put(Configurable.LOG_CONFIGURATION_FILE, debugFileName);
-      if (debugDir == null) {
-        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
-      } else {
-        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
-      }
-      ((Configurable) factory).configure(prop);
-    }
+//     if (doConfiguration) {
+//       Properties prop = new Properties();
+//       prop.put(Configurable.LOG_CONFIGURATION_TYPE, Configurable.PROPERTY);
+//       prop.put(org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.JAVALOG_CONFIGURATION, org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.PROPERTY);
+//       prop.put(Configurable.LOG_CONFIGURATION_FILE, debugFileName);
+//       prop.put(org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.JAVALOG_CONFIGURATION_FILE, debugFileName);
+//       if (debugDir == null) {
+//         prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
+//       } else {
+//         prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
+//       }
+//       ((Configurable) factory).configure(prop);
+//     }
   }
 
   public static Logger getLogger(String topic) {
