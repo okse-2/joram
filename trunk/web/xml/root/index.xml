@@ -57,7 +57,10 @@
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
-      <s2 name="More than 13,000 standalone downloads">
+      <!--s2 name="As a standalone software, JORAM has been downloaded more
+               than 14,000 times"-->
+      <subtitle>As a standalone software, JORAM has been downloaded more
+                than 14,000 times</subtitle>
 
       <table border="0">
 	<tr>
@@ -77,7 +80,7 @@
       <p> JORAM, the MOM it gives access to and the Scalagent
       platform are <strong>open source</strong> softwares and released under
       the <strong>LGPL</strong> license.</p>
-      </s2>
+      <!--/s2-->
 
       <s2 name="Specification">
 
