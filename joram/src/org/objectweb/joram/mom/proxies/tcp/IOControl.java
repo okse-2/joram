@@ -38,9 +38,9 @@ public class IOControl {
 
   private Socket sock;
 
-  private ObjectOutputStream oos;
+  private NetOutputStream nos;
 
-  private ObjectInputStream ois;
+  private BufferedInputStream bis;
 
   private int windowSize;
 
@@ -51,8 +51,7 @@ public class IOControl {
   }
     
   public IOControl(Socket sock,
-		   long inputCounter) 
-    throws IOException {    
+		   long inputCounter)  throws IOException {    
     windowSize = Integer.getInteger(
       fr.dyade.aaa.util.ReliableTcpConnection.WINDOW_SIZE_PROP_NAME,
       fr.dyade.aaa.util.ReliableTcpConnection.DEFAULT_WINDOW_SIZE).intValue();
@@ -60,13 +59,8 @@ public class IOControl {
     this.inputCounter = inputCounter;
     this.sock = sock;
 
-    oos = new ObjectOutputStream(
-      sock.getOutputStream());
-    oos.flush();
-
-    ois = new ObjectInputStream(
-      new BufferedInputStream(
-        sock.getInputStream()));
+    nos = new NetOutputStream(sock);
+    bis = new BufferedInputStream(sock.getInputStream());
   }
 
   public synchronized void send(ProxyMessage msg) throws IOException {
@@ -75,16 +69,49 @@ public class IOControl {
         BasicLevel.DEBUG, "IOControl.send(" + 
         msg + ')');
     try {
-      oos.writeLong(msg.getId());
-      oos.writeLong(msg.getAckId());
-      oos.writeObject(msg.getObject());
-      oos.reset();
+      nos.send(msg.getId(), msg.getAckId(), msg.getObject());
       unackCounter = 0;
     } catch (IOException exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       close();
       throw exc;
+    }
+  }
+
+  static class NetOutputStream {
+    private ByteArrayOutputStream baos = null;
+    private ObjectOutputStream oos = null;
+    private OutputStream os = null;
+
+    static private final byte[] streamHeader = {
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
+    };
+
+    NetOutputStream(Socket sock) throws IOException {
+      baos = new ByteArrayOutputStream(1024);
+      oos = new ObjectOutputStream(baos);
+      baos.reset();
+      os = sock.getOutputStream();
+    }
+
+    void send(long id, long ackId, Object msg) throws IOException {
+      try {
+        baos.write(streamHeader, 0, 4);
+        oos.writeLong(id);
+        oos.writeLong(ackId);
+        oos.writeObject(msg);
+        oos.flush();
+
+        baos.writeTo(os);
+        os.flush();
+      } finally {
+        oos.reset();
+        baos.reset();
+      }
     }
   }
   
@@ -94,6 +121,7 @@ public class IOControl {
         BasicLevel.DEBUG, "IOControl.receive()");
     try {
       while (true) {
+        ObjectInputStream ois = new ObjectInputStream(bis);
         long messageId = ois.readLong();
         long ackId = ois.readLong();
         Object obj = ois.readObject();
@@ -126,10 +154,10 @@ public class IOControl {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "IOControl.close()");
     try { 
-      ois.close();
+      if (bis != null) bis.close();
     } catch (IOException exc) {}
     try { 
-      oos.close();
+      sock.getOutputStream().close();
     } catch (IOException exc) {}
     try { 
       sock.close();
