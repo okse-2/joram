@@ -385,7 +385,7 @@ public final class AgentId implements Serializable {
    */
   public final String toString() {
     if (str == null) 
-      str = "#" + from + '.' + to + '.' + stamp;
+      str = StringId.toStringId('#', '.', from, to, stamp);
     return str;
   }
 
