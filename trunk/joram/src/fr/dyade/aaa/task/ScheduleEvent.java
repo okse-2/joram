@@ -51,7 +51,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class ScheduleEvent extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: ScheduleEvent.java,v 1.3 2002-10-21 08:41:14 maistrfr Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ScheduleEvent.java,v 1.4 2002-12-11 11:26:53 maistrfr Exp $"; 
 
 
   /** event and condition name */

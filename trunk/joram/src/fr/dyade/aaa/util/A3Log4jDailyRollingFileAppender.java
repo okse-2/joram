@@ -36,15 +36,24 @@ import fr.dyade.aaa.agent.AgentServer;
  * agent server id.
  */
 public class A3Log4jDailyRollingFileAppender extends DailyRollingFileAppender {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: A3Log4jDailyRollingFileAppender.java,v 1.1 2002-10-21 08:42:00 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jDailyRollingFileAppender.java,v 1.2 2002-12-11 11:27:00 maistrfr Exp $";
 
   /**
    * The default constructor does not do anything. 
    */
   public A3Log4jDailyRollingFileAppender() {
     super();
-    fileName = "server#" + AgentServer.getServerId() + ".audit";
+    short id = AgentServer.getServerId();
+    if (id != -1) {
+      fileName = "server#" + id + ".audit";
+    } else if (fileName == null) {
+      try {
+        fileName = File.createTempFile("client", ".audit", new File(".")).getPath();
+      } catch (Exception exc) {
+        fileName = "client.audit";
+      }
+    }
     activateOptions();
   }
 }
