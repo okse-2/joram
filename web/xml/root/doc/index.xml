@@ -47,6 +47,9 @@
       <ul>
         <li><a href="../current/doc/joram3_3_ADV_CFG.pdf">Advanced</a>
         configuration tips for the 3.3 and later releases.</li>
+        <li>Update of the <a href="../current/doc/joram_ADMIN.pdf">
+        administration</a> guide for the latest synchronous admin procotol,
+        available through CVS, no tag.</li>
       </ul>
     </s1>
 
