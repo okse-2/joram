@@ -1,6 +1,5 @@
 <!-- ===================================================================== -->
 <!-- Build JORAM web site -->
-<!-- http://www.objectweb.org/JORAM -->
 <!-- ===================================================================== -->
 <project default="all" basedir=".">
 
@@ -15,13 +14,20 @@
   <!-- ===================================================================== -->
   <!-- prepare -->
   <!-- ===================================================================== -->
-  <target name="prepare" depends="check">    
+  <target name="prepare"
+	  depends="check">    
 
     <!-- get time -->
     <tstamp>
       <format property="touch.time" pattern="yyyy-MM-dd hh:mm aa"/>
     </tstamp>
-    
+
+    <!-- deal with stylesheets and project files (menus) dependencies -->
+    <uptodate property="rebuild.unneeded" targetfile="${html.dest}/index.html" >
+      <srcfiles dir= "${stylesheets.dir}" includes="*.xsl"/>
+      <srcfiles dir= "${xml.dir}" includes="**/*.xml"/>
+    </uptodate>
+
     <!-- static html files -->
     <copy todir="${html.dest}" preservelastmodified="yes">
       <fileset dir="${html.src}">
@@ -43,7 +49,8 @@
   <!-- ===================================================================== -->
   <!-- check -->
   <!-- ===================================================================== -->
-  <target name="check" description="Check xml files">    
+  <target name="check"
+	  description="Check xml files">    
 
     <xmlvalidate failonerror="no" lenient="no" warn="yes"
 		 classname="org.apache.xerces.parsers.SAXParser">
@@ -60,10 +67,14 @@
   <!-- ===================================================================== -->
   <!-- html -->
   <!-- ===================================================================== -->
-  <target name="html" depends="prepare" description="Build Web site (browsable version)">
+  <target name="html"
+	  depends="prepare"
+	  description="Build Web site (browsable version)"
+	  unless="rebuild.unneeded">
     
     <style basedir="${xml.dir}"
 	   destdir="${html.dest}"
+	   force="true"
 	   extension=".html"
 	   style="${stylesheet}"
 	   excludes="${project.file}"
@@ -80,10 +91,14 @@
   <!-- ===================================================================== -->
   <!-- html_print -->
   <!-- ===================================================================== -->
-  <target name="html_print" depends="prepare" description="Build Web site (printable version)">
+  <target name="html_print"
+	  depends="prepare"
+	  description="Build Web site (printable version)"
+	  unless="rebuild.unneeded">
 
     <style basedir="${xml.dir}"
 	   destdir="${html.dest}"
+	   force="true"
 	   extension="_print.html"
 	   style="${stylesheet.printable}"
 	   excludes="${project.file}"
@@ -99,7 +114,8 @@
   <!-- ===================================================================== -->
   <!-- clean -->
   <!-- ===================================================================== -->
-  <target name="clean" description="Delete all Web site files">
+  <target name="clean"
+	  description="Delete all Web site files">
     
     <delete includeEmptyDirs="true" quiet="true">
 
@@ -115,6 +131,8 @@
   <!-- ===================================================================== -->
   <!-- all -->
   <!-- ===================================================================== -->
-  <target name="all" depends="html, html_print" description="Build Web site"/>
+  <target name="all"
+	  depends="html, html_print"
+	  description="Build Web site"/>
 
 </project>
