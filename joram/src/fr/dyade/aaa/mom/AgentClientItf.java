@@ -21,24 +21,11 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom;
 
-/**
-  *
-  * @see        fr.dyade.aaa.mom.Queue
-  * @see        fr.dyade.aaa.mom.Topic
-  * @see		fr.dyade.aaa.mom.SubscriptionClient
-  */
-
-
-public interface AgentClientItf {
-	
-	/** send a Message to a client */
-	public void sendMessageMOMExtern(fr.dyade.aaa.mom.MessageMOMExtern msg);
-	
-	/** send a notification to a Queue or a Topic (destination "object") */
-	public void sendNotification(fr.dyade.aaa.agent.AgentId to, fr.dyade.aaa.agent.Notification not);
-
+public interface AgentClientItf
+{
+  public void sendMessageMOMExtern(fr.dyade.aaa.mom.MessageMOMExtern msg);
+  public void sendNotification(fr.dyade.aaa.agent.AgentId to,
+    fr.dyade.aaa.agent.Notification not);
 }

@@ -28,7 +28,7 @@ import java.io.*;
 import fr.dyade.aaa.util.*;
 
 public abstract class AgentDriver extends Driver {
-public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.5 2001-05-04 14:54:48 tachkeni Exp $";
   /** id of associated proxy agent */
   protected AgentId proxy;
   /** queue of <code>Notification</code> objects to be sent */

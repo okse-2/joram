@@ -56,7 +56,8 @@ public abstract class XASession extends Session implements javax.jms.XASession {
     public XidTable xidTable;
 
 
-    public XASession(long sessionID, XAConnection refConnection) {
+    //public XASession(long sessionID, XAConnection refConnection) {
+    public XASession(long sessionID, Connection refConnection) {
 	super(true, fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED, sessionID, (Connection) refConnection);
 	isClosed = false;
 
@@ -64,90 +65,6 @@ public abstract class XASession extends Session implements javax.jms.XASession {
 	xidTable = new XidTable();
     }
     
-    //     public javax.jms.BytesMessage createBytesMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.BytesMessage();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.MapMessage createMapMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.MapMessage();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.Message createMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.Message();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.ObjectMessage createObjectMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.ObjectMessage();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.ObjectMessage createObjectMessage(Serializable object) throws JMSException {
-    // 	try {
-    // 	    fr.dyade.aaa.mom.ObjectMessage message = new fr.dyade.aaa.mom.ObjectMessage();
-    // 	    message.setObject(object);
-    // 	    return message;
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.StreamMessage createStreamMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.StreamMessage();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.TextMessage createTextMessage() throws JMSException {
-    // 	try {
-    // 	    return new fr.dyade.aaa.mom.TextMessage();
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
-    //     public javax.jms.TextMessage createTextMessage(String string) throws JMSException {
-    // 	try {
-    // 	    fr.dyade.aaa.mom.TextMessage message = new fr.dyade.aaa.mom.TextMessage();
-    // 	    message.setText(string);
-    // 	    return message;
-    // 	} catch (Exception e) {
-    // 	    JMSException jmse = new JMSException("Internal error");
-    // 	    jmse.setLinkedException(e);
-    // 	    throw jmse;
-    // 	}
-    //     }
-
     public javax.transaction.xa.XAResource getXAResource() {
 	return xar;
     }
@@ -185,17 +102,6 @@ public abstract class XASession extends Session implements javax.jms.XASession {
 	throw new JMSException("Not implemented");
     }
 
-
-    public MessageListener getMessageListener() throws JMSException {
-	throw new JMSException("Not implemented");
-    }
-
-
-    public void setMessageListener(MessageListener listener) throws JMSException {
-	throw new JMSException("Not implemented");
-    }
-
-    
     public void acknowledgeMessage(String messageID) throws JMSException {
 	throw new JMSException("Prohibited in a distributed transaction");
     }
@@ -226,46 +132,6 @@ public abstract class XASession extends Session implements javax.jms.XASession {
     protected abstract Vector createAckRollbackVector(javax.transaction.xa.Xid xid) throws JMSException;
     
 
-    //     private void sendMessage(MessageMOMExtern message) throws JMSException {
-    // 	if (isClosed) throw new JMSException("Session closed");
-	
-    // 	Long messageID = new Long(message.getMessageMOMExternID());
-	
-    // 	Object synchroObj = new Object();
-    // 	synchronized (synchroObj) {
-    // 	    refConnection.waitThreadTable.put(messageID, synchroObj);
-    // 	    refConnection.sendMsgToAgentClient(message);
-    // 	    try {
-    // 		synchroObj.wait();
-    // 	    } catch (InterruptedException ie) {
-    // 		JMSException jmse = new JMSException("Internal error");
-    // 		jmse.setLinkedException(ie);
-    // 		throw jmse;
-    // 	    }
-    // 	}
-
-    // 	if (!refConnection.messageJMSMOMTable.contains(messageID))
-    // 	    throw new JMSException("Message has no sender");
-
-    // 	Object answerMsg = refConnection.messageJMSMOMTable.remove(messageID);
-
-    // 	if (answerMsg instanceof ExceptionMessageMOMExtern) {
-    // 	    JMSException jmse = new JMSException("MOM internal error");
-    // 	    jmse.setLinkedException(((ExceptionMessageMOMExtern) answerMsg).exception);
-    // 	    throw jmse;
-    // 	}
-
-    // 	if (!(answerMsg instanceof SendingBackMessageMOMExtern))
-    // 	    throw new JMSException("MOM internal error");
-
-    // 	if (answerMsg instanceof MessageAckTransactedVector) {
-    // 	    // OK
-    // 	} else if (answerMsg instanceof MessageAckTransactedRollback) {
-    // 	    // OK
-    // 	}
-    //     }
-
-    
     /**
      * Send a message via the connection and wait for the answer.
      */
@@ -283,19 +149,6 @@ public abstract class XASession extends Session implements javax.jms.XASession {
 	    }
 	}
 	return ((MessageMOMExtern) refConnection.messageJMSMOMTable.remove(messageID));
-    }
-
-
-    /**
-     * We are in transacted mode so the run is useless.
-     */
-    public void run() {
-	// void
-	try {
-	    throw new Exception();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
     }
 
 

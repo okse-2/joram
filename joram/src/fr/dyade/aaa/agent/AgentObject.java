@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.*;
  */
 public abstract class AgentObject implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $"; 
 
   transient String name;
   /**
@@ -51,7 +51,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.3 2000-10-
    */
   static AgentObject
   load(String name) throws IOException, ClassNotFoundException {
-    return (AgentObject) Server.transaction.load("AgentObject_" + name);
+    return (AgentObject) AgentServer.transaction.load("AgentObject_" + name);
   }
 
   /**
@@ -62,7 +62,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentObject.java,v 1.3 2000-10-
    * @exception Exception	unspecialized exception
    */
   void save() throws IOException {
-    Server.transaction.save(this, "AgentObject_" + name);
+    AgentServer.transaction.save(this, "AgentObject_" + name);
   }
 
   /**

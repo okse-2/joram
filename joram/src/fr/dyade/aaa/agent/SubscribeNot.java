@@ -29,7 +29,7 @@ package fr.dyade.aaa.agent;
  * This is the super class of all subscribe notification.
  */
 public class SubscribeNot extends Notification {
-public static final String RCS_VERSION="@(#)$Id: SubscribeNot.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: SubscribeNot.java,v 1.4 2001-05-04 14:54:53 tachkeni Exp $";
     /**
      * Add listener action.
      */

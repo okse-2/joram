@@ -21,47 +21,45 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
+
+import java.util.Vector;
 
 public final class A3ServersList extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.3 2000-10-05 15:15:18 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.4 2001-05-04 14:54:48 tachkeni Exp $";
 
  /**
-   * A3Node contains informations about an agent server.
-   */
+  * A3Node contains informations about an agent server.
+  */
   public A3Node nodes[];
- 
 
   public A3ServersList() {
-    int nb = Server.networkServers.length;
-    if (Server.transientServers != null)
-      nb += Server.transientServers.length;
-    
-    nodes = new A3Node[nb];
-    
-    if (Server.transientServers != null) {
-      for (int i = Server.a3config.transientServers.length; i-- > 0;) {
-	nodes[--nb] = new A3Node(
-	  Server.a3config.transientServers[i].name,	// node name
-	  Server.a3config.transientServers[i].sid,	// server's number
-	  Server.a3config.transientServers[i].hostname,
-	  Server.a3config.transientServers[i].port,
-	  Server.ADMINISTRED,
-	  Server.admin,
-	  Server.a3config.transientServers[i].active);
+    ServerDesc server = null;
+    Vector servers = new Vector();
+    for (int i=0; i<AgentServer.getServerNb(); i++) {
+      server = AgentServer.getServerDesc((short) i);
+      if (server != null) {
+	servers.addElement(new A3Node(server));
       }
     }
-    for (int i = Server.a3config.networkServers.length; i-- > 0;) {
-      nodes[--nb] = new A3Node(
-	Server.a3config.networkServers[i].name,		// node name
-	Server.a3config.networkServers[i].sid,		// server's number
-	Server.a3config.networkServers[i].hostname,
-	Server.a3config.networkServers[i].port,
-	Server.ADMINISTRED,
-	Server.admin,
-	Server.a3config.networkServers[i].active);
+    nodes = new A3Node[servers.size()];
+    nodes = (A3Node []) servers.toArray(nodes);
+  }
+
+  /**
+   * Returns a string representation of this object, including alls A3Nodes.
+   *
+   * @return	A string representation of this object.
+   */
+  public String toString(){
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("A3ServersList[").append(nodes.length).append(',');
+    for (int i=0; i<nodes.length; i++) {
+      strBuf.append(nodes[i]);
+      if (i< (nodes.length -1)) strBuf.append(',');
     }
+    strBuf.append(']');
+    return strBuf.toString();
   }
 }

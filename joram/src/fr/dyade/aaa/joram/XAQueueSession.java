@@ -45,7 +45,7 @@ public class XAQueueSession extends XASession implements javax.jms.XAQueueSessio
     /**
      * Creates a new XAQueueSession.
      */
-    protected XAQueueSession(long sessionID, XAConnection refConnection) {
+    protected XAQueueSession(long sessionID, QueueConnection refConnection) {
 	super(sessionID, refConnection);
 	this.sessionID = sessionID;
 	this.refConnection = refConnection;

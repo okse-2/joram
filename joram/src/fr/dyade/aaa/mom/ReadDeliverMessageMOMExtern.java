@@ -21,25 +21,23 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 /** 
- *	allows a tCP Proxy to deliver an enumeration of messages
- *	from a Queue
- * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
+ * A <code>ReadDeliverMessageMOMExtern</code> delivers an enumeration 
+ * of the messages held in a <code>Queue</code>.
  */ 
- 
-public class ReadDeliverMessageMOMExtern extends MessageMOMExtern { 
-	
-	/** Enumeration of the messages hold in the Queue */ 
-	public java.util.Vector messageEnumerate; 
-	 
-	public ReadDeliverMessageMOMExtern(long requestIdNew, java.util.Vector messageEnumerateNew) {
-		super(requestIdNew);
-		messageEnumerate = messageEnumerateNew;
-	}
-	
+public class ReadDeliverMessageMOMExtern extends MessageMOMExtern
+{ 
+  /** Enumeration of the messages held in the <code>Queue</code>. */ 
+  public java.util.Vector messageEnumerate; 
+
+  /** Constructor. */
+  public ReadDeliverMessageMOMExtern(long requestId,
+    java.util.Vector messageEnumerate, int drvKey)
+  {
+    super(requestId, drvKey);
+    this.messageEnumerate = messageEnumerate;
+  }
+
 }

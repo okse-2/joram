@@ -21,31 +21,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
-import java.lang.*; 
-import fr.dyade.aaa.agent.*; 
- 
 /** 
- *	Parent notification which contains an identifier to make
- *	correspond request and response
- *	-1 means no response forwrded to the external client
- * 
- *	@see	subclasses
- *	@see	fr.dyade.aaa.mom.Topic 
- *	@see	fr.dyade.aaa.mom.Queue 
- *	@see	fr.dyade.aaa.mom.AgentClient 
+ * A <code>NotificationMOMRequest</code> is the parent notification
+ * of the request notifications coming from the clients.
  */ 
- 
-public class NotificationMOMRequest extends fr.dyade.aaa.agent.Notification { 
- 
-	/** the identifier of the MOM Notification */ 
-	public long notMOMID;
-		 
-	public NotificationMOMRequest(long messageIDNew) { 
-		notMOMID = messageIDNew;
-	} 
- 
+public class NotificationMOMRequest extends fr.dyade.aaa.agent.Notification
+{ 
+  /** The Notification identifier. */ 
+  public long notMOMID;
+  public int driverKey;
+
+
+  /** Constructor. */
+  public NotificationMOMRequest(long messageID, int driverKey)
+  { 
+    this.notMOMID = messageID;
+    this.driverKey = driverKey;
+  } 
+
 }

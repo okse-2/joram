@@ -58,6 +58,7 @@ public class SubscriptionNoDurableMOMExtern extends MessageMOMExtern {
 	 
 	/** the mode of acknowledgment of the session */
 	public int ackMode;
+    public boolean connectionConsumer = false;
 	
 	/** constructor */
 	public SubscriptionNoDurableMOMExtern(long requestID, String nameSubscription, fr.dyade.aaa.mom.TopicNaming topic, boolean noLocal, String selector, String sessionID, int ackMode) {
@@ -69,5 +70,18 @@ public class SubscriptionNoDurableMOMExtern extends MessageMOMExtern {
 		this.sessionID = sessionID;
 		this.ackMode = ackMode;
 	}
-	
+
+  /** 
+   * Constructor used for a <code>fr.dyade.aaa.joram.ConnectionConsumer</code>
+   * subscription.
+   *
+   * @author Frederic Maistre
+   */
+  public SubscriptionNoDurableMOMExtern(long requestID, String nameSubscription,
+    fr.dyade.aaa.mom.TopicNaming topic, String selector)
+  {
+    this(requestID, nameSubscription, topic, false, selector, "", 0);
+    this.connectionConsumer = true;
+  }
+
 }

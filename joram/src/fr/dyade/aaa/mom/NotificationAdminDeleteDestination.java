@@ -25,5 +25,6 @@
 
 package fr.dyade.aaa.mom; 
 
-public class NotificationAdminDeleteDestination extends fr.dyade.aaa.agent.Notification {
+public class NotificationAdminDeleteDestination extends
+fr.dyade.aaa.agent.Notification {
 }

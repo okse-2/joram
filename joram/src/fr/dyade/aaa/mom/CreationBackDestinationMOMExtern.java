@@ -35,15 +35,17 @@ package fr.dyade.aaa.mom;
  *	@see fr.dyade.aaa.mom.CommonClient
  */ 
  
-public class CreationBackDestinationMOMExtern extends MessageMOMExtern { 
-	
-	/** the name of the destination to create */ 
-	public fr.dyade.aaa.mom.DestinationNaming destination; 
-	 
-	/** constructor */
-	public CreationBackDestinationMOMExtern(long requestIdNew, fr.dyade.aaa.mom.DestinationNaming destinationNew) {
-		super(requestIdNew);
-		destination = destinationNew;
-	}
-	
+public class CreationBackDestinationMOMExtern extends MessageMOMExtern
+{ 
+  /** The name of the created destination. */ 
+  public fr.dyade.aaa.mom.DestinationNaming destination; 
+ 
+  /** Constructor. */
+  public CreationBackDestinationMOMExtern(long requestId,
+    fr.dyade.aaa.mom.DestinationNaming destination, int drvKey)
+  {
+    super(requestId, drvKey);
+    this.destination = destination;
+  }
+
 }

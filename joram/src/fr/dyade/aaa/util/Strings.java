@@ -37,7 +37,7 @@ import java.io.*;
  * @version	v1.0
  */
 public class Strings {
-public static final String RCS_VERSION="@(#)$Id: Strings.java,v 1.3 2000-10-05 15:21:08 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: Strings.java,v 1.4 2001-05-04 14:55:05 tachkeni Exp $";
 
   /**
    * Provides a string representation of an object. Checks if there exists

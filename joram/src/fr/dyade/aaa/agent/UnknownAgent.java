@@ -31,7 +31,7 @@ package fr.dyade.aaa.agent;
  * @see Engine
  */
 public class UnknownAgent extends Notification {
-  public static final String RCS_VERSION="@(#)$Id: UnknownAgent.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: UnknownAgent.java,v 1.4 2001-05-04 14:54:53 tachkeni Exp $";
 
   /** The non-existent target agent id. */
   public AgentId agent;

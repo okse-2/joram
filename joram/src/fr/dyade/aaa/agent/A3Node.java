@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -30,183 +28,96 @@ import java.net.*;
 import java.util.Properties;
 
 /**
- * Description of a remote server (A3Node).
- * A3Node class is similar to ServerDesc class. This class should 
- * be used only by the admin agent.
+ * Description of a remote server.
  * @version	1.1, 29/7/98
  * @author	Noel De Palma
  */
 public final class A3Node implements Serializable {
+  public static final String RCS_VERSION="@(#)$Id: A3Node.java,v 1.4 2001-05-04 14:54:47 tachkeni Exp $"; 
 
-public static final String RCS_VERSION="@(#)$Id: A3Node.java,v 1.3 2000-10-05 15:15:18 tachkeni Exp $"; 
-
-  /**
-   * Node name.
-   */
+  /**  Node name. */
   private String Name;
-  /**
-   * Node number.
-   */
+  /** Node number.  */
   private int Num;
-  /**
-   * Host name.
-   */
+  /** Host name. */
   private String HostName;
-  /**
-   * Node port.
-   */
-  private int Port;
-  
-  /**
-  * monitored server ?
-  */
-  private boolean administred;
-  
-  /**
-   * actually monitored server ?
-   */
-  private boolean admin;
-
-  /**
-  * Server State (active or not);
-  */
+  /** Is the server transient? */
+  boolean isTransient;
+  /** Server State (active or not). */
   private boolean active;
   
-    public A3Node(){
-	this(0,"",0,false,Server.ADMINISTRED,false);
-    }
+  /**
+   * Constructs a new node with default values.
+   */
+  public A3Node(){
+    this(null, 0, "localhost", false, false);
+  }
 
   /**
    * Constructs a new node with the specified parameters.
-   * @param	HostName	Host Name
-   * @param     Num		Node Number
-   * @param	Port		Node port
-   * @param	admin		monitored server ?
-   * @param	active		server active ?
+   * @param Name	Server Name
+   * @param Num		Node Number
+   * @param HostName	Host Name
+   * @param isTransient	Is the server transient?
+   * @param active	Is the server active?
    */
-
-  public A3Node(int Num,
-		String HostName,
-		int Port,
-		boolean administred,
-		boolean admin,
+  public A3Node(String Name,
+        	int Num,
+                String HostName,
+		boolean isTransient,
 		boolean active) {
-    this(HostName+":" + Port, Num,HostName, Port);
-    this.administred = administred;
-    this.admin = admin;
-    this.active	= active;
+    this.Name = Name;
+    this.Num = Num;
+    this.HostName = HostName;
+    this.isTransient = isTransient;
+    this.active = active;
   }
-  
+ 
   /**
-   * Constructs a new node with the specified parameters.
-   * @param	Name	        Server Name
-   * @param	HostName	Host   Name
-   * @param     Num		Node   Number
-   * @param	Port		Node   port
-   * @param	admin		monitored server ?
-   * @param	active		server active ?
+   * Constructs a new node with the specified server descriptor.
+   *
+   * @param	desc	Agent server descriptor.
    */
-
-  public A3Node(String Name,
-        	int Num,
-                String HostName,
-		int Port,
-		boolean administred,
-		boolean admin,
-		boolean active) {
-    this.Name			= Name;
-    this.Num			= Num;
-    this.HostName		= HostName;
-    this.Port			= Port;
-    this.administred   		= administred;
-    this.admin			= admin;
-    this.active			= active;
-  }
- 
-
- /**
-   * Constructs a new node with the specified parameters.
-   * @param	HostName	Host Name
-   * @param     Num		Node Number
-   * @param	Port		Node port
-   */
-
-  public A3Node(int Num,
-		String HostName,
-		int Port) {
-    this(HostName+":" + Port, Num,HostName, Port);
+  public A3Node(ServerDesc desc) {
+    this.Name = desc.name;
+    this.Num = desc.sid;
+    this.HostName = desc.hostname;
+    this.isTransient = desc.isTransient;
+    this.active = desc.active;
   }
 
-/**
-   * Constructs a new node with the specified parameters.
-   * @param	Name	        Server Name
-   * @param	HostName	Host   Name
-   * @param     Num		Node   Number
-   * @param	Port		Node   port
-   */
-
-  public A3Node(String Name,
-        	int Num,
-                String HostName,
-		int Port) {
-    this.Name			= Name;
-    this.Num			= Num;
-    this.HostName		= HostName;
-    this.Port			= Port;
-    this.administred 		= Server.ADMINISTRED;
-    this.admin 			= false;
-    this.active			= false;
-  }
-
- 
-
-/**
+  /**
    * Return the name of the node.
    */
- public String GetName(){
+  public String GetName(){
     return Name;
   }
 
-/**
+  /**
    * Return the number that identifie the node.
    */
   public int GetNodeNumber(){
     return Num;
   }
 
-/**
+  /**
    * Return the name of the Host where the node run.
    */
-
   public String GetHostName(){
     return HostName;
   }
 
   /**
-   * Return the Port of the host were the node run.
+   * Return True if the Remote Server is transient.
    */
-  public int GetPort(){
-    return Port;
-  }
-
-  /**
-   * Return true if the server can be administred
-   */
-  public boolean canBeAdmin(){
-    return administred;
-  }  
-  
-  /**
-   * Return true if the server is actually administred
-   */
-  public boolean isAdmin(){
-    return admin;
+  public boolean isTransient(){
+    return isTransient;
   }
 
   /**
    * Return true if the server is active
    */
-  public boolean isActive(){
+  public boolean isActive() {
     return active;
   }
 
@@ -214,17 +125,13 @@ public static final String RCS_VERSION="@(#)$Id: A3Node.java,v 1.3 2000-10-05 15
    * Return the the node in a string whose can be display.
    */
   public String toString(){
-     return new String("Node : "+Integer.toString(this.GetNodeNumber())+" Name : "+this.GetName()+" Running on : "
-		       +this.GetHostName()+" At port :" +Integer.toString(GetPort()) + ", Administred: "
-		       + this.admin + ", Active: " + this.active);
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("A3Node[").append(GetNodeNumber()).append(", ");
+    strBuf.append(Name).append(", ");
+    strBuf.append(HostName).append(", ");
+    strBuf.append(isTransient).append(", ");
+    strBuf.append(active).append("]");
+    return strBuf.toString();
   }
-  
-  /**
-  * Return True if the Remote Server is transient.
-  */
-  public boolean isTransient(){
-  	return (this.Num >= Server.MIN_TRANSIENT_ID);
-  }
- 
 }
 

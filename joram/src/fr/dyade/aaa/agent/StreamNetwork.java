@@ -31,12 +31,12 @@ import java.net.*;
  * class for stream sockets.
  */
 abstract class StreamNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.1 2000-10-05 15:15:24 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.2 2001-05-04 14:54:53 tachkeni Exp $";
 
   /** Creates a new Network component */
-  StreamNetwork(MatrixClock mclock) {
-    super(mclock);
+  StreamNetwork() {
+    super();
   }
   
   /**
@@ -58,6 +58,8 @@ abstract class StreamNetwork extends Network {
    * @exception IOException	if the connection can't be established
    */
   Socket createSocket(InetAddress host, int port) throws IOException {
+    if (host == null)
+      throw new UnknownHostException();
     return new Socket(host, port);
   }
 
@@ -72,7 +74,7 @@ abstract class StreamNetwork extends Network {
    *
    * @exception IOException	for networking errors
    */
-  ServerSocket createServerSocket(int port) throws IOException {
+  ServerSocket createServerSocket() throws IOException {
     return new ServerSocket(port);
   }
 

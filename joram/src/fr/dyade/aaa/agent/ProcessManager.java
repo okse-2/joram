@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.util.*;
@@ -36,7 +34,7 @@ import fr.dyade.aaa.util.*;
  * an external <code>ProcessEnd</code> notification.
  *
  * The <code>ProcessManager</code> object is initialized in <code>init</code>,
- * called from <code>Server.init</code>.
+ * called from <code>AgentServer.init</code>.
  *
  * This classes reuses the persistency service provided by
  * <code>Transaction</code>.
@@ -49,7 +47,7 @@ import fr.dyade.aaa.util.*;
  */
 public class ProcessManager implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.3 2000-10-05 15:15:22 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $"; 
 
 
   /** the unique <code>ProcessManager</code> in the agent server */
@@ -73,7 +71,7 @@ public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.3 2000-
 	ProcessMonitor monitor =
 	  (ProcessMonitor) processManager.registry.elementAt(i);
 	processManager.registry.removeElementAt(i);
-	Channel.channel.sendTo(
+	Channel.sendTo(
 	  monitor.agent,
 	  new ProcessEnd(-1, "unknown process end due to server failure"));
       }
@@ -92,14 +90,14 @@ public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.3 2000-
    *	if the stored image class may not be found
    */
   static ProcessManager load() throws IOException, ClassNotFoundException {
-    return (ProcessManager) Server.transaction.load("processManager");
+    return (ProcessManager) AgentServer.transaction.load("processManager");
   }
 
   /**
    * Saves object in persistent storage.
    */
   void save() throws IOException {
-    Server.transaction.save(processManager, "processManager");
+    AgentServer.transaction.save(processManager, "processManager");
   }
 
 

@@ -36,7 +36,7 @@ package fr.dyade.aaa.agent;
 
 public class DeleteAck extends Notification { 
 
-public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $"; 
 
 
   }

@@ -28,7 +28,7 @@ package fr.dyade.aaa.agent;
 import java.lang.*;
 
 public abstract class ServerEventReport extends Notification{
-public static final String RCS_VERSION="@(#)$Id: ServerEventReport.java,v 1.3 2000-10-05 15:15:23 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ServerEventReport.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $";
 
   /**
    * the SEI associated

@@ -98,7 +98,7 @@ public class TopicPublisher extends fr.dyade.aaa.joram.MessageProducer implement
       /*	reset the message to put the mode in readOnly and to
        *	destroy the transient attributes
        */
-      refSession.resetMessage(message);
+      //refSession.resetMessage(message);
 
       Object obj = new Object();
       long messageJMSMOMID = refConnection.getMessageMOMID();

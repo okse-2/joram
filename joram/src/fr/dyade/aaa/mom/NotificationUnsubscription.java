@@ -21,31 +21,41 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 /** 
- *	NotificationUnsubscription allows a client to unsubscribe to a Topic 
+ * A <code>NotificationUnsubscription</code> tells a
+ * <code>Topic</code> about a client unsubscription.
  * 
- * @see         fr.dyade.aaa.mom.Topic 
- * @see         fr.dyade.aaa.mom.Queue 
- * @see         fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
  */ 
- 
-public class NotificationUnsubscription extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	/** the name of the subscription given by the agentClient */
-	public java.lang.String nameSubscription;
-	
-	/** path and name of a theme in a Topic  */ 
-	public java.lang.String theme; 
-	 
-	/** constructor */	 
-	public NotificationUnsubscription(long messageID, java.lang.String nameSubscriptionNew, java.lang.String themeNew) { 
-		super(messageID);
-		nameSubscription = nameSubscriptionNew;
-		theme = themeNew; 
-	} 
+public class NotificationUnsubscription
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The subscription name. */
+  public java.lang.String nameSubscription;
+
+  /** The subscription theme.  */ 
+  public java.lang.String theme; 
+
+  public String sessionID;
+
+  /** Constructor. */ 
+  public NotificationUnsubscription(long messageID,
+    java.lang.String nameSubscription, java.lang.String theme,
+    int drvKey)
+  { 
+    super(messageID, drvKey);
+    this.nameSubscription = nameSubscription;
+    this.theme = theme; 
+  } 
+
+  public NotificationUnsubscription(UnsubscriptionMessageMOMExtern msgUnsub)
+  {
+    super(msgUnsub.getMessageMOMExternID(), msgUnsub.getDriverKey());
+    this.nameSubscription = msgUnsub.nameSubscription;
+    this.theme = msgUnsub.topic.getTheme();
+    this.sessionID = msgUnsub.sessionID;
+  }
  
 }

@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
- 
 package fr.dyade.aaa.mom; 
  
 /** 
@@ -31,15 +29,17 @@ package fr.dyade.aaa.mom;
  * 
  *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
  */ 
- 
-public class SendingBackMessageMOMExtern extends MessageMOMExtern { 
-	
-	/** the message to  send */
-	public fr.dyade.aaa.mom.Message message;
-	
-	public SendingBackMessageMOMExtern(long requestIdNew, fr.dyade.aaa.mom.Message messageNew) {
-		super(requestIdNew);
-		message = messageNew;
-	}
+public class SendingBackMessageMOMExtern extends MessageMOMExtern
+{ 
+  /** The sent message this <code>SendingBackMessageMOMExtern</code> acknowledges. */
+  public fr.dyade.aaa.mom.Message message;
+
+  /** Constructor. */
+  public SendingBackMessageMOMExtern(long requestId, 
+    Message message, int driverOutKey)
+  {
+    super(requestId, driverOutKey);
+    this.message = message;
+  }
 	
 }

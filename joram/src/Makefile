@@ -23,7 +23,7 @@
 
 PACKAGES = fr
 
-SHIP_LIBRARIES = a3rt.jar nwlogs.jar ogc.jar ocl.jar
+SHIP_LIBRARIES = a3rt.jar
 
 build_all: all test ship_all scripts doc_protected doc_private
 ship_all: ship_dtd $(SHIP_LIBRARIES:%.jar=ship_%)
@@ -32,15 +32,22 @@ a3rt.jar_LIBRARIES = \
 	a3util.jar \
 	a3agent.jar \
 	a3ip.jar \
-	a3task.jar \
-	a3ns.jar \
-	a3config.jar
+	a3ns.jar
 
-ocl.jar_LIBRARIES = \
+# Previously in a3rt.jar
+#	a3task.jar \
+
+a3jms.jar_LIBRARIES = \
+	a3mom.jar \
+	a3jndi.jar \
+	joram.jar
+
+a3ocl.jar_LIBRARIES = \
 	a3model.jar \
 	a3sconf.jar \
 	a3generation.jar \
-	a3dt.jar
+	a3dt.jar \
+	a3config.jar
 
 ogc.jar_LIBRARIES = \
 	a3model.jar \

@@ -33,7 +33,7 @@ package fr.dyade.aaa.mom;
  */
 
 
-public class NotificationOutputMessage extends fr.dyade.aaa.agent.Notification  {
+public class NotificationOutputMessage extends fr.dyade.aaa.agent.Notification {
 
 	/** the inputStream which contains the ObjectInputStream,
 	 *	ie the MessageJMSMOM

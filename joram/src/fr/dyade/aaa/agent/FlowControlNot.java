@@ -39,11 +39,18 @@ package fr.dyade.aaa.agent;
  */
 public class FlowControlNot extends Notification {
 
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: FlowControlNot.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: FlowControlNot.java,v 1.4 2001-05-04 14:54:50 tachkeni Exp $";
 
   /** id of <code>DriverIn</code> agent issuing notification, when applicable */
   int driverId;
+
+  /** 
+   * Key of the <code>DriverIn</code> issuing the notification,
+   * in a multi-connections context.
+   */
+  int driverKey;
+
 
   /**
    * Constructor.
@@ -53,6 +60,19 @@ public class FlowControlNot extends Notification {
   FlowControlNot(int driverId) {
     this.driverId = driverId;
   }
+
+  /**
+   * Constructor.
+   *
+   * @param driverId  id of <code>Driver</code> issuing notification
+   * @param driverKey  key of driver issuing the notification.
+   */
+  FlowControlNot(int driverId, int driverKey) {
+    this.driverId = driverId;
+    this.driverKey = driverKey;
+  }
+
+
 
   /**
    * Constructor with default id.
@@ -68,6 +88,7 @@ public class FlowControlNot extends Notification {
    */
   public String toString() {
     return "(" + super.toString() +
+      ",driverKey=" + driverKey +
       ",driverId=" + driverId + ")";
   }
 }

@@ -26,6 +26,7 @@ package fr.dyade.aaa.ns;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.agent.*;
@@ -97,7 +98,7 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  */
 public class NameService extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.1 2000-10-05 15:18:44 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.2 2001-05-04 14:55:02 tachkeni Exp $";
 
   /** initializes service only once */
   private static boolean initialized = false;
@@ -160,7 +161,7 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.1 2000-10-
    *	unspecialized exception
    */
   public static AgentId getDefault() throws Exception {
-    return getDefault(Server.getServerId());
+    return getDefault(AgentServer.getServerId());
   }
 
 
@@ -312,6 +313,19 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.1 2000-10-
    *	unspecialized exception
    */
   public void doReact(RegisterCommand not) throws Exception {
+    if (not.getRebind() == false) {
+      Object agent = table.get(not.getName());
+      if (agent != null) {
+        if (agent instanceof AgentId) {
+          AgentId client = ((SimpleCommand) not).getReport();
+          if (! client.isNullId())
+            sendTo(client, new LookupReport(not, Status.DONE, null, (AgentId) agent));
+          return;
+        } else {
+          throw (new AlreadyBoundException (not.getName()+" already exists into the database"));
+        }
+      }
+    }
     register(not.getName(), not.getAgent());
     AgentId client = ((SimpleCommand) not).getReport();
     if (! client.isNullId())

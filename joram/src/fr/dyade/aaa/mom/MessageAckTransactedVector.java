@@ -21,12 +21,18 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
-public class MessageAckTransactedVector extends MessageMOMExtern { 
-    public MessageAckTransactedVector(long requestID) {
-	super(requestID);
-    }
+/**
+ * A <code>MessageAckTransactedVector</code>
+ * is an acknowledgement of a transacted sending.
+ */ 
+public class MessageAckTransactedVector extends MessageMOMExtern
+{ 
+  /** Constructor. */
+  public MessageAckTransactedVector(long requestID, int driversKey)
+  {
+    super(requestID, driversKey);
+  }
+
 }

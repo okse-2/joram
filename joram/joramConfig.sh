@@ -11,28 +11,26 @@
 #
 # directories definitions
 #
+# <--------------------------------- TO BE UPDATED 
 
 # root directory holds the src, classes (if you have 
 # downloaded JORAM sources) and lib directories.
 # In a windows environment, the drive letter is given 
-# using the //d notation, not the d: or //D notations.
+# using the //d notation, not the d: notation or //D.
 # The value of this variable must be the output of the 
 # pwd command executed in that directory. It is case 
 # sensitive.
 
-# <--------------------------------- TO BE UPDATED 
 # UNIX OS:
 #export ROOTDIR=/home/joram1_1_0
 # WINDOWS OS:
-# Please respect the syntax "//drive/..."
-export ROOTDIR=//d/joram1_1_0
-
+export ROOTDIR=//e/joram1_1_0
+export WINROOTDIR=e:/joram1_1_0
 # where java finds the language classes.
 # UNIX OS:
 #export JDKHOME=/usr/local/jdk1.2.2
 # WINDOWS OS:
-# Please respect the syntax "drive:/..."
-export JDKHOME=c:/jdk1.2.2
+export JDKHOME=c:/java/jdk1.2.2
 
 # ----------------------------------------------->
 
@@ -56,10 +54,11 @@ export GENERAL_MK=${SRCDIR}/makefiles/general.mk
 #
 export JAVA=${JDKHOME}/bin/java
 export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
-# jikes users: uncomment next line, comment 
-# the line after...
-#export JAVAC="c:/jikes/jikes -nowarn"
-export JAVAC="${JDKHOME}/bin/javac -nowarn"
+
+# <--------------------------------- TO BE UPDATED 
+export JAVAC="c:/java/jikes/jikes -nowarn"
+#export JAVAC="${JDKHOME}/bin/javac -nowarn"
+# ----------------------------------------------->
 
 #
 # build specific definitions
@@ -73,16 +72,7 @@ export GDT_FMT=XML
 if [ ${OSTYPE} == "cygwin32" ] 
 then
     export PATH_SEP=";"
-    rm -f in_tmp
-    echo ${ROOTDIR} > in_tmp
-    echo ${ROOTDIR} |grep "^//\([a-z]\)/joram" >/dev/null
-    if [ $? -ne 0 ]
-    then
-	export ROOT=`sed 's$^/joram$c:/joram$' in_tmp`
-    else
-	export ROOT=`sed 's$^//\([a-z]\)/joram$\1:/joram$' in_tmp`
-    fi
-    rm -f in_tmp
+    export ROOT=${WINROOTDIR}
 else
     export PATH_SEP=:
     export ROOT=${ROOTDIR}
@@ -90,7 +80,7 @@ fi
 
 if [ -z "${ROOT}" ]
 then
-    echo "Problem while configuring your CLASSPATH"
+    echo "Pb with your ROOT"
     exit 1
 fi
 

@@ -37,7 +37,8 @@ import javax.jms.*;
  */
 
 public class XATopicConnection extends XAConnection implements javax.jms.XATopicConnection {
-    
+ 
+    private TopicConnection tc;   
     /**
      * Construct an <code>XATopicConnection</code>. The difference with
      * <code>Connection</code> is that a <code>XAConnection</code>
@@ -46,7 +47,7 @@ public class XATopicConnection extends XAConnection implements javax.jms.XATopic
     public XATopicConnection(String proxyAgentIdString,
 			     InetAddress proxyAddress, int proxyPort,
 			     String login, String passwd) throws javax.jms.JMSException {
-	super(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
+	tc = new TopicConnection(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
     }
     
     /**
@@ -54,7 +55,7 @@ public class XATopicConnection extends XAConnection implements javax.jms.XATopic
      */
     public javax.jms.XATopicSession createXATopicSession() throws JMSException {
 	long sessionID = getNextSessionID();
-	return new XATopicSession(sessionID, this);
+	return new XATopicSession(sessionID, tc);
     }
 
     /**
@@ -63,18 +64,18 @@ public class XATopicConnection extends XAConnection implements javax.jms.XATopic
     public javax.jms.TopicSession createTopicSession(boolean transacted,
 						     int acknowledgeMode) throws JMSException {
       long sessionID = getNextSessionID();
-	  return new TopicSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, this);
+	  return new TopicSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, tc);
     }
 
     /**
      * Create a connection consumer for this connection (optional operation).
      * This is an expert facility not used by regular JMS clients.
-     */
+     */ 
     public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Topic topic,
 								 String messageSelector,
 								 javax.jms.ServerSessionPool sessionPool,
 								 int maxMessages) throws JMSException {
-	throw new JMSException("Not implemented");
+      return tc.createConnectionConsumer(topic, messageSelector, sessionPool, maxMessages);
     }
 
     /**
@@ -86,8 +87,41 @@ public class XATopicConnection extends XAConnection implements javax.jms.XATopic
 									String messageSelector,
 									javax.jms.ServerSessionPool sessionPool,
 									int maxMessages) throws JMSException {
-	throw new JMSException("Not implemented");
+      return tc.createDurableConnectionConsumer(topic, subscriptionName, messageSelector,
+        sessionPool, maxMessages);
     }
 
+    public void close() throws JMSException
+    {
+      tc.close();
+    }
+    public void start() throws JMSException
+    {
+      tc.start();
+    }
+    public void stop() throws JMSException
+    {
+      tc.stop();
+    }
+    public String getClientID() throws JMSException 
+    {
+      return tc.getClientID();
+    }
+    public void setClientID(String clientID) throws JMSException
+    {
+      tc.setClientID(clientID);
+    }
+    public javax.jms.ConnectionMetaData getMetaData() throws JMSException
+    {
+      return tc.getMetaData();
+    }
+    public ExceptionListener getExceptionListener() throws JMSException
+    {
+      return tc.getExceptionListener();
+    }
+    public void setExceptionListener(ExceptionListener listener) throws JMSException
+    {
+      tc.setExceptionListener(listener);
+    } 
 
 } // XATopicConnection

@@ -21,10 +21,7 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
-
 
 /**
  * Notification reporting the end of a driver execution.
@@ -36,10 +33,14 @@ package fr.dyade.aaa.agent;
  */
 public class DriverDone extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.4 2001-05-04 14:54:50 tachkeni Exp $"; 
 
 
-  protected int driver;		/** identifies the terminated driver */
+  protected int driver;		/** identifies the terminated driver (OUT or IN) */
+
+  /** Identifies the driver in the context of multi-connections. */
+  protected int driverKey;
+
 
   /**
    * Creates a notification to be sent.
@@ -51,18 +52,38 @@ public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.3 2000-10-0
   }
 
   /**
+   * Constructor used in a multi-connections context.
+   *
+   * @param driver  identifies the terminated driver (IN or OUT).
+   * @param driverKey  identifies the driver amongst other drivers.
+   */
+  public DriverDone(int driver, int driverKey) {
+    this.driver = driver;
+    this.driverKey = driverKey;
+  }
+
+
+  /**
    * Accesses read only property.
    */
   public int getDriver() {
     return driver;
   }
 
+  /**
+   * Method returning the driverKey identifying
+   * the closing driver.
+   */
+  public int getDriverKey() {
+    return driverKey;
+  }
 
   /**
    * Provides a string image for this object.
    */
   public String toString() {
     return "(" + super.toString() +
-      ",driver=" + driver + ")";
+      ",driver=" + driver + 
+      ",driverKey=" + driverKey + ")";
   }
 }

@@ -24,15 +24,15 @@
 LIBRARIES = a3agent.jar
 
 a3agent.jar_CLASSES = \
-	NullIdException \
+	UnknownServerException \
+	UnknownServiceException \
 	UnknownAgentException \
 	UnknownNotificationException \
 	Debug \
 	ServerDesc \
 	ServiceDesc \
+	ServiceManager \
 	A3Node \
-	A3Config \
-	A3Config@A3CMLHandler \
 	AgentId \
 	AgentId@AgentIdStamp \
 	RoleMultiple \
@@ -40,6 +40,10 @@ a3agent.jar_CLASSES = \
 	UnknownAgent \
 	UnknownNotification \
 	ExceptionNotification \
+	Daemon \
+	Engine \
+	Engine@TransactionEngine \
+	Engine@TransientEngine \
 	Agent \
 	AgentObject \
 	Update \
@@ -50,9 +54,6 @@ a3agent.jar_CLASSES = \
 	Channel \
 	Channel@TransactionChannel \
 	Channel@TransientChannel \
-	Engine \
-	Engine@TransactionEngine \
-	Engine@TransientEngine \
 	AgentCreateRequest \
 	AgentCreateReply \
 	AgentDeleteRequest \
@@ -71,16 +72,22 @@ a3agent.jar_CLASSES = \
 	DriverIn \
 	DriverOut \
 	ProxyAgent \
-	ProxyAgent@DriverConnect \
+	ProxyNotification \
+	DriverConnect \
+	DriverMonitor \
 	AgentDriver \
 	Boot\
+	MessageConsumer \
 	Network \
 	StreamNetwork \
 	SingleCnxNetwork \
-	SingleCnxNetwork@NetServerIn \
-	SingleCnxNetwork@NetServerOut \
-	SingleCnxNetwork@WatchDog \
-	Server \
+	A3CMLDomain \
+	A3CMLServer \
+	A3CMLPServer \
+	A3CMLTServer \
+	A3CMLNetwork \
+	A3CMLService \
+	A3CMLHandler \
 	AgentServer \
 	ProcessEnd \
 	ProcessManager \
@@ -91,16 +98,6 @@ a3agent.jar_CLASSES = \
         DeleteAck \
 	DupRequest \
 	DupReply \
-	TransientConfig \
-	TransientMessage \
-	TransDriverIn \
-	TransDriverIn@ObjectToNotifInputStream \
-	TransDriverOut \
-	TransDriverOut@ObjectToNotifOutputStream \
-	TransientMonitor \
-	TransientManager \
-	TransientManager@TransientConnector \
-	TransientServer \
 	DebugDriver \
 	AgentDesc \
 	AdminEventListenerId \
@@ -120,15 +117,18 @@ a3agent.jar_CLASSES = \
 	StatusReport \
 	Role \
 	GetStatusNot \
-	PoolCnxNetwork \
-	PoolCnxNetwork@StatusMessage \
-	PoolCnxNetwork@NetSession \
-	PoolCnxNetwork@WakeOnConnection \
-	PoolCnxNetwork@NetServerOut2 \
-	PoolCnxNetwork@WatchDog2 \
 	StatusNot \
-	HttpDriver
+	TransientNetworkServer \
+	TransientNetworkProxy \
+	PoolCnxNetwork \
+	HttpDebug \
+	AdminProxy
+
+# To make the SSLNetwork component you need jsse, jnet and jcert libraries.
+#	SSLNetwork \
 
 LIBS = a3util.jar:xerces.jar
+
+SSLNetwork_LIBS = $LIBS:jsse.jar:jnet.jar:jcert.jar
 
 include $(GENERAL_MK)

@@ -43,6 +43,10 @@ public abstract class XAConnection extends Connection implements javax.jms.XACon
 
     private static final int STOP = 0;
     private static final int START = 1;
+
+
+    /** Constructor. */
+    public XAConnection() {}
     
     /**
      * Create a new <code>XAConnection</code> with default user identity.
@@ -53,7 +57,6 @@ public abstract class XAConnection extends Connection implements javax.jms.XACon
     public XAConnection(String agentClient,
 			InetAddress proxyAddress, int proxyPort) throws JMSException {
 	super(agentClient, proxyAddress, proxyPort, "anonymous", "anonymous");
-	//init(agentClient, proxyAddress, proxyPort);
     }
 
     /**
@@ -69,45 +72,6 @@ public abstract class XAConnection extends Connection implements javax.jms.XACon
 			InetAddress proxyAddress, int proxyPort,
 			String userName, String password) throws JMSException {
 	super(agentClient, proxyAddress, proxyPort, userName, password);
-	//init(agentClient, proxyAddress, proxyPort);
     }
-
-    /**
-     * Common method used by constructors.
-     */
-//     private void init(String agentClient,
-// 		      InetAddress proxyAddress,
-// 		      int proxyPort) throws JMSException {
-// 	this.proxyAddress = proxyAddress;
-// 	this.proxyPort = proxyPort;
-// 	this.agentClient = agentClient;
-
-// 	messageCounter = 0;
-// 	sessionCounter = 0;
-// 	waitThreadTable = new Hashtable();
-// 	messageJMSMOMTable = new Hashtable();
-
-// 	started = false;
-// 	isClosed = false;
-	
-// 	try {
-// 	    socketClientProxy = new Socket(proxyAddress, proxyPort);
-// 	    socketClientProxy.setTcpNoDelay(true);
-// 	    socketClientProxy.setSoTimeout(0);
-// 	    socketClientProxy.setSoLinger(true, 1000);
-
-// 	    /* FIXME : différence par rapport à Connection */
-// 	    oos = new ObjectOutputStream(socketClientProxy.getOutputStream());
-// 	    ois = new ObjectInputStream(new BufferedInputStream(socketClientProxy.getInputStream()));
-// 	    oos.writeObject(agentClient);
-// 	    oos.flush();
-
-// 	    driver = new Driver(this, ois);
-// 	} catch (IOException ioe) {
-// 	    JMSException jmse = new JMSException("Internal error");
-// 	    jmse.setLinkedException(ioe);
-// 	    throw jmse;
-// 	}	
-//     }
 
 } // XAConnection

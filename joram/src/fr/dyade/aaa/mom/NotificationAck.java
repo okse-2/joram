@@ -21,34 +21,37 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
 /** 
- *	NotificationAck allows a agentClient to acknowledge a message sent by a Queue 
+ * A <code>NotificationAck</code> wraps a client
+ * acknowledgement of a message sent by a <code>Queue</code>.
  *	
- *	@see	fr.dyade.aaa.mom.Topic 
- *	@see	fr.dyade.aaa.mom.Queue 
- *	@see	fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
+ * @see  fr.dyade.aaa.mom.Queue 
+ * @see  fr.dyade.aaa.mom.AgentClient 
  */ 
 
-public class NotificationAck extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	/** identifier of a message sent by a Queue */ 
-	public java.lang.String messageID;  
-	
-	/** acknowledgement mode chosen by the agentClient */
-	public int ackMode ;
-	
-	/** the identifier of the Session */  
-	public java.lang.String sessionID;
-	 
-	public NotificationAck(long messageMOMID, java.lang.String messageIDNew, int ackModeNew, java.lang.String sessionIDNew) { 
-		super(messageMOMID);
-		messageID = messageIDNew;
-		ackMode = ackModeNew;
-		sessionID = sessionIDNew;
-	} 
+public class NotificationAck
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The identifier of the message sent by the <code>Queue</code>. */ 
+  public java.lang.String messageID;  
+
+  /** The acknowledgement mode chosen by the client. */
+  public int ackMode ;
+
+  /** The Session identifier. */  
+  public java.lang.String sessionID;
+
+  /** Constructor. */
+  public NotificationAck(long messageMOMID, java.lang.String messageID,
+    int ackMode, java.lang.String sessionID, int driverKey)
+  { 
+    super(messageMOMID, driverKey);
+    this.messageID = messageID;
+    this.ackMode = ackMode;
+    this.sessionID = sessionID;
+  }
  
 }

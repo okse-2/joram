@@ -56,5 +56,4 @@ public class UnsubscriptionMessageMOMExtern extends MessageMOMExtern {
 		this.topic = topic; 
 		this.ackMode = ackMode;
 	}
-	
 }

@@ -21,68 +21,78 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
-
 package fr.dyade.aaa.mom; 
  
 import java.lang.*; 
  
 /** 
- *	a Request object allows to stack the requests of a client
+ * A <code>RequestQueueObject</code> is used to stack
+ * the clients requests at the <code>Queue</code> level.
  * 
- * @see         fr.dyade.aaa.mom.Topic 
- * @see         fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Queue
  */ 
- 
-public class RequestQueueObject implements java.io.Serializable { 
-	
-	/** the identity of the agent which has to acknowledge the message */ 
-	private fr.dyade.aaa.agent.AgentId agentClient; 
-	
-	/** the instant of the end of the request */
-	private long timeOut;
-	
-	/** the selector of the request */ 
-	private String selector;  
-	
-	/** the identifier of the MOM Notification */ 
-	private long notMOMID;
-	
-	/** the identifier of the Session */  
-	private String sessionID;
-	
-	
-	RequestQueueObject(fr.dyade.aaa.agent.AgentId agentClientNew, long timeOutNew, String selectorNew, long notMOMIDNew, String sessionIDNew) {
-		agentClient = agentClientNew;
-		timeOut = timeOutNew;
-		selector = selectorNew;
-		notMOMID = notMOMIDNew;
-		sessionID = sessionIDNew;
-	}
-	
-	/** get the identity of the agent doing the request */
-	public fr.dyade.aaa.agent.AgentId getAgentIdentity() {
-		return agentClient;
-	}
-	
-	/** the timeOut of the request*/
-	public long getTimeOut() {
-		return timeOut;
-	}
-	
-	/** the selector of the request  */
-	public String getSelector() {
-		return selector;
-	}
-	
-	/** the MOMID of the request */
-	public long getNotMOMID() {
-		return notMOMID;
-	}
-	
-	/** return the sessionID which has to acknowledge the message */
-	public String getSessionID() {
-		return sessionID;
-	}
+public class RequestQueueObject implements java.io.Serializable
+{ 
+  /** The agent identity. */ 
+  private fr.dyade.aaa.agent.AgentId agentClient; 
+
+  /** The request's timeOut. */
+  private long timeOut;
+
+  /** The request's selector. */ 
+  private String selector;  
+
+  /** The Notification identifier. */ 
+  private long notMOMID;
+
+  /** The session's identifier. */  
+  private String sessionID;
+
+  /** The connection set identifier. */
+  private int driversKey;
+
+  boolean toListener;
+
+  /** Constructor. */
+  RequestQueueObject(fr.dyade.aaa.agent.AgentId agentClient, long timeOut,
+    String selector, long notMOMID, String sessionID, int driversKey)
+  {
+    this.agentClient = agentClient;
+    this.timeOut = timeOut;
+    this.selector = selector;
+    this.notMOMID = notMOMID;
+    this.sessionID = sessionID;
+    this.driversKey = driversKey;
+  }
+
+  public fr.dyade.aaa.agent.AgentId getAgentIdentity()
+  {
+    return agentClient;
+  }
+
+  public long getTimeOut()
+  {
+    return timeOut;
+  }
+
+  public String getSelector()
+  {
+    return selector;
+  }
+
+  public long getNotMOMID()
+  { 
+    return notMOMID;
+  }
+
+  public String getSessionID()
+  {
+    return sessionID;
+  }
+
+  public int getDriversKey()
+  {
+    return driversKey;
+  }
+
 }

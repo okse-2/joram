@@ -124,7 +124,15 @@ public class XidTable implements Serializable {
      * Set a xid in the 'message to send' list.
      */
     public void setMessageToSendXid(javax.transaction.xa.Xid xid, Vector xidSendVector) {
-	messageToSendTable.put(xid, new Vector(xidSendVector));
+	if (statusTable.containsKey(xid)) {
+      Vector newVec = (Vector) messageToSendTable.get(xid);
+      Enumeration newElements = xidSendVector.elements();
+      while (newElements.hasMoreElements())
+        newVec.add(newElements.nextElement());
+      messageToSendTable.put(xid, newVec);
+	}
+    else
+	  messageToSendTable.put(xid, new Vector(xidSendVector));
     }
 
 
@@ -132,6 +140,14 @@ public class XidTable implements Serializable {
      * Set a xid in the 'ack to send' list.
      */
     public void setAckToSendXid(javax.transaction.xa.Xid xid, Vector xidAckVector) {
+	if (statusTable.containsKey(xid)) {
+      Vector newVec = (Vector) messageToAckTable.get(xid);
+      Enumeration newElements = xidAckVector.elements();
+      while (newElements.hasMoreElements())
+        newVec.add(newElements.nextElement());
+      messageToAckTable.put(xid, newVec);
+	}
+    else
 	messageToAckTable.put(xid, new Vector(xidAckVector));
     }
     

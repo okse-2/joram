@@ -24,23 +24,22 @@
 LIBRARIES = a3util.jar
 a3util.jar_CLASSES = \
 	Strings \
-	Comparable \
 	Transaction \
 	ObjectStreamWrapper \
 	NullTransaction \
 	StartWithFilter \
 	SimpleTransaction \
 	JTransaction \
-	JTransaction@Operation \
 	ATransaction \
-	ATransaction@TOperation \
 	FSTransaction \
 	EmptyQueueException \
 	Queue \
+	Daemon \
 	Ubyte \
 	QuickSort \
 	FlowControlDuplexStream \
 	FlowControlDxInputStream \
-	FlowControlDxOutputStream
+	FlowControlDxOutputStream \
+        Trace
 
 include $(GENERAL_MK)

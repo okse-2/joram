@@ -21,26 +21,27 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
 /** 
- *	NotificationSend allows a agentclient to send a message to a Topic 
+ * A <code>NotificationTopicSend</code> wraps a message destinated
+ * to a <code>Topic</code>. 
  * 
- * @see		fr.dyade.aaa.mom.Topic 
- * @see		fr.dyade.aaa.mom.CommonClientAAA
- * @see		fr.dyade.aaa.mom.AgentClient 
+ * @see	fr.dyade.aaa.mom.Topic 
+ * @see	fr.dyade.aaa.mom.CommonClientAAA
  */ 
- 
-public class NotificationTopicSend extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	/** message sent by a client to a Topic */ 
-	public fr.dyade.aaa.mom.Message msg ; 
-	 
-	 
-	public NotificationTopicSend(long messageID, fr.dyade.aaa.mom.Message msgNew) { 
-		super(messageID);
-		msg = msgNew; 
-	} 
- }
+public class NotificationTopicSend
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The wrapped message. */ 
+  public fr.dyade.aaa.mom.Message msg ; 
+
+  /** Constructor. */ 
+  public NotificationTopicSend(long messageID,
+    fr.dyade.aaa.mom.Message msg, int driversKey)
+  { 
+    super(messageID, driversKey);
+    this.msg = msg; 
+  }
+
+}

@@ -21,33 +21,64 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.mom; 
 
 import java.lang.*; 
 import java.util.*;  
  
 /** 
- *	a MessageMOMExtern is the parent request of all requests
- *	of the client. It contains the ID of the request or the response 
- * 
- *	@see         subclasses
+ * A <code>MessageMOMExtern</code> is used for the client - 
+ * MOM communications.
+ * <br>
+ * Attributes are the request ID and a key identifying 
+ * either the <code>DriverIn</code> through which it reached
+ * the MOM, or the <code>DriverOut</code> it must go through
+ * to reach the external client.
+ *
+ * @author  Frederic Maistre
  */ 
- 
-public class MessageMOMExtern implements java.io.Serializable { 
-	
-	/** scheduling of messages */
-	private long requestID;
-	
-	/** constructor for the MOM */
-	protected MessageMOMExtern(long requestID) {
-		this.requestID = requestID;
-	}
-	
-	/** get the Identifier o the MessageMOMExtern */
-	public long getMessageMOMExternID() {
-		return requestID;
-	}
-	
-	
+public class MessageMOMExtern implements java.io.Serializable
+{ 
+  private long requestID;
+  private int driverKey;
+
+  /**
+   * Constructor.
+   *
+   * @param requestID Request identifier.
+   */
+  protected MessageMOMExtern(long requestID) {
+    this.requestID = requestID;
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param requestID Request identifier.
+   * @param driversKey Connection set identifier.
+   */
+  protected MessageMOMExtern(long requestID, int driverKey)
+  {
+    this.requestID = requestID;
+    this.driverKey = driverKey;
+  }
+
+  /** Method setting the driversKey attribute. */
+  public void setDriverKey(int driverKey)
+  {
+    this.driverKey = driverKey;
+  }
+
+  /** Method returning the request ID. */
+  public long getMessageMOMExternID()
+  {
+    return requestID;
+  }
+
+  /** Method returning the driversKey attribute. */
+  public int getDriverKey()
+  {
+    return driverKey;
+  }
+
 }

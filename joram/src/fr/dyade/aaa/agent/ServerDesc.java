@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -30,133 +29,133 @@ import java.net.*;
 import fr.dyade.aaa.util.Strings;
 
 /**
- * Description of a remote server.
- * @author	Andr* Freyssinet
+ * Description of an agent server. It is used by <code>Channel</code> and
+ * <code>Network</code> objects.
+ *
+ * @author	Andre Freyssinet
  */
 public final class ServerDesc implements Serializable {
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.4 2001-05-04 14:54:52 tachkeni Exp $";
 
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.3 2000-10-05 15:15:23 tachkeni Exp $";
-
-  /**
-   * Server unique identifier.
-   */
-  public short sid;
-  /**
-   * Server name.
-   */
-  public String name;
-  /**
-   * Host name.
-   */
-  public String hostname;
-  /**
-   * Host address, use getAddr() method instead.
-   */
+  /**  Server unique identifier. */
+  short sid;
+  /** Server name. */
+  String name;
+  /** Host name. */
+  String hostname;
+  /** Is the server transient? */
+  boolean isTransient;
+  /** Host address, use getAddr() method instead. */
   private transient InetAddress addr = null;
-  /**
-   * Server port.
-   */
-  public int port = -1;
-  /**
-   * Listen port for transient agent servers to connect,
-   * -1 when not applicable.
-   */
-  public int transientPort = -1;
-  /**
-   * Id of persistent proxy agent responsible for a transient server,
-   * null when not applicable.
-   */
-  public AgentId proxyId = null;
   /**
    * Description of services running on this server.
    */
-  public ServiceDesc[] services = null;
+  ServiceDesc[] services = null;
   /**
-   * Server state
+   * Server Id. of a gateway server for this server if it is not in a
+   * adjoining domain.
    */
-  transient volatile boolean active;
-  transient volatile long last;
-  transient volatile int retry;
+  short gateway = -1;
+  /**
+   * Domain description of this server.
+   */
+  MessageConsumer domain = null;
 
   /**
-   * Server type (monitored or not)
+   * The communication port. This variable is set only if the server is
+   * directly accessible from this node, in this case it corresponds to the
+   * communication port of the server in the adjoining domain.
    */
-  public boolean administred = Server.ADMINISTRED;
-  
-  /**
-   * Server actually monitored or not
-   */
-  public boolean admin = Server.admin;
+  int port = -1;
+
+  /** True if there is no waiting messages for this server. */
+  transient volatile boolean active = true;
+  /** Date of the last unsuccessful connection to this server. */
+  transient volatile long last = 0L;
+  /** Number of unsuccessful connection to this server. */
+  transient volatile int retry = 0;
     
   /**
    * Constructs a new node for a persistent agent server.
    * @param	name		server name
    * @param	hostname	host name
-   * @param	port		server port
    */
   public ServerDesc(short sid,
 		    String name,
-		    String hostname,
-		    int port) {
+		    String hostname) {
     this.sid = sid;
     this.name = name;
     this.hostname = hostname;
-    this.port = port;
-    try {
-      this.addr = InetAddress.getByName(hostname);
-    } catch (UnknownHostException exc) {
-      this.addr = null;
-      Debug.trace("Can't resolve \"" + hostname + "\" Inet address", exc);
-    }
-    this.services = null;
-    this.active = true;
-    this.last = 0L;
-    this.retry = 0;
+// AF: I think we don't have to resolve inet address here because many of them
+// will never be used.
+//     try {
+//       this.addr = InetAddress.getByName(hostname);
+//     } catch (UnknownHostException exc) {
+//       this.addr = null;
+//       Debug.trace("Can't resolve \"" + hostname + "\" Inet address", exc);
+//     }
   }
 
   /**
-   * Constructs a new node for a transient agent server.
-   * @param	sid		unique server id
-   * @param	name		server name
-   * @param	hostname	host name
-   * @param	id		unique id of proxy server
+   * Gets server id. for this server.
+   *
+   * @return the server id.
    */
-  public ServerDesc(short sid,
-		    String name,
-		    String hostname,
-		    short persistentId) {
-    this.sid = sid;
-    this.name = name;
-    this.hostname = hostname;
-    try {
-      this.addr = InetAddress.getByName(hostname);
-    } catch (UnknownHostException exc) {
-      this.addr = null;
-      Debug.trace("Can't resolve \"" + hostname + "\" Inet address", exc);
-    }
-    this.proxyId = new AgentId(persistentId,
-			       persistentId,
-			       AgentId.TransientProxyIdStamp);
-    this.services = null;
+  public short getServerId() {
+    return sid;
+  }
+
+  /**
+   * Gets server name for this server.
+   *
+   * @return the server name.
+   */
+  public String getServerName() {
+    return name;
+  }
+
+  /**
+   * Gets host name for this server.
+   *
+   * @return the host name.
+   */
+  public String getHostname() {
+    return hostname;
+  }
+
+  /**
+   * Is the server transient?
+   *
+   * @return true if the server is transient, false otherwise.
+   */
+  public boolean isTransient() {
+    return isTransient;
   }
 
   /**
    * Returns an IP address for its server.
    * 
    * @return	an IP address for this server.
-   * @exception	if no IP address for the host could be found.
    */
-  public final InetAddress getAddr() throws UnknownHostException {
+  public InetAddress getAddr() {
     if (addr == null) {
       try {
 	addr = InetAddress.getByName(hostname);
       } catch (UnknownHostException exc) {
 	addr = null;
-	throw exc;
       }
     }
     return addr;
+  }
+
+  /**
+   * Gets the description of services running on this server.
+   *
+   * @return the description of services.
+   */
+  public ServiceDesc[] getServices() {
+    return services;
   }
 
   /**
@@ -168,15 +167,11 @@ public final class ServerDesc implements Serializable {
     return "(" + getClass().getName() +
       ",sid=" + sid + 
       ",name=" + name +
+      ",isTransient=" + isTransient +
       ",hostname=" + hostname +
       ",addr=" + addr +
-      ",port=" + port +
-      ",transientPort=" + transientPort +
-      ",proxyId=" + proxyId +
       ",services=" + Strings.toString(services) +
       ",active=" + active +
-      ",last=" + last +
-      ",Administred=" + administred +
-      ",admin=" + admin + ")";
+      ",last=" + last + ")";
   }
 }

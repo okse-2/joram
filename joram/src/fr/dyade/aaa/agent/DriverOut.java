@@ -31,8 +31,8 @@ import fr.dyade.aaa.util.*;
 
 class DriverOut extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.6 2000-10-20 15:08:40 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.7 2001-05-04 14:54:50 tachkeni Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;
@@ -40,6 +40,14 @@ class DriverOut extends Driver {
   protected Queue mq;
   /** stream to write notifications to */
   protected NotificationOutputStream out;
+
+  /**
+   * Identifies the <code>DriverOut</code> in a
+   * multi-connections context.
+   */
+  private int key = 0;
+  /** True in a multi-connections context. */
+  private boolean multiConn = false;
 
   /**
    * Constructor.
@@ -57,6 +65,24 @@ class DriverOut extends Driver {
   }
 
   /**
+   * Constructor called by a <code>ProxyAgent</code>
+   * managing multiple connections.
+   *
+   * @param id  identifier local to the driver creator
+   * @param proxy  id of associated proxy agent
+   * @param mq  queue of <code>Notification</code> objects to be sent
+   * @param out  stream to write notifications to
+   * @param key key identifying the connection.
+   */
+  DriverOut(int id, AgentId proxy, Queue mq, 
+    NotificationOutputStream out, int key)
+  {
+    this(id, proxy, mq, out);
+    this.key = key;
+    this.multiConn = true;
+  }
+
+  /**
    * Constructor with default id.
    *
    * @param proxy	id of associated proxy agent
@@ -66,6 +92,7 @@ class DriverOut extends Driver {
   DriverOut(AgentId proxy, Queue mq, NotificationOutputStream out) {
     this(0, proxy, mq, out);
   }
+
 
   public void run() {
     Notification m = null;
@@ -95,7 +122,7 @@ class DriverOut extends Driver {
   /**
    * Close the OutputStream.
    */
-    public void close() {
+  public void close() {
     try {
       out.close();
     } catch (Exception exc) {}
@@ -120,14 +147,25 @@ class DriverOut extends Driver {
   protected void end() {
     // report end to proxy
     try {
-      sendTo(proxy, new DriverDone(id));
+      if (! multiConn)
+        // Single connection context.
+        sendTo(proxy, new DriverDone(id));
+
+      else
+        // In a multi-connections context, flagging the DriverDone
+        // notification with the key so that it is known which 
+        // DriverOut to close.
+        sendTo(proxy, new DriverDone(id, key));
+
     } catch (IOException exc) {
       if (Debug.error)
 	Debug.trace("error in reporting end of DriverOut", exc);
     }
   }
-    /** remove all elements of queue */
-    protected void clean() {
-	mq.removeAllElements();
-    }
+
+  /** remove all elements of queue */
+  protected void clean() {
+    mq.removeAllElements();
+  }
+
 }

@@ -43,7 +43,7 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 
     /** constructor with selector chosen by the client */
     public QueueReceiver(String consumerID, fr.dyade.aaa.joram.Connection refConnection, fr.dyade.aaa.joram.Session refSession, javax.jms.Queue queue, String selector) {
-	super();
+	super(consumerID, refConnection, refSession, selector);
 	this.queue = (fr.dyade.aaa.mom.QueueNaming) queue;
 	this.refConnection = refConnection;
 	this.refSession = refSession;
@@ -59,10 +59,6 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 	    return queue;
     }
     
-    /** overwrite the methode from MessageConsumer */
-    public javax.jms.Message receive()  throws javax.jms.JMSException {
-	return this.receive((long) -1);
-    }
     
     /** overwrite the methode from MessageConsumer */
     public javax.jms.Message receive(long timeOut)  throws javax.jms.JMSException {
@@ -103,7 +99,8 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 	    if(msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
 		/* return the message */
 		fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msgDeliver = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM;
-		
+	
+        if (msgDeliver.message != null) {	
 		if(!refSession.transacted) {
 		    if(refSession.acknowledgeMode==fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
 			/* prepares the acknowledge in case of autoacknowledge */
@@ -119,6 +116,7 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 			refSession.transactedMessageToAckVector.addElement(msgDeliver);
 		    }
 		}
+        }
 		
 		/* reset the message to put the mode in readOnly and to
 		 * prepare the transient attributes dor the reading
@@ -145,14 +143,41 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 	    throw(except);
 	} 
     }
-	
-    /** overwrite the methode from MessageConsumer */
-    public javax.jms.Message receiveNoWait()  throws javax.jms.JMSException {
-	return this.receive((long) 0);
+
+
+  /** Method setting a MessageListener for asynchronously consuming messages. */
+  public void setMessageListener(javax.jms.MessageListener listener)
+    throws javax.jms.JMSException
+  {
+    if (listener == null && messageListener != null) {
+      refSession.listenersTable.remove(consumerID);
+      messageListener = null;
     }
+    else if (listener != null && messageListener == null) {
+      long requestID = refConnection.getMessageMOMID();
+      Long requestKey = new Long(requestID);
+      refSession.listenersTable.put(consumerID, listener); 
+
+	  fr.dyade.aaa.mom.ReceptionMessageMOMExtern reqMsg =
+        new fr.dyade.aaa.mom.ReceptionMessageMOMExtern(requestID, queue,
+        selector, -1, refSession.acknowledgeMode,
+        new Long(refSession.sessionID).toString());
+
+      reqMsg.toListener = true;
+
+      refConnection.waitThreadTable.put(requestKey, consumerID);
+      refConnection.sessionsTable.put(requestKey, refSession);
+      refConnection.sendMsgToAgentClient(reqMsg);
+    }
+    else
+      throw (new javax.jms.JMSException("A MessageListener already exists for this consumer!"));
+  }
+
+	
 	
     /**overwrite the methode from MessageConsumer  */
     public void close()  throws javax.jms.JMSException {
+    refSession.listenersTable.remove(consumerID);
 	/* cancel the inscription in the Table of the Session */
 	synchronized(refSession.messageConsumerTable) {	
 	    Object obj;

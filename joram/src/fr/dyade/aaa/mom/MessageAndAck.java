@@ -21,62 +21,69 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
   
 /** 
-  *	this object allows to conserve messages and to know who has to acknowledge
-  *	the message 
-  *
-  * @version     29/05/1999 
-  * @author      Richard Mathis 
-  * 
-  * @see         fr.dyade.aaa.mom.Topic 
-  * @see         fr.dyade.aaa.mom.AgentClient 
-  */ 
- 
- 
-public class MessageAndAck implements java.io.Serializable  { 
- 
- 
-	/** the message conserved by a Queue*/ 
-	private fr.dyade.aaa.mom.Message msg; 
-	  
-	/** the identity of the agent which has to acknowledge the message */ 
-	private fr.dyade.aaa.agent.AgentId agentClient;
-	 
-	/** the identifier of the Session */  
-	private String sessionID;
-	
-	 
-	/** Constructor only for messages sent  */ 
-	public MessageAndAck(fr.dyade.aaa.mom.Message newMessage) { 
-		msg = newMessage; 
-		agentClient = null;
-		sessionID = null;
-	}  
-	 
-	/** return the message conserved by the object */  
-	public fr.dyade.aaa.mom.Message getMessage() { 
-		return msg; 
-	} 
-	 
-	/** return the agentClient which has to acknowledge the message */ 
-	public fr.dyade.aaa.agent.AgentId getAgentIdentity() { 
-		return agentClient; 
-	} 
-	
-	/** return the sessionID which has to acknowledge the message */
-	public String getSessionID() {
-		return sessionID;
-	}
-	
-	/** set the agentClient which has to acknowledge the message */ 
-	public void setAgentIdentity(fr.dyade.aaa.agent.AgentId agentAck, String sessionAck) { 
-		 agentClient = agentAck;
-		 sessionID = sessionAck;
-	}
-	 
-	 
+ * A <code>MessageAndAck</code> is used to wrap a message
+ * stored in a Queue and knows who will acknowledge it.
+ * <p>
+ * Modified: Frederic Maistre, 01.2001
+ *
+ * @see  fr.dyade.aaa.mom.Queue
+ */ 
+public class MessageAndAck implements java.io.Serializable
+{ 
+  /** The wrapped message. */
+  fr.dyade.aaa.mom.Message msg; 
+  /** The JMS Session ID from which the message was sent. */
+  private String sessionID;
+  /** The AgentClient who received the message. */ 
+  private fr.dyade.aaa.agent.AgentId agentClient;
+  /** 
+   * The key identifying the connection through which 
+   * the message is sent. 
+   */
+  private int driversKey;
+
+  public MessageAndAck(fr.dyade.aaa.mom.Message msg) { 
+    this.msg = msg; 
+    agentClient = null;
+    sessionID = null;
+  }  
+
+
+  /** Method setting the parameters. */
+  public void setAgentIdentity(fr.dyade.aaa.agent.AgentId agentClient, 
+    String sessionID, int driversKey) { 
+    this.agentClient = agentClient;
+    this.sessionID = sessionID;
+    this.driversKey = driversKey;
+  }
+
+  /** Method returning the message hold by the MessageAndAck. */  
+  public fr.dyade.aaa.mom.Message getMessage() { 
+    return msg; 
+  } 
+
+  /** Method returning the driversKey. */
+  public int getDriversKey() {
+    return driversKey;
+  } 
+
+  /** 
+   * Method returning the AgentClient's id which has 
+   * to acknowledge the message.
+   */ 
+  public fr.dyade.aaa.agent.AgentId getAgentIdentity() { 
+    return agentClient; 
+  } 
+
+  /** 
+   * Method returning the sessionID which has to 
+   * acknowledge the message.
+   */
+  public String getSessionID() {
+    return sessionID;
+  }
+
 } 

@@ -35,10 +35,15 @@ import java.io.*;
  */
 public class AgentCreateRequest extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.4 2001-05-04 14:54:48 tachkeni Exp $"; 
 
+  /** Id. of agent to reply to */
   public AgentId reply;
+  /** Id. of agent to deploy. Used in case of unrecoverable error to report
+   * the creation status.
+   */
   public AgentId deploy;
+  /** Serialized state of the agent */
   public byte agentState[];
 
   public AgentCreateRequest(Agent agent) throws IOException {

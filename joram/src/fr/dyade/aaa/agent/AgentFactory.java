@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -36,9 +34,8 @@ import java.util.*;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -132,7 +129,7 @@ final class AgentVector extends AgentObject {
 public final class AgentFactory extends Agent {
 
   /** RCS version number of this file: $$ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -148,11 +145,12 @@ public final class AgentFactory extends Agent {
    * server the first time it runs.
    */
   public AgentFactory() {
-    super("AgentFactory#" + Server.serverId,
+    super("AgentFactory#" + AgentServer.getServerId(),
 	  true,
 	  AgentId.factoryId);
-    if (Server.ADMINISTRED)
-        agentsList = new Vector();
+// TODO: To delete
+//     if (AgentServer.ADMINISTRED)
+//         agentsList = new Vector();
   }
 
   /**
@@ -192,7 +190,7 @@ public final class AgentFactory extends Agent {
   void removeFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.removeElement(id);
     // If the server is transient, save it now.
-    if (Server.isTransient(Server.getServerId()))
+    if (AgentServer.isTransient())
       fixedAgentIdList.save();
   }
 
@@ -205,7 +203,7 @@ public final class AgentFactory extends Agent {
   void addFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.addElement(id);
     // If the server is transient, save it now.
-    if (Server.isTransient(Server.getServerId()))
+    if (AgentServer.isTransient())
       fixedAgentIdList.save();
   }
 
@@ -230,53 +228,55 @@ public final class AgentFactory extends Agent {
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof AgentCreateRequest) {
+      AgentCreateRequest cnot = (AgentCreateRequest) not;
       try {
 	// Restore the new agent state.
-	byte[] agentState = ((AgentCreateRequest) not).agentState;
-	ByteArrayInputStream is = new ByteArrayInputStream(agentState, 0, agentState.length);
-	ObjectInputStream ois = new ObjectInputStream(is);
+	ObjectInputStream ois =
+	  new ObjectInputStream(
+	    new ByteArrayInputStream(
+	      cnot.agentState, 0, cnot.agentState.length));
 	Agent ag = (Agent) ois.readObject();
-	is.close();
+	ois.close();
 
 	createAgent(ag);
 
 	if (Debug.createAgent)
 	  Debug.trace(name + " creates " + ag, false);
 
-	if (((AgentCreateRequest) not).reply != null)
-	  sendTo(((AgentCreateRequest) not).reply,
-		 new AgentCreateReply(ag.getId()));
+	if (cnot.reply != null)
+	  sendTo(cnot.reply, new AgentCreateReply(ag.getId()));
 
-	if (Server.ADMINISTRED){
-	  AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
-	  if (Server.admin && (adminEventReactor != null) &&
-	      adminEventReactor.hasListeners(ServerEventType.AGENT_CREATED)) {
-	    if (Debug.admin)
-	      Debug.trace(name + "send Add" + desc, false);
-	    adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_CREATED);
-	  }
-	  agentsList.addElement(desc);
-	}
+// TODO: To delete
+// 	if (AgentServer.ADMINISTRED) {
+// 	  AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
+// 	  if (AgentServer.admin && (adminEventReactor != null) &&
+// 	      adminEventReactor.hasListeners(ServerEventType.AGENT_CREATED)) {
+// 	    if (Debug.admin)
+// 	      Debug.trace(name + "send Add" + desc, false);
+// 	    adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_CREATED);
+// 	  }
+// 	  agentsList.addElement(desc);
+// 	}
       } catch (Exception exc) {
 	if (Debug.debug && Debug.error)
-	  Debug.trace(name + " creation failed.", exc);
+	  Debug.trace(name + ": creation failed for " + cnot.deploy, exc);
 	//  If there is an explicit reply request send it the
 	// ExceptionNotification to the requester else to the
 	// sender.
-	((AgentCreateRequest) not).agentState = null;
-	if (((AgentCreateRequest) not).reply != null) {
-	  sendTo(((AgentCreateRequest) not).reply,
-		 new ExceptionNotification(getId(), not, exc));
+	cnot.agentState = null;
+	if (cnot.reply != null) {
+	  sendTo(cnot.reply,
+		 new ExceptionNotification(getId(), cnot, exc));
 	} else {
 	  sendTo(from,
-		 new ExceptionNotification(getId(), not, exc));
+		 new ExceptionNotification(getId(), cnot, exc));
 	}
       }
     } else if (not instanceof AgentDeleteRequest) {
       Agent ag;
       try {
 	ag = Agent.load(from);
-	Server.transaction.delete(ag.id.toString());
+	AgentServer.transaction.delete(ag.id.toString());
       } catch (UnknownAgentException exc) {
 	sendTo(from,
 	       new ExceptionNotification(getId(),
@@ -295,16 +295,17 @@ public final class AgentFactory extends Agent {
       }
       agents.remove(ag.getId());
 
-      if (Server.ADMINISTRED){
-	AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
-	if (Server.admin && (adminEventReactor != null) && 
-	    adminEventReactor.hasListeners(ServerEventType.AGENT_DELETED)) {
-	  if (Debug.admin)
-	    Debug.trace(name + "send Removed" + desc, false);
-	  adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_DELETED);
-	}
-	agentsList.removeElement(desc);
-      } 
+// TODO: To delete
+//      if (AgentServer.ADMINISTRED) {
+// 	AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
+// 	if (AgentServer.admin && (adminEventReactor != null) && 
+// 	    adminEventReactor.hasListeners(ServerEventType.AGENT_DELETED)) {
+// 	  if (Debug.admin)
+// 	    Debug.trace(name + "send Removed" + desc, false);
+// 	  adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_DELETED);
+// 	}
+// 	agentsList.removeElement(desc);
+//       } 
 
     } else {
       try {

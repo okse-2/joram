@@ -42,16 +42,16 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.4 2001-05-04 14:54:51 tachkeni Exp $";
 
   /**
    * The <code>Vector</code> into which <code>Message</code> objects are
    * stored in memory.
    */
-  Vector data;
+  private Vector data;
   /** last validated message: last <= data.size(); */
-  int last;
+  private int last;
 
   MessageQueue() {
     data = new Vector();
@@ -106,18 +106,9 @@ public final class MessageQueue {
 
   /**
    * Atomicaly validates all messages pushed in queue during a reaction.
-   * It must be used during a transaction.
+   * It must only be used during a transaction.
    */
   synchronized void validate() {
-    //  There is a potential problem with the MessageQueue
-    // synchronization: if a thread pushes several notifications
-    // in the queue during a transaction, another thread can get
-    // it without wait the commit ; so if the transaction abort
-    // we have a big problem. In the actual use of MessageQueue
-    // there is no problem because the only one thread that push
-    // more than one notification in a queue is the engine (as
-    // the engine is also the thread that get the notification,
-    // all is right...).
     last = data.size();
     notify();
   }
@@ -136,30 +127,30 @@ public final class MessageQueue {
    * it from the queue. It should never be used during a transaction
    * to avoid dead-lock problems.
    *
-   * @return     the message at the top of this queue. 
+   * @return    the message at the top of this queue. 
+   * @exception	InterruptedException if another thread has interrupted the
+   *		current thread.
    */
-  synchronized Message get() {
+  synchronized Message get() throws InterruptedException {
     while (last == 0) {
-      try {
-	wait();
-      } catch (InterruptedException e) {
-	// AF: May be, we have to return null so the 'client' (Engine,
-	// NetServerIn, etc.) can stop properly. Before do it, we've to
-	// verified all use of get method...
-      }
+      wait();
     }
     return (Message) data.elementAt(0);
   }
 
   /**
+   * Returns the number of messages in this <code>MessageQueue</code>
+   * object. Be careful, the result includes messages to be validated.
+   *
    * @return the size of the MessageQueue
    */
   synchronized int size(){
+    // AF: May be the result should be last...
     return data.size();
   }
 
   /**
-   * Returns a string representation of this <code>TransientChannel</code>
+   * Returns a string representation of this <code>MessageQueue</code>
    * object. Be careful we scan the vector without synchronization, so the
    * result can be incoherent.
    *

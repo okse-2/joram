@@ -50,15 +50,13 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	
     public TopicSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
 	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
+    listener = new SessionListener(new Long(sessionID), refConnection, this, true);
+    listener.setDaemon(true);
+    listener.start();
 		
 	/* in the creation no subscription is taken*/
 	numberNotDurableTopicSubscriber = 0;
 	synchroNbTemporarySubObject = new Object();
-		
-	/* creation of the Thread to deliver the messages from the Topics */
-	threadDeliver = new java.lang.Thread(this);
-	threadDeliver.setDaemon(true);
-	threadDeliver.start();
     }
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
@@ -73,6 +71,10 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
     public javax.jms.TopicSubscriber createSubscriber(javax.jms.Topic topic, java.lang.String messageSelector, boolean noLocal) throws javax.jms.JMSException {
+
+      if (super.messageListener != null)
+        throw new javax.jms.JMSException("Canno't create a subscriber in a session that has a messageListener set");
+
 	/* subscribe to the Topic in the MOM */
 	String nameSub = new Long(sessionID).toString() + "_" + new Long(counterConsumerID).toString();
 	/* subscribe to the agentClient */
@@ -81,9 +83,9 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	    topicSubscriber = createMySubscriber(new Long(counterConsumerID).toString(), nameSub, topic, messageSelector, noLocal, false);
 	    numberNotDurableTopicSubscriber++;
 	} else {
-	    topicSubscriber = createMySubscriber(new Long(counterConsumerID).toString(), nameSub, topic, messageSelector, noLocal, true);
+	    topicSubscriber = createMySubscriber(new Long(counterConsumerID).toString(), nameSub, topic, messageSelector, noLocal, false);
 	}
-				
+
 	/* calculate the new TopicSubscriber and increments the counter */
 	counterConsumerID = Connection.calculateMessageID(counterConsumerID);
 
@@ -448,72 +450,6 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 		    v.removeElementAt(0);
 		}
 	    }
-	}
-    }
-	
-    /** used for asynchronous receptions */
-    public void run() {
-	fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgMOM;
-	while(true) {
-	    try {
-		msgMOM = (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) msgNoDeliveredQueue.get();
-
-		if (recoverySet || transactedRollback) {
-		    try {
-			Thread.currentThread().sleep(1);
-		    } catch (InterruptedException exc) {}
-		    continue;
-		}
-
-		fr.dyade.aaa.mom.TopicNaming topic = new fr.dyade.aaa.mom.TopicNaming(((fr.dyade.aaa.mom.TopicNaming) msgMOM.message.getJMSDestination()).getTopicName(), msgMOM.theme);
-		fr.dyade.aaa.mom.AckTopicMessageMOMExtern msgAck;
-
-		/* searchs the correspondant MessageConsumer */
-		synchronized(messageConsumerTable) {
-		    java.util.Vector v = (java.util.Vector) messageConsumerTable.get(topic);
-		    fr.dyade.aaa.joram.MessageConsumer consumer = (fr.dyade.aaa.joram.MessageConsumer) v.firstElement();
-					
-		    /* delivers the message to the listener */
-		    if(consumer.getDeliveryMessage()) {
-			if(consumer.messageListener!=null) {
-			    /* add the reference to the session to acknowledge handly */
-			    if(acknowledgeMode!=fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE)
-				msgMOM.message.setRefSessionItf(this);
-		  
-			    /*	reset the message to put the mode in readOnly and to
-			     *	prepare the transient attributes dor the reading
-			     */
-			    resetMessage(msgMOM.message);
-			    if(this.transacted) {
-				/* add the transacted messages to the message to ack */
-				synchronized (transactedSynchroObject) {
-				    msgAck = new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(), topic, msgMOM.nameSubscription, msgMOM.message.getJMSMessageID(), fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
-				    transactedMessageToAckVector.addElement(msgMOM);
-				}
-			    } else {
-				if(acknowledgeMode!=fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-				    lastNotAckVector.addElement(msgMOM);
-				}
-				else {
-				    /* sends an acknowledge */
-				    msgAck = new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(), topic, msgMOM.nameSubscription, msgMOM.message.getJMSMessageID(), fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
-				    this.sendToConnection(msgAck);
-				}
-			    }
-			    msgNoDeliveredQueue.pop();
-			    consumer.messageListener.onMessage(msgMOM.message);
-			}
-		    } else {
-			/*	sends an acknowledge but delivers no message because only 1 MessageConsumer
-			 *	is to able to receive a same message 
-			 */
-			msgAck = new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(), topic, msgMOM.nameSubscription, msgMOM.message.getJMSMessageID(), fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
-			this.sendToConnection(msgAck);
-			msgNoDeliveredQueue.pop();
-		    }
-		}
-	
-	    } catch (javax.jms.JMSException exc) {}	
 	}
     }
 	

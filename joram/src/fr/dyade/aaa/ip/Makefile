@@ -32,8 +32,9 @@ a3ip.jar_CLASSES = \
 	SerialInputStream \
 	SerialOutputStream \
 	StringOutputStream \
-	DebugProxy \
-	HttpProxy
+	DebugProxy
+
+#	HttpProxy
 
 LIBS = a3agent.jar
 

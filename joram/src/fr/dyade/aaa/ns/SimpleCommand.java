@@ -39,7 +39,7 @@ import fr.dyade.aaa.util.Strings;
  */
 public class SimpleCommand extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: SimpleCommand.java,v 1.1 2000-10-05 15:18:44 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: SimpleCommand.java,v 1.2 2001-05-04 14:55:03 tachkeni Exp $";
 
   /** agent to report completion status to */
   private AgentId report;
@@ -77,7 +77,12 @@ public static final String RCS_VERSION="@(#)$Id: SimpleCommand.java,v 1.1 2000-1
    *
    * @return		agent to report status to
    */
-  public AgentId getReport() { return report; }
+  public final AgentId getReport() {
+    if (report == null)
+      return AgentId.nullId;
+    else
+      return report;
+  }
 
   /**
    * Accesses read only property.

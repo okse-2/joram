@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.ip;
 
 import java.io.*;
@@ -48,7 +46,7 @@ import fr.dyade.aaa.agent.*;
  * @see		DebugDriver
  */
 public class DebugProxy extends TcpProxy {
-public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.3 2000-10-05 15:15:38 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.4 2001-05-04 14:54:54 tachkeni Exp $";
 
   transient DebugDriver driver = null;
 
@@ -90,7 +88,7 @@ public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.3 2000-10-0
     super.initialize(firstTime);
 
     // registers this agent so that the client may connect
-    File file = new File("server" + Server.getServerId() + "DebugProxy.cnx");
+    File file = new File("server" + AgentServer.getServerId() + "DebugProxy.cnx");
     if (file.exists()) {
       // remove previous registration
       if (! file.delete())

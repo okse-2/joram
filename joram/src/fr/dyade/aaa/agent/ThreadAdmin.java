@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import fr.dyade.aaa.util.*;
@@ -32,7 +30,7 @@ import java.util.*;
  * <code>Thread</code> used for recuperation of value on each A3 server.
  */
 public final class ThreadAdmin extends Thread {
-public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.4 2001-05-04 14:54:53 tachkeni Exp $";
     
     /**
      * frequence of recuperation of values (in millisecond)
@@ -67,10 +65,10 @@ public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.3 2000-10-
 	  try {
 	    if (!udpAgentAdmin.hasListeners(ServerEventType.SERVER_THROUGHPUT))
 	      this.wait(); // if no listener, the thread is stopped
-// 	    udpAgentAdmin.throughputEventReact(Server.getServerId(),
+// 	    udpAgentAdmin.throughputEventReact(AgentServer.getServerId(),
 // 					       Channel.getCounter(),
-// 					       Server.qin.nbElementAdd,
-// 					       Server.qout.nbElementAdd);
+// 					       AgentServer.qin.nbElementAdd,
+// 					       AgentServer.qout.nbElementAdd);
 // 	    Channel.resetCounter();
 	    this.sleep(sleepTime);
 	  } catch (Exception e){

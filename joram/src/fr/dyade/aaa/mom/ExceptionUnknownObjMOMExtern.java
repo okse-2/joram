@@ -37,8 +37,8 @@ public class ExceptionUnknownObjMOMExtern extends ExceptionMessageMOMExtern {
 	public fr.dyade.aaa.mom.DestinationNaming destination;
 	
 	/** constructor for exception on request of the clients */
-	public ExceptionUnknownObjMOMExtern(long requestIDNew, java.lang.Exception exception, fr.dyade.aaa.mom.DestinationNaming destination) {
-		super(requestIDNew, exception);
+	public ExceptionUnknownObjMOMExtern(long requestIDNew, java.lang.Exception exception, fr.dyade.aaa.mom.DestinationNaming destination, int drvKey) {
+		super(requestIDNew, exception, drvKey);
 		this.destination = destination;
 	}
 

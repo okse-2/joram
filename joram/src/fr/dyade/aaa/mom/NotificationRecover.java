@@ -37,8 +37,9 @@ public class NotificationRecover extends fr.dyade.aaa.mom.NotificationMOMRequest
 	/** identifier of a message sent by a Queue */ 
 	public java.lang.String messageID = null;  
 	 
-	public NotificationRecover(long notMOMID, java.lang.String messageID) {
-		super(notMOMID);
+	public NotificationRecover(long notMOMID, java.lang.String messageID, int
+driverKey) {
+		super(notMOMID, driverKey);
 		this.messageID = messageID;
 	} 
  

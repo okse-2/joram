@@ -52,8 +52,8 @@ public class NotificationUpdateSubscription extends fr.dyade.aaa.mom.Notificatio
 	/** the selector of the request */ 
 	public String selector;  
 	 
-	public NotificationUpdateSubscription(long messageID, String nameSubscriptionNew, String themeNew, boolean noLocalNew, String selectorNew) { 
-		super(messageID);
+	public NotificationUpdateSubscription(long messageID, String nameSubscriptionNew, String themeNew, boolean noLocalNew, String selectorNew, int driverKey) { 
+		super(messageID, driverKey);
 		nameSubscription = nameSubscriptionNew;
 		theme = themeNew; 
 		noLocal = noLocalNew; 

@@ -40,12 +40,16 @@ import fr.dyade.aaa.agent.*;
  * Connections may be queued when the target proxy is not ready to accept it.
  * This allows a closing proxy not to reject a connection. However this may
  * lead to a client waiting forever a really busy target proxy.
+ * <p>
+ * Connections may also be accepted even if the target proxy is busy. This
+ * leads to a new connection set creation (drivers pair, qout, ois, oos,...).
+ * Only true when the ProxyAgent is set as multiConn.
  *
  * @author	Freyssinet Andre
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 2000-10-05 15:15:38 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 2001-05-04 14:54:55 tachkeni Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */
@@ -94,7 +98,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
    * Creates a local connected TCP server to be configured.
    */
   protected TcpMultiServerProxy() {
-    super(Server.getServerId(), null);
+    super(AgentServer.getServerId(), null);
     blockingCnx = false;
     multipleCnx = false;
   }
@@ -105,7 +109,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
    * @param listenPort	port number > 0, or 0 for any port
    */
   public TcpMultiServerProxy(int listenPort) {
-    this(Server.getServerId(), null, listenPort);
+    this(AgentServer.getServerId(), null, listenPort);
   }
 
   /**
@@ -177,23 +181,25 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
       // this is a listen server correctly configured, initializes
       // the listen socket
       if (listenSocket == null)
-	listenSocket = new ServerSocket(listenPort);
-    } else if (key == null) {
+        listenSocket = new ServerSocket(listenPort);
+    }
+    else if (key == null) {
       // this is an old connected server
-      if (newClient) {
-	delete();
-      } else {
-	// checks for queued connections
-	if ((connectQueue != null) &&
-	    ! connectQueue.isEmpty()) {
-	  sendTo(getId(), (Notification) connectQueue.firstElement());
-	  connectQueue.removeElementAt(0);
-	}
+      if (newClient) 
+        delete();
+      else {
+        // checks for queued connections
+        if ((connectQueue != null) && ! connectQueue.isEmpty()) {
+          sendTo(getId(), (Notification) connectQueue.firstElement());
+          connectQueue.removeElementAt(0);
+        }
       }
       return;
-    } else {
+    } 
+    else {
       socket = (Socket) sockets.get(key);
     }
+
     super.reinitialize();
   }
 
@@ -224,23 +230,25 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
       Integer key = null;
       Socket sock = listenSocket.accept();
       synchronized(lock) {
-	key = new Integer(keyIdx++);
-	sockets.put(key, sock);
+        key = new Integer(keyIdx++);
+        sockets.put(key, sock);
       }
       if (newClient) {
-	Channel.channel.directSendTo(getId(), new ConnectNot(key));
-      } else {
-	// Gets the destination agent id from intput stream, then
-	// sends it a ConnectNot.
-	DataInputStream dis = new DataInputStream(sock.getInputStream());
-	String header = dis.readUTF();
-	AgentId to = idFromString(header);
-	if (to == null)
-	  Channel.channel.directSendTo(getId(), new ConnectNot(key, header));
-	else
-	  Channel.channel.directSendTo(to, new ConnectNot(key, header));
+        Channel.sendTo(getId(), new ConnectNot(key));
       }
-    } else if (socket != null) {
+      else {
+        // Gets the destination agent id from intput stream, then
+        // sends it a ConnectNot.
+        DataInputStream dis = new DataInputStream(sock.getInputStream());
+        String header = dis.readUTF();
+        AgentId to = idFromString(header);
+        if (to == null) 
+          Channel.sendTo(getId(), new ConnectNot(key, header));
+        else 
+          Channel.sendTo(to, new ConnectNot(key, header));
+      }
+    } 
+    else if (socket != null) {
       // this is a connected client
       oos = setOutputFilters(socket.getOutputStream());
       ois = setInputFilters(socket.getInputStream());
@@ -253,31 +261,43 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
    * @exception IOException
    *	unspecialized exception
    */
-  public void disconnect() throws IOException {
+  public void disconnect() throws IOException
+  {
     if (listenPort >= 0) {
       // this is a listening server
       if (listenSocket != null) {
-	listenSocket.close();
-	listenSocket = null;
+        listenSocket.close();
+        listenSocket = null;
       }
-    } else {
+    } 
+    else {
       // this is a connected client
-      if (ois != null) {
-	ois.close();
-	ois = null;
-      }
-      if (oos != null) {
-	oos.close();
-	oos = null;
-      }
-      if (socket != null) {
-	socket.close();
-	socket = null;
-      }
+      close();
       if (key != null) {
-	sockets.remove(key);
-	key = null;
+        sockets.remove(key);
+        key = null;
       }
+    }
+  }
+
+  protected void close() {
+    if (ois != null) {
+      try {
+	ois.close();
+      } catch (IOException exc) {}
+      ois = null;
+    }
+    if (oos != null) {
+      try {
+	oos.close();
+      } catch (IOException exc) {}
+      oos = null;
+    }
+    if (socket != null) {
+      try {
+	socket.close();
+      } catch (IOException exc) {}
+      socket = null;
     }
   }
 
@@ -289,17 +309,31 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
    */
   protected void driverDone(DriverDone not) throws IOException {
     super.driverDone(not);
-    if (ois != null || oos != null) {
-      // wait for both drivers to terminate execution
-	  
-      stop();
-      return;
+    if (!multiConn) {
+      if (ois != null || oos != null) {
+        // wait for both drivers to terminate execution
+        stop();
+	close();
+        return;
+      }
     }
-
+    else {
+      int drvKey = not.getDriverKey();
+      DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+      if (dMonitor != null) {
+        if (dMonitor.getOis() != null || dMonitor.getOos() != null) {
+          // wait for both drivers of the connection set identified by 
+          // drvKey to terminate execution
+          stop(drvKey);
+          return;
+        }
+      }
+    }
+          
     if (listenPort < 0) {
       // it seems there is a recovery case when key may be null
       if (key != null)
-	sockets.remove(key);
+	    sockets.remove(key);
       key = null;
       socket = null;
     }
@@ -327,47 +361,50 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
   public void react(AgentId from, Notification not) throws Exception {
     try {
       if (not instanceof ConnectNot) {
-	ConnectNot cnot = (ConnectNot) not;
-	if (listenPort >= 0) {
-	  // This is a listen Server, creates a new proxy for the
-	  // connection.
-	  TcpMultiServerProxy agent = null;
-	  agent = createNewProxy(cnot.header);
-	  // Initialize the new proxy (Should be used in subclass).
-	  initNewProxy(agent);
-	  agent.key = cnot.key;
-	  agent.deploy();
-	} else {
-	  // This is a Server
-	  if (cnot.key == null)
-	    return;
-
-	  if (socket == null) {
-	    // There is no connection alive, accept it
-	    if ((connectQueue != null) &&
-		! connectQueue.isEmpty() &&
-		! from.equals(getId())) {
-	      // this is a new connection
-	      // but older ones are waiting in the connection queue
-	      cnot = (ConnectNot) connectQueue.firstElement();
-	      connectQueue.removeElementAt(0);
-	      connectQueue.addElement(not);
+        ConnectNot cnot = (ConnectNot) not;
+        if (listenPort >= 0) {
+          // This is a listen Server, creates a new proxy for the
+          // connection.
+          TcpMultiServerProxy agent = null;
+          agent = createNewProxy(cnot.header);
+          // Initialize the new proxy (Should be used in subclass).
+          initNewProxy(agent);
+          agent.key = cnot.key;
+          agent.deploy();
+        } 
+        else {
+          // This is a Server
+          if (cnot.key == null)
+            return;
+          // Accept the ConnectNot if no connection is already
+          // alive, or if the proxy manages multi-connections.
+          if (socket == null || multiConn) {
+            if ((connectQueue != null) && ! connectQueue.isEmpty() &&
+	          ! from.equals(getId())) {
+              // this is a new connection
+              // but older ones are waiting in the connection queue
+              cnot = (ConnectNot) connectQueue.firstElement();
+              connectQueue.removeElementAt(0);
+              connectQueue.addElement(not);
+            }
+            key = cnot.key;
+            reinitialize();
+          } 
+          else {
+            if (((connectQSize > 0) && (connectQueue.size() < connectQSize)) ||
+	          (connectQSize < 0)) {
+              connectQueue.addElement(not);
+            }
+            else {
+              // rejects connection
+              ((Socket) sockets.get(cnot.key)).close();
+              sockets.remove(cnot.key);
+            }
+          }
 	    }
-	    key = cnot.key;
-	    reinitialize();
-	  } else {
-	    if (((connectQSize > 0) && (connectQueue.size() < connectQSize)) ||
-		(connectQSize < 0)) {
-	      connectQueue.addElement(not);
-	    } else {
-	      // rejects connection
-	      ((Socket) sockets.get(cnot.key)).close();
-	      sockets.remove(cnot.key);
-	    }
-	  }
-	}
-      } else {
-	super.react(from, not);
+      } 
+      else {
+        super.react(from, not);
       }
     } catch (Exception exc) {
       stop();
@@ -379,14 +416,13 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.3 
     * Creates a (chain of) filter(s) for transforming the specified
     * <code>InputStream</code> into a <code>NotificationInputStream</code>.
     */
-  protected abstract NotificationInputStream
-    setInputFilters(InputStream in)
-      throws StreamCorruptedException, IOException;
+  protected abstract NotificationInputStream setInputFilters(InputStream in)
+    throws StreamCorruptedException, IOException;
 
   /**
     * Creates a (chain of) filter(s) for transforming the specified
     * <code>OutputStream</code> into a <code>NotificationOutputStream</code>.
     */
-  protected abstract NotificationOutputStream
-    setOutputFilters(OutputStream out) throws IOException;
+  protected abstract NotificationOutputStream setOutputFilters(OutputStream out) 
+    throws IOException;
 }

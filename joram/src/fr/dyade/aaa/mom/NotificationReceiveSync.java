@@ -21,44 +21,59 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 import java.lang.*; 
 import fr.dyade.aaa.agent.*; 
  
 /** 
- *	NotificationReceiveSync allows a agentclient to receive a message from a Queue synchronously 
+ * A <code>NotificationReceiveSync</code> wrapps an <code>AgentClient</code> 
+ * request to receive a message from a <code>Queue</code> synchronously. 
  *
- *	@see	fr.dyade.aaa.mom.Queue 
- *	@see	fr.dyade.aaa.mom.AgentClient 
+ * @see fr.dyade.aaa.mom.Queue 
+ * @see fr.dyade.aaa.mom.AgentClient 
  */  
- 
-public class NotificationReceiveSync extends fr.dyade.aaa.mom.NotificationMOMRequest { 
-  
-	/** the time of availability of the request 
-	 *	negative value means without constraint of time 
-	 *	0 value means nowait delivery 
-	 *	positive value means the end-time of availability of the request in millisecondes  
-	 */ 
-	public long timeOut;  
-	 
-	/** the selector of the request */ 
-	public String selector;
-	
-	/** the identifier of the Session */  
-	public String sessionID;
-	
-	public NotificationReceiveSync(long messageID, long timeOutNew, String selectorNew, String sessionIDNew) { 
-		super(messageID);
-		timeOut = timeOutNew; 
-		selector = selectorNew;
-		sessionID = sessionIDNew;
-	}
-    public String toString() {
-	return "timeOut=" + timeOut +
-	    " selector=" + selector + 
-	    " sessionID=" + sessionID;
-    }
+public class NotificationReceiveSync 
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /**
+   * The availability time of the request. 
+   * A negative value means no time constraint.
+   * 0 value means nowait delivery. 
+   * A positive value is the request availibility limit in milliseconds.
+   */ 
+  public long timeOut;  
+
+  /** The request selector. */ 
+  public String selector;
+
+  /** The Session identifier. */  
+  public String sessionID;
+
+  public boolean toListener;
+
+  /**
+   * Constructor.
+   * 
+   * @param driverKey  key identifying the connection which received the
+   * request.
+   */
+  public NotificationReceiveSync(long messageID, long timeOut,
+    String selector, String sessionID, int driverKey)
+  { 
+    super(messageID, driverKey);
+    this.timeOut = timeOut; 
+    this.selector = selector;
+    this.sessionID = sessionID;
+  }
+
+
+  public String toString()
+  {
+    return "timeOut=" + timeOut +
+    " selector=" + selector + 
+    " sessionID=" + sessionID +
+    " driverKey=" + driverKey;
+  }
+
 }

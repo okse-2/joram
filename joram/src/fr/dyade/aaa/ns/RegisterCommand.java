@@ -39,10 +39,13 @@ import fr.dyade.aaa.agent.*;
  */
 public class RegisterCommand extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: RegisterCommand.java,v 1.1 2000-10-05 15:18:44 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: RegisterCommand.java,v 1.2 2001-05-04 14:55:03 tachkeni Exp $";
 
   /** agent associated with name */
   private AgentId agent;
+
+  /** true if the register command must overwrite the evnetual existing entry */
+  public boolean rebind = true;
 
   /**
    * Creates a notification to be sent.
@@ -52,8 +55,21 @@ public static final String RCS_VERSION="@(#)$Id: RegisterCommand.java,v 1.1 2000
    * @param agent		agent associated with name
    */
   public RegisterCommand(AgentId report, String name, AgentId agent) {
+    this (report, name, agent, true);
+  }
+
+  /**
+   * Creates a notification to be sent.
+   *
+   * @param report		agent to report status to
+   * @param name		name of target entry of the command
+   * @param agent		agent associated with name
+   * @param rebind
+   */
+  public RegisterCommand(AgentId report, String name, AgentId agent, boolean rebind) {
     super(report, name);
     this.agent = agent;
+    this.rebind = rebind;
   }
 
   /**
@@ -63,6 +79,13 @@ public static final String RCS_VERSION="@(#)$Id: RegisterCommand.java,v 1.1 2000
    */
   public AgentId getAgent() { return agent; }
 
+
+  /**
+   * Accesses read only property.
+   *
+   * @return		rebind value
+   */
+  public boolean getRebind() { return rebind; }
 
   /**
    * Provides a string image for this object.

@@ -21,21 +21,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
 
 /** 
- *	NotificationCloseDestination allows to discard a Queue or a Topic 
- *	
- *	@see	fr.dyade.aaa.mom.Destination
- *	@see	fr.dyade.aaa.mom.CommonClient 
+ * A <code>NotificationCloseDestination</code> is sent by
+ * an <code>AgentClient</code> to a <code>Destination</code>
+ * agent and tells it to delete itself.
+ *
+ * @see  fr.dyade.aaa.mom.Destination
+ * @see  fr.dyade.aaa.mom.CommonClientAAA
  */ 
 
-public class NotificationCloseDestination extends fr.dyade.aaa.mom.NotificationMOMRequest { 
- 
-	public NotificationCloseDestination(long messageMOMID) {
-		super(messageMOMID);
-	} 
+public class NotificationCloseDestination
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** Constructor. */
+  public NotificationCloseDestination(long messageMOMID, int drvKey)
+  {
+    super(messageMOMID, drvKey);
+  } 
  
 }

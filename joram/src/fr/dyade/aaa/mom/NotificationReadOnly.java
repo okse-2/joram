@@ -21,30 +21,29 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 import java.lang.*; 
 import fr.dyade.aaa.agent.*; 
  
-/** 
- *	NotificationReadOnly allows a agentClient to ask to a Queue 
- *	the list of messages which it contains   
+/**
+ * A <code>NotificationReadOnly</code> asks a <code>Queue</code> 
+ * to send an enumeration of its messages.
  * 
- *	@see	fr.dyade.aaa.mom.Topic 
- *	@see	fr.dyade.aaa.mom.Queue 
- *	@see	fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Queue 
  */ 
- 
-public class NotificationReadOnly extends fr.dyade.aaa.mom.NotificationMOMRequest { 
-	 
-	/** the selector of the request */ 
-	String selector;  
-	 
-	public NotificationReadOnly(long messageID, String selectorNew) {
-		super(messageID);
-		selector = selectorNew;
-	} 
+public class NotificationReadOnly
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** The selector of the request. */ 
+  String selector;  
+
+  /** Constructor. */
+  public NotificationReadOnly(long messageID,
+    String selector, int drvKey)
+  {
+    super(messageID, drvKey);
+    this.selector = selector;
+  } 
  
 }

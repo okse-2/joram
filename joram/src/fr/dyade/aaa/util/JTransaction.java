@@ -21,38 +21,36 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.util;
 
 import java.io.*;
 import java.util.*;
 
-class Operation implements Serializable {
-  static final int SAVE = 1;
-  static final int DELETE = 2;
-
-  int type;
-  byte[] value = null;
-
-  Operation(int type) {
-    this.type = type;
-  }
-
-  Operation(int type, byte[] value) {
-    this.type = type;
-    this.value = value;
-  }
-}
-
 public class JTransaction implements Transaction {
-
-public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.3 2000-10-05 15:21:08 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.4 2001-05-04 14:55:04 tachkeni Exp $"; 
 
   private File dir = null;
 
   static private final String LOG = "log";
   private RandomAccessFile logFile = null; 
   private Hashtable log = null;
+
+  class Operation implements Serializable {
+    static final int SAVE = 1;
+    static final int DELETE = 2;
+
+    int type;
+    byte[] value = null;
+
+    Operation(int type) {
+      this.type = type;
+    }
+
+    Operation(int type, byte[] value) {
+      this.type = type;
+      this.value = value;
+    }
+  }
 
   // State of the transaction monitor.
   private int phase;
@@ -248,4 +246,6 @@ public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.3 2000-10
     setPhase(FREE);
     notify();
   }
+
+  public final void stop() {}
 }

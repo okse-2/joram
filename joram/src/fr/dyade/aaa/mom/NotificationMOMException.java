@@ -21,33 +21,33 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.mom; 
  
 import fr.dyade.aaa.agent.*; 
- 
+
 /** 
- *	NotificationMOMException allows a client to know the exception which happened during execution 
+ * A <code>NotificationMOMException</code> wraps an Exception.
  * 
- * @see         fr.dyade.aaa.mom.Topic 
- * @see         fr.dyade.aaa.mom.Queue 
- * @see         fr.dyade.aaa.mom.AgentClient 
+ * @see  fr.dyade.aaa.mom.Topic 
+ * @see  fr.dyade.aaa.mom.Queue 
+ * @see  fr.dyade.aaa.mom.AgentClient 
  */ 
+public class NotificationMOMException extends fr.dyade.aaa.agent.Notification
+{ 
+  /** The notification causing the wrapped exception. */ 
+  public NotificationMOMRequest typeNotification;  
+  int driverKey;
  
- 
-public class NotificationMOMException extends fr.dyade.aaa.agent.Notification { 
- 
-	/** the type of the notification unavailable by the Queue or the Topic */ 
-	public NotificationMOMRequest typeNotification;  
-	 
-	/** the exception which happeened during execution */ 
-	public MOMException except ;  
-	 
-	 
-	public NotificationMOMException(NotificationMOMRequest not, MOMException exc) { 
-		typeNotification = not; 
-		except = exc; 
-	}
+  /** The wrapped exception. */ 
+  public MOMException except ;  
+
+  /** Constructor. */ 
+  public NotificationMOMException(NotificationMOMRequest not, 
+    MOMException exc, int driverKey)
+  { 
+    typeNotification = not; 
+    except = exc; 
+    this.driverKey = driverKey;
+  }
 
 }

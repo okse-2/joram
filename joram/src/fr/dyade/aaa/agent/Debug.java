@@ -52,7 +52,7 @@ import java.lang.reflect.*;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.4 2001-05-04 14:54:49 tachkeni Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
@@ -108,7 +108,7 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:
     initProperties();
 
     // creates the debug trace file
-    File file = new File(directory, "server" + Server.serverId + ".audit");
+    File file = new File(directory, "server" + serverId + ".audit");
     try {
       stream = new PrintWriter(
 	new BufferedWriter(new FileWriter(file.getPath(), true)));
@@ -159,22 +159,22 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:
       engineLoop = true;
     }
 
-    bootNetwork = new Boolean(
-      properties.getProperty("Debug.bootNetwork", "false"))
+    if (new Boolean(properties.getProperty("Debug.A3Server", "false"))
+	.booleanValue()) {
+      A3Server = true;
+    }
+
+    network = new Boolean(
+      properties.getProperty("Debug.network", "false"))
       .booleanValue();
-    recvMessage = new Boolean(
-      properties.getProperty("Debug.recvMessage", "false"))
-      .booleanValue();
-    sendMessage = new Boolean(
-      properties.getProperty("Debug.sendMessage", "false"))
+    message = new Boolean(
+      properties.getProperty("Debug.message", "false"))
       .booleanValue();
 
-    if (new Boolean(properties.getProperty("Debug.Network", "false"))
+    if (new Boolean(properties.getProperty("Debug.Network.all", "false"))
 	.booleanValue()) {
       network = true;
-      bootNetwork = true;
-      recvMessage = true;
-      sendMessage = true;
+      message = true;
     }
 
     restoreServer = new Boolean(
@@ -263,6 +263,12 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:
 
   static int debugLevel = 1;
 
+  static boolean config = false;
+  static boolean configParse = false;
+  static boolean configRoute = false;
+
+  static boolean A3Server = false;
+
   static boolean createAgent = false;
   static boolean garbageAgent = false;
   static boolean loadAgent = false;
@@ -279,18 +285,13 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:
   static boolean error = true;
 
   static boolean network = false;
-  static boolean recvMessage = false;
-  static boolean sendMessage = false;
+  static boolean message = false;
 
   static boolean restoreServer = false;
   static boolean agentError = false;
-  static boolean bootNetwork = false;
   static boolean agentInit = false;
 
   static boolean dumpMatrixClock = false;
-
-  static boolean traceMethodCalls = false;
-  static boolean traceInstructions = false;
 
   public static boolean drivers = false;
   public static boolean driversControl = false;

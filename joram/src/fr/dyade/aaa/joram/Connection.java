@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.joram; 
  
 import javax.jms.*;
@@ -103,13 +102,29 @@ public abstract class Connection implements javax.jms.Connection {
      * using is not proved.
      */
     public Hashtable subscriptionListenerTable;
-	
+
+  /** The ConnectionConsumer on this Connection, if any. */
+  protected ConnectionConsumer connectionConsumer = null;
+
+  /**
+   * Listener distributing the incoming messages to the
+   * <code>QueueReceiver</code>'s <code>MessageListener</code>s.
+   */ 
+  QueueConnectionListener queueConnectionListener = null;
+
+  /**
+   * <code>FifoQueue</code> in which messages to be passed to
+   * <code>MessageListener</code>s are stored.
+   */
+  protected FifoQueue messagesToDeliver;
+
+  protected Hashtable sessionsTable;
+
 
     public Connection(String agentClient,
 		      java.net.InetAddress proxyAddress, int proxyPort,
 		      String userName, String password) throws javax.jms.JMSException {
 	try {
-      
 	    /* parameters of the connection */
 	    this.agentClient = agentClient;
 	    this.proxyAddress = proxyAddress;
@@ -125,6 +140,9 @@ public abstract class Connection implements javax.jms.Connection {
 	    messageJMSMOMTable = new Hashtable();
 	    /* initialisation of the subscriptionListenerTable */
 	    subscriptionListenerTable = new Hashtable();
+
+        messagesToDeliver = new FifoQueue();
+
 	    /* initialisation of the sesion counter */
 	    sessionCounter = 1;
 
@@ -134,7 +152,8 @@ public abstract class Connection implements javax.jms.Connection {
 	    /* Connection opened */
 	    isClosed = false;
 
-	    socket = new Socket(proxyAddress, proxyPort);
+
+	    socket = new Socket(proxyAddress, proxyPort); 
 	    socket.setTcpNoDelay(true);
 	    socket.setSoTimeout(0);
 	    socket.setSoLinger(true,1000);
@@ -147,9 +166,12 @@ public abstract class Connection implements javax.jms.Connection {
 	    /* creation of the objectinputStream and ObjectOutputStream */
 	    oos = new ObjectOutputStream(socket.getOutputStream()); 
 	    ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-
+        
 	    /* creation of the thread listening */
 	    driver = new Driver(this, ois);
+
+        sessionsTable = new Hashtable();
+
 	} catch (IOException exc) {
 	    fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("IOException Error Sending Message: ",JMSAAAException.ERROR_CONNECTION_MOM);
 	    except.setLinkedException(exc);
@@ -160,6 +182,8 @@ public abstract class Connection implements javax.jms.Connection {
 	    throw(except);
 	}
     }
+
+    public Connection() {}
   
     /**
      * Close the connection and run garbage collection.
@@ -175,9 +199,12 @@ public abstract class Connection implements javax.jms.Connection {
 		messageJMSMOMTable.clear();
 		waitThreadTable.clear();
 		subscriptionListenerTable.clear();
+        if (queueConnectionListener != null)
+          queueConnectionListener.stop();
+          queueConnectionListener = null;
+	    }
 		System.gc();
 		isClosed = true;
-	    }
 	} catch (Exception exc) {
 	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
 	    except.setLinkedException(exc);
@@ -526,6 +553,7 @@ public abstract class Connection implements javax.jms.Connection {
 	    throw(except);
 	}
     }
+
     
     /**
      * Extract message from the socket
@@ -533,9 +561,9 @@ public abstract class Connection implements javax.jms.Connection {
     protected void extractMessage(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) throws Exception {
 	try {
 	    if (msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
-		deliveryRequestAgree(msgMOM);
+		deliverMsgFromQueue((fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM);
 	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) {
-		deliveryMessageTopic((fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) msgMOM);
+        deliverMsgFromTopic((fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) msgMOM);
 	    } else if (msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
 		deliveryRequestAgree(msgMOM);
 	    } else if (msgMOM instanceof fr.dyade.aaa.mom.SendingBackMessageMOMExtern) {
@@ -655,30 +683,70 @@ public abstract class Connection implements javax.jms.Connection {
 	     *	Thread retrieves it
 	     */
 	    messageJMSMOMTable.put(longMsgID, msgMOM);
-		
+
+        if (msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
+        fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msg =
+          (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM;
+        if (msg.toListener) {
+          Session session = (Session) sessionsTable.remove(longMsgID);
+          session.listenersRequests.push(longMsgID); 
+        }
+        else {	
 	    /* wake up the Thread */
 	    synchronized(objWait) {
 		objWait.notify();
 	    }
+        }
+        }
+        else {
+	    /* wake up the Thread */
+	    synchronized(objWait) {
+		objWait.notify();
+        }
+        }
 	}
     }
+
 	
-    /**
-     * Deliver a message from a Topic to the appropriated Session.
-     */
-    private void deliveryMessageTopic(fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgMOM) throws Exception {
-	fr.dyade.aaa.mom.TopicNaming topic = (fr.dyade.aaa.mom.TopicNaming) msgMOM.message.getJMSDestination();
-	KeyConnectionSubscription key = new KeyConnectionSubscription(msgMOM.nameSubscription, topic.getTopicName(), msgMOM.theme);
-
-	fr.dyade.aaa.joram.Session session = (fr.dyade.aaa.joram.Session) subscriptionListenerTable.get(key); 
-
-	/* search of the correspondant request */
-	if(session == null)
-	    throw (new fr.dyade.aaa.joram.JMSAAAException("No Session is listening for this message",JMSAAAException.NO_SESSION_LISTENING));
-
-	/* put the message in the Sesion object*/
-	session.addNewMessage(msgMOM);
+  /**
+   * Method delivering a message from a <code>fr.dyade.aaa.mom.Topic</code>.
+   *
+   * @author Frederic Maistre
+   */
+  private void deliverMsgFromTopic(fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgMOM)
+    throws Exception
+  {
+    if (msgMOM.connectionConsumer) {
+      if (connectionConsumer == null)
+        throw (new JMSException("Can't find a ConnectionConsumer for this message"));
+      connectionConsumer.getMessage(msgMOM);
     }
+    else if (msgMOM.toListener) {
+      fr.dyade.aaa.mom.TopicNaming topic =
+        (fr.dyade.aaa.mom.TopicNaming) msgMOM.message.getJMSDestination();
+
+      KeyConnectionSubscription key =
+        new KeyConnectionSubscription(msgMOM.nameSubscription,
+        topic.getTopicName(), msgMOM.theme);
+
+      Session session = (Session) subscriptionListenerTable.get(key); 
+
+      if (session == null)
+        throw (new JMSException("Can't find a session for this message"));
+
+      session.addNewMessage(msgMOM);
+    }
+    else
+      deliveryRequestAgree(msgMOM);
+  }
+
+  private void deliverMsgFromQueue(fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern momMsg)
+    throws Exception
+  {
+      deliveryRequestAgree(momMsg);
+  }
+
+
 	
     /** incrementation of the counter with the syntax
      *	a,b,c,...,z,aa,ab,ac,...,az,ba,... 
@@ -766,7 +834,7 @@ class Driver implements java.lang.Runnable {
 	    try {
 		if(stopDriver)
 		    break;
-		Object obj = ois.readObject();
+        Object obj = ois.readObject();
 		if(obj instanceof fr.dyade.aaa.mom.MessageMOMExtern) {
 		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) obj;
 		    refConnection.extractMessage(msgMOM);

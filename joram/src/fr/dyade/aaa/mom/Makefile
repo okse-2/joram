@@ -38,7 +38,6 @@ a3mom.jar_CLASSES = \
 	CreationBackDestinationMOMExtern \
 	NotificationAdminDeleteDestination \
 	AgentClient \
-	NotYetSubRecordObject \
 	NotificationReadOnly \
 	AgentClientItf \
 	NotificationReceiveSync\
@@ -59,7 +58,8 @@ a3mom.jar_CLASSES = \
 	CommonClientAAA\
 	NotificationSubscription\
 	ConnectionFactory\
-	NotificationTopicMessageDeliver\
+	NotifMessageFromTopic\
+	NotifMessageFromQueue\
 	Debug\
 	NotificationTopicSend\
 	Destination\
@@ -72,9 +72,9 @@ a3mom.jar_CLASSES = \
 	ExceptionListenerMOMExtern\
 	ExceptionUnknownObjMOMExtern\
 	Queue\
-	KeyClientSubscription\
 	QueueNaming\
-	KeySubscription\
+	ClientSubscriptionKey\
+	TopicSubscriptionKey\
 	ReadDeliverMessageMOMExtern\
 	MOMException\
 	ReadOnlyMessageMOMExtern\
@@ -97,10 +97,10 @@ a3mom.jar_CLASSES = \
 	SettingExcListenerMOMExtern\
 	NotificationAck\
 	SendingMessageTopicMOMExtern\
-	NotificationAgreeAsk\
-	Subscription\
+	NotifAckFromDestination\
+	TopicSubscription\
 	NotificationInputMessage\
-	SubscriptionClient\
+	ClientSubscription\
 	NotificationMOMException\
 	NotificationCloseDestination\
 	SubscriptionMessageMOMExtern\
@@ -113,16 +113,14 @@ a3mom.jar_CLASSES = \
 	Theme\
 	NotificationMOMRequest\
 	Topic\
-	NotificationMessageDeliver\
 	TopicNaming\
 	NotificationOutputMessage\
 	UnsubscriptionMessageMOMExtern\
 	NotificationQueueSend\
-	NotificationReadDeliver\
+	NotifMessageEnumFromQueue\
 	MetaData\
 	MetaDataMOMExtern\
 	MetaDataRequestMOMExtern\
-	SessionSubscription\
 	RecoverMsgMOMExtern\
 	RecoverQueue\
 	RecoverObject\
@@ -135,7 +133,8 @@ a3mom.jar_CLASSES = \
 	MessageAckXAPrepare \
 	MessageAckXACommit \
 	MessageAckXARollback \
-	MessageAckXARecover
+	MessageAckXARecover \
+	SynchronousReceptionRequestMsg
 
 LIBS = a3util.jar:a3agent.jar:a3ip.jar:jms.jar:joram.jar:jta-spec1_0_1.jar
 

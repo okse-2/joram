@@ -27,6 +27,6 @@ final class Boot implements java.io.Serializable {
   short sid;
 
   Boot() {
-    this.sid = Server.serverId;
+    this.sid = AgentServer.getServerId();
   }
 }

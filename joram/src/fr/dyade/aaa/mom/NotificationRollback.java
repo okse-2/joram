@@ -28,21 +28,26 @@ package fr.dyade.aaa.mom;
 import java.lang.*; 
  
 /** 
- *	NotificationRollback is the notification to specify to a Queue
- *	that a rollback was done by a client
+ * A <code>NotificationRollback</code> tells a
+ * <code>Queue</code> that a rollback has been
+ * done by a client.
  */ 
- 
-public class NotificationRollback extends fr.dyade.aaa.mom.NotificationMOMRequest { 
-	 
-  /** identifier of a message sent by a Queue */ 
+public class NotificationRollback
+  extends fr.dyade.aaa.mom.NotificationMOMRequest
+{ 
+  /** Identifier of a message sent by a <code>Queue</code>. */ 
   public String messageID = null;
 
-  /** identifier of a session */
+  /** Session identifier. */
   public String sessionID = null;
 
-  public NotificationRollback(long notMOMID, String messageID, String sessionID) {
-    super(notMOMID);
+  /** Constructor. */
+  public NotificationRollback(long notMOMID, String messageID,
+    String sessionID, int driversKey)
+  {
+    super(notMOMID, driversKey);
     this.messageID = messageID;
     this.sessionID = sessionID;
   } 
+
 }
