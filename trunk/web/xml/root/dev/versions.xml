@@ -15,8 +15,19 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications">
-      <p>February 13: THE CVS TREE IS CURRENTLY UNDER HEAVY MODIFICATIONS; THE
-      CODE BASE WILL BE UNSTABLE UNTIL SUBMISSION IS OVER.</p>
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram4_0_0 (February 13, 2004)">
+      <p>This version provides new functionnalities (collocated client-server
+      communication protocol, universal JMS bridge feature, distributed JNDI
+      server) and introduces a new sources architecture.</p>
+      <s2 name="Modifications">
+      <p>Packages under <code>fr/dyade/aaa/joram</code> and
+      <code>fr/dyade/aaa/mom</code> have moved under
+      <code>org/objectweb/joram/client</code>,
+      <code>org/objectweb/joram/mom</code> and
+      <code>org/objectweb/joram/shared</code>.</p>
       </s2>
     </s1>
     <s1 name="joram3_7_1 (February 3, 2004)">
@@ -257,16 +268,6 @@
         Prashanth Kasturi</a>. The bug is corrected, the impacted class is
         <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.</li>
       </ul>
-      </s2>
-    </s1>
-    <s1 name="joram3_5_0 (June 2003, 24th)"> 
-      <p>This version provides a totally refactored message persistence
-      management.</p>  
-      <s2 name="Modifications">
-      <p>Modifications mainly occured in the destinations' and proxy's 
-      algorithms. Check packages <code>fr.dyade.aaa.mom.dest</code> and
-      <code>fr.dyade.aaa.mom.proxies</code>. Check also the new class
-      <code>fr.dyade.aaa.mom.messages.PersistenceModule</code>.</p>
       </s2>
     </s1>
 
