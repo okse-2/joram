@@ -23,8 +23,17 @@
         <code>org.objectweb.joram.client.tools.admin</code>.</li>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: October 27, 2003)">
+      <s2 name="Corrected bugs (latest: November 3, 2003)">
       <ul>
+        <li>Recovery issue, found by 
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-10/msg00069.html">
+        Dirk Muthorst</a>. When stopping a JORAM server during a PTP exchange,
+        and re-starting it, a <code>NullPointerException</code> is happening
+        from time to time. This is due to the fact that the consumer's 
+        proxy may deny twice a same message (the message currently exchanged
+        when the server stops), and that the queue could not handle this double
+        deny. This bug is corrected, the corrected class is
+        <code>fr.dyade.aaa.mom.dest.QueueImpl</code>.</li>
         <li><code>NullPointerException</code> occuring when requesting the
         defaut DMQ settings of a server in a distributed configuration; 
         corrected class is <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>. 
