@@ -100,6 +100,7 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   protected void prepare() throws Exception
   {
     momMsg.setObject(obj);
+    super.prepare();
   }
 
   /** 
