@@ -598,15 +598,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     qout.validate();
   }
 
-  /**
-   * Invalidates all messages pushed in queue during transaction session.
-   */
-  public void invalidate() {
-    qout.invalidate();
-  }
-
   public MessageQueue getQueue() {
     return qout;
+  }
+
+  /**
+   * This operation always throws an IllegalStateException.
+   */
+  public void delete() throws IllegalStateException {
+    throw new IllegalStateException();
   }
 
   /**
