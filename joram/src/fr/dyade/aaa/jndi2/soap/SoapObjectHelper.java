@@ -66,14 +66,15 @@ public class SoapObjectHelper
       object = m.invoke(clazz.newInstance(),new Object[]{codedObject});
       
     } catch (Throwable exc) {
-      throw new NamingException("Could not decode Hashtable " + codedObject
-                                + " into an object: " + exc);
+      throw new NamingException("could not decode Hashtable [" + codedObject
+                                + "] into an object: " + exc);
     }
 
     if (object instanceof SoapObjectItf)
       return object;
     
-    throw new NamingException("Could not decode vector " + codedObject
-                              + " into an object.");
+    throw new NamingException("hashtable [" + codedObject
+                              + "] decoded into an unexpected object ["
+                              + object + "]");
   }
 }
