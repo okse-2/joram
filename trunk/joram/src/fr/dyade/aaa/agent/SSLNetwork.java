@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2003 - 2004 SCALAGENT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -26,7 +28,7 @@ import javax.security.cert.X509Certificate;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
-public final class SSLNetwork extends PoolCnxNetwork {
+public final class SSLNetwork extends PoolNetwork {
   public final static String SSLCONTEXT = "fr.dyade.aaa.agent.SSLNetwork.SSLContext";
   public final static String KMGRFACT = "fr.dyade.aaa.agent.SSLNetwork.KeyMgrFact";
   public final static String KTYPE = "fr.dyade.aaa.agent.SSLNetwork.KeyStoreType";
@@ -100,7 +102,7 @@ public final class SSLNetwork extends PoolCnxNetwork {
    *
    * @exception IOException	for networking errors
    */
-  ServerSocket createServerSocket() throws IOException {
+  ServerSocket createServerSocket(int port) throws IOException {
     ServerSocket serverSocket = null;
     serverSocket = serverSocketFactory.createServerSocket(port);
     ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
@@ -117,7 +119,7 @@ public final class SSLNetwork extends PoolCnxNetwork {
    *
    * @exception IOException	for networking errors
    */ 
-  static void setSocketOption(Socket sock) throws SocketException {
+  void setSocketOption(Socket sock) throws SocketException {
     // Don't use TCP data coalescing - ie Nagle's algorithm
     sock.setTcpNoDelay(true);
     // Read operation will block indefinitely until requested data arrives

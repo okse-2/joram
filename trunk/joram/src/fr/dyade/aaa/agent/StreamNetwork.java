@@ -45,9 +45,80 @@ import fr.dyade.aaa.util.SocketAddress;
  * class for TCP sockets.
  */
 public abstract class StreamNetwork extends Network {
+  /**
+   *  Numbers of attempt to bind the server's socket before aborting,
+   * default value is 3.
+   *  This value can be adjusted for all network components by setting
+   * <code>CnxRetry</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.CnxRetry</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int CnxRetry = 3;
+  /**
+   *  The maximum queue length for incoming connection indications,
+   * default value is 5.
+   *  This value can be adjusted for all network components by setting
+   * <code>backlog</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.backlog</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int backlog = 5;
+  /**
+   *  Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm),
+   * default value is false.
+   *  This value can be adjusted for all network components by setting
+   * <code>TcpNoDelay</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.TcpNoDelay</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  boolean TcpNoDelay = false;
+  /**
+   *  Enable SO_LINGER with the specified linger time in seconds, if the
+   * value is less than 0 then it disables SO_LINGER. Default value is -1.
+   *  This value can be adjusted for all network components by setting
+   * <code>TcpNoDelay</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.TcpNoDelay</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int SoLinger = -1;
+
   /** Creates a new Network component */
   public StreamNetwork() {
     super();
+  }
+
+  /**
+   * Initializes a new <tt>StreamNetwork</tt> component.
+   *
+   * @see Network
+   *
+   * @param name	The domain name.
+   * @param port	The listen port.
+   * @param servers	The list of servers directly accessible from this
+   *			network interface.
+   */
+  public void init(String name, int port, short[] servers) throws Exception {
+    super.init(name, port, servers);
+
+    CnxRetry = Integer.getInteger("CnxRetry", CnxRetry).intValue();
+    CnxRetry = Integer.getInteger(name + ".CnxRetry", CnxRetry).intValue();
+
+    backlog = Integer.getInteger("backlog", backlog).intValue();
+    backlog = Integer.getInteger(name + ".backlog", backlog).intValue();
+
+    TcpNoDelay = Boolean.getBoolean(name + ".TcpNoDelay");
+    if (! TcpNoDelay) TcpNoDelay = Boolean.getBoolean("TcpNoDelay");
+
+    SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
+    SoLinger = Integer.getInteger(name + ".SoLinger", SoLinger).intValue();
   }
 
   /**
@@ -122,9 +193,25 @@ public abstract class StreamNetwork extends Network {
   }
 
   /**
-   * Numbers of attempt to bind the server's socket before aborting.
+   *  This method creates and returns a server socket which uses all network
+   * interfaces on the host, and is bound to the specified port.
+   *
+   * @return		a server socket bound to the specified port.
+   *
+   * @exception IOException	for networking errors
    */
-  final static int CnxRetry = 3;
+  final ServerSocket createServerSocket() throws IOException {
+    for (int i=0; ; i++) {
+      try {
+        return createServerSocket(port);
+      } catch (BindException exc) {
+        if (i > CnxRetry) throw exc;
+        try {
+          Thread.sleep(i * 200);
+        } catch (InterruptedException e) {}
+      }
+    }
+  }
 
   /**
    *  This method creates and returns a server socket which uses all network
@@ -137,17 +224,8 @@ public abstract class StreamNetwork extends Network {
    *
    * @exception IOException	for networking errors
    */
-  ServerSocket createServerSocket() throws IOException {
-    for (int i=0; ; i++) {
-      try {
-        return new ServerSocket(port);
-      } catch (BindException exc) {
-        if (i > CnxRetry) throw exc;
-        try {
-          Thread.sleep(i * 200);
-        } catch (InterruptedException e) {}
-      }
-    }
+  ServerSocket createServerSocket(int port) throws IOException {
+    return new ServerSocket(port, backlog);
   }
 
   /**
@@ -159,19 +237,22 @@ public abstract class StreamNetwork extends Network {
    *
    * @exception IOException	for networking errors
    */ 
-  static void setSocketOption(Socket sock) throws SocketException {
-    // Don't use TCP data coalescing - ie Nagle's algorithm
-    sock.setTcpNoDelay(true);
+  void setSocketOption(Socket sock) throws SocketException {
+    // TCP data coalescing - ie Nagle's algorithm
+    sock.setTcpNoDelay(TcpNoDelay);
     // Read operation will block indefinitely until requested data arrives
     sock.setSoTimeout(0);
-    // Set Linger-on-Close timeout.
-    sock.setSoLinger(true, 5);
+    // Linger-on-Close timeout.
+    if (SoLinger >= 0)
+      sock.setSoLinger(true, SoLinger);
+    else
+      sock.setSoLinger(false, 0);
   }
 
   /**
    * Class used to send messages through a TCP stream.
    */
-  static class NetOutputStream {
+  static final class NetOutputStream {
     private ByteArrayOutputStream baos = null;
     private ObjectOutputStream oos = null;
     private OutputStream os = null;
@@ -205,36 +286,4 @@ public abstract class StreamNetwork extends Network {
       }
     }
   }
-
-//   /**
-//    *  Returns an <code>ObjectInputStream</code> for this socket. This
-//    * method may be overloaded in subclass, transforming the data along
-//    * the way or providing additional functionality (ie cyphering).
-//    *
-//    * @param sock	the socket.
-//    * @return		an input stream for reading object from this socket.
-//    *
-//    * @exception	IOException	if an I/O error occurs when creating the
-//    *				input stream.
-//    */
-//   static ObjectInputStream
-//   getInputStream(Socket sock) throws IOException {
-//     return new ObjectInputStream(sock.getInputStream());
-//   }
-
-//   /**
-//    *  Returns an <code>ObjectOutputStream</code> for this socket. This
-//    * method may be overloaded in subclass, transforming the data along
-//    * the way or providing additional functionality (ie cyphering).
-//    *
-//    * @param sock	the socket.
-//    * @return		an output stream for writing object to this socket.
-//    *
-//    * @exception	IOException	if an I/O error occurs when creating the
-//    *				output stream.
-//    */
-//   static ObjectOutputStream
-//   getOutputStream(Socket sock) throws IOException {
-//     return new ObjectOutputStream(sock.getOutputStream());
-//   }
 }

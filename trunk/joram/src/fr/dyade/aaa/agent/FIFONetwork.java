@@ -71,7 +71,7 @@ public abstract class FIFONetwork extends StreamNetwork {
     AgentServer.getServerDesc(from).active = true;
     AgentServer.getServerDesc(from).retry = 0;
 
-    // Start atransaction in order to ensure atomicity of clock updates
+    // Start a transaction in order to ensure atomicity of clock updates
     // and queue changes.
     AgentServer.transaction.begin();
 
@@ -88,46 +88,12 @@ public abstract class FIFONetwork extends StreamNetwork {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    getName() + ", deliver msg#" + msg.getStamp());
-      scanlist:
-      while (true) {
-	for (int i=0; i<waiting.size(); i++) {
-	  Message tmpMsg = (Message) waiting.elementAt(i);
-	  if ((tmpMsg.getFromId() == from) &&
-              (clock.testRecvUpdate(tmpMsg.getUpdate()) == LogicalClock.DELIVER)) {
-	    // Be Careful, changing the stamp imply the filename
-	    // change !! So we have to delete the old file.
-	    tmpMsg.delete();
-	    //  Deliver the message, then delete it from list.
-	    Channel.post(tmpMsg);
-	    waiting.removeElementAt(i);
 
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         getName() + ",	 deliver msg#" + tmpMsg.getStamp());
-
-	    // logical time has changed we have to rescan the list.
-	    continue scanlist;
-	  }
-	}
-	//  We have scan the entire list without deliver any message
-	// so we leave the loop.
-	break scanlist;
-      }
       Channel.save();
       AgentServer.transaction.commit();
       // then commit and validate the message.
       Channel.validate();
       AgentServer.transaction.release();
-    } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
-      // Insert in a waiting list.
-      msg.save();
-      waiting.addElement(msg);
-      AgentServer.transaction.commit();
-      AgentServer.transaction.release();
-      
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", block msg#" + msg.getStamp());
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).

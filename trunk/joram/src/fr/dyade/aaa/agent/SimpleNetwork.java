@@ -36,10 +36,8 @@ import fr.dyade.aaa.util.*;
  * a time.
  */
 public class SimpleNetwork extends FIFONetwork {
-  /**
-   * FIFO list of all messages to be sent by the watch-dog thead.
-   */
-  Vector sendList;
+  /** FIFO list of all messages to be sent by the watch-dog thead. */
+  MessageVector sendList;
 
   /**
    * Creates a new network component.
@@ -52,28 +50,24 @@ public class SimpleNetwork extends FIFONetwork {
   NetServerIn netServerIn = null;
   /** Output component */
   NetServerOut netServerOut = null;
-  /** Watch-dog component */
-  WatchDog watchDog = null;
 
   /**
    * Causes this network component to begin execution.
    */
   public void start() throws IOException {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
-    try {
+    try {    
       if (sendList == null)
-        sendList = new Vector();
-    
+        sendList = new MessageVector(getName(),
+                                     AgentServer.getTransaction().isPersistent());
+
       if (netServerIn == null)
         netServerIn = new NetServerIn(getName(), logmon);
       if (netServerOut == null)
         netServerOut = new NetServerOut(getName(), logmon);
-      if (watchDog == null)
-        watchDog = new WatchDog(getName(), logmon);
 
       if (! netServerIn.isRunning()) netServerIn.start();
       if (! netServerOut.isRunning()) netServerOut.start();
-      if (! watchDog.isRunning()) watchDog.start();
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
@@ -81,12 +75,12 @@ public class SimpleNetwork extends FIFONetwork {
     logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
-  /**
-   * Wakes up the watch-dog thread.
-   */
-  public void wakeup() {
-    if (watchDog != null) watchDog.wakeup();
-  }
+//   /**
+//    * Wakes up the watch-dog thread.
+//    */
+//   public void wakeup() {
+//     if (netServerOut != null) netServerOut.wakeup();
+//   }
 
   /**
    * Forces the network component to stop executing.
@@ -94,7 +88,6 @@ public class SimpleNetwork extends FIFONetwork {
   public void stop() {
     if (netServerIn != null) netServerIn.stop();
     if (netServerOut != null) netServerOut.stop();
-    if (watchDog != null) watchDog.stop();
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
@@ -106,8 +99,7 @@ public class SimpleNetwork extends FIFONetwork {
    */
   public boolean isRunning() {
     if ((netServerIn != null) && netServerIn.isRunning() &&
-	(netServerOut != null) && netServerOut.isRunning() &&
-	(watchDog != null) && watchDog.isRunning())
+	(netServerOut != null) && netServerOut.isRunning())
       return true;
     else
       return false;
@@ -127,12 +119,30 @@ public class SimpleNetwork extends FIFONetwork {
       strbuf.append(netServerIn.toString()).append("\n\t");
     if (netServerOut != null)
       strbuf.append(netServerOut.toString()).append("\n\t");
-    if (watchDog != null)
-      strbuf.append(watchDog.toString()).append("\n");
 
     return strbuf.toString();
   }
+  
+//   /**
+//    * Use to clean the qout of all messages to the dead node.
+//    *
+//    * @param	dead - the unique id. of dead server.
+//    */
+//   void clean(short dead) {
+//     Message msg = null;
+    
+//     // TODO: Be careful, to the route algorithm!
 
+//     synchronized (lock) {
+//       for (int i=0; i<qout.size(); i++) {
+//         msg = (Message) qout.getMessageAt(i);
+//         if (msg.to.to == dead) {
+//           qout.removeMessageAt(i);
+//         }
+//       }
+//     }
+//   }
+  
   final class NetServerOut extends Daemon {
     NetOutputStream nos = null;
 
@@ -170,7 +180,7 @@ public class SimpleNetwork extends FIFONetwork {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", waiting message");
-            msg = qout.get();
+            msg = qout.get(WDActivationPeriod);
           } catch (InterruptedException exc) {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
@@ -180,118 +190,214 @@ public class SimpleNetwork extends FIFONetwork {
           canStop = false;
           if (! running) break;
 
-          msgto = msg.getToId();
+          if (msg != null) {
+            msgto = msg.getToId();
 
-          Socket socket = null;
+            Socket socket = null;
+            try {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", try to send message -> " +
+                                msg + "/" + msgto);
+              // Can throw an UnknownServerException...
+              server = AgentServer.getServerDesc(msgto);
+
+              try {
+                if (! server.active) {
+                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG,
+                                    this.getName() + ", AgentServer#" + msgto + " is down");
+                  throw new ConnectException("AgentServer#" + msgto + " is down");
+                }
+                
+                // Open the connection.
+                try {
+                  socket = createSocket(server);
+                } catch (IOException exc) {
+                  this.logmon.log(BasicLevel.WARN,
+                                  this.getName() + ", connection refused", exc);
+                  server.active = false;
+                  server.last = System.currentTimeMillis();
+                  server.retry += 1;
+                  throw exc;
+                }
+                setSocketOption(socket);
+              } catch (IOException exc) {
+                this.logmon.log(BasicLevel.WARN,
+                                this.getName() + ", move msg in watchdog list", exc);
+                //  There is a connection problem, put the message in a
+                // waiting list.
+                sendList.addMessage(msg);
+                qout.pop();
+                continue;
+              }
+
+              try {
+                send(socket, msg);
+              } catch (IOException exc) {
+                this.logmon.log(BasicLevel.WARN,
+                                this.getName() + ", move msg in watchdog list", exc);
+                //  There is a problem during network transaction, put the
+                // message in waiting list in order to retry later.
+                sendList.addMessage(msg);
+                qout.pop();
+                continue;
+              } 
+            } catch (UnknownServerException exc) {
+              this.logmon.log(BasicLevel.ERROR,
+                              this.getName() + ", can't send message: " + msg,
+                              exc);
+              // Remove the message (see below), may be we have to post an
+              // error notification to sender.
+            }
+
+            AgentServer.transaction.begin();
+            //  Suppress the processed notification from message queue,
+            // and deletes it.
+            qout.pop();
+            msg.delete();
+            AgentServer.transaction.commit();
+            AgentServer.transaction.release();
+          } else {
+            watchdog();
+          }
+        }
+      } catch (Exception exc) {
+        this.logmon.log(BasicLevel.FATAL,
+                        this.getName() + ", unrecoverable exception", exc);
+        //  There is an unrecoverable exception during the transaction
+        // we must exit from server.
+        AgentServer.stop(false);
+      } finally {
+        finish();
+      }
+    }
+
+    /*
+     *
+     * @exception IOException unrecoverable exception during transaction.
+     */
+    void watchdog() throws IOException {
+      ServerDesc server = null;
+      long currentTimeMillis = System.currentTimeMillis();
+
+      for (int i=0; i<sendList.size(); i++) {
+        Message msg = (Message) sendList.getMessageAt(i);
+        short msgto = msg.getToId();
+
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG,
+                          this.getName() +
+                          ", check msg#" + msg.getStamp() +
+                          " from " + msg.from +
+                          " to " + msg.to);
+
+        try {
+          server = AgentServer.getServerDesc(msgto);
+        } catch (UnknownServerException exc) {
+          this.logmon.log(BasicLevel.ERROR,
+                          this.getName() + ", can't send message: " + msg,
+                          exc);
+          // Remove the message, may be we have to post an error
+          // notification to sender.
+          AgentServer.transaction.begin();
+          // Deletes the processed notification
+          sendList.removeMessageAt(i); i--;
+          msg.delete();
+          AgentServer.transaction.commit();
+          AgentServer.transaction.release();
+
+          continue;
+        }
+
+        if ((server.active) ||
+            ((server.retry < WDNbRetryLevel1) && 
+             ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
+            ((server.retry < WDNbRetryLevel2) &&
+             ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
+            ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
           try {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
-                              this.getName() + ", try to send message -> " +
-                              msg + "/" + msgto);
-            // Can throw an UnknownServerException...
-            server = AgentServer.getServerDesc(msgto);
+                              this.getName() +
+                              ", send msg#" + msg.getStamp());
 
+            server.last = currentTimeMillis;
+
+            // Open the connection.
+            Socket socket = null;
             try {
-              if (! server.active) {
-                if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG,
-                                  this.getName() + ", AgentServer#" + msgto + " is down");
-                throw new ConnectException("AgentServer#" + msgto + " is down");
-              }
-	  
-              // Open the connection.
-              try {
-                socket = createSocket(server);
-              } catch (IOException exc) {
-                this.logmon.log(BasicLevel.WARN,
-                                this.getName() + ", connection refused", exc);
-                server.active = false;
-                server.last = System.currentTimeMillis();
-                server.retry += 1;
-                throw exc;
-              }
-              setSocketOption(socket);
+              socket = createSocket(server);
+              // The connection is ok, reset active and retry flags.
+              server.active = true;
+              server.retry = 0;
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.WARN,
-                              this.getName() + ", move msg in watchdog list", exc);
-              if (msg.isPersistent()) {
-                //  There is a connection problem, put the message in a
-                // waiting list.
-                // Be careful, if the message is not persistent, a new sending
-                // may cause a duplication
-                sendList.addElement(msg);
-              }
-              qout.pop();
-              continue;
+                              this.getName() + ", connection refused",
+                              exc);
+              throw exc;
             }
+            setSocketOption(socket);
 
-            try {
-              // Send the message,
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", write message");
-              nos.writeObject(socket, msg);
-
-              // and wait the acknowledge.
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", wait ack");
-              is = socket.getInputStream();
-              if ((ret = is.read()) == -1)
-                throw new ConnectException("Connection broken");
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", receive ack");
-            } catch (IOException exc) {
+            send(socket, msg);
+          } catch (SocketException exc) {
+            if (this.logmon.isLoggable(BasicLevel.WARN))
               this.logmon.log(BasicLevel.WARN,
-                              this.getName() + ", move msg in watchdog list", exc);
-              if (msg.isPersistent()) {
-                //  There is a problem during network transaction, put the
-                // message in waiting list in order to retry later.
-                // Be careful, if the message is not persistent, a new sending
-                // may cause a duplication
-                sendList.addElement(msg);
-              }
-              qout.pop();
-              continue;
-            } finally {
-              try {
-                socket.getOutputStream().close();
-              } catch (IOException exc) {}
-              try {
-                is.close();
-              } catch (IOException exc) {}
-              try {
-                socket.close();
-              } catch (IOException exc) {}
-            }
-	  } catch (UnknownServerException exc) {
+                              this.getName() + ", let msg in watchdog list",
+                              exc);
+            server.active = false;
+            server.last = System.currentTimeMillis();
+            server.retry += 1;
+            //  There is a connection problem, let the message in the
+            // waiting list.
+            continue;
+          } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR,
-                            this.getName() + ", can't send message: " + msg,
-                            exc);
-            // Remove the message (see below), may be we have to post an
-            // error notification to sender.
+                            this.getName() + ", error", exc);
           }
 
-	  try {
-	    AgentServer.transaction.begin();
-	    //  Suppress the processed notification from message queue,
-	    // and deletes it.
-	    qout.pop();
-	    msg.delete();
-	    AgentServer.transaction.commit();
-	    AgentServer.transaction.release();
-	  } catch (Exception exc) {
-	    this.logmon.log(BasicLevel.FATAL,
-                       this.getName() + ", unrecoverable exception", exc);
-            //  There is an unrecoverable exception during the transaction
-            // we must exit from server.
-            AgentServer.stop(false);
-            break loop;
-	  }
-	}
+          AgentServer.transaction.begin();
+          //  Deletes the processed notification
+          sendList.removeMessageAt(i); i--;
+          msg.delete();
+          AgentServer.transaction.commit();
+          AgentServer.transaction.release();
+        }
+      }
+    }
+
+    public void send(Socket socket, Message msg) throws IOException {
+      int ret;
+      InputStream is = null;
+
+      try {
+        // Send the message,
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG,
+                          this.getName() + ", write message");
+        nos.writeObject(socket, msg);
+        socket.shutdownOutput();
+        // and wait the acknowledge.
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG,
+                          this.getName() + ", wait ack");
+        is = socket.getInputStream();
+        if ((ret = is.read()) == -1)
+          throw new ConnectException("Connection broken");
+
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG,
+                          this.getName() + ", receive ack");
       } finally {
-        finish();
+        try {
+          socket.getOutputStream().close();
+        } catch (IOException exc) {}
+        try {
+          is.close();
+        } catch (IOException exc) {}
+        try {
+          socket.close();
+        } catch (IOException exc) {}
       }
     }
   }
@@ -369,7 +475,8 @@ public class SimpleNetwork extends FIFONetwork {
 	    os.write(0);
             socket.shutdownOutput();
 	  } catch (Exception exc) {
-            this.logmon.log(BasicLevel.ERROR, ", closed", exc);
+            this.logmon.log(BasicLevel.ERROR, 
+                            this.getName() + ", closed", exc);
 	  } finally {
 	    try {
 	      os.close();
@@ -390,216 +497,6 @@ public class SimpleNetwork extends FIFONetwork {
       }
     }
   }
-
-  final class WatchDog extends Daemon {
-    /** Use to synchronize thread */
-    private Object lock;
-    NetOutputStream nos = null;
-
-    WatchDog(String name, Logger logmon) {
-      super(name + ".WatchDog");
-      lock = new Object();
-      // Overload logmon definition in Daemon
-      this.logmon = logmon;
-      this.setThreadGroup(AgentServer.getThreadGroup());
-    }
-
-    protected void close() {}
-
-    protected void shutdown() {
-      wakeup();
-    }
-
-    /**
-     *  Use to wake up the watch-dog thread after a message from a
-     * stopped node (see NetServerIn).
-     */
-    void wakeup() {
-      synchronized (lock) {
-	lock.notify();
-      }
-    }
-  
-    /**
-     * Use to clean the sendList of all messages to the dead node.
-     * @param	dead - the unique id. of dead server.
-     */
-    void clean(short dead) {
-      Message msg = null;
-
-      // TODO: Be careful, to the route algorithm!
-
-      synchronized (lock) {
-	for (int i=0; i<sendList.size(); i++) {
-	  msg = (Message) sendList.elementAt(i);
-	  if (msg.to.to == dead) {
-	    sendList.removeElementAt(i);
-	  }
-	}
-      }
-    }
-
-    public void run() {
-      int ret;
-      Message msg = null;
-      short msgto;
-      ServerDesc server = null;
-      InputStream is = null;
       
-      try {
-        try {
-          nos = new NetOutputStream();
-        } catch (IOException exc) {
-          logmon.log(BasicLevel.FATAL,
-                     getName() + ", cannot start.");
-          return;
-        }
 
-        loop:
-        synchronized (lock) {
-	  while (running) {
-	    try {
-	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", waiting...");
-	      lock.wait(WDActivationPeriod);
-	    } catch (InterruptedException exc) {
-	      continue;
-	    }
-	    
-	    if (! running) break;
-	    long currentTimeMillis = System.currentTimeMillis();
-
-	    for (int i=0; i<sendList.size(); i++) {
-	      msg = (Message) sendList.elementAt(i);
-	      msgto = msg.getToId();
-
-	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() +
-                           ", check msg#" + msg.getStamp() +
-			    " from " + msg.from +
-			    " to " + msg.to);
-
-              try {
-                server = AgentServer.getServerDesc(msgto);
-
-                if ((server.active) ||
-                    ((server.retry < WDNbRetryLevel1) && 
-                     ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
-                    ((server.retry < WDNbRetryLevel2) &&
-                     ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
-                    ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
-                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG,
-                                    this.getName() +
-                                    ", send msg#" + msg.getStamp());
-
-                  server.last = currentTimeMillis;
-
-		  // Open the connection.
-		  Socket socket = null;
-                  try {
-                    socket = createSocket(server);
-                    // The connection is ok, reset active and retry flags.
-                    server.active = true;
-                    server.retry = 0;
-                  } catch (IOException exc) {
-                    this.logmon.log(BasicLevel.WARN,
-                                    this.getName() + ", connection refused",
-                                    exc);
-                    throw exc;
-		  }
-		  setSocketOption(socket);
-
-                  try {
-                    // Send the message,
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", write message");
-                    nos.writeObject(socket, msg);
-                  
-                    // and wait the acknowledge.
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", wait ack");
-                    is = socket.getInputStream();
-                    if ((ret = is.read()) == -1)
-                      throw new ConnectException("Connection broken");
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", receive ack");
-                  } finally {
-                    try {
-                      socket.getOutputStream().close();
-                    } catch (IOException exc) {}
-                    try {
-                      is.close();
-                    } catch (IOException exc) {}
-                    try {
-                      socket.close();
-                    } catch (IOException exc) {}
-                  }
-
-                  try {
-                    AgentServer.transaction.begin();
-                    //  Deletes the processed notification
-                    sendList.removeElementAt(i); i--;
-                    msg.delete();
-                    AgentServer.transaction.commit();
-                    AgentServer.transaction.release();
-                  } catch (Exception exc) {
-                    this.logmon.log(BasicLevel.FATAL,
-                                    this.getName() + ", unrecoverable exception",
-                                    exc);
-                    //  There is an unrecoverable exception during the
-                    // transaction we must exit from server.
-                    AgentServer.stop(false);
-                    break loop;
-                  }
-                }
-              } catch (SocketException exc) {
-                if (this.logmon.isLoggable(BasicLevel.WARN))
-                  this.logmon.log(BasicLevel.WARN,
-                                  this.getName() + ", let msg in watchdog list",
-                                  exc);
-                server.active = false;
-                server.last = System.currentTimeMillis();
-                server.retry += 1;
-                //  There is a connection problem, let the message in the
-                // waiting list.
-              } catch (UnknownServerException exc) {
-                this.logmon.log(BasicLevel.ERROR,
-                                this.getName() + ", can't send message: " + msg,
-                                exc);
-                // Remove the message, may be we have to post an error
-                // notification to sender.
-                try {
-                  AgentServer.transaction.begin();
-                  // Deletes the processed notification
-                  sendList.removeElementAt(i); i--;
-                  msg.delete();
-                  AgentServer.transaction.commit();
-                  AgentServer.transaction.release();
-                } catch (Exception exc2) {
-                  this.logmon.log(BasicLevel.FATAL,
-                                  this.getName() + ", unrecoverable exception",
-                                  exc2);
-                  //  There is an unrecoverable exception during the
-                  // transaction we must exit from server.
-                  AgentServer.stop(false);
-                  break loop;
-                }
-              } catch (Exception exc) {
-                this.logmon.log(BasicLevel.ERROR,
-                                this.getName() + ", error", exc);
-              }
-	    }
-	  }
-        }
-      } finally {
-        finish();
-      }
-    }
-  }
 }

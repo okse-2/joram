@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,26 +27,26 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 abstract class LogicalClock implements Serializable {
+  /** Id. of local server. */
+  protected short sid;
+  /** Name of including component. */ 
   protected String name = null;
+  /** Index of local server in status and matrix arrays. */
+  protected int idxLS;
   /**
    * List of id. for all servers in the domain, this list is sorted and
-   * is used as index for status and matrix arrays. Be careful, this array
-   * is shared with the <code>Network</code> components (may be it should
-   * be saved by this component).
+   * is used as index for clock tables. Be careful, this array is shared
+   * with the <code>Network</code> components (may be it should be saved
+   * by this component).
    */
   protected short[] servers;
   /** Filename for servers storage */
   transient protected String serversFN = null;
+  /** Filename for boot time stamp storage */
+  transient protected String bootTSFN = null;
 
   /** True if the timestamp is modified since last save. */
   transient protected boolean modified = false;
-
-  /** The message can be delivered. */
-  static final int DELIVER = 0;
-  /** There is other message in the causal ordering before this.*/
-  static final int WAIT_TO_DELIVER = 1;
-  /** The message has already been delivered. */
-  static final int ALREADY_DELIVERED = 2;
  
   transient protected Logger logmon = null;
    
@@ -62,6 +62,7 @@ abstract class LogicalClock implements Serializable {
     this.name = name;
     this.servers = servers;
     this.serversFN = name + "Servers";
+    this.bootTSFN = name + "BootTS";
     // Get the logging monitor from current server MonologLoggerFactory
     this.logmon = Debug.getLogger(Debug.A3Debug + ".LogicalClock." + name);
   }
@@ -79,19 +80,51 @@ abstract class LogicalClock implements Serializable {
    */
   abstract void load()throws IOException, ClassNotFoundException;
 
-  abstract void addServer(String name, short sid) 
-    throws IOException;
-
-  abstract void delServer(String name, short sid) 
+  /**
+   * Adds the specified server in the logical clock.
+   *
+   * @param id	the unique server id.
+   */
+  abstract void addServer(short id) 
     throws IOException;
 
   /**
-   * Returns the index of the specified server.
+   * Removes the specified server in the logical clock.
+   *
+   * @param id	the unique server id.
+   */
+  abstract void delServer(short id) 
+    throws IOException;
+
+  /**
+   * Reset all information related to the specified server in the
+   * logical clock.
+   *
+   * @param id	the unique server id.
+   */
+  abstract void resetServer(short id) 
+    throws IOException;
+
+  /**
+   *  Returns the index in logical clock table of the specified server.
+   * The servers array must be ordered.
+   *
+   * @param id	the unique server id.
    */
   protected final int index(short id) {
     int idx = Arrays.binarySearch(servers, id);
     return idx;
   }
+
+  /** The message can be delivered. */
+  static final int DELIVER = 0;
+  /**
+   *  There is other message in the causal ordering before this one.
+   * This cannot happened with a FIFO ordering.
+   */
+  static final int WAIT_TO_DELIVER = 1;
+  /** The message has already been delivered. */
+  static final int ALREADY_DELIVERED = 2;
 
   /**
    *  Test if a received message with the specified clock must be
@@ -106,7 +139,7 @@ abstract class LogicalClock implements Serializable {
    * @return		<code>DELIVER</code>, <code>ALREADY_DELIVERED</code>,
    * 			or <code>WAIT_TO_DELIVER</code> code.
    */
-  abstract int testRecvUpdate(Update update);
+  abstract int testRecvUpdate(Update update) throws IOException;
 
   /**
    * Computes the matrix clock of a send message. The server's
@@ -115,5 +148,5 @@ abstract class LogicalClock implements Serializable {
    * @param to	The identification of receiver.	
    * @return	The message matrix clock (list of update).
    */
-  abstract Update getSendUpdate(short to);
+  abstract Update getSendUpdate(short to) throws IOException;
 }

@@ -26,56 +26,228 @@ import java.io.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.util.EmptyQueueException;
+
 /**
- * Class <code>MessageVector</code> represents a persistent vector of Message
- * (source and target agent identifier, notification). 
- * As messages  have a relatively short life span, then the messages are
- * kept in main memory. The list is backed by a persistent image on the
- * disk for reliability needs.<p><hr>
+ * Class <code>MessageVector</code> represents a persistent vector of
+ * <tt>Message</tt> (source and target agent identifier, notification). 
+ * As messages  have a relatively short life span, then the messages
+ * are kept in main memory. If possible, the list is backed by a persistent
+ * image on the disk for reliability needs. In this case, we can use
+ * <tt>SoftReference</tt> to avoid memory overflow.<p><hr>
+ * The stamp information in Message is used to restore the queue from
+ * persistent storage at initialization time, so there is no longer need 
+ * to save <code>MessageVector</code> object state.
  */
-final class MessageVector {
+final class MessageVector implements MessageQueue {
   private Logger logmon = null;
   private String logmsg = null;
+  private long cpt1, cpt2;
 
   /**
    * The array buffer into which the <code>Message</code> objects are stored
    * in memory. The capacity of this array buffer is at least large enough to
    * contain all the messages of the <code>MessageVector</code>.<p>
    * Messages are stored in a circular way, first one in <tt>data[first]</tt>
-   * through <tt>data[(first+count-1)%length]</tt>.
-   * Any other array elements  are null.
+   * through <tt>data[(first+count-1)%length]</tt>. Any other array elements
+   * are null.
    */
   private Object data[];
-  /**
-   * The index of the first message in the circular buffer.
-   */
+  /** The index of the first message in the circular buffer. */
   private int first;
   /**
-   * The number of messages in this <tt>MessageQueue</tt> object. Components
+   * The number of messages in this <tt>MessageVector</tt> object. Components
    * <tt>data[first]</tt> through <tt>data[(first+count)%length]</tt> are the
    * actual items.
    */
   private int count;
+  /** The number of validated message in this <tt>MessageQueue</tt>. */
+  private int validated;
 
   private boolean persistent;
 
   MessageVector(String name, boolean persistent) {
-    logmon = Debug.getLogger(getClass().getName());
+    logmon = Debug.getLogger(getClass().getName() + '.' + name);
     logmsg = name + ".MessageVector: ";
 
     this.persistent = persistent;
     data = new Object[50];
     first = 0;
     count = 0;
+    validated = 0;
   }
 
   /**
-   * Inserts the specified message to the internal <code>Vector</code>.
+   * Insert a message in the queue, it should only be used during
+   * initialization for restoring the queue state.
+   *
+   * @param	item   the message to be pushed onto this queue.
+   */
+  public synchronized void insert(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "insert(" + item + ")");
+
+    int i = 0;
+    for (; i<validated; i++) {
+      Message msg = getMessageAt(i);
+      if (item.getStamp() < msg.getStamp()) break;
+    }
+    insertMessageAt(item, i);
+    validated += 1;
+  }
+
+  /**
+   * Pushes a message onto the bottom of this queue. It should only
+   * be used during a transaction. The item will be really available
+   * after the transaction commit and the queue validate.
+   *
+   * @param   item   the message to be pushed onto this queue.
+   */
+  public synchronized void push(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "push(" + item + ")");
+    addMessage(item);
+  }
+
+  /**
+   * Removes the message at the top of this queue.
+   * It must only be used during a transaction.
+   *
+   * @return     The message at the top of this queue.
+   * @exception  EmptyQueueException if this queue is empty.
+   */
+  public synchronized Message pop() throws EmptyQueueException {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "pop()");
+
+    if (validated == 0)
+      throw new EmptyQueueException();
+    
+    Message item = getMessageAt(0);
+    removeMessageAt(0);
+    validated -= 1;
+
+    return item;
+  }
+
+  /**
+   * Atomicaly validates all messages pushed in queue during a reaction.
+   * It must only be used during a transaction.
+   */
+  public synchronized void validate() {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "validate()");
+    validated = size();
+    notify();
+  }
+
+  /**
+   * Atomicaly invalidates all messages pushed in queue during a reaction.
+   * It must be used during a transaction.
+   */
+  public synchronized void invalidate() {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "invalidate()");
+    while (validated != size())
+      removeMessageAt(validated);
+  }
+
+  /**
+   * Looks at the message at the top of this queue without removing
+   * it from the queue.
+   * It should never be used during a transaction to avoid dead-lock
+   * problems.
+   *
+   * @return    the message at the top of this queue. 
+   * @exception	InterruptedException if another thread has interrupted the
+   *		current thread.
+   */
+  public synchronized Message get() throws InterruptedException {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
+      logmon.log(BasicLevel.DEBUG, logmsg + "get()");
+
+      cpt1 += 1; cpt2 += validated;
+      if ((cpt1 & 0xFFFFL) == 0L) {
+          logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
+      }
+    }
+    
+    while (validated == 0) {
+      wait();
+    }
+    Message item = getMessageAt(0);
+ 
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+
+   return item;
+  }
+
+  /**
+   * Looks at the message at the top of this queue without removing
+   * it from the queue. It should never be used during a transaction
+   * to avoid dead-lock problems. It waits until a message is available
+   * or the specified amount of time has elapsed.
+   *
+   * @param	timeout	the maximum time to wait in milliseconds.
+   * @return    	the message at the top of this queue. 
+   * @exception	InterruptedException if another thread has interrupted the
+   *		current thread.
+   * @exception	IllegalArgumentException if the value of timeout is negative.
+   */
+  public synchronized Message get(long timeout) throws InterruptedException {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
+      logmon.log(BasicLevel.DEBUG, logmsg + "get(" + timeout + ")");
+
+      cpt1 += 1; cpt2 += validated;
+      if ((cpt1 & 0xFFFFL) == 0L) {
+        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
+      }
+    }
+    
+    Message item = null;
+    if ((validated == 0) && (timeout > 0)) wait(timeout);
+    if (validated > 0) item = getMessageAt(0);
+
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+
+    return item;
+  }
+
+//   public synchronized Message get(int index, long timeout) throws InterruptedException {
+//     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
+//       logmon.log(BasicLevel.DEBUG,
+//                  logmsg + "get(" + idx + ", " + timeout + ")");
+
+//       cpt1 += 1; cpt2 += validated;
+//       if ((cpt1 & 0xFFFFL) == 0L) {
+//         logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
+//       }
+//     }
+    
+//     Message item = null;
+//     if ((validated <= index) && (timeout > 0)) wait(timeout);
+//     if (validated > index) item = getMessageAt(index);
+
+//     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+//       logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+
+//     return item;
+//   }
+
+  /**
+   * Inserts the specified message to this <code>MessageVector</code> at
+   * the specified index. Each component in this vector with an index greater
+   * or equal to the specified index is shifted upward.
+   *
+   * @param item	the message to be pushed onto this queue.
+   * @param index	where to insert the new message.
    */
   void insertMessageAt(Message item, int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 logmsg + "insertMessageAt(" + item.getStamp() + ", " + index + ")");
+                 logmsg + "insertMessageAt(" + item + ", " + index + ")");
 
     if (count == data.length) {
       Object newData[] = new Object[data.length *2];
@@ -104,30 +276,44 @@ final class MessageVector {
 
   /**
    * Adds the specified message to the end of internal <code>Vector</code>.
+   *
+   * @param   item   the message to be added onto this queue.
    */
   void addMessage(Message item) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 logmsg + "addMessage(" + item.getStamp() + ")");
+                 logmsg + "addMessage(" + item + ")");
 
     insertMessageAt(item, count);
   }
 
   /**
    * Returns the message at the specified index.
+   *
+   * @param index	the index of the message.
+   * @return     	The message at the top of this queue.
    */
   Message getMessageAt(int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "getMessageAt(" + index + ")");
 
-    if (persistent)
-      return ((MessageSoftRef) data[(first + index)%data.length]).getMessage();
-    else
-      return (Message) data[(first + index)%data.length];
+    int idx = (first + index)%data.length;
+    if (persistent) {
+      Message msg = ((MessageSoftRef) data[idx]).getMessage();
+      if (msg == null) {
+        msg = ((MessageSoftRef) data[idx]).loadMessage();
+        data[idx] = new MessageSoftRef(msg);
+      }
+      return msg;
+    } else {
+      return (Message) data[idx];
+    }
   }
 
   /**
-   * Deletes the message at the specified index. 
+   * Deletes the message at the specified index.
+   *
+   * @param index	the index of the message to remove.
    */
   void removeMessageAt(int index) {
     if ((first + index) < data.length) {
@@ -175,7 +361,9 @@ final class MessageVector {
     StringBuffer strbuf = new StringBuffer();
     
     strbuf.append('(').append(super.toString()).append(',');
-    strbuf.append(first).append(',').append(count).append(",(");
+    strbuf.append(first).append(',');
+    strbuf.append(count).append(',');
+    strbuf.append(validated).append(",(");
     for (int i=0; i<data.length; i++) {
       strbuf.append(data[i]).append(',');
     }
@@ -207,25 +395,35 @@ final class MessageVector {
 
     /**
      * Returns this reference message's referent. If the message has been
-     * swap out, it is loaded from disk.
+     * swap out it returns null.
      *
      * @return The message to which this reference refers.
      */
-    public Message getMessage() throws TransactionError {
+    public Message getMessage() {
+      if (ref != null) return ref;
+      return (Message) get();
+    }
+
+    /**
+     * Loads from disk this reference message's referent if the message
+     * has been swap out. It should be called only after a getMessage
+     * returning null.
+     *
+     * @return The message to which this reference refers.
+     */
+    public Message loadMessage() throws TransactionError {
       if (ref != null) return ref;
 
-      Message msg = (Message) get();
-      if (msg == null) {
-        try {
-          msg = (Message) AgentServer.getTransaction().load(name);
+      Message msg;
+      try {
+        msg = (Message) AgentServer.getTransaction().load(name);
 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, logmsg + "reload from disk " + msg);
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR,
-                     logmsg + "Can't load message " + name, exc);
-          throw new TransactionError(exc);
-        }
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, logmsg + "reload from disk " + msg);
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR,
+                   logmsg + "Can't load message " + name, exc);
+        throw new TransactionError(exc);
       }
       return msg;
     }
