@@ -31,8 +31,12 @@
         <code>com.scalagent.ksoap</code>.</li>
       </ul>
       </s2>
-      <s2 name="Modifications (latest: April 22, 2004)">
+      <s2 name="Modifications (latest: April 28, 2004)">
       <ul>
+        <li>Submission of the <code>fr.dyade.aaa.jndi2.scn</code> package
+        allowing to use serveral JNDIs as documented
+        <a href="ftp://ftp.javasoft.com/docs/j2se1.3/jndispi.pdf">
+        here</a> (section 3.2).</li>
         <li>Destinations' administrative names are now returned when calling
         the <code>AdminModule.getDestinations</code> monitoring methods, and
         wrapped into the corresponding <code>Destination</code> instances.</li>
