@@ -68,21 +68,43 @@
         </para>
       </sect3>
       <sect3>
-        <title>Users actions</title>
+        <title>Administrators actions</title>
         <para>Once connected to a server, an administrator may
           <itemizedlist>
             <listitem>
-              <simpara><emphasis
-                  role="strong">create/retrieve/delete</emphasis> a
-                <emphasis role="strong">user</emphasis></simpara>
+              <simpara><emphasis role="strong">add an
+              administrator identity</emphasis></simpara>
             </listitem>
             <listitem>
-              <simpara><emphasis role="strong">test
-                  existence</emphasis> of a given <emphasis
-                  role="strong">user</emphasis></simpara> 
+              <simpara><emphasis role="strong">change an
+              administrator identity</emphasis></simpara>
             </listitem>
           </itemizedlist>
-        </para>
+      </sect3>
+      <sect3>
+        <title>Users actions</title>
+        <itemizedlist>
+          <listitem>
+            <simpara><emphasis
+                role="strong">create</emphasis> a
+              <emphasis role="strong">user</emphasis> given his name
+              and password</simpara>
+          </listitem>
+          <listitem>
+            <simpara><emphasis
+                role="strong">get/delete</emphasis> a given
+              <emphasis role="strong">user</emphasis></simpara>
+          </listitem>
+          <listitem>
+            <simpara><emphasis role="strong">test
+                existence</emphasis> of a given <emphasis
+                role="strong">user</emphasis></simpara> 
+          </listitem>
+          <listitem>
+            <simpara><emphasis role="strong">change
+                password</emphasis> for a given <emphasis role="strong">user</emphasis></simpara>
+          </listitem>
+        </itemizedlist>
       </sect3>
       <sect3>
         <title>Destination actions</title>
