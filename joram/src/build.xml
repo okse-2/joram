@@ -123,46 +123,21 @@
     <copy file="${build.dir}/mom.jar" todir="${lib.dir}"/>
   </target>
  
-  <target name="javadoc" depends="prepare"
+  <target name="javadoc" depends="init"
       description="--> Generate Javadoc">
-  <!-- Path needed to create the javadoc  -->
-  <path id="doc.class.path">
-    <fileset dir="${lib.dir}">
-      <include name="jms.jar"/>
-      <include name="log4j.jar"/>
-      <include name="owlogapi.jar"/>
-      <include name="owlogwrpl4j.jar"/>
-      <include name="xerces.jar"/>
-      <include name="jndi.jar"/>
-    </fileset>
-  </path>
-  
-  <javadoc sourcepath="${src.dir}"
-    destdir="${doc.dir}"
-    classpathref="doc.class.path"
-    overview="overview.html"
-    access="${doc.access}"
-    version="${doc.version}"
-    author="${doc.author}"
-    windowtitle="${doc.name} API"
-             doctitle="${doc.name}"
-    bottom="Copyright &#xA9; 2001 Scalagent - All rights reserved">
-    <package name="fr.dyade.aaa.util"/>
-    <package name="fr.dyade.aaa.agent"/>
-    <package name="fr.dyade.aaa.ip"/>
-    <package name="fr.dyade.aaa.task"/>
-    <package name="fr.dyade.aaa.ns"/>
-    <package name="fr.dyade.aaa.jndi"/> 
-    <package name="fr.dyade.aaa.mom"/>
-    <package name="fr.dyade.aaa.mom.comm"/>
-    <package name="fr.dyade.aaa.mom.dest"/>
-    <package name="fr.dyade.aaa.mom.excepts"/>
-    <package name="fr.dyade.aaa.mom.jms"/>
-    <package name="fr.dyade.aaa.mom.messages"/>
-    <package name="fr.dyade.aaa.mom.proxies"/>
-    <package name="fr.dyade.aaa.mom.selectors"/>
-    <package name="fr.dyade.aaa.joram"/>
-    <package name="fr.dyade.aaa.joram.admin"/>
-  </javadoc>
+    <echo message="project.class.path" />
+    <javadoc packagenames="fr.dyade.aaa.*"
+      sourcepath="${src.dir}"
+      classpathref="project.class.path"
+      defaultexcludes="yes"
+      destdir="${doc.dir}"
+      author="true"
+      version="true"
+      use="false"
+      windowtitle="Joram Documentation">	   
+      <doctitle><![CDATA[<h1>Joram Documentation</h1>]]></doctitle>
+      <link href="http://java.sun.com/j2ee/sdk_1.3/techdocs/api/" />
+      <link href="http://java.sun.com/j2se/1.3/docs/api/" />
+    </javadoc>
   </target>
 </project>
