@@ -59,10 +59,10 @@ if ($MESSAGE eq "") {
   print "Email:   $MAIL_EMAIL<br>\n";
   print "Company: $MAIL_COMPANY<br>\n";
   print "<p>You must choose one of these options:</p><ol>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.zip\">Joram sources and jar (zip file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.tar.gz\">Joram sources and jar (tar.gz file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.zip\">Joram jar only (zip file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.tar.gz\">Joram jar (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.zip\">JORAM sources and jar (zip file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.tar.gz\">JORAM sources and jar (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.zip\">JORAM jar (zip file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.tar.gz\">JORAM jar (tar.gz file)</a></li>\n";
   print "</ol>\n";
   print "<p><em>NOTE:The distribution does not contain the javax.jms.* package; you need to fetch that yourself</em>, (see the <em>Installation Guide</em>).</p>";
 
