@@ -608,14 +608,16 @@ class ClientSubscription implements java.io.Serializable
       deniedMsgs.remove(id);
       msg = (Message) messagesTable.get(id);
 
-      msg.acksCounter--;
-      if (msg.acksCounter == 0)
-        messagesTable.remove(id);
-      if (durable) {
-        msg.durableAcksCounter--;
-
-        if (msg.durableAcksCounter == 0)
-          persistenceModule.delete(msg);
+      if (msg != null) {
+        msg.acksCounter--;
+        if (msg.acksCounter == 0)
+          messagesTable.remove(id);
+        if (durable) {
+          msg.durableAcksCounter--;
+          
+          if (msg.durableAcksCounter == 0)
+            persistenceModule.delete(msg);
+        }
       }
     }
   }
