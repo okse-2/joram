@@ -50,6 +50,9 @@
         <li>Update of the <a href="../current/doc/joram_ADMIN.pdf">
         administration</a> guide for the latest synchronous admin procotol,
         available through CVS, no tag.</li>
+        <li>New guide about <a href="../current/doc/joram_MONITOR.pdf">
+        monitoring</a> JORAM. Monitoring methods are available through CVS,
+        no tag.</li>
       </ul>
     </s1>
 
