@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>JORAM road map</title>
+    <filename>roadMap.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+  <s1 name="Road map">
+  
+    <subtitle>Joram 3.7 (November 2003)</subtitle>
+    <p>The main new feature that Joram 3.7 will provide is a graphical
+    administration tool. This tool allows to administer and monitor one or many
+    interconnected servers; create/delete destinations, users; set destinations
+    access rights; build connection factories; bind factories and destinations
+    to a JNDI server.</p>
+    <p>This new release will finaly allow a friendly and evolutive Joram
+    administration!</p>
+
+    <subtitle>Joram 3.8 (December 2003)</subtitle>
+    <p>It is planned for this release to provide a new client/server
+    communication protocol. Today, in the case of collocated client and server,
+    their communication still goes through a TCP connection. This is clearly a
+    waste of resources and a brake to performances.</p>
+    <p>The new "local" protocol consists in optimizing the communication in
+    this collocated case.</p>
+
+    <subtitle>Joram 4.0 (1st quarter of 2004)</subtitle>
+    <p>The move to release 4.0 will introduce:</p>
+    <ul>
+      <li>a completely new sources architecture, which main branches will be
+      <code>org.objectweb.joram</code> and <code>com.scalagent.aaa</code>;</li>
+      <li>clustering features providing High Availability and Load Balancing
+      for Queue and Topic destinations;</li>
+      <li>a JCA 1.5 standard Resource Adapter for plugging Joram into any
+      JCA compliant platform.</li>
+    </ul>
+
+  </s1>
+
+  <s1 name="Call for contributions">
+
+    <subtitle>C/C++ client sample</subtitle>
+    <p>The usual communication protocol between a client application and
+    a Joram server is based on TCP and Java serialization. Since release
+    3.4, a new protocol based on SOAP has been added. It gets rid of the 
+    Java serialization, and thus opens the door to connecting non Java
+    applications.</p>
+    <p>In order to exhibit Joram as a true MOM allowing to interconnect 
+    heterogenous applications, a sample involving a C or C++ client
+    would be a great contribution!</p>
+
+    <subtitle>Database message persistence</subtitle>
+    <p>The Joram persistence is a complex mechanism involving internal
+    transactions, for guaranteeing atomicity and coherence, and which support
+    is file based. This mechanism has been improved in the 3.5 release, 
+    allowing better performances and flexibility.</p>
+    <p>The next evolution could be to persist the messages in a database rather
+    than on file.</p>
+
+  </s1>
+
+  </body>
+
+</document>

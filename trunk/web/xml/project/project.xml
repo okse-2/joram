@@ -24,8 +24,8 @@
     <menu>
       <legend>Developers' Corner</legend>
       <menuitem><a href="dev/corner.html">About</a></menuitem>
+      <menuitem><connect href="dev/roadMap.xml">Road map</connect></menuitem>
       <menuitem><connect href="dev/versions.xml">Releases info</connect></menuitem>
-      <menuitem><connect href="dev/topics.xml">Hot topics</connect></menuitem>
       <menuitem><a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
     </menu>
     
