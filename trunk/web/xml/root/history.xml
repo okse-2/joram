@@ -14,6 +14,17 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>March, 6th 2002: </subtitle>
+      
+      <p>The new version of JORAM will be commited in CVS. Since this
+      version is a complete rewrite of JORAM, some problems may occur
+      when commiting into CVS. CVS may be in a inconstitent state for
+      the next two days. Thus we recommend anyone using CVS to avoid
+      to checkout JORAM for the next two days. As soon as the CVS is
+      ok, we will warn you.
+      </p>
+
+      <hr />
       <subtitle>March, 1st 2002: new version of JORAM to be expected soon</subtitle>
 
       <p>A new version of JORAM will soon be available (likely next week). JORAM 3.0 is a
