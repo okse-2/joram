@@ -34,7 +34,7 @@ import java.util.StringTokenizer;
  * The <code>JoramUrl</code> class is used for building URLs locating Joram
  * servers and administered objects.
  */
-public class JoramUrl
+public class JoramUrl implements java.io.Serializable
 {
   /** Joram communication protocol. */
   private static final String PROTO = "joram";
