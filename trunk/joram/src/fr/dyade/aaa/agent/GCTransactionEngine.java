@@ -42,10 +42,14 @@ final class GCTransactionEngine extends Engine {
   /** True if the timestamp is modified since last save. */
   private boolean modified = false;
 
+  int loop = 0;
+  int NbMaxLoop = 50;
+
   GCTransactionEngine() throws Exception {
     super();
 
     NbMaxAgents = Integer.getInteger("NbMaxAgents", 100).intValue();
+    NbMaxLoop = Integer.getInteger("NbMaxLoop", NbMaxLoop).intValue();
     needToBeCommited = false;
 
     restore();
@@ -100,9 +104,6 @@ final class GCTransactionEngine extends Engine {
     qin.push(msg);
   }
 
-  int loop = 0;
-  final static int NBMAXLOOP = 50;
-
   /**
    * Commit the agent reaction in case of rigth termination:<ul>
    * <li>suppress the processed notification from message queue,
@@ -145,7 +146,7 @@ final class GCTransactionEngine extends Engine {
     // Saves the agent state then commit the transaction.
     if (agent != null) agent.save();
 
-    if (needToBeCommited || (qin.size() == 0) || (loop > NBMAXLOOP)) {
+    if (needToBeCommited || (qin.size() == 0) || (loop > NbMaxLoop)) {
       loop = 0;
       AgentServer.transaction.begin();
       // Post all notifications temporary keeped in mq in the rigth consumers,
