@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.connector;
 
 import javax.jms.*;
+import javax.jms.IllegalStateException;
 
 
 /**
@@ -62,15 +63,16 @@ public class OutboundTopicConnection
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    if (managedCx.session == null)
-      managedCx.session = xac.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    Session sess = managedCx.session;
+    if (sess == null)
+      sess = xac.createSession(transacted, acknowledgeMode);
 
-    return new OutboundTopicSession(managedCx.session, this);
+    return new OutboundTopicSession(sess, this);
   }
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public ConnectionConsumer
          createConnectionConsumer(Topic topic,
@@ -79,10 +81,7 @@ public class OutboundTopicConnection
                                   int maxMessages)
          throws JMSException
   {
-    if (! valid)
-      throw new javax.jms.IllegalStateException("Invalid connection handle.");
-
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 }
