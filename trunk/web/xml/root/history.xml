@@ -27,7 +27,7 @@
           a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
           improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
           preventing backward compatibility with prior Joram versions.</li>
-	  <li>JDK 1.5 support</li>
+	  <li><strong>JDK 1.5 support</strong></li>
 	</ul>
 
         <p>This version has been partly sponsored by France Telecom R&amp;D</p>
