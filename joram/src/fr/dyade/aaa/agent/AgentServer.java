@@ -1050,7 +1050,7 @@ public final class AgentServer {
       // avoid deadlock.
       Thread t = new Thread() {
           public void run() {
-            stop();
+            AgentServer.stop();
           }
         };
       t.setDaemon(true);
