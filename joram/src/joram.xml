@@ -79,26 +79,13 @@
       <classpath refid="project.class.path"/>
 
       <include name="fr/**/*.java"/>
- 
-      <!-- Requires jdk1.4 -->
-      <exclude name="fr/dyade/aaa/agent/SSLNetwork.java"/>
+      <include name="org/**/*.java"/>
 
-      <!-- Excludes tests and CVS directories -->
+      <!-- Requires kxml.jar -->
+      <exclude name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+
+      <!-- Exclude CVS directories -->
       <exclude name="fr/dyade/aaa/**/CVS/**/*.java"/>
-    </javac>
-  </target>
-
-  <target name="compile.gui" depends="prepare"
-      description="--> Compiles the graphical admin tool sources.">
-    <javac srcdir="${src.dir}:${obj.dir}"
-           destdir="${obj.dir}"
-           debug="on"
-           deprecation="${deprecation}"
-           optimize="false"
-           nowarn="${nowarn}"
-           verbose="${verbose}">
-      <classpath refid="project.class.path"/>
-      <include name="org/objectweb/joram/client/tools/admin/*.java"/>
     </javac>
   </target>
 
@@ -121,19 +108,19 @@
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/jndi2/server/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/*.class"/>
-        <include name="fr/dyade/aaa/mom/*.class"/>
-        <include name="fr/dyade/aaa/mom/admin/*.class"/>
-        <include name="fr/dyade/aaa/mom/comm/*.class"/>
-        <include name="fr/dyade/aaa/mom/dest/*.class"/>
-        <include name="fr/dyade/aaa/mom/excepts/*.class"/>
-        <include name="fr/dyade/aaa/mom/jms/*.class"/>
-        <include name="fr/dyade/aaa/mom/messages/*.class"/>
-        <include name="fr/dyade/aaa/mom/proxies/*.class"/>
-        <include name="fr/dyade/aaa/mom/proxies/soap/*.class"/>
-        <include name="fr/dyade/aaa/mom/proxies/tcp/*.class"/>
-        <include name="fr/dyade/aaa/mom/selectors/*.class"/>
-        <include name="fr/dyade/aaa/ns/*.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
+        <include name="org/objectweb/joram/mom/*.class"/>
+        <include name="org/objectweb/joram/mom/dest/*.class"/>
+        <include name="org/objectweb/joram/mom/notifications/*.class"/>
+        <include name="org/objectweb/joram/mom/proxies/*.class"/>
+        <include name="org/objectweb/joram/mom/proxies/soap/*.class"/>
+        <include name="org/objectweb/joram/mom/proxies/tcp/*.class"/>
+        <include name="org/objectweb/joram/mom/util/*.class"/>
+        <include name="org/objectweb/joram/shared/admin/*.class"/>
+        <include name="org/objectweb/joram/shared/client/*.class"/>
+        <include name="org/objectweb/joram/shared/excepts/*.class"/>
+        <include name="org/objectweb/joram/shared/messages/*.class"/>
+        <include name="org/objectweb/joram/shared/selectors/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${lib.dir}/joram.jar">
@@ -141,21 +128,22 @@
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/*.class"/>
-        <include name="fr/dyade/aaa/joram/*.class"/>
-        <include name="fr/dyade/aaa/joram/admin/*.class"/>
-        <include name="fr/dyade/aaa/joram/soap/*.class"/>
-        <include name="fr/dyade/aaa/joram/tcp/*.class"/>
-        <include name="fr/dyade/aaa/mom/admin/*.class"/>
-        <include name="fr/dyade/aaa/mom/excepts/*.class"/>
-        <include name="fr/dyade/aaa/mom/jms/*.class"/>
-        <include name="fr/dyade/aaa/mom/messages/*.class"/>
-        <include name="fr/dyade/aaa/mom/selectors/*.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
+        <include name="org/objectweb/joram/client/jms/*.class"/>
+        <include name="org/objectweb/joram/client/jms/admin/*.class"/>
+        <include name="org/objectweb/joram/client/jms/local/*.class"/>
+        <include name="org/objectweb/joram/client/jms/soap/*.class"/>
+        <include name="org/objectweb/joram/client/jms/tcp/*.class"/>
+        <include name="org/objectweb/joram/shared/admin/*.class"/>
+        <include name="org/objectweb/joram/shared/client/*.class"/>
+        <include name="org/objectweb/joram/shared/excepts/*.class"/>
+        <include name="org/objectweb/joram/shared/messages/*.class"/>
+        <include name="org/objectweb/joram/shared/selectors/*.class"/>
       </fileset>
     </jar>
   </target>
 
-  <target name="ship.gui" depends="init,compile.gui"
+  <target name="ship.gui" depends="init,compile"
       description="--> Builds the graphical admin tool jar.">
     <jar jarfile="${lib.dir}/joramgui.jar">
       <fileset dir="${obj.dir}">

@@ -44,6 +44,9 @@ import javax.jms.*;
 /**
  * This class is the reference implementation of the <code>AdminItf</code> 
  * interface.
+ *
+ * @deprecated  This class is temporarily kept but the methods of the new
+ *              <code>AdminModule</code> class should be used instead.
  */
 public class AdminImpl implements AdminItf
 {
