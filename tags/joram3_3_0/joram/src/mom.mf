@@ -1,0 +1,8 @@
+Class-Path: jakarta-regexp-1.2.jar log4j.jar ow_util_log_wrp_log4j.jar xerces.jar JCup.jar jndi.jar 
+Main-Class: fr.dyade.aaa.agent.AgentServer
+Specification-Title: Java Message Service
+Specification-Version: 1.1
+Specification-Vendor: Sun Microsystems Inc. 
+Implementation-Title: JORAM MOM
+Implementation-Version: 3.3.0
+Implementation-Vendor: ObjectWeb Consortium
