@@ -12,14 +12,14 @@
 
   <body>
     <s1 name="Administration">
-    <p>Tony Thompson has started to work on the <em>configuration</em> of
-    a JORAM platform. His goal is to get rid of the current static 
+    <p>Tony Thompson has started to work on the <strong>configuration</strong>
+    of a JORAM platform. His goal is to get rid of the current static 
     configuration way based on a XML file, by allowing to start a server
     in a minimum configuration state and configure it through administration
     methods. Tony has suspended his work but hopefully will be able to resume
     soon!</p>
-    <p><em>Monitoring</em> capabilities have been added by Frédéric Maistre
-    (INRIA). They allow to:</p>
+    <p><strong>Monitoring</strong> capabilities have been added by Frédéric
+    Maistre (INRIA). They allow to:</p>
     <ul> 
       <li>get a list of destinations for a given server;</li>
       <li>get a list of users for a given server;</li>
@@ -39,7 +39,7 @@
     <p>The SOAP proxy introduced by version 3.4 allows non Java clients to 
        connect to the MOM. A sample illustrating this ability of JORAM to
        authorize connections between heterogenous worlds would be great!
-       <em>Contributions would be highly appreciated!</em></p>
+       <strong>Contributions would be highly appreciated!</strong></p>
     </s1>
 
     <s1 name="Performances and Persistence">
@@ -47,8 +47,8 @@
     providing more flexibility to the persistence of messages.</p>
     <p>Algorithms may still evolve to become more performant. New interfaces
     and classes might be written for allowing the messages to be persisted on
-    any other support than the current file based one. <em>Contributions
-    are welcome!</em></p>
+    any other support than the current file based one. <strong>Contributions
+    are welcome!</strong></p>
     </s1>
   </body>
 
