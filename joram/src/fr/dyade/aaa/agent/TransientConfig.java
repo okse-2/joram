@@ -37,7 +37,7 @@ package fr.dyade.aaa.agent;
  */
 public class TransientConfig extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: TransientConfig.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TransientConfig.java,v 1.2 2000-08-01 09:13:31 tachkeni Exp $"; 
 
 
   /** id of transient agent server */

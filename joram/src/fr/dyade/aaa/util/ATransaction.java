@@ -28,7 +28,7 @@ import java.io.*;
 import java.util.*;
 
 final class TOperation implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.1.1.1 2000-05-30 11:45:21 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.2 2000-08-01 09:14:06 tachkeni Exp $";
   static final int SAVE = 1;
   static final int DELETE = 2;
   static final int COMMIT = 3;

@@ -30,32 +30,33 @@ import java.net.*;
 import fr.dyade.aaa.agent.*;
 
 /**
- * A <code>DebugProxy</code> agent provides a command line interface to
- * access to debugging functions in a running agent server.
+ * A <code>HttpProxy</code> agent provides a HTTP interface to
+ * access to debugging functions in running agent servers.
  * <p>
- * The <code>DebugProxy</code> agent exports its connecting parameters in
- * a file named server<serverId>DebugProxy.cnx. It may be accessed from the
- * outside using a <code>telnet</code> client.
+ * The <code>HttpProxy</code> agent is a service which needs an argument :
+ * the TCP port number.
+ * Moreover, The <code>HttpProxy</code> agent exports its connecting
+ * parameters in a file named server<serverId>HttpProxy.cnx.
+ * It may be accessed using a HTTP browser client.
  * <p>
- * The <code>DebugProxy</code> input and output streams filters are a unique
- * <code>DebugDriver</code> object. There is only one thread running, as
+ * The <code>HttpProxy</code> input and output streams filters are a unique
+ * <code>HttpDriver</code> object. There is only one thread running, as
  * input driver, which reads and analyses commands from the input flow,
  * and writes results synchronously onto the output flow.
  *
- * @author	Lacourte Serge
+ * @author	Paulet Jerome
  * @version	v1.0
  *
- * @see		DebugDriver
+ * @see		HttpDriver
  */
-public class DebugProxy extends TcpProxy {
-public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.2 2000-08-01 09:13:50 tachkeni Exp $";
+public class HttpProxy extends TcpProxy {
 
-  transient DebugDriver driver = null;
+  transient HttpDriver driver = null;
 
   /**
     * Creates a local agent with unknown port.
     */
-  public DebugProxy() {
+  public HttpProxy() {
     super(0);
   }
 
@@ -64,10 +65,11 @@ public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.2 2000-08-0
     *
     * @param to		target agent server
     * @param name	symbolic name of this agent
+    * @param localport  TCP port of this proxyagent
     */
-  public DebugProxy(short to, String name) {
+  public HttpProxy(short to, String name,int localport) {
     super(to, name);
-    localPort = 0;
+    this.localPort = localport;
   }
 
 
@@ -90,7 +92,7 @@ public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.2 2000-08-0
     super.initialize(firstTime);
 
     // registers this agent so that the client may connect
-    File file = new File("server" + Server.getServerId() + "DebugProxy.cnx");
+    File file = new File("server" + Server.getServerId() + "HttpProxy.cnx");
     if (file.exists()) {
       // remove previous registration
       if (! file.delete())
@@ -103,7 +105,33 @@ public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.2 2000-08-0
     fw.close();
 
     // creates the driver object
-    driver = new DebugDriver();
+    driver = new HttpDriver();
+  }
+
+  /** initializes service only once */
+  private static boolean initialized = false;
+
+  /**
+   * Initializes the package as a well known service.
+   * <p>
+   * Creates a <code>HttpProxy</code> agent.
+   *
+   * @param args	parameters from the configuration file
+   * @param firstTime	<code>true</code> when agent server starts anew
+   */
+  public static void init(String args, boolean firstTime) throws Exception {
+    if (initialized)
+      return;
+    initialized = true;
+
+    if (! firstTime)
+      return;
+    if (args.length()!=0){
+	HttpProxy httpproxy = new HttpProxy(Server.getServerId(),"HttpProxy",Integer.parseInt(args));
+	httpproxy.deploy();
+    }else{
+	throw new IllegalStateException("You must specify a port as an argument in the a3servers.xml for the HttpProxy service.");
+    }
   }
 
   /**
@@ -114,7 +142,7 @@ public static final String RCS_VERSION="@(#)$Id: DebugProxy.java,v 1.2 2000-08-0
    */
   protected NotificationInputStream setInputFilters(InputStream in) throws StreamCorruptedException, IOException {
     driver.setInputStream(in);
-    return driver;
+   return driver;
   }
 
   /**

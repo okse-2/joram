@@ -28,7 +28,7 @@ import java.io.*;
 
 public class NullTransaction implements Transaction {
 
-public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.1.1.1 2000-05-30 11:45:22 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.2 2000-08-01 09:14:07 tachkeni Exp $"; 
 
   public NullTransaction(String path) throws IOException {
   }

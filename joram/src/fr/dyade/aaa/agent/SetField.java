@@ -26,7 +26,7 @@ package fr.dyade.aaa.agent;
 
 public class SetField extends Notification {
 
-  public static final String RCS_VERSION="@(#)$Id: SetField.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SetField.java,v 1.2 2000-08-01 09:13:30 tachkeni Exp $"; 
 
   public String name;	// Name of field to set.
   public Object value;

@@ -46,7 +46,7 @@ import fr.dyade.aaa.util.Strings;
  * @version 1.0, 01/09/99
  */
 public class A3Config {
-public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 09:13:25 tachkeni Exp $";
   final static boolean DEBUG = true;
   static public boolean trace = false;
 

@@ -37,7 +37,7 @@ import fr.dyade.aaa.agent.*;
  */
 
 public class ConnectNot extends Notification {
-public static final String RCS_VERSION="@(#)$Id: ConnectNot.java,v 1.1.1.1 2000-05-30 11:45:23 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ConnectNot.java,v 1.2 2000-08-01 09:13:49 tachkeni Exp $";
   Integer key;
   String header;
 
