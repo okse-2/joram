@@ -15,9 +15,6 @@
       <menuitem><a href="index.html">Home</a></menuitem>
       <menuitem><a href="download/index.html">Download</a></menuitem>
       <menuitem><a href="doc/index.html">Documentation</a></menuitem>
-      <menuitem><a href="mailing.html">Mailing Lists</a></menuitem>
-      <menuitem><a href="partners.html">Partners</a></menuitem>
-      <menuitem><a href="support.html">Support</a></menuitem>
       <menuitem><a href="license.html">Licenses</a></menuitem>
       <menuitem><a href="history.html">History</a></menuitem>
     </menu>
@@ -30,10 +27,17 @@
       <menuitem><a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
       <menuitem><a href="http://forge.objectweb.org/projects/joram">ObjectWeb Forge site</a></menuitem>
     </menu>
+
+    <menu>
+      <legend>Support</legend>
+      <menuitem><a href="mailing.html">Free mailing lists</a></menuitem>
+      <menuitem><a href="support.html">Professional Support</a></menuitem>
+    </menu>
     
     <menu>
-      <legend>About</legend>
+      <legend>Community</legend>
       <menuitem><a href="team.html">Team</a></menuitem>
+      <menuitem><a href="partners.html">Partners</a></menuitem>
       <menuitem><a href="mailing.html">Contacts</a></menuitem>
     </menu>
 
