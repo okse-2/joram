@@ -64,6 +64,23 @@ public class User extends AdministeredObject
     return "User[" + name + "]:" + proxyId;
   }
 
+
+  /** Returns the user name. */
+  public String getName()
+  {
+    return name;
+  }
+
+  /** Provides a reliable way to compare <code>User</code> instances. */
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof User))
+      return false;
+
+    User other = (User) o;
+
+    return other.proxyId ==proxyId;
+  }
   
   /**
    * Admin method creating a user for a given server and instanciating the
