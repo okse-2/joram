@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -109,6 +109,8 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   public javax.jms.Message receiveNoWait() throws JMSException
   {
     checkValidity();
+    if (!session.isStarted())
+      return null;
     return consumer.receiveNoWait();
   }
 
