@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -45,7 +45,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Utility class used by XA connections for managing XA resources.
  */
-class XAResourceMngr
+public class XAResourceMngr
 {
   /** Transaction active. */
   public static final int STARTED = 0;
@@ -69,16 +69,22 @@ class XAResourceMngr
   /** The connection this manager belongs to. */
   Connection cnx;
 
+  /** Session. */
+  Session sess;
+
 
   /**
    * Creates a <code>XAResourceMngr</code> instance.
    *
-   * @param cnx  The connection this manager belongs to.
+   * @param cnx   The connection this manager belongs to.
    */
-  XAResourceMngr(Connection cnx)
-  {
+  public XAResourceMngr(Connection cnx) {
     this.cnx = cnx;
     transactions = new Hashtable();
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 " XAResourceMngr cnx = " + cnx);
   }
 
 
@@ -89,8 +95,16 @@ class XAResourceMngr
    *                         the RM in an incompatible state with the start
    *                         request.
    */
-  synchronized void start(Xid xid, int flag) throws XAException
-  {
+  synchronized void start(Xid xid, int flag, Session sess) 
+    throws XAException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 " XAResourceMngr start(" + xid +
+                                 ", " + flag +
+                                 ", " + sess +")");
+
+    this.sess = sess;
+
     // New transaction.
     if (flag == XAResource.TMNOFLAGS) {
       if (transactions.containsKey(xid))
@@ -141,10 +155,18 @@ class XAResourceMngr
    * @exception XAException  If the specified transaction is in an
    *                         incompatible state with the end request.
    */
-  synchronized void end(Xid xid, int flag, Session sess) throws XAException
-  {
+  synchronized void end(Xid xid, int flag, Session sess) 
+    throws XAException {
     boolean saveResourceState = true;
 
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": end(" + xid
+                                 + ", " + flag
+                                 + ", " + sess + ")"); 
+    
     if (flag == XAResource.TMSUSPEND) {
       if (getStatus(xid) != STARTED)
         throw new XAException("Can't suspend non started transaction.");
@@ -174,6 +196,8 @@ class XAResourceMngr
       xaC.addSendings(sess.sendings);
       xaC.addDeliveries(sess.deliveries);
     }
+
+    sess.setTransacted(false);
   }
 
   /** 
@@ -183,8 +207,15 @@ class XAResourceMngr
    *                         incompatible state with the prepare request,
    *                         or if the request fails.
    */
-  synchronized void prepare(Xid xid) throws XAException
-  {
+  synchronized void prepare(Xid xid) 
+    throws XAException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": prepare(" + xid + ")"); 
+    
     try {
       if (getStatus(xid) == ROLLBACK_ONLY)
         throw new XAException("Can't prepare resource in ROLLBACK_ONLY state.");
@@ -246,8 +277,15 @@ class XAResourceMngr
    *                         incompatible state with the commit request,
    *                         or if the request fails.
    */
-  synchronized void commit(Xid xid) throws XAException
-  {
+  synchronized void commit(Xid xid) 
+    throws XAException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": commit(" + xid + ")"); 
+
     try {
       if (getStatus(xid) != PREPARED)
         throw new XAException("Can't commit non prepared transaction.");
@@ -266,6 +304,8 @@ class XAResourceMngr
                                        xid.getGlobalTransactionId())); 
 
       transactions.remove(xid);
+      if (sess != null)
+        sess.setTransacted(false);
     }
     catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
@@ -284,8 +324,15 @@ class XAResourceMngr
    *                         incompatible state with the rollback request,
    *                         or if the request fails.
    */
-  synchronized void rollback(Xid xid) throws XAException
-  {
+  synchronized void rollback(Xid xid)
+    throws XAException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": rollback(" + xid + ")");
+
     try {
       XAContext xaC = (XAContext) transactions.get(xid);
 
@@ -321,6 +368,8 @@ class XAResourceMngr
       cnx.syncRequest(rollbackRequest);
 
       transactions.remove(xid);
+      if (sess != null)
+        sess.setTransacted(false);
     }
     catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
@@ -398,13 +447,18 @@ class XAResourceMngr
   }
 
   /** Resource managers are equal if they belong to the same connection. */
-  public boolean equals(Object o)
-  {
+  public boolean equals(Object o) {
     if (! (o instanceof XAResourceMngr))
       return false;
 
     XAResourceMngr other = (XAResourceMngr) o;
 
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 this + ": equals other = " + other.cnx + 
+                                 ", this.cnx = " + cnx +
+                                 ", equals = " + cnx.equals(other.cnx));
+    
     return cnx.equals(other.cnx);
   }
 }
