@@ -21,8 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -34,8 +32,8 @@ import java.io.*;
  * @version 1.0, 12/10/97
  */
 public class AgentCreateRequest extends Notification {
-
-public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
   /** Id. of agent to reply to */
   public AgentId reply;

@@ -21,14 +21,19 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 public abstract class AgentDriver extends Driver {
-public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.7 2001-08-31 08:13:55 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+
   /** id of associated proxy agent */
   protected AgentId proxy;
   /** queue of <code>Notification</code> objects to be sent */
@@ -41,10 +46,13 @@ public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.7 2001-08-
    * @param mq		queue of <code>Notification</code> objects to be sent
    * @param out		stream to write notifications to
    */
-  protected AgentDriver(AgentId proxy, Queue mq) {
-    super();
-    this.proxy = proxy;
+  protected AgentDriver(int id, Agent proxy, Queue mq) {
+    super(id);
+    this.proxy = proxy.getId();
     this.mq = mq;
+    this.name = proxy.getName() + ".AgentDriver#" + id;
+    // Get the proxy logging monitor
+    logmon = proxy.logmon;
   }
 
   /**
@@ -73,7 +81,9 @@ public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.7 2001-08-
 	react(m);
 	canStop = false;
       } catch (Exception exc) {
-	Debug.trace(this.toString() +".react(" + m + ")", exc);
+        logmon.log(BasicLevel.ERROR,
+                   getName() + ", exception in " + this +
+                   ".react(" + m + ")", exc);
 	break mainLoop;
       }
       mq.pop();
@@ -105,7 +115,8 @@ public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.7 2001-08-
     try {
       sendTo(proxy, new DriverDone(id));
     } catch (IOException exc) {
-      Debug.trace("error in reporting end of Driver", exc);
+      logmon.log(BasicLevel.ERROR,
+                   getName() + ", error in reporting end", exc);
     }
   }
 }

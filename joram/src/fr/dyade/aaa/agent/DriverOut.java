@@ -24,12 +24,18 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
+/**
+ * Output driver.
+ */
 class DriverOut extends Driver {
-
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.9 2001-08-31 08:13:56 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.10 2002-01-16 12:46:47 joram Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;
@@ -38,14 +44,9 @@ class DriverOut extends Driver {
   /** stream to write notifications to */
   protected NotificationOutputStream out;
 
-  /**
-   * Identifies the <code>DriverOut</code> in a
-   * multi-connections context.
-   */
+  /** Identifies the <code>DriverOut</code> in a multi-connections context. */
   private int key = 0;
-  /** True in a multi-connections context. */
-  private boolean multiConn = false;
-
+ 
   /**
    * Constructor.
    *
@@ -54,65 +55,68 @@ class DriverOut extends Driver {
    * @param mq		queue of <code>Notification</code> objects to be sent
    * @param out		stream to write notifications to
    */
-  DriverOut(int id, AgentId proxy, Queue mq, NotificationOutputStream out) {
+  DriverOut(int id,
+            ProxyAgent proxy,
+            Queue mq,
+            NotificationOutputStream out) {
     super(id);
-    this.proxy = proxy;
+    this.proxy = proxy.getId();
     this.mq = mq;
     this.out = out;
+    this.name = proxy.getName() + ".DriverOut#" + id;
+    // Get the logging monitor using proxy topic
+    String classname = getClass().getName();
+    logmon = Debug.getMonitor(proxy.getLogTopic()+ '.' +
+      classname.substring(classname.lastIndexOf('.') +1));
   }
 
   /**
-   * Constructor called by a <code>ProxyAgent</code>
-   * managing multiple connections.
+   * Constructor called by a <code>ProxyAgent</code> managing multiple
+   * connections.
    *
-   * @param id  identifier local to the driver creator
-   * @param proxy  id of associated proxy agent
-   * @param mq  queue of <code>Notification</code> objects to be sent
-   * @param out  stream to write notifications to
-   * @param key key identifying the connection.
+   * @param id      identifier local to the driver creator
+   * @param proxy   associated proxy agent
+   * @param mq      queue of <code>Notification</code> objects to be sent
+   * @param out     stream to write notifications to
+   * @param key     key identifying the connection.
    */
-  DriverOut(int id, AgentId proxy, Queue mq, 
-    NotificationOutputStream out, int key)
+  DriverOut(int id,
+            ProxyAgent proxy,
+            Queue mq,
+            NotificationOutputStream out,
+            int key)
   {
     this(id, proxy, mq, out);
     this.key = key;
-    this.multiConn = true;
   }
 
   /**
-   * Constructor with default id.
-   *
-   * @param proxy	id of associated proxy agent
-   * @param mq		queue of <code>Notification</code> objects to be sent
-   * @param out		stream to write notifications to
+   * Returns name of driver.
    */
-  DriverOut(AgentId proxy, Queue mq, NotificationOutputStream out) {
-    this(0, proxy, mq, out);
+  public String getName() {
+    return name;
   }
-
 
   public void run() {
     Notification m = null;
     mainLoop:
     while (isRunning) {
-	try {
-	    canStop = true;
-	    m = (Notification) mq.get();
-	    if (! isRunning)
-		break;
-	    if (Debug.driversData)
-		Debug.trace("out driver write " + m, false);
-	    canStop = false;
-	    out.writeNotification(m);
-	} catch (IOException exc) {
-	    if (Debug.error)
-		Debug.trace("out driver write " + m, exc);
-	    break mainLoop;
-	} catch (InterruptedException exc) {
-	    break mainLoop;
-	}
-
-	mq.pop();
+      try {
+        canStop = true;
+        m = (Notification) mq.get();
+        if (! isRunning) break;
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", write: " + m);
+        canStop = false;
+        out.writeNotification(m);
+      } catch (IOException exc) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", write failed" + m, exc);
+        break mainLoop;
+      } catch (InterruptedException exc) {
+        break mainLoop;
+      }
+      mq.pop();
     }
   }
     
@@ -144,19 +148,19 @@ class DriverOut extends Driver {
   protected void end() {
     // report end to proxy
     try {
-      if (! multiConn)
-        // Single connection context.
+      // Single connection context.
+      if (key == 0)
         sendTo(proxy, new DriverDone(id));
 
+      // In a multi-connections context, flagging the DriverDone
+      // notification with the key so that it is known which 
+      // DriverOut to close.
       else
-        // In a multi-connections context, flagging the DriverDone
-        // notification with the key so that it is known which 
-        // DriverOut to close.
         sendTo(proxy, new DriverDone(id, key));
 
     } catch (IOException exc) {
-      if (Debug.error)
-	Debug.trace("error in reporting end of DriverOut", exc);
+      logmon.log(BasicLevel.ERROR,
+                       getName() + ", error in reporting end", exc);
     }
   }
 
@@ -164,5 +168,4 @@ class DriverOut extends Driver {
   protected void clean() {
     mq.removeAllElements();
   }
-
 }

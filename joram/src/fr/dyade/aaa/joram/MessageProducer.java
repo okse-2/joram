@@ -191,6 +191,6 @@ public class MessageProducer implements javax.jms.MessageProducer {
 	 *	methode override by the QueueSender and TopicPublisher
 	 */
 	public void close() throws javax.jms.JMSException {
-		System.gc();
+	  System.gc();
 	}
 }

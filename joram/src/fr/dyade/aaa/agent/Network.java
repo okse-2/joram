@@ -26,22 +26,27 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.Vector;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 abstract class Network implements MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.6 2001-08-31 08:13:58 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /** Time between two activation of watch-dog thread (default 10 seconds) */
   final static long WDActivationPeriod = 10000L; // 10 seconds
-  /** Number of try at stage 1 (default 6 times) */
-  final static int  WDNbRetryLevel1 = 6;
-  /** Time between two sending at stage 1 (default 15 seconds) */
-  final static long WDRetryPeriod1 = 15000L;	 // 15 seconds
-  /** Number of try at stage 2 (default 12 times) */
-  final static int  WDNbRetryLevel2 = 12;
-  /** Time between two sending at stage 2 (default 2 minutes) */
-  final static long WDRetryPeriod2 = 120000L;	 // 2 minutes
-  /** time between two sending at stage 3 (default 30 minutes) */
-  final static long WDRetryPeriod3 = 1800000L;	 // 30 minutes
+  /** Number of try at stage 1 (default 30 times) */
+  final static int  WDNbRetryLevel1 = 30;
+  /** Time between two sending at stage 1 (default 10 seconds) */
+  final static long WDRetryPeriod1 = 10000L;	 // 10 seconds
+  /** Number of try at stage 2 (default 25 times) */
+  final static int  WDNbRetryLevel2 = 55;
+  /** Time between two sending at stage 2 (default 1 minutes) */
+  final static long WDRetryPeriod2 = 60000L;	 // 1 minutes
+  /** time between two sending at stage 3 (default 15 minutes) */
+  final static long WDRetryPeriod3 = 900000L;	 // 15 minutes
+
+  protected Monitor logmon = null;
 
   /**
    * Reference to the current network component in order to be used
@@ -150,13 +155,19 @@ abstract class Network implements MessageConsumer {
    *			network interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
-    this.name = name;
+    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
     this.port = port;
     this.servers = servers;
+
+    // Get the logging monitor from current server MonologMonitorFactory
+    // Be careful, logmon is initialized from name and not this.name !!
+    logmon = Debug.getMonitor(Debug.A3Network + '.' + name);
+    logmon.log(BasicLevel.DEBUG, name + ", initialized");
+
     // Sorts the array of server ids into ascending numerical order.
     java.util.Arrays.sort(servers);
     // then get the logical clock.
-    mclock = MatrixClock.load(name, servers);
+    mclock = MatrixClock.load(this.name, servers);
   }
 
   /**
@@ -203,15 +214,16 @@ abstract class Network implements MessageConsumer {
    *
    * @param msg		the message.
    */
-  public void deliver(Message msg) throws IOException {
+  public void deliver(Message msg) throws Exception {
     // Get real from serverId.
     short from = msg.update.getFromId();
 
-    if (Debug.debug && Debug.message)
-      Debug.trace(getName() + ": recv msg#" + msg.update.stamp +
-		  " from " + msg.from +
-		  " to " + msg.to +
-		  " by " + from, false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", recv msg#" + msg.update.stamp +
+                 " from " + msg.from +
+                 " to " + msg.to +
+                 " by " + from);
 
     AgentServer.getServerDesc(from).active = true;
     AgentServer.getServerDesc(from).retry = 0;
@@ -226,8 +238,9 @@ abstract class Network implements MessageConsumer {
       // local queue, and save it.
       Channel.post(msg);
 
-      if (Debug.debug && Debug.message)
-	Debug.trace(getName() + ": deliver msg#" + msg.update.stamp, false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", deliver msg#" + msg.update.stamp);
       scanlist:
       while (true) {
 	for (int i=0; i<waiting.size(); i++) {
@@ -240,9 +253,9 @@ abstract class Network implements MessageConsumer {
 	    Channel.post(tmpMsg);
 	    waiting.removeElementAt(i);
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(getName() + ": deliver msg#" + tmpMsg.update.stamp,
-			  false);
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ",	 deliver msg#" + tmpMsg.update.stamp);
 
 	    // logical time has changed we have to rescan the list.
 	    continue scanlist;
@@ -265,12 +278,13 @@ abstract class Network implements MessageConsumer {
       AgentServer.transaction.commit();
       AgentServer.transaction.release();
       
-      if (Debug.debug && Debug.message)
-	Debug.trace(getName() + ": block msg#" + msg.update.stamp, false);
-    } // else {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", block msg#" + msg.update.stamp);
+    } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).
-//  }
+    }
   }
 
   /**

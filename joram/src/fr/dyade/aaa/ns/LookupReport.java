@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class LookupReport extends SimpleReport {
 
-public static final String RCS_VERSION="@(#)$Id: LookupReport.java,v 1.3 2001-08-31 08:14:05 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: LookupReport.java,v 1.4 2002-01-16 12:46:47 joram Exp $";
 
   /** agent associated with name */
   private AgentId agent;

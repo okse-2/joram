@@ -77,6 +77,7 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
     cnxFact.deploy();
   }
 
+
   public void react(AgentId from, Notification not) throws Exception { 
     try {
 	/* later check the name of the clients  */

@@ -25,6 +25,9 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 /**
   * Object which monitors in a separate thread the execution of a process,
   * on account for a monitoring <code>Agent</code>.
@@ -38,8 +41,8 @@ import java.io.*;
   * @see	ProcessManager
   */
 class ProcessMonitor extends Driver implements Serializable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.7 2001-08-31 08:13:59 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */
@@ -66,7 +69,15 @@ class ProcessMonitor extends Driver implements Serializable {
       while (isRunning) {
 	  canStop = true;
 	  try {
+            if (ProcessManager.xlogmon.isLoggable(BasicLevel.DEBUG))
+	      ProcessManager.xlogmon.log(BasicLevel.DEBUG,
+                                         "AgentServer#" + AgentServer.getServerId() +
+                                         ".ProcessMonitor, waiting");
 	      exitValue = process.waitFor();
+              if (ProcessManager.xlogmon.isLoggable(BasicLevel.DEBUG))
+                  ProcessManager.xlogmon.log(BasicLevel.DEBUG,
+                                             "AgentServer#" + AgentServer.getServerId() +
+                                             ".ProcessMonitor, exit " + exitValue);
 	  } catch (InterruptedException exc) {
 	      continue;
 	  }
@@ -83,9 +94,11 @@ class ProcessMonitor extends Driver implements Serializable {
 	}
       }
       sendTo(agent, new ProcessEnd(exitValue, errorMessage));
-      ProcessManager.processManager.unregister(this);
+      ProcessManager.manager.unregister(this);
     } catch (Exception exc) {
-      Debug.trace("failure in ProcessMonitor.run(): " + exc, false);
+      ProcessManager.xlogmon.log(BasicLevel.ERROR,
+                                 "AgentServer#" + AgentServer.getServerId() +
+                                 ".ProcessMonitor, failure in run", exc);      
     }
   }
 

@@ -31,12 +31,10 @@ import fr.dyade.aaa.util.Strings;
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
  * <code>Network</code> objects.
- *
- * @author	Andre Freyssinet
  */
 public final class ServerDesc implements Serializable {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.6 2001-08-31 08:13:59 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /**  Server unique identifier. */
   short sid;
@@ -87,14 +85,6 @@ public final class ServerDesc implements Serializable {
     this.sid = sid;
     this.name = name;
     this.hostname = hostname;
-// AF: I think we don't have to resolve inet address here because many of them
-// will never be used.
-//     try {
-//       this.addr = InetAddress.getByName(hostname);
-//     } catch (UnknownHostException exc) {
-//       this.addr = null;
-//       Debug.trace("Can't resolve \"" + hostname + "\" Inet address", exc);
-//     }
   }
 
   /**

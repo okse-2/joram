@@ -36,6 +36,6 @@ a3ip.jar_CLASSES = \
 
 #	HttpProxy
 
-LIBS = a3agent.jar
+LIBS = a3agent.jar:owlogapi.jar:owlogwrpl4j.jar:log4j.jar
 
 include $(GENERAL_MK)

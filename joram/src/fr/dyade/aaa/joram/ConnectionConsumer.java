@@ -115,7 +115,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
       ((QueueConnection) connection).queueConnectionListener.stop();
     }
 
-    System.gc();
+      System.gc();
   }
 
 }

@@ -65,7 +65,7 @@ class QueueConnectionListener extends fr.dyade.aaa.util.Daemon
   public void run()
   {
     try {
-      while (isRunning) {
+      while (running) {
         canStop = true; 
         fr.dyade.aaa.mom.MessageMOMExtern momMsg;
 
@@ -96,7 +96,7 @@ class QueueConnectionListener extends fr.dyade.aaa.util.Daemon
       }
     } catch (Exception e) {
     } finally {
-      isRunning = false;
+      running = false;
     }
   } 
 

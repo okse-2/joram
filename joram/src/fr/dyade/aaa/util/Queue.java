@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class Queue extends Vector {
 
-public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.6 2001-08-31 08:14:08 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
   /**
    * Pushes an item onto the bottom of this queue. 

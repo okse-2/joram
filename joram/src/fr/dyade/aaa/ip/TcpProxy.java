@@ -25,19 +25,20 @@ package fr.dyade.aaa.ip;
 
 import java.io.*;
 import java.net.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.agent.*;
 
 /**
   * Class providing a TCP "connection".
   * This class is used for a client or a server as well. A client proxy
   * is identified by a -1 <code>localPort</code> value.
-  *
-  * @author	Lacourte Serge
-  * @version	v1.0
   */
 public abstract class TcpProxy extends ProxyAgent {
-
-public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.5 2001-08-31 08:14:02 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
 
 
   protected int localPort = -1;		/** in server: required listening port, may be 0 */
@@ -161,25 +162,26 @@ public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.5 2001-08-31 
     Socket sock;
     if (localPort >= 0) {
       // this is a server
-      if (Debug.drivers)
-	Debug.trace("cnx driver before accept", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "before accept");
       sock = server.accept();
-      if (Debug.drivers)
-	Debug.trace("cnx driver after accept", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "after accept");
     } else {
       // this is a client
-    infinite:
+      infinite:
       while (true) {
 	try {
-	  if (Debug.drivers)
-	    Debug.trace("cnx driver before connect", false);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, "before connect");
 	  sock = new Socket(remoteHost, remotePort);
-	  if (Debug.drivers)
-	    Debug.trace("cnx driver after connect", false);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, "after connect");
 	  break infinite;
 	} catch (ConnectException exc) {
-	  if (Debug.drivers)
-	    Debug.trace("cnx driver", exc);
+          logmon.log(BasicLevel.ERROR,
+                     "exception during connect " +
+                     remoteHost + ':' + remotePort, exc);
 	  // assume server is down
 	  // wait for 1 mn before retry
 	  Thread.sleep(60000);
@@ -188,8 +190,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.5 2001-08-31 
     }
     oos = setOutputFilters(sock.getOutputStream());
     ois = setInputFilters(sock.getInputStream());
-    if (Debug.drivers)
-      Debug.trace("cnx driver done", false);
+    logmon.log(BasicLevel.DEBUG, "driver done");
   }
 
   /**

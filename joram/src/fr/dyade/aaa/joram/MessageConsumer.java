@@ -104,7 +104,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
 	
 	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
 	public void close()  throws javax.jms.JMSException {
-		System.gc();
+	  System.gc();
 	}
 	
 	/** session updates the boolean to allow delivery or not */

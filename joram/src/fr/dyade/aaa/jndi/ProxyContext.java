@@ -43,27 +43,34 @@ import javax.naming.*;
  * @see fr.dyade.aaa.ns.NameService
  */
 public class ProxyContext extends TcpMultiServerProxy {
-  /** AgentId NameService */
-  protected static AgentId nsid;
-  static {
-	try {
-	  nsid = NameService.getDefault((short) 0);
-	} catch (Exception e) {}
-  }
-  /** Well known port for this agent to listen to */
-  static final int WKNPort = 16400;
+  public static final int WKNPort = 16400;
+
+  /**
+   * Id of the naming server.
+   * Currently it is the default naming service,
+   * i.e. the local server naming service.
+   * it seems not useful to configure it
+   * because this JNDI proxy should work
+   * on the same site as the naming.
+   */
+  private AgentId nsid;
   
-  public ProxyContext () throws Exception {
-	super();
-  }
+  /**
+   * Constructor of the delegate proxy that
+   * has no listening port.
+   * @see createNewProxy
+   */
   public ProxyContext (AgentId nsid) throws Exception {
-	super(WKNPort);
-	this.nsid = nsid;
+    super();
+    this.nsid = nsid;
   }
     
+  /**
+   * Constructor of the main proxy server.
+   */
   public ProxyContext (AgentId nsid, int localPort) throws Exception {
-	super(localPort);
-	this.nsid = nsid;
+    super(localPort);
+    this.nsid = nsid;
   }
   
   /**
@@ -133,6 +140,13 @@ public class ProxyContext extends TcpMultiServerProxy {
 	} else {
 	  super.react(from, not);
 	}
+  }
+
+  /**
+   * Create a delegate to handle the connection.
+   */
+  protected TcpMultiServerProxy createNewProxy(String header) throws Exception {
+    return new ProxyContext(nsid);
   }
   
   /**

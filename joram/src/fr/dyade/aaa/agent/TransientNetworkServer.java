@@ -26,6 +26,11 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.net.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
+import fr.dyade.aaa.util.Daemon;
+
 /**
  * A <code>TransientNetworkServer</code> component resides in a transient
  * agent server and ensures the notification delivery from and to the other
@@ -38,11 +43,12 @@ import java.net.*;
  * <code>TransientNetworkServer</code> component connects to when it
  * initializes.
  *
- * @author	Freyssinet Andre
- *
  * @see		TransientNetworkProxy
+ * @see		AgentServer
  */
 final class TransientNetworkServer implements MessageConsumer {
+  /** The domain name. */
+  String name;
   /** The <code>MessageQueue</code> associated with this network component */
   MessageQueue qout;
   /**  */
@@ -50,13 +56,15 @@ final class TransientNetworkServer implements MessageConsumer {
   /**  */
   NetServerOut netServerOut = null;
 
+  protected Monitor logmon = null;
+
   /**
    * Returns this <code>MessageConsumer</code>'s name.
    *
    * @return this <code>MessageConsumer</code>'s name.
    */
   public final String getName() {
-    return "transient";
+    return name;
   }
 
   /**
@@ -65,8 +73,14 @@ final class TransientNetworkServer implements MessageConsumer {
    */
   TransientNetworkServer() {
     qout = new MessageQueue();
-    netServerIn = new NetServerIn(getName());
-    netServerOut = new NetServerOut(getName());
+
+    name = "AgentServer#" + AgentServer.getServerId() + ".transient";
+    // Get the logging monitor from current server MonologMonitorFactory
+    logmon = Debug.getMonitor(Debug.A3Network + '.' + name);
+    logmon.log(BasicLevel.DEBUG, name + ", initialized");
+
+    netServerIn = new NetServerIn(getName(), logmon);
+    netServerOut = new NetServerOut(getName(), logmon);
   }
 
   /**
@@ -123,24 +137,23 @@ final class TransientNetworkServer implements MessageConsumer {
   /**
    * Causes this component to begin execution.
    */
-  public void start() throws IOException {
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " starting.", false);
+  public void start() throws Exception {
+    logmon.log(BasicLevel.DEBUG, getName() + ", starting");
 
     try {
       if (isRunning())
 	throw new IOException("Consumer already running.");
 
       // connects to the proxy server
-      ServerDesc proxy = AgentServer.getServerDesc(AgentServer.getServerDesc().gateway);
+      ServerDesc proxy = AgentServer.getServerDesc(AgentServer.getServerDesc(AgentServer.getServerId()).gateway);
       for (int i=0; ; i++) {
 	try {
 	  sock = new Socket(proxy.getAddr(), proxy.port);
 	  break;
 	} catch (IOException exc) {
-	  if (i > 5) throw exc;
+	  if (i > 20) throw exc;
 	  try {
-	    Thread.currentThread().sleep(i * 500);
+	    Thread.currentThread().sleep(i * 250);
 	  } catch (InterruptedException e) {}
 	}
       }
@@ -157,13 +170,14 @@ final class TransientNetworkServer implements MessageConsumer {
 
       netServerIn.start();
       netServerOut.start();
+    } catch (UnknownServerException exc) {
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
+      throw exc;
     } catch (IOException exc) {
-      Debug.trace(getName(), exc);
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
     }
-
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " started.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
   /**
@@ -172,6 +186,7 @@ final class TransientNetworkServer implements MessageConsumer {
   public void stop() {
     if (netServerIn != null) netServerIn.stop();
     if (netServerOut != null) netServerOut.stop();
+    logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
   /**
@@ -181,8 +196,8 @@ final class TransientNetworkServer implements MessageConsumer {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((netServerIn != null) && netServerIn.isRunning &&
-	(netServerOut != null) && netServerOut.isRunning)
+    if ((netServerIn != null) && netServerIn.isRunning() &&
+	(netServerOut != null) && netServerOut.isRunning())
       return true;
     else
       return false;
@@ -211,11 +226,13 @@ final class TransientNetworkServer implements MessageConsumer {
   }
 
   final class NetServerIn extends Daemon {
-    NetServerIn(String name) {
+    NetServerIn(String name, Monitor logmon) {
       super(name + ".netServerIn");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       close();
     }
 
@@ -223,55 +240,64 @@ final class TransientNetworkServer implements MessageConsumer {
       Message msg = null;
 
       try {
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 
 	  try {
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + " waiting message", false);
-
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", waiting message");
 	    msg = (Message) ois.readObject();
 	    // reset the error's count.
 	  } catch (ClassNotFoundException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
-	    Debug.trace(this.getName(), exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (InvalidClassException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
-	    Debug.trace(this.getName(), exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (StreamCorruptedException exc) {
-	    Debug.trace(this.getName(), exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", error during waiting message", exc);
 	    break;
 	  } catch (OptionalDataException exc) {
-	    Debug.trace(this.getName(), exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", error during waiting message", exc);
+	    break;
+	  } catch (EOFException exc) {
+	    this.logmon.log(BasicLevel.WARN,
+                            this.getName() + ", connection closed", exc);
+	    break;
+	  } catch (SocketException exc) {
+	    this.logmon.log(BasicLevel.WARN,
+                            this.getName() + ", connection closed", exc);
 	    break;
 	  } catch (IOException exc) {
-	    Debug.trace(this.getName(), exc);
-	    // May be we have to handle differently EOFException and others
-	    // IOException.
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", error during waiting message", exc);
 	    break;
 	  }
 	  canStop = false;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(this.getName() + " receives message " +
-			msg, false);
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", receives message " + msg);
 
 	  Channel.post( msg);
 	  Channel.validate();
 	}
       } catch (Exception exc) {
 	// TODO:
-	Debug.trace(this.getName() + " exited", exc);
+	this.logmon.log(BasicLevel.ERROR, this.getName() + ", exited", exc);
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped", false);
-
+	this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
 	close();
-	isRunning = false;
+	running = false;
 	thread = null;
 
 	AgentServer.stop();
@@ -280,11 +306,13 @@ final class TransientNetworkServer implements MessageConsumer {
   }
 
   final class NetServerOut extends Daemon {
-    NetServerOut(String name) {
+    NetServerOut(String name, Monitor logmon) {
       super(name + ".netServerOut");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       close();
     }
 
@@ -292,21 +320,26 @@ final class TransientNetworkServer implements MessageConsumer {
       Message msg = null;
       
       try {
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(this.getName() + " waiting message", false);
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", waiting message");
 
 	  try {
 	    msg = qout.get();
 	  } catch (InterruptedException exc) {
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", interrupted");
 	    continue;
 	  }
 	  canStop = false;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(this.getName() + " try to send message -> " + msg, false);
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", try to send message -> " + msg);
 
 	  // Send the message
 	  try {
@@ -314,18 +347,16 @@ final class TransientNetworkServer implements MessageConsumer {
 	    oos.flush();
 	    oos.reset();
 	  } catch (IOException exc) {
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName() + " error during sending", exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", server unreachable", exc);
 	    break;
 	  }
 	  qout.pop();
 	}
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped", false);
-
+        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
 	close();
-	isRunning = false;
+	running = false;
 	thread = null;
 
 	AgentServer.stop();

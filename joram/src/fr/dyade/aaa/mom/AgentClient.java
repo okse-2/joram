@@ -31,7 +31,7 @@ import fr.dyade.aaa.agent.*;
  * and <code>agent.ProxyAgent</code>.
  * <br><br>
  * It is a proxy accepting multiple connections from the client side, and
- * reacting to two types of notifications: the <code>ProxyNotification</code>
+ * reacting to two types of notifications: the <code>DriverNotification</code>
  * is of the first type, wrapping clients messages (messages, acknowledgements,
  * requests), and coming from a <code>agent.DriverIn</code>. All the other
  * notifications are of the second type, and come from inside the agents world.
@@ -47,6 +47,8 @@ import fr.dyade.aaa.agent.*;
  * @see fr.dyade.aaa.mom.Queue
  * @see fr.dyade.aaa.mom.Topic
  */
+
+
 public class AgentClient extends fr.dyade.aaa.mom.ConnectionFactory
   implements AgentClientItf
 {
@@ -65,7 +67,6 @@ public class AgentClient extends fr.dyade.aaa.mom.ConnectionFactory
     commonClient = new CommonClientAAA(this);
   }
 
-  
   /**
    * react() method all agents must implement for defining their
    * behaviour when receiving notifications.
@@ -77,12 +78,12 @@ public class AgentClient extends fr.dyade.aaa.mom.ConnectionFactory
         if(Debug.clientTest)
           System.out.println("AgentClient.react(): not " + not.getClass().getName());	 
 
-      if (not instanceof ProxyNotification) {
+      if (not instanceof DriverNotification) {
         //////////////////////////////////////////////////////////////////////
         // The following notification comes from outside the agents server. //
         // It wraps a client request, message or acknowledgement.           //
         //////////////////////////////////////////////////////////////////////
-        commonClient.reactToProxyNotification((ProxyNotification) not);
+        commonClient.reactToProxyNotification((DriverNotification) not);
 
         ///////////////////////////////////////////////////////////////////////
         // The following notifications come from inside the agents server in //
@@ -153,7 +154,6 @@ public class AgentClient extends fr.dyade.aaa.mom.ConnectionFactory
     // find the qout in which pushing the message.
     int drvKey = msgMOMExtern.getDriverKey();
     DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
-
     if (dMonitor != null) {
       fr.dyade.aaa.mom.NotificationOutputMessage not = 
         new fr.dyade.aaa.mom.NotificationOutputMessage(msgMOMExtern);

@@ -65,7 +65,7 @@ $(_CLASSES_): $(_JAVA_CLASS_): $(_JAVA_OBJECT_)
 $(_JCUPCLASSES_): $(_JAVA_CLASS_): $(_JAVA_OBJECT_) $(_JCUP_PARSER_OBJECT_) $(_JCUP_SYMBOLS_OBJECT_)
 
 $(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JAVA_OBJECT_)): $(_JAVA_OBJECT_): $(_JFLEX_SOURCE_) $(_JCUP_SYMBOLS_OBJECT_)
-	$(JFLEX_COMMAND) $<
+	$(JAVA) -classpath '$(_CLASSPATH_)' JFlex.Main $<
 	sed s/sym.EOF/$(<:$(_JFLEX_SOURCE_)=$(_JCUP_SYMBOLS_)).EOF/g $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_)) \
 	| sed s/class\ $(JCUP)/public\ class\ $(JCUP)/g \
 	| sed s/$(JCUP)\(/public\ $(JCUP)\ \(/g > $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_).bad)

@@ -21,13 +21,23 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
+
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Category;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
+
+import org.objectweb.monolog.wrapper.log4j.MonologMonitorFactory;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+import org.objectweb.monolog.api.MonitorFactory;
 
 /**
  * This class controls the debug traces printed to the audit file.
@@ -52,50 +62,18 @@ import java.lang.reflect.*;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.6 2001-08-31 08:13:56 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
 
-  /** name of the debug property file */
-  private static final String PROP_FILE_NAME = "a3debug.cfg";
+  static MonitorFactory factory = null;
 
-  /** debug properties, publicly accessible */
-  public static Properties properties = null;
-
-  /** stream to the debug trace file */
-  private static PrintWriter stream;
-
-  /**
-   * Initializes the properties variable.
-   * This function may be used outside of an agent server to get the definition
-   * of debug variables in the debug property file.
-   */
-  public static void initProperties() {
-    // finds the debug directory
-    String dirName = System.getProperty("A3DEBUG_DIR", ".");
-    directory = new File(dirName);
-
-    properties = new Properties(System.getProperties());
-    // looks up for the debug property file
-    File propFile = new File(directory, PROP_FILE_NAME);
-    if (propFile.exists()) {
-      InputStream propIn = null;
-      try {
-	propIn = new FileInputStream(propFile);
-	properties.load(propIn);
-	propIn.close();
-      } catch (Exception exc) {
-	// ignores exceptions
-      } finally {
-	if (propIn != null) {
-	  try {
-	    propIn.close();
-	  } catch (Exception exc) {}
-	}
-      }
-    }
-  }
+  public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_DIR";
+  public final static String DEFAULT_DEBUG_DIR = ".";
+  public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_FILE";
+  public final static String DEFAULT_DEBUG_FILE = "a3debug.cfg";
 
   /**
    * Initializes the package.
@@ -105,265 +83,154 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.6 2001-08-31 08:
    * @param serverId	this server id
    */
   public static void init(short serverId) {
-    initProperties();
+    boolean basic = false;
 
-    // creates the debug trace file
-    File file = new File(directory, "server" + serverId + ".audit");
-    try {
-      stream = new PrintWriter(
-	new BufferedWriter(new FileWriter(file.getPath(), true)));
-    } catch (IOException exc) {
-      System.err.println("cannot open audit file " + file.getPath());
-      System.exit(1);
-    }
+    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY,
+                                         DEFAULT_DEBUG_DIR);
+    String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
+                                              DEFAULT_DEBUG_FILE);
 
-    // sets Debug debug variables
-    createAgent = new Boolean(
-      properties.getProperty("Debug.createAgent", "false"))
-      .booleanValue();
-    garbageAgent = new Boolean(
-      properties.getProperty("Debug.garbageAgent", "false"))
-      .booleanValue();
-    loadAgent = new Boolean(
-      properties.getProperty("Debug.loadAgent", "false"))
-      .booleanValue();
-    saveAgent = new Boolean(
-      properties.getProperty("Debug.saveAgent", "false"))
-      .booleanValue();
-    loadAgentObject = new Boolean(
-      properties.getProperty("Debug.loadAgentObject", "false"))
-      .booleanValue();
-    saveAgentObject = new Boolean(
-      properties.getProperty("Debug.saveAgentObject", "false"))
-      .booleanValue();
-
-    if (new Boolean(properties.getProperty("Debug.AgentLifeCycle", "false"))
-	.booleanValue()) {
-      createAgent = true;
-      garbageAgent = true;
-      saveAgent = true;
-      loadAgentObject = true;
-      saveAgentObject = true;
-    }
-
-    channelSend = new Boolean(
-      properties.getProperty("Debug.channelSend", "false"))
-      .booleanValue();
-    engineLoop = new Boolean(
-      properties.getProperty("Debug.engineLoop", "false"))
-      .booleanValue();
-
-    if (new Boolean(properties.getProperty("Debug.A3Engine", "false"))
-	.booleanValue()) {
-      channelSend = true;
-      engineLoop = true;
-    }
-
-    if (new Boolean(properties.getProperty("Debug.A3Server", "false"))
-	.booleanValue()) {
-      A3Server = true;
-    }
-
-    network = new Boolean(
-      properties.getProperty("Debug.network", "false"))
-      .booleanValue();
-    message = new Boolean(
-      properties.getProperty("Debug.message", "false"))
-      .booleanValue();
-
-    if (new Boolean(properties.getProperty("Debug.Network.all", "false"))
-	.booleanValue()) {
-      network = true;
-      message = true;
-    }
-
-    restoreServer = new Boolean(
-      properties.getProperty("Debug.restoreServer", "false"))
-      .booleanValue();
-    agentError = new Boolean(
-      properties.getProperty("Debug.agentError", "false"))
-      .booleanValue();
-    agentInit = new Boolean(
-      properties.getProperty("Debug.agentInit", "false"))
-      .booleanValue();
-
-    dumpMatrixClock = new Boolean(
-      properties.getProperty("Debug.dumpMatrixClock", "false"))
-      .booleanValue();
-    printThread = new Boolean(
-      properties.getProperty("Debug.printThread", "false"))
-      .booleanValue();
-
-    drivers = new Boolean(
-      properties.getProperty("Debug.drivers", "false"))
-      .booleanValue();
-    driversControl = new Boolean(
-      properties.getProperty("Debug.drivers.control", "false"))
-      .booleanValue();
-    driversData = new Boolean(
-      properties.getProperty("Debug.drivers.data", "false"))
-      .booleanValue();
-    if (new Boolean(properties.getProperty("Debug.drivers.all", "false"))
-	.booleanValue()) {
-      drivers = true;
-      driversControl = true;
-      driversData = true;
-    }
-
-    // sets dynamic debug variables for other packages
-    final String dynvarMarker = "Debug.var.";
-    int markerLength = dynvarMarker.length();
-    for (Enumeration list = properties.propertyNames();
-	 list.hasMoreElements();) {
-      String key = (String) list.nextElement();
-      if (key.regionMatches(0, dynvarMarker, 0, markerLength)) {
-	// finds variable class and name
-	int pindex = key.lastIndexOf('.');
-	if (pindex <= markerLength) {
-	  // bad formed property name, ignores
-	  Debug.trace("bad formed property name: " + key, false);
-	  continue;
-	}
-	String varClassName = key.substring(markerLength, pindex);
-	String varName = key.substring(pindex + 1);
-	// finds variable value
-	String varValue = properties.getProperty(key);
-	try {
-	  // finds variable
-	  Class varClass = Class.forName(varClassName);
-	  Field var = varClass.getField(varName);
-	  // sets variable according to its type
-	  String varType = var.getType().getName();
-	  if (varType.equals("boolean") ||
-	      varType.equals("java.lang.Boolean")) {
-	    var.set(null, new Boolean(varValue));
-	  } else if (varType.equals("int") ||
-	      varType.equals("java.lang.Integer")) {
-	    var.set(null, new Integer(varValue));
-	  } else if (varType.equals("java.lang.String")) {
-	    var.set(null, varValue);
-	  } else {
-	    Debug.trace("error setting debug variable " +
-			varClassName + "." + varName +
-			": unexpected type " + varType, null);
-	    continue;
-	  }
-	} catch (Exception exc) {
-	  Debug.trace("error setting debug variable " +
-		      varClassName + "." + varName, exc);
-	  continue;
-	}
+    File debugFile = new File(debugDir, debugFileName);
+    if ((debugFile == null) ||
+        (!debugFile.exists()) ||
+        (!debugFile.isFile()) ||
+        (debugFile.length() == 0)) {
+      BasicConfigurator.configure();
+      basic = true;
+    } else {
+      try {
+        PropertyConfigurator.configure(debugFile.getCanonicalPath());
+      } catch (Exception exc) {
+        BasicConfigurator.configure();
+        basic = true;
       }
     }
+
+    Category root = Category.getRoot();
+    if (basic) {
+      root.setPriority(org.apache.log4j.Priority.ERROR);
+    } else if (serverId >= 0) {
+      try {
+        // Try to create local appender if defined...
+        FileAppender local = (FileAppender) root.getAppender("local");
+        local.setFile("server#" + serverId + ".audit");
+      } catch (Exception exc) { }
+    }
+
+    // Instanciate the MonologMonitorFactory
+    factory = (MonitorFactory) new MonologMonitorFactory();
   }
+
+    // sets dynamic debug variables for other packages
+//     final String dynvarMarker = "Debug.var.";
+//     int markerLength = dynvarMarker.length();
+//     for (Enumeration list = properties.propertyNames();
+// 	 list.hasMoreElements();) {
+//       String key = (String) list.nextElement();
+//       if (key.regionMatches(0, dynvarMarker, 0, markerLength)) {
+// 	// finds variable class and name
+// 	int pindex = key.lastIndexOf('.');
+// 	if (pindex <= markerLength) {
+// 	  // bad formed property name, ignores
+// 	  logmon.log(BasicLevel.ERROR,
+//                      "AgentServer#" + AgentServer.getServerId() +
+//                      ".Debug, bad formed property name: " + key);
+// 	  continue;
+// 	}
+// 	String varClassName = key.substring(markerLength, pindex);
+// 	String varName = key.substring(pindex + 1);
+// 	// finds variable value
+// 	String varValue = properties.getProperty(key);
+// 	try {
+// 	  // finds variable
+// 	  Class varClass = Class.forName(varClassName);
+// 	  Field var = varClass.getField(varName);
+// 	  // sets variable according to its type
+// 	  String varType = var.getType().getName();
+// 	  if (varType.equals("boolean") ||
+// 	      varType.equals("java.lang.Boolean")) {
+// 	    var.set(null, new Boolean(varValue));
+// 	  } else if (varType.equals("int") ||
+// 	      varType.equals("java.lang.Integer")) {
+// 	    var.set(null, new Integer(varValue));
+// 	  } else if (varType.equals("java.lang.String")) {
+// 	    var.set(null, varValue);
+// 	  } else {
+//             logmon.log(BasicLevel.ERROR,
+//                        "AgentServer#" + AgentServer.getServerId() +
+//                        ".Debug, error setting debug variable " +
+//                        varClassName + "." + varName +
+//                        ": unexpected type " + varType);
+// 	    continue;
+// 	  }
+// 	} catch (Exception exc) {
+// 	  logmon.log(BasicLevel.ERROR,
+//                      "AgentServer#" + AgentServer.getServerId() +
+//                      ".Debug, error setting debug variable " +
+//                      varClassName + "." + varName, exc);
+// 	  continue;
+// 	}
+//       }
+//     }
 
   static final boolean debug = true;
 
-  static boolean printThread = false;
+  public static final String A3Debug = "fr.dyade.aaa.agent";
+  public static final String A3Agent = A3Debug + ".Agent";
+  public static final String A3Engine = A3Debug + ".Engine";
+  public static final String A3Network = A3Debug + ".Network";
+  public static final String A3Service = A3Debug + ".Service";
+  public static final String A3Daemon = A3Debug + ".Daemon";
+  public static final String A3Proxy = A3Agent + ".ProxyAgent";
 
-  static int debugLevel = 1;
+  public static Monitor getMonitor(String topic) {
+    if (factory == null)
+      init((short) -1);
 
-  static boolean config = false;
-  static boolean configParse = false;
-  static boolean configRoute = false;
-
-  static boolean A3Server = false;
-
-  static boolean createAgent = false;
-  static boolean garbageAgent = false;
-  static boolean loadAgent = false;
-  static boolean saveAgent = false;
-  static boolean loadAgentObject = false;
-  static boolean saveAgentObject = false;
-
-  static boolean channelSend = false;
-  static boolean engineLoop = false;
-
-  /**
-   * Traces catch'd exception, normally should always be true.
-   */
-  static boolean error = true;
-
-  static boolean network = false;
-  static boolean message = false;
-
-  static boolean restoreServer = false;
-  static boolean agentError = false;
-  static boolean agentInit = false;
-
-  static boolean dumpMatrixClock = false;
-
-  public static boolean drivers = false;
-  public static boolean driversControl = false;
-  public static boolean driversData = false;
-
-  public static boolean admin = false;
-
-  static Object lock = new Object();
-
-  public static void trace(String msg, boolean stack) {
-    synchronized (lock) {
-      stream.print("+-- " + new Date().getTime() + " ----- ");
-      if (printThread)
-	stream.print(Thread.currentThread());
-      else
-	stream.print("*************************");
-      stream.println(" -----");
-      stream.println("+ " + msg);
-      if (stack) new Exception("Stack trace").printStackTrace(stream);
-      stream.flush();
-    }
+    return factory.getMonitor(topic);
   }
 
-  public static void trace(String msg, Throwable exc) {
-    synchronized (lock) {
-      trace(msg + ": " + exc, false);
-      exc.printStackTrace(stream);
-      stream.flush();
-    }
-  }
+//   static void dump(byte[] buf, int size) {
+//     int idx = 0;
 
-  static void dump(byte[] buf, int size) {
-    int idx = 0;
-
-    synchronized (lock) {
-      while (idx < size) {
-	if (idx < 10)
-	  stream.print("\n [    " + idx +"] | ");
-	else if (idx < 100)
-	  stream.print("\n [   " + idx +"] | ");
-	else if (idx < 1000)
-	  stream.print("\n [  " + idx +"] | ");
-	else if (idx < 10000)
-	  stream.print("\n [ " + idx +"] | ");
-	else
-	stream.print("\n [" + idx +"] | ");
-	for (int i=0; i<16; i++) {
-	  if ((idx+i) < size) {
-	    if (buf[idx+i] < 0) {
-	      stream.print(Integer.toHexString(256 + buf[idx+i]));
-	    } else {
-	      if (buf[idx+i] < 16)
-		stream.print('0');
-	      stream.print(Integer.toHexString(buf[idx+i]));
-	    }
-	    stream.print(' ');
-	  } else
-	    stream.print("   ");
-	}
-	stream.print(" | ");
-	for (int i=0; i<16; i++) {
-	  if ((idx+i) >= size)
-	    stream.print(' ');
-	  else if (!Character.isLetterOrDigit((char) buf[idx+i]))
-	    stream.print('.');
-	  else
-	    stream.print((char) buf[idx+i]);
-	}
-	idx += 16;
-      }
-      stream.println();
-      stream.flush();
-    }
-  }
+//     synchronized (lock) {
+//       while (idx < size) {
+// 	if (idx < 10)
+// 	  stream.print("\n [    " + idx +"] | ");
+// 	else if (idx < 100)
+// 	  stream.print("\n [   " + idx +"] | ");
+// 	else if (idx < 1000)
+// 	  stream.print("\n [  " + idx +"] | ");
+// 	else if (idx < 10000)
+// 	  stream.print("\n [ " + idx +"] | ");
+// 	else
+// 	stream.print("\n [" + idx +"] | ");
+// 	for (int i=0; i<16; i++) {
+// 	  if ((idx+i) < size) {
+// 	    if (buf[idx+i] < 0) {
+// 	      stream.print(Integer.toHexString(256 + buf[idx+i]));
+// 	    } else {
+// 	      if (buf[idx+i] < 16)
+// 		stream.print('0');
+// 	      stream.print(Integer.toHexString(buf[idx+i]));
+// 	    }
+// 	    stream.print(' ');
+// 	  } else
+// 	    stream.print("   ");
+// 	}
+// 	stream.print(" | ");
+// 	for (int i=0; i<16; i++) {
+// 	  if ((idx+i) >= size)
+// 	    stream.print(' ');
+// 	  else if (!Character.isLetterOrDigit((char) buf[idx+i]))
+// 	    stream.print('.');
+// 	  else
+// 	    stream.print((char) buf[idx+i]);
+// 	}
+// 	idx += 16;
+//       }
+//       stream.println();
+//       stream.flush();
+//     }
+//   }
 }

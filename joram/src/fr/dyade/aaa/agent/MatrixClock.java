@@ -24,14 +24,19 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
  * An element of the matrix clock.
- * @version	1.1, 11/19/97
- * @author	Andre Freyssinet
  */
 class MatClockElt {
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+
   /** Element value. */
   int stamp;
   /** Source node of last modification. */
@@ -43,12 +48,10 @@ class MatClockElt {
 
 /**
  * Matrix clock realization. 
- * @version	2.0, 22/09/2000
- * @author	Andre Freyssinet
  */
 class MatrixClock implements Serializable {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -62,12 +65,16 @@ class MatrixClock implements Serializable {
    * be saved by this component).
    */
   private transient short[] servers;
+  /** The domain name. */
+  private transient String name;
   /** Index of local server in status and matrix arrays. */
   private transient int idxLS;
   /** */
   private transient int status[];
   /** */
   private transient MatClockElt matrix[][];
+
+  private transient Monitor logmon = null;
 
  /**
   * The writeObject method is responsible for writing the state of the
@@ -127,10 +134,10 @@ class MatrixClock implements Serializable {
    * @param servers	List of domain's server id.
    */
   private MatrixClock(String name, short[] servers) throws IOException {
-    AgentServer.transaction.save(servers, name + "Servers");
+    this.name = name;
     this.servers = servers;
+    AgentServer.transaction.save(servers, name + "Servers");
     idxLS = index(AgentServer.getServerId());
-
     status = new int[servers.length];
     matrix = new MatClockElt[servers.length][servers.length];
     // Immediatly allocates all elements
@@ -169,11 +176,17 @@ class MatrixClock implements Serializable {
     if (mc == null) {
       // Creates a new Matrix and save it.
       mc = new MatrixClock(name, servers);
+      // Get the logging monitor from current server MonologMonitorFactory
+      mc.logmon = Debug.getMonitor(Debug.A3Debug + ".MatrixClock." + name);
     } else {
+      // Get the logging monitor from current server MonologMonitorFactory
+      mc.logmon = Debug.getMonitor(Debug.A3Debug + ".MatrixClock." + name);
       // Join with the new domain configuration:
       mc.servers = (short[]) AgentServer.transaction.load(name + "Servers");
       mc.idxLS = mc.index(AgentServer.getServerId());
       if (!java.util.Arrays.equals(mc.servers, servers)) {
+        mc.logmon.log(BasicLevel.WARN,
+                      "MatrixClock." + name + ", updates configuration");
 	// TODO: Insert or suppress corresponding elements in matrix...
 	throw new IOException("Bad configuration");
       }
@@ -212,16 +225,19 @@ class MatrixClock implements Serializable {
     short from = update.getFromId();
     int fromIdx = index(from);
 
-    if (Debug.dumpMatrixClock)
-      Debug.trace("testRecvUpdate(" + from + ", " + update + ") <" + this + '>', false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".testRecvUpdate(" + from + ", " + update + ") <" + this + '>');
 
     // The 1st element of update is always: HM[from, to]
     Update ptr = update;
     if ((matrix[fromIdx][idxLS].stamp +1) < ptr.stamp) {
       // There is other messages from the same node to deliver before this one.
-      if (Debug.dumpMatrixClock)
-	Debug.trace("testRecvUpdate return WAIT_TO_DELIVER", false);
-
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "MatrixClock." + name +
+                   ", testRecvUpdate return WAIT_TO_DELIVER");
       return WAIT_TO_DELIVER;
     } else if ((matrix[fromIdx][idxLS].stamp +1) == ptr.stamp) {
       // Verify that all messages to be delivered to this node and known by
@@ -237,17 +253,19 @@ class MatrixClock implements Serializable {
       // We have already receive this message, we should send a new
       // acknowledge. Be careful: don't put this message in waiting list
       // it's a bug!
-      if (Debug.dumpMatrixClock)
-	Debug.trace("testRecvUpdate return ALREADY_DELIVERED", false);
-
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "MatrixClock." + name +
+                   ", testRecvUpdate return ALREADY_DELIVERED");
       return ALREADY_DELIVERED;
     }
 
     if (ptr != null) {
       // The message can not be delivered.
-      if (Debug.dumpMatrixClock)
-	Debug.trace("testRecvUpdate return WAIT_TO_DELIVER", false);
-
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "MatrixClock." + name +
+                   ", testRecvUpdate return WAIT_TO_DELIVER");
       return WAIT_TO_DELIVER;
     } else {
       // The message is ready to be delivered, so updates the matrix clock.
@@ -263,9 +281,10 @@ class MatrixClock implements Serializable {
 	ptr = ptr.next;
       } while (ptr != null);
       
-      if (Debug.dumpMatrixClock)
-	Debug.trace("testRecvUpdate return DELIVER <" + this + '>', false);
-
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "MatrixClock." + name +
+                   ", testRecvUpdate return DELIVER <" + this + '>');
       modified = true;
       return DELIVER;
     }
@@ -281,8 +300,10 @@ class MatrixClock implements Serializable {
   synchronized Update getSendUpdate(short to) {
     int toIdx = index(to);
 
-    if (Debug.dumpMatrixClock)
-      Debug.trace("getSendUpdate(" + to + ") <" + this + '>', false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "MatrixClock." + name +
+                   ", getSendUpdate(" + to + ") <" + this + '>');
 
     matrix[idxLS][toIdx].stamp += 1;
     matrix[idxLS][toIdx].status = status[idxLS];
@@ -306,8 +327,10 @@ class MatrixClock implements Serializable {
       status[idxLS] += 1;
     }
 
-    if (Debug.dumpMatrixClock)
-      Debug.trace("getSendUpdate return " + update + '<' + this + '>', false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "MatrixClock." + name +
+                   ", getSendUpdate return " + update + '<' + this + '>');
 
     modified = true;
     return update;

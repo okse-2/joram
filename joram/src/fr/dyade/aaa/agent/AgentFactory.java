@@ -26,6 +26,9 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 /**
  * The <code>AgentVector</code> class. This class should be completed to
  * reflected the totally of Vector interface, then it should be public.
@@ -34,8 +37,8 @@ import java.util.*;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -126,10 +129,9 @@ final class AgentVector extends AgentObject {
  *
  * @author  Andre Freyssinet
  */
-public final class AgentFactory extends Agent {
-
-  /** RCS version number of this file: $$ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
+final class AgentFactory extends Agent {
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -144,13 +146,10 @@ public final class AgentFactory extends Agent {
    * An <code>AgentFactory</code> agent must be created on every agent
    * server the first time it runs.
    */
-  public AgentFactory() {
+  AgentFactory() {
     super("AgentFactory#" + AgentServer.getServerId(),
 	  true,
 	  AgentId.factoryId);
-// TODO: To delete
-//     if (AgentServer.ADMINISTRED)
-//         agentsList = new Vector();
   }
 
   /**
@@ -189,6 +188,7 @@ public final class AgentFactory extends Agent {
    */
   void removeFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.removeElement(id);
+    nbFixedAgents -= 1;
     // If the server is transient, save it now.
     if (AgentServer.isTransient())
       fixedAgentIdList.save();
@@ -202,6 +202,7 @@ public final class AgentFactory extends Agent {
    */
   void addFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.addElement(id);
+    nbFixedAgents += 1;
     // If the server is transient, save it now.
     if (AgentServer.isTransient())
       fixedAgentIdList.save();
@@ -239,33 +240,23 @@ public final class AgentFactory extends Agent {
 	try {
 	  ois.close();
 	} catch (IOException exc) {}
+        
+        createAgent(ag);
 
-	createAgent(ag);
-
-	if (Debug.createAgent)
-	  Debug.trace(name + " creates " + ag, false);
-
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     "AgentFactory" + id +
+                     ", create Agent" + ag.id + " [" + ag.name + "]");
 	if (cnot.reply != null)
 	  sendTo(cnot.reply, new AgentCreateReply(ag.getId()));
-
-// TODO: To delete
-// 	if (AgentServer.ADMINISTRED) {
-// 	  AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
-// 	  if (AgentServer.admin && (adminEventReactor != null) &&
-// 	      adminEventReactor.hasListeners(ServerEventType.AGENT_CREATED)) {
-// 	    if (Debug.admin)
-// 	      Debug.trace(name + "send Add" + desc, false);
-// 	    adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_CREATED);
-// 	  }
-// 	  agentsList.addElement(desc);
-// 	}
       } catch (Exception exc) {
-	if (Debug.debug && Debug.error)
-	  Debug.trace(name + ": creation failed for " + cnot.deploy, exc);
-	//  If there is an explicit reply request send it the
+ 	//  If there is an explicit reply request send it the
 	// ExceptionNotification to the requester else to the
 	// sender.
 	cnot.agentState = null;
+        logmon.log(BasicLevel.ERROR,
+                   "AgentFactory" + id + ", can't create Agent" + cnot.deploy,
+                   exc);
 	if (cnot.reply != null) {
 	  sendTo(cnot.reply,
 		 new ExceptionNotification(getId(), cnot, exc));
@@ -275,40 +266,9 @@ public final class AgentFactory extends Agent {
 	}
       }
     } else if (not instanceof AgentDeleteRequest) {
-      Agent ag;
       try {
-	ag = Agent.load(from);
-	AgentServer.transaction.delete(ag.id.toString());
-      } catch (UnknownAgentException exc) {
-	sendTo(from,
-	       new ExceptionNotification(getId(),
-					 not,
-					 new Exception("Unknown agent" + from)));
-	return;
-      } catch (Exception exc) {
-	sendTo(from,
-	       new ExceptionNotification(getId(),
-					 not,
-					 new Exception("Can't delete agent" + from)));
-	return;
-      }
-      if (ag.isFixed()) {
-	removeFixedAgentId(ag.id);
-      }
-      agents.remove(ag.getId());
-
-// TODO: To delete
-//      if (AgentServer.ADMINISTRED) {
-// 	AgentDesc desc = new AgentDesc(ag.name,ag.getId(),ag.isFixed());
-// 	if (AgentServer.admin && (adminEventReactor != null) && 
-// 	    adminEventReactor.hasListeners(ServerEventType.AGENT_DELETED)) {
-// 	  if (Debug.admin)
-// 	    Debug.trace(name + "send Removed" + desc, false);
-// 	  adminEventReactor.factoryEventReact(desc,ServerEventType.AGENT_DELETED);
-// 	}
-// 	agentsList.removeElement(desc);
-//       } 
-
+        deleteAgent(from);
+      } catch (Exception exc) {}
     } else {
       try {
 	super.react(from, not);
@@ -317,6 +277,32 @@ public final class AgentFactory extends Agent {
 	       new ExceptionNotification(getId(), not, exc));
       }
     }
+  }
+
+  /**
+   * Deletes an agent in the local agent server.
+   */
+  void deleteAgent(AgentId from) throws Exception {
+    Agent ag;
+    try {
+      ag = Agent.load(from);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "AgentFactory" + id +
+                   ", delete Agent" + ag.id + " [" + ag.name + "]");
+      AgentServer.transaction.delete(ag.id.toString());
+    } catch (UnknownAgentException exc) {
+      logmon.log(BasicLevel.ERROR,
+                 "AgentFactory" + id +
+                 ", can't delete unknown Agent" + from);
+      throw new Exception("Can't delete unknown Agent" + from);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 "AgentFactory" + id + ", can't delete Agent" + from);
+      throw new Exception("Can't delete Agent" + from);
+    }
+    if (ag.isFixed()) removeFixedAgentId(ag.id);
+    agents.remove(ag.getId());
   }
 
   /**
@@ -332,12 +318,14 @@ public final class AgentFactory extends Agent {
    *	unspecialized exception
    */
   void createAgent(Agent agent) throws Exception {
+    agent.deployed = true;
     if (agent.isFixed()) {
       // Subscribe the agent in pre-loading list.
       addFixedAgentId(agent.getId());
     }
     // Initialize the agent
     agent.initialize(true);
+    if (agent.logmon == null) agent.logmon = xlogmon;
     agent.save();
 
     // Memorize the agent creation and ...
@@ -346,13 +334,6 @@ public final class AgentFactory extends Agent {
       garbage();
     
     agents.put(agent.getId(), agent);
-  }
-
-  /**
-   * set the EventReactor (now the UdpAdminProxy).
-   */
-  public static void setEventReactor(AdminEventReactor aer){
-    adminEventReactor = aer;
   }
 }
 

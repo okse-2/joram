@@ -26,26 +26,24 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
- *  <code>SingleCnxNetwork</code> is an implementation of <code>StreamNetwork</code>
- * class for stream sockets.
- * 
+ *  <code>SingleCnxNetwork</code> is a simple implementation of
+ * <code>StreamNetwork</code> class with a single connection at
+ * a time.
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.4 2001-08-31 08:14:00 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.5 2002-01-16 12:46:47 joram Exp $";
 
   Vector sendList;
 
   final static boolean TempNetwallFix = false;
-
-
-  /**
-   * Numbers of attempt to connect to a server's socket before aborting.
-   */
-  final static int CnxRetry = 3;
 
   /**
    * Creates a new network component.
@@ -65,29 +63,25 @@ class SingleCnxNetwork extends StreamNetwork {
    * Causes this network component to begin execution.
    */
   public void start() throws IOException {
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " starting.", false);
-
+    logmon.log(BasicLevel.DEBUG, getName() + ", starting");
     try {
       if (isRunning())
-	throw new IOException("Consumer already running.");
+	throw new IOException("Consumer already running");
 
       sendList = new Vector();
     
-      netServerIn = new NetServerIn(getName());
-      netServerOut = new NetServerOut(getName());
-      watchDog = new WatchDog(getName());
+      netServerIn = new NetServerIn(getName(), logmon);
+      netServerOut = new NetServerOut(getName(), logmon);
+      watchDog = new WatchDog(getName(), logmon);
 
       netServerIn.start();
       netServerOut.start();
       watchDog.start();
     } catch (IOException exc) {
-      Debug.trace(getName(), exc);
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
     }
-
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " started", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
   /**
@@ -104,6 +98,7 @@ class SingleCnxNetwork extends StreamNetwork {
     if (netServerIn != null) netServerIn.stop();
     if (netServerOut != null) netServerOut.stop();
     if (watchDog != null) watchDog.stop();
+    logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
   /**
@@ -113,9 +108,9 @@ class SingleCnxNetwork extends StreamNetwork {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((netServerIn != null) && netServerIn.isRunning &&
-	(netServerOut != null) && netServerOut.isRunning &&
-	(watchDog != null) && watchDog.isRunning)
+    if ((netServerIn != null) && netServerIn.isRunning() &&
+	(netServerOut != null) && netServerOut.isRunning() &&
+	(watchDog != null) && watchDog.isRunning())
       return true;
     else
       return false;
@@ -142,11 +137,13 @@ class SingleCnxNetwork extends StreamNetwork {
   }
 
   final class NetServerOut extends Daemon {
-    NetServerOut(String name) {
+    NetServerOut(String name, Monitor logmon) {
       super(name + ".NetServerOut");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {}
+    public void shutdown() {}
 
     public void run() {
       int ret;
@@ -155,60 +152,59 @@ class SingleCnxNetwork extends StreamNetwork {
       ServerDesc server = null;
 
       try {
-	while (isRunning) {
+	while (running) {
 	  try {
 	    canStop = true;
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + ": waiting message", false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
 
 	    try {
 	      msg = qout.get();
 	    } catch (InterruptedException exc) {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", interrupted");
 	      continue;
 	    }
 	    canStop = false;
 
 	    msgto = msg.update.getToId();
-	    server = AgentServer.getServerDesc(msgto);
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + ": try to send message -> " +
-			  msg + "/" + msgto, false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                         this.getName() + ", try to send message -> " +
+                         msg + "/" + msgto);
+            // Can throw an UnknownServerException...
+            server = AgentServer.getServerDesc(msgto);
 
 	    if (! server.active) {
-	      if (Debug.debug && Debug.message)
-		Debug.trace("Server#" + msgto + "inactive", false);
-	      throw new ConnectException("Host is down");
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", AgentServer#" + msgto + " is down");
+	      throw new ConnectException("AgentServer#" + msgto + " is down");
 	    }
 	  
 	    // Open the connection.
 	    Socket socket = null;
-	    for (int i=0;;) {
-	      try {
-		if (Debug.debug && Debug.message)
-		  Debug.trace("Try to connect", false);
-	      
-		socket = createSocket(server.getAddr(), server.port);
-		if (Debug.debug && Debug.message)
-		  Debug.trace("Connected", false);
-		break;
-	      } catch (IOException exc) {
-		if (Debug.debug && Debug.message)
-		  Debug.trace("Connection aborted", exc);
-		if ((server.getAddr() == null) || 
-		    ((i += 1) > CnxRetry)) {
-		  server.active = false;
-		  server.last = System.currentTimeMillis();
-		  server.retry += 1;
-		  throw exc;
-		}
-	      }
-	    }
+            try {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
+              socket = createSocket(server.getAddr(), server.port);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+            } catch (IOException exc) {
+              this.logmon.log(BasicLevel.WARN,
+                              this.getName() + ", connection refused", exc);
+              server.active = false;
+              server.last = System.currentTimeMillis();
+              server.retry += 1;
+              throw exc;
+            }
 	    setSocketOption(socket);
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace("Write message", false);
+	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", write message");
 	    // Send the message,
 	    ObjectOutputStream oos = getOutputStream(socket);
 	    // AF: Configuration coherency verification.
@@ -218,15 +214,15 @@ class SingleCnxNetwork extends StreamNetwork {
 	    }
 	    oos.writeObject(msg);
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace("Wait ack", false);
+	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait ack");
 	    // and wait the acknowledge.
 	    InputStream is = socket.getInputStream();
 	    if ((ret = is.read()) == -1)
 	      throw new ConnectException("Connection broken");
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace("Receive ack", false);
+	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", receive ack");
 	
 	    try {
 	      oos.close();
@@ -238,14 +234,20 @@ class SingleCnxNetwork extends StreamNetwork {
 	      socket.close();
 	    } catch (IOException exc) {}
 	  } catch (IOException exc) {
-	    if (Debug.debug && Debug.message)
-	      Debug.trace("Move msg in watchdog list", exc);
+            this.logmon.log(BasicLevel.WARN,
+                       this.getName() + ", move msg in watchdog list", exc);
 	    //  There is a connection problem, put the message in a
 	    // waiting list.
 	    sendList.addElement(msg);
 	    qout.pop();
 	    continue;
-	  } 
+	  } catch (UnknownServerException exc) {
+            this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", can't send message: " + msg,
+                            exc);
+            // Remove the message (see below), may be we have to post an
+            // error notification to sender.
+          }
 
 	  try {
 	    AgentServer.transaction.begin();
@@ -256,17 +258,17 @@ class SingleCnxNetwork extends StreamNetwork {
 	    AgentServer.transaction.commit();
 	    AgentServer.transaction.release();
 	  } catch (Exception exc) {
-	    Debug.trace("Unrecoverable exception", exc);
+	    this.logmon.log(BasicLevel.FATAL,
+                       this.getName() + ", unrecoverable exception", exc);
 	    //  There is an unrecoverable exception during the transaction
 	    // we must exit from server.
 	    AgentServer.stop();
 	  }
 	}
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + ": stopped", false);
+        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", stopped");
 
-	isRunning = false;
+	running = false;
 	thread = null;
      }
     }
@@ -277,12 +279,14 @@ class SingleCnxNetwork extends StreamNetwork {
 
     WatchDog watchDog = null;
 
-    NetServerIn(String name) throws IOException {
+    NetServerIn(String name, Monitor logmon) throws IOException {
       super(name + ".NetServerIn");
       listen = createServerSocket();
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       try {
 	listen.close();
       } catch (IOException exc) {}
@@ -295,15 +299,15 @@ class SingleCnxNetwork extends StreamNetwork {
       ObjectInputStream ois = null;
 
       try {
-	while (isRunning) {
+	while (running) {
 	  try {
 	    canStop = true;
 
 	    // Get the connection
 	    try {
-	      if (Debug.debug && Debug.message)
-		Debug.trace(this.getName() + "Wait connection", false);
-
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", waiting connection");
 	      socket = listen.accept();
 	    } catch (IOException exc) {
 	      continue;
@@ -313,8 +317,9 @@ class SingleCnxNetwork extends StreamNetwork {
 	    setSocketOption(socket);
 // 	    socket.setSoLinger(true, 1000);
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + "Read message", false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                         this.getName() + ", connected");
 
 	    // Read the message,
 	    os = socket.getOutputStream();
@@ -345,8 +350,8 @@ class SingleCnxNetwork extends StreamNetwork {
 	    }
 	    Object obj = ois.readObject();
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + "Message read", false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", msg received");
 
 	    if (obj instanceof Message) {
 	      deliver((Message) obj);
@@ -356,9 +361,10 @@ class SingleCnxNetwork extends StreamNetwork {
 	      AgentServer.getServerDesc(boot.sid).active = true;
 	      AgentServer.getServerDesc(boot.sid).retry = 0;
 
-	      if (Debug.debug && Debug.network)
-		Debug.trace(this.getName() + "Get connection with server#" +
-			    boot.sid, false);
+	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", connection setup from #" +
+                           boot.sid);
 
 	      // resend all waiting messages.
 	      wakeup();
@@ -366,14 +372,14 @@ class SingleCnxNetwork extends StreamNetwork {
 	      // TODO: ?
 	    }
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + "Send ack", false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", send ack");
 
 	    // then send the acknowledge.
 	    os.write((byte) 0);
 	    os.flush();	// nop !
 	  } catch (Exception exc) {
-	    Debug.trace(this.getName(), exc);
+            this.logmon.log(BasicLevel.ERROR, ", exited", exc);
 	  } finally {
 	    try {
 	      os.close();
@@ -390,10 +396,8 @@ class SingleCnxNetwork extends StreamNetwork {
 	  }
 	}
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + ": stopped", false);
-
-	isRunning = false;
+	this.logmon.log(BasicLevel.DEBUG, ", ends");
+	running = false;
 	thread = null;
       }
     }
@@ -404,12 +408,14 @@ class SingleCnxNetwork extends StreamNetwork {
     /** Use to synchronize thread */
     private Object lock;
 
-    WatchDog(String name) {
+    WatchDog(String name, Monitor logmon) {
       super(name + ".WatchDog");
       lock = new Object();
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       wakeup();
     }
 
@@ -430,7 +436,7 @@ class SingleCnxNetwork extends StreamNetwork {
     void clean(short dead) {
       Message msg = null;
 
-// TODO: Be careful, to the route algorithm!
+      // TODO: Be careful, to the route algorithm!
 
       synchronized (lock) {
 	for (int i=0; i<sendList.size(); i++) {
@@ -450,66 +456,69 @@ class SingleCnxNetwork extends StreamNetwork {
       
       synchronized (lock) {
 	try {
-	  while (isRunning) {
+	  while (running) {
 	    try {
-	      if (Debug.debug && Debug.message)
-		Debug.trace(this.getName() + " waiting...", false);
+	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", waiting...");
 	      lock.wait(WDActivationPeriod);
 	    } catch (InterruptedException exc) {
 	      continue;
 	    }
 	    
-	    if (! isRunning) break;
+	    if (! running) break;
 	    long currentTimeMillis = System.currentTimeMillis();
 
 	    for (int i=0; i<sendList.size(); i++) {
 	      msg = (Message) sendList.elementAt(i);
-
 	      msgto = msg.update.getToId();
-	      server = AgentServer.getServerDesc(msgto);
 
-	      if (Debug.debug && Debug.message)
-		Debug.trace("Check msg#" + msg.update.stamp +
+	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() +
+                           ", check msg#" + msg.update.stamp +
 			    " from " + msg.from +
-			    " to " + msg.to, false);
+			    " to " + msg.to);
 
-	      if ((server.active) ||
-		  ((server.retry < WDNbRetryLevel1) && 
-		   ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
-		  ((server.retry < WDNbRetryLevel2) &&
-		   ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
-		  ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
-		if (Debug.debug && Debug.message)
-		  Debug.trace("send msg#" + msg.update.stamp, false);
+              try {
+                server = AgentServer.getServerDesc(msgto);
 
-		server.last = currentTimeMillis;
+                if ((server.active) ||
+                    ((server.retry < WDNbRetryLevel1) && 
+                     ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
+                    ((server.retry < WDNbRetryLevel2) &&
+                     ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
+                    ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
+                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG,
+                                    this.getName() +
+                                    ", send msg#" + msg.update.stamp);
 
-		try {
+                  server.last = currentTimeMillis;
+
 		  // Open the connection.
-		  InetAddress addr = null;
 		  Socket socket = null;
-		  for (int j=0;;) {
-		    try {
-		      if (Debug.debug && Debug.message)
-			Debug.trace("Try to connect", false);
-		      addr = server.getAddr();
-		      socket = createSocket(addr, server.port);
-		      server.active = true;
-		      server.retry = 0;
-		      if (Debug.debug && Debug.message)
-			Debug.trace("Connected", false);
-		      break;
-		    } catch (IOException exc) {
-		      if (Debug.debug && Debug.message)
-			Debug.trace("Connection aborted", exc);
-		      if ((addr == null) || ((j += 1) > CnxRetry))
-			throw exc;
-		    }
+                  try {
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", try to connect");
+                    socket = createSocket(server.getAddr(), server.port);
+                    server.active = true;
+                    server.retry = 0;
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", connected");
+                  } catch (IOException exc) {
+                    this.logmon.log(BasicLevel.WARN,
+                                    this.getName() + ", connection refused",
+                                    exc);
+                    throw exc;
 		  }
 		  setSocketOption(socket);
 
-		  if (Debug.debug && Debug.message)
-		    Debug.trace("Write message", false);
+		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG,
+                                    this.getName() + ", write message");
 
 		  // Send the message,
 		  ObjectOutputStream oos = getOutputStream(socket);
@@ -520,16 +529,18 @@ class SingleCnxNetwork extends StreamNetwork {
 		  }
 		  oos.writeObject(msg);
 
-		  if (Debug.debug && Debug.message)
-		    Debug.trace("Wait ack", false);
+		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG,
+                                    this.getName() + ", wait ack");
 
 		  // and wait the acknowledge.
 		  InputStream is = socket.getInputStream();
 		  if ((ret = is.read()) == -1)
 		    throw new ConnectException("Connection broken");
 
-		  if (Debug.debug && Debug.message)
-		    Debug.trace("Receive ack", false);
+		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                    this.logmon.log(BasicLevel.DEBUG,
+                               this.getName() + ", receive ack");
 	    
 		  try {
 		    oos.close();
@@ -541,32 +552,62 @@ class SingleCnxNetwork extends StreamNetwork {
 		    socket.close();
 		  } catch (IOException exc) {}
 
-		  AgentServer.transaction.begin();
-		  //  Deletes the processed notification
-		  sendList.removeElementAt(i); i--;
-		  msg.delete();
-		  AgentServer.transaction.commit();
-		  AgentServer.transaction.release();
-		} catch (SocketException exc) {
-		  if (Debug.debug && Debug.message)
-		    Debug.trace("Let msg in watchdog list", exc);
-
-		  server.active = false;
-		  server.last = System.currentTimeMillis();
-		  server.retry += 1;
-		  //  There is a connection problem, let the message in the
-		  // waiting list.
-		} catch (Exception exc) {
-		  Debug.trace("WatchDog", exc);
-		}
-	      }
+                  try {
+                    AgentServer.transaction.begin();
+                    //  Deletes the processed notification
+                    sendList.removeElementAt(i); i--;
+                    msg.delete();
+                    AgentServer.transaction.commit();
+                    AgentServer.transaction.release();
+                  } catch (Exception exc) {
+                    this.logmon.log(BasicLevel.FATAL,
+                                    this.getName() + ", unrecoverable exception",
+                                    exc);
+                    //  There is an unrecoverable exception during the
+                    // transaction we must exit from server.
+                    AgentServer.stop();
+                  }
+                }
+              } catch (SocketException exc) {
+                if (this.logmon.isLoggable(BasicLevel.WARN))
+                  this.logmon.log(BasicLevel.WARN,
+                                  this.getName() + ", let msg in watchdog list",
+                                  exc);
+                server.active = false;
+                server.last = System.currentTimeMillis();
+                server.retry += 1;
+                //  There is a connection problem, let the message in the
+                // waiting list.
+              } catch (UnknownServerException exc) {
+                this.logmon.log(BasicLevel.ERROR,
+                                this.getName() + ", can't send message: " + msg,
+                                exc);
+                // Remove the message, may be we have to post an error
+                // notification to sender.
+                try {
+                  AgentServer.transaction.begin();
+                  // Deletes the processed notification
+                  sendList.removeElementAt(i); i--;
+                  msg.delete();
+                  AgentServer.transaction.commit();
+                  AgentServer.transaction.release();
+                } catch (Exception exc2) {
+                  this.logmon.log(BasicLevel.FATAL,
+                                  this.getName() + ", unrecoverable exception",
+                                  exc2);
+                  //  There is an unrecoverable exception during the
+                  // transaction we must exit from server.
+                  AgentServer.stop();
+                }
+              } catch (Exception exc) {
+                this.logmon.log(BasicLevel.ERROR,
+                                this.getName() + ", error", exc);
+              }
 	    }
 	  }
 	} finally {
-	  if (Debug.debug && Debug.A3Server)
-	    Debug.trace(this.getName() + ": stopped", false);
-
-	  isRunning = false;
+	  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
+	  running = false;
 	  thread = null;
 	}
       }

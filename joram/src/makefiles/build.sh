@@ -1,4 +1,4 @@
-# @(#) $Id: build.sh,v 1.1 2001-08-31 08:14:09 tachkeni Exp $
+# @(#) $Id: build.sh,v 1.2 2002-01-16 12:46:47 joram Exp $
 
 DFLT_SHIP_FILE=$SRCDIR/makefiles/ship/scalagent.conf
 SHIPDIR=$SHIP

@@ -33,13 +33,13 @@ package fr.dyade.aaa.agent;
  */
 public class DriverDone extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.6 2001-08-31 08:13:56 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
 
   protected int driver;		/** identifies the terminated driver (OUT or IN) */
 
   /** Identifies the driver in the context of multi-connections. */
-  protected int driverKey;
+  protected int driverKey = 0;
 
 
   /**
@@ -55,7 +55,7 @@ public static final String RCS_VERSION="@(#)$Id: DriverDone.java,v 1.6 2001-08-3
    * Constructor used in a multi-connections context.
    *
    * @param driver  identifies the terminated driver (IN or OUT).
-   * @param driverKey  identifies the driver amongst other drivers.
+   * @param driverKey  identifies the driver among other drivers.
    */
   public DriverDone(int driver, int driverKey) {
     this.driver = driver;

@@ -25,6 +25,10 @@ package fr.dyade.aaa.agent;
 
 import java.util.*;
 import java.io.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -39,19 +43,17 @@ import fr.dyade.aaa.util.*;
  * This classes reuses the persistency service provided by
  * <code>Transaction</code>.
  *
- * @author	Lacourte Serge
- * @version	v1.0
- *
  * @see		ProcessEnd
  * @see		ProcessMonitor
  */
 public class ProcessManager implements Serializable {
-
-public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.6 2001-08-31 08:13:59 tachkeni Exp $"; 
-
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
   /** the unique <code>ProcessManager</code> in the agent server */
-  public static ProcessManager processManager;
+  public static ProcessManager manager;
+
+  static Monitor xlogmon = null;
 
   /**
    * Initializes the <code>ProcessManager</code> object.
@@ -60,22 +62,25 @@ public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.6 2001-
    *	unspecialized exception
    */
   static void init() throws Exception {
-    processManager = ProcessManager.load();
-    if (processManager == null) {
-      processManager = new ProcessManager();
-      processManager.save();
-    } else if (processManager.registry.size() > 0) {
+    // Get the logging monitor from current server MonologMonitorFactory
+    xlogmon = Debug.getMonitor(Debug.A3Debug + ".ProcessManager");
+
+    manager = ProcessManager.load();
+    if (manager == null) {
+      manager = new ProcessManager();
+      manager.save();
+    } else if (manager.registry.size() > 0) {
       // declare previously registered processes as having failed
       // assume -1 is interpreted as a failure return code ...
-      for (int i = processManager.registry.size(); i-- > 0;) {
+      for (int i = manager.registry.size(); i-- > 0;) {
 	ProcessMonitor monitor =
-	  (ProcessMonitor) processManager.registry.elementAt(i);
-	processManager.registry.removeElementAt(i);
+	  (ProcessMonitor) manager.registry.elementAt(i);
+	manager.registry.removeElementAt(i);
 	Channel.sendTo(
 	  monitor.agent,
 	  new ProcessEnd(-1, "unknown process end due to server failure"));
       }
-      processManager.save();
+      manager.save();
     }
   }
 
@@ -97,7 +102,7 @@ public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.6 2001-
    * Saves object in persistent storage.
    */
   void save() throws IOException {
-    AgentServer.transaction.save(processManager, "processManager");
+    AgentServer.transaction.save(manager, "processManager");
   }
 
 

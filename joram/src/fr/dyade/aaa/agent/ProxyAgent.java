@@ -25,11 +25,14 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.util.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.8 2001-08-31 08:13:59 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.9 2002-01-16 12:46:47 joram Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -50,12 +53,12 @@ public abstract class ProxyAgent extends Agent {
   /** manage connection step, optional */
   private transient DriverConnect drvCnx;
 
-  /** Set as true for managing multi-connections. */
+  /** <code>true</code> if the proxy manages multiple connections. */
   protected boolean multiConn = false;
   /** 
-   * Table holding the <code>DriverMonitor</code> objects,
-   * each holding a connection set (a pair of drivers, a qout,
-   * ois, oos, ...). For multi-connections management.
+   * Table holding the <code>DriverMonitor</code> objects, each one holding a
+   * connection set (a pair of drivers, a qout, ois, oos, ...).
+   * For multi-connections management.
    *
    * @see  DriverMonitor
    */
@@ -66,6 +69,16 @@ public abstract class ProxyAgent extends Agent {
    */
   private int driversKey ;
 
+  /**
+   * Returns default log topic for proxies. Its method  overriddes
+   * the default one in Agent, the resulting logging topic is
+   * <code>Debug.A3Proxy</code> dot the real classname.
+   */
+  protected String getLogTopic() {
+    String classname = getClass().getName();
+    return Debug.A3Proxy + '.' +
+      classname.substring(classname.lastIndexOf('.') +1);
+  }
 
   public ProxyAgent() {
     this(null);
@@ -106,28 +119,22 @@ public abstract class ProxyAgent extends Agent {
       ",blockingCnx=" + blockingCnx +
       ",multipleCnx=" + multipleCnx +
       ",inFlowControl=" + inFlowControl +
-      ", multiConn=" + multiConn +
+      ",multiConn=" + multiConn +
       ",qout=" + qout +
       ",driversKey=" + driversKey + ")";
   }
-
   
   /**
-   * Method setting the <code>ProxyAgent</code> as
-   * multiConn, and creating the driversTable for
-   * holding the connection sets. Should be called
-   * after the <code>ProxyAgent</code> creation.
+   * Method setting the <code>ProxyAgent</code> in multiConn mode.
+   * To be called immediately after the <code>ProxyAgent</code> instanciation.
    */
   public void setMultiConn() {
     multiConn = true;
   }
 
-
-  /** Method returning the current key. */
-  protected int getProxyDriversKey() {
+  public int getProxyDriversKey() {
     return driversKey;
   }
-
 
   /**
    * Initializes the transient members of this agent.
@@ -145,16 +152,15 @@ public abstract class ProxyAgent extends Agent {
   protected void initialize(boolean firstTime) throws Exception {
     super.initialize(firstTime);
 
+    // In single connection mode, creating qout once:
     if (!multiConn)
-      // In single connection mode, qout is created once.
       qout = new Queue();
+    // In multi connections mode, creating the driversTable and initializing
+    // the driversKey:
     else {
-      // In multi connections mode, creating the driversTable 
-      // and initializing the driversKey.
       driversKey = 1;
       driversTable = new Hashtable();
     }
-
     reinitialize();
   }
 
@@ -167,19 +173,17 @@ public abstract class ProxyAgent extends Agent {
    */
   protected void reinitialize() throws IOException {
     if (drvIn != null || drvOut != null) {
-      if (!multiConn)
-        throw new IllegalStateException();
+      if (!multiConn) throw new IllegalStateException();
     }
 
     drvCnx = new DriverConnect(this, blockingCnx, multipleCnx);
     drvCnx.start();
 
-    // If the ProxyAgent manages multi-connections, stores 
-    // the connection set in a DriverMonitor and put it in 
-    // the driversTable.
+    // If the ProxyAgent manages multi-connections, storing the connection set
+    // in a DriverMonitor and putting it in the driversTable.
     if (multiConn) {
-      DriverMonitor dMonitor = new DriverMonitor(drvIn, drvOut, 
-        qout, ois, oos, drvCnx);
+      DriverMonitor dMonitor = new DriverMonitor(drvIn, drvOut, qout, ois, oos,
+                                                 drvCnx);
 
       driversTable.put(new Integer(driversKey), dMonitor);
       driversKey++;
@@ -222,31 +226,35 @@ public abstract class ProxyAgent extends Agent {
   void createDrivers() {
     try {
       connect();
-    } catch (Exception exc) {
-      Debug.trace(toString() + ".createDrivers()", exc);
+    } catch (EOFException exc) {
+      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
+    } catch (Exception exc) { 
+      logmon.log(BasicLevel.ERROR, "error in createDrivers()", exc);
     }
     if (!multiConn) {  
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "connected");
       if (ois != null) {
-        drvIn = new DriverIn(DRIVER_IN, getId(), ois, inFlowControl);
+        drvIn = new DriverIn(DRIVER_IN, this, ois, inFlowControl);
         drvIn.start();
       }
       if (oos != null) {
-        drvOut = new DriverOut(DRIVER_OUT, getId(), qout, oos);
+        drvOut = new DriverOut(DRIVER_OUT, this, qout, oos);
         drvOut.start();
       }
     }
-
-    // If the ProxyAgent is multiConn, creating drvIn and drvOut
-    // with the additionnal driversKey parameter and also creating
-    // a new qout.
+    // If the ProxyAgent is multiConn, creating drvIn and drvOut with
+    // the additionnal driversKey parameter and also creating a new qout.
     else {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "connected - driversKey=" + driversKey);
       if (ois != null) {
-        drvIn = new DriverIn(DRIVER_IN, getId(), ois, inFlowControl, driversKey);
+        drvIn = new DriverIn(DRIVER_IN, this, ois, inFlowControl, driversKey);
         drvIn.start();
       }
       if (oos != null) {
         qout = new Queue(); 
-        drvOut = new DriverOut(DRIVER_OUT, getId(), qout, oos, driversKey);
+        drvOut = new DriverOut(DRIVER_OUT, this, qout, oos, driversKey);
         drvOut.start();
       }
     }
@@ -258,20 +266,22 @@ public abstract class ProxyAgent extends Agent {
    * May be multiply called.
    */
   protected void stop() {
-    if (! multiConn) {
-      if (drvCnx != null) {
-        drvCnx.stop();
-        drvCnx = null;
-      }
-      if (drvIn != null) {
-        drvIn.stop();
-        drvIn = null;
-      }
-      if (drvOut != null) {
-        drvOut.stop();
-        drvOut = null;
-      }
-    } 
+    if (multiConn) return;
+
+    if (drvCnx != null) {
+      drvCnx.stop();
+      drvCnx = null;
+    }
+    if (drvIn != null) {
+      drvIn.stop();
+      drvIn = null;
+    }
+    if (drvOut != null) {
+      drvOut.stop();
+      drvOut = null;
+    }
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "stopped");
   }
 
   /**
@@ -280,7 +290,9 @@ public abstract class ProxyAgent extends Agent {
    * @param drvKey  key identifying the connection set to stop.
    */
   protected void stop(int drvKey) {
-    DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+    DriverMonitor dMonitor =
+      (DriverMonitor) driversTable.get(new Integer(drvKey));
+
     if (dMonitor != null) {
       if (dMonitor.drvCnx != null) {
         (dMonitor.drvCnx).stop();
@@ -294,6 +306,8 @@ public abstract class ProxyAgent extends Agent {
         (dMonitor.drvOut).stop();
         dMonitor.drvOut = null;
       }
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "stopped - driversKey=" + driversKey);
     }
   }
 
@@ -314,7 +328,8 @@ public abstract class ProxyAgent extends Agent {
    * @param  drvKey key identifying the connection set.
    */ 
   public void cleanDriverOut(int drvKey) {
-    DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+    DriverMonitor dMonitor =
+      (DriverMonitor) driversTable.get(new Integer(drvKey));
     if (dMonitor != null) {
       if (dMonitor.drvOut != null)
         (dMonitor.drvOut).clean();
@@ -364,7 +379,7 @@ public abstract class ProxyAgent extends Agent {
     try {
       disconnect();
     } catch (Exception exc) {
-      Debug.trace(toString() + ".finalize(): ", exc);
+      logmon.log(BasicLevel.WARN, "error in finalize", exc);
     }
 
     stop();
@@ -376,11 +391,31 @@ public abstract class ProxyAgent extends Agent {
   }
 
 
+  /** 
+   * Method called by <code>DriverIn</code> instances to forward the 
+   * notifications they get. 
+   * <p>
+   * May be overridden for specific behaviour as long as the proxy state
+   * is not modified by the method, because it does not occur within a
+   * transaction.
+   *
+   * @param key  Identifier of the driver calling the method.
+   * @param not  Forwarded notification.
+   */ 
+  void getDriverInNotification(int key, Notification not)
+  {
+    if (key != 0) 
+      sendTo(this.getId(), new DriverNotification(key, not));
+    else
+      sendTo(this.getId(), not);
+  }
+
+
   /**
-   * Reacts to notifications.<br>
-   * Assumes notifications from nullId come from drvIn; let derive classes
-   * handle them. Forwards notifications coming from an identified agent
-   * onto the outgoing connection.
+   * Method implementing the <code>ProxyAgent</code> reactions to
+   * notifications.
+   * Forwards notifications coming from an identified agent onto the outgoing
+   * connection.
    *
    * @param from	agent sending notification
    * @param not		notification to react to
@@ -389,32 +424,44 @@ public abstract class ProxyAgent extends Agent {
    *	unspecialized exception
    */
   public void react(AgentId from, Notification not) throws Exception {
+    int drvKey;
+    DriverMonitor dMon;
+    DriverIn dIn;
+    Queue qo;
     try {
-      if (not instanceof DriverDone) {
+      if (not instanceof DriverDone)
         driverDone((DriverDone) not);
-      } 
       else if (not instanceof FlowControlNot) {
         // Allowing drvIn to read more data
-        if (multiConn) {
-          int drvKey = ((FlowControlNot) not).driverKey;
-          DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
-	      (dMonitor.drvIn).recvFlowControl((FlowControlNot) not);
+        drvKey = ((FlowControlNot) not).driverKey;
+        // MultiConn proxy: getting the right driverIn to control:
+        if (drvKey != 0) {
+          dMon = (DriverMonitor) driversTable.get(new Integer(drvKey));
+          dIn = dMon.drvIn;
+          dIn.recvFlowControl((FlowControlNot) not);
         }
         else
-	      drvIn.recvFlowControl((FlowControlNot) not);
-      } 
-      else if (! from.isNullId()) {
-        if (!multiConn)
+          drvIn.recvFlowControl((FlowControlNot) not);
+      }
+      // If notification comes from an identified agent:
+      else if (! from.equals(this.getId())) {
+        // If not is a DriverNotification, pushing it into the right queue out.
+        if (not instanceof DriverNotification) {
+          drvKey = ((DriverNotification) not).getDriverKey();
+          dMon = (DriverMonitor) driversTable.get(new Integer(drvKey));
+          qo = dMon.qout;
+          qo.push(((DriverNotification) not).getNotification());
+        }
+        else
           qout.push(not);
-      } 
-      else {
+      }
+      else
         super.react(from, not);
-      }
     } catch (Exception exc) {
-      if ((Debug.drivers) || (Debug.error)) {
-	    Debug.trace("ProxyAgent: Exception in " +
-		  this + ".react(" + from + "," + not + ")", exc);
-      }
+      if (logmon.isLoggable(BasicLevel.ERROR))
+        logmon.log(BasicLevel.ERROR,
+                   "error in " + this + ".react(" + from + ", " + not + ")",
+                   exc);
       stop();
       // the proxy agent may restart
     }
@@ -449,11 +496,13 @@ public abstract class ProxyAgent extends Agent {
           break;
       }
     }
-    // In case of multiConn, the driver to close is identified
-    // in the DriverDone notification.
+    // In case of multiConn, the driver to close is identified in the
+    // DriverDone notification.
     else {
       int drvKey = not.getDriverKey();
-      DriverMonitor dMonitor = (DriverMonitor) driversTable.get(new Integer(drvKey));
+      DriverMonitor dMonitor = (DriverMonitor)
+        driversTable.get(new Integer(drvKey));
+
       if (dMonitor != null) {
         switch (not.getDriver()) {
           case DRIVER_IN:
@@ -469,7 +518,7 @@ public abstract class ProxyAgent extends Agent {
 	    dMonitor.drvOut = null;
             break;
         }
-        // When both drivers have been closed, remove the entry
+        // When both drivers have been closed, removing the entry
         // corresponding to their pair from the driversTable.
         if (dMonitor.drvIn == null && dMonitor.drvOut == null)
           driversTable.remove(new Integer(drvKey));
