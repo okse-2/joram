@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -39,7 +39,7 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData
   public final static String jmsVersion = "1.1";
   public final static int providerMajorVersion = 4;
   public final static int providerMinorVersion = 1;
-  public final static String providerVersion = "4.1.4";
+  public final static String providerVersion = "4.1.5";
   public final static Vector jmsxProperties = new Vector();
 
   static
