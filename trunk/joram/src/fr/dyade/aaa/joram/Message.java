@@ -668,9 +668,9 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  If the data could not be deserialized.
    */
-  static Message wrapMomMessage(Session sess,
-                                fr.dyade.aaa.mom.messages.Message momMsg)
-       throws JMSException
+  static Message
+         wrapMomMessage(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
+         throws JMSException
   {
     Message msg = null;
 
@@ -709,7 +709,7 @@ public class Message implements javax.jms.Message
    * @exception JMSException  If the Joram message creation fails.
    */
   static Message convertJMSMessage(Session sess, javax.jms.Message jmsMsg)
-       throws JMSException
+         throws JMSException
   {
     Message msg = null;
     if (jmsMsg instanceof javax.jms.TextMessage)
@@ -790,6 +790,8 @@ public class Message implements javax.jms.Message
     if (ROproperties)
       throw new MessageNotWriteableException("Can't set properties on a"
                                              + " read-only message.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty property name.");
 
     if (name.startsWith("JMS") && ! name.startsWith("JMS_"))
       throw new JMSException("Property name can't start with JMS.");

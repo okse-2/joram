@@ -29,6 +29,7 @@ package fr.dyade.aaa.joram;
 import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
 
+
 /**
  * Implements the <code>javax.jms.QueueSender</code> interface.
  */
@@ -67,58 +68,41 @@ public class QueueSender extends MessageProducer
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed sender.");
 
-    return (Queue) super.dest;
+    return (javax.jms.Queue) super.dest;
   }
 
-  /** 
+  /**
    * API method.
    *
+   * @exception UnsupportedOperationException  When the sender did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified queue.
    * @exception IllegalStateException  If the sender is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Message message, int deliveryMode, int priority,
-                   long timeToLive) throws JMSException
+  public void send(javax.jms.Queue queue, javax.jms.Message message)
+            throws JMSException
   {
-    super.produce(message, deliveryMode, priority, timeToLive);
-  }
-    
-  /** 
-   * API method.
-   *
-   * @exception IllegalStateException  If the sender is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  public void send(javax.jms.Message message) throws JMSException
-  {
-    super.produce(message);
+    super.send(queue, message);
   }
 
-  /** 
+  /**
    * API method.
    *
-   * @exception IllegalStateException  If the sender is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  public void send(javax.jms.Queue queue,
-                   javax.jms.Message message) throws JMSException
-  {
-    super.produce((Queue) queue, message);
-  }
-
-  /** 
-   * API method.
-   *
+   * @exception UnsupportedOperationException  When the sender did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified queue.
    * @exception IllegalStateException  If the sender is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
   public void send(javax.jms.Queue queue, javax.jms.Message message,
-                   int deliveryMode, int priority, long timeToLive)
-                   throws JMSException
+                   int deliveryMode, int priority,
+                   long timeToLive) throws JMSException
   {
-    super.produce((Queue) queue, message, deliveryMode, priority, timeToLive);
+    super.send(queue, message, deliveryMode, priority, timeToLive);
   }
 }

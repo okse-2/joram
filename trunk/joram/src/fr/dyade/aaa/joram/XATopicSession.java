@@ -37,37 +37,20 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.XATopicSession</code> interface.
- * <p>
- * An XA TopicSession actually wraps what looks like a "normal" TopicSession
- * object. This object takes care of producing and consuming messages, the
- * actual sendings and acknowledgement being managed by this XA wrapper.
  */
 public class XATopicSession extends XASession
                             implements javax.jms.XATopicSession
 {
   /**
-   * An XA TopicSession actually wraps what looks like a "normal"
-   * session object.
-   */
-  private TopicSession ts;
-
-    
-  /**
    * Constructs an <code>XATopicSession</code> instance.
    *
-   * @param ident  Identifier of the session.
    * @param cnx  The connection the session belongs to.
    *
    * @exception JMSException  Actually never thrown.
    */
-  XATopicSession(String ident, XATopicConnection cnx) throws JMSException
+  XATopicSession(XATopicConnection cnx) throws JMSException
   {
-    super(ident, cnx);
-    ts = new TopicSession(ident, cnx, true, 0);
-
-    // The wrapped session is removed from the connection's list, as it
-    // is to be only seen by the wrapping XA session.
-    cnx.sessions.remove(ts);
+    super(cnx, new TopicSession(cnx, true, 0));
   }
 
   
@@ -81,182 +64,6 @@ public class XATopicSession extends XASession
   /** API method. */ 
   public javax.jms.TopicSession getTopicSession() throws JMSException
   {
-    return ts;
-  }
-
-  /** 
-   * This method inherited from the <code>XASession</code> class processes
-   * the asynchronous deliveries coming from a connection consumer.
-   * <p>
-   * These deliveries are actually handed to the wrapped session.
-   */
-  public void run()
-  {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": running...");
-    ts.messageListener = super.messageListener;
-    ts.connectionConsumer = super.connectionConsumer;
-    ts.repliesIn = super.repliesIn;
-    ts.run();
-    super.repliesIn.removeAllElements();
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": runned.");
-  }
-
-  /**
-   * Method basically inherited from session, but intercepted here for
-   * adapting its behaviour to the XA context.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  public void close() throws JMSException
-  {
-    // Ignoring the call if the session is already closed:
-    if (closed)
-      return;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "---" + this
-                                 + ": closing..."); 
-
-    // Stopping the wrapped session:
-    ts.stop();
-
-    // Closing the wrapped session's resources:
-    while (! ts.consumers.isEmpty())
-      ((MessageConsumer) ts.consumers.get(0)).close();
-    while (! ts.producers.isEmpty())
-      ((MessageProducer) ts.producers.get(0)).close();
-
-    ts.closed = true;
-
-    cnx.sessions.remove(this);
-
-    closed = true;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
-  }
-
-
-  /** 
-   * This method is called by the wrapped <code>XAResource</code> for saving
-   * the "state" of the wrapped session for later modifying it or commiting it.
-   * <p>
-   * The word "state" actually means the messages produced by the session's
-   * producers, and the acknowledgements due to its consumers.
-   *
-   * @exception XAException  If the session is not involved with this
-   *              transaction. 
-   */
-  void saveTransaction(Xid xid) throws XAException
-  {
-    XAContext xaC = (XAContext) transactionsTable.get(xid);
-
-    if (xaC == null)
-      throw new XAException("Resource is not involved in specified"
-                            + " transaction.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": saves transaction "
-                                 + xid.toString()); 
-    
-    xaC.addSendings(ts.sendings);
-    xaC.addDeliveries(ts.deliveries);
-  }
-
-  /**
-   * This method is called by the wrapped <code>XAResource</code> for
-   * preparing the session by sending the corresponding messages and
-   * acknowledgements previously saved.
-   *
-   * @exception XAException  If the session is not involved with this
-   *              transaction. 
-   * @exception JMSException If the prepare failed because of the
-   *              Joram server.
-   */
-  void prepareTransaction(Xid xid) throws Exception
-  {
-    XAContext xaC = (XAContext) transactionsTable.get(xid);
-
-    if (xaC == null)
-      throw new XAException("Resource is not involved in specified"
-                            + " transaction.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": prepares transaction "
-                                 + xid.toString()); 
-
-    Enumeration subs;    
-    String sub;
-    Vector pMs = new Vector();
-    Vector ids;
-    Vector acks = new Vector();
-
-    // Getting all the ProducerMessages to send:
-    subs = xaC.sendings.keys();
-    while (subs.hasMoreElements()) {
-      sub = (String) subs.nextElement();
-      pMs.add(xaC.sendings.remove(sub));
-    }
-
-    // Getting all the TSessAckRequest to send:
-    subs = xaC.deliveries.keys();
-    while (subs.hasMoreElements()) {
-      sub = (String) subs.nextElement();
-      ids = (Vector) xaC.deliveries.remove(sub);
-      acks.add(new TSessAckRequest(sub, ids));
-    }
-
-    // Sending to the proxy:
-    ts.cnx.syncRequest(new XATSessPrepare(ident + " " + xid.toString(),
-                                          pMs, acks));
-  }
-
-
-  /** 
-   * Method called by the XA resource when the transaction rolls back.
-   *
-   * @exception XAException  If the session is not involved with this
-   *              transaction.
-   * @exception JMSException  If the rollback fails because of Joram server.
-   */
-  void rollbackTransaction(Xid xid) throws Exception
-  {
-    XAContext xaC = (XAContext) transactionsTable.get(xid);
-
-    if (xaC == null)
-      throw new XAException("Resource is not involved in specified"
-                            + " transaction.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": rolls back transaction "
-                                 + xid.toString()); 
-
-    Enumeration subs;    
-    String sub;
-    Vector ids;
-
-    XASessRollback rollbackRequest;
-
-    subs = xaC.deliveries.keys();
-
-    if (xaC.deliveries.isEmpty())
-      rollbackRequest = new XASessRollback(ident + " " + xid.toString());
-    else
-      rollbackRequest = new XATSessRollback(ident + " " + xid.toString());
-
-    while (subs.hasMoreElements()) {
-      sub = (String) subs.nextElement();
-      ids = (Vector) xaC.deliveries.remove(sub);
-      ((XATSessRollback) rollbackRequest).add(sub, ids);
-    }
-
-    // Sending to the proxy:
-    ts.cnx.syncRequest(rollbackRequest);
+    return (TopicSession) sess;
   }
 }

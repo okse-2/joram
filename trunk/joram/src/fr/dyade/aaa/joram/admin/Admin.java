@@ -98,8 +98,8 @@ public class Admin
    *              server is not listening.
    * @exception AdminException  If the admin identification is incorrect.
    */
-  public Admin(String url, String adminName, String adminPass,
-               int timer) throws Exception
+  public Admin(String url, String adminName, String adminPass, int timer)
+         throws Exception
   {
     if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "--- Connecting admin"
@@ -305,12 +305,32 @@ public class Admin
   }
 
   /**
+   * Creates a <code>ConnectionFactory</code> instance.
+   *
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public ConnectionFactory createConnectionFactory() throws AdminException
+  {
+    if (disconnected)
+      throw new AdminException("Forbidden method call as the admin has"
+                               + " disconnected.");
+    try {
+      return new ConnectionFactory(serverUrl.toString());
+    }
+    catch (Exception e) {
+      // Can't happen as the url parameter has already been checked by
+      // this Admin instance.
+      return null;
+    }
+  }
+
+  /**
    * Creates a <code>QueueConnectionFactory</code> instance.
    *
    * @exception AdminException  If the admin session has been closed.
    */
   public QueueConnectionFactory createQueueConnectionFactory()
-       throws AdminException
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
@@ -331,7 +351,7 @@ public class Admin
    * @exception AdminException  If the admin session has been closed.
    */
   public TopicConnectionFactory createTopicConnectionFactory()
-       throws AdminException
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
@@ -347,12 +367,32 @@ public class Admin
   }
 
   /**
+   * Creates an <code>XAConnectionFactory</code> instance.
+   *
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public XAConnectionFactory createXAConnectionFactory() throws AdminException
+  {
+    if (disconnected)
+      throw new AdminException("Forbidden method call as the admin has"
+                               + " disconnected.");
+    try {
+      return new XAConnectionFactory(serverUrl.toString());
+    }
+    catch (Exception e) {
+      // Can't happen as the url parameter has already been checked by
+      // this Admin instance.
+      return null;
+    }
+  }
+
+  /**
    * Creates an <code>XAQueueConnectionFactory</code> instance.
    *
    * @exception AdminException  If the admin session has been closed.
    */
   public XAQueueConnectionFactory createXAQueueConnectionFactory()
-       throws AdminException
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
@@ -373,7 +413,7 @@ public class Admin
    * @exception AdminException  If the admin session has been closed.
    */
   public XATopicConnectionFactory createXATopicConnectionFactory()
-       throws AdminException
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
@@ -766,7 +806,7 @@ public class Admin
    *              and can't be re-opened.
    */
   void sendRequest(JmsAdminRequest request)
-     throws AdminException, ConnectException
+       throws AdminException, ConnectException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as " + this

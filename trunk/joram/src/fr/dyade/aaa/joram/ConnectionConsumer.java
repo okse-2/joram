@@ -26,6 +26,8 @@
  */
 package fr.dyade.aaa.joram;
 
+import fr.dyade.aaa.mom.jms.*;
+
 import java.util.Vector;
 
 import javax.jms.IllegalStateException;
@@ -37,39 +39,45 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.ConnectionConsumer</code> interface.
  */
-public abstract class ConnectionConsumer
-                    implements javax.jms.ConnectionConsumer
+public class ConnectionConsumer implements javax.jms.ConnectionConsumer
 {
-  /** The daemon taking care of the asynchronous deliveries distribution. */
-  protected fr.dyade.aaa.util.Daemon ccDaemon;
   /** The connection the consumer belongs to. */
-  protected Connection cnx;
+  private Connection cnx;
+  /** <code>true</code> if the consumer is a durable topic subscriber. */
+  private boolean durable = false;
   /** The selector for filtering messages. */
-  protected String selector;
+  private String selector;
   /** The session pool provided by the application server. */
-  protected javax.jms.ServerSessionPool sessionPool;
+  private javax.jms.ServerSessionPool sessionPool;
   /** The maximum number of messages a session may process at once. */
-  protected int maxMessages;
+  private int maxMessages;
+  /**
+   * The daemon taking care of distributing the asynchronous deliveries to
+   * the sessions. 
+   */
+  private CCDaemon ccDaemon;
+  /** The current consuming request. */
+  private fr.dyade.aaa.mom.jms.AbstractJmsRequest currentReq = null;
+  /** <code>true</code> if the connection consumer is closed. */
+  private boolean closed = false;
 
+  /** The name of the queue or of the subscription the deliveries come from. */
+  String targetName;
+  /** <code>true</code> if the deliveries come from a queue. */
+  boolean queueMode = true;
   /**
    * The FIFO queue where the connection pushes the asynchronous server
    * deliveries.
    */
-  protected fr.dyade.aaa.util.Queue repliesIn;
-  /** The current consuming request. */
-  protected fr.dyade.aaa.mom.jms.AbstractJmsRequest currentReq = null;
-  /** <code>true</code> if the connection consumer is closed. */
-  protected boolean closed = false;
-
-  /** The name of the destination the consumer consumes on. */
-  String destName;
+  fr.dyade.aaa.util.Queue repliesIn;
 
 
   /**
    * Constructs a <code>ConnectionConsumer</code>.
    *
    * @param cnx  The connection the consumer belongs to.
-   * @param destName  The name of the destination where consuming messages.
+   * @param dest  The destination where consuming messages.
+   * @param subName  The durable consumer name, if any.
    * @param selector  The selector for filtering messages.
    * @param sessionPool  The session pool provided by the application server.
    * @param maxMessages  The maximum number of messages to be passed at once
@@ -82,10 +90,9 @@ public abstract class ConnectionConsumer
    *              destination.
    * @exception JMSException  If one of the parameters is wrong.
    */
-  protected ConnectionConsumer(Connection cnx, String destName,
-                               String selector,
-                               javax.jms.ServerSessionPool sessionPool,
-                               int maxMessages) throws JMSException
+  ConnectionConsumer(Connection cnx, Destination dest, String subName,
+                     String selector, javax.jms.ServerSessionPool sessionPool,
+                     int maxMessages) throws JMSException
   {
     try {
       fr.dyade.aaa.mom.selectors.Selector.checks(selector);
@@ -98,17 +105,27 @@ public abstract class ConnectionConsumer
       throw new JMSException("Invalid ServerSessionPool parameter: "
                              + sessionPool);
     if (maxMessages <= 0)
-      throw new JMSException("Invalid maxMessages parameter: "
-                             + maxMessages);
+      throw new JMSException("Invalid maxMessages parameter: " + maxMessages);
+    
+    // Checking the user's access permission:
+    cnx.isReader(dest.getName());
 
     this.cnx = cnx;
-    this.destName = destName;
     this.selector = selector;
     this.sessionPool = sessionPool;
     this.maxMessages = maxMessages;
 
-    // Checking the user's access permission:
-    cnx.isReader(destName);
+    if (dest instanceof Queue)
+      targetName = dest.getName();
+    else if (subName == null) {
+      queueMode = false;
+      targetName = cnx.nextSubName();
+    }
+    else {
+      queueMode = false;
+      targetName = subName;
+      durable = true;
+    }
 
     repliesIn = new fr.dyade.aaa.util.Queue();
 
@@ -117,8 +134,47 @@ public abstract class ConnectionConsumer
  
     cnx.cconsumers.add(this);
 
+    ccDaemon = new CCDaemon(this);
+    ccDaemon.setDaemon(true);
+    ccDaemon.start();
+
+    // If the consumer is a subscriber, subscribing to the target topic:
+    if (! queueMode) 
+      cnx.syncRequest(new ConsumerSubRequest(dest.getName(), targetName,
+                                             selector, false, durable));
+
+    // Sending a listener request:
+    currentReq = new ConsumerSetListRequest(targetName, selector, queueMode);
+    currentReq.setIdentifier(cnx.nextRequestId());
+    cnx.requestsTable.put(currentReq.getRequestId(), this);
+    cnx.asyncRequest(currentReq);
+
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+  }
+
+  /**
+   * Constructs a <code>ConnectionConsumer</code>.
+   *
+   * @param cnx  The connection the consumer belongs to.
+   * @param dest  The destination where consuming messages.
+   * @param selector  The selector for filtering messages.
+   * @param sessionPool  The session pool provided by the application server.
+   * @param maxMessages  The maximum number of messages to be passed at once
+   *          to a session.
+   *
+   * @exception InvalidSelectorException  If the selector syntax is wrong.
+   * @exception InvalidDestinationException  If the target destination does not
+   *              exist.
+   * @exception JMSSecurityException  If the user is not a READER on the
+   *              destination.
+   * @exception JMSException  If one of the parameters is wrong.
+   */
+  ConnectionConsumer(Connection cnx, Destination dest, String selector,
+                     javax.jms.ServerSessionPool sessionPool,
+                     int maxMessages) throws JMSException
+  {
+    this(cnx, dest, null, selector, sessionPool, maxMessages);
   }
 
   /** Returns a string image of the connection consumer. */
@@ -142,6 +198,158 @@ public abstract class ConnectionConsumer
   }
 
 
-  /** API method, implemented in subclasses. */
-  public abstract void close() throws JMSException;
+  /**
+   * API method.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void close() throws JMSException
+  {
+    // If the consumer is a subscriber, managing the subscription closing: 
+    if (! queueMode) {
+      try {
+        if (durable) 
+          cnx.syncRequest(new ConsumerCloseSubRequest(targetName));
+        else
+          cnx.syncRequest(new ConsumerUnsubRequest(targetName));
+      }
+      catch (JMSException jE) {}
+    }
+
+    cnx.requestsTable.remove(currentReq.getRequestId());
+    ccDaemon.stop();
+
+    cnx.cconsumers.remove(this);
+  }
+
+/** 
+ * The <code>CCDaemon</code> distributes the server's asynchronous
+ * deliveries to the application server's sessions.
+ */ 
+class CCDaemon extends fr.dyade.aaa.util.Daemon
+{
+  /** The connection consumer the daemon belongs to. */
+  private ConnectionConsumer cc;
+
+  /**
+   * Constructs the <code>CCDaemon</code> belonging to this connection
+   * consumer.
+   */
+  CCDaemon(ConnectionConsumer cc)
+  {
+    super(cc.toString());
+    this.cc = cc;
+  }
+
+  /** The daemon's loop. */
+  public void run()
+  {
+    ConsumerMessages reply;
+    Vector deliveries = new Vector();
+    javax.jms.ServerSession serverSess;
+    Session sess;
+    int counter;
+
+    try {
+      while (running) {
+        canStop = true; 
+
+        try {
+          // Expecting a reply:
+          repliesIn.get();
+        }
+        catch (Exception iE) {
+          continue;
+        }
+        canStop = false;
+
+        // Processing the delivery:
+        try {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + cc
+                                       + ": got a delivery.");
+
+          // Getting a server's session:
+          serverSess = sessionPool.getServerSession();
+          sess = (fr.dyade.aaa.joram.Session) serverSess.getSession();
+          sess.connectionConsumer = cc;
+          counter = 1;
+
+          // As long as there are messages to deliver, passing to session(s)
+          // as many messages as possible:
+          while (counter <= maxMessages && repliesIn.size() > 0) {
+            
+            // If the consumer is a queue consumer, sending a new request:
+            if (queueMode) {
+              cnx.requestsTable.remove(currentReq.getRequestId());
+              currentReq = new ConsumerSetListRequest(targetName, selector,
+                                                      queueMode);
+              currentReq.setIdentifier(cnx.nextRequestId());
+              cnx.requestsTable.put(currentReq.getRequestId(), cc);
+              cnx.asyncRequest(currentReq);
+            }
+
+            reply = (ConsumerMessages) repliesIn.pop();
+            deliveries.addAll(reply.getMessages());
+
+            while (! deliveries.isEmpty()) {
+              while (counter <= maxMessages && ! deliveries.isEmpty()) {
+                if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+                  JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Passes a"
+                                             + " message to a session.");
+                sess.repliesIn.push(deliveries.remove(0));
+                counter++;
+              }
+              if (counter > maxMessages) {
+                if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+                  JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Starts the"
+                                             + " session.");
+                serverSess.start(); 
+                counter = 1;
+
+                if (! deliveries.isEmpty() || repliesIn.size() > 0) {
+                  serverSess = sessionPool.getServerSession();
+                  sess =
+                    (fr.dyade.aaa.joram.Session) serverSess.getSession();
+                  sess.connectionConsumer = cc;
+                }
+              }
+            }
+          }
+          // There is no more message to deliver and no more delivery, 
+          // starting the last session to which messages have been passed:
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "No more delivery.");
+          if (counter > 1) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Starts the"
+                                         + " session.");
+            counter = 1;
+            serverSess.start();
+          }
+        }
+        // A JMSException will be caught if the application server failed
+        // to provide a session: closing the consumer.
+        catch (JMSException jE) {
+          canStop = true;
+          try {
+            cc.close();
+          }
+          catch (JMSException jE2) {}
+        }
+      }
+    }
+    finally {
+      finish();
+    }
+  }
+
+  /** Shuts the daemon down. */
+  public void shutdown()
+  {}
+
+  /** Releases the daemon's resources. */
+  public void close()
+  {}
+}
 }

@@ -35,36 +35,35 @@ import javax.naming.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * Implements the <code>javax.jms.ConnectionFactory</code> interface.
+ * Implements the <code>javax.jms.XAConnectionFactory</code> interface.
  */
-public class ConnectionFactory implements javax.jms.ConnectionFactory,
-                                          javax.naming.Referenceable,
-                                          java.io.Serializable
+public class XAConnectionFactory implements javax.jms.XAConnectionFactory,
+                                            javax.naming.Referenceable,
+                                            java.io.Serializable
 {
   /**
-   * Class table holding the <code>ConnectionFactory</code> instances, needed
+   * Class table holding the <code>XAConnectionFactory</code> instances, needed
    * by the naming service.
    * <p>
-   * <b>Key:</b> cf's class name + url<br>
+   * <b>Key:</b> cf's hashcode<br>
    * <b>Object:</b> cf's instance
    */
   protected static Hashtable instancesTable = new Hashtable();
 
-  /** Object containing the factory's configuration parameters. */
+  /** Factory's configuration object. */
   protected FactoryConfiguration config;
 
-
   /**
-   * Constructs a <code>ConnectionFactory</code> instance wrapping a given
+   * Constructs a <code>XAConnectionFactory</code> instance wrapping a given
    * agent server url.
    *
    * @param url  Url of the agent server.
    * @exception ConnectException  If the url is incorrect.
    */
-  public ConnectionFactory(String url) throws ConnectException
+  public XAConnectionFactory(String url) throws ConnectException
   {
     config = new FactoryConfiguration();
-    
+
     try {
       config.serverUrl = new JoramUrl(url);
       config.serverAddr = InetAddress.getByName(config.serverUrl.getHost());
@@ -87,7 +86,7 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "CF:" + config.serverAddr.toString();
+    return "XACF:" + config.serverAddr.toString();
   }
 
 
@@ -97,10 +96,10 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-         throws JMSException
+  public javax.jms.XAConnection
+         createXAConnection(String name, String password) throws JMSException
   {
-    return new Connection(config, name, password);
+    return new XAConnection(config, name, password);
   }
 
   /**
@@ -110,9 +109,9 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection() throws JMSException
+  public javax.jms.XAConnection createXAConnection() throws JMSException
   {
-    return createConnection("anonymous", "anonymous");
+    return createXAConnection("anonymous", "anonymous");
   }
 
   /**
@@ -122,20 +121,9 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
    */
   public void setCnxTimer(int timer)
   {
-    if (timer >= 0)
+    if (timer > 0)
       config.cnxTimer = timer;
   } 
-
-  /**
-   * Sets the transaction timer.
-   *
-   * @param timer  Maximum time in seconds for a transaction to finish.
-   */
-  public void setTxTimer(int timer)
-  {
-    if (timer >= 0)
-      config.txTimer = timer;
-  }
 
   /** Sets the naming reference of this connection factory. */
   public Reference getReference() throws NamingException
@@ -146,8 +134,6 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
     ref.add(new StringRefAddr("cFactory.url", config.serverUrl.toString()));
     ref.add(new StringRefAddr("cFactory.cnxT",
                               (new Integer(config.cnxTimer)).toString()));
-    ref.add(new StringRefAddr("cFactory.txT",
-                              (new Integer(config.txTimer)).toString()));
     return ref;
   }
 

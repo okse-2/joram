@@ -34,8 +34,8 @@ import javax.jms.JMSException;
  * Implements the <code>javax.jms.XAQueueConnectionFactory</code> interface.
  */
 public class XAQueueConnectionFactory
-           extends QueueConnectionFactory
-           implements javax.jms.XAQueueConnectionFactory
+             extends QueueConnectionFactory
+             implements javax.jms.XAQueueConnectionFactory
 {
   /**
    * Constructs an <code>XAQueueConnectionFactory</code> instance wrapping a 
@@ -52,7 +52,7 @@ public class XAQueueConnectionFactory
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "XAQCF:" + serverAddr.toString();
+    return "XAQCF:" + config.serverAddr.toString();
   }
 
   /**
@@ -62,10 +62,10 @@ public class XAQueueConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XAQueueConnection
-       createXAQueueConnection(String name, String password)
-       throws JMSException
+         createXAQueueConnection(String name, String password)
+         throws JMSException
   {
-    return new XAQueueConnection(this, serverAddr, port, name, password);
+    return new XAQueueConnection(config, name, password);
   }
 
   /**
@@ -75,13 +75,33 @@ public class XAQueueConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAQueueConnection
-       createXAQueueConnection() throws JMSException
+  public javax.jms.XAQueueConnection createXAQueueConnection()
+         throws JMSException
   {
     return createXAQueueConnection("anonymous", "anonymous");
   }
 
-  /** Overrides this method for keeping the txTimer parameter to 0. */
-  public void setTxTimer(int timer)
-  {}
+  /**
+   * Method inherited from interface <code>XAConnectionFactory</code>.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection
+         createXAConnection(String name, String password) throws JMSException
+  {
+    return new XAConnection(config, name, password);
+  }
+
+  /**
+   * Method inherited from interface <code>XAConnectionFactory</code>.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection createXAConnection() throws JMSException
+  {
+    return createXAConnection("anonymous", "anonymous");
+  }
 }

@@ -41,7 +41,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class QueueBrowser implements javax.jms.QueueBrowser
 {
   /** The session the browser belongs to. */
-  private QueueSession sess;
+  private Session sess;
   /** The queue the browser browses. */
   private Queue queue;
   /** The selector for filtering messages. */
@@ -62,8 +62,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  QueueBrowser(QueueSession sess, Queue queue,
-               String selector) throws JMSException
+  QueueBrowser(Session sess, Queue queue, String selector) throws JMSException
   {
     if (queue == null)
       throw new InvalidDestinationException("Invalid queue: " + queue);

@@ -67,7 +67,7 @@ public class TopicPublisher extends MessageProducer
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed publisher.");
 
-    return (Topic) super.dest;
+    return (javax.jms.Topic) super.dest;
   }
 
   /** 
@@ -80,7 +80,7 @@ public class TopicPublisher extends MessageProducer
   public void publish(javax.jms.Message message, int deliveryMode,
                       int priority, long timeToLive) throws JMSException
   {
-    super.produce(message, deliveryMode, priority, timeToLive);
+    super.send(message, deliveryMode, priority, timeToLive);
   }
     
   /** 
@@ -92,7 +92,7 @@ public class TopicPublisher extends MessageProducer
    */
   public void publish(javax.jms.Message message) throws JMSException
   {
-    super.produce(message);
+    super.send(message);
   }
 
   /** 
@@ -105,7 +105,7 @@ public class TopicPublisher extends MessageProducer
   public void publish(javax.jms.Topic topic, javax.jms.Message message)
             throws JMSException
   {
-    super.produce((Topic) topic, message);
+    super.send(topic, message);
   }
 
   /** 
@@ -119,6 +119,6 @@ public class TopicPublisher extends MessageProducer
                       int deliveryMode, int priority,
                       long timeToLive) throws JMSException
   {
-    super.produce((Topic) topic, message, deliveryMode, priority, timeToLive);
+    super.send(topic, message, deliveryMode, priority, timeToLive);
   }
 }
