@@ -139,6 +139,10 @@ public class Debug {
     return factory.getLogger(topic);
   }
 
+  public static void setLoggerLevel(String topic, int level) {
+    getLogger(topic).setIntLevel(level);
+  }
+
   /**
    * Set the monolog Loggerfactory
    * @param loggerFactory the monolog LoggerFactory
