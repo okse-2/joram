@@ -421,6 +421,15 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
     for (ids = not.getIds(); ids.hasMoreElements();) {
       msgId = (String) ids.nextElement();
       msg = (Message) deliveredMsgs.remove(msgId);
+
+      // Message may have already been denied. For example, a proxy may deny
+      // a message twice, first when detecting a connection failure - and
+      // in that case it sends a contextual denying -, then when receiving 
+      // the message from the queue - and in that case it also sends an
+      // individual denying.
+      if (msg == null)
+        break;
+
       msg.denied = true;
 
       consumers.remove(msgId);
