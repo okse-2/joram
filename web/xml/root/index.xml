@@ -14,30 +14,30 @@
 
     <s1 name="Latest News">
       <subtitle>July 1st, 2004: Report of the 1st JORAM Users' Day</subtitle>
-  	  <p>The first JORAM Users&rsquo; Day has been held last June 17 th in Paris.
+  	  <p>The first JORAM Users' Day has been held last June 17 th in Paris.
 			 This event was the first successful attempt within the ObjectWeb community 
 			 to have direct exchanges between users and designers/developers of an 
-			 ObjectWeb component.</P>
-			 <P>The Report as well as some of the presentations are available online at
-			  the ScalAgent Distributed Technologies web site : </P>
+			 ObjectWeb component.</p>
+			 <p>The Report as well as some of the presentations are available online at
+			  the ScalAgent Distributed Technologies web site : </p>
 			 <ul>
-			 <li>Report as <A href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</A>
-			  or <A href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</A></li>
-			 <LI class="base"><A href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
-			 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</A>
-			 </LI>
-       <LI class="base"><A href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
+			 <li>Report as <a href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</a>
+			  or <a href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</a></li>
+			 <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
+			 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</a>
+			 </li>
+       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
 			 Next Generation Open Source by J.P. Laisn&eacute; (President of the 
-			 Objectweb consortium)(PDF in french)</A>
-			 </LI>
-       <LI class="base"><A href="http://www.scalagent.com/pages/en/datasheet/040617-EPFL-joram_day.pdf">
+			 Objectweb consortium)(PDF in french)</a>
+			 </li>
+       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-EPFL-joram_day.pdf">
 			 JMSGroups: Towards JMS-Compliant Group Communication by A. Kupsys 
-			 (EPFL Switzerland) (PDF)</A>
-			 </LI>
+			 (EPFL Switzerland) (PDF)</a>
+			 </li>
 			 </ul>
-			 <P>The discussion about JORAM is open especially for those who have not been
+			 <p>The discussion about JORAM is open especially for those who have not been
 			 able to join the Users' Day. Any contribution is welcome on the main
-			 JORAM mailing list.</P>
+			 JORAM mailing list.</p>
 			<subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
       <p>ObjectWeb and the JORAM core development team are setting up
       a JORAM Users' Day on June 17th in Paris (place to be defined later).</p>
