@@ -14,13 +14,26 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far...</p>
+      <s2 name="Corrected bugs (latest: April 6, 2004)">
+      <ul>
+        <li>Transacted sending not working from kJoram client, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00040.html">
+        André Bottaro</a>. The bug is corrected, the packages to update are
+        <code>com.scalagent.kjoram.ksoap</code> and
+        <code>com.scalagent.ksoap</code>.</li>
+      </ul>
+      </s2>
+      <s2 name="Modifications (latest: April 6, 2004)">
+      <ul>
+        <li>Following the renaming of <code>kjoram.jar</code> to
+        <code>joram-kclient.jar</code>, the <code>samples/src/kjoram</code>
+        directory should be updated.</li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram4_0_1 (March 23, 2004)">
       <p>This maintenance version is integrated within JOnAS 4.0</p>
-      <s2 name="Modifications (latest: March 16, 2004)">
+      <s2 name="Modifications">
       <ul>
         <li>New logging configuration, based on JavaLog rather than on
         log4j. Updated file is <code>samples/config/a3debug.cfg</code>.</li>
@@ -32,7 +45,7 @@
         </ul>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: March 11, 2004)"> 
+      <s2 name="Corrected bugs"> 
       <ul>
         <li>Blocking admin disconnection, found  by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00028.html">
