@@ -16,6 +16,12 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications (latest: March 16, 2004)">
       <ul>
+        <li>New JORAM shipping; generated jars now are:</li>
+        <ul>
+          <li><code>joram-client.jar</code>: client library</li>
+          <li><code>joram-mom.jar</code>: server library</li>
+          <li><code>joram-shared.jar</code>: client/server shared library</li>
+        </ul>
         <li>Submission of the new
         <code>org/objectweb/joram/connector</code> package holding the classes
         implementing the JCA 1.5 resource adapter for JORAM.</li>
