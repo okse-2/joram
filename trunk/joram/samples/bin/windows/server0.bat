@@ -17,8 +17,9 @@ set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\log4j.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%CONFIG_HOME%
 
-cp %CONFIG_HOME%\distributed_a3servers.xml %CONFIG_HOME%\a3servers.xml
-cp %CONFIG_HOME%\tcp_jndi.properties %CONFIG_HOME%\jndi.properties
+copy %CONFIG_HOME%\distributed_a3servers.xml %CONFIG_HOME%\a3servers.xml
+
+copy %CONFIG_HOME%\tcp_jndi.properties %CONFIG_HOME%\jndi.properties
 
 mkdir %RUN_DIR%
 cd %RUN_DIR%
