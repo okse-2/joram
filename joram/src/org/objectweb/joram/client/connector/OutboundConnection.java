@@ -24,6 +24,7 @@ package org.objectweb.joram.client.connector;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
+import java.util.Vector;
 
 
 /**
@@ -40,7 +41,8 @@ public class OutboundConnection implements javax.jms.Connection
   XAConnection xac;
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
-
+  /** Vector of the connection's sessions. */
+  Vector sessions;
  
   /**
    * Constructs an <code>OutboundConnection</code> instance.
@@ -48,10 +50,11 @@ public class OutboundConnection implements javax.jms.Connection
    * @param managedCx  The managed connection building the handle.
    * @param xac        The underlying physical connection to handle.
    */
-  OutboundConnection(ManagedConnectionImpl managedCx, XAConnection xac)
-  {
+  OutboundConnection(ManagedConnectionImpl managedCx, 
+                     XAConnection xac) {
     this.managedCx = managedCx;
     this.xac = xac;
+    sessions = new Vector();
   }
 
   /**
@@ -96,7 +99,7 @@ public class OutboundConnection implements javax.jms.Connection
 
     Session sess = managedCx.session;
     if (sess == null)
-      sess = xac.createSession(false, acknowledgeMode);
+      sess = xac.createSession(transacted, acknowledgeMode);
 
     return new OutboundSession(sess, this);
   }
@@ -153,6 +156,11 @@ public class OutboundConnection implements javax.jms.Connection
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
     xac.start();
+
+    for (int i = 0; i < sessions.size(); i++) {
+      OutboundSession session = (OutboundSession) sessions.get(i);
+      session.start();
+    }
   }
 
   /**
@@ -214,7 +222,23 @@ public class OutboundConnection implements javax.jms.Connection
   public synchronized void close() throws JMSException
   {
     valid = false;
+
+    for (int i = 0; i < sessions.size(); i++) {
+      OutboundSession session = (OutboundSession) sessions.get(i);
+      session.close();
+    }
+
     managedCx.closeHandle(this);
+  }
+
+  /**
+   *  returns <code>true</code> if the
+   * parameter is a <code>Connection</code> instance sharing the same
+   * proxy identifier and connection key.
+   */
+  public boolean cnxEquals(Object obj) {
+    return (obj instanceof Connection)
+           && xac.equals(obj);
   }
 
   /**
