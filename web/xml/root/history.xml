@@ -14,6 +14,16 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>March, 1st 2002: new version of JORAM to be expected soon</subtitle>
+
+      <p>A new version of JORAM will soon be available (likely next week). JORAM 3.0 is a
+      complete refactoring of JORAM with better conformance,
+      scalability and performance. It should also be integrated with
+      the next version of JOnAS. Stay tuned for future information.
+      </p>
+      
+      <hr /> 
+
       <subtitle>January, 16th 2002: Documentation update</subtitle>
       <p>The <a
 	  href="http://www.objectweb.org/joram/current/doc/install/index.html">Installation guide</a> 
