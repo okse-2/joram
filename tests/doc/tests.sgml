@@ -1,0 +1,190 @@
+<!DOCTYPE article SYSTEM "/usr/share/sgml/docbook/dtd/3.1/docbook.dtd"> 
+
+<article>
+  <title>JMS Test Suite Documentation</title>
+
+  <sect1>
+    <title>Aim of the test suite</title>
+    <para>At first, this test suite goal was to test(!) JMS compliance
+      for JORAM. It happended while JORAM was totally rewritten from
+      scratch. Thus we needed to test that the new code was still
+      compliant to JMS specifications.</para>
+    <para>Another goal of this test suite was for me to learn more about
+      JMS. As I was learning it, I thought interesting to know how
+    other JMS providers performed. So it was interesting to
+    be able to use other providers than JORAM for this suite.</para>
+    <para>Therefore, it became apparent that a JMS Test Suite
+    independent of any JMS providers was interesting. I knew that
+    other JMS test suites existed but since they came from company
+    selling JMS solutions I was quite doubtful about it. Working for
+    ObjectWeb, a consortiun aiming at creating Open Source middleware
+    software, I was my interest to make an objective test suite that
+    could help us to improve our code quality.</para>
+    <para>I don't deny it, at the beginning JORAM results were not
+    very good. But the new version being written in parallel of this
+    suite, results became better really fast.</para>
+  </sect1>
+  <sect1>
+    <title>Installing the test suite</title>
+    <sect2>
+      <title>CVS repository</title>
+      <para>The test suite is available only by CVS. To setup the CVS
+	software, see <ulink url="http://www/cvshome.org">CVS
+      website</ulink></para> 
+      <para>To the CVS repository in anonymous mode, simply use the
+      following commands (if you are using a GUI CVS client, configure
+      it appropriately):
+	<simplelist>
+	  <member><command>cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM login</command></member>
+	  <member><command>password:</command></member>
+	  <member><command>cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM co tests</command></member>
+	</simplelist>
+	When prompted for a password for anonymous, simply press the
+	<keycap>Enter</keycap> key.</para>
+      <para>This will create a replica of the test suite source
+	tree in your account on your machine, with all files needed by
+	the module. You can then compile and play with it.
+      </para>
+      <para>The Test Suite CVS repository can only be accessed in read
+	mode in the pserver mode. Therefore, the only possible CVS
+	commands are <command>checkout</command>,
+	<command>update</command>, <command>status</command> or
+	<command>diff</command>. When running the
+	<command>cvs update</command> command, make sure that you are
+	in the correct	directory. 
+      </para>
+    </sect2>
+    <sect2>
+      <title>Description of the source tree</title>
+      <para>The root of the test suite source tree is the
+	<filename>tests</filename> directory. It contains
+      <filename>build.xml</filename> used by Ant to compile, generate
+      Javadoc, start tests, etc.</para>
+      <sect3>
+	<title><filename>src</filename> directory</title>
+	<para>This directory contains all source code of the
+	  suite. The tests classes are in the package
+	  <varname>org.objectweb.jtests.jms.conform</varname> and its
+	  subpackages. There is also a
+	  <varname>org.objectweb.jtests.jms.admin</varname> package
+	  which defines an simple interface for JMS administration as
+	  well as a factory to get a provider-specific implementation of
+	  this interface.
+	</para>
+	<para>There is also a
+	  <varname>org.objectweb.jtests.providers.admin</varname>
+	  package which contains administration implementations for
+	  providers.</para>
+      </sect3>
+      <sect3>
+	<title><filename>doc</filename> directory</title>
+	<para>This directory contains documentation source (in
+	DocBook) as well as the generated documentation (in HTML and PDF).</para>
+      </sect3>
+      <sect3>
+	<title><filename>lib</filename> directory</title>
+	<para>This directory contains all libraries needed to compile
+	the tests.</para>
+      </sect3>
+      <sect3>
+	<title><filename>providers</filename> directory</title>
+	<para>This directory contains libraries needed to use JMS
+	  providers. For example, there is a
+	<filename>joram</filename> subdirectory with all jar files
+	used by JORAM.</para>
+      </sect3>
+      <sect3>
+	<title><filename>config</filename> directory</title>
+	<para>There is not much in this directory. Only one file,
+	  <filename>provider.properties</filename>, which states which
+	provider is to be tested (more on that later).</para>
+      </sect3>
+      <sect3>
+	<title>Other directories</title>
+	<para>Other directories will be created when compiling,
+	testing or generating Javadoc.</para>
+      </sect3>
+    </sect2>
+    <sect2>
+      <title>Use the test suite</title>
+      <sect3>
+	<title>Prerequisites</title>
+	<para>To compile or use the test suite, <ulink
+	    url="http://jakarta.apache.org/ant">Ant</ulink> is
+	  needed. I use Ant 1.4.1 so I recommend to use this version. You
+	  will also need the optional targets library,
+	  <filename>jakarta-ant-1.4.1-optional.jar</filename> which
+	  defines <filename>junit</filename> target and is available
+	also on Ant website.</para>
+	<para>Once Ant environment is properly installed (see Ant
+	  documentation), you have to put both
+	  <filename>jakarta-ant-1.4.1-optional.jar</filename> you've
+	  just downloaded and <filename>junit.jar</filename> (which is
+	  in the <filename>lib</filename> directory) in
+	  <filename>$ANT_HOME/lib</filename> directory.</para>
+      </sect3>
+      <sect3>
+	<title>Javadoc</title>
+	<para>To generate the Javadoc documentation of the suite, in the
+	  <filename>tests</filename> directory, type:
+	  <simplelist>
+	    <member><command>ant javadoc</command></member>
+	  </simplelist>
+	  All generated files will be put in the
+	  <filename>javadoc</filename> directory.</para>
+	<para>The javadoc documentation contains a description for each
+	  test methods of the JMS specifications aspects which is tested
+	  by it.  
+	</para>
+      </sect3>
+      <sect3>
+	<title>Compilation of the test suite</title>
+	<para>Once you have retrieved the source code of the suite, you
+	  have to compile it. In the <filename>tests</filename>
+	  directory simply type: 
+	  <simplelist>
+	    <member><command>ant compile</command></member>
+	  </simplelist>
+	  to do so.</para>
+      </sect3>
+      <sect3>
+	<title>Compilation of the providers</title>
+	<para>There is only one class for each provider to compile:
+	  the implementation of a simple administration interface.
+	  Each JMS providers has its own way to create JMS
+	  administrated objects (connection factories and destinations).
+	  To remove this dependance from the test suite, it uses a
+	  simple Admin interface to create these objects. The
+	  implementation of the interface is discovered at runtime by
+	  a property put in the
+	  <filename>config/provider.properties</filename> file which
+	  indicates which class implementing the Admin interface is to use.
+	</para>
+	<para>For the moment, there is only one provider
+	  implementation of this interface. Guess which provider?
+	  JORAM, of course! ;-).
+	</para>
+	<para>To compile these provider specific classes, in the
+	  <filename>tests</filename> directory, type:
+	  <simplelist>
+	    <member><command>ant compile.providers</command></member>
+	  </simplelist>
+	</para>
+	<para>Provider specific classes are not compiled with the test suite
+	  to avoid dependency of the suite to these providers. </para>
+      </sect3>
+      <sect3>
+	<title>Starting the tests</title>
+	<para>Before starting the test, provider specific setup has to
+	  be made to start their server. Since there are too many way to
+	  do so, I have deliberately not included this step in the suite
+	  process. I hope that other providers will contribute to this
+	  suite and that we could obtain a common way to start
+	  servers. But in the mean time, it has to be made by
+	  hand.</para>
+	<para>Since JORAM is my favorite JMS provider, I'll show you
+	how to set it up.</para>
+      </sect3>
+    </sect2>
+  </sect1>
+</article>
