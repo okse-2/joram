@@ -92,7 +92,7 @@ public abstract class AdministeredObject implements java.io.Serializable,
 
 
   /**
-   * Codes a <code>AdministeredObject</code> as a Hashtable for travelling 
+   * Codes an <code>AdministeredObject</code> as a Hashtable for travelling 
    * through the SOAP protocol.
    */
   public Hashtable code() {
