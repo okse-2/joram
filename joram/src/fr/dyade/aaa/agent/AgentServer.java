@@ -1004,9 +1004,8 @@ public final class AgentServer {
             cons.start();
             try {
               MXWrapper.registerMBean(cons,
-                                      cons.getName(),
                                       "AgentServer",
-                                      null);
+                                      "server=" + getName() + ",cons=" + cons.getName());
             } catch (Exception exc) {
               logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
             }
@@ -1180,7 +1179,7 @@ public final class AgentServer {
 
     try {
       SCServerMBean bean = new SCServer();
-      MXWrapper.registerMBean(bean, getName(), "AgentServer", null);
+      MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
     } catch (Exception exc) {
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
