@@ -14,11 +14,20 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far...</p>
+      <s2 name="Modifications (latest: September 12, 2003)">
+      <ul>
+        <li>Modification of <code>AgentServer</code> and
+        <code>NameService</code> initialization allowing to stop a server
+        (<code>AgentServer.stop()</code>), intialize it
+        (<code>AgentServer.init(...)</code>) and start it again. In
+        <code>NullTransaction</code> mode should allow to re-initialize 
+        completely the server. Impacted packages are
+        <code>fr.dyade.aaa.agent</code>, <code>fr.dyade.aaa.ns</code> and
+        <code>fr.dyade.aaa.util</code>.</li>
+      </ul>
       </s2>
     </s1>
-    <s1 name="joram3_6_1 (September 12, 2003)">
+    <s1 name="joram3_6_1 (September 11, 2003)">
       <p>This release is integrated in JOnAS 3.3.</p>
       <s2 name="Modifications"> 
       <ul>
