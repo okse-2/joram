@@ -9,7 +9,8 @@ set CONFIG_HOME=%JORAM_HOME%\samples\config
 set RUN_DIR=%JORAM_HOME%\samples\run
 
 :: Building the Classpath
-set CLASSPATH=%JORAM_LIBS%\mom.jar
+set CLASSPATH=%JORAM_LIBS%\joram-mom.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\xerces.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jakarta-regexp-1.2.jar

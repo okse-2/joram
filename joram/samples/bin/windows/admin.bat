@@ -7,8 +7,9 @@ call setHome
 set JORAM_LIBS=%JORAM_HOME%\lib
 set CONFIG_ENV=%JORAM_HOME%\samples\config
 
-set CLASSPATH=%JORAM_LIBS%\joramgui.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram.jar
+set CLASSPATH=%JORAM_LIBS%\joram-gui.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-client.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jms.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jndi.jar
