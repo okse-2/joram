@@ -33,10 +33,29 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class NamingContext implements Serializable {
 
+  private NamingContextId id;
+
+  private Object ownerId;
+
   private Vector records;
 
-  public NamingContext() {
-    this.records = new Vector();
+  public NamingContext(NamingContextId id,
+                       Object ownerId) {
+    this.id = id;
+    this.ownerId = ownerId;
+    records = new Vector();
+  }
+
+  public final NamingContextId getId() {
+    return id;
+  }
+
+  public final Object getOwnerId() {
+    return ownerId;
+  }
+
+  public void setOwnerId(Object ownerId) {
+    this.ownerId = ownerId;
   }
 
   public Record getRecord(String name) {
@@ -119,8 +138,10 @@ public class NamingContext implements Serializable {
 
   public String toString() {
     StringBuffer buf = new StringBuffer();
-    buf.append('(' + super.toString());    
-    buf.append(",records = ");
+    buf.append('(' + super.toString());
+    buf.append(",id=" + id);
+    buf.append(",ownerId=" + ownerId);
+    buf.append(",records=");
     Strings.toString(buf, records);
     buf.append(')');
     return buf.toString();

@@ -25,10 +25,11 @@ package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
+import fr.dyade.aaa.agent.*;
+
 public class CreateSubcontextRequest extends JndiRequest {
 
   public CreateSubcontextRequest(CompositeName name) {
     super(name);
   }
-
 }

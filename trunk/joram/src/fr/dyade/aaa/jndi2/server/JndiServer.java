@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ package fr.dyade.aaa.jndi2.server;
 import java.io.*;
 import javax.naming.*;
 import java.net.*;
+import java.util.*;
 
 import fr.dyade.aaa.jndi2.impl.*; 
 import fr.dyade.aaa.jndi2.msg.*; 
@@ -37,24 +38,23 @@ import fr.dyade.aaa.ip.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-public class JndiServer extends ServerAgent {
+/**
+ * Class of a JNDI centralized server. This is an
+ * agent that may be accessed either by TCP connections
+ * or agent notifications.
+ */
+public class JndiServer extends Agent {
   
-  /**
-   * The listen socket of the proxy is statically
-   * created (@see init).
-   */
-  private static ServerSocket serverSocket;
-  
-  /**
-   * Overrides the default behavior that creates a
-   * server socket. The socket is statically created
-   * (@see init).
-   */
+  protected static ServerSocket serverSocket;
+
   protected ServerSocket getServerSocket() {
     return serverSocket;
   }
 
-  public static void init(String args, boolean firstTime) throws Exception {    
+  public static void init(String args, boolean firstTime) throws Exception {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "JndiServer.init(" + 
+                       args + ',' + firstTime + ')');
     int port = Integer.parseInt(args);
 
     // Create the socket here in order to throw an exception
@@ -63,11 +63,16 @@ public class JndiServer extends ServerAgent {
 
     if (! firstTime) return;
     else {
-      JndiServer a = new JndiServer("LocalJndiService");
-      a.setNbMonitor(5);
-      a.setPort(port); 
-      a.deploy();          
+      JndiServer a = new JndiServer();
+      a.deploy();
     }
+  }
+
+  /**
+   * Stops the <code>JndiServer</code> service.
+   */ 
+  public static void stopService() {
+    // Do nothing   
   }
   
   /**
@@ -86,47 +91,116 @@ public class JndiServer extends ServerAgent {
    * @return the <code>AgentId</code> of the JndiServer
    */
   public static AgentId getDefault(short serverId) {
-    return new AgentId(serverId, serverId, AgentId.LocalJndiServiceStamp);
+    return new AgentId(
+      serverId, serverId,
+      AgentId.LocalJndiServiceStamp);
   }
+
+  private int nbm;
+
+  private transient TcpServer tcpServer;
 
   private transient ServerImpl impl;
-  private transient Transaction transaction;
 
-  public JndiServer(String name) {
-    super(name, AgentId.LocalJndiServiceStamp);
-  }
-
-  public void initialize(boolean firstTime) throws Exception {
-    // The transaction is the factory's reaction transaction.
-    initialize(AgentServer.getTransaction());    
-  }
-
-  public void initialize(Transaction transaction) throws Exception {
-    this.transaction = transaction;
-    this.impl = new ServerImpl(transaction);
-    impl.initialize();
-    super.initialize(true);
+  /**
+   * Constructs a new JNDI server agent.
+   * This agent cannot be swapped and has 
+   * a reserved identifier on each agent server.
+   */
+  public JndiServer() {
+    super("", true, AgentId.LocalJndiServiceStamp);
+    this.nbm = 3;
   }
 
   /**
-   * Stops the <code>JndiServer</code> service.
-   */ 
-  public static void stopService() {
-    // Do nothing
+   * Initializes the JNDI server.
+   */
+  public void agentInitialize(boolean firstTime) throws Exception {
+    // 1- Create the object that handles the
+    //    naming data.
+    impl = new ServerImpl(
+      AgentServer.getTransaction(),
+      getId(),
+      getRootOwnerId());    
+    impl.initialize();
+    
+    // 2- Create the TCP entry point.
+    tcpServer = new TcpServer(
+      getServerSocket(),
+      nbm,
+      getId());
+    tcpServer.start();
   }
 
-  public void react(AgentId from, Notification not) {
+  /**
+   * Returns the root naming context owner
+   * identifier.
+   * May be overridden by a subclass.
+   */
+  protected AgentId getRootOwnerId() {
+    return getId();
+  }
+
+  protected final ServerImpl getServerImpl() {
+    return impl;
+  }
+
+  public void agentFinalize(boolean lastTime) {
+    tcpServer.stop();
+  }
+
+  /**
+   * Notification entry point.
+   */
+  public void react(AgentId from, Notification not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer.react(" + 
                        from + ',' + not + ')');
     if (not instanceof JndiScriptRequestNot) {
       doReact(from, (JndiScriptRequestNot)not);
+    } else if (not instanceof TcpRequestNot) {
+      doReact((TcpRequestNot)not);
     } else {
       super.react(from, not);
     }
+    setNoSave();
   }
 
-  private void doReact(AgentId from, JndiScriptRequestNot not) {
+  /**
+   * Reacts to a TCP connection request. This is the
+   * TCP entry point.
+   *
+   * @param not the TCP connection request
+   */
+  private void doReact(TcpRequestNot not) throws Exception {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "JndiServer.doReact((TcpRequestNot)" + 
+                       not + ')');
+    Socket s = not.getSocket();
+    if (s != null) {
+      try {
+        TcpRequestContext reqCtx = 
+          new TcpRequestContext(s);
+        JndiReply reply = invoke(reqCtx);
+        if (reply != null) {
+          reqCtx.reply(reply);
+        }
+      } catch (Exception exc) {
+        Trace.logger.log(BasicLevel.WARN, "", exc);
+      }
+    } else {
+      Trace.logger.log(BasicLevel.WARN, "Drop " + not);
+    }
+  }
+
+  /**
+   * Reacts to a JNDI script request. This is the notification
+   * entry point.
+   * 
+   * @param not the JNDI script
+   */
+  private void doReact(AgentId from, JndiScriptRequestNot not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
                        "JndiServer.doReact(" + from +
@@ -134,147 +208,263 @@ public class JndiServer extends ServerAgent {
     JndiRequest[] requests = not.getRequests();
     JndiReply[] replies = new JndiReply[requests.length];
     for (int i = 0; i < requests.length; i++) {
-      replies[i] = invoke(requests[i]);
+      AgentRequestContext reqCtx = new AgentRequestContext(
+        requests[i], from, not.reply());
+      replies[i] = invoke(reqCtx);
     }
     if (not.reply()) {
+      // Reply to all the operations from the input
+      // script except those that are asynchronous.
+      // This can't happen in a centralized server.
+      // But in a distributed JNDI configuration, this
+      // server may be waiting for a notification reply 
+      // from an other naming server. 
+      // These asynchronous operations
+      // are acknowledged in separate notifications.
       sendTo(from, new JndiScriptReplyNot(replies));
     }
   }
-  
-  public void doRequest(Monitor monitor) throws Exception {
+
+  protected synchronized JndiReply invoke(RequestContext reqCtx) {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer.doRequest(" + 
-                       monitor.getId() + ')');
-    Socket socket = monitor.getSocket();
-    SerialOutputStream sender = new SerialOutputStream(socket.getOutputStream());
-    ObjectInputStream receiver  = new ObjectInputStream(socket.getInputStream());
-    Loop:
-    while (true) {        
-      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, 
-                         " -> readObject (" + 
-                         monitor.getId() + ')');
-      
-      // Get a request
-      JndiRequest request;
-      try {
-         request = (JndiRequest)receiver.readObject();
-      } catch (IOException exc) {
-        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, 
-                         " -> exit (" + 
-                         monitor.getId() + ')');
-        break Loop;
-      }
-      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, " -> begins (" + 
-                         monitor.getId() + ')');
-      // Start a transaction
-      transaction.begin();
-      JndiReply reply = invoke(request);
-      if (reply instanceof JndiError) {
-        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-          Trace.logger.log(BasicLevel.DEBUG, " -> rollback (" + 
-                           monitor.getId() + ')');
-        // Rollback
-        transaction.rollback();
-        transaction.release();
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "JndiServer.invoke(" + reqCtx + ')');
+    JndiRequest request = reqCtx.getRequest();
+    try {      
+      if (request instanceof JndiReadRequest) {
+        // 1- Dispatch the read requests
+        return invokeReadRequest(reqCtx);
+      } if (request instanceof JndiAdminRequest) {
+        return invokeAdminRequest(reqCtx);
       } else {
-        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-          Trace.logger.log(BasicLevel.DEBUG, " -> commit (" + 
-                           monitor.getId() + ')');
-        // Commit
-        transaction.commit();
-        transaction.release();
-      } 
-      sender.writeObject(reply);
+        // 2- Dispatch the write requests
+        return invokeWriteRequest(reqCtx);
+      }
+    } catch (MissingContextException mce) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", mce);
+      return onMissingContext(mce, reqCtx);
+    } catch (MissingRecordException nnfe) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", nnfe);
+      return onMissingRecord(nnfe, reqCtx);
+    } catch (NamingException nexc) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", nexc);
+      return new JndiError(nexc);
     }
   }
 
-  private JndiReply invoke(JndiRequest request) {
+  protected synchronized JndiReply invokeReadRequest(RequestContext reqCtx) 
+    throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "JndiServer.invoke(" + request + ')');
-    try {
-      if (request instanceof BindRequest) {
-        bind((BindRequest)request);
+                       "JndiServer.invokeReadRequest(" + reqCtx + ')');
+    JndiRequest request = reqCtx.getRequest();
+    if (request instanceof LookupRequest) {
+      Object obj = lookup((LookupRequest)request);
+      if (obj != null) {
+        ObjectRecord or = (ObjectRecord)obj;
+        return new LookupReply(or.getObject());
+      } else {
+        // This is a context record
         return new JndiReply();
-      } else if (request instanceof LookupRequest) {
-        Object obj = lookup((LookupRequest)request);
-        if (obj instanceof ObjectRecord) {
-          ObjectRecord or = (ObjectRecord)obj;
-          return new LookupReply(or.getObject());
-        } else {
-          // This is a context record
-          return new JndiReply();
-        }
+      }
+    } else if (request instanceof ListBindingsRequest) {
+      Object obj = listBindings((ListBindingsRequest)request);
+      return new ListBindingsReply((Binding[])obj);
+    } else if (request instanceof ListRequest) {
+      Object obj = list((ListRequest)request);
+      return new ListReply((NameClassPair[])obj);
+    } else {
+      return new JndiError(
+        new NamingException("Unknown operation"));
+    }
+  }
+
+  protected synchronized JndiReply invokeWriteRequest(
+    RequestContext reqCtx)
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "JndiServer.invokeWriteRequest(" + 
+                       reqCtx + ',' + ')');
+    try {
+      JndiRequest request = reqCtx.getRequest();
+      JndiReply reply;
+      if (request instanceof BindRequest) {
+        bind((BindRequest)request);        
+        return new JndiReply();
       } else if (request instanceof UnbindRequest) {
         unbind((UnbindRequest)request);
         return new JndiReply();
-      } else if (request instanceof ListBindingsRequest) {
-        Object obj = listBindings((ListBindingsRequest)request);
-        return new ListBindingsReply((Binding[])obj);
-      } else if (request instanceof ListRequest) {
-        Object obj = list((ListRequest)request);
-        return new ListReply((NameClassPair[])obj);
       } else if (request instanceof CreateSubcontextRequest) {
-        createSubcontext((CreateSubcontextRequest)request);
+        createSubcontext(
+          (CreateSubcontextRequest)request);
         return new JndiReply();
       } else if (request instanceof DestroySubcontextRequest) {
-        destroySubcontext((DestroySubcontextRequest)request);
+        destroySubcontext(
+          (DestroySubcontextRequest)request);
         return new JndiReply();
       } else {
-        return new JndiError(new NamingException("Unknown operation"));
+        return new JndiError(
+          new NamingException("Unknown operation"));
       }
-    } catch (NamingException nexc) {
-      return new JndiError(nexc);
-    } catch (IOException ioexc) {
-      NamingException nexc2 = new NamingException();
-      nexc2.setRootCause(ioexc);
-      return new JndiError(nexc2);
+    } catch (NotOwnerException noexc) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", noexc);
+      return invokeOwner(
+        (AgentId)noexc.getOwner(),
+        reqCtx);
     }
   }
 
-  private void bind(BindRequest request) throws NamingException, IOException {
-    if (request.isRebind()) {
-      impl.rebind(request.getName(), request.getObject());
+  protected synchronized JndiReply invokeAdminRequest(
+    RequestContext reqCtx)
+    throws NamingException {
+    JndiRequest request = reqCtx.getRequest();
+    if (request instanceof ChangeOwnerRequest) {
+      changeOwner((ChangeOwnerRequest)request);
+      return new JndiReply();
     } else {
-      impl.bind(request.getName(), request.getObject());
-    }    
+      return new JndiError(
+        new NamingException("Unknown admin operation"));
+    }
   }
 
-  private void unbind(UnbindRequest request) throws NamingException, IOException {
+  private void bind(BindRequest request) 
+    throws NamingException {
+    if (request.isRebind()) {
+      impl.rebind(
+        request.getName(), 
+        request.getObject());
+    } else {
+      impl.bind(
+        request.getName(), 
+        request.getObject());
+    } 
+  }
+
+  private void unbind(UnbindRequest request) 
+    throws NamingException {
     impl.unbind(request.getName());
   }
 
-  private Record lookup(LookupRequest request) throws NamingException, IOException {
+  private Record lookup(LookupRequest request) 
+    throws NamingException {
     return impl.lookup(request.getName());
   }
 
-  private NameClassPair[] list(ListRequest request) throws NamingException, IOException {
+  private NameClassPair[] list(ListRequest request) 
+    throws NamingException {
     return impl.list(request.getName());
   }
 
-  private Binding[] listBindings(ListBindingsRequest request) throws NamingException, IOException {
+  private Binding[] listBindings(ListBindingsRequest request) 
+    throws NamingException {
     return impl.listBindings(request.getName());
   }
 
-  private void createSubcontext(CreateSubcontextRequest request) throws NamingException, IOException {
-    impl.createSubcontext(request.getName());
+  protected void createSubcontext(CreateSubcontextRequest request) 
+    throws NamingException {
+    impl.createSubcontext(
+      request.getName());
   }
 
-  private void destroySubcontext(DestroySubcontextRequest request) throws NamingException, IOException {
-    impl.destroySubcontext(request.getName());
+  private void destroySubcontext(DestroySubcontextRequest request)
+    throws NamingException {
+    impl.destroySubcontext(
+      request.getName());
   }
 
-  private void writeObject(java.io.ObjectOutputStream out)
-    throws IOException {
-    // Do nothing
+  protected void changeOwner(ChangeOwnerRequest request)
+    throws NamingException {
+    AgentId serverId;
+    try {
+      serverId =
+        AgentId.fromString(request.getOwnerId());
+    } catch (Exception exc) {
+      NamingException ne = 
+        new NamingException(exc.toString());
+      ne.setRootCause(exc);
+      throw ne;
+    }
+    if (getId().equals(serverId))
+      throw new NamingException("Server already owner");
+    impl.changeOwner(serverId);
   }
 
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-    // Do nothing
+  /**
+   * A centralized JNDI server returns a JNDI error 
+   * explaining that this server is not the owner 
+   * of the context on which the JNDI operation is called.
+   * A subclass may override this behavior in order
+   * to invoke the owner of the naming context.
+   *
+   * @param owner the identifier of the naming server that 
+   * owns the naming context on which the
+   * JNDI operation is called.
+   * 
+   * @param reqCtx the JNDI request context that raised
+   * the exception.
+   *
+   * @return the JNDI reply.
+   * May be <code>null</code> if the owner invocation 
+   * is asynchronous.
+   */
+  protected JndiReply invokeOwner(AgentId owner,
+                                  RequestContext reqCtx) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "JndiServer.invokeOwner(" +
+                       owner + ',' + reqCtx + ')');
+    return new JndiError(new NamingException("Not owner"));
   }
+  
+  /**
+   * In a centralized JNDI server a missing context shows 
+   * that the naming data are unconsistent. So it throws an error.
+   * A subclass may override this behavior in order
+   * to try to resolve the missing context.
+   *
+   * @param mce the missing context exception
+   *
+   * @param reqCtx the JNDI request context that raised
+   * the exception.
+   *
+   * @return the JNDI reply.
+   * May be <code>null</code> if the resolution is asynchronous.   
+   */
+  protected JndiReply onMissingContext(MissingContextException mce,
+                                       RequestContext reqCtx) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "JndiServer.onMissingContext(" +
+                       mce + ',' + reqCtx + ')');
+    throw new Error(mce.toString());
+  }
+
+  /**
+   * In a centralized JNDI server a missing record shows that the
+   * name asked by the JNDI request doesn't exist. So the
+   * <code>NameNotFoundException</code> is directly forwarded to 
+   * the client.
+   * A subclass may override this behavior in order
+   * to try to resolve the missing record.
+   * 
+   * @param mre the missing context exception
+   *
+   * @param reqCtx the JNDI request context that raised
+   * the exception.
+   * 
+   * @return the JNDI reply.
+   * May be <code>null</code> if the resolution is asynchronous.
+   */
+  protected JndiReply onMissingRecord(MissingRecordException mre,
+                                      RequestContext reqCtx) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "JndiServer.onMissingRecord(" +
+                       mre + ',' + reqCtx + ')');
+    return new JndiError(mre.getNameNotFoundException());
+  }
+
 }
 

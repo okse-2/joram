@@ -26,6 +26,7 @@ package fr.dyade.aaa.jndi2.impl;
 import java.io.*;
 import java.util.*;
 import javax.naming.*;
+
 import fr.dyade.aaa.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -33,105 +34,189 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class ServerImpl {
 
-  public static final String ROOT = "jndiStorage";
+  /**
+   * Identifier of this server.
+   */
+  private Object serverId;
 
-  public static final String NC_FILE = "nc.jndi";
+  /**
+   * Identifier of the server that owns
+   * the root naming context.
+   */
+  private Object rootOwnerId;
+
+  /**
+   * Optional update listener.
+   * May be <code>null</code>.
+   */
+  private UpdateListener updateListener;
   
-  private Hashtable contexts;
+  /**
+   * A context manager for the factory
+   * operations (new, delete). It also
+   * handles a cache and the persistency.
+   */
+  private ContextManager contextManager;
 
-  private Transaction transaction;
+  /**
+   * Constructs a <code>ServerImpl</code>
+   *
+   * @param transaction Transactional context that 
+   * provides atomicity for the write operations
+   * performed during a request.
+   *
+   * @param serverId Identifier of this server.
+   *
+   * @param rootOwnerId Identifier of the server 
+   * that owns the root naming context.
+   */
+  public ServerImpl(Transaction transaction,
+                    Object serverId,
+                    Object rootOwnerId) { 
+    this.serverId = serverId;
+    this.rootOwnerId = rootOwnerId;
+    contextManager = new ContextManager(
+      transaction, serverId, rootOwnerId);
+  }
 
-  public ServerImpl(Transaction transaction) throws NamingException { 
-    this.transaction = transaction;
-    this.contexts = new Hashtable();
+  public void setUpdateListener(UpdateListener updateListener) {
+    this.updateListener = updateListener;
   }
   
-  public void initialize() throws NamingException {
-    // Create the root naming context.
-    CompositeName rootName = new CompositeName();
-    if (loadNamingContext(rootName) == null) {
-      createNamingContext(rootName);
+  public void initialize() throws Exception {
+    contextManager.initialize();
+
+    // Creates the root naming context if this
+    // server owns it.
+    if (rootOwnerId.equals(serverId)) {
+      NamingContext rootNc = 
+        contextManager.getRootNamingContext();
+      if (rootNc == null) {
+        contextManager.newNamingContext(
+          serverId, 
+          null, 
+          new CompositeName());
+      }
     }
   }
-
-  public void bind(CompositeName path, Object obj) throws NamingException {
+  
+  /**
+   * Binds an object to the specified path.
+   *
+   * @param path the path of the object
+   *
+   * @param obj the object to bind
+   *
+   * @exception NameAlreadyBoundException if the name of
+   * the subcontext is already bound.
+   * 
+   * @exception NameNotFoundException if some of the
+   * intermediate names in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   */
+  public void bind(CompositeName path, 
+                   Object obj) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.bind(" + path + ',' + obj + ')');
-
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.bind(" + 
+                       path + ',' + 
+                       obj + ',' + ')');
     // The root context is (in a way) already bound since
     // it is already a context.
     if (path.size() == 0) throw new NameAlreadyBoundException();
-    
-    String lastName = (String)path.remove(path.size() - 1);
-    NamingContext nc = loadNamingContext(path);
 
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (nc == null) throw new NameNotFoundException();
+    path = (CompositeName)path.clone();
+    String lastName = (String)path.remove(path.size() - 1);
+    NamingContext nc = contextManager.getNamingContext(path);
+
+    bind(nc, lastName, obj, serverId);
+    
+    if (updateListener != null) {
+      updateListener.onUpdate(
+        new BindEvent(nc.getId(), lastName, obj));
+    }
+  }
+
+  public void bind(NamingContext nc, 
+                   String lastName, 
+                   Object obj,
+                   Object ownerId) throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.bind(" + 
+                       nc + ',' +
+                       lastName + ',' + 
+                       obj + ',' + 
+                       ownerId + ')');
+    if (! nc.getOwnerId().equals(ownerId)) {
+      throw new NotOwnerException(
+        nc.getOwnerId());
+    }
 
     Record r = nc.getRecord(lastName);
     if (r != null) throw new NameAlreadyBoundException();
     else {
       nc.addRecord(new ObjectRecord(lastName, obj));
-      storeNamingContext(path, nc);
+      contextManager.storeNamingContext(nc);      
     }
   }
 
-  private void createNamingContext(CompositeName name) throws NamingException {
+  /**
+   * Rebinds an object to the specified path.
+   *
+   * @param path the path of the object
+   *
+   * @param obj the object to rebind
+   *
+   * @exception NameNotFoundException if some of the
+   * intermediate names in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   *
+   * @exception NamingException if the specified path
+   * is bound to a naming context.
+   */
+  public void rebind(CompositeName path, 
+                     Object obj) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.createNamingContext(" + name + ')');
-    NamingContext nc = new NamingContext();
-    // 1- Put it in the cache.
-    contexts.put(name, nc);
-    // 2- Store it on the disk.
-    storeNamingContext(name, nc);
-  }
-
-  private NamingContext loadNamingContext(CompositeName name) throws NamingException {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.loadNamingContext(" + name + ')');
-
-    // 1- From the cache    
-    NamingContext nc = (NamingContext)contexts.get(name);
-    if (nc == null) {
-      try {
-        // 2- From the disk
-        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-          Trace.logger.log(BasicLevel.DEBUG, " -> Load from disk");
-        String filePath = ROOT;
-        if (name.size() > 0) {
-          filePath = filePath + File.separator + name.toString();
-        }
-        nc = (NamingContext)transaction.load(filePath, NC_FILE);
-        if (nc != null) contexts.put(name, nc);
-      } catch (IOException exc) {
-        NamingException ne = new NamingException(exc.getMessage());
-        ne.setRootCause(exc);
-        throw ne;
-      } catch (ClassNotFoundException exc2) {
-        NamingException ne = new NamingException(exc2.getMessage());
-        ne.setRootCause(exc2);
-        throw ne;
-      }
-    }
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, " -> nc = " + nc);
-    return nc;
-  }
-
-  public void rebind(CompositeName path, Object obj) throws NamingException {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.rebind(" + path + ',' + obj + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.rebind(" + 
+                       path + ',' + 
+                       obj + ',' + ')');
 
     // The root context cannot become a name-value pair.
     if (path.size() == 0) throw new NamingException("Cannot rebind the root context");
 
+    path = (CompositeName)path.clone();
     String lastName = (String)path.remove(path.size() - 1);
-    NamingContext nc = loadNamingContext(path);
+    NamingContext nc = contextManager.getNamingContext(path);    
 
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (nc == null) throw new NameNotFoundException();
+    rebind(nc, lastName, obj, serverId);
+
+    if (updateListener != null) {
+      updateListener.onUpdate(
+        new RebindEvent(nc.getId(), lastName, obj));
+    }
+  }
+
+  public void rebind(NamingContext nc, 
+                     String lastName, 
+                     Object obj,
+                     Object ownerId) throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.rebind(" + 
+                       nc + ',' +
+                       lastName + ',' + 
+                       obj + ',' + 
+                       ownerId + ')');
+    if (! nc.getOwnerId().equals(ownerId)) {
+      throw new NotOwnerException(
+        nc.getOwnerId());
+    }
 
     Record r = nc.getRecord(lastName);
     if (r != null) {
@@ -149,209 +234,350 @@ public class ServerImpl {
     } else {
       nc.addRecord(new ObjectRecord(lastName, obj));
     }
-    storeNamingContext(path, nc);
+    contextManager.storeNamingContext(nc);    
   }
 
+  /**
+   * Looks up the specified path.
+   *
+   * @param path the path to look up
+   *
+   * @exception NameNotFoundException if some of the
+   * names (intermediate and final) in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   *
+   * @return <code>null</code> if the bound object is a context.
+   *
+   * @exception NameNotFoundException 
+   */
   public Record lookup(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.lookup(" + path + ')');    
 
     if (path.size() == 0) {
-      return new ContextRecord(null);
+      return null;
     }
 
+    path = (CompositeName)path.clone();
     String lastName = (String)path.remove(path.size() - 1);
-    NamingContext nc = loadNamingContext(path);
-
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (nc == null) throw new NameNotFoundException();
-
+    NamingContext nc = contextManager.getNamingContext(path);
+    
     Record r = nc.getRecord(lastName);
-    if (r != null) {
+    if (r == null) {
+      NameNotFoundException nnfe = 
+        new NameNotFoundException();
+      nnfe.setResolvedName(path);
+      throw new MissingRecordException(
+        nc.getId(), nc.getOwnerId(), nnfe);
+    } else if (r instanceof ObjectRecord) {      
       return r;
     } else {
-      throw new NameNotFoundException();
+      return null;
     }
   }
 
-  private void storeNamingContext(CompositeName name, NamingContext nc) 
-    throws NamingException {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "ServerImpl.storeNamingContext(" + name + ',' + nc + ')');
-    try {
-      String filePath = ROOT;
-      if (name.size() > 0) {
-        filePath = filePath + File.separator + name.toString();
-      }
-      transaction.save(nc, filePath, NC_FILE);
-    } catch (IOException exc) {
-      NamingException ne = new NamingException(exc.getMessage());
-      ne.setRootCause(exc);
-      throw ne;
-    }
-  }
-
+  /**
+   * Unbinds the specified path. This operation is
+   * idempotent: does nothing if the final name of
+   * the path is not found.
+   *
+   * @param path the path to unbind
+   *
+   * @exception NameNotFoundException if some of the
+   * intermediate names in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   *
+   * @exception NamingException if the specified path
+   * is bound to a naming context.
+   */
   public void unbind(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.unbind(" + path + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.unbind(" + 
+                       path + ')');
 
     // The root context cannot be deleted.
     if (path.size() == 0) throw new NamingException("Cannot unbind the root context");
 
-    CompositeName parentPath = (CompositeName)path.clone();    
-    String lastName = (String)parentPath.remove(parentPath.size() - 1);
-    NamingContext parentNc = loadNamingContext(parentPath);
+    path = (CompositeName)path.clone();    
+    String lastName = (String)path.remove(path.size() - 1);
+    NamingContext nc = contextManager.getNamingContext(path);    
 
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (parentNc == null) throw new NameNotFoundException();
-
-    Record r = parentNc.getRecord(lastName);
-    if (r != null) { 
-      if (r instanceof ContextRecord) {
-        destroySubcontext(path);
-      } else if (r instanceof ObjectRecord) {
-        parentNc.removeRecord(lastName);
-        storeNamingContext(parentPath, parentNc);
+    if (unbind(nc, lastName, serverId)) {
+      if (updateListener != null) {
+        updateListener.onUpdate(
+          new UnbindEvent(nc.getId(), lastName));
       }
     }
-    // else do nothing (idempotency)
+  }
+
+  public boolean unbind(NamingContext nc,
+                        String lastName,
+                        Object ownerId) throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.unbind(" + 
+                       nc + ',' +
+                       lastName + ',' + 
+                       ownerId + ')');
+    if (! nc.getOwnerId().equals(ownerId)) {
+      throw new NotOwnerException(
+        nc.getOwnerId());
+    }
+    Record r = nc.getRecord(lastName);
+    if (r != null) { 
+      if (r instanceof ContextRecord) {
+        throw new NamingException("Cannot unbind a context");
+      } else {
+        nc.removeRecord(lastName);
+        contextManager.storeNamingContext(nc);        
+        return true;
+      }
+    } else {
+      // else do nothing (idempotency)
+      return false;
+    }
   }
 
   public NameClassPair[] list(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.list(" + path + ')');
-
-    NamingContext nc = loadNamingContext(path);
-
-    if (nc == null) {
-      if (path.size() > 0) {
-        CompositeName parentPath = (CompositeName)path.clone();    
-        String lastName = (String)parentPath.remove(parentPath.size() - 1);
-        NamingContext parentNc = loadNamingContext(parentPath);        
-
-        // The target context and/or intermediate contexts don't exist.
-        // As a csq, the name is not found.
-        if (parentNc == null) throw new NameNotFoundException();
-
-        Record r = parentNc.getRecord(lastName);
-        if (r != null) {
-          if (r instanceof ObjectRecord) {
-            throw new NotContextException();
-          } else {
-            throw new Error("Missing context");
-          }
-        } else {
-          throw new NameNotFoundException();
-        }
-      } else {
-        throw new Error("Missing root context");
-      }
-    } else {
-      return nc.getNameClassPairs();
-    }
+    NamingContext nc = contextManager.getNamingContext(path);
+    return nc.getNameClassPairs();
   }
 
   public Binding[] listBindings(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.list(" + path + ')');
-
-    NamingContext nc = loadNamingContext(path);
-
-    if (nc == null) {
-      if (path.size() > 0) {
-        CompositeName parentPath = (CompositeName)path.clone();    
-        String lastName = (String)parentPath.remove(parentPath.size() - 1);
-        NamingContext parentNc = loadNamingContext(parentPath);        
-
-        // The target context and/or intermediate contexts don't exist.
-        // As a csq, the name is not found.
-        if (parentNc == null) throw new NameNotFoundException();
-
-        Record r = parentNc.getRecord(lastName);
-        if (r != null) {
-          if (r instanceof ObjectRecord) {
-            throw new NotContextException();
-          } else {
-            throw new Error("Missing context");
-          }
-        } else {
-          throw new NameNotFoundException();
-        }
-      } else {
-        throw new Error("Missing root context");
-      }
-    } else {
-      return nc.getBindings();
-    }
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.listBindings(" + path + ')');
+    NamingContext nc = contextManager.getNamingContext(path);
+    return nc.getBindings();
   }
 
-  public void createSubcontext(CompositeName path) throws NamingException {
+  public void createSubcontext(CompositeName path) 
+    throws NamingException {
+    createSubcontext(path, serverId);
+  }
+
+  /**
+   * Create a subcontext.
+   *
+   * @param path the path of the subcontext
+   *
+   * @param subcontextOwner identifier of the owner of
+   * the subcontext (<code>null</code> if the 
+   * owner is the local naming server).
+   *
+   * @exception NameAlreadyBoundException if the name of
+   * the subcontext is already bound.
+   * 
+   * @exception NameNotFoundException if some of the
+   * intermediate names in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   */
+  public void createSubcontext(CompositeName path,
+                               Object subcontextOwnerId) 
+    throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.createSubcontext(" + path + ')');
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "ServerImpl.createSubcontext(" + 
+        path + ',' + subcontextOwnerId + ')');
 
     // The root already exists.
     if (path.size() == 0) throw new NameAlreadyBoundException();
 
     CompositeName parentPath = (CompositeName)path.clone();    
-    String lastName = (String)parentPath.remove(parentPath.size() - 1);
-    NamingContext parentNc = loadNamingContext(parentPath);
+    String lastName = 
+      (String)parentPath.remove(parentPath.size() - 1);
+    NamingContext parentNc = 
+      contextManager.getNamingContext(parentPath);
 
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (parentNc == null) throw new NameNotFoundException();
+    NamingContextId ncid = createSubcontext(
+      parentNc, lastName, path, null,
+      subcontextOwnerId, serverId);
+
+    if (updateListener != null) {
+      updateListener.onUpdate(
+        new CreateSubcontextEvent(
+          parentNc.getId(), lastName, path, ncid, 
+          subcontextOwnerId));
+    }
+  }
+    
+  public NamingContextId createSubcontext(
+    NamingContext parentNc, 
+    String lastName,
+    CompositeName path,
+    NamingContextId ncid,
+    Object subcontextOwnerId,
+    Object ownerId) 
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.createSubcontext(" + 
+                       parentNc + ',' +
+                       lastName + ',' + 
+                       path + ',' + 
+                       ncid + ',' + 
+                       subcontextOwnerId + ',' +
+                       ownerId + ')');
+    if (! parentNc.getOwnerId().equals(ownerId)) {
+      throw new NotOwnerException(
+        parentNc.getOwnerId());
+    }
 
     if (parentNc.getRecord(lastName) != null) 
       throw new NameAlreadyBoundException();
-    parentNc.addRecord(new ContextRecord(lastName));
-    storeNamingContext(parentPath, parentNc);
-    createNamingContext(path);
+    
+    NamingContext nc = 
+      contextManager.newNamingContext(
+        subcontextOwnerId, ncid, path);
+    parentNc.addRecord(new ContextRecord(
+      lastName, nc.getId()));
+    contextManager.storeNamingContext(parentNc);
+    return nc.getId();
   }
 
+  /**
+   * Destroy a subcontext. This operation is
+   * idempotent: does nothing if the final name of
+   * the path is not found.
+   *
+   * @param path the path of the subcontext
+   *
+   * @exception NameAlreadyBoundException if the name of
+   * the subcontext is already bound.
+   * 
+   * @exception NameNotFoundException if some of the
+   * intermediate names in the path don't exist.
+   * 
+   * @exception NotOwnerException if the owner of the 
+   * parent context is checked and is not the local
+   * naming server.
+   * 
+   * @exception NotContextException if the specified path
+   * isn't bound to a context.
+   */
   public void destroySubcontext(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "ServerImpl.destroySubcontext(" + path + ')');
+                       "ServerImpl.destroySubcontext(" + 
+                       path + ')');
 
     if (path.size() == 0) 
       throw new NamingException("Cannot delete root context.");
 
     CompositeName parentPath = (CompositeName)path.clone();
     String lastName = (String)parentPath.remove(parentPath.size() - 1);
-    NamingContext parentNc = loadNamingContext(parentPath);
+    NamingContext parentNc = contextManager.getNamingContext(parentPath);
 
-    // The target context and/or intermediate contexts don't exist.
-    // As a csq, the name is not found.
-    if (parentNc == null) throw new NameNotFoundException();
+    NamingContext nc = contextManager.getNamingContext(path);
+    if (nc.size() > 0) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, 
+                         " -> not empty: nc = " + nc);
+      throw new ContextNotEmptyException();
+    }
+    
+    if (destroySubcontext(parentNc, lastName, path, serverId)) {
+      if (updateListener != null) {
+        updateListener.onUpdate(
+          new DestroySubcontextEvent(
+            parentNc.getId(), lastName, path));
+      }
+    }
+  }
+
+  public boolean destroySubcontext(NamingContext parentNc,                                    
+                                   String lastName,
+                                   CompositeName path,
+                                   Object ownerId) 
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.destroySubcontext(" + 
+                       parentNc + ',' +
+                       lastName + ',' + 
+                       path + ',' +
+                       ownerId + ')');
+    if (! parentNc.getOwnerId().equals(ownerId)) {
+      throw new NotOwnerException(
+        parentNc.getOwnerId());
+    }
 
     Record r = parentNc.getRecord(lastName);
     if (r != null) {
-      if (r instanceof ObjectRecord) throw new NotContextException();
-
-      NamingContext nc = loadNamingContext(path);
-      if (nc != null) {
-        if (nc.size() > 0) {
-          throw new ContextNotEmptyException();
-        } else {
-          // Remove from the cache
-          contexts.remove(path);
-          
-          // Remove from the disk
-          String filePath = ROOT;
-          if (path.size() > 0) {
-            filePath = filePath + File.separator + path.toString();
-          }
-          transaction.delete(filePath, NC_FILE);
-          
-          // Remove from the parent context
-          parentNc.removeRecord(lastName);
-          storeNamingContext(parentPath, parentNc);          
-        }
-      } else throw new Error("Missing naming context");      
+      if (r instanceof ContextRecord) {        
+        ContextRecord cr = (ContextRecord)r;
+        NamingContextId ctxId = cr.getId();
+        contextManager.delete(ctxId, path);
+        
+        // Remove from the parent context
+        parentNc.removeRecord(lastName);
+        contextManager.storeNamingContext(parentNc);        
+        return true;
+      } else {
+        throw new NotContextException();
+      }
+    } else {
+      // else do nothing (idempotency)
+      return false;
     }
-    // else do nothing (idempotency)
+  }
+
+  /**
+   * Returns the naming contexts owned by the server
+   * which identifier is specified.
+   *
+   * @param serverId the identifier of the server that owns
+   * the naming contexts to get.
+   */
+  public NamingContextInfo[] getNamingContexts(Object serverId) 
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+    Trace.logger.log(BasicLevel.DEBUG, 
+                     "ServerImpl.getNamingContexts(" + serverId + ')');
+    return contextManager.getNamingContexts(serverId);
+  }
+
+  public NamingContext getNamingContext(NamingContextId ncid)
+    throws NamingException {
+    return contextManager.getNamingContext(ncid);
+  }
+
+  public void addNamingContext(NamingContextInfo ncInfo)
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ServerImpl.addNamingContext(" + 
+                       ncInfo + ')');
+    contextManager.addNamingContext(ncInfo);
+  }
+
+  public void changeOwner(Object formerOwnerId)
+    throws NamingException {
+    NamingContextInfo[] contexts = 
+      contextManager.changeOwner(
+        formerOwnerId, serverId);    
+    if (updateListener != null) {
+      updateListener.onUpdate(
+        new ChangeOwnerEvent(
+          formerOwnerId,
+          contexts));
+    }
+  }
+
+  public void resetNamingContext(NamingContext context)
+    throws NamingException {
+    contextManager.resetNamingContext(context);
   }
 }
 
