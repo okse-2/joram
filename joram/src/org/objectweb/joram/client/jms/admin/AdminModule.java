@@ -104,10 +104,16 @@ public class AdminModule
       requestor = new TopicRequestor(sess, topic);
       
       cnx.start();
-      
-      org.objectweb.joram.client.jms.FactoryParameters params = 
-        ((org.objectweb.joram.client.jms.ConnectionFactory)
-         cnxFact).getParameters();
+     
+      org.objectweb.joram.client.jms.FactoryParameters params = null;
+
+      if (cnxFact instanceof javax.jms.XATopicConnectionFactory) 
+        params = ((org.objectweb.joram.client.jms.XAConnectionFactory)
+                  cnxFact).getParameters();
+      else
+        params = ((org.objectweb.joram.client.jms.ConnectionFactory)
+                  cnxFact).getParameters();
+
       localHost = params.getHost();
       localPort = params.getPort();
       
