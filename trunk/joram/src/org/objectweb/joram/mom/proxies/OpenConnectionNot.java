@@ -43,14 +43,14 @@ public class OpenConnectionNot extends Notification {
   private transient UserConnection uc;
 
   /**
-   * Exception that may be raised during
-   * the connection opening.
+   * Need to wrap the exception because exceptions are
+   * cloned.
    */
-  private transient Exception exception;
+  private transient ErrorContext errorContext;
 
   public OpenConnectionNot(UserConnection uc) {
     this.uc = uc;
-    this.exception = null;
+    this.errorContext = new ErrorContext();
   }
 
   /**
@@ -60,11 +60,31 @@ public class OpenConnectionNot extends Notification {
     return uc;
   }
 
-  public final Exception getException() {
-    return exception;
+  public Exception getException() {
+    if (errorContext!= null) {
+      return errorContext.getException();
+    } else  return null;
   }
 
   public void setException(Exception exception) {
-    this.exception = exception;
+    if (errorContext!= null) {
+      errorContext.setException(exception);
+    }
+  }
+
+  static class ErrorContext {
+    /**
+     * Exception that may be raised during
+     * the connection opening.
+     */
+    private Exception exception;
+
+    public final Exception getException() {
+      return exception;
+    }
+
+    public synchronized void setException(Exception exception) {
+      this.exception = exception;
+    }
   }
 }
