@@ -30,6 +30,7 @@ import fr.dyade.aaa.util.Transaction;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -50,7 +51,7 @@ public class PersistenceModule implements java.io.Serializable
    * <b>Key:</b> name of the persistence vector<br>
    * <b>Value:</b> table of identifiers of the persisted messages
    */
-  private Hashtable idsTable;
+  private Hashtable vectorsTable;
   /** Counter of persistence objects. */
   private long counter = 0;
 
@@ -60,13 +61,14 @@ public class PersistenceModule implements java.io.Serializable
   private transient Hashtable toBeUpdated;
   /** Table of the identifiers of the messages to delete. */
   private transient Hashtable idsToBeDeleted;
-  /**
-   * Table of the names of the persistence objects.
+  /** 
+   * Table of the persisted messages' identifiers.
    * <p>
-   * <b>Key:</b> identifier of a message persisted in a vector<br>
-   * <b>Value:</b> name of the persistence vector
+   * <b>Key:</b> identifier of the persisted message<br>
+   * <b>Value:</b> name of the vector in which the message is persisted,
+   *               <code>null</code> if message persisted individually.
    */
-  private transient Hashtable namesTable;
+  private transient HashMap idsTable;
 
 
   /**
@@ -77,12 +79,12 @@ public class PersistenceModule implements java.io.Serializable
   public PersistenceModule(AgentId agentId)
   {
     this.agentId = agentId;
-    idsTable = new Hashtable();
+    vectorsTable = new Hashtable();
 
     toBeSaved = new Hashtable();
     toBeUpdated = new Hashtable();
     idsToBeDeleted = new Hashtable();
-    namesTable = new Hashtable();
+    idsTable = new HashMap();
   }
 
  
@@ -98,9 +100,16 @@ public class PersistenceModule implements java.io.Serializable
 
     String id = message.getIdentifier();
 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "Registering msg " + id + " for saving");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "Registering msg " + id + " for saving");
+
     // If message already persisted, its persistent state will have
     // to be upated.
-    if (namesTable.containsKey(id))
+    if (idsTable.containsKey(id))
       toBeUpdated.put(id, message);
     // Else, the message will have to be saved.
     else
@@ -121,6 +130,13 @@ public class PersistenceModule implements java.io.Serializable
 
     String id = message.getIdentifier();
 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "Registering msg " + id + " for deletion");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "Registering msg " + id + " for deletion");
+
     idsToBeDeleted.put(id, id);
 
     toBeSaved.remove(id);
@@ -130,6 +146,9 @@ public class PersistenceModule implements java.io.Serializable
   /** Commits the registered savings and deletions. */
   public void commit()
   {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Commiting...");
+
     // Nothing to commit.
     if (toBeUpdated.isEmpty()
         && toBeSaved.isEmpty()
@@ -148,10 +167,9 @@ public class PersistenceModule implements java.io.Serializable
     // Deletion: browsing the identifiers of the messages to delete.
     for (enum = idsToBeDeleted.keys(); enum.hasMoreElements();) {
       id = (String) enum.nextElement();
-      name = (String) namesTable.remove(id);
+      name = (String) idsTable.remove(id);
 
-      // No persistence object registered: message was persisted
-      // individually.
+      // No vector name: message was persisted individually.
       if (name == null) {
         tx.delete("msg" + agentId + id.substring(3));
 
@@ -162,14 +180,14 @@ public class PersistenceModule implements java.io.Serializable
           MomTracing.dbgProxy.log(BasicLevel.DEBUG,
                                         "Message deleted: " + id);
       }
-      // Persistence object name retrieved: message was persisted in a vector.
+      // Vector name retrieved: message was persisted in a vector.
       else {
-        ids = (Hashtable) idsTable.get(name);
+        ids = (Hashtable) vectorsTable.get(name);
         ids.remove(id);
 
         // No more messages to be kept: removing the persistence object.
         if (ids.isEmpty()) {
-          idsTable.remove(name);
+          vectorsTable.remove(name);
           tx.delete(name);
 
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -182,13 +200,12 @@ public class PersistenceModule implements java.io.Serializable
       }
     }
 
-    // Update: deleting the previous messages state.
+    // Update: deleting the previous message's state.
     for (enum = toBeUpdated.keys(); enum.hasMoreElements();) {
       id = (String) enum.nextElement();
-      name = (String) namesTable.remove(id);
+      name = (String) idsTable.get(id);
 
-      // No persistence object registered: message was persisted
-      // individually.
+      // No vector name: message was persisted individually.
       if (name == null) {
         tx.delete("msg" + agentId + id.substring(3));
 
@@ -199,14 +216,14 @@ public class PersistenceModule implements java.io.Serializable
           MomTracing.dbgProxy.log(BasicLevel.DEBUG,
                                   "Message deleted: " + id);
       }
-      // Persistence object name retrieved: message was persisted in a vector.
+      // Vector name retrieved: message was persisted in a vector.
       else {
-        ids = (Hashtable) idsTable.get(name);
+        ids = (Hashtable) vectorsTable.get(name);
         ids.remove(id);
 
         // No more messages to be kept: removing the persistence object.
         if (ids.isEmpty()) {
-          idsTable.remove(name);
+          vectorsTable.remove(name);
           tx.delete(name);
 
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -235,6 +252,7 @@ public class PersistenceModule implements java.io.Serializable
       if (msgs.size() == 1) {
         Message msg = (Message) msgs.get(0);
         name = "msg" + agentId + msg.getIdentifier().substring(3);
+        idsTable.put(msg.getIdentifier(), null);
         tx.save(msg, name);
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -251,10 +269,10 @@ public class PersistenceModule implements java.io.Serializable
         if (counter == Long.MAX_VALUE)
           counter = 0;
         name = "msgs" + agentId + "-" + counter++;
-        idsTable.put(name, msgIds);
+        vectorsTable.put(name, msgIds);
 
         for (enum = msgIds.keys(); enum.hasMoreElements();)
-          namesTable.put(enum.nextElement(), name);
+          idsTable.put(enum.nextElement(), name);
   
         tx.save(msgs, name);
 
@@ -306,10 +324,11 @@ public class PersistenceModule implements java.io.Serializable
     Message msg;
     String msgId;
 
-    // Getting the identifiers of the messages still to be persisted.
+    // Getting the identifiers of the messages persisted in vectors, and to
+    // be kept.
     Hashtable idsToPersist = new Hashtable();
-    for (enum = idsTable.keys(); enum.hasMoreElements();)
-      idsToPersist.putAll((Hashtable) idsTable.remove(enum.nextElement()));
+    for (enum = vectorsTable.keys(); enum.hasMoreElements();)
+      idsToPersist.putAll((Hashtable) vectorsTable.remove(enum.nextElement()));
      
     // Retrieving the names of the persistence objects previously saved. 
     Transaction tx = AgentServer.getTransaction();
@@ -400,6 +419,6 @@ public class PersistenceModule implements java.io.Serializable
     toBeSaved = new Hashtable();
     toBeUpdated = new Hashtable();
     idsToBeDeleted = new Hashtable();
-    namesTable = new Hashtable();
+    idsTable = new HashMap();
   }
 }
