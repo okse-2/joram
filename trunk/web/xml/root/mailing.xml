@@ -13,26 +13,25 @@
 
     <s1 name="Mailing Lists">
 
-    <subtitle>JORAM community</subtitle>
-    <p>For sending questions to the JORAM users and developers community,
-    post mails to the 
+    <subtitle>Pure JORAM/JMS support</subtitle>
+    <p>Support on pure JORAM/JMS issues is provided by the
     <a href="mailto:joram@objectweb.org">joram@objectweb.org</a> forum.</p>
-    <p>But BEFORE, please make sure your question is not already answered
-    in the <a href="http://www.objectweb.org/wws/arc/joram">archives</a>.
-    </p>
-    <p>Subscribing can be performed
-    <a href="http://www.objectweb.org/wws/subrequest/joram">here</a>.</p>
-    <p>For getting in touch with the JORAM development team only (the team
-    also receives and reads the community mails), post mails to
-    <a href="mailto:joram-team@objectweb.org">joram-team@objectweb.org</a>.
-    </p>
+    
+    <p>Many questions are already answered in the
+    <a href="http://www.objectweb.org/wws/arc/joram">archives</a>.</p>
 
-    <subtitle>EJB developers</subtitle>
-    <p>Questions and feedbacks related to using JORAM within JOnAS
-    can also be sent to the <a href="mailto:jonas@objectweb.org">JOnAS
-    mailing list</a>, and may also have already been answered in JOnAS
-    <a href="http://www.objectweb.org/wws/arc/jonas">archives</a>.</p>
+    <p>For keeping an eye on the forum, please
+    <a href="http://www.objectweb.org/wws/subrequest/joram">subscribe</a>.</p>
 
+    <subtitle>Support for using JORAM within the JOnAS application server</subtitle>
+    <p>For questions or feedbacks related to using JMS within JOnAS components,
+    or to the JORAM/JOnAS integration, or to specific JORAM/JOnAS architecturing
+    issues, please use the  
+    <a href="mailto:jonas@objectweb.org">jonas@objectweb.org</a> forum.</p>
+
+    <p>Its archives are also browsable
+    <a href="http://www.objectweb.org/wws/arc/joram">here</a>.</p>
+    
     </s1>
 
   </body>
