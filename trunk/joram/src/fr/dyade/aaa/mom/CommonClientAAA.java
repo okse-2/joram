@@ -528,6 +528,8 @@ public class CommonClientAAA implements java.io.Serializable {
 		adminGetAgentClient((MessageAdminGetAgentClient) not.msgMOMExtern);
 	    } else  if (not.msgMOMExtern instanceof MessageAdminDeleteAgentClient) {
 		adminDeleteAgentClient((MessageAdminDeleteAgentClient) not.msgMOMExtern);
+	    } else  if (not.msgMOMExtern instanceof MessageAdminCleanDriver) {
+		adminCleanDriver((MessageAdminCleanDriver) not.msgMOMExtern);
 	    } else  if (not.msgMOMExtern instanceof MessageTransactedVector) {
 		notificationTransactedVectorSend((MessageTransactedVector) not.msgMOMExtern);
 	    } else  if (not.msgMOMExtern instanceof MessageTransactedRollback) {
@@ -587,7 +589,18 @@ public class CommonClientAAA implements java.io.Serializable {
 	    if (Debug.admin)
 		System.out.println("<-CommonClientAAA : adminDeleteAgentClient : "+ msg.getAgent() + " deleted");
     }
-
+    /** stop driver of this ProxyAgent */
+    protected void adminCleanDriver(MessageAdminCleanDriver msg) throws Exception {
+	if (Debug.debug)
+	    if (Debug.admin)
+		System.out.println("->CommonClientAAA : adminCleanDriver = " + msg.toString() + 
+				   "\n  agentClient " + agentClient);
+	((ProxyAgent) agentClient).cleanDriverOut();
+	//agentClient.sendNotification(((Agent)agentClient).getId(),new fr.dyade.aaa.agent.DriverDone(msg.getDriver()));
+	if (Debug.debug)
+	    if (Debug.admin)
+		System.out.println("<-CommonClientAAA : adminCleanDriver send to " + ((Agent)agentClient).getId());
+    }
     /** Creation of Agent Topic with the admin tools */
     protected void adminCreateTopic(MessageAdminCreateTopic msg) throws Exception {
 	if (Debug.debug)
