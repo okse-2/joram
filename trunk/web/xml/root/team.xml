@@ -9,7 +9,7 @@
     <filename>team.xml</filename>
     <pathtoroot>.</pathtoroot>
   </properties>
-  
+
   <body>
     <s1 name="Team">
 
@@ -17,19 +17,12 @@
  
       <p>Currently, the JORAM project team is composed of:</p>
       <ul>
+	<li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+        <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
 	<li>Andre Freyssinet (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
 	<li>Serge Lacourte (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
 	<li>Frederic Maistre (<a href="http://www.bull.com/">Bull</a>)</li>
         <li>Nicolas Tachker (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-      </ul>
-
-      <subtitle>Contributors</subtitle>
-
-      <p>The following contributors are actively involved in supporting JORAM:</p>
-      <ul>
-        <li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-        <li>Alexander Fedorowicz</li>
-        <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
       </ul>
 
       <p>We would also like to thank all the following people who have
@@ -38,6 +31,7 @@
 	<li>Cyril Araud (<a href="http://www.inria.fr/">INRIA</a>)</li>
 	<li>Laurent Chauvirey (<a href="http://www.inpg.fr/">INPG</a>)</li>
 	<li>Philippe Coq (<a href="http://www.bull.com/">Bull</a>)</li>
+        <li>Alexander Fedorowicz</li>
 	<li>Xavier Etchevers (<a href="http://www.bull.com/">Bull</a>)</li>
 	<li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>)</li>
 	<li>Douglas S. Jackson</li>
@@ -50,6 +44,6 @@
 
       <p>If you feel forgotten, please <a
       href="mailto:joram-team@objectweb.org">contact</a> us.</p>
-    </s1>    
+    </s1>
   </body>
 </document>
