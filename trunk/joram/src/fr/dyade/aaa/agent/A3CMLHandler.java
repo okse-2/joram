@@ -165,7 +165,7 @@ public class A3CMLHandler extends DefaultHandler {
     A3CMLHandler a3configHdl = new A3CMLHandler(cfgName, serverId);
     reader.setContentHandler(a3configHdl);
     reader.setErrorHandler(a3configHdl);
-    reader.parse(cfgFileName);
+    reader.parse(cfgFile.getCanonicalPath());
 
     if (a3configHdl.servers == null)
       throw new Exception("Empty configuration \"" + cfgName + "\" in " +
