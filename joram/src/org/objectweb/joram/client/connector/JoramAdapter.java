@@ -81,9 +81,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                      java.io.Serializable
 {
   /**
-   * Path to the directory containing the underlying JORAM platform
-   * <code>a3servers.xml</code> configuration file, needed in the
-   * collocated case.
+   * Path to the directory containing JORAM's configuration files
+   * (<code>a3servers.xml</code> and <code>a3debug.cfg</code>).
    */
   private String platformConfigDir;
   /** <code>true</code> if the underlying JORAM platform is persistent. */
@@ -133,7 +132,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    */
   public JoramAdapter()
   {
-    debug("JORAM adapter instanciated.");
+    debugINFO("JORAM adapter instanciated.");
 
     consumers = new Hashtable();
     producers = new Vector();
@@ -155,28 +154,30 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (stopped)
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
-    debug("JORAM adapter starting deployment...");
+    debugINFO("JORAM adapter starting deployment...");
 
     workManager = ctx.getWorkManager();
 
     // Collocated mode: starting the JORAM server. 
     if (collocated) {
 
-      debug("  - Collocated JORAM server is starting...");
+      debugINFO("  - Collocated JORAM server is starting...");
 
       if (persistentPlatform)
         System.setProperty("Transaction", "fr.dyade.aaa.util.ATransaction");   
       else
         System.setProperty("Transaction", "fr.dyade.aaa.util.NullTransaction");
 
-      if (platformConfigDir != null)
+      if (platformConfigDir != null) {
         System.setProperty("fr.dyade.aaa.agent.A3CONF_DIR", platformConfigDir);
+        System.setProperty("fr.dyade.aaa.agent.DEBUG_DIR", platformConfigDir);
+      }
 
       try {
         String[] args = {"" + serverId, serverName};
         AgentServer.init(args);
         AgentServer.start();
-        debug("  - Collocated JORAM server has successfully started.");
+        debugINFO("  - Collocated JORAM server has successfully started.");
       }
       catch (Exception exc) {
         throw new ResourceAdapterInternalException("Could not start "
@@ -190,7 +191,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       FileReader file = new FileReader(adminFile);
       BufferedReader reader = new BufferedReader(file);
 
-      debug("  - Reading the provided admin file...");
+      debugINFO("  - Reading the provided admin file...");
 
       boolean end = false;
       String line;
@@ -229,7 +230,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                   createUser(name, password);
                 }
                 else
-                  debug("  - Missing password for user [" + name + "]");
+                  debugDEBUG("  - Missing password for user [" + name + "]");
               }
               else if (firstToken.equalsIgnoreCase("CF")) {
                 if (tokenizer.hasMoreTokens()) {
@@ -256,20 +257,20 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         catch (IOException exc) {}
         // Error while creating the destination.
         catch (AdminException exc) {
-          debug("  CREATION FAILED: " + exc);
+          debugDEBUG("  CREATION FAILED: " + exc);
         }
         // JNDI error.
         catch (NamingException exc) {
-          debug("  BINDING FAILED: " + exc);
+          debugDEBUG("  BINDING FAILED: " + exc);
         }
       }
     }
     // No destination to deploy.
     catch (java.io.FileNotFoundException fnfe) { 
-      debug("  - No administration task requested.");
+      debugINFO("  - No administration task requested.");
     }
 
-    debug("JORAM adapter successfully deployed.");
+    debugINFO("JORAM adapter successfully deployed.");
 
     started = true;
   }
@@ -280,6 +281,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    */
   public synchronized void stop()
   {
+    debugINFO("JORAM adapter stopping...");
+
     if (! started || stopped)
       return;
 
@@ -306,6 +309,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       catch (Exception exc) {}
     }
     stopped = true;
+    debugINFO("JORAM adapter successfully stopped.");
   }
 
   /**
@@ -338,6 +342,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (! specImpl.getResourceAdapter().equals(this))
       throw new ResourceException("Supplied ActivationSpec instance "
                                   + "associated to an other ResourceAdapter.");
+
+    debugDEBUG("Activating Endpoint on JORAM adapter.");
 
     boolean durable =
       specImpl.getSubscriptionDurability() != null
@@ -435,6 +441,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (! started || stopped)
       return;
 
+    debugDEBUG("Deactivating Endpoint on JORAM adapter.");
+
     ((InboundConsumer) consumers.remove(spec)).close();
   }
 
@@ -489,13 +497,14 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       Queue queue = Queue.create(name);
       queue.setFreeReading();
       queue.setFreeWriting();
-      debug("  - Queue [" + name + "] has been created.");
+      debugINFO("  - Queue [" + name + "] has been created.");
       Context ctx = new InitialContext();
       ctx.bind(name, queue);
       return queue;
     }
     catch (ConnectException exc) {
-      throw new AdminException("Admin connection has been lost.");
+      throw new AdminException("createQueue() failed: admin connection "
+                               + "has been lost.");
     }
   }
 
@@ -513,13 +522,14 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       Topic topic = Topic.create(name);
       topic.setFreeReading();
       topic.setFreeWriting();
-      debug("  - Topic [" + name + "] has been created.");
+      debugINFO("  - Topic [" + name + "] has been created.");
       Context ctx = new InitialContext();
       ctx.bind(name, topic);
       return topic;
     }
     catch (ConnectException exc) {
-      throw new AdminException("Admin connection has been lost.");
+      throw new AdminException("createTopic() failed: admin connection "
+                               + "has been lost.");
     }
   }
 
@@ -533,10 +543,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     try {
       adminConnect();
       User.create(name, password);
-      debug("  - User [" + name + "] has been created.");
+      debugINFO("  - User [" + name + "] has been created.");
     }
     catch (ConnectException exc) {
-      throw new AdminException("Admin connection has been lost.");
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
     }
   }
 
@@ -557,8 +568,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
       ctx.bind(name, factory);
-      debug("  - ConnectionFactory [" + name
-            + "] has been created and bound.");
+      debugINFO("  - ConnectionFactory [" + name
+                + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -583,8 +594,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
       ctx.bind(name, factory);
-      debug("  - QueueConnectionFactory [" + name
-            + "] has been created and bound.");
+      debugINFO("  - QueueConnectionFactory [" + name
+                + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -609,8 +620,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
       ctx.bind(name, factory);
-      debug("  - TopicConnectionFactory [" + name
-            + "] has been created and bound.");
+      debugINFO("  - TopicConnectionFactory [" + name
+                + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -654,8 +665,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     producers.remove(managedCx);
   }
 
-  /** Debugging method. */
-  private void debug(String message)
+  /** Debugging method (INFO level). */
+  static void debugINFO(String message)
+  {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO, message);
+  }
+
+  /** Debugging method (DEBUG level). */
+  static void debugDEBUG(String message)
   {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, message);
