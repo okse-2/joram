@@ -351,7 +351,6 @@ public class Message implements Cloneable, Serializable
     else if (name.equals("JMSCorrelationID"))
       res = correlationId;
     else if (name.equals("JMSDeliveryMode")) {
-        System.out.println("JMSDeliveryMode in message selector");
       //XXX it would be better to check userIntHeader based on the constants
       //XXX of javax.jms.DeliveryMode instead of the hard-coded values.
       //XXX but without creating a dependency on javax.jms in mom package.
