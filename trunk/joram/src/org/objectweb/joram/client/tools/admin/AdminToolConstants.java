@@ -51,36 +51,22 @@ public class AdminToolConstants {
 	protected static final Color COLOR_DISCONNECTED = new Color(0xff, 0x00, 0x00);
 
 	// Icons used in the admin tool
-  static final ImageIcon expandedIcon =
-  	new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/expanded.png")));
+	private static final String iconPackageName = "/org/objectweb/joram/client/tools/admin/icons/";
+ 
+  static final ImageIcon expandedIcon = loadIcon("expanded.png");
+  static final ImageIcon collapsedIcon = loadIcon("collapsed.png");
+  static final ImageIcon serverIcon = loadIcon("server.png");
+  static final ImageIcon queueIcon = loadIcon("queue.png");
+  static final ImageIcon userIcon = loadIcon("user.png");
+  static final ImageIcon jndiIcon = loadIcon("jndi.png");
+  static final ImageIcon refreshIcon = loadIcon("refresh.png");
+  static final ImageIcon stopIcon = loadIcon("stop.png");
+  static final ImageIcon trashIcon = loadIcon("trash.png");
+  static final ImageIcon lockIcon =	loadIcon("lock.png");
+  static final ImageIcon homeIcon = loadIcon("home.png");
 
-  static final ImageIcon collapsedIcon =
-  	new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/collapsed.png")));
-
-  static final ImageIcon serverIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/server.png")));
-
-  static final ImageIcon queueIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/queue.png")));
-
-  static final ImageIcon userIcon =
-  	new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/user.png")));
-
-  static final ImageIcon jndiIcon =
-  	new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/jndi.png")));
-
-  static final ImageIcon refreshIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/refresh.png")));
-
-  static final ImageIcon stopIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/stop.png")));
-
-  static final ImageIcon trashIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/trash.png")));
-
-  static final ImageIcon lockIcon =
-  	new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/lock.png")));
-
-  static final ImageIcon homeIcon =
-    new ImageIcon(Toolkit.getDefaultToolkit().getImage(AdminTool.class.getResource("/org/objectweb/joram/client/tools/admin/icons/home.png")));
+	private static ImageIcon loadIcon(String name) {
+		return new ImageIcon(Toolkit.getDefaultToolkit().getImage(
+			AdminTool.class.getResource(iconPackageName + name)));
+	}
 }
