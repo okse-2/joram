@@ -754,7 +754,12 @@ public class Message implements Cloneable, Serializable
   public Object clone()
   {
     try {
-      return super.clone();
+      Message clone = (Message) super.clone();
+      clone.optionalHeader = new Hashtable();
+      clone.optionalHeader.putAll(optionalHeader);
+      clone.properties = new Hashtable();
+      clone.properties.putAll(properties);
+      return clone;
     }
     catch (CloneNotSupportedException cE) {
       return null;
