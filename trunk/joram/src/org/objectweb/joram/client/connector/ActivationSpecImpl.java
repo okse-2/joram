@@ -90,8 +90,8 @@ public class ActivationSpecImpl
       throw new InvalidPropertyException("Missing destination property.");
 
     if (acknowledgeMode != null
-        && ! acknowledgeMode.equals("auto_acknowledge")
-        && ! acknowledgeMode.equals("dups_ok_acknowledge"))
+        && ! acknowledgeMode.equals("Auto-acknowledge")
+        && ! acknowledgeMode.equals("Dups-ok-acknowledge"))
       throw new InvalidPropertyException("Invalid acknowledge mode: " 
                                          + acknowledgeMode);
 
