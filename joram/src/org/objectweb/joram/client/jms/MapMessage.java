@@ -387,7 +387,12 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   public String getString(String name) 
     throws JMSException {
     try {
-      return ConversionHelper.toString(map.get(name));
+      Object value = map.get(name);
+      if (value instanceof byte[])
+        throw new MessageValueException("Type " + value.getClass().getName() 
+                                        + " can't be converted to String.");
+      else
+        return ConversionHelper.toString(map.get(name));
     } catch (Exception exc) {
       MessageFormatException mfe =
         new MessageFormatException(exc.getMessage());
