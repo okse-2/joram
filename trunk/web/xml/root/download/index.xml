@@ -13,7 +13,7 @@
   <body>
 
     <s1 name="Downloading...">
-      <s2 name="JORAM source and binary packages:">
+      <s2 name="JORAM source and binary packages">
       <p>The latest release packages are:</p>
       <ul>
         <li><code>joram-4.0.0.tgz</code>, including JORAM client and MOM
@@ -32,7 +32,7 @@
      ObjectWeb Forge</a>.</p>
      </s2>
 
-    <s2 name="JORAM CVS code base:">
+    <s2 name="JORAM CVS code base">
     <p>JORAM and kJORAM are available by checking out the
     <strong>joram</strong> module from
     <a href="http://forge.objectweb.org/cvs/?group_id=4">CVS</a>.</p>
