@@ -54,6 +54,9 @@ public class ActivationSpecImpl
   /** Durable subscription name, if any. */
   private String subscriptionName;
 
+  /** Acknowledgement mode. */
+  private String acknowledgeMode = null;
+
   /** Maximum number of work instances to be submitted (0 for infinite). */
   private String maxNumberOfWorks = "0";
 
@@ -86,6 +89,11 @@ public class ActivationSpecImpl
     if (destination == null)
       throw new InvalidPropertyException("Missing destination property.");
 
+    if (acknowledgeMode != null
+        && ! acknowledgeMode.equals("auto_acknowledge")
+        && ! acknowledgeMode.equals("dups_ok_acknowledge"))
+      throw new InvalidPropertyException("Invalid acknowledge mode: " 
+                                         + acknowledgeMode);
 
     if (subscriptionDurability != null) {
 
@@ -171,6 +179,12 @@ public class ActivationSpecImpl
     this.subscriptionName = subscriptionName;
   }
 
+  /** Sets the acknowledgement mode. */
+  public void setAcknowledgeMode(String acknowledgeMode)
+  {
+    this.acknowledgeMode = acknowledgeMode;
+  }
+
   /** Sets the maximum number of work instances to be submitted. */
   public void setMaxNumberOfWorks(String maxNumberOfWorks)
   {
@@ -217,6 +231,12 @@ public class ActivationSpecImpl
   public String getSubscriptionName()
   {
     return subscriptionName;
+  }
+
+  /** Returns the acknowledgement mode. */
+  public String getAcknowledgeMode()
+  {
+    return acknowledgeMode;
   }
 
   /** Returns the maximum number of work instances to be submitted. */
