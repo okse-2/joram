@@ -28,6 +28,8 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.*;
 
+import fr.dyade.aaa.util.TimerTask;
+
 import java.util.*;
 
 import javax.jms.JMSException;
@@ -89,8 +91,8 @@ public abstract class Session implements javax.jms.Session
    */
   Hashtable deliveries;
 
-  /** Timer for terminating pending transactions. */
-  private Timer transactimer = null;
+  /** Task actually terminating pending transactions. */
+  private TimerTask transactask = null;
 
 
   /**
@@ -290,9 +292,9 @@ public abstract class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
-    if (transactimer != null) {
-      transactimer.cancel();
-      transactimer = null;
+    if (transactask != null) {
+      transactask.cancel();
+      transactask = null;
     }
 
     // Sending client messages:
@@ -342,9 +344,9 @@ public abstract class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
 
-    if (transactimer != null) {
-      transactimer.cancel();
-      transactimer = null;
+    if (transactask != null) {
+      transactask.cancel();
+      transactask = null;
     }
 
     // Denying the received messages:
@@ -515,8 +517,8 @@ public abstract class Session implements javax.jms.Session
   void prepareSend(String name, fr.dyade.aaa.mom.messages.Message msg)
   {
     boolean rearmTimer = false;
-    if (transactimer != null) {
-      transactimer.cancel();
+    if (transactask != null) {
+      transactask.cancel();
       rearmTimer = true;
     }
 
@@ -527,10 +529,13 @@ public abstract class Session implements javax.jms.Session
     }
     pM.addMessage(msg);
 
-    if (rearmTimer) {
-      transactimer = new Timer();
-      transactimer.schedule(new TxTimerTask(this), cnx.factory.txTimer * 1000);
+    try {
+      if (rearmTimer) {
+        transactask = new TxTimerTask(this);
+        cnx.transactimer.schedule(transactask, cnx.factory.txTimer * 1000);
+      }
     }
+    catch (Exception e) {}
   }
 
   /** 
@@ -543,8 +548,8 @@ public abstract class Session implements javax.jms.Session
    */
   void prepareAck(String name, String id)
   {
-    if (transactimer != null) 
-      transactimer.cancel();
+    if (transactask != null) 
+      transactask.cancel();
 
     Vector ids = (Vector) deliveries.get(name);
     if (ids == null) {
@@ -553,10 +558,13 @@ public abstract class Session implements javax.jms.Session
     }
     ids.add(id);
 
-    if (cnx.factory.txTimer != 0) {
-      transactimer = new Timer();
-      transactimer.schedule(new TxTimerTask(this), cnx.factory.txTimer * 1000);
+    try {
+      if (cnx.transactimer != null) {
+        transactask = new TxTimerTask(this);
+        cnx.transactimer.schedule(transactask, cnx.factory.txTimer * 1000);
+      }
     }
+    catch (Exception e) {}
   }
 
   /**

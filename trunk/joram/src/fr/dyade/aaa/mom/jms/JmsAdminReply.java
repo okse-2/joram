@@ -63,4 +63,8 @@ public class JmsAdminReply extends AbstractJmsReply
   {
     return info;
   }
+
+  public String toString() {
+    return "JmsAdminReply[success="+ success +", info= "+ info +"]";
+  }
 }

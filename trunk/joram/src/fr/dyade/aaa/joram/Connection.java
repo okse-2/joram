@@ -28,6 +28,7 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.jms.*;
+import fr.dyade.aaa.util.Timer;
 
 import java.io.*;
 import java.net.*;
@@ -113,6 +114,8 @@ public abstract class Connection implements javax.jms.Connection
    * <b>Object:</b> reply object
    */
   Hashtable repliesTable;
+  /** Timer for terminating pending transactions. */
+  Timer transactimer = null;
 
   /**
    * Opens a connection.
@@ -142,6 +145,9 @@ public abstract class Connection implements javax.jms.Connection
     readables = new Vector();
     writables = new Vector();
     deleteds = new Vector();
+
+    if (factory.txTimer != 0)
+      transactimer = new Timer();
 
     try {
       // Opening the connection:
@@ -368,6 +374,10 @@ public abstract class Connection implements javax.jms.Connection
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this 
                                  + ": closing...");
+
+    // Finishing the timer, if any:
+    if (transactimer != null)
+      transactimer.cancel();
 
     // Stopping the connection:
     try {
