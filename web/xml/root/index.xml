@@ -24,7 +24,7 @@
       <subtitle>January, 16th 2002: JORAM 2.2 (cvs tag:
 	joram2_2)</subtitle>
       <p>This version adds support for <a
-	  href="http://jakarta.apache.org/ant">Ant</a> build
+	  href="http://jakarta.apache.org/ant/">Ant</a> build
 	system. Package are also available for download. Have a look <a
 	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">JORAM CVS repository</a>
 	<br/>
