@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - Bull SA
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2003 Bull SA
+ * Copyright (C) 1996 - 2001 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s):       Andre Freyssinet (ScalAgent D.T.)
  */
 package fr.dyade.aaa.mom.proxies;
 
@@ -62,8 +62,12 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
   /** Administrator's initial password. */
   private String initialAdminPass;
 
-  // FLOW CONTROL OBJECTS AND PARAMETERS //
+  // Flow control objects and parameters
   private static Object lock = new Object();
+  /**
+   * Flow control duration (in ms) between two message sendings
+   * (-1 for no flow control).
+   */
   private static int inFlow = -1;
   private static long flowControl = 0;
   private static long start = 0L;
@@ -331,20 +335,19 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
       synchronized (lock) {
         if (start == 0L) start = System.currentTimeMillis();
         nbmsg += 1;
-        if (nbmsg == (inFlow *10)) {
+        if (nbmsg == inFlow) {
           end = System.currentTimeMillis();
-          flowControl += (10000L - (end - start)) / (inFlow *10);
-          if (flowControl < 0) flowControl = 0L;
-          start = end;
+          flowControl = 1000L - (end - start);
+          if (flowControl > 0) {
+            try {
+              Thread.sleep(flowControl);
+            } catch (InterruptedException exc) {}
+            start = System.currentTimeMillis();
+          } else {
+            start = end;
+          }
           nbmsg = 0;
         }
-      }
-      if (flowControl > 0) {
-        try {
-          Thread.sleep(flowControl);
-        } catch (InterruptedException exc) {}
-      } else {
-        Thread.yield();
       }
     }
   }
