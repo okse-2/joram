@@ -22,12 +22,11 @@
       messaging functionnalities. A J2ME application is a lightweight Java
       application deployed and running on a mobile device such as a PDA or a
       smart phone.</p>
-      <p>In the
-      <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
-      download area</a> you will find the usual JORAM sources and jars-only
-      packages (<code>joram-3.6.0-src.tgz</code> and
-      <code>joram-3.6.0.tgz</code>). You will also find two new packages 
-      holding the specific kJORAM client interfaces for the J2ME applications:
+      <p>In the<a href="download/index.html">download area</a> you will find
+      the usual JORAM sources and jars-only packages
+      (<code>joram-3.6.0-src.tgz</code> and <code>joram-3.6.0.tgz</code>).
+      You will also find two new packages holding the specific kJORAM client
+      interfaces for the J2ME applications:
       </p>
       <ul>
         <li><code>kjoram-3.6.0-src.tgz</code>, providing the kJORAM sources and
