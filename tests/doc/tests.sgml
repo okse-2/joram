@@ -43,6 +43,12 @@
         <para><ulink url="http://www.objectweb.org/joram">JORAM 3.0.1</ulink></para>
       </listitem>
       <listitem>
+        <para><ulink url="http://www.ashnasoft.com">AshnaMQ
+            2.0</ulink>  Standard Edition or Enterprise Edition
+          (provided by <ulink
+            url="mailto:support@ashnasoft.com">Ashnasoft</ulink>)</para>
+      </listitem>
+      <listitem>
         <para><ulink
             url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ 5.21</ulink> (provided by me, not by Fiorano)</para>
       </listitem>
@@ -217,7 +223,7 @@
         <varname>&lt;provider&gt;</varname> being of one the providers which implements
         the Admin interface. </para>
       <sect3>
-        <title>Compile JORAM Admin</title>
+        <title>JORAM</title>
         <para>To compile JORAM <varname>Admin</varname>
           implementation, type in the <filename>tests</filename> directory
           <simplelist>
@@ -226,7 +232,7 @@
         </para>
       </sect3>
       <sect3>
-        <title>Compile Pramati Admin</title> 
+        <title>Pramati</title> 
         <para>First install
           Pramati Message Server and copy the following jars to the
           <filename>providers/pramati</filename> directory from
@@ -258,9 +264,21 @@
         </para>
       </sect3>
       <sect3>
-        <title>Compile FioranoMQ Admin</title>
+        <title>AshnaMQ</title>
+        <para>To compile AshnaMQ, first you have to add the
+          <filename>AshnaClient.jar</filename> file in the
+          <filename>providers/ashnasoft</filename> directory (this file
+          can be found in the <filename>lib</filename> directory of
+          your installation of AshnaMQ). Then, type in the
+          <filename>tests</filename> directory: 
+          <simplelist>
+            <member><command>ant compile.ashnasoft</command></member>
+          </simplelist>  </para>
+      </sect3>
+      <sect3>
+        <title>FioranoMQ</title>
         <para>To compile FioranoMQ <varname>Admin</varname>
-          implementation, you have first to install and propertly
+          implementation, you have first to install and properly
           setup it (for more information see <ulink
             url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ web site</ulink>, 
           then add fioranoMQ libraries in the
@@ -306,6 +324,17 @@
         <para>Please refer to Pramati Message Server's <ulink
             url="http://www.pramati.com/docstore/1230006/help/index1.htm">documentation</ulink>
         </para>
+      </sect3>
+      <sect3>
+        <title>AshnaMQ</title>
+        <para>Let say that ASMQ_HOME is the home directory of
+          AshnaMQ, go to
+          <filename>$ASMQ_HOME/bin</filename> directory and
+          type
+          <simplelist>
+            <member><command>server.sh</command> (on Unix)</member>
+            <member><command>server.bat</command> (on Win32)</member>
+          </simplelist></para>
       </sect3>
       <sect3>
         <title>FioranoMQ</title>
