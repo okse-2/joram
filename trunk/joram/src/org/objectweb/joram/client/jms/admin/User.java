@@ -39,9 +39,9 @@ import org.objectweb.joram.shared.admin.*;
 public class User extends AdministeredObject
 {
   /** The name of the user. */
-  private String name;
+  String name;
   /** Identifier of the user's proxy agent. */
-  private String proxyId;
+  String proxyId;
 
 
   /**
