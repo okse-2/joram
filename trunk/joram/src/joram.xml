@@ -143,11 +143,11 @@
         <include name="org/objectweb/joram/client/jms/tcp/*.class"/>
       </fileset>
     </jar>
-    <jar jarfile="${lib.dir}/joram-connector.jar">
-      <fileset dir="${obj.dir}">
-        <include name="org/objectweb/joram/client/connector/*.class"/>
-      </fileset>
-    </jar>
+  </target>
+
+  <!-- Builds a JORAM admin GUI jar. -->
+  <target name="ship.gui" depends="init,compile"
+      description="--> Builds Joram admin GUI jar.">
     <jar jarfile="${lib.dir}/joram-gui.jar">
       <fileset dir="${obj.dir}">
         <include name="org/objectweb/joram/client/tools/admin/*.class"/>
@@ -156,29 +156,6 @@
         <include name="org/objectweb/joram/client/tools/admin/icons/*.png"/>
       </fileset>
     </jar>
-  </target>
-
-  <!-- Builds and ships a JORAM JCA 1.5 adapter -->
-  <target name="ship.adapter" depends="ship.joram"
-          description="--> Builds and ships JORAM JCA 1.5 adapter archive">
-    <mkdir dir="${lib.dir}/META-INF"/>
-    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
-          todir="${lib.dir}/META-INF"/>
-    <jar jarfile="${lib.dir}/joram-adapter.rar">
-      <fileset dir="${lib.dir}">
-        <include name="joram-shared.jar"/>
-        <include name="joram-mom.jar"/>
-        <include name="joram-client.jar"/>
-        <include name="joram-connector.jar"/>
-        <include name="META-INF/*.xml"/>
-        <include name="jakarta-regexp-1.2.jar"/>
-        <include name="JCup.jar"/>
-        <include name="log4j.jar"/>
-        <include name="ow_monolog.jar"/>
-        <include name="xerces.jar"/>
-      </fileset>
-    </jar>
-    <delete dir="${lib.dir}/META-INF"/>
   </target>
 
   <!-- JAVADOC --> 
