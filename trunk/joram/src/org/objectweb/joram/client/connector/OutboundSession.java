@@ -27,6 +27,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundSession</code> instance wraps a JMS session (XA or not)
@@ -37,7 +38,7 @@ public class OutboundSession implements javax.jms.Session
   /** The <code>OutboundConnection</code> the session belongs to. */
   protected OutboundConnection cnx;
   /** The wrapped JMS session. */
-  protected Session sess;
+  Session sess;
 
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
@@ -45,31 +46,63 @@ public class OutboundSession implements javax.jms.Session
   /** <code>true</code> if the session is started. */
   boolean started = false;
 
+  protected boolean transacted;
+
   /**
    * Constructs an <code>OutboundSession</code> instance.
    */
-  OutboundSession(Session sess, OutboundConnection cnx)
-  {
+  OutboundSession(Session sess, OutboundConnection cnx) {
     this.sess = sess;
     this.cnx = cnx;
     cnx.sessions.add(this);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundSession(" + sess + 
+                                    ", " + cnx + ")" + 
+                                    "  cnx.sessions = " +  cnx.sessions);
   }
  
+  /**
+   * Constructs an <code>OutboundSession</code> instance.
+   */
+  OutboundSession(Session sess, 
+                  OutboundConnection cnx,
+                  boolean transacted) {
+    this.sess = sess;
+    this.cnx = cnx;
+    this.transacted = transacted;
+    cnx.sessions.add(this);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundSession(" + sess + 
+                                    ", " + cnx + ")" + 
+                                    "  cnx.sessions = " +  cnx.sessions);
+  }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public int getAcknowledgeMode() throws JMSException
-  {
+  public int getAcknowledgeMode() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " getAcknowledgeMode() = " + sess.getAcknowledgeMode());
+    
     checkValidity();
+    if (transacted)
+      return Session.SESSION_TRANSACTED;
     return sess.getAcknowledgeMode();
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public boolean getTransacted() throws JMSException
-  {
+  public boolean getTransacted() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getTransacted() = " + sess.getTransacted());
+
     checkValidity();
     return sess.getTransacted();
   }
@@ -98,8 +131,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.Message createMessage() throws JMSException
-  {
+  public javax.jms.Message createMessage() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createMessage()");
+
     checkValidity();
     return sess.createMessage();
   }
@@ -107,8 +143,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.TextMessage createTextMessage() throws JMSException
-  {
+  public javax.jms.TextMessage createTextMessage() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createTextMessage()");
+
     checkValidity();
     return sess.createTextMessage();
   }
@@ -117,8 +156,11 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.TextMessage createTextMessage(String text)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createTextMessage(" + text + ")");
+
     checkValidity();
     return sess.createTextMessage(text);
   }
@@ -195,8 +237,10 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.MessageProducer createProducer(javax.jms.Destination dest)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createProducer(" + dest + ")");
+    
     checkValidity();
     return new OutboundProducer(sess.createProducer(dest), this);
   }
@@ -205,11 +249,15 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.MessageConsumer
-         createConsumer(javax.jms.Destination dest,
-                        String selector,
-                        boolean noLocal)
-         throws JMSException
-  {
+      createConsumer(javax.jms.Destination dest,
+                     String selector,
+                     boolean noLocal)
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConsumer(" + dest +
+                                    ", " + selector +
+                                    ", " + noLocal + ")");
+
     checkValidity();
     return new OutboundConsumer(sess.createConsumer(dest, selector, noLocal),
                                 this);
@@ -220,8 +268,11 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.MessageConsumer
          createConsumer(javax.jms.Destination dest, String selector)
-         throws JMSException
-  {
+         throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConsumer(" + dest +
+                                    ", " + selector + ")");
+
     checkValidity();
     return new OutboundConsumer(sess.createConsumer(dest, selector), this);
   }
@@ -230,8 +281,10 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConsumer(" + dest + ")");
+
     checkValidity();
     return new OutboundConsumer(sess.createConsumer(dest), this);
   }
@@ -240,12 +293,18 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.TopicSubscriber
-         createDurableSubscriber(javax.jms.Topic topic,
-                                 String name,
-                                 String selector,
-                                 boolean noLocal)
-         throws JMSException
-  {
+      createDurableSubscriber(javax.jms.Topic topic,
+                              String name,
+                              String selector,
+                              boolean noLocal)
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createDurableSubscriber(" + topic +
+                                    ", " + name +
+                                    ", " + selector +
+                                    ", " + noLocal + ")");
+
     checkValidity();
 
     TopicSubscriber sub =
@@ -258,9 +317,13 @@ public class OutboundSession implements javax.jms.Session
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.TopicSubscriber
-         createDurableSubscriber(javax.jms.Topic topic, String name)
-         throws JMSException
-  {
+      createDurableSubscriber(javax.jms.Topic topic, String name)
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createDurableSubscriber(" + topic +
+                                    ", " + name + ")");
+
     checkValidity();
 
     TopicSubscriber sub = sess.createDurableSubscriber(topic, name);
@@ -270,8 +333,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.Queue createQueue(String queueName) throws JMSException
-  {
+  public javax.jms.Queue createQueue(String queueName) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createQueue(" + queueName + ")");
+
     checkValidity();
     return sess.createQueue(queueName);
   }
@@ -279,8 +345,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.Topic createTopic(String topicName) throws JMSException
-  {
+  public javax.jms.Topic createTopic(String topicName) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopic(" + topicName + ")");
+
     checkValidity();
     return sess.createTopic(topicName);
   }
@@ -288,8 +357,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException
-  {
+  public javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTemporaryQueue()");
+
     checkValidity();
     return sess.createTemporaryQueue();
   }
@@ -297,8 +369,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException
-  {
+  public javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTemporaryTopic()");
+
     checkValidity();
     return sess.createTemporaryTopic();
   }
@@ -330,8 +405,11 @@ public class OutboundSession implements javax.jms.Session
   /** 
    * Delegates the call to the wrapped JMS session.
    */
-  public void recover() throws JMSException
-  {
+  public void recover() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " recover()");
+
     checkValidity();
     sess.recover();
   }
@@ -340,8 +418,11 @@ public class OutboundSession implements javax.jms.Session
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public void unsubscribe(String name) throws JMSException
-  {
+  public void unsubscribe(String name) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " unsubscribe(" + name + ")");
+
     checkValidity();
     sess.unsubscribe(name);
   }
@@ -350,6 +431,10 @@ public class OutboundSession implements javax.jms.Session
    * set started = true 
    */
   void start() {
+   if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " start() started = true");
+
     started = true;
   }
 
@@ -357,8 +442,11 @@ public class OutboundSession implements javax.jms.Session
    * Actually does nothing, closing of the session occurs while closing
    * the component's connection.
    */
-  public void close() throws JMSException
-  {
+  public void close() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " close()");
+
     valid = false;
     cnx.sessions.remove(this);
     started = false;
