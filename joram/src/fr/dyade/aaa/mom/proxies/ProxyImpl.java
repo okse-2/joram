@@ -63,6 +63,12 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
   private String initialAdminPass;
 
   /**
+   * Flow control duration (in ms) between two message sendings
+   * (-1 for no flow control).
+   */
+  private int flowControl = -1;
+
+  /**
    * Identifier of this proxy dead message queue, <code>null</code> for DMQ
    * not set.
    */
@@ -122,6 +128,10 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
   {
     contexts = new Hashtable();
     subsTable = new Hashtable();
+
+    int inFlow = fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory.inFlow;
+    if (inFlow != -1)
+      flowControl = 1000 / inFlow;
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
@@ -316,9 +326,15 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
 
     proxyAgent.sendNot(AgentId.fromString(req.getTarget()), not);
     doReply(key, new ServerReply(req));
-    // Flow control: gives the opportunity to other threads to consume the
-    // messages.
-    Thread.yield();
+
+    if (flowControl == -1)
+      Thread.yield();
+    else {
+      try {
+        Thread.sleep(flowControl);
+      }
+      catch (Exception exc) {}
+    }
   }
 
   /**

@@ -75,6 +75,9 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
   /** JMS administrator's proxy identifier. */
   private AgentId adminProxyId;
 
+  /** Incoming messages flow (msgs/s) requested, if any (-1 if none). */
+  public static int inFlow = -1;
+
   /**
    * Constructs a <code>ConnectionFactory</code> listening to a given port.
    * <p>
@@ -155,6 +158,8 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
           initialAdminName = st.nextToken();
           initialAdminPass = st.nextToken();
         }
+        if (st.hasMoreTokens())
+          inFlow = Integer.parseInt(st.nextToken());
       }
       else
         port = defaultPort;
