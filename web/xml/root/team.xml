@@ -12,14 +12,7 @@
 
   <body>
     <s1 name="Team">
-
-      <subtitle>Project Team</subtitle>
- 
-      <p>Currently, the JORAM project team is composed of:</p>
-      <ul>
-      </ul>
-
-      <subtitle>Contributors</subtitle>
+      <subtitle>Project Team and Contributors</subtitle>
 
       <p>Here is the list of all contributors to Joram, past and present :</p>
       <ul>
@@ -44,8 +37,7 @@
 				<li>JC Waeny (<a href="http://www.dfjug.org">Brasilia Java Users Group</a>)</li>
       </ul>
 
-      <p>If you feel forgotten, please <a
-      href="mailto:joram-team@objectweb.org">contact</a> us.</p>
+      <p>If you feel forgotten, please <a href="mailto:joram-team@objectweb.org">contact</a> us.</p>
     </s1>
   </body>
 </document>
