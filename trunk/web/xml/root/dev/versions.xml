@@ -28,7 +28,7 @@
       </s2>
     </s1>
     <s1 name="joram3_6_1 (September 11, 2003)">
-      <p>This release introduces MBeans classes for standard JMX management.
+      <p>This release introduces MBean classes for standard JMX management.
       It is also integrated into JOnAS 3.3.</p>
       <s2 name="Modifications"> 
       <ul>
