@@ -39,6 +39,34 @@
          org.objectweb.joram.client.connector.JoramAdapter
       </resourceadapter-class>
       <config-property>
+         <config-property-name>CollocatedServer</config-property-name>
+         <config-property-type>java.lang.Boolean</config-property-type>
+         <config-property-value>true</config-property-value>
+      </config-property>
+      <config-property>
+         <config-property-name>PlatformConfigDir</config-property-name>
+         <config-property-type>java.lang.String</config-property-type>
+      </config-property>
+      <config-property>
+         <config-property-name>PersistentPlatform</config-property-name>
+         <config-property-type>java.lang.Boolean</config-property-type>
+      </config-property>
+      <config-property>
+         <config-property-name>ServerId</config-property-name>
+         <config-property-type>java.lang.Short</config-property-type>
+         <config-property-value>0</config-property-value>
+      </config-property>
+      <config-property>
+         <config-property-name>ServerName</config-property-name>
+         <config-property-type>java.lang.String</config-property-type>
+         <config-property-value>s0</config-property-value>
+      </config-property>
+      <config-property>
+         <config-property-name>AdminFile</config-property-name>
+         <config-property-type>java.lang.String</config-property-type>
+         <config-property-type>joram-admin.properties</config-property-type>
+      </config-property>
+      <config-property>
          <config-property-name>HostName</config-property-name>
          <config-property-type>java.lang.String</config-property-type>
          <config-property-value>localhost</config-property-value>

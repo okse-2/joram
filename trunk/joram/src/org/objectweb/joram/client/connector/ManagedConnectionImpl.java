@@ -133,9 +133,11 @@ public class ManagedConnectionImpl
                               ConnectionRequestInfo cxRequestInfo)
                 throws ResourceException
   {
-    if (! isValid())
+    if (! isValid()) {
+      out.print("Physical connection to the underlying JORAM server has been lost.");
       throw new CommException("Physical connection to the underlying "
                               + "JORAM server has been lost.");
+    }
 
     OutboundConnection handle;
 
@@ -159,13 +161,17 @@ public class ManagedConnectionImpl
    */
   public void associateConnection(Object connection) throws ResourceException
   {
-    if (! isValid())
+    if (! isValid()) { 
+      out.print("Physical connection to the underlying JORAM server has been lost.");
       throw new CommException("Physical connection to the underlying "
                               + "JORAM server has been lost.");
+    }
 
-    if (! (connection instanceof OutboundConnection))
+    if (! (connection instanceof OutboundConnection)) {
+      out.print("The provided connection handle is not a JORAM handle.");
       throw new ResourceException("The provided connection handle is not "
                                   + "a JORAM handle.");
+    }
 
     OutboundConnection newConn = (OutboundConnection) connection;
     newConn.managedCx = this;
@@ -198,20 +204,25 @@ public class ManagedConnectionImpl
    */
   public XAResource getXAResource() throws ResourceException
   {
-    if (! isValid())
+    if (! isValid()) {
+      out.print("Physical connection to the underlying JORAM server has been lost.");
       throw new CommException("Physical connection to the underlying "
                               + "JORAM server has been lost.");
+    }
 
     try {
       if (session == null)
         session = cnx.createXASession();
-      else if (! (session instanceof javax.jms.XASession))
+      else if (! (session instanceof javax.jms.XASession)) {
+        out.print("Managed connection not involved in a local transaction.");
         throw new IllegalStateException("Managed connection not involved "
                                         + "in a local transaction.");
+      }
 
       return ((XASession) session).getXAResource();
     }
     catch (JMSException exc) {
+      out.print("Could not get XA resource: " + exc);
       throw new ResourceAdapterInternalException("Could not get XA resource: "
                                                  + exc);
     }
@@ -231,19 +242,24 @@ public class ManagedConnectionImpl
   public javax.resource.spi.LocalTransaction getLocalTransaction()
          throws ResourceException
   {
-    if (! isValid())
+    if (! isValid()) {
+      out.print("Physical connection to the underlying JORAM server has been lost.");
       throw new CommException("Physical connection to the underlying "
                               + "JORAM server has been lost.");
+    }
     try {
       if (session == null)
         session = cnx.createSession(true, 0);
-      else if (session instanceof javax.jms.XASession)
+      else if (session instanceof javax.jms.XASession) {
+        out.print("Managed connection already involved in a distributed transaction.");
         throw new IllegalStateException("Managed connection already involved "
                                         + "in a distributed transaction.");
+      }
 
       return this;
     }
     catch (JMSException exc) {
+      out.print("Could not build underlying transacted JMS session: " + exc);
       throw new LocalTransactionException("Could not build underlying "
                                           + "transacted JMS session: " + exc);
     }

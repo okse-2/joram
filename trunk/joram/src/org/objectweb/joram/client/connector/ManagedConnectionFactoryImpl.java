@@ -159,9 +159,11 @@ public class ManagedConnectionFactoryImpl
       password = this.password;
     }
     else {
-      if (! (cxRequest instanceof ConnectionRequest))
+      if (! (cxRequest instanceof ConnectionRequest)) {
+        out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
+      }
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
@@ -182,12 +184,15 @@ public class ManagedConnectionFactoryImpl
       cnx = factory.createXAConnection(userName, password);
     }
     catch (IllegalStateException exc) {
+      out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
     }
     catch (JMSSecurityException exc) {
+      out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
     }
     catch (JMSException exc) {
+      out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
 
@@ -224,9 +229,11 @@ public class ManagedConnectionFactoryImpl
     if (cxRequest == null)
       userName = this.userName;
     else {
-      if (! (cxRequest instanceof ConnectionRequest))
+      if (! (cxRequest instanceof ConnectionRequest)) {
+        out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
+      }
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
     }
@@ -308,16 +315,21 @@ public class ManagedConnectionFactoryImpl
    */
   public void setResourceAdapter(ResourceAdapter ra) throws ResourceException
   {
-    if (this.ra != null)
+    if (this.ra != null) {
+      out.print("ResourceAdapter instance already associated.");
       throw new javax.resource.spi.IllegalStateException("ResourceAdapter "
                                                          + "instance "
                                                          + "already "
                                                          + "associated.");
+    }
 
-    if (! (ra instanceof JoramAdapter))
+    if (! (ra instanceof JoramAdapter)) {
+      out.print("Provided ResourceAdapter is not a JORAM ResourceAdapter object: "
+                + ra.getClass().getName());
       throw new ResourceException("Provided ResourceAdapter is not a JORAM "
                                   + "ResourceAdapter object: "
                                   + ra.getClass().getName());
+    }
 
     this.ra = (JoramAdapter) ra;
     collocated = ((JoramAdapter) ra).collocated;
