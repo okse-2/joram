@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,21 +17,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Frederic Maistre (Bull)
  * Contributor(s):
  */
 package org.objectweb.joram.shared.excepts;
 
 /**
- * A <code>ProxyException</code> is thrown by a proxy when encountering a
- * problem with its clients connections.
+ * A <code>StateException</code> is thrown by a destination or a proxy when
+ * processing a request in an invalid state.
  */
-public class ProxyException extends MomException
+public class StateException extends MomException
 {
   /**
-   * Constructs a <code>ProxyException</code> instance.
+   * Constructs a <code>Statexception</code> instance.
    */
-  public ProxyException(String info)
+  public StateException(String info)
   {
     super(info);
   }
