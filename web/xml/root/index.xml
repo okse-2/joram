@@ -36,6 +36,10 @@
       the <strong>LGPL</strong> license.</p>
    
       <s2 name="Latest News">
+	<subtitle>December 22,2004: JORAM 4.1.4 maintenance release is available</subtitle>
+	<p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvments.</p>
+	<subtitle>December 2004: New suite of professional services on JORAM</subtitle>
+	<p>Please check the <a href="support.html">Joram Support pages</a> or <a href="http://www.scalagent.com">ScalAgent website</a>.</p>
 	<subtitle>November 9, 2004: JORAM 4.1.2 maintenance release is available</subtitle>
 	<p>Joram 4.1.2 is a maintenance release with bug fixes and performance improvments. This version is embedded in the last JOnAS build (4.2.0)</p>
 	<subtitle>October 13, 2004: JORAM 4.1.1 maintenance release is available</subtitle>
