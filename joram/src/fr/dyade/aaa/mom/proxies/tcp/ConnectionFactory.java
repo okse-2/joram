@@ -185,7 +185,7 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
       throw new Exception("Could not parse arguments");
     }
     catch (IOException exc) {
-      throw new Exception("Could not deploy an agent");
+      throw new Exception("ConnectionFactory deployment error: " + exc);
     }
   }
 
