@@ -676,6 +676,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
 	
 	canStop = false;
 	if (! isRunning) break;
+        if (msg == null) continue;
 
 	try {
 	  agent = load(msg.to);
@@ -866,11 +867,13 @@ final class TransactionEngine extends Engine {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    modified = true;
-    msg.setUpdate(Update.alloc(AgentServer.getServerId(),
-                               AgentServer.getServerId(),
-                               ++stamp));
-    msg.save();
+    if (msg.isPersistent()) {
+      modified = true;
+      msg.setUpdate(Update.alloc(AgentServer.getServerId(),
+                                 AgentServer.getServerId(),
+                                 ++stamp));
+      msg.save();
+    }
     qin.push(msg);
   }
 
