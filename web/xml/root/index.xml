@@ -61,7 +61,7 @@
 
 	<ul>
 	  <li><em>Point-to-Point</em> (PTP) messaging model</li>
-	  <li></em>Publish / Subscribe</em> (Pub/Sub) messaging model</li>
+	  <li><em>Publish / Subscribe</em> (Pub/Sub) messaging model</li>
 	  <li>Message selection</li>
 	  <li>Plus a distributed Topic destination</li>
 	  <li>Plus a "light" <em>JNDI 1.1.2</em> implementation</li>
