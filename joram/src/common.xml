@@ -66,9 +66,9 @@
       description="--> Compiles sources.">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
-           debug="true"
+           debug="${debug}"
            deprecation="${deprecation}"
-           optimize="false"
+           optimize="${optimize}"
            nowarn="${nowarn}"
            verbose="${verbose}">
 
@@ -79,8 +79,6 @@
   </target>
 
   <target name="dos2unix" depends="init">
-    <fixcrlf srcdir="${src.dir}" eol="lf"
-             includes="**/*.java,**/*.cup,**/*.flex,**/*.html,**/*.xml,**/*.dtd,**/*.sh"/>
     <fixcrlf srcdir="${src.dir}" eol="lf"
              includes="**/*.java,**/*.cup,**/*.flex,**/*.html,**/*.xml,**/*.dtd,**/*.sh"/>
     <fixcrlf srcdir="${test.dir}" eol="lf"
