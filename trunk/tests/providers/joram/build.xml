@@ -1,0 +1,28 @@
+<project default="server" basedir=".">
+
+  <!-- Initializes the environment paths and properties -->
+  <target name="init">
+    <!-- Initializes the directory structure properties -->
+    <property name="run.dir" location="."/>
+    <!-- Project classpath needed for execution -->
+    <path id="project.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <pathelement path="${run.dir}"/>
+      <fileset dir="${run.dir}">
+         <include name="*.jar"/>
+      </fileset>
+    </path>
+    <property name="project.class.path" refid="project.class.path"/>
+  </target>
+
+  <!-- Starts a JORAM server -->
+  <target name="server" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg value="-DTransaction=fr.dyade.aaa.util.NullTransaction"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+</project>
