@@ -91,7 +91,7 @@
 	    <td align="right">Download site: </td>
 	    <td><select name="site" size="1">
 		<option value="http://www.objectweb.org/joram/download/">HTTP download from France</option>
-		<option value="http://objectweb.cs.rice.edu/joram/download/">HTTP download from United Stated</option>
+		<option value="http://objectweb.cs.rice.edu/joram/download/">HTTP download from United States</option>
 	      </select>
 	    </td>
 	  </tr>
