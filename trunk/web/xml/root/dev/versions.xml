@@ -17,6 +17,14 @@
       <s2 name="Modifications (latest: May 2003, 5th)">
       <ul>
       <li>Following
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00014.html">
+      Huey-Siang Kam's</a> feedback, a bug in Joram's administration has been
+      corrected: it was not possible, with the
+      <code>AdminItf.updateUser()</code> method to only update a user's password,
+      rather than both its name and password. Now, it is. The impacted class is
+      <code>AdminTopicImpl</code> in the <code>fr.dyade.aaa.mom.dest</code>
+      package.</li>
+      <li>Following
       <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00000.html">
       Knut's</a> feedback, the setting of JNDI's URL has evolved:
       <code>java.naming.provider.url</code> might be set 
