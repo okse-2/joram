@@ -212,7 +212,7 @@ public class XAResource implements javax.transaction.xa.XAResource
 
 
   /**
-   * JTA API method: rolls the transaction back.
+   * JTA API method: rolls back the transaction.
    *
    * @exception XAException  If the resource is not involved in the
    *              transaction.
@@ -226,7 +226,7 @@ public class XAResource implements javax.transaction.xa.XAResource
     }
 
     try {
-      sess.rollTransactionBack(xid);
+      sess.rollbackTransaction(xid);
     }
     catch (Exception e) {}
 
