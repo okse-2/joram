@@ -311,35 +311,35 @@
   <!-- Runs the cluster administration -->
   <target name="cluster_admin" depends="init"
     description="--> Runs the cluster administration">
-    <java classname="cluster.ClusterAdmin" failonerror="no" fork="yes">
+    <java classname="cluster.topic.ClusterAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber10" depends="init">
-    <java classname="cluster.Subscriber10" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber10" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber20" depends="init">
-    <java classname="cluster.Subscriber20" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber20" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber21" depends="init">
-    <java classname="cluster.Subscriber21" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber21" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs the cluster publisher -->
   <target name="cluster_pub" depends="init">
-    <java classname="cluster.Publisher" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
