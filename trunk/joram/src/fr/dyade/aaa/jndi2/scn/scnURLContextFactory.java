@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot
- * Contributor(s): 
+ * Contributor(s):
  */
 package fr.dyade.aaa.jndi2.scn;
 
@@ -31,7 +31,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 /**
- * Context factory for aaaURLContext objects.
+ * Context factory for scnURLContext objects.
  * This factory will be used for all "scn:..." urls provided as Name objects
  * for all JNDI operations.
  */
@@ -44,7 +44,7 @@ public class scnURLContextFactory implements ObjectFactory {
   }
 
   /**
-   * Returns an instance of aaaURLContext for a java URL.
+   * Returns an instance of scnURLContext for a java URL.
    *
    * If url is null, the result is a context for resolving java URLs.
    * If url is a URL, the result is a context named by the URL.
@@ -54,7 +54,9 @@ public class scnURLContextFactory implements ObjectFactory {
    * @param ctx	Context relative to which 'name' is named.
    * @param env	Environment to use when creating the context
    */
-  public Object getObjectInstance(Object url, Name name, Context ctx,
+  public Object getObjectInstance(Object url, 
+                                  Name name, 
+                                  Context ctx,
 				  Hashtable env)
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -63,12 +65,8 @@ public class scnURLContextFactory implements ObjectFactory {
                  ',' + name + ',' + ctx + ',' + env + ')');
 
     if (url == null) {
-      // All naming operations with "scn:..." comes here
-      // Users are encouraged to used intermediate contexts:
-      // ctx = ic.lookup("aaa:comp/env") called only once (perfs)
       return new scnURLContext(env);
-    }
-    if (url instanceof String) {
+    } else if (url instanceof String) {
       // Don't know what to do here 
       return null;
     } else if (url instanceof String[]) {
@@ -76,7 +74,8 @@ public class scnURLContextFactory implements ObjectFactory {
       return null;
     } else {
       // invalid argument
-      throw (new IllegalArgumentException("aaaURLContextFactory"));
+      throw (new IllegalArgumentException(
+        "scnURLContextFactory"));
     }
   }
 }

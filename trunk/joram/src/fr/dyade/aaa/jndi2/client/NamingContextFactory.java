@@ -36,14 +36,31 @@ public class NamingContextFactory implements InitialContextFactory {
    *  This property which defines the listener port must be passed
    *  when creating an initial context using this factory.
    */
-  public final static String PORT_PROPERTY = "java.naming.factory.port";
+  public final static String JAVA_PORT_PROPERTY = "java.naming.factory.port";
 
   /**
    *  This property which defines the host name must be passed
    *  when creating an initial context using this factory.
    */
-  public final static String HOST_PROPERTY = "java.naming.factory.host";
+  public final static String JAVA_HOST_PROPERTY = "java.naming.factory.host";
 
+  /**
+   * Specific property. It is useful when several naming provider use
+   * the same property.
+   */
+  public final static String SCN_PORT_PROPERTY = "scn.naming.factory.port";
+
+  /**
+   * Specific property. It is useful when several naming provider use
+   * the same property.
+   */
+  public final static String SCN_HOST_PROPERTY = "scn.naming.factory.host";
+
+  /**
+   * Specific property. It is useful when several naming provider use
+   * the same property.
+   */
+  public final static String SCN_PROVIDER_URL = "scn.naming.provider.url";
 
   /**
    * @param  env  This contains the hostname and the port.
@@ -65,18 +82,16 @@ public class NamingContextFactory implements InitialContextFactory {
 
   public static NamingConnection getNamingConnection(
     Hashtable env) 
-    throws NamingException {    
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "NamingContextFactory.getNamingConnection(" + env + ')'); 
     try {
       NamingConnection namingConnection;
-
-      // URL should be as: scn://host:port
-      String url = null;
-      if (env != null) {
-        url = (String) env.get(Context.PROVIDER_URL);
-      }      
-      if (url == null)
-        url = System.getProperty(Context.PROVIDER_URL, null);
-    
+      // The URL format is scn://host:port
+      String url = (String) env.get(SCN_PROVIDER_URL);
+      if (url == null) url = (String) env.get(Context.PROVIDER_URL);
       if (url != null) {
         StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
         if (! tokenizer.hasMoreElements()) 
@@ -86,48 +101,34 @@ public class NamingContextFactory implements InitialContextFactory {
           String host = tokenizer.nextToken();
           String portStr = tokenizer.nextToken();
           int port = Integer.parseInt(portStr);
-          namingConnection = new SimpleNamingConnection(host, port);
+          namingConnection = new SimpleNamingConnection(host, port, env);
         } else {
           throw new NamingException("Unknown protocol:" + protocol);
         }
-      } else {    
-        String host = null;
-        if (env != null) {
-          host = (String) env.get(HOST_PROPERTY);
-        }
-        if (host == null) {
-          host = System.getProperty(HOST_PROPERTY, "localhost");
-        }
-        String portStr = null;
-        if (env != null) {
-          portStr = (String) env.get(PORT_PROPERTY);
-        }
-        if (portStr == null) {
-          portStr = System.getProperty(PORT_PROPERTY, "16400");
-        }
+      } else {        
+        String host = (String) env.get(SCN_HOST_PROPERTY);
+        if (host == null) host = (String) System.getProperty(SCN_HOST_PROPERTY);
+        if (host == null) host = (String) env.get(JAVA_HOST_PROPERTY);
+        if (host == null) host = (String) System.getProperty(JAVA_HOST_PROPERTY);
+        if (host == null) host = "localhost";
+
+        String portStr = (String) env.get(SCN_PORT_PROPERTY);
+        if (portStr == null) portStr = (String) System.getProperty(SCN_PORT_PROPERTY);
+        if (portStr == null) portStr = (String) env.get(JAVA_PORT_PROPERTY);
+        if (portStr == null) portStr = (String) System.getProperty(JAVA_PORT_PROPERTY);
+        if (portStr == null) portStr = "16400";
+
         int port = Integer.parseInt(portStr);
-        namingConnection = new SimpleNamingConnection(host, port);
+        namingConnection = new SimpleNamingConnection(
+          host, port, env);
       }
       return namingConnection;
-    } catch (ClassCastException e) {
-      NamingException nx = 
-        new NamingException(
-          "ClassCastException!  Are " + 
-          HOST_PROPERTY + " and " + 
-          PORT_PROPERTY + " String objects?");
-      nx.setRootCause(e);
-      throw nx;
     } catch (NumberFormatException e) {
-      NamingException nx = 
-        new NamingException("the " + PORT_PROPERTY + 
-                            " is not a valid integer");
+      NamingException nx = new NamingException();
       nx.setRootCause(e);
       throw nx;
     } catch (Exception e) {
-      NamingException nx = 
-        new NamingException(
-          "exception creating NamingContext: " +
-          e.toString());
+      NamingException nx = new NamingException();
       nx.setRootCause(e);
       throw nx;
     }

@@ -148,10 +148,19 @@ public class StorageManager {
   }
   
   public NamingContext loadNamingContext(String fileName) 
-    throws NamingException {    
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "StorageManager.loadNamingContext(" + fileName + ')');
     try {
-      return (NamingContext)transaction.load(
+      Object obj = transaction.load(
         ROOT, fileName);
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(
+          BasicLevel.DEBUG, 
+          " -> obj = " + obj);
+      return (NamingContext)obj;
     } catch (IOException exc) {
       if (Trace.logger.isLoggable(BasicLevel.DEBUG))
         Trace.logger.log(BasicLevel.DEBUG, "", exc);

@@ -110,7 +110,9 @@ public class ContextManager
     if (ncid != null) {
       // 3- Get the naming context
       nc = getNamingContext(ncid);
-      if (nc == null) throw new Error("Missing context");
+      if (nc == null) throw new Error(
+        "Missing context: name=" + name + 
+        ", id=" + ncid);
       put(name, nc);
       return nc;
     } else {
