@@ -33,7 +33,10 @@
 	all <a href="doc/index.html">JORAM documentation</a> in PostScript or PDF (it is still
 	available online in HTML).</p>
       
+      <hr/>
+
       <subtitle>14 September 2001: JORAM 2.1.1 (cvs tag: joram2_1_1)</subtitle>
+    
       <p>This version corrects some bugs concerning the selectors. <code>Null</code>
       selectors are now authorized, syntax is systematically checked and Strings
       syntax has been enlarged to characters such as '/', ';', ...</p>
