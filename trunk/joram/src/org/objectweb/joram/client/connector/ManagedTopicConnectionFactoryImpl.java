@@ -176,19 +176,23 @@ public class ManagedTopicConnectionFactoryImpl
         if (cxRequest instanceof TopicConnectionRequest) {
           XATopicConnectionFactory factory =
             XATopicLocalConnectionFactory.create();
+          setParameters(factory);
           cnx = factory.createXATopicConnection(userName, password);
         } else {
           XAConnectionFactory factory = XALocalConnectionFactory.create();
+          setParameters(factory);
           cnx = factory.createXAConnection(userName, password);
         }
       } else {
         if (cxRequest instanceof TopicConnectionRequest) {
           XATopicConnectionFactory factory =
             XATopicTcpConnectionFactory.create(hostName, serverPort);
+          setParameters(factory);
           cnx = factory.createXATopicConnection(userName, password);
         } else {
           XAConnectionFactory factory =
             XATcpConnectionFactory.create(hostName, serverPort);
+          setParameters(factory);
           cnx = factory.createXAConnection(userName, password);
         }
       }

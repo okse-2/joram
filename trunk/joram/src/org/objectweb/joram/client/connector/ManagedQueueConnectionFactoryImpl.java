@@ -176,19 +176,23 @@ public class ManagedQueueConnectionFactoryImpl
         if (cxRequest instanceof QueueConnectionRequest) {
           XAQueueConnectionFactory factory =
             XAQueueLocalConnectionFactory.create();
+          setParameters(factory);
           cnx = factory.createXAQueueConnection(userName, password);
         } else {
           XAConnectionFactory factory = XALocalConnectionFactory.create();
+          setParameters(factory);
           cnx = factory.createXAConnection(userName, password);
         }
       } else {
         if (cxRequest instanceof QueueConnectionRequest) {
           XAQueueConnectionFactory factory =
             XAQueueTcpConnectionFactory.create(hostName, serverPort);
+          setParameters(factory);
           cnx = factory.createXAQueueConnection(userName, password);
         } else {
           XAConnectionFactory factory =
             XATcpConnectionFactory.create(hostName, serverPort);
+          setParameters(factory);
           cnx = factory.createXAConnection(userName, password);
         }
       }

@@ -153,6 +153,25 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   /** Registered MBeans. */
   private static Vector mbeans = new Vector();
 
+  /**
+   * Duration in seconds during which connecting is attempted (connecting
+   * might take time if the server is temporarily not reachable); the 0 value
+   * is set for connecting only once and aborting if connecting failed.
+   */
+  public int connectingTimer = 0;
+  /**
+   * Duration in seconds during which a JMS transacted (non XA) session might
+   * be pending; above that duration the session is rolled back and closed;
+   * the 0 value means "no timer".
+   */
+  public int txPendingTimer = 0;
+  /** 
+   * Period in milliseconds between two ping requests sent by the client
+   * connection to the server; if the server does not receive any ping
+   * request during more than 2 * cnxPendingTimer, the connection is
+   * considered as dead and processed as required.
+   */
+  public int cnxPendingTimer = 0;
 
   /**
    * Constructs a <code>JoramAdapter</code> instance. 
@@ -493,6 +512,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         connectionFactory =
           XATcpConnectionFactory.create(hostName, serverPort);
 
+      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
+      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
+      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
+
       XAConnection cnx =
         connectionFactory.createXAConnection(userName, password);
 
@@ -604,6 +627,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
             connectionFactory =
               XATcpConnectionFactory.create(hostName, serverPort);
 
+          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
+          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
+          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
+          
           connection =
             connectionFactory.createXAConnection(userName, password);
   
@@ -1005,7 +1032,19 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   {
     this.serverPort = serverPort.intValue();
   }
-  
+
+  public void setConnectingTimer(java.lang.Integer connectingTimer) {
+    this.connectingTimer = connectingTimer.intValue();
+  }
+
+  public void setTxPendingTimer(java.lang.Integer txPendingTimer) {
+    this.txPendingTimer = txPendingTimer.intValue();
+  }
+
+  public void setCnxPendingTimer(java.lang.Integer cnxPendingTimer) {
+    this.cnxPendingTimer = cnxPendingTimer.intValue();
+  }
+
   public java.lang.String getPlatformConfigDir()
   {
     return platformConfigDir;
@@ -1044,5 +1083,17 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   public java.lang.Integer getServerPort()
   {
     return new Integer(serverPort);
+  }
+
+  public java.lang.Integer getConnectingTimer() {
+    return new Integer(connectingTimer);
+  }
+
+  public java.lang.Integer getTxPendingTimer() {
+    return new Integer(txPendingTimer);
+  }
+
+  public java.lang.Integer getCnxPendingTimer() {
+    return new Integer(cnxPendingTimer);
   }
 }
