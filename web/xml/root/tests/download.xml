@@ -45,7 +45,7 @@ cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM co tests</source>
 	  JORAM code.
 	</p>
 	<p>The Test Suite CVS repository can only be accessed in
-	  <em>read mode in the pserver mode</em>. Therefore, the only
+	  <em>read mode in the <code>pserver</code> mode</em>. Therefore, the only
 	  possible CVS commands are <code>checkout, update, status</code> or
 	  <code>diff</code>. When running the <code>cvs update</code>
 	  command, make sure that you are in the correct directory.  
