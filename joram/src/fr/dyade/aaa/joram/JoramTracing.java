@@ -24,7 +24,7 @@
  */
 package fr.dyade.aaa.joram;
 
-import fr.dyade.aaa.util.ClientDebug;
+import fr.dyade.aaa.util.Debug;
 
 import org.objectweb.util.monolog.api.Logger;
 
@@ -55,7 +55,7 @@ public class JoramTracing
    */
   static
   {
-    dbgAdmin = ClientDebug.getLogger("fr.dyade.aaa.joram.Admin");
-    dbgClient = ClientDebug.getLogger("fr.dyade.aaa.joram.Client");
+    dbgAdmin = Debug.getLogger("fr.dyade.aaa.joram.Admin");
+    dbgClient = Debug.getLogger("fr.dyade.aaa.joram.Client");
   }
 }
