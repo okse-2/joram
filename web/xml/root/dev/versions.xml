@@ -23,8 +23,15 @@
         <code>com.scalagent.ksoap</code>.</li>
       </ul>
       </s2>
-      <s2 name="Modifications (latest: April 6, 2004)">
+      <s2 name="Modifications (latest: April 8, 2004)">
       <ul>
+        <li>Large update of the XA classes implementation for a better XA
+        support (for example, recovery is now provided). Submissions occured
+        in the <code>org.objectweb.joram.client.connector</code>,
+        <code>org.objectweb.joram.client.jms</code>,
+        <code>org.objectweb.joram.mom.proxies</code>,
+        and <code>org.objectweb.joram.shared.client</code> packages.
+        </li>
         <li>Following the renaming of <code>kjoram.jar</code> to
         <code>joram-kclient.jar</code>, the <code>samples/src/kjoram</code>
         directory should be updated.</li>
