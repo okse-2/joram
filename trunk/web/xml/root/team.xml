@@ -24,22 +24,27 @@
 
       <subtitle>Contributors</subtitle>
 
+      <p>The following contributors are actively involved in supporting JORAM:</p>
+      <ul>
+        <li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+        <li>Alexander Fedorowicz</li>
+        <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+        <li>Nicolas Tachker (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      </ul>
+
       <p>We would also like to thank all the following people who have
       contributed to JORAM:</p>
-
       <ul>
 	<li>Cyril Araud (<a href="http://www.inria.fr/">INRIA</a>)</li>
-	<li>Luc Bellissard (<a href="http://www.inpg.fr/">INPG</a>)</li>
 	<li>Laurent Chauvirey (<a href="http://www.inpg.fr/">INPG</a>)</li>
+	<li>Philippe Coq (<a href="http://www.bull.com/">Bull</a>)</li>
 	<li>Xavier Etchevers (<a href="http://www.bull.com/">Bull</a>)</li>
-        <li>Alexander Fedorowicz</li>
 	<li>David Feliot (<a href="http://www.scalagent.com/">Scalagent</a>)</li>
 	<li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>)</li>
 	<li>Douglas S. Jackson</li>
 	<li>Philippe Laumay (Schlumberger)</li>
 	<li>Richard Mathis</li>
 	<li>Jean-Frédéric Mesnil (<a href="http://www.inria.fr/">INRIA</a>)</li>
-	<li>Nicolas Tachker (<a href="http://www.scalagent.com/">Scalagent</a>)</li>
         <li>Tony Thompson</li>
 	<li>JC Waeny (<a href="http://www.dfjug.org">Brasilia (Brazil) Java Users Group</a>)</li>
       </ul>
