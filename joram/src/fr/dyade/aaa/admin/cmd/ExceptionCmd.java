@@ -20,20 +20,22 @@
 
 package fr.dyade.aaa.admin.cmd;
 
-import java.lang.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class ExceptionCmd extends Exception {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: ExceptionCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: ExceptionCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
+
+  private Throwable throwable;
 
   public ExceptionCmd() {
     super();
   }
 
-  public ExceptionCmd(Throwable t) {
+  public ExceptionCmd(Throwable throwable) {
     // for compatibility with jdk 1.1
-    super(t.getMessage());
-    //super(t);
+    super(throwable.toString());
+    this.throwable = throwable;
   }
 
   public ExceptionCmd(String s) {
@@ -41,6 +43,14 @@ public class ExceptionCmd extends Exception {
   }
 
   public String toString() {
-    return super.toString();
+    StringBuffer buf = new StringBuffer();
+    buf.append(super.toString());
+    if (throwable instanceof InvocationTargetException) {
+      InvocationTargetException ite = 
+        (InvocationTargetException)throwable;
+      buf.append(": " + 
+        ite.getTargetException().toString());
+    }
+    return buf.toString();
   }
 }

@@ -88,25 +88,25 @@ public class ConversionSoapHelper {
       throw new MessageFormatException(	"SoapObject " + name
                                         + " no className found.");
 
-      if (className.equals("fr.dyade.aaa.mom.jms.CnxConnectReply")){
+      if (className.equals("org.objectweb.joram.shared.client.CnxConnectReply")){
       return CnxConnectReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.ServerReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.ServerReply")){
       return ServerReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.MomExceptionReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.MomExceptionReply")){
       return MomExceptionReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.ProducerMessages")){
+    } else if (className.equals("org.objectweb.joram.shared.client.ProducerMessages")){
       return ProducerMessages.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.QBrowseReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.QBrowseReply")){
       return QBrowseReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.SessCreateTDReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.SessCreateTDReply")){
       return SessCreateTDReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.CnxCloseReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.CnxCloseReply")){
       return CnxCloseReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.CnxConnectReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.CnxConnectReply")){
       return CnxConnectReply.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.ConsumerMessages")){
+    } else if (className.equals("org.objectweb.joram.shared.client.ConsumerMessages")){
       return ConsumerMessages.soapDecode(h);
-    } else if (className.equals("fr.dyade.aaa.mom.jms.GetAdminTopicReply")){
+    } else if (className.equals("org.objectweb.joram.shared.client.GetAdminTopicReply")){
       return GetAdminTopicReply.soapDecode(h);
     } else {
       throw new MessageFormatException(	"SoapObject " + className

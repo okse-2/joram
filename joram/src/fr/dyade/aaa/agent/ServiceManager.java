@@ -42,6 +42,14 @@ public class ServiceManager implements Serializable {
   static ServiceManager manager;
 
   static Logger xlogmon = null;
+
+  private static String name = null;
+
+  public final static String getName() {
+    if (name == null)
+      name = AgentServer.getName() + ".ServiceManager";
+    return name;
+  }
   
   /**
    * Initializes the <code>ServiceManager</code> object. Synchronize the
@@ -97,8 +105,7 @@ public class ServiceManager implements Serializable {
    */
   static void start(ServiceDesc desc) throws Exception {
     xlogmon.log(BasicLevel.DEBUG,
-                "ServiceManager#" + AgentServer.getServerId() +
-                " start service " + desc);
+                getName() +" start service: " + desc);
 
     if (desc.running)
       throw new Exception("Service already running");
@@ -116,8 +123,7 @@ public class ServiceManager implements Serializable {
     desc.initialized = true;
 
     xlogmon.log(BasicLevel.DEBUG,
-                "ServiceManager#" + AgentServer.getServerId() +
-                " service started");
+                getName() + " service started");
   }
 
   /**
@@ -144,8 +150,7 @@ public class ServiceManager implements Serializable {
 	start(desc);
       } catch (Exception exc) {
         xlogmon.log(BasicLevel.ERROR,
-                   "AgentServer#" + AgentServer.getServerId() +
-                   ".ServiceManager, cannot start service:" +
+                   getName() + ", cannot start service:" +
                    desc.getClassName(), exc);
       }
     }
@@ -157,8 +162,9 @@ public class ServiceManager implements Serializable {
    * @param desc	service descriptor.
    */
   static void stop(ServiceDesc desc) throws Exception {
-    if (! desc.running)
-      throw new Exception("Service already stopped");
+    // DF: idempotency (could be done in AgentAdmin)
+    if (! desc.running) return;
+//       throw new Exception("Service already stopped");
     Class service = Class.forName(desc.getClassName());
     Method stop = service.getMethod("stopService", new Class[0]);
     stop.invoke(null, new Object[0]);
@@ -190,20 +196,16 @@ public class ServiceManager implements Serializable {
       try {
         if (xlogmon.isLoggable(BasicLevel.DEBUG))
           xlogmon.log(BasicLevel.DEBUG,
-                      "AgentServer#" + AgentServer.getServerId() +
-                      ".ServiceManager, stops " + desc);
+                      getName() + ", stops: " + desc);
 
 	if (desc.running) stop(desc);
 
         if (xlogmon.isLoggable(BasicLevel.DEBUG))
           xlogmon.log(BasicLevel.DEBUG,
-                      "AgentServer#" + AgentServer.getServerId() +
-                      ".ServiceManager, " + desc + " stopped");
+                      getName() + ", service stopped");
       } catch (Throwable exc) {
         xlogmon.log(BasicLevel.WARN,
-                   "AgentServer#" + AgentServer.getServerId() +
-                   ".ServiceManager, cannot stop service " +
-                   desc.getClassName(), exc);
+                   getName() + ", cannot stop service: " + desc, exc);
       }
     }
   }
@@ -218,8 +220,7 @@ public class ServiceManager implements Serializable {
     synchronized (manager) {
       ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
       xlogmon.log(BasicLevel.DEBUG,
-                  "AgentServer#" + AgentServer.getServerId() +
-                  ".ServiceManager.register " + scname + " -> " + desc);
+                  getName() + ", register " + scname + " -> " + desc);
       if (desc == null) {
         desc =  new ServiceDesc(scname, args);
         manager.registry.put(scname, desc);
@@ -264,7 +265,11 @@ public class ServiceManager implements Serializable {
    * @return	a string image for this object
    */
   public String toString() {
-    return "(" + super.toString() +
-      ",registry=" + Strings.toString(registry) + ")";
+    StringBuffer output = new StringBuffer();
+    output.append('(');
+    output.append(super.toString());
+    output.append(",registry=").append(Strings.toString(registry));
+    output.append(')');
+    return output.toString();
   }
 }

@@ -30,8 +30,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.18 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.18 2003-09-11 09:53:25 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.19 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.19 2004-02-13 08:12:56 fmaistre Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -147,8 +147,8 @@ public abstract class ProxyAgent extends Agent {
    * @exception Exception
    *	unspecialized exception
    */
-  protected void initialize(boolean firstTime) throws Exception {
-    super.initialize(firstTime);
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
 
     // In single connection mode, creating qout once:
     if (!multiConn)
@@ -515,8 +515,10 @@ public abstract class ProxyAgent extends Agent {
   /**
    * Finalizes this proxy agent execution. Calls <code>disconnect</code> to
    * close the open streams, and <code>stop</code> to stop the drivers.
+   *
+   * @param lastTime	true when last called by the factory on agent deletion.
    */
-  public void agentFinalize() {
+  public void agentFinalize(boolean lastime) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  toString() + " agentFinalize -> " + drvCnx);

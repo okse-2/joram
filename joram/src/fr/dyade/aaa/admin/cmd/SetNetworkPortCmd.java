@@ -24,21 +24,25 @@ import java.io.*;
 import java.util.*;
 
 public class SetNetworkPortCmd extends NetworkCmd {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: SetNetworkPortCmd.java,v 1.1 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: SetNetworkPortCmd.java,v 1.2 2004-02-13 08:12:03 fmaistre Exp $"; 
+  
+  public int port;
 
- /**
-  * @param serverName  server name
-  * @param domain      domain name
-  * @param port        port
-  */
+  /**
+   * @param serverName  server name
+   * @param domain      domain name
+   * @param port        port
+   */
   public SetNetworkPortCmd(String serverName, 
                            String domain, 
                            int port) {
-    super(serverName, domain, port);
+    super(serverName, domain);
+    this.port = port;
   }
 
   public String toString() {
-    return "SetNetworkPortCmd" + super.toString();
+    return '(' + super.toString() +
+      ",port=" + port + ')';
   }
 }

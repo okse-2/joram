@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,24 +25,19 @@ import java.io.*;
 /**
  * This notification is used to ask aa agent creation to a remote
  * agent factory.
- * @author  Andr* Freyssinet
- * @version 1.0, 12/10/97
  */
-public class AgentCreateRequest extends Notification {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
-
-
+public final class AgentCreateRequest extends Notification {
   static final long serialVersionUID = -873215263839213534L;
 
   /** Id. of agent to reply to */
   public AgentId reply;
-  /** Id. of agent to deploy. Used in case of unrecoverable error to report
-   * the creation status.
+  /**
+   * Id. of agent to deploy, used since id is not more serialized in
+   * agent state.
    */
-  public AgentId deploy;
+  AgentId deploy;
   /** Serialized state of the agent */
-  public byte agentState[];
+  byte agentState[];
 
   public AgentCreateRequest(Agent agent) throws IOException {
     this(agent, null);
@@ -58,5 +54,9 @@ public class AgentCreateRequest extends Notification {
     oos.writeObject(agent);
     oos.flush();
     agentState = bos.toByteArray();
+  }
+
+  public final AgentId getDeploy() {
+    return deploy;
   }
 }

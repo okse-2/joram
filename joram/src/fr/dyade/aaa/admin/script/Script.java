@@ -37,9 +37,9 @@ import fr.dyade.aaa.agent.conf.*;
  * @see AdminCmd
  * @see A3CMLConfig
  */
-public class Script implements Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: Script.java,v 1.2 2003-09-11 09:52:05 fmaistre Exp $"; 
+public class Script implements Serializable, Cloneable {
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Script.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
   /** AdminCmd Vector */
   private Vector commands = null;
@@ -93,4 +93,10 @@ public class Script implements Serializable {
     return commands.toString();
   }
 
+  public Object clone() throws CloneNotSupportedException {
+    Script clone = (Script)super.clone();
+    clone.commands = (Vector)commands.clone();
+    clone.newConfig = newConfig;
+    return clone;
+  }
 }

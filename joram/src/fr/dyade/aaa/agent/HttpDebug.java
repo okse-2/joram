@@ -483,7 +483,6 @@ public class HttpDebug {
       buf.append("now=" + AgentServer.engine.now + "\n");
       buf.append("NumberAgents=" + AgentServer.engine.agents.size() + "\n");
       buf.append("NbMaxAgents=" + AgentServer.engine.NbMaxAgents + "\n");
-      buf.append("nbFixedAgents=" + AgentServer.engine.nbFixedAgents + "\n");
       buf.append("</PRE>\n");
       buf.append("<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=\"100%\">\n");
       AgentId list[] = AgentServer.engine.getLoadedAgentIdlist();

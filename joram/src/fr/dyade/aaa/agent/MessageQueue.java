@@ -1,7 +1,7 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
- * Copyright (C) 2001 - 2003 SCALAGENT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  */
-
 package fr.dyade.aaa.agent;
 
 import java.io.*;
@@ -41,9 +40,6 @@ import fr.dyade.aaa.util.*;
  * to save <code>MessageQueue</code> object state.
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $";
-
   private Logger logmon = null;
   private String logmsg = null;
   private long cpt1, cpt2;
@@ -71,7 +67,7 @@ public final class MessageQueue {
     int i = 0;
     for (; i<last; i++) {
       Message msg = (Message) data.elementAt(i);
-      if (item.update.stamp < msg.update.stamp) break;
+      if (item.getStamp() < msg.getStamp()) break;
     }
     data.insertElementAt(item, i);
     last += 1;
@@ -109,6 +105,7 @@ public final class MessageQueue {
     return item;
   }
 
+  
   /**
    * Atomicaly validates all messages pushed in queue during a reaction.
    * It must only be used during a transaction.

@@ -43,8 +43,8 @@ import fr.dyade.aaa.agent.conf.A3CMLConfig;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.8 2003-09-11 09:53:25 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.9 2004-02-13 08:12:56 fmaistre Exp $"; 
 
   static AdminProxy proxy = null;
 
@@ -128,7 +128,7 @@ public class AdminProxy {
         if (i > 5) throw exc;
         try {
 	  // Wait ~15s: n*(n+1)*500 ms with n=5
-          Thread.currentThread().sleep(i * 500);
+          Thread.sleep(i * 500);
         } catch (InterruptedException e) {}
       }
     }

@@ -108,6 +108,18 @@ public class A3CMLServer implements Serializable {
     return "";
   }
 
+  public final A3CMLService getService(String classname) throws UnknownServiceException {
+    if (services != null) {
+      for (int i = services.size() - 1; i >= 0; i--) {
+	A3CMLService service = (A3CMLService) services.elementAt(i);
+	if (service.classname.equals(classname))
+	  return service;
+      }
+    }
+    throw new UnknownServiceException("Unknown service \"" + classname +
+                                      "\" on server#" + sid);
+  }
+
   public final String getServiceArgs(String classname) throws UnknownServiceException {
     if (services != null) {
       for (int i = services.size() -1; i >=0; i--) {

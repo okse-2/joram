@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@ import fr.dyade.aaa.util.*;
  * <code>HttpNetwork</code> is a simple implementation of <code>Network</code>
  * based on HTTP 1.1 protocol.
  */
-public class HttpNetwork extends Network {
+public class HttpNetwork extends FIFONetwork {
   InetAddress proxy = null;
   String proxyhost = null;
   int proxyport = 0;
@@ -92,103 +92,6 @@ public class HttpNetwork extends Network {
       proxyport = Integer.getInteger("proxyport", 8080).intValue();
       proxyport = Integer.getInteger(name + ".proxyport", proxyport).intValue();
       proxy = InetAddress.getByName(proxyhost);
-    }
-  }
-
-  public LogicalClock createsLogicalClock(String name, short[] servers) {
-    return new SimpleClock(name, servers);
-  }
-
-  /**
-   * Try to deliver the received message to the right consumer.
-   *
-   * @param msg		the message.
-   */
-  public void deliver(Message msg) throws Exception {
-    // Get real from serverId.
-    short from = msg.update.getFromId();
-
-    // Test if the message is really for this node (final destination or
-    // router).
-    short dest = msg.update.getToId();
-    if (dest != AgentServer.getServerId()) {
-      logmon.log(BasicLevel.ERROR,
-                 getName() + ", recv bad msg#" + msg.update.stamp +
-                 " really to " + dest +
-                 " by " + from);
-      throw new Exception("recv bad msg#" + msg.update.stamp +
-                          " really to " + dest +
-                          " by " + from);
-    }
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", recv msg#" + msg.update.stamp +
-                 " from " + msg.from +
-                 " to " + msg.to +
-                 " by " + from);
-
-    AgentServer.getServerDesc(from).active = true;
-    AgentServer.getServerDesc(from).retry = 0;
-
-    // Test if the message can be delivered then deliver it
-    // else put it in the waiting list
-    int todo = clock.testRecvUpdate(msg.update);
-
-    if (todo == LogicalClock.DELIVER) {
-      // Deliver the message then try to deliver alls waiting message.
-      AgentServer.transaction.begin();
-      // Allocate a local time to the message to order it in
-      // local queue, and save it.
-      Channel.post(msg);
-
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", deliver msg#" + msg.update.stamp);
-      scanlist:
-      while (true) {
-	for (int i=0; i<waiting.size(); i++) {
-	  Message tmpMsg = (Message) waiting.elementAt(i);
-	  if ((tmpMsg.update.getFromId() == from) &&
-              (clock.testRecvUpdate(tmpMsg.update) == LogicalClock.DELIVER)) {
-	    // Be Careful, changing the stamp imply the filename
-	    // change !! So we have to delete the old file.
-	    tmpMsg.delete();
-	    //  Deliver the message, then delete it from list.
-	    Channel.post(tmpMsg);
-	    waiting.removeElementAt(i);
-
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         getName() + ",	 deliver msg#" + tmpMsg.update.stamp);
-
-	    // logical time has changed we have to rescan the list.
-	    continue scanlist;
-	  }
-	}
-	//  We have scan the entire list without deliver any message
-	// so we leave the loop.
-	break scanlist;
-      }
-      Channel.save();
-      AgentServer.transaction.commit();
-      // then commit and validate the message.
-      Channel.validate();
-      AgentServer.transaction.release();
-    } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
-      AgentServer.transaction.begin();
-      // Insert in a waiting list.
-      msg.save();
-      waiting.addElement(msg);
-      AgentServer.transaction.commit();
-      AgentServer.transaction.release();
-      
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", block msg#" + msg.update.stamp);
-    } else {
-//    it's an already delivered message, we have just to re-send an
-//    aknowledge (see below).
     }
   }
 
@@ -310,7 +213,7 @@ public class HttpNetwork extends Network {
       } catch (BindException exc) {
         if (i > CnxRetry) throw exc;
         try {
-          Thread.currentThread().sleep(i * 200);
+          Thread.sleep(i * 200);
         } catch (InterruptedException e) {}
       }
     }
@@ -362,7 +265,7 @@ public class HttpNetwork extends Network {
       if (proxy != null) {
         strbuf.append("http://").append(server.getHostname()).append(':').append(server.port);
       }
-      strbuf.append("/msg#").append(msg.update.stamp).append(" HTTP/1.1");
+      strbuf.append("/msg#").append(msg.getStamp()).append(" HTTP/1.1");
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ObjectOutputStream oos = new ObjectOutputStream(bos);
       oos.writeObject(msg);
@@ -594,16 +497,31 @@ public class HttpNetwork extends Network {
 
             // Open the connection.
             socket = null;
-            try {
+            while (true) {
+              boolean phase1 = true;
               if (proxy == null) {
-                socket = createSocket(server.getAddr(), server.port);
+                try {
+                  socket = createSocket(server.getAddr(), server.port);
+                  break;
+                } catch (IOException exc) {
+                  logmon.log(BasicLevel.WARN,
+                             this.getName() + ", connection refused", exc);
+                  if (! phase1) throw exc;
+                  phase1 = false;
+                  server.resetAddr();
+                }
               } else {
-                socket = createSocket(proxy, proxyport);
+                try {
+                  socket = createSocket(proxy, proxyport);
+                  break;
+                } catch (IOException exc) {
+                  logmon.log(BasicLevel.WARN,
+                             this.getName() + ", connection refused", exc);
+                  if (! phase1) throw exc;
+                  phase1 = false;
+                  proxy = InetAddress.getByName(proxyhost);
+                }
               }
-            } catch (IOException exc) {
-              logmon.log(BasicLevel.WARN,
-                         this.getName() + ", connection refused", exc);
-              throw exc;
             }
             setSocketOption(socket);
 

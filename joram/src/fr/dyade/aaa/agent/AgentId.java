@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.*;
  * well known services as factory. They are defined in <code>AgentId</code>
  * class.
  */
-class AgentIdStamp implements Serializable {
+final class AgentIdStamp implements Serializable {
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
 
@@ -151,7 +151,7 @@ class AgentIdStamp implements Serializable {
  *
  * @see AgentIdStamp
  */
-public final class AgentId implements Serializable, Cloneable {
+public final class AgentId implements Serializable {
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
 
@@ -228,6 +228,8 @@ public final class AgentId implements Serializable, Cloneable {
   public static int LocalJndiServiceStamp = 8;
   /** Reserved stamp for SCAdmin proxy <code>AgentId</code>. */
   public static int SCAdminProxyStamp = 9;
+  /** Reserved stamp for JORAM administration topic <code>AgentId</code>. */
+  public static int JoramAdminStamp = 10;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
@@ -281,9 +283,6 @@ public final class AgentId implements Serializable, Cloneable {
   static void init()
     throws IOException, ClassNotFoundException {
     // Initialize well known ids
-//     nullId = new AgentId((short) 0,
-// 			 (short) 0,
-// 			 NullIdStamp);
     localId = new AgentId(AgentServer.getServerId(),
 			  AgentServer.getServerId(),
 			  NullIdStamp);
@@ -424,20 +423,6 @@ public final class AgentId implements Serializable, Cloneable {
       return true;
     } else {
       return false;
-    }
-  }
-
-  /**
-   * Returns a clone of this agent id.
-   *
-   * @return  A clone of this agent id.
-   */
-  public synchronized Object clone() {
-    try { 
-      return super.clone();
-    } catch (CloneNotSupportedException e) { 
-      // this shouldn't happen, since we are Cloneable
-      throw new InternalError();
     }
   }
 }

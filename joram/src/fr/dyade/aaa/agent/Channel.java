@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -37,12 +37,7 @@ import fr.dyade.aaa.util.*;
  * localizing the target agent.
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
-
   static Channel channel = null;
-
-  protected Queue mq;
 
   /**
    * Creates a new instance of channel (result depends of server type).
@@ -74,8 +69,6 @@ abstract public class Channel {
     logmon = Debug.getLogger(Debug.A3Engine +
                              ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
-
-    this.mq = new Queue();
   }
 
   /**
@@ -92,6 +85,8 @@ abstract public class Channel {
    * is provided as source agent.<p>
    * The notification is immediately validated, that is made persistent,
    * if it is not sent from an agent reaction.
+   * Be careful, does not use this method in the engine thread, sometime
+   * engine.agent is null and it throws a NullPointerException.
    *
    * @param   to     destination agent.
    * @param   not    notification.
@@ -101,80 +96,16 @@ abstract public class Channel {
    */
   public final static void sendTo(AgentId to,
 				  Notification not) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
-      // Be careful, does not use this method in the engine thread, sometime
-      // engine.agent is null and it throws a NullPointerException.
-      channel.push(AgentServer.engine.agent.getId(), to, not);
-    } else {
-      //  Be careful, the destination node use the from.to field
-      // to get the from node id.
+    try {
+      EngineThread thread = (EngineThread) Thread.currentThread();
+      // Use the engine's sendTo method that push message in temporary queue
+      // until the end of current reaction.
+      thread.engine.push(AgentServer.engine.agent.getId(), to, not);
+    } catch (ClassCastException exc) {
+      //  Be careful, the destination node use the from.to field to
+      // get the from node id.
       channel.directSendTo(AgentId.localId, to, not);
     }
-  }
-
-  /**
-   * Sends a notification to an agent. Normally used uniquely in
-   * <a href="Agent.html#sendTo(AgentId, Notification)">sendTo</a> method.
-   * 
-   * @param   from   source agent.
-   * @param   to     destination agent.
-   * @param   not    notification.
-   */
-  synchronized final void sendTo(AgentId from,
-				 AgentId to,
-				 Notification not) {
-    if (Thread.currentThread() == AgentServer.engine.thread) {
-      // Be careful, does not use this method in the engine thread, sometime
-      // engine.agent is null and it throws a NullPointerException.
-      push(from, to, not);
-    } else {
-      //  Be careful, the destination node use the from.to field
-      // to get the from node id.
-      directSendTo(from, to, not);
-    }
-
-  }
-
-  synchronized final void push(AgentId from,
-                               AgentId to,
-                               Notification not) {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 toString() + ".SendTo(" + from + ", " + to + ", " + not + ")");
-    if ((to == null) || to.isNullId())
-      return;
-    
-    mq.push(Message.alloc(from, to, not));
-  }
-
-  /**
-   * Dispatch messages between the <a href="MessageConsumer.html">
-   * <code>MessageConsumer</code></a>: <a href="Engine.html">
-   * <code>Engine</code></a> component and <a href="Network.html">
-   * <code>Network</code></a> components.<p>
-   * Handle persistent information in respect with engine transaction.
-   * <p><hr>
-   * Be careful, this method must only be used during a transaction in
-   * order to ensure the mutual exclusion.
-   *
-   * @exception IOException	error when accessing the local persistent
-   *				storage.
-   */
-  static final void dispatch() throws Exception {
-    Message msg = null;
-
-    while (! channel.mq.isEmpty()) {
-      try {
-	msg = (Message) channel.mq.get();
-      } catch (InterruptedException exc) {
-	continue;
-      }
-
-      if (msg.from == null) msg.from = AgentId.localId;
-      post(msg);
-      channel.mq.pop();
-    }
-    save();
   }
 
   /**
@@ -257,22 +188,9 @@ abstract public class Channel {
   directSendTo(AgentId from,
 	       AgentId to,
 	       Notification not);
-
-  /**
-   * Cleans the Channel queue of all pushed notifications.
-   * <p><hr>
-   * Be careful, this method must only be used during a transaction in
-   * order to ensure the mutual exclusion.
-   */
-  static final void clean() {
-    channel.mq.removeAllElements();
-  }
 }
 
 final class TransactionChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
-
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
    * must only be used by <a href="Channel.html#newInstance()">static channel
@@ -309,7 +227,7 @@ final class TransactionChannel extends Channel {
       consumer = AgentServer.getConsumer(to.to);
     } catch (UnknownServerException exc) {
       channel.logmon.log(BasicLevel.ERROR,
-                         channel.toString() + ", can't post message: " + msg,
+                         toString() + ", can't post message: " + msg,
                          exc);
       // TODO: Post an ErrorNotification ?
       return;
@@ -357,9 +275,6 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
-
   /**
    * Constructs a new <code>TransientChannel</code> object. this method
    * must only be used by <a href="Channel.html#newInstance()">static channel
@@ -391,12 +306,12 @@ final class TransientChannel extends Channel {
     if ((to == null) || to.isNullId())
       return;
  
+    msg = Message.alloc(from, to, not);
     try {
-      msg = Message.alloc(from, to, not);
       consumer = AgentServer.getConsumer(to.to);
     } catch (UnknownServerException exc) {
       channel.logmon.log(BasicLevel.ERROR,
-                         channel.toString() + ", can't post message: " + msg,
+                         toString() + ", can't post message: " + msg,
                          exc);
       // TODO: Post an ErrorNotification
     }

@@ -20,8 +20,8 @@
 package fr.dyade.aaa.agent;
 
 public class AgentDeleteRequest extends Notification {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentDeleteRequest.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentDeleteRequest.java,v 1.15 2004-02-13 08:12:56 fmaistre Exp $"; 
 
   /**
    * the agent identified by 'reply' will receive a DeleteAck

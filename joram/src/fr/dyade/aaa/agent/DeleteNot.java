@@ -25,7 +25,7 @@ package fr.dyade.aaa.agent;
  * @version 1.0, 7/10/98
  */
 public class DeleteNot extends Notification {
-  public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.15 2004-02-13 08:12:56 fmaistre Exp $"; 
 
   /**
    * the agent identified by 'reply' will receive a DeleteAck

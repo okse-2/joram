@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -199,6 +199,10 @@ public final class AgentServer {
     if (! consumers.containsKey(domain))
       throw new Exception("Unknown consumer for domain " + domain);
     return (MessageConsumer) consumers.get(domain);
+  }
+
+  static void removeConsumer(String domain) {
+    consumers.remove(domain);
   }
 
   /**
@@ -1006,22 +1010,22 @@ public final class AgentServer {
       for (int i=0; i<list.length; i++) {
         Message msg = Message.load(list[i]);
 
-	if (msg.update.getFromId() == serverId) {
+	if (msg.getFromId() == serverId) {
 	  // The update has been locally generated, the message is ready to
 	  // deliver to its consumer (Engine or Network component). So we have
 	  // to insert it in the queue of this consumer.
           try {
-            ((ServerDesc) servers.get(new Short(msg.update.getToId()))).domain.insert(msg);
+            ((ServerDesc) servers.get(new Short(msg.getToId()))).domain.insert(msg);
           } catch (NullPointerException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message to unknown server id#" +
-                       msg.update.getToId());
+                       msg.getToId());
             msg.delete();
             continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message to unknown server id#" +
-                       msg.update.getToId());
+                       msg.getToId());
             msg.delete();
             continue;
           }
@@ -1031,17 +1035,17 @@ public final class AgentServer {
 	  // have to insert it in waiting list of the network component that
 	  // received it.
           try {
-            ((ServerDesc) servers.get(new Short(msg.update.getFromId()))).domain.insert(msg);
+            ((ServerDesc) servers.get(new Short(msg.getFromId()))).domain.insert(msg);
           } catch (NullPointerException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message from unknown server id#" +
-                       msg.update.getFromId());
+                       msg.getFromId());
             msg.delete();
             continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message from unknown server id#" +
-                       msg.update.getFromId());
+                       msg.getFromId());
             msg.delete();
             continue;
           }
@@ -1128,7 +1132,7 @@ public final class AgentServer {
    *  Causes this AgentServer to begin its execution. This method starts all
    * <code>MessageConsumer</code> (i.e. the engine and the network components).
    */
-  public static void
+  public static String
   start() throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", start()", new Exception());
@@ -1142,8 +1146,8 @@ public final class AgentServer {
       status.value = Status.STARTING;
     }
 
-    boolean ok = true;
     // Now we can start all message consumers.
+    StringBuffer errBuf = null;
     if (consumers != null) {
       for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
 	MessageConsumer cons = (MessageConsumer) c.nextElement();
@@ -1159,7 +1163,9 @@ public final class AgentServer {
               logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
             }
           } catch (IOException exc) {
-            ok = false;
+            if (errBuf == null) errBuf = new StringBuffer();
+            errBuf.append(cons.getName()).append(": ");
+            errBuf.append(exc.getMessage()).append('\n');
             logmon.log(BasicLevel.FATAL,
                        getName() +
                        ", problem during " + cons.getName() + " starting", exc);
@@ -1168,12 +1174,7 @@ public final class AgentServer {
       }
     }
     // The server is running.
-    if (ok) {
-      logmon.log(BasicLevel.WARN,
-                 getName() + ", started at " + new Date());
-    } else {
-      throw new Exception("Problem during MessageConsumer starting");
-    }
+    logmon.log(BasicLevel.WARN, getName() + ", started at " + new Date());
 
     // Commit all changes.
     transaction.begin();
@@ -1185,6 +1186,9 @@ public final class AgentServer {
         throw new Exception("bad start, status: " + status.value);
       status.value = Status.STARTED;
     }
+
+    if (errBuf == null) return null;
+    return errBuf.toString();
   }
 
   /**
@@ -1272,6 +1276,9 @@ public final class AgentServer {
                getName() + ", stopped at " + new Date());
   }
 
+  public static final String OKSTRING = "OK";
+  public static final String ERRORSTRING = "ERROR";
+  public static final String ENDSTRING = "END";
   /**
    * Main for a standard agent server.
    * The start arguments include in first position the identifier of the
@@ -1287,7 +1294,9 @@ public final class AgentServer {
     try {
       init(args);
     } catch (Throwable exc) {
-      System.out.println(getName() + "initialisation failed: " + exc.toString());
+      System.out.println(getName() + "initialisation failed: " + ERRORSTRING);
+      System.out.println(exc.toString());
+      System.out.println(ENDSTRING);
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR,
@@ -1306,12 +1315,20 @@ public final class AgentServer {
     }
 
     try {
-      start();
+      String errStr = start();
       // Be careful, the output below is needed by some tools (AdminProxy for
       // example.
-      System.out.println(getName() + " started.");
+      if (errStr == null) {
+        System.out.println(getName() + " started: " + OKSTRING);
+      } else {
+        System.out.println(getName() + " started: " + ERRORSTRING);
+        System.out.print(errStr);
+        System.out.println(ENDSTRING);
+      }
     } catch (Throwable exc) {
-      System.out.println(getName() + " failed: " + exc.toString());
+      System.out.println(getName() + " start failed: " + ERRORSTRING);
+      System.out.print(exc.toString());
+      System.out.println(ENDSTRING);
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR, getName() + " failed", exc);

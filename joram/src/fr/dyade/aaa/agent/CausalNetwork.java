@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -27,20 +28,19 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Arrays;
 
+/**
+ *  <code>CausalNetwork</code> is a base implementation for network components
+ * with a causal message ordering.
+ */
 public abstract class CausalNetwork extends Network {
   /**
-   * Creates a new network component. This simple constructor is required in
-   * order to use <code>Class.newInstance()</code> method during configuration.
-   * The configuration of component is then done by <code>init</code> method.
+   * Creates a new network component. This simple constructor is required
+   * by subclasses.
    */
-  public CausalNetwork() {
-    waiting = new Vector();
-  }
+  public CausalNetwork() {}
 
 
-  public LogicalClock
-      createsLogicalClock(String name,
-                          short[] servers) {
+  public LogicalClock createsLogicalClock(String name, short[] servers) {
     return new MatrixClock(name, servers);
   }
 
@@ -51,11 +51,24 @@ public abstract class CausalNetwork extends Network {
    */
   public void deliver(Message msg) throws Exception {
     // Get real from serverId.
-    short from = msg.update.getFromId();
+    short from = msg.getFromId();
+
+    // Test if the message is really for this node (final destination or
+    // router).
+    short dest = msg.getToId();
+    if (dest != AgentServer.getServerId()) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", recv bad msg#" + msg.getStamp() +
+                 " really to " + dest +
+                 " by " + from);
+      throw new Exception("recv bad msg#" + msg.getStamp() +
+                          " really to " + dest +
+                          " by " + from);
+    }
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 getName() + ", recv msg#" + msg.update.stamp +
+                 getName() + ", recv msg#" + msg.getStamp() +
                  " from " + msg.from +
                  " to " + msg.to +
                  " by " + from);
@@ -65,7 +78,7 @@ public abstract class CausalNetwork extends Network {
 
     // Test if the message can be delivered then deliver it
     // else put it in the waiting list
-    int todo = clock.testRecvUpdate(msg.update);
+    int todo = clock.testRecvUpdate(msg.getUpdate());
     if (todo == LogicalClock.DELIVER) {
       // Deliver the message then try to deliver alls waiting message.
       AgentServer.transaction.begin();
@@ -75,12 +88,12 @@ public abstract class CausalNetwork extends Network {
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   getName() + ", deliver msg#" + msg.update.stamp);
+                   getName() + ", deliver msg#" + msg.getStamp());
       scanlist:
       while (true) {
 	for (int i=0; i<waiting.size(); i++) {
 	  Message tmpMsg = (Message) waiting.elementAt(i);
-	  if (clock.testRecvUpdate(tmpMsg.update) == LogicalClock.DELIVER) {
+	  if (clock.testRecvUpdate(tmpMsg.getUpdate()) == LogicalClock.DELIVER) {
 	    // Be Careful, changing the stamp imply the filename
 	    // change !! So we have to delete the old file.
 	    tmpMsg.delete();
@@ -90,7 +103,7 @@ public abstract class CausalNetwork extends Network {
 
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         getName() + ",	 deliver msg#" + tmpMsg.update.stamp);
+                         getName() + ",	 deliver msg#" + tmpMsg.getStamp());
 
 	    // logical time has changed we have to rescan the list.
 	    continue scanlist;
@@ -115,7 +128,7 @@ public abstract class CausalNetwork extends Network {
       
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   getName() + ", block msg#" + msg.update.stamp);
+                   getName() + ", block msg#" + msg.getStamp());
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).

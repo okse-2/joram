@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -89,7 +89,7 @@ public final class TransientNetworkProxy extends Network {
    * @param servers	the domain's servers.
    */
   public void init(String name, int port, short[] servers) {
-    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
+    this.name = AgentServer.getName() + '.' + name;
     this.port = port;
     this.servers = servers;
     // Sorts the array of server ids into ascending numerical order.
@@ -108,8 +108,8 @@ public final class TransientNetworkProxy extends Network {
    */
   public void insert(Message msg) {
     // Update stamp to maximum known.
-    if (msg.update.stamp > stamp)
-      stamp = msg.update.stamp;
+    if (msg.getStamp() > stamp)
+      stamp = msg.getStamp();
     qout.insert(msg);
   }
 
@@ -135,9 +135,9 @@ public final class TransientNetworkProxy extends Network {
    * @param msg		the message
    */
   public void post(Message msg) throws Exception {
-    msg.update = new Update(AgentServer.getServerId(),
-			    msg.to.to,
-			    ++stamp);
+    msg.setUpdate(Update.alloc(AgentServer.getServerId(),
+                               msg.to.to,
+                               ++stamp));
     msg.save();
     qout.push(msg);
   }
@@ -251,8 +251,10 @@ public final class TransientNetworkProxy extends Network {
   public synchronized void stop() {
     if (listener != null) listener.stop();
     if (manager != null) manager.stop();
-    for (int i=0; i<monitors.length; i++) {
-      if (monitors[i]!= null) monitors[i].stop();
+    if (monitors != null) {
+      for (int i=0; i<monitors.length; i++) {
+        if (monitors[i]!= null) monitors[i].stop();
+      }
     }
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
@@ -386,7 +388,7 @@ public final class TransientNetworkProxy extends Network {
 	} catch (BindException exc) {
 	  if (i > 10) throw exc;
 	  try {
-	    Thread.currentThread().sleep(i * 250);
+	    Thread.sleep(i * 250);
 	  } catch (InterruptedException e) {}
 	}
       }

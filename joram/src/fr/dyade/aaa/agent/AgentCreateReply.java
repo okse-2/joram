@@ -22,7 +22,7 @@ package fr.dyade.aaa.agent;
 
 public class AgentCreateReply extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: AgentCreateReply.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentCreateReply.java,v 1.15 2004-02-13 08:12:56 fmaistre Exp $"; 
 
   static final long serialVersionUID = 8123502821909657657L;
 

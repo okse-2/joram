@@ -104,8 +104,8 @@ public abstract class ServerAgent extends Agent {
    *
    * @param firstTime	<code>true</code> when service starts anew
    */
-  public void initialize(boolean firstTime) throws Exception {
-    super.initialize(firstTime);
+  public void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
 
     host = InetAddress.getLocalHost().getHostName();
     listen = getServerSocket();
@@ -135,10 +135,9 @@ public abstract class ServerAgent extends Agent {
    * Finalizes this proxy agent execution. Calls <code>stop</code> to stop
    * the drivers.
    *
-   * @exception Throwable
-   *	unspecialized exception
+   * @param lastTime	true when last called by the factory on agent deletion.
    */
-  public void agentFinalize() {
+  public void agentFinalize(boolean lastTime) {
     stop();
   }
 
@@ -175,9 +174,11 @@ public abstract class ServerAgent extends Agent {
 
     strBuf.append("(").append(super.toString());
     strBuf.append(",port=").append(port);
-    strBuf.append(",monitors=[");
-    for (int i=0; i<monitors.length; i++) {
-      strBuf.append(monitors[i].toString()).append(",");
+    if (monitors != null) {
+      strBuf.append(",monitors=[");
+      for (int i=0; i<monitors.length; i++) {
+        strBuf.append(monitors[i].toString()).append(",");
+      }
     }
     strBuf.append("]");
     strBuf.append(")");

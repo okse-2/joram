@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,9 +29,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.*;
 
 public class SCAdminHelper {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: SCAdminHelper.java,v 1.2 2003-09-11 09:53:25 fmaistre Exp $"; 
-
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
   protected Hashtable ASP = null;
 
@@ -75,6 +72,23 @@ public class SCAdminHelper {
   public String startAgentServer(short sid,
                                  File dir,
                                  String[] jvmarg) throws Exception {
+    return startAgentServer(sid, dir, jvmarg, 
+                            "fr.dyade.aaa.agent.AgentServer");
+  }
+
+  /**
+   * Starts an agent server from its id.
+   *
+   * @param sid		id of agent server to start
+   * @param dir		new working directory for the created agent server,
+   *	current working directory if <code>null</code>
+   * @param jvmarg	arguments to pass to the created java program
+   * @param className   the name of the main class
+   */
+  public String startAgentServer(short sid,
+                                 File dir,
+                                 String[] jvmarg,
+                                 String className) throws Exception {
     logmon.log(BasicLevel.DEBUG,
                "SCAdmin: start AgentServer#" + sid);
 
@@ -105,28 +119,35 @@ public class SCAdminHelper {
       for (int i=0; i<jvmarg.length; i++)
         argv.addElement(jvmarg[i]);
     }
-    argv.addElement("fr.dyade.aaa.agent.AgentServer");
+    argv.addElement(className);
     argv.addElement(Short.toString(sid));
     argv.addElement("s" + sid);
 
     String[] command = new String[argv.size()];
     argv.copyInto(command);
 
+    logmon.log(BasicLevel.DEBUG,
+               "SCAdmin" + ": starts AgentServer#" + sid);
     if (dir == null) {
       p = Runtime.getRuntime().exec(command);
     } else {
       p = Runtime.getRuntime().exec(command, null, dir);
     }
     ASP.put(new Short(sid), p);
-    logmon.log(BasicLevel.DEBUG,
-               "SCAdmin" + ": AgentServer#" + sid + " started");
     BufferedReader br =
       new BufferedReader(new InputStreamReader(p.getInputStream()));
-    String status = br.readLine();
-    if (status == null){
-      BufferedReader er =
-        new BufferedReader(new InputStreamReader(p.getErrorStream()));
-      status = er.readLine();
+    String line = br.readLine();
+    if (line != null) {
+      if (line.endsWith(AgentServer.ERRORSTRING)) {
+        StringBuffer strBuf = new StringBuffer();
+        strBuf.append(line);
+        while (((line = br.readLine()) != null) &&
+               (! line.equals(AgentServer.ENDSTRING))) {          
+          strBuf.append('\n');
+          strBuf.append(line);
+        }
+        line = strBuf.toString();
+      }
     }
     // Close all streams of subprocess in order to avoid deadlock due
     // to limited buffer size.
@@ -139,7 +160,7 @@ public class SCAdminHelper {
     try {
       p.getErrorStream().close();
     } catch (Exception exc) {}
-    return status;
+    return line;
   }
 
   /**

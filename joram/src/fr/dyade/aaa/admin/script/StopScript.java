@@ -37,8 +37,8 @@ import fr.dyade.aaa.agent.conf.*;
  * @see A3CMLConfig
  */
 public class StopScript implements Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: StopScript.java,v 1.2 2003-09-11 09:52:05 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: StopScript.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
   /** vector of StopAdminCmd */
   private Vector commands = null;

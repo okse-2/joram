@@ -24,21 +24,20 @@ import java.io.*;
 import java.util.*;
 
 public class RemoveNetworkCmd extends NetworkCmd implements Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: RemoveNetworkCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: RemoveNetworkCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
- /**
-  * remove network
-  *
-  * @param serverName  server name
-  * @param domain      doamine name
-  * @param port        port
-  */
-  public RemoveNetworkCmd(String serverName, String domain, int port) {
-    super(serverName,domain,port);
+  /**
+   * Constructs a new network removal command.
+   *
+   * @param serverName  server name
+   * @param domain      domain name
+   */
+  public RemoveNetworkCmd(String serverName, String domain) {
+    super(serverName, domain);
   }
 
   public String toString() {
-    return "RemoveNetworkCmd" + super.toString();
+    return '(' + super.toString() + ')';
   }
 }
