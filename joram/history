@@ -1,12 +1,23 @@
 ###############################################################################
-# 2004/11/05 | Joram 4.1.2 release.
+# 2004/11/08 | Joram 4.1.3 release.
 ###############################################################################
++==============================================================================
+| 2004/11/24 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| JoramAdapter : remove scn:com/ prefix when we register a destination.
+###############################################################################
+# 2004/11/08 | Joram 4.1.2 release.
+###############################################################################
++==============================================================================
+| 2004/11/08 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Changes in TCP connection to improve performances.
 +==============================================================================
 | 2004/11/04 | Nicolas Tachker - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
-| fix bug (NullPointerException) in 
-| OutboundConnectionFactory.java, cxManager can be null.
-| ProxyImpl.java in setCtx(int key) if key <0 throw a StateException.
+| Fix bug (NullPointerException) in  OutboundConnectionFactory.java,
+| cxManager can be null.
+| Throws a StateException in setCtx(int key) if key <0 (ProxyImpl.java).
 +==============================================================================
 | 2004/10/18 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
