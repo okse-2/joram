@@ -781,6 +781,19 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   {
     producers.remove(managedCx);
   }
+  
+  /** remove prefix name scn:comp/ */
+  private static String removePrefix(String name) {
+    String PREFIX_NAME = "scn:comp/";
+    try {
+      if (name.startsWith(PREFIX_NAME))
+        return name.substring(PREFIX_NAME.length());
+      else
+        return name;
+    } catch (Exception e) {
+      return name;
+    }
+  }
 
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
@@ -790,23 +803,21 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * @exception NamingException  If the binding fails.
    */
   static Destination createQueue(String name)
-         throws AdminException, NamingException
-  {
+    throws AdminException, NamingException {
     Context ctx = new InitialContext();
     try {
       return (Queue) ctx.lookup(name);
-    }
-    catch (javax.naming.NamingException exc) {
+    } catch (javax.naming.NamingException exc) {
       try {
-        Queue queue = Queue.create(name);
+        String shortName = removePrefix(name);
+        Queue queue = Queue.create(shortName); 
         queue.setFreeReading();
         queue.setFreeWriting();
-        AdapterTracing.debugINFO("  - Queue [" + name + "] has been created.");
+        AdapterTracing.debugINFO("  - Queue [" + shortName + "] has been created.");
         bind(name, queue);
         register(new LocalQueue(queue));
         return queue;
-      }
-      catch (ConnectException exc2) {
+      } catch (ConnectException exc2) {
         throw new AdminException("createQueue() failed: admin connection "
                                  + "has been lost.");
       }
@@ -821,23 +832,21 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * @exception NamingException  If the binding fails.
    */
   static Destination createTopic(String name)
-         throws AdminException, NamingException
-  {
+    throws AdminException, NamingException {
     Context ctx = new InitialContext();
     try {
       return (Topic) ctx.lookup(name);
-    }
-    catch (javax.naming.NamingException exc) {
+    } catch (javax.naming.NamingException exc) {
       try {
-        Topic topic = Topic.create(name);
+        String shortName = removePrefix(name);
+        Topic topic = Topic.create(shortName);
         topic.setFreeReading();
         topic.setFreeWriting();
-        AdapterTracing.debugINFO("  - Topic [" + name + "] has been created.");
+        AdapterTracing.debugINFO("  - Topic [" + shortName + "] has been created.");
         bind(name, topic);
         register(new LocalTopic(topic));
         return topic;
-      }
-      catch (ConnectException exc2) {
+      } catch (ConnectException exc2) {
         throw new AdminException("createTopic() failed: admin connection "
                                  + "has been lost.");
       }
