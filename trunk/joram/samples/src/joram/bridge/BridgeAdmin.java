@@ -59,8 +59,7 @@ public class BridgeAdmin
     bridgeD.setFreeReading();
     bridgeD.setFreeWriting();
 
-    javax.jms.ConnectionFactory cf =
-      QueueTcpConnectionFactory.create("localhost", 16010);
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create();
 
     User user = User.create("anonymous", "anonymous", 0);
 
