@@ -30,7 +30,7 @@ package fr.dyade.aaa.agent;
  * @see StatusNot
  */
 public class GetStatusNot extends Notification {
-public static final String RCS_VERSION="@(#)$Id: GetStatusNot.java,v 1.5 2001-05-14 16:26:40 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: GetStatusNot.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
     /**
      * The name of the status attribute.
      */

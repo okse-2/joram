@@ -40,7 +40,7 @@ import java.io.*;
  */
 public interface NotificationInputStream {
 
-public static final String RCS_VERSION="@(#)$Id: NotificationInputStream.java,v 1.5 2001-05-14 16:26:41 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: NotificationInputStream.java,v 1.6 2001-08-31 08:13:58 tachkeni Exp $"; 
 
 
   /**

@@ -27,7 +27,7 @@ import java.util.Vector;
 
 public final class A3ServersList extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.5 2001-05-14 16:26:37 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.6 2001-08-31 08:13:54 tachkeni Exp $";
 
  /**
   * A3Node contains informations about an agent server.

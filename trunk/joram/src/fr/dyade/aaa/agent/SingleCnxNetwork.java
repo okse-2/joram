@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.3 2001-05-14 16:26:42 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.4 2001-08-31 08:14:00 tachkeni Exp $";
 
   Vector sendList;
 

@@ -32,7 +32,7 @@ import java.io.*;
  * @version	v1.0
  */
 public final class ServiceDesc implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.5 2001-05-14 16:26:42 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.6 2001-08-31 08:13:59 tachkeni Exp $";
 
   /** service class name */
   String scname;

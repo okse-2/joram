@@ -100,7 +100,7 @@ public class ClientSubscription implements java.io.Serializable
     this.noLocal = noLocal; 
     this.selector = selector ;
 
-    fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+    Selector selectorObj = new Selector();
     String messageID;
     String sender;
 
@@ -114,7 +114,7 @@ public class ClientSubscription implements java.io.Serializable
         sender =  messageID.substring(0, messageID.indexOf('_'));
 
         if ((noLocal && agentClient.toString().equals(sender)) ||
-          (selecObj.isAvailable(msg,selector)))
+          (selectorObj.matches(msg, selector)))
 
           receivedMessages.removeElementAt(i);
         else

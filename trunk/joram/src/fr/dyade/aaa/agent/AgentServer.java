@@ -138,7 +138,7 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public class AgentServer {
-public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-31 08:13:56 tachkeni Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -165,6 +165,13 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
   static ServerDesc[] servers = null;
   /** Static reference to the transactional monitor. */
   static Transaction transaction = null;
+
+  /**
+   * Returns the agent server transaction context.
+   */
+  public static Transaction getTransaction() {
+    return transaction;
+  }
 
   /** server properties, publicly accessible (see get/set operation) */
   static Properties properties = null;
@@ -240,12 +247,12 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
     try {
       return getServerDesc(sid).isTransient;
     } catch (NullPointerException exc) {
-      throw new UnknownServerException("Unknow server id. #" + sid);
+      throw new UnknownServerException("Unknown server id. #" + sid);
     }
   }
 
   /**
-   * Gets the caracteristics of the current server.
+   * Gets the characteristics of the current server.
    *
    * @return	the server's descriptor.
    */
@@ -263,7 +270,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
   }
 
   /**
-   * Gets the caracteristics of the corresponding server.
+   * Gets the characteristics of the corresponding server.
    *
    * @param id	agent server id.
    * @return	the server's descriptor.
@@ -401,7 +408,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
   private static A3CMLHandler a3configHdl = null;
 
   /**
-   * The second step of initialization. It needs the Transaction component is
+   * The second step of initialization. It needs the Transaction component be
    * up, then it initializes all <code>Server</code> structures from the
    * <code>A3CMLHandler</code> ones.
    */
@@ -426,7 +433,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
       } else if (root instanceof A3CMLTServer) {
 	configure((A3CMLTServer) root);
       } else {
-	throw new Exception("Unknow agent server type: " + serverId);
+	throw new Exception("Unknown agent server type: " + serverId);
       }
     }
     return;
@@ -736,7 +743,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
     // Gets static configuration of agent servers from a file. This method
     // fills the object graph configuration in the <code>A3CMLHandler</code>
     // object, then the configure method really initializes the server.
-    // There is two steps because the configuration step needs the transaction
+    // There are two steps because the configuration step needs the transaction
     // components to be initialized.
     try {
       a3configHdl = A3CMLHandler.getConfig(serverId);
@@ -920,6 +927,10 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
     return 2;
   }
 
+  /**
+   *  Causes this AgentServer to begin its execution. This method starts all
+   * <code>MessageConsumer</code> (i.e. the engine and the network components).
+   */
   public static void
   start() throws Exception {
     boolean ok = true;
@@ -948,6 +959,11 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
     transaction.release();
   }
 
+  /**
+   *  Forces this AgentServer to stop executing. This method stops all
+   * consumers and services. Be careful, the stop process is asynchronous
+   * and may be in progress when the method ends.
+   */
   public static void stop() {
     // Stop all message consumers.
     for (int i=0; i<consumers.length; i++) {
@@ -975,8 +991,10 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.5 2001-05-
     try {
       init(args);
       start();
+      System.out.println("AgentServer#" + getServerId() + " started.");
     } catch (Exception exc) {
-      System.err.println(exc.toString());
+      System.out.println("AgentServer#" + getServerId() + " failed: " +
+                         exc.toString());
       System.exit(1);
     }
   }

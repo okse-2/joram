@@ -25,6 +25,8 @@
 
 package fr.dyade.aaa.mom; 
  
+import java.io.*;
+
 /** 
  *	a ObjectMessage is as JMS specifications 
  * 
@@ -33,61 +35,67 @@ package fr.dyade.aaa.mom;
  
 public class ObjectMessage extends fr.dyade.aaa.mom.Message implements javax.jms.ObjectMessage{ 
  
-	/** the object of the message */ 
-	private java.io.Serializable obj;
+  /** the object of the message */ 
+  private byte[] obj;
 	
-	public ObjectMessage() {
-		modeReadWrite = READ_WRITE_MODE;
-	}
+  public ObjectMessage() {
+    modeReadWrite = READ_WRITE_MODE;
+  }
 	
-	/** @see jms specifications */ 
-	public java.io.Serializable getObject() throws javax.jms.JMSException {
-		try {
-			return obj;
-		} catch (Exception exc) {
-			/* can never send a MessageFormatException */
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+  /** @see jms specifications */ 
+  public java.io.Serializable getObject() throws javax.jms.JMSException {
+    try {
+      ByteArrayInputStream bis = new ByteArrayInputStream(obj);
+      ObjectInputStream ois = new ObjectInputStream(bis);
+      return (java.io.Serializable) ois.readObject();
+    } catch (Exception exc) {
+      /* can never send a MessageFormatException */
+      javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+      except.setLinkedException(exc);
+      throw(except);
+    }
+  }
 	
-	/** @see jms specifications */ 
-	public void setObject(java.io.Serializable obj) throws javax.jms.JMSException {
-		try {
-			if(modeReadWrite==READ_MODE)
-				throw(new javax.jms.MessageNotWriteableException("Message Not Writeable"));
-			this.obj = obj;
-		} catch (javax.jms.JMSException exc) {
-			throw(exc);	
-		} catch (Exception exc) {
-			/* can never send a MessageFormatException */
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+  /** @see jms specifications */ 
+  public void setObject(java.io.Serializable obj) throws javax.jms.JMSException {
+    try {
+      if(modeReadWrite==READ_MODE)
+        throw(new javax.jms.MessageNotWriteableException("Message Not Writeable"));
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(bos);
+      oos.writeObject(obj);
+      oos.flush();
+      this.obj =  bos.toByteArray();
+    } catch (javax.jms.JMSException exc) {
+      throw(exc);	
+    } catch (Exception exc) {
+      /* can never send a MessageFormatException */
+      javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+      except.setLinkedException(exc);
+      throw(except);
+    }
+  }
 	
-	/** overwrite the methode as jms specified */ 
-	public void clearBody() throws javax.jms.JMSException {
-		try {
-			modeReadWrite = READ_WRITE_MODE;
-			obj = null;
-		} catch (Exception exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+  /** overwrite the methode as jms specified */ 
+  public void clearBody() throws javax.jms.JMSException {
+    try {
+      modeReadWrite = READ_WRITE_MODE;
+      obj = null;
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+      except.setLinkedException(exc);
+      throw(except);
+    }
+  }
 	
-	/** put the mode in readOnly */
-	public void reset() throws javax.jms.JMSException {
-		try {
-			modeReadWrite = READ_MODE;
-		} catch (Exception exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+  /** put the mode in readOnly */
+  public void reset() throws javax.jms.JMSException {
+    try {
+      modeReadWrite = READ_MODE;
+    } catch (Exception exc) {
+      javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+      except.setLinkedException(exc);
+      throw(except);
+    }
+  }
 }

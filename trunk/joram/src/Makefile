@@ -21,9 +21,9 @@
 # All Rights Reserved.
 #
 
-PACKAGES = fr
+PACKAGES = fr com
 
-SHIP_LIBRARIES = a3rt.jar a3ocl.jar a3jms.jar
+SHIP_LIBRARIES = a3rt.jar a3ocl.jar a3joram.jar
 
 build_all: all test ship_all scripts doc_protected doc_private
 ship_all: ship_dtd $(SHIP_LIBRARIES:%.jar=ship_%)
@@ -37,8 +37,13 @@ a3rt.jar_LIBRARIES = \
 # Previously in a3rt.jar
 #	a3task.jar \
 
-a3jms.jar_LIBRARIES = \
+a3joram.jar_LIBRARIES = \
+	a3util.jar \
+	a3agent.jar \
+	a3ip.jar \
+	a3ns.jar \
 	a3mom.jar \
+	a3mom_selec.jar \
 	a3jndi.jar \
 	joram.jar
 
@@ -162,5 +167,26 @@ $(SHIP_LIBRARIES:%= $(SHIP)/%):
 	done
 	cd $(SHIP)/tmp; jar cMf $(@://$(DRIVE)%=$(DRIVE):%) *
 	-rm -fr $(SHIP)/tmp
+
+service:
+	rm -f $(OBJDIR)/WebPortalService.exe
+	cd $(OBJDIR);\
+	$(LIBDIR)/jntsvc.exe \
+	/svcmain:com.scalagent.paf.admin.WebPortalService \
+	/OUT:WebPortalService.exe \
+	/eventsource:WebPortalService \
+	/DISPLAYNAME:WebPortalService \
+	com\\scalagent\\paf\\admin\\WebPortalService.class \
+	com\\scalagent\\paf\\admin\\ServerThread.class \
+	com\\scalagent\\paf\\admin\\TransientThread.class \
+	com\\scalagent\\paf\\admin\\AgentControlService.class
+
+build: service
+	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/scalagent.conf rm_ship
+	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/webportal.conf
+	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/tool.conf
+
+joram:
+	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/joram.conf rm_ship
 
 include $(GENERAL_MK)

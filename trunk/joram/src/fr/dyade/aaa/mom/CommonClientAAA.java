@@ -920,7 +920,7 @@ public class CommonClientAAA implements java.io.Serializable
 	fr.dyade.aaa.mom.Message msg = msgSendMOMExtern.message;
 		
 	/* set of the identifier of the Message */
-	msg.setJMSMessageID(calculateMessageID());
+	msg.setJMSMessageID("ID:" + calculateMessageID());
 		
 	if(Debug.debug)
 	    if(Debug.clientSend && (msg instanceof fr.dyade.aaa.mom.TextMessage))
@@ -942,7 +942,7 @@ public class CommonClientAAA implements java.io.Serializable
     int drvKey = msgSendMOMExtern.getDriverKey();
 			
 	/* set of the identifier of the Message */
-	msg.setJMSMessageID(calculateMessageID());
+	msg.setJMSMessageID("ID:" + calculateMessageID());
 			
 	/* checking the message */
 	checking(msg);

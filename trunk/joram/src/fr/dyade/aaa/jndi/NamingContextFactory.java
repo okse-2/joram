@@ -49,40 +49,46 @@ public class NamingContextFactory implements InitialContextFactory {
    * or if an exception is thrown from the NamingContext constructor.
    */
   public Context getInitialContext(Hashtable env)
-	throws NamingException {
-	try {
-	  String host = (String) env.get(HOST_PROPERTY);	  
-	  if (host == null) {
-		host = "localhost";//default host
-	  }
-	  String portStr = (String) env.get(PORT_PROPERTY);
-	  if (portStr == null) {
-		portStr = "16400";//default port
-	  }
-	  int port = Integer.parseInt(portStr);
-	  return new fr.dyade.aaa.jndi.NamingContext(host, port);
+    throws NamingException {
+    try {
+      String host = System.getProperty(HOST_PROPERTY,null);
+      String portStr = System.getProperty(PORT_PROPERTY,null);
+      if (host == null) {
+	host = (String) env.get(HOST_PROPERTY);	  
+	if (host == null) {
+	  host = "localhost";//default host
 	}
-	catch (ClassCastException e) {
-	  NamingException nx = 
-		new NamingException("ClassCastException!  Are " + 
-							HOST_PROPERTY + " and " + 
-							PORT_PROPERTY + " String objects?");
-	  nx.setRootCause(e);
-	  throw nx;
+      }
+      if (portStr == null) {
+	portStr = (String) env.get(PORT_PROPERTY);
+	if (portStr == null) {
+	  portStr = "16400";//default port
 	}
-	catch (NumberFormatException e) {
-	  NamingException nx = 
-		new NamingException("the " + PORT_PROPERTY + 
-							" is not a valid integer");
-	  nx.setRootCause(e);
-	  throw nx;
-	}
-	catch (Exception e) {
-	  NamingException nx = 
-		new NamingException("exception creating NamingContext: " +
-							e.toString());
-	  nx.setRootCause(e);
-	  throw nx;
-	}
+      }
+      int port = Integer.parseInt(portStr);
+      return new fr.dyade.aaa.jndi.NamingContext(host, port);
+    }
+    catch (ClassCastException e) {
+      NamingException nx = 
+	new NamingException("ClassCastException!  Are " + 
+			    HOST_PROPERTY + " and " + 
+			    PORT_PROPERTY + " String objects?");
+      nx.setRootCause(e);
+      throw nx;
+    }
+    catch (NumberFormatException e) {
+      NamingException nx = 
+	new NamingException("the " + PORT_PROPERTY + 
+			    " is not a valid integer");
+      nx.setRootCause(e);
+      throw nx;
+    }
+    catch (Exception e) {
+      NamingException nx = 
+	new NamingException("exception creating NamingContext: " +
+			    e.toString());
+      nx.setRootCause(e);
+      throw nx;
+    }
   }
 }

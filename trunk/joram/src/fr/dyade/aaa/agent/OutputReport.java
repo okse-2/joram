@@ -32,7 +32,7 @@ import java.io.*;
  * sent through the specified role of an agent.
  */
 public class OutputReport implements MonitoringReport {
-public static final String RCS_VERSION="@(#)$Id: OutputReport.java,v 1.5 2001-05-14 16:26:41 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: OutputReport.java,v 1.6 2001-08-31 08:13:58 tachkeni Exp $";
     /**
      * The name of the destination role.
      */

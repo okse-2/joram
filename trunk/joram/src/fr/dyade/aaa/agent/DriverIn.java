@@ -30,8 +30,8 @@ import java.io.*;
  */
 class DriverIn extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.6 2001-05-14 16:26:39 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.7 2001-08-31 08:13:56 tachkeni Exp $";
 
   /** id of agent to forward notifications to */
   protected AgentId proxy;
@@ -162,11 +162,9 @@ class DriverIn extends Driver {
 
   public void run() {
     Notification m;
-    ProxyNotification pm;
     mainLoop:
     while (isRunning) {
       m = null;
-      pm = null;
       canStop = true;
       try {
         if (nbNotSent > maxNotSent) {
@@ -180,30 +178,27 @@ class DriverIn extends Driver {
           nbNotSent = 0;
         }
         m = in.readNotification();
-
-        // In a multi-connections context, wrapping the Notification
-        // in a ProxyNotification.
-        if (multiConn)
-          pm = new ProxyNotification(m, key);
-
       } catch (EOFException exc) {
         // End of input flow.
         break mainLoop;
       } catch (Exception exc) {
-        if (Debug.error)
+        if ((Debug.debug) && (Debug.drivers))
           Debug.trace("error in " + in + ".readNotification", exc);
         break mainLoop;
       }
       canStop = false;
 
       if (m != null) {
-        if (Debug.driversData)
+        if ((Debug.debug) && (Debug.driversData))
           Debug.trace("in driver read " + m, false);
         try {
-          if (multiConn)
-            react(pm);
-          else
+          if (multiConn) {
+	    // In a multi-connections context, wrapping the Notification
+	    // in a ProxyNotification.
+            react(new ProxyNotification(m, key));
+          } else {
             react(m);
+	  }
           nbNotSent += 1;
         } catch (IOException exc) {
           if (Debug.error)

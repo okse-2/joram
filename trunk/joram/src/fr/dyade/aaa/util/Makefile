@@ -40,6 +40,11 @@ a3util.jar_CLASSES = \
 	FlowControlDuplexStream \
 	FlowControlDxInputStream \
 	FlowControlDxOutputStream \
-        Trace
+        Trace \
+	EnumerationType \
+	ConditionnalString \
+	SimplePropertiesReader \
+        AdminClientProxy
+
 
 include $(GENERAL_MK)

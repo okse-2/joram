@@ -35,8 +35,8 @@ import fr.dyade.aaa.util.Strings;
  * @author	Andre Freyssinet
  */
 public final class ServerDesc implements Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.5 2001-05-14 16:26:42 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.6 2001-08-31 08:13:59 tachkeni Exp $";
 
   /**  Server unique identifier. */
   short sid;

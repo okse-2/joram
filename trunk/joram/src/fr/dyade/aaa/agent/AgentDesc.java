@@ -27,7 +27,7 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 
 public class AgentDesc implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: AgentDesc.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: AgentDesc.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
 
   /** 
    * The name of the Agent.

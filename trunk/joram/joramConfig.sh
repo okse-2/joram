@@ -25,13 +25,13 @@
 #export OSTYPE=unix
 #export ROOTDIR=/home/joram
 # WINDOWS OS:
-export ROOTDIR=//e/joram
-export WINROOTDIR=e:/joram
+export ROOTDIR=/joram
+export WINROOTDIR=c:/joram
 # where java finds the language classes.
 # UNIX OS:
 #export JDKHOME=/usr/local/jdk1.2.2
 # WINDOWS OS:
-export JDKHOME=c:/java/jdk1.2.2
+export JDKHOME=c:/jdk1.3
 
 # ----------------------------------------------->
 
@@ -57,7 +57,7 @@ export JAVA=${JDKHOME}/bin/java
 export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
 
 # <--------------------------------- TO BE UPDATED 
-export JAVAC="c:/java/jikes/jikes -nowarn"
+export JAVAC="c:/jikes/bin/jikes -nowarn"
 #export JAVAC="${JDKHOME}/bin/javac -nowarn"
 # ----------------------------------------------->
 
@@ -92,15 +92,16 @@ else
     export CLASSPATH="${CLASSPATH}${PATH_SEP}."
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/classes"
-    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3util.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3agent.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3ip.jar"
-    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3mom.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3ns.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3util.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3jndi.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3mom.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/joram.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/xerces.jar"
-    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jta-spec1_0_1.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jakarta-regexp-1.2.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jms.jar"
     export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jndi.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jta-spec1_0_1.jar"
 fi

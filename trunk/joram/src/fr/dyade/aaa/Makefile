@@ -23,8 +23,8 @@
 
 
 PACKAGES = \
-	util agent ip proxy config task ns \
-	model beans services tools \
+	util agent scbean ip proxy config task ns \
+	ejb model beans services tools \
 	ar paf mom joram jndi
 
 # Evidian delivery: Only packages:

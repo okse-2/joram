@@ -38,6 +38,6 @@ package fr.dyade.aaa.agent;
 
 public class SetFieldAck extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: SetFieldAck.java,v 1.5 2001-05-14 16:26:42 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: SetFieldAck.java,v 1.6 2001-08-31 08:14:00 tachkeni Exp $"; 
 
 }

@@ -31,7 +31,6 @@ import fr.dyade.aaa.util.*;
 /**
  * Object which manages services.
  * There is only one <code>ServiceManager</code> object per agent server.
- *
  * The <code>ServiceManager</code> object is initialized in <code>init</code>,
  * called from <code>AgentServer.init</code>. This classes reuses the
  * persistency service provided by <code>Transaction</code>.
@@ -39,8 +38,9 @@ import fr.dyade.aaa.util.*;
  * @author	Freyssinet Andre
  */
 public class ServiceManager implements Serializable {
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.3 2001-08-31 08:13:59 tachkeni Exp $"; 
 
-public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-05-14 16:26:42 tachkeni Exp $"; 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
   
@@ -132,7 +132,8 @@ public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-
       try {
 	start(desc);
       } catch (Exception exc) {
-	Debug.trace("cannot start service: " + desc.getClassName(), exc);
+	if (Debug.error)
+	  Debug.trace("cannot start service: " + desc.getClassName(), exc);
       }
     }
   }
@@ -147,8 +148,6 @@ public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-
       throw new Exception("Service already stopped");
     Class service = Class.forName(desc.getClassName());
     Method stop = service.getMethod("stop", new Class[0]);
-    if (stop == null)
-      throw new Exception("Method stop is not implemented");
     stop.invoke(null, new Object[0]);
     desc.running = false;
   }
@@ -175,7 +174,8 @@ public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-
       try {
 	if (desc.running) stop(desc);
       } catch (Throwable exc) {
-	Debug.trace("cannot stop service " + desc.getClassName(), exc);
+	if (Debug.error)
+	  Debug.trace("cannot stop service " + desc.getClassName(), exc);
       }
     }
   }
@@ -213,7 +213,7 @@ public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-
     try {
       services = (ServiceDesc[]) values.toArray(services);
     } catch (ArrayStoreException exc) {
-      Debug.trace("Can't get services.", exc);
+      if (Debug.error) Debug.trace("Can't get services.", exc);
     }
     return services;
   }
@@ -224,6 +224,7 @@ public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.2 2001-
    * @return	a string image for this object
    */
   public String toString() {
-    return "(" + super.toString() + ")";
+    return "(" + super.toString() +
+      ",registry=" + Strings.toString(registry) + ")";
   }
 }

@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class UnregisterCommand extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: UnregisterCommand.java,v 1.2 2001-05-04 14:55:03 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: UnregisterCommand.java,v 1.3 2001-08-31 08:14:06 tachkeni Exp $";
 
   /**
    * Creates a notification to be sent.

@@ -34,6 +34,9 @@ JVERSION := $(shell $(JAVA) -version 2>&1 |\
 	(read version; expr "$$version" : 'java version "\(.*\)"'))
 JREVISION := $(word 2,$(subst ., ,$(JVERSION)))
 endif
+ifndef JFLEX_COMMAND
+JFLEX_COMMAND = jflex
+endif
 
 ifdef PACKAGE
 RELPATH := $(subst .,/,$(PACKAGE))
@@ -45,6 +48,15 @@ endif
 _JAVA_CLASS_ = %
 _JAVA_SOURCE_ = %.java
 _JAVA_OBJECT_ = $(OBJDIR)/$(RELPATH)/%.class
+_JFLEX_SOURCE_ = %.flex
+_JCUP_SOURCE_ = %.cup
+_JCUP_PARSER_ = %Parser
+_JCUP_PARSER_SOURCE_ = %Parser.java
+_JCUP_PARSER_OBJECT_ = $(OBJDIR)/$(RELPATH)/%Parser.class
+_JCUP_SYMBOLS_ = %Symbols
+_JCUP_SYMBOLS_SOURCE_ = %Symbols.java
+_JCUP_SYMBOLS_OBJECT_ = $(OBJDIR)/$(RELPATH)/%Symbols.class
+
 
 INT_LIST := \
 	    1  2  3  4  5  6  7  8  9 \
@@ -85,6 +97,10 @@ include $(SRCDIR)/makefiles/file.mk
 else
 ifdef CLASSES
 include $(SRCDIR)/makefiles/file.mk
+else
+ifdef JCUP
+include $(SRCDIR)/makefiles/file.mk
+endif
 endif
 endif
 

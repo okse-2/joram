@@ -35,7 +35,7 @@ import java.io.*;
  */
 public class DeleteNot extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.5 2001-05-14 16:26:39 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.6 2001-08-31 08:13:56 tachkeni Exp $"; 
 
  
   // the agent identified by 'reply' will receive a DeleteAck
