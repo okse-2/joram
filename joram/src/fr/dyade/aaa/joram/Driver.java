@@ -69,12 +69,7 @@ class Driver extends fr.dyade.aaa.util.Daemon
   
         // Waiting for an object on the stream:
         try {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Driver: waiting...");
           obj = ois.readObject();
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                       "Driver: got an object!");
         }
         // Catching an IOException:
         catch (IOException ioE) {
