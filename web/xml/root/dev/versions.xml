@@ -60,36 +60,6 @@
       <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
       </ul>
       </s2>
-    </s1>
-    <s1 name="joram3_4_0"> 
-      <s2 name="Support of SOAP as a client/server communication protocol">
-      <p>This version is only available in CVS with tag joram3_4_0. So far, 
-      Joram provided a TCP link between its clients and servers. Now,
-      it also provides a SOAP link, based on HTTP and XML.</p>
-     
-      <p>For more info on SOAP, check
-      <a href="http://www.w3.org/TR/SOAP">W3C's SOAP</a> site.
-      </p>
-
-      <p>The support of the SOAP protocol led to re-architecturing 
-      the server side proxies (fr.dyade.aaa.mom.proxies) and client side
-      connection classes (fr.dyade.aaa.joram.Connection,
-      fr.dyade.aaa.joram.Driver, fr.dyade.aaa.joram.tcp,
-      fr.dyade.aaa.joram.soap).</p>
-
-      <p><a href="../doc/index.html">Documentation</a> is available, samples
-      have been added for testing. Testing requires the use of a servlet
-      container such as Apache's <a href="http://jakarta.apache.org/tomcat/">
-      Tomcat</a>.</p>
-      </s2>
-    </s1>
-
-    <s1 name="joram3_3_1"> 
-      <s2 name="Maintenance release of joram3_3_0">
-      <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
-      is similar to the joram3_3_0 version except that it corrects
-      a few bugs.</p>
-      </s2>
       <s2 name="Corrected bugs">
       <ul>
       <li>Non serializable ConnectionFactory objects, found by
