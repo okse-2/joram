@@ -568,7 +568,7 @@ public class QueueImpl extends DestinationImpl
    * Internal method for getting the indexes of the messages matching the
    * given parameters.
    *
-   * @param requester  AgentId of client acknowledging or denying messages.
+   * @param consumer  AgentId of client acknowledging or denying messages.
    * @param msgIds  Vector of message identifiers.
    *
    * @exception RequestException  If the requester is not the consumer of

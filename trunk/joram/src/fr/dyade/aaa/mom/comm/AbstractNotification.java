@@ -32,12 +32,12 @@ public abstract class AbstractNotification
                     extends fr.dyade.aaa.agent.Notification
 {
   /**
-   * In the case where the client agent is a proxy agent linking an external
-   * client with the MOM, this field identifies the connection context of
-   * the interaction the notification is involved in.
+   * In the case where the client agent is a proxy agent representing, server
+   * side, multiple external clients, this field allows the proxy to identify
+   * a given client.
    * <p>
    * Keeping this information finally allows the proxy to route a reply to the 
-   * external client through the right connection.
+   * correct client.
    * <p>
    * When the client is not a proxy, this field default value is 0.
    */
@@ -47,17 +47,15 @@ public abstract class AbstractNotification
   /**
    * Constructs an <code>AbstractNotification</code>.
    *
-   * @param key  Key of the connection used for reaching the external client,
-   *          taken into account if positive.
+   * @param key  Key identifying an external client.
    */
   public AbstractNotification(int key)
   {
-    if (key > 0)
-      connectionKey = key;
+    connectionKey = key;
   }
 
 
-  /** Returns the connection key, 0 if no connection is involved. */
+  /** Returns the connection key, 0 if no external client is involved. */
   public int getConnectionKey()
   {
     return connectionKey;
