@@ -98,6 +98,17 @@ public interface AdminItf
   /** Closes the administration connection. */
   public void disconnect();
 
+  
+  /**
+   * Stops a given server of the platform.
+   *
+   * @param serverId  Identifier of the server to stop.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void stopServer(int serverId) throws ConnectException, AdminException;
+
 
   /**
    * Creates and deploys a queue destination on a given server, instanciates

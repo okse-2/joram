@@ -195,6 +195,20 @@ public class AdminImpl implements AdminItf
     cnx = null;
   }
 
+  /**
+   * Stops a given server of the platform.
+   * <p>
+   * The method never returns if the server is not part of the platform.
+   *
+   * @param serverId  Identifier of the server to stop.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Not thrown.
+   */
+  public void stopServer(int serverId) throws ConnectException, AdminException
+  {
+    doRequest(new StopServerRequest(serverId));
+  }
  
   /**
    * Creates and deploys a queue destination on a given server, instanciates
