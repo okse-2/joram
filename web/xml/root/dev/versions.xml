@@ -16,6 +16,11 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: September 10, 2003)">
       <ul>
+        <li>Bug related to the <code>MessageConsumer</code>
+        <code>noLocal</code> attribute, found by 
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00020.html">
+        Tony Thompson</a>. The bug has been corrected, the impacted class is
+        <code>fr.dyade.aaa.mom.proxies.ClientSubscription</code>.</li>
         <li>Invalid precedence on naming properties (as noticed
         <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00015.html">
         here</a>). The correct order is now taken into account. Modifications
