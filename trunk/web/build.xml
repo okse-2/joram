@@ -64,7 +64,7 @@
       <classpath refid="externals.classpath"/> 
 
       <fileset dir="${xml.dir}"
-	       excludes="${project.file} html/**"
+	       excludes="html/**"
 	       includes="**/*.xml">
       </fileset>
     </xmlvalidate>
