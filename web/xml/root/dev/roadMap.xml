@@ -14,22 +14,23 @@
 
   <s1 name="Road map">
   
-    <subtitle>Joram 3.8 (December 2003)</subtitle>
-    <p>This release will provide:</p>
-    <ul>
-      <li>Clustering features for Load Balancing and Fail Over</li>
-      <li>A new JNDI server distributed and replicated implementation</li>
-    </ul>
-
-    <subtitle>Joram 4.0 (1st quarter of 2004)</subtitle>
+    <subtitle>Joram 4.0 (December 2003)</subtitle>
     <p>The move to release 4.0 will introduce:</p>
     <ul>
-      <li>A completely new sources architecture, which main branches will be
-      <code>org.objectweb.joram</code> and <code>com.scalagent.aaa</code></li>
+      <li>A universal bridge to foreign JMS providers</li>
+      <li>Clustering features for Load Balancing and Fail Over</li>
+      <li>A new JNDI server distributed and replicated implementation</li>
+      <li>A new branch for the Joram and MOM sources: 
+      <code>org.objectweb.joram</code></li>
+    </ul>
+
+    <subtitle>Joram 4.1 (1st quarter of 2004)</subtitle>
+    <p>This release will provide:</p>
+    <ul>
       <li>A JCA 1.5 standard Resource Adapter for plugging Joram into any
       JCA compliant platform</li>
-      <li>Optimised connections for collocated clients and servers</li>
       <li>Clustering features providing High Availability</li>
+      <li>Optimised connections for collocated clients and servers</li>
     </ul>
 
   </s1>
