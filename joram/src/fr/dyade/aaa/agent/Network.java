@@ -108,11 +108,28 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   protected Logger logmon = null;
 
+  /** Id. of local server. */
+  protected short sid;
+  /** Index of local server in status and matrix arrays. */
+  protected int idxLS;
   /**
-   * Reference to the current network component in order to be used
-   * by inner daemon's.
+   * List of id. for all servers in the domain, this list is sorted and
+   * is used as index for internal tables.
    */
-  protected Network network;
+  protected short[] servers;
+  /** Filename for servers storage */
+  transient protected String serversFN = null;
+  /** Logical timestamp information for messages in domain, stamp[idxLS)]
+   * for messages sent, and stamp[index(id] for messages received.
+   */
+  private int[] stamp;
+  /** Buffer used to optimise transactions*/
+  private byte[] stampBuf = null;
+  /** */
+  private int[] bootTS = null;
+  /** Filename for boot time stamp storage */
+  transient protected String bootTSFN = null;
+ 
   /** The component's name as it appears in logging. */
   protected String name;
   /** The domain name. */
@@ -121,12 +138,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   protected int port;
   /** The <code>MessageVector</code> associated with this network component. */
   protected MessageVector qout;
-  /** The logical clock associated to this network component. */
-  protected LogicalClock clock;
-  /**
-   * The waiting list: it contains all messages that waiting to be delivered.
-   */
-  protected Vector waiting;
 
   /**
    * Returns this session's name.
@@ -156,6 +167,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     strbuf.append("(").append(super.toString());
     strbuf.append(",name=").append(getName());
     strbuf.append(",qout=").append(qout.size());
+    for (int i=0; i<servers.length; i++) {
+      strbuf.append(",(").append(servers[i]).append(',');
+      strbuf.append(stamp[i]).append(')');
+    }
     strbuf.append(")");
 
     return strbuf.toString();
@@ -167,7 +182,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * The configuration of component is then done by <code>init</code> method.
    */
   public Network() {
-    network = this;
   }
 
   /**
@@ -178,69 +192,65 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param msg		the message
    */
   public void insert(Message msg) {
-    if (msg.getFromId() == AgentServer.getServerId()) {
-      // The update has been locally generated, the message is ready to
-      // deliver, we have to insert it in the queue.
-      qout.insert(msg);
-    } else {
-      // The update has been generated on a remote server. If the message
-      // don't have a local update, It is waiting to be delivered. So we
-      // have to insert it in waiting list.
-      addRecvMessage(msg);
-    }
+    qout.insert(msg);
   }
 
   /**
-   * Adds a message in waiting list. This method is used to retain messages
-   * that cannot be delivered now. Each message in this list is evaluated
-   * (see <code>deliver()</code>) each time a new message succeed.
-   * <p><hr>
-   * This method is also used to fill the waiting list during initialisation.
-   *
-   * @param msg		the message
+   * Saves information to persistent storage.
    */
-  final void addRecvMessage(Message msg) {
-    waiting.addElement(msg);
-  }
+  public void save() throws IOException {}
 
   /**
-   *  Creates a new <code>LogicalClock</code> for this Network component.
-   * This method should be defined in subclass depending of implementation
-   * message ordering (FIFO, causal, etc.).
-   */
-  abstract LogicalClock createsLogicalClock(String name, short[] servers);
-
-  /**
-   *  Sets the <code>LogicalClock</code> for this Network component.
-   * This method is normally used to initialize the clock of a new slave
-   * server in HA mode.
-   */
-  final void setLogicalClock(LogicalClock clock) {
-    this.clock = clock;
-  }
-
-  /**
-   *  Gets the <code>LogicalClock</code> of this Network component.
-   * This method is normally used to capture the current clock of the
-   * master server in HA mode, then initialize a new slave.
-   */
-  final LogicalClock getLogicalClock() {
-    return clock;
-  }
-
-  /**
-   * Saves logical clock information to persistent storage.
-   */
-  public void save() throws IOException {
-    clock.save();
-  }
-
-  /**
-   * Restores logical clock information from persistent storage.
+   * Restores component's information from persistent storage.
+   * If it is the first load, initializes it.
    */
   public void restore() throws Exception {
-    clock = createsLogicalClock(name, null);
-    clock.load();
+    sid = AgentServer.getServerId();
+    idxLS = index(sid);
+    // Loads the logical clock.
+    stampBuf = AgentServer.transaction.loadByteArray(name);
+    if (stampBuf ==  null) {
+      // Creates the new stamp array and the boot time stamp,
+      stampBuf = new byte[4*servers.length];
+      stamp = new int[servers.length];
+      bootTS = new int[servers.length];
+      // Then initializes them
+      for (int i=0; i<servers.length; i++) {
+        if (i != idxLS) {
+          stamp[i] = -1;
+          bootTS[i] = -1;
+        } else {
+          stamp[i] = 0;
+          bootTS[i] = (int) (System.currentTimeMillis() /1000L);
+        }
+      }
+      // Save the servers configuration and the logical time stamp.
+      AgentServer.transaction.save(servers, serversFN);
+      AgentServer.transaction.save(bootTS, bootTSFN);
+      AgentServer.transaction.saveByteArray(stampBuf, name);
+    } else {
+      // Loads the domain configurations
+      short[] s = (short[]) AgentServer.transaction.load(serversFN);
+      bootTS = (int[]) AgentServer.transaction.load(bootTSFN);
+      stamp = new int[s.length];
+      for (int i=0; i<servers.length; i++) {
+        stamp[i] = ((stampBuf[(i*4)+0] & 0xFF) << 24) +
+          ((stampBuf[(i*4)+1] & 0xFF) << 16) +
+          ((stampBuf[(i*4)+2] & 0xFF) <<  8) +
+          (stampBuf[(i*4)+3] & 0xFF);
+      }
+      // Joins with the new domain configuration:
+      if ((servers != null) && !Arrays.equals(servers, s)) {
+        for (int i=0; i<servers.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + servers[i]);
+        for (int i=0; i<s.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + s[i]);
+
+        throw new IOException("Network configuration changed");
+      }
+    }
   }
 
   /**
@@ -261,7 +271,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
     qout = new MessageVector(this.name,
                             AgentServer.getTransaction().isPersistent());
-    waiting = new Vector();
 
     this.domain = name;
     this.port = port;
@@ -303,36 +312,124 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
     // Sorts the array of server ids into ascending numerical order.
     Arrays.sort(servers);
-    // then get the logical clock.
-    clock = createsLogicalClock(this.name, servers);
-    clock.load();
+
+    this.servers = servers;
+    this.serversFN = name + "Servers";
+    this.bootTSFN = name + "BootTS";
+
+    restore();
   }
 
   /**
    * Adds the server sid in the network configuration.
    *
-   * @param sid	the unique server id.
+   * @param id	the unique server id.
    */
-  public void addServer(short sid) throws Exception {
-    clock.addServer(sid);
+  synchronized void addServer(short id) throws Exception {
+    // First we have to verify that id is not already in servers
+    int idx = index(id);
+    if (idx >= 0) return;
+    idx = -idx -1;
+    // Allocates new array for stamp and server
+    int[] newStamp = new int[servers.length+1];
+    byte[] newStampBuf = new byte[4*(servers.length+1)];
+    int[] newBootTS = new int[servers.length+1];
+    short[] newServers = new short[servers.length+1];
+    // Copy old data from stamp and server, let a free room for the new one.
+    int j = 0;
+    for (int i=0; i<servers.length; i++) {
+      if (i == idx) j++;
+      newServers[j] = servers[i];
+      newBootTS[j] = bootTS[i];
+      newStamp[j] = stamp[i];
+      j++;
+    }
+    if (idx > 0)
+      System.arraycopy(stampBuf, 0, newStampBuf, 0, idx*4);
+    if (idx < servers.length)
+      System.arraycopy(stampBuf, idx*4,
+                       newStampBuf, (idx+1)*4, (servers.length-idx)*4);
+
+    newServers[idx] = id;
+    newBootTS[idx] = -1;
+    newStamp[idx] = -1;		// useless
+    newStampBuf[idx] = 0;	// useless
+    newStampBuf[idx+1] = 0;	// useless
+    newStampBuf[idx+2] = 0; 	// useless
+    newStampBuf[idx+3] = 0; 	// useless
+
+    stamp = newStamp;
+    stampBuf = newStampBuf;
+    servers = newServers;
+    // be careful, set again the index of local server.
+    idxLS = index(sid);
+
+    // Save the servers configuration and the logical time stamp.
+    AgentServer.transaction.save(servers, serversFN);
+    AgentServer.transaction.save(bootTS, bootTSFN);
+    AgentServer.transaction.saveByteArray(stampBuf, name);
   }
 
   /**
    * Removes the server sid in the network configuration.
    *
-   * @param sid	the unique server id.
+   * @param id	the unique server id.
    */
-  public void delServer(short sid) throws Exception {
-    clock.delServer(sid);
+  synchronized void delServer(short id) throws Exception {
+    // First we have to verify that id is already in servers
+    int idx = index(id);
+    if (idx < 0) return;
+
+    int[] newStamp = new int[servers.length-1];
+    byte[] newStampBuf = new byte[4*(servers.length-1)];
+    int[] newBootTS = new int[servers.length-1];
+    short[] newServers = new short[servers.length-1];
+
+    int j = 0;
+    for (int i=0; i<servers.length; i++) {
+      if (id == servers[i]) {
+        idx = i;
+        continue;
+      }
+      newServers[j] = servers[i];
+      newBootTS[j] = bootTS[i];
+      newStamp[j] = stamp[i];
+      j++;
+    }
+    if (idx > 0)
+      System.arraycopy(stampBuf, 0, newStampBuf, 0, idx*4);
+    if (idx < (servers.length-1))
+      System.arraycopy(stampBuf, (idx+1)*4,
+                       newStampBuf, idx*4, (servers.length-idx-1)*4);
+
+    stamp = newStamp;
+    stampBuf = newStampBuf;
+    servers = newServers;
+    // be careful, set again the index of local server.
+    idxLS = index(sid);
+
+    // Save the servers configuration and the logical time stamp.
+    AgentServer.transaction.save(servers, serversFN);
+    AgentServer.transaction.save(bootTS, bootTSFN);
+    AgentServer.transaction.saveByteArray(stampBuf, name);
   }
 
   /**
    * Reset all information related to server sid in the network configuration.
    *
-   * @param sid	the unique server id.
+   * @param id	the unique server id.
    */
-  void resetServer(short sid) throws IOException {
-    clock.resetServer(sid);
+  synchronized void resetServer(short id, int boot) throws IOException {
+    // First we have to verify that id is already in servers
+    int idx = index(id);
+    if (idx < 0) return;
+
+    // TODO...
+
+    // Save the servers configuration and the logical time stamp.
+    AgentServer.transaction.save(servers, serversFN);
+    AgentServer.transaction.save(bootTS, bootTSFN);
+    AgentServer.transaction.saveByteArray(stampBuf, name);
   }
 
   /**
@@ -344,11 +441,154 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
-    msg.setUpdate(clock.getSendUpdate(to));
+
+    msg.source = AgentServer.getServerId();
+    msg.dest = to;
+    msg.stamp = getSendUpdate(to);
+    msg.boot = getBootTS();
+
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.
     qout.push(msg);
+  }
+
+  /**
+   *  Returns the index in internal table of the specified server.
+   * The servers array must be ordered.
+   *
+   * @param id	the unique server id.
+   */
+  protected final int index(short id) {
+    int idx = Arrays.binarySearch(servers, id);
+    return idx;
+  }
+
+  /** The message can be delivered. */
+  static final int DELIVER = 0;
+//   /**
+//    *  There is other message in the causal ordering before this one.
+//    * This cannot happened with a FIFO ordering.
+//    */
+//   static final int WAIT_TO_DELIVER = 1;
+  /** The message has already been delivered. */
+  static final int ALREADY_DELIVERED = 2;
+
+  /**
+   *  Test if a received message with the specified clock must be
+   * delivered. If the message is ready to be delivered, the method returns
+   * <code>DELIVER</code> and the matrix clock is updated. If the message has
+   * already been delivered, the method returns <code>ALREADY_DELIVERED</code>,
+   * and if other messages are waited before this message the method returns
+   * <code>WAIT_TO_DELIVER</code>. In the last two case the matrix clock
+   * remains unchanged.
+   *
+   * @param update	The message matrix clock (list of update).
+   * @return		<code>DELIVER</code>, <code>ALREADY_DELIVERED</code>,
+   * 			or <code>WAIT_TO_DELIVER</code> code.
+   */
+  synchronized int testRecvUpdate(short source, int update, int boot) throws IOException {
+    int fromIdx = index(source);
+
+    if (boot != bootTS[fromIdx]) {
+      bootTS[fromIdx] = boot;
+      stamp[fromIdx] = -1;
+      AgentServer.transaction.save(bootTS, bootTSFN);
+    }
+    if (update > stamp[fromIdx]) {
+      stamp[fromIdx] = update;
+      stampBuf[(fromIdx*4)+0] = (byte)((stamp[fromIdx] >>> 24) & 0xFF);
+      stampBuf[(fromIdx*4)+1] = (byte)((stamp[fromIdx] >>> 16) & 0xFF);
+      stampBuf[(fromIdx*4)+2] = (byte)((stamp[fromIdx] >>>  8) & 0xFF);
+      stampBuf[(fromIdx*4)+3] = (byte)(stamp[fromIdx] & 0xFF);
+      AgentServer.transaction.saveByteArray(stampBuf, name);
+      return DELIVER;
+    }
+    return ALREADY_DELIVERED;
+  }
+
+  /**
+   * Computes the matrix clock of a send message. The server's
+   * matrix clock is updated.
+   *
+   * @param to	The identification of receiver.	
+   * @return	The message matrix clock (list of update).
+   */
+  synchronized int getSendUpdate(short to) throws IOException {
+    int update =  ++stamp[idxLS];
+    stampBuf[(idxLS*4)+0] = (byte)((stamp[idxLS] >>> 24) & 0xFF);
+    stampBuf[(idxLS*4)+1] = (byte)((stamp[idxLS] >>> 16) & 0xFF);
+    stampBuf[(idxLS*4)+2] = (byte)((stamp[idxLS] >>>  8) & 0xFF);
+    stampBuf[(idxLS*4)+3] = (byte)(stamp[idxLS] & 0xFF);
+    AgentServer.transaction.saveByteArray(stampBuf, name);
+    return update;
+  }
+
+  final int getBootTS() {
+    return bootTS[idxLS];
+  }
+
+  /**
+   * Try to deliver the received message to the right consumer.
+   *
+   * @param msg		the message.
+   */
+  protected void deliver(Message msg) throws Exception {
+    // Get real from serverId.
+    short source = msg.getSource();
+
+    // Test if the message is really for this node (final destination or
+    // router).
+    short dest = msg.getDest();
+    if (dest != AgentServer.getServerId()) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", recv bad msg#" + msg.getStamp() +
+                 " really to " + dest +
+                 " by " + source);
+      throw new Exception("recv bad msg#" + msg.getStamp() +
+                          " really to " + dest +
+                          " by " + source);
+    }
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", recv msg#" + msg.getStamp() +
+                 " from " + msg.from +
+                 " to " + msg.to +
+                 " by " + source);
+
+    AgentServer.getServerDesc(source).active = true;
+    AgentServer.getServerDesc(source).retry = 0;
+
+    // Start a transaction in order to ensure atomicity of clock updates
+    // and queue changes.
+    AgentServer.transaction.begin();
+
+    // Test if the message can be delivered then deliver it
+    // else put it in the waiting list
+    int todo = testRecvUpdate(source, msg.getStamp(), msg.boot);
+
+    if (todo == DELIVER) {
+      // Deliver the message then try to deliver alls waiting message.
+      // Allocate a local time to the message to order it in
+      // local queue, and save it.
+      Channel.post(msg);
+
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", deliver msg#" + msg.getStamp());
+
+      Channel.save();
+      AgentServer.transaction.commit();
+      // then commit and validate the message.
+      Channel.validate();
+      AgentServer.transaction.release();
+    } else {
+//    it's an already delivered message, we have just to re-send an
+//    aknowledge (see below).
+      AgentServer.transaction.commit();
+      AgentServer.transaction.release();
+    }
   }
 
   /**

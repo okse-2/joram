@@ -31,10 +31,10 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 /**
- *  <code>PoolNetwork</code> is an implementation of <code>FIFONetwork</code>
+ *  <code>PoolNetwork</code> is an implementation of <code>StreamNetwork</code>
  * class that manages multiple connection.
  */
-public class PoolNetwork extends FIFONetwork {
+public class PoolNetwork extends StreamNetwork {
   /** */
   WakeOnConnection wakeOnConnection = null; 
   /** */
@@ -155,7 +155,7 @@ public class PoolNetwork extends FIFONetwork {
   }
 
   final NetSession getSession(short sid) {
-    return sessions[clock.index(sid)];
+    return sessions[index(sid)];
   }
 
   /**
@@ -632,9 +632,11 @@ public class PoolNetwork extends FIFONetwork {
       Message ack = Message.alloc(AgentId.localId,
                                   AgentId.localId(server.sid),
                                   null);
-      ack.setUpdate(Update.alloc(AgentServer.getServerId(),
-                                 AgentServer.getServerDesc(server.sid).gateway,
-                                 stamp));
+      ack.source = AgentServer.getServerId();
+      ack.dest = AgentServer.getServerDesc(server.sid).gateway;
+      ack.stamp = stamp;
+      ack.boot = getBootTS();
+
       qout.push(ack);
     }
 
@@ -855,7 +857,7 @@ public class PoolNetwork extends FIFONetwork {
           if (! running) break;
 
           // Send the message
-          getSession(msg.getToId()).send(msg);
+          getSession(msg.getDest()).send(msg);
           qout.pop();
         }
       } finally {

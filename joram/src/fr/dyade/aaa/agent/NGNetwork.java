@@ -714,7 +714,10 @@ public class NGNetwork extends FIFONetwork {
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
-    msg.setUpdate(clock.getSendUpdate(to));
+    msg.source = AgentServer.getServerId();
+    msg.dest = to;
+    msg.stamp = clock.getSendUpdate(to);
+    msg.boot = clock.getBootTS();
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.

@@ -863,45 +863,50 @@ public final class AgentServer {
       for (int i=0; i<list.length; i++) {
         Message msg = Message.load(list[i]);
 
-	if (msg.getFromId() == serverId) {
+	if (msg.getSource() == serverId) {
 	  // The update has been locally generated, the message is ready to
 	  // deliver to its consumer (Engine or Network component). So we have
 	  // to insert it in the queue of this consumer.
           try {
-            ((ServerDesc) servers.get(new Short(msg.getToId()))).domain.insert(msg);
+            ((ServerDesc) servers.get(new Short(msg.getDest()))).domain.insert(msg);
           } catch (NullPointerException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message to unknown server id#" +
-                       msg.getToId());
+                       msg.getDest());
             msg.delete();
             continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", discard message to unknown server id#" +
-                       msg.getToId());
+                       msg.getDest());
             msg.delete();
             continue;
           }
 	} else {
-	  // The update has been generated on a remote server. If the message
-	  // don't have a local update, It is waiting to be delivered. So we
-	  // have to insert it in waiting list of the network component that
-	  // received it.
-          try {
-            ((ServerDesc) servers.get(new Short(msg.getFromId()))).domain.insert(msg);
-          } catch (NullPointerException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ", discard message from unknown server id#" +
-                       msg.getFromId());
-            msg.delete();
-            continue;
-          } catch (ArrayIndexOutOfBoundsException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ", discard message from unknown server id#" +
-                       msg.getFromId());
-            msg.delete();
-            continue;
-          }
+// 	  // The update has been generated on a remote server. If the message
+// 	  // don't have a local update, It is waiting to be delivered. So we
+// 	  // have to insert it in waiting list of the network component that
+// 	  // received it.
+//           try {
+//             ((ServerDesc) servers.get(new Short(msg.getSource()))).domain.insert(msg);
+//           } catch (NullPointerException exc) {
+//             logmon.log(BasicLevel.ERROR,
+//                        getName() + ", discard message from unknown server id#" +
+//                        msg.getSource());
+//             msg.delete();
+//             continue;
+//           } catch (ArrayIndexOutOfBoundsException exc) {
+//             logmon.log(BasicLevel.ERROR,
+//                        getName() + ", discard message from unknown server id#" +
+//                        msg.getSource());
+//             msg.delete();
+//             continue;
+//           }
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ", discard undelivered message from server id#" +
+                     msg.getDest());
+          msg.delete();
+          continue;
 	}
       }
     } catch (ClassNotFoundException exc) {
