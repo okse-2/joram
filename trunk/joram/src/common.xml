@@ -66,6 +66,7 @@
       description="--> Compiles sources.">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
+           source="1.4"
            debug="${debug}"
            deprecation="${deprecation}"
            optimize="${optimize}"
@@ -78,13 +79,11 @@
     </javac>
   </target>
 
-  <target name="dos2unix" depends="init">
-    <fixcrlf srcdir="${src.dir}" eol="lf"
+  <target name="dosunix" depends="init">
+    <fixcrlf srcdir=".." eol="lf"
              includes="**/*.java,**/*.cup,**/*.flex,**/*.html,**/*.xml,**/*.dtd,**/*.sh"/>
-    <fixcrlf srcdir="${test.dir}" eol="lf"
-             includes="**/*.java,**/*.html**,/*.xml,**/*.dtd,*.sh"/>
-    <fixcrlf srcdir=".." eol="lf" defaultexcludes="no"
-             includes="**/CVS/*"/>
+    <fixcrlf srcdir=".." eol="lf" defaultexcludes="no" includes="**/CVS/*"/>
+    <fixcrlf srcdir=".." eol="crlf" includes="**/*.bat"/>
   </target>
 
   <target name="chroot" depends="init">
