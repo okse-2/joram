@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -290,9 +290,9 @@ class MatrixClock extends LogicalClock {
     matrix[idxLS][toIdx].node = to;
     // The 1st element of update is always (from, to, stamp), its property
     // is used in testRecvUpdate.
-    Update update = new Update(AgentServer.getServerId(),
-			       to,
-			       matrix[idxLS][toIdx].stamp);
+    Update update = Update.alloc(AgentServer.getServerId(),
+                                 to,
+                                 matrix[idxLS][toIdx].stamp);
     if (to != AgentServer.getServerId()) {
       // If the message is remote there is need of matrix clock update.
       for (short i=0; i<matrix.length; i++) {
@@ -300,7 +300,7 @@ class MatrixClock extends LogicalClock {
 	  if ((matrix[i][j].status > status[toIdx]) &&
 	      (matrix[i][j].node != to) &&
 	      ((i != idxLS) || (j != toIdx)))
-	    new Update(servers[i], servers[j], matrix[i][j].stamp, update);
+	    Update.alloc(servers[i], servers[j], matrix[i][j].stamp, update);
 	}
       }
       status[toIdx] = status[idxLS];

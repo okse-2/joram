@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -27,8 +28,8 @@ import java.net.*;
  * class for stream sockets.
  */
 public abstract class StreamNetwork extends CausalNetwork {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.13 2003-09-11 09:53:25 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.14 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.14 2004-02-13 08:12:56 fmaistre Exp $";
 
   /** Creates a new Network component */
   public StreamNetwork() {
@@ -82,7 +83,7 @@ public abstract class StreamNetwork extends CausalNetwork {
       } catch (BindException exc) {
         if (i > CnxRetry) throw exc;
         try {
-          Thread.currentThread().sleep(i * 200);
+          Thread.sleep(i * 200);
         } catch (InterruptedException e) {}
       }
     }

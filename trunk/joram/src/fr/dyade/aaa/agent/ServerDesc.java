@@ -127,6 +127,21 @@ public final class ServerDesc implements Serializable {
     return addr;
   }
 
+  /**
+   * Resolves an IP address for its server, don't use an eventually caching
+   * address.
+   * 
+   * @return	an IP address for this server.
+   */
+  public InetAddress resetAddr() {
+    try {
+      addr = InetAddress.getByName(hostname);
+    } catch (UnknownHostException exc) {
+      addr = null;
+    }
+    return addr;
+  }
+
   public int getPort() {
     return port;
   }
@@ -167,7 +182,6 @@ public final class ServerDesc implements Serializable {
     strBuf.append("(").append(super.toString());
     strBuf.append(",sid=").append(sid);
     strBuf.append(",name=").append(name);
-//     strBuf.append(",isTransient=").append(isTransient);
     strBuf.append(",hostname=").append(hostname);
     strBuf.append(",addr=").append(addr);
     strBuf.append(",services=");

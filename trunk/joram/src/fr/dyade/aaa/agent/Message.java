@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2003 SCALAGENT
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -31,9 +31,7 @@ import fr.dyade.aaa.util.*;
 /**
  * 
  */
-class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $"; 
-
+final class Message implements Serializable {
   static final long serialVersionUID =  -2179939607085028300L;
 
   //  Declares all fields transient in order to avoid useless
@@ -45,13 +43,29 @@ class Message implements Serializable {
   /** The notification. */
   transient Notification not;
   /** The logical date of sending specified by the update of matrix clock. */
-  transient Update update;
+  private transient Update update;
  
-  /**
-   * The deadline of current message specified in number of milliseconds
-   * since the standard base time known as "the epoch".
-   */
-//   transient long deadline;
+  short getFromId() {
+    return update.getFromId();
+  }
+ 
+  short getToId() {
+    return update.getToId();
+  }
+
+  int getStamp() {
+    return update.stamp;
+  }
+
+  void setUpdate(Update update) {
+    if (this.update != null) this.update.free();
+    this.update = update;
+    stringId = null;
+  }
+
+  Update getUpdate() {
+    return update;
+  }
 
   /**
    * Returns a string representation for this object.
@@ -61,14 +75,19 @@ class Message implements Serializable {
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
 
-    strbuf.append("(from=");
-    strbuf.append(from).append(",to=");
-    strbuf.append(to).append(",not=[");
-    strbuf.append(not).append("],update=[");
-    strbuf.append(update).append(']');
-//     if (deadline != -1L) {
-//       strbuf.append(",deadline=").append(new Date(deadline));
-//     }
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",from=").append(from);
+    strbuf.append(",to=").append(to);
+    strbuf.append(",not=").append(not);
+    strbuf.append(",update=");
+    Update current = update;
+    while (current != null) {
+      strbuf.append(current).append(',');
+//       strbuf.append(current.l).append(',')
+// 	.append(current.c).append(',')
+// 	.append(current.stamp).append(':');
+      current = current.next;
+    }
     strbuf.append(')');
     
     return strbuf.toString();
@@ -81,13 +100,14 @@ class Message implements Serializable {
    */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
+    // Writes from AgentId
     out.writeShort(from.from);
     out.writeShort(from.to);
     out.writeInt(from.stamp);
+    // Writes to AgentId
     out.writeShort(to.from);
     out.writeShort(to.to);
     out.writeInt(to.stamp);
-//     out.writeLong(deadline);
     out.writeObject(not);
     // In order to optimize the serialization, we serialize each update...
     Update next = update;
@@ -106,28 +126,112 @@ class Message implements Serializable {
    */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
+    // Reads from AgentId
     from = new AgentId(in.readShort(), in.readShort(), in.readInt());
+    // Reads to AgentId
     to = new AgentId(in.readShort(), in.readShort(), in.readInt());
-//     deadline = in.readLong();
     not = (Notification) in.readObject();
+    // Gets clock update
     short l;
     while ((l = in.readShort()) != -1) {
       if (update == null)
-	update = new Update(l, in.readShort(), in.readInt());
+	update = Update.alloc(l, in.readShort(), in.readInt());
       else
-	new Update(l, in.readShort(), in.readInt(), update);
+	Update.alloc(l, in.readShort(), in.readInt(), update);
     }
+  }
+
+  private final static int BUFLEN = 20;
+
+  // Per-thread buffer for string/stringbuffer conversion
+  private static ThreadLocal perThreadBuffer = new ThreadLocal() {
+    protected synchronized Object initialValue() {
+      return new char[BUFLEN];
+    }
+  };
+
+  transient private String stringId = null;
+
+  private final String toStringId() {
+    if (stringId == null) {
+      char[] buf = (char[]) (perThreadBuffer.get());
+      int idx = getChars(update.stamp, buf, BUFLEN);
+      buf[--idx] = '_';
+      idx = getChars(update.c, buf, idx);
+      buf[--idx] = '@';
+      stringId = new String(buf, idx, BUFLEN - idx);
+    }
+    return stringId;
+  }
+
+  final static char [] DigitTens = {
+    '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+    '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
+    '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
+    '3', '3', '3', '3', '3', '3', '3', '3', '3', '3',
+    '4', '4', '4', '4', '4', '4', '4', '4', '4', '4',
+    '5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
+    '6', '6', '6', '6', '6', '6', '6', '6', '6', '6',
+    '7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
+    '8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
+    '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
+  } ; 
+
+  final static char [] DigitOnes = { 
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+  } ;
+
+  private final static int getChars(int i, char[] buf, int idx) {
+    int q, r;
+    int charPos = idx;
+    char sign = 0;
+
+    if (i < 0) { 
+      sign = '-';
+      i = -i;
+    }
+
+    // Generate two digits per iteration
+    while (i >= 65536) {
+      q = i / 100;
+      // really: r = i - (q * 100);
+      r = i - ((q << 6) + (q << 5) + (q << 2));
+      i = q;
+      buf [--charPos] = DigitOnes[r];
+      buf [--charPos] = DigitTens[r];
+    }
+
+    // Fall thru to fast mode for smaller numbers
+    // assert(i <= 65536, i);
+    for (;;) { 
+      q = (i * 52429) >>> (16+3);
+      r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
+      buf [--charPos] = DigitOnes[r];
+      i = q;
+      if (i == 0) break;
+    }
+    if (sign != 0) {
+      buf [--charPos] = sign;
+    }
+    return charPos;
   }
 
   /**
    *  Saves the object state on persistent storage.
    */
   void save() throws IOException {
-    AgentServer.transaction.save(this,
-			    "@" +
-			    update.l + Transaction.separator +
-			    update.c + Transaction.separator +
-			    update.stamp);
+    if ((not != null) && not.persistent) {
+      AgentServer.transaction.save(this, toStringId());
+    }
   }
 
   /**
@@ -147,21 +251,9 @@ class Message implements Serializable {
    * Deletes the current object in persistent storage.
    */
   void delete()  throws IOException {
-    AgentServer.transaction.delete("@" +
-			      update.l + Transaction.separator +
-			      update.c + Transaction.separator +
-			      update.stamp);
-  }
-
-  /**
-   * Private constructor used in PoolCnxNetwork to create a ghost message
-   * in order to force an acknowledge transmission.
-   */
-  Message(AgentId from, AgentId to) {
-    this.from = from;
-    this.to = to;
-    this.not = null;
-    this.update = new Update(from.getTo(), to.getTo(), 0);
+    if ((not != null) && not.persistent) {
+      AgentServer.transaction.delete(toStringId());
+    }
   }
 
   /**
@@ -170,30 +262,17 @@ class Message implements Serializable {
    * @param to    	id of destination Agent.
    * @param not    	Notification to be signaled.
    */
-  public Message(AgentId from, AgentId to, Notification not) {
+  private Message(AgentId from, AgentId to, Notification not) {
     this.from = from;
     this.to = to;
-    this.not = (Notification) not.clone();
-//     this.deadline = -1L;
+    if (not != null) this.not = (Notification) not.clone();
   }
-
-  /**
-   * Construct a new message with a deadline.
-   * @param from	id of source Agent.
-   * @param to    	id of destination Agent.
-   * @param not    	Notification to be signaled.
-   * @param deadline	Deadline.
-   */
-//   public Message(AgentId from, AgentId to, Notification not, long deadline) {
-//     this(from, to, not);
-//     this.deadline = deadline;
-//   }
 
   private static Pool pool = null;
 
   static {
     int size = Integer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
-    pool = new Pool(size);
+    pool = new Pool("Message", size);
   }
 
   static Message alloc(AgentId from, AgentId to, Notification not) {
@@ -209,67 +288,16 @@ class Message implements Serializable {
   }
 
   void free() {
-    this.not = null;	/* to let gc do its work */
-    this.update = null; /* to let gc do its work */
+    not = null;	/* to let gc do its work */
+    if (update != null) update.free();
+    update = null;
     pool.freeElement(this);
   }
-
-  private Message() {}
   
   private void set(AgentId from, AgentId to, Notification not) {
     this.from = (AgentId) from;
     this.to = (AgentId) to;
-    // Be careful, normally we have to clone the notification !!!
-    this.not = (Notification) not.clone();
-//     this.deadline = -1L;
-  }
-
-  static class Pool {
-    int elementCount = 0;
-    Object[] elementData =  null;
-
-    private Logger logmon = null;
-    private long cpt1, cpt2, alloc, free, min, max;
-
-    public Pool(int capacity) {
-      elementData = new Object[capacity];
-      logmon = Debug.getLogger(getClass().getName());
-      logmon.log(BasicLevel.DEBUG, "Message$Pool: " + capacity);
-    }
-
-    public final synchronized void freeElement(Object obj) {
-      // If there is enough free element, let the gc get this element. 
-      if (elementCount == elementData.length) {
-        free += 1;
-        return;
-      }
-      elementData[elementCount] = obj;
-      elementCount += 1;
-
-      if (elementCount > max) max = elementCount;
-    }
-
-    public final synchronized Object allocElement() throws Exception {
-      if (elementCount == 0) {
-        alloc += 1;
-        throw new Exception();
-      }
-      elementCount -= 1;
-      Object obj = elementData[elementCount];
-      elementData[elementCount] = null; /* to let gc do its work */
-
-      if (elementCount < min) min = elementCount;
-      cpt1 += 1; cpt2 += elementCount;
-      if ((cpt1 & 0xFFFFFL) == 0L) {
-        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          logmon.log(BasicLevel.DEBUG,
-                     "Message$Pool=" + (cpt2/cpt1) + '/' + elementCount +
-                     ", " + min + '/' + max + ", " + alloc + ", " + free);
-          alloc = 0; free = 0; min = elementData.length; max = 0;
-        }
-      }
-    
-      return obj;
-    }
+    if (not != null) this.not = (Notification) not.clone();
+    stringId = null;
   }
 }

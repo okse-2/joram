@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -116,7 +116,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param msg		the message
    */
   public void insert(Message msg) {
-    if (msg.update.getFromId() == AgentServer.getServerId()) {
+    if (msg.getFromId() == AgentServer.getServerId()) {
       // The update has been locally generated, the message is ready to
       // deliver, we have to insert it in the queue.
       qout.insert(msg);
@@ -174,7 +174,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *			network interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
-    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
+    this.name = AgentServer.getName() + '.' + name;
     this.domain = name;
     this.port = port;
 
@@ -207,7 +207,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
-    msg.update = clock.getSendUpdate(to);
+    msg.setUpdate(clock.getSendUpdate(to));
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.
@@ -236,4 +236,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * Wakes up the watch-dog thread.
    */
   public abstract void wakeup();
+
+  /**
+   * Updates the network port.
+   */
+  public void setPort(int port) {
+    this.port = port;
+  }
+
+  public final int getPort() {
+    return port;
+  }
 }

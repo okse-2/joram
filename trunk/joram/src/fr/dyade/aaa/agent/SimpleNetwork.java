@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class with a single connection at
  * a time.
  */
-public class SimpleNetwork extends Network {
+public class SimpleNetwork extends FIFONetwork {
   /**
    * FIFO list of all messages to be sent by the watch-dog thead.
    */
@@ -95,7 +95,7 @@ public class SimpleNetwork extends Network {
       } catch (BindException exc) {
         if (i > CnxRetry) throw exc;
         try {
-          Thread.currentThread().sleep(i * 250);
+          Thread.sleep(i * 250);
         } catch (InterruptedException e) {}
       }
     }
@@ -153,104 +153,6 @@ public class SimpleNetwork extends Network {
 
   // End of code from StreamNetwork class.
   // -----+----- -----+----- -----+----- -----+----- -----+----- -----+----- 
-
-  public LogicalClock createsLogicalClock(String name, short[] servers) {
-    return new SimpleClock(name, servers);
-  }
-
-
-  /**
-   * Try to deliver the received message to the right consumer.
-   *
-   * @param msg		the message.
-   */
-  private void deliver(Message msg) throws Exception {
-    // Get real from serverId.
-    short from = msg.update.getFromId();
-
-    // Test if the message is really for this node (final destination or
-    // router).
-    short dest = msg.update.getToId();
-    if (dest != AgentServer.getServerId()) {
-      logmon.log(BasicLevel.ERROR,
-                 getName() + ", recv bad msg#" + msg.update.stamp +
-                 " really to " + dest +
-                 " by " + from);
-      throw new Exception("recv bad msg#" + msg.update.stamp +
-                          " really to " + dest +
-                          " by " + from);
-    }
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", recv msg#" + msg.update.stamp +
-                 " from " + msg.from +
-                 " to " + msg.to +
-                 " by " + from);
-
-    AgentServer.getServerDesc(from).active = true;
-    AgentServer.getServerDesc(from).retry = 0;
-
-    // Test if the message can be delivered then deliver it
-    // else put it in the waiting list
-    int todo = clock.testRecvUpdate(msg.update);
-
-    if (todo == LogicalClock.DELIVER) {
-      // Deliver the message then try to deliver alls waiting message.
-      AgentServer.transaction.begin();
-      // Allocate a local time to the message to order it in
-      // local queue, and save it.
-      Channel.post(msg);
-
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", deliver msg#" + msg.update.stamp);
-      scanlist:
-      while (true) {
-	for (int i=0; i<waiting.size(); i++) {
-	  Message tmpMsg = (Message) waiting.elementAt(i);
-	  if ((tmpMsg.update.getFromId() == from) &&
-              (clock.testRecvUpdate(tmpMsg.update) == LogicalClock.DELIVER)) {
-	    // Be Careful, changing the stamp imply the filename
-	    // change !! So we have to delete the old file.
-	    tmpMsg.delete();
-	    //  Deliver the message, then delete it from list.
-	    Channel.post(tmpMsg);
-	    waiting.removeElementAt(i);
-
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         getName() + ",	 deliver msg#" + tmpMsg.update.stamp);
-
-	    // logical time has changed we have to rescan the list.
-	    continue scanlist;
-	  }
-	}
-	//  We have scan the entire list without deliver any message
-	// so we leave the loop.
-	break scanlist;
-      }
-      Channel.save();
-      AgentServer.transaction.commit();
-      // then commit and validate the message.
-      Channel.validate();
-      AgentServer.transaction.release();
-    } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
-      AgentServer.transaction.begin();
-      // Insert in a waiting list.
-      msg.save();
-      waiting.addElement(msg);
-      AgentServer.transaction.commit();
-      AgentServer.transaction.release();
-      
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", block msg#" + msg.update.stamp);
-    } else {
-//    it's an already delivered message, we have just to re-send an
-//    aknowledge (see below).
-    }
-  }
 
   /** Input component */
   NetServerIn netServerIn = null;
@@ -372,7 +274,7 @@ public class SimpleNetwork extends Network {
 	    }
 	    canStop = false;
 
-	    msgto = msg.update.getToId();
+	    msgto = msg.getToId();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
@@ -495,7 +397,6 @@ public class SimpleNetwork extends Network {
       try {
 	listen.close();
       } catch (Exception exc) {}
-      listen = null;
     }
 
     protected void shutdown() {
@@ -524,7 +425,6 @@ public class SimpleNetwork extends Network {
 	    canStop = false;
 
 	    setSocketOption(socket);
-// 	    socket.setSoLinger(true, 1000);
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
@@ -537,25 +437,15 @@ public class SimpleNetwork extends Network {
 	    Object obj = ois.readObject();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", msg received");
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", msg received");
 
 	    if (obj instanceof Message) {
 	      deliver((Message) obj);
-	    } else if (obj instanceof Boot) {
-	      Boot boot = (Boot) obj;
-	      // It's a valid boot message, set the server on.
-	      AgentServer.getServerDesc(boot.sid).active = true;
-	      AgentServer.getServerDesc(boot.sid).retry = 0;
-
-	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", connection setup from #" +
-                           boot.sid);
-
-	      // resend all waiting messages.
-	      wakeup();
 	    } else {
-	      // TODO: ?
+              this.logmon.log(BasicLevel.ERROR,
+                              this.getName() + ", not a message");
+	      throw new IOException("Not a message");
 	    }
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -658,12 +548,12 @@ public class SimpleNetwork extends Network {
 
 	    for (int i=0; i<sendList.size(); i++) {
 	      msg = (Message) sendList.elementAt(i);
-	      msgto = msg.update.getToId();
+	      msgto = msg.getToId();
 
 	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
                 this.logmon.log(BasicLevel.DEBUG,
                            this.getName() +
-                           ", check msg#" + msg.update.stamp +
+                           ", check msg#" + msg.getStamp() +
 			    " from " + msg.from +
 			    " to " + msg.to);
 
@@ -679,7 +569,7 @@ public class SimpleNetwork extends Network {
                   if (this.logmon.isLoggable(BasicLevel.DEBUG))
                     this.logmon.log(BasicLevel.DEBUG,
                                     this.getName() +
-                                    ", send msg#" + msg.update.stamp);
+                                    ", send msg#" + msg.getStamp());
 
                   server.last = currentTimeMillis;
 

@@ -24,8 +24,8 @@ import java.io.*;
 import java.util.*;
 
 public class NewServerCmd extends ServerCmd implements Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: NewServerCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: NewServerCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
  /**
   * create new persistent server

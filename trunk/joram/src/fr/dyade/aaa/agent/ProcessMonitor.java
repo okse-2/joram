@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -34,9 +34,14 @@ import org.objectweb.util.monolog.api.BasicLevel;
   * @see	ProcessManager
   */
 class ProcessMonitor extends Driver implements Serializable {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
+  private String name = null;
 
+  public final String getName() {
+    if (name == null)
+      name = AgentServer.getName() + ".ProcessMonitor";
+    return name;
+  }
+ 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */
 
@@ -64,13 +69,11 @@ class ProcessMonitor extends Driver implements Serializable {
 	  try {
             if (ProcessManager.xlogmon.isLoggable(BasicLevel.DEBUG))
 	      ProcessManager.xlogmon.log(BasicLevel.DEBUG,
-                                         "AgentServer#" + AgentServer.getServerId() +
-                                         ".ProcessMonitor, waiting");
+                                         getName() + ", waiting");
 	      exitValue = process.waitFor();
               if (ProcessManager.xlogmon.isLoggable(BasicLevel.DEBUG))
                   ProcessManager.xlogmon.log(BasicLevel.DEBUG,
-                                             "AgentServer#" + AgentServer.getServerId() +
-                                             ".ProcessMonitor, exit " + exitValue);
+                                             getName() + ", exit " + exitValue);
 	  } catch (InterruptedException exc) {
 	      continue;
 	  }
@@ -90,8 +93,7 @@ class ProcessMonitor extends Driver implements Serializable {
       ProcessManager.manager.unregister(this);
     } catch (Exception exc) {
       ProcessManager.xlogmon.log(BasicLevel.ERROR,
-                                 "AgentServer#" + AgentServer.getServerId() +
-                                 ".ProcessMonitor, failure in run", exc);      
+                                 getName() + ", failure in run", exc);      
     }
   }
 

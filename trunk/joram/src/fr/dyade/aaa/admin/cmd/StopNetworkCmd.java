@@ -24,38 +24,28 @@ import java.io.*;
 import java.util.*;
 
 public class StopNetworkCmd implements StopAdminCmd, Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: StopNetworkCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: StopNetworkCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
-  public short sid = -1;
-  public String domainName = null;
-  public int port = -1;
+  public short sid;
 
- /**
-  * stop network
-  *
-  * @param sid         server id
-  * @param domainName  domain name
-  * @param port        port
-  */
+  public String domainName;
+
+  /**
+   * Constructs a new stop network command.
+   *
+   * @param sid         server id
+   * @param domainName  domain name
+   */
   public StopNetworkCmd(short sid,
-                        String domainName, 
-                        int port) {
+                        String domainName) {
     this.sid = sid;
     this.domainName = domainName;
-    this.port = port;
   }
 
   public String toString() {
-    StringBuffer buf = new StringBuffer();
-    buf.append("StopNetworkCmd(");
-    buf.append("sid=");
-    buf.append(sid);
-    buf.append(",domainName=");
-    buf.append(domainName);
-    buf.append(",port=");
-    buf.append(port);
-    buf.append(")");
-    return buf.toString();
+    return '(' + super.toString() + 
+      ",sid=" + sid + 
+      ",domainName=" + domainName + ')';
   }
 }

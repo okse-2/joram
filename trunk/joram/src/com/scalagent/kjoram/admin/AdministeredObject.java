@@ -95,17 +95,17 @@ public abstract class AdministeredObject
       className.length());
 
     if (className.startsWith("com.scalagent.kjoram.admin")) {
-      className = "fr.dyade.aaa.joram.admin";
+      className = "org.objectweb.joram.client.jms.admin";
     } else if (className.startsWith("com.scalagent.kjoram.excepts")) {
-      className = "fr.dyade.aaa.mom.excepts";
+      className = "org.objectweb.joram.shared.excepts";
     } else if (className.startsWith("com.scalagent.kjoram.jms")) {
-      className = "fr.dyade.aaa.mom.jms";
+      className = "org.objectweb.joram.shared.client";
     } else if (className.startsWith("com.scalagent.kjoram.ksoap")) {
-      className = "fr.dyade.aaa.joram.ksoap";
+      className = "org.objectweb.joram.client.jms.ksoap";
     } else if (className.startsWith("com.scalagent.kjoram.messages")) {
-      className = "fr.dyade.aaa.mom.messages";
+      className = "org.objectweb.joram.shared.messages";
     } else if (className.startsWith("com.scalagent.kjoram")) {
-      className = "fr.dyade.aaa.joram";
+      className = "org.objectweb.joram.client.jms";
     }
     className = className + end;
     h.put("className",className);

@@ -75,7 +75,7 @@ public final class TransientNetworkServer extends Network {
    *			network interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
-    name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
+    name = AgentServer.getName() + '.' + name;
     // Get the logging monitor from current server MonologLoggerFactory
     logmon = Debug.getLogger(Debug.A3Network + '.' + name);
     logmon.log(BasicLevel.DEBUG, name + ", initialized");
@@ -140,7 +140,7 @@ public final class TransientNetworkServer extends Network {
 	} catch (IOException exc) {
 	  if (i > 20) throw exc;
 	  try {
-	    Thread.currentThread().sleep(i * 250);
+	    Thread.sleep(i * 250);
 	  } catch (InterruptedException e) {}
 	}
       }

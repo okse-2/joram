@@ -103,10 +103,8 @@ final public class AgentAdmin extends Agent {
     // Does nothing
   }
   
-  protected void initialize(boolean firstTime) throws Exception {
-    if (firstTime) {
-    }
-    super.initialize(firstTime);
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
   }
 
   /**
@@ -137,7 +135,7 @@ final public class AgentAdmin extends Agent {
       logmon.log(BasicLevel.DEBUG,
                  "\n\n\nAgentAdmin.react(" + from + "," + not + ")");    
     if (not instanceof AdminRequestNot) {
-        doReact(from, (AdminRequestNot) not);
+      doReact(from, (AdminRequestNot) not);
     } else if (not instanceof AdminStartStopNot) {
       doReact(from, (AdminStartStopNot) not);
     } else { 
@@ -164,25 +162,7 @@ final public class AgentAdmin extends Agent {
 
     try {
       // configuration phase
-      doReact(not.script);
-      if (not.autoStart) {
-        // start/stop configuration in same reaction
-        AdminStartStopNot startstop = new AdminStartStopNot();
-        startstop.setContext(not.getContext());
-        startstop.startScript = startScript;
-        startstop.stopScript = stopScript;
-        doReact(from, startstop);
-      } else {
-        // reply to agent sending AdminRequestNot.
-        // set in AdminReplyNot startScript and stopScript.
-        // use to start this configuration.
-        AdminReplyNot reply = new AdminReplyNot();
-        reply.setContext(not.getContext());
-        reply.startScript = startScript;
-        reply.stopScript = stopScript;
-        reply.status = CONFIGURED;
-        sendTo(from, reply);
-      }
+      doReact(not.script);      
     } catch (Exception exc) {
       logmon.log(BasicLevel.WARN, "AgentAdmin.react", exc);
       if (exc instanceof ExceptionCmd) {
@@ -198,6 +178,25 @@ final public class AgentAdmin extends Agent {
         rollback = null;
       } else
         throw exc;
+    }
+
+    if (not.autoStart) {
+      // start/stop configuration in same reaction
+      AdminStartStopNot startstop = new AdminStartStopNot();
+      startstop.setContext(not.getContext());
+      startstop.startScript = startScript;
+      startstop.stopScript = stopScript;
+      doReact(from, startstop);
+    } else {
+      // reply to agent sending AdminRequestNot.
+      // set in AdminReplyNot startScript and stopScript.
+      // use to start this configuration.
+      AdminReplyNot reply = new AdminReplyNot();
+      reply.setContext(not.getContext());
+      reply.startScript = startScript;
+      reply.stopScript = stopScript;
+      reply.status = CONFIGURED;
+      sendTo(from, reply);
     }
   }
 
@@ -267,9 +266,10 @@ final public class AgentAdmin extends Agent {
       // start network, server and service.
       for (Enumeration e = startScript.elements(); e.hasMoreElements();) {
         StartAdminCmd cmd = (StartAdminCmd) e.nextElement();
-        if (cmd instanceof UpdateNetworkPortCmd) {
-          doReact((UpdateNetworkPortCmd) cmd);
-        } else if (cmd instanceof StartNetworkCmd) {
+//         if (cmd instanceof UpdateNetworkPortCmd) {
+//           doReact((UpdateNetworkPortCmd) cmd);
+//         } else 
+        if (cmd instanceof StartNetworkCmd) {
           doReact((StartNetworkCmd) cmd);
         } else if (cmd instanceof StartServiceCmd) {
           doReact((StartServiceCmd) cmd);
@@ -495,12 +495,21 @@ final public class AgentAdmin extends Agent {
                      "AgentAdmin startScript.serverDesc.put(" + id + "," + sd + ")");
       } else {
         if (silence) {
-          startScript.add(new StartServerCmd(
-            a3cmlConfig.getServerIdByName(cmd.name),
-            cmd.name));
-          return;
+          short sid;
+          if (cmd.sid == null) {
+            sid = a3cmlConfig.getServerIdByName(cmd.name);
+          } else {
+            sid = cmd.sid.shortValue();
+          }
+          if (sid != AgentServer.getServerId()) {
+            startScript.add(new StartServerCmd(
+              sid,
+              cmd.name));
+          }
+        } else {
+          throw new ServerCmdException(
+            "Server " + cmd.name + " already exists");
         }
-        throw new ServerCmdException("Server " + cmd.name + " already exist id=" + id);
       }
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -636,8 +645,7 @@ final public class AgentAdmin extends Agent {
         if (silence) {
           if (server.sid == AgentServer.getServerId()) {
             startScript.add(new StartNetworkCmd(server.sid,
-                                                cmd.domain,
-                                                cmd.port));
+                                                cmd.domain));
           }
           return;
         }
@@ -645,8 +653,7 @@ final public class AgentAdmin extends Agent {
       }
       server.networks.addElement(toadd);
       rollback.add(new RemoveNetworkCmd(cmd.serverName,
-                                        cmd.domain,
-                                        cmd.port));
+                                        cmd.domain));
       
       if (!cmd.domain.equals("transient")) {
         // add server in domains
@@ -658,8 +665,7 @@ final public class AgentAdmin extends Agent {
             logmon.log(BasicLevel.DEBUG,
                        "startScript.add(" + server.sid + ")");
           startScript.add(new StartNetworkCmd(server.sid,
-                                              cmd.domain,
-                                              cmd.port));
+                                              cmd.domain));
         }
 
         // prepare serverDesc and add to startScript
@@ -711,10 +717,9 @@ final public class AgentAdmin extends Agent {
 //             cmd.serverName, cmd.domain, network.port));
         network.port = cmd.port;
         startScript.add(
-          new UpdateNetworkPortCmd(
+          new StartNetworkCmd(
             server.sid,
-            cmd.domain,
-            cmd.port));
+            cmd.domain));
       } else {
         throw new Exception("Unknown network");
       }
@@ -857,14 +862,20 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.doReact(" + cmd + ")");
     
     try {
-      ServiceManager.register(cmd.className,cmd.args);
+      A3CMLServer a3cmlServer = 
+        a3cmlConfig.getServer(AgentServer.getServerId());
+      A3CMLService a3cmlService = 
+        a3cmlServer.getService(cmd.className);
+      ServiceManager.register(
+        a3cmlService.classname, a3cmlService.args);
       ServiceDesc desc = 
-        (ServiceDesc) ServiceManager.manager.registry.get(cmd.className);
+        (ServiceDesc) ServiceManager.manager.registry.get(
+          a3cmlService.classname);
       if (desc.running) return;
       ServiceManager.start(desc);
       if (stopScript == null) stopScript = new StopScript();
-      stopScript.add(new StopServiceCmd(cmd.className,
-                                        cmd.args));
+      stopScript.add(new StopServiceCmd(a3cmlService.classname,
+                                        a3cmlService.args));
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
         logmon.log(BasicLevel.ERROR, "", exc);
@@ -873,7 +884,7 @@ final public class AgentAdmin extends Agent {
   }
 
   /** 
-   * start network
+   * Starts a network (idempotent).
    *
    * @param cmd StartNetworkCmd
    *
@@ -883,43 +894,84 @@ final public class AgentAdmin extends Agent {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  "AgentAdmin.doReact(" + cmd + ")");
-
     try {
       if (a3cmlConfig == null)
         a3cmlConfig = AgentServer.getConfig();
+      A3CMLPServer a3cmlServer = 
+        (A3CMLPServer) a3cmlConfig.getServer(cmd.sid);
+      A3CMLNetwork a3cmlNetwork = null;
+      for (int i = 0; i < a3cmlServer.networks.size(); i++) {
+        A3CMLNetwork nw = 
+          (A3CMLNetwork)a3cmlServer.networks.elementAt(i);
+        if (nw.domain.equals(cmd.domainName)) {
+          a3cmlNetwork = nw;
+        }
+      }
       
-      A3CMLDomain domain = (A3CMLDomain) a3cmlConfig.getDomain(cmd.domainName);
-      Network consumer = (Network) Class.forName(domain.network).newInstance();
-//       domain.consumer = consumer;
-      short[] domainSids = new short[domain.servers.size()];
-      for (int i=0; i<domainSids.length; i++) {
-        domainSids[i] = ((A3CMLServer) domain.servers.elementAt(i)).sid;
-      }
+      if (a3cmlNetwork == null)
+        throw new NetworkCmdException(
+          "Unknown network: " + 
+          cmd.sid + '.' + cmd.domainName);
 
-//       // set serverDesc.domain
-//       for (Enumeration e = startScript.serverDesc.elements(); e.hasMoreElements();) {
-//         ServerDesc serverDesc = AgentServer.getServerDesc(((ServerDesc) e.nextElement()).sid);
-//         if (!serverDesc.isTransient) {
-//           serverDesc.domain = consumer;
-//         } else {
-//           serverDesc.domain = (Network) Class.
-//             forName("fr.dyade.aaa.agent.TransientNetworkServer").newInstance();
-//         }
-//       }
+      if (cmd.sid == AgentServer.getServerId()) {
+        Network network;
+        try {
+          // The network may have already been 
+          // added (idempotency).
+          network =
+            (Network) AgentServer.getConsumer(cmd.domainName);
+        } catch (Exception exc) {
+          network = null;
+        }
 
-      // add consumer
-      try {
-        AgentServer.addConsumer(cmd.domainName, consumer);
-      } catch (Exception exc) {
-        // The consumer has already been added
-        return;
+        if (network != null) {         
+          if (network.getPort() != a3cmlNetwork.port) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         " -> port change (before = " + 
+                         network.getPort() + 
+                         ", after = " + 
+                         a3cmlNetwork.port + ')');
+            // The network is local so we have to 
+            // stop it in order to update the listen port.
+            network.stop();
+            network.setPort(a3cmlNetwork.port);
+          }
+          network.start();
+        } else {
+          A3CMLDomain a3cmlDomain = 
+            (A3CMLDomain) a3cmlConfig.getDomain(cmd.domainName);
+          network = 
+            (Network) Class.forName(a3cmlDomain.network).newInstance();        
+          short[] domainSids = new short[a3cmlDomain.servers.size()];
+          for (int i = 0; i < domainSids.length; i++) {
+            domainSids[i] = 
+              ((A3CMLServer) a3cmlDomain.servers.elementAt(i)).sid;
+          }
+          AgentServer.addConsumer(cmd.domainName, network);
+          network.init(a3cmlDomain.name, 
+                       a3cmlNetwork.port, 
+                       domainSids);
+          network.start();
+        }
+      } else {
+        // The network is remote so we just 
+        // may have to update the port value
+        // of the server desc.
+        try {
+          ServerDesc serverDesc = 
+            AgentServer.getServerDesc(cmd.sid);
+          if (cmd.domainName.equals(
+            serverDesc.getDomainName())) {
+            serverDesc.port = a3cmlNetwork.port;
+          }
+        } catch (UnknownServerException exc) {
+          // Nothing to do
+        }
       }
-      consumer.init(domain.name, cmd.port, domainSids);
-      consumer.start();
       if (stopScript == null) stopScript = new StopScript();
       stopScript.add(new StopNetworkCmd(cmd.sid,
-                                        cmd.domainName,
-                                        cmd.port));
+                                        cmd.domainName));
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
         logmon.log(BasicLevel.ERROR, "", exc);
@@ -927,22 +979,24 @@ final public class AgentAdmin extends Agent {
     }
   }
 
-  private void doReact(UpdateNetworkPortCmd cmd) throws NetworkCmdException {    
-    try {
-      ServerDesc serverDesc = AgentServer.getServerDesc(cmd.sid);
-      if (cmd.domainName.equals(serverDesc.getDomainName())) {
-        // DF: Don't add the reverse action into the
-        // stopScript because the meaning of the
-        // update command does not fit into the start/stop
-        // script principle.
-        serverDesc.port = cmd.port;
-      }
-    } catch (Exception exc) {
-      if (logmon.isLoggable(BasicLevel.ERROR))
-        logmon.log(BasicLevel.ERROR, "", exc);
-      throw new NetworkCmdException(exc);
-    }
-  }
+  // DF: removed this command. It is replaced by StartNetworkCmd
+  // 
+  // private void doReact(UpdateNetworkPortCmd cmd) throws NetworkCmdException {    
+//     try {
+//       ServerDesc serverDesc = AgentServer.getServerDesc(cmd.sid);
+//       if (cmd.domainName.equals(serverDesc.getDomainName())) {
+//         // DF: Don't add the reverse action into the
+//         // stopScript because the meaning of the
+//         // update command does not fit into the start/stop
+//         // script principle.
+//         serverDesc.port = cmd.port;
+//       }
+//     } catch (Exception exc) {
+//       if (logmon.isLoggable(BasicLevel.ERROR))
+//         logmon.log(BasicLevel.ERROR, "", exc);
+//       throw new NetworkCmdException(exc);
+//     }
+//   }
 
   /** 
    * start server
@@ -959,6 +1013,8 @@ final public class AgentAdmin extends Agent {
       // Attention, on prend des infos de la config courante (!=  de celle
       // de l'AgentServer et on reporte les modifs dans les ServerDesc de
       // l'AgentServer.
+      if (a3cmlConfig == null)
+        a3cmlConfig = AgentServer.getConfig();
       A3CMLServer current = a3cmlConfig.getServer(AgentServer.getServerId());
       A3CMLServer server = a3cmlConfig.getServer(cmd.sid);
       ServerDesc desc = AgentServer.getServerDesc(server.sid);
@@ -1036,13 +1092,37 @@ final public class AgentAdmin extends Agent {
             logmon.log(BasicLevel.DEBUG,
                        "AgentAdmin Stop domain = " + cmd.domainName);
           consumer.stop();
+
+          A3CMLNetwork nw = getNetwork(
+            AgentServer.getServerId(), cmd.domainName);
+          if (nw == null) {
+            // Means that the network has been removed.
+            AgentServer.removeConsumer(cmd.domainName);
+          }
         }
-      }
+      }        
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
         logmon.log(BasicLevel.ERROR, "", exc);
       throw new NetworkCmdException(exc);
     }
+  }
+  
+  private A3CMLNetwork getNetwork(short sid, String domainName) 
+    throws Exception {
+    if (a3cmlConfig == null)
+      a3cmlConfig = AgentServer.getConfig();
+    A3CMLPServer server = 
+      (A3CMLPServer) a3cmlConfig.getServer(sid);
+    if (server == null) return null;
+    for (int i = 0; i < server.networks.size(); i++) {
+      A3CMLNetwork network = 
+        (A3CMLNetwork)server.networks.elementAt(i);
+      if (network.domain.equals(domainName)) {
+        return network;
+      }
+    }
+    return null;
   }
 
   /** 
@@ -1093,8 +1173,7 @@ final public class AgentAdmin extends Agent {
 
           if (server.networks.size() > 2) {
             doReact(new RemoveNetworkCmd(server.name,
-                                         cmd.name,
-                                         server.port));
+                                         cmd.name));
           } else if (server.networks.size() == 2) {
             if ((((A3CMLNetwork) server.networks.elementAt(0)).domain.equals("transient") && 
                  ((A3CMLNetwork) server.networks.elementAt(1)).domain.equals(cmd.name)) ||
@@ -1104,8 +1183,7 @@ final public class AgentAdmin extends Agent {
                                                       server.hostname));
             else
               doReact(new RemoveNetworkCmd(server.name,
-                                           cmd.name,
-                                           server.port));
+                                           cmd.name));
           } else
             toRemove.addElement(new RemoveServerCmd(server.name,
                                              server.hostname));
@@ -1148,8 +1226,7 @@ final public class AgentAdmin extends Agent {
                      "stopScript.add( StopNetworkCmd(" + 
                      cmd.serverName + "))");
         stopScript.add(new StopNetworkCmd(server.sid,
-                                          cmd.domain,
-                                          server.port));
+                                          cmd.domain));
       }
       removeNetwork(server.sid,cmd.domain);
     } catch (Exception exc) {

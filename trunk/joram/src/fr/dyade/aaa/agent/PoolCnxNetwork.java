@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -35,9 +35,6 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 public class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.13 2003-09-11 09:53:25 fmaistre Exp $";
-
   /** */
   WakeOnConnection wakeOnConnection = null; 
   /** */
@@ -197,7 +194,7 @@ public class PoolCnxNetwork extends StreamNetwork {
         } catch (ClassCastException exc) {
           continue;
         }
-        if (msg.update.stamp == stamp) {
+        if (msg.getStamp() == stamp) {
           int j = elementCount - index - 1;
           if (j > 0) {
 	    System.arraycopy(elementData, index + 1, elementData, index, j);
@@ -592,7 +589,7 @@ public class PoolCnxNetwork extends StreamNetwork {
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", remove msg#" + msg.update.stamp);
+                     getName() + ", remove msg#" + msg.getStamp());
       } catch (NoSuchElementException exc) {
         logmon.log(BasicLevel.WARN,
                    getName() + ", can't ack, unknown msg#" + ack);
@@ -607,10 +604,10 @@ public class PoolCnxNetwork extends StreamNetwork {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         if (msg.not != null) {
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", send msg#" + msg.update.stamp);
+                     getName() + ", send msg#" + msg.getStamp());
         } else {
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", send ack#" + msg.update.stamp);
+                     getName() + ", send ack#" + msg.getStamp());
         }
       }
 
@@ -633,12 +630,12 @@ public class PoolCnxNetwork extends StreamNetwork {
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", set ack msg#" + stamp);
 
-      Message ack = new Message(AgentId.localId,
-                                AgentId.localId(server.sid));
-      ack.update = new Update(AgentServer.getServerId(),
-                              AgentServer.getServerDesc(
-                                server.sid).gateway,
-                              stamp);
+      Message ack = Message.alloc(AgentId.localId,
+                                  AgentId.localId(server.sid),
+                                  null);
+      ack.setUpdate(Update.alloc(AgentServer.getServerId(),
+                                 AgentServer.getServerDesc(server.sid).gateway,
+                                 stamp));
       qout.push(ack);
     }
 
@@ -700,7 +697,7 @@ public class PoolCnxNetwork extends StreamNetwork {
             Message msg = (Message) obj;
             //  Keep message stamp in order to acknowledge it (be careful,
             // the message get a new stamp to be delivered).
-            int stamp = msg.update.stamp;
+            int stamp = msg.getStamp();
             if (msg.not != null) {
               deliver(msg);
               ack(stamp);
@@ -858,7 +855,7 @@ public class PoolCnxNetwork extends StreamNetwork {
           canStop = false;
 
           // Send the message
-          getSession(msg.update.getToId()).send(msg);
+          getSession(msg.getToId()).send(msg);
           qout.pop();
         }
       } finally {

@@ -24,38 +24,29 @@ import java.io.*;
 import java.util.*;
 
 public class NetworkCmd implements AdminCmd, Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: NetworkCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: NetworkCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
 
-  public String serverName = null;
-  public String domain = null;
-  public int port = -1;
+  public String serverName;
 
- /**
-  * network
-  *
-  * @param serverName  server name
-  * @param domain      doamine name
-  * @param port        port
-  * @see   NewNetworkCmd
-  * @see   RemoveNetworkCmd
-  */
-  public NetworkCmd(String serverName, String domain, int port) {
+  public String domain;
+
+  /**
+   * network
+   *
+   * @param serverName  server name
+   * @param domain      domain name
+   * @see   NewNetworkCmd
+   * @see   RemoveNetworkCmd
+   */
+  public NetworkCmd(String serverName, String domain) {
     this.serverName = serverName;
     this.domain = domain;
-    this.port = port;
   }
-
+  
   public String toString() {
-    StringBuffer buf = new StringBuffer();
-    buf.append("(");
-    buf.append("serverName=");
-    buf.append(serverName);
-    buf.append(",domain=");
-    buf.append(domain);
-    buf.append(",port=");
-    buf.append(port);
-    buf.append(")");
-    return buf.toString();
+    return '(' + super.toString() + 
+      ",serverName=" + serverName +
+      ",domain=" + domain + ')';
   }
 }

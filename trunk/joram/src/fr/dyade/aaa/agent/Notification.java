@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,12 @@ import java.io.*;
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
-
   static final long serialVersionUID = 3007264908616389613L;
 
-  /**
-   * Context of the notification.
-   */
+  /** Context of the notification. */
+  protected boolean persistent = true;
+
+  /** Context of the notification. */
   private Object context;
 
   /**
@@ -69,11 +69,13 @@ public class Notification implements Serializable, Cloneable {
 
   public String toString() {
     StringBuffer output = new StringBuffer();
+
     output.append("(");
     output.append(super.toString());
-    output.append(",context=");
-    output.append(context);
+    output.append(",persistent=").append(persistent);
+    output.append(",context=").append(context);
     output.append(")");
+
     return output.toString();
   }
 

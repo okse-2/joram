@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -159,7 +159,7 @@ public class SingleCnxNetwork extends StreamNetwork {
 	    }
 	    canStop = false;
 
-	    msgto = msg.update.getToId();
+	    msgto = msg.getToId();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
@@ -442,12 +442,12 @@ public class SingleCnxNetwork extends StreamNetwork {
 
 	    for (int i=0; i<sendList.size(); i++) {
 	      msg = (Message) sendList.elementAt(i);
-	      msgto = msg.update.getToId();
+	      msgto = msg.getToId();
 
 	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
                 this.logmon.log(BasicLevel.DEBUG,
                            this.getName() +
-                           ", check msg#" + msg.update.stamp +
+                           ", check msg#" + msg.getStamp() +
 			    " from " + msg.from +
 			    " to " + msg.to);
 
@@ -463,7 +463,7 @@ public class SingleCnxNetwork extends StreamNetwork {
                   if (this.logmon.isLoggable(BasicLevel.DEBUG))
                     this.logmon.log(BasicLevel.DEBUG,
                                     this.getName() +
-                                    ", send msg#" + msg.update.stamp);
+                                    ", send msg#" + msg.getStamp());
 
                   server.last = currentTimeMillis;
 

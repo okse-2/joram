@@ -45,7 +45,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Only true when the ProxyAgent is set as multiConn.
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-  public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.14 2003-09-11 09:53:50 fmaistre Exp $";
+  public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.15 2004-02-13 08:13:22 fmaistre Exp $";
 
   /** Listening port, may be 0 */
   protected int listenPort = -1;

@@ -108,15 +108,15 @@ public class ConversionSoapHelper {
       throw new Exception("SoapObject " + name
                           + " no className found.");
     
-      if (className.equals("fr.dyade.aaa.joram.soap.SoapConnectionFactory")) {
+      if (className.equals("org.objectweb.joram.client.jms.soap.SoapConnectionFactory")) {
       return com.scalagent.kjoram.ksoap.SoapConnectionFactory.decode(h);
-    } else if (className.equals("fr.dyade.aaa.joram.Queue")){
+    } else if (className.equals("org.objectweb.joram.client.jms.Queue")){
       return com.scalagent.kjoram.Queue.decode(h);
-    } else if (className.equals("fr.dyade.aaa.joram.Topic")){
+    } else if (className.equals("org.objectweb.joram.client.jms.Topic")){
       return com.scalagent.kjoram.Topic.decode(h);
-    } else if (className.equals("fr.dyade.aaa.joram.TemporaryQueue")){
+    } else if (className.equals("org.objectweb.joram.client.jms.TemporaryQueue")){
       return com.scalagent.kjoram.TemporaryQueue.decode(h);
-    } else if (className.equals("fr.dyade.aaa.joram.TemporaryTopic")){
+    } else if (className.equals("org.objectweb.joram.client.jms.TemporaryTopic")){
       return com.scalagent.kjoram.TemporaryTopic.decode(h);
     }
       throw new Exception("SoapObject " + className

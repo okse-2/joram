@@ -76,7 +76,7 @@ public class AbstractJmsReply
     String end = className.substring(
       className.lastIndexOf((int)'.'),
       className.length());
-    h.put("className","fr.dyade.aaa.mom.jms"+end);
+    h.put("className","org.objectweb.joram.shared.client"+end);
     //h.put("className",getClass().getName());
     h.put("correlationId",getKey());
     return h;
