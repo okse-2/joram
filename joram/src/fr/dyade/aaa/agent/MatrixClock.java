@@ -25,8 +25,8 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * An element of the matrix clock.
  */
 class MatClockElt {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   /** Element value. */
   int stamp;
@@ -50,8 +50,8 @@ class MatClockElt {
  * Matrix clock realization. 
  */
 class MatrixClock implements Serializable {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -74,7 +74,7 @@ class MatrixClock implements Serializable {
   /** */
   private transient MatClockElt matrix[][];
 
-  private transient Monitor logmon = null;
+  private transient Logger logmon = null;
 
  /**
   * The writeObject method is responsible for writing the state of the
@@ -176,15 +176,15 @@ class MatrixClock implements Serializable {
     if (mc == null) {
       // Creates a new Matrix and save it.
       mc = new MatrixClock(name, servers);
-      // Get the logging monitor from current server MonologMonitorFactory
-      mc.logmon = Debug.getMonitor(Debug.A3Debug + ".MatrixClock." + name);
+      // Get the logging monitor from current server MonologLoggerFactory
+      mc.logmon = Debug.getLogger(Debug.A3Debug + ".MatrixClock." + name);
     } else {
-      // Get the logging monitor from current server MonologMonitorFactory
-      mc.logmon = Debug.getMonitor(Debug.A3Debug + ".MatrixClock." + name);
+      // Get the logging monitor from current server MonologLoggerFactory
+      mc.logmon = Debug.getLogger(Debug.A3Debug + ".MatrixClock." + name);
       // Join with the new domain configuration:
       mc.servers = (short[]) AgentServer.transaction.load(name + "Servers");
       mc.idxLS = mc.index(AgentServer.getServerId());
-      if (!java.util.Arrays.equals(mc.servers, servers)) {
+      if (!Arrays.equals(mc.servers, servers)) {
         mc.logmon.log(BasicLevel.WARN,
                       "MatrixClock." + name + ", updates configuration");
 	// TODO: Insert or suppress corresponding elements in matrix...
@@ -199,7 +199,7 @@ class MatrixClock implements Serializable {
    */
   private final int index(short id) {
 //   private final int index(short id) throws UnknownServerException {
-    int idx = java.util.Arrays.binarySearch(servers, id);
+    int idx = Arrays.binarySearch(servers, id);
 //     if (idx < 0)
 //       throw new UnknownServerException("Unknow server id. #" + id);
     return idx;

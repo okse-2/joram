@@ -271,8 +271,10 @@ public class A3CMLHandler extends DefaultHandler {
       } else if (name.equals(ELT_PROPERTY)) {
 	if ((server ==  null) ||	   // Global property
 	    (server.sid == serverId)) {    // Server property
-	  System.setProperty(atts.getValue(ATT_NAME),
-                             atts.getValue(ATT_VALUE));
+// 1.2 	  System.setProperty(atts.getValue(ATT_NAME),
+// 1.2                       atts.getValue(ATT_VALUE));
+          System.getProperties().put(atts.getValue(ATT_NAME),
+                                     atts.getValue(ATT_VALUE));
 	}
       } else {
 	throw new SAXException("unknown element \"" + name + "\"");

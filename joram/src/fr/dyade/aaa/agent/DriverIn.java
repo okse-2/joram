@@ -25,15 +25,15 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * Input driver.
  */
 class DriverIn extends Driver {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   /** Proxy this <code>DriverIn<code> belongs to. */
   private ProxyAgent proxy;
@@ -82,7 +82,7 @@ class DriverIn extends Driver {
     this.name = proxy.getName() + ".DriverIn#" + id;
     // Get the logging monitor using proxy topic
     String classname = getClass().getName();
-    logmon = Debug.getMonitor(proxy.getLogTopic()+ '.' +
+    logmon = Debug.getLogger(proxy.getLogTopic()+ '.' +
       classname.substring(classname.lastIndexOf('.') +1));
   }
 

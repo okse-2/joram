@@ -24,8 +24,8 @@
  */
 package fr.dyade.aaa.util;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
@@ -59,8 +59,8 @@ import fr.dyade.aaa.agent.Debug;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.4 2002-03-06 16:58:48 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.5 2002-03-26 16:10:07 joram Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -118,7 +118,7 @@ public abstract class Daemon implements Runnable {
     return strbuf.toString();
   }
 
-  protected Monitor logmon = null;
+  protected Logger logmon = null;
 
   /**
    * Allocates a new Daemon object.
@@ -129,7 +129,7 @@ public abstract class Daemon implements Runnable {
     this.name = name;
 
     // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getMonitor(Debug.A3Daemon + '.' + name);
+    logmon = Debug.getLogger(Debug.A3Daemon + '.' + name);
     logmon.log(BasicLevel.DEBUG, getName() + ", created.");
 
     running = false;

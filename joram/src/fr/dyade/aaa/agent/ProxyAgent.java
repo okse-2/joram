@@ -29,13 +29,13 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.10 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.11 2002-03-26 16:08:39 joram Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;

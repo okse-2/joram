@@ -30,9 +30,9 @@ import java.net.*;
  *  <code>StreamNetwork</code> is a base implementation of <code>Network</code>
  * class for stream sockets.
  */
-abstract class StreamNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.6 2002-03-06 16:50:00 joram Exp $";
+abstract class StreamNetwork extends CausalNetwork {
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.7 2002-03-26 16:08:39 joram Exp $";
 
   /** Creates a new Network component */
   StreamNetwork() {

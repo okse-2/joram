@@ -40,7 +40,7 @@ import java.io.*;
  */
 public class SchedulerAlarm implements NotificationInputStream {
 
-public static final String RCS_VERSION="@(#)$Id: SchedulerAlarm.java,v 1.1 2002-03-06 16:52:20 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: SchedulerAlarm.java,v 1.2 2002-03-26 16:09:59 joram Exp $"; 
 
 
   /** time to sleep in milliseconds */

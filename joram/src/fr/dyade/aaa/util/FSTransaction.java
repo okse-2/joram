@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class FSTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
   private File dir = null;
 
@@ -57,7 +57,9 @@ public class FSTransaction implements Transaction {
   private Vector created = null;
   private Vector used = null;
 
-  public FSTransaction(String path) throws IOException {
+  public FSTransaction() {}
+
+  public void init(String path) throws IOException {
     phase = INIT;
 
     dir = new File(path);

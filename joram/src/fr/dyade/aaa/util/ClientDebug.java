@@ -32,11 +32,11 @@ import org.apache.log4j.Category;
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 
-import org.objectweb.monolog.wrapper.log4j.MonologMonitorFactory;
+import org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
-import org.objectweb.monolog.api.MonitorFactory;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
 
 /**
  * This class handles the debug traces produced by 
@@ -49,7 +49,7 @@ public class ClientDebug {
   public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.client.DEBUG_FILE";
   public final static String DEFAULT_DEBUG_FILE = "clientDebug.cfg";
 
-  private static MonitorFactory factory;
+  private static LoggerFactory factory;
 
   public static void init() {
     String debugDir = System.getProperty(DEBUG_DIR_PROPERTY,
@@ -78,12 +78,12 @@ public class ClientDebug {
       root.setPriority(org.apache.log4j.Priority.ERROR);
     }
 
-    // Instanciate the MonologMonitorFactory
-    factory = (MonitorFactory) new MonologMonitorFactory();
+    // Instanciate the MonologLoggerFactory
+    factory = (LoggerFactory) new MonologLoggerFactory();
   }
 
-  public static Monitor getMonitor(String topic) {
+  public static Logger getLogger(String topic) {
     if (factory == null) init();
-    return factory.getMonitor(topic);
+    return factory.getLogger(topic);
   }
 }

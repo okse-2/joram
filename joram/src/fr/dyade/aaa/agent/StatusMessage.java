@@ -5,9 +5,6 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
-
 /**
  * Message used to acknowledge transmission.
  *
@@ -16,8 +13,8 @@ import org.objectweb.monolog.api.Monitor;
  * @see fr.dyade.aaa.TransientNetworkServer
  */
 class StatusMessage implements Serializable {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.2 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.3 2002-03-26 16:08:39 joram Exp $";
 
   transient byte status;
   transient int stamp;

@@ -25,14 +25,13 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.*;
 
 public abstract class AgentDriver extends Driver {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;

@@ -38,7 +38,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class AddConditionListener extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: AddConditionListener.java,v 1.1 2002-03-06 16:52:20 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: AddConditionListener.java,v 1.2 2002-03-26 16:09:59 joram Exp $"; 
 
 
   /** condition name */

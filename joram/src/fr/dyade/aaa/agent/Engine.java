@@ -25,8 +25,8 @@ package fr.dyade.aaa.agent;
 
 import java.io.IOException;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -82,8 +82,8 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
@@ -169,7 +169,7 @@ abstract class Engine implements Runnable, MessageConsumer {
       return new TransactionEngine();
   }
 
-  protected Monitor logmon = null;
+  protected Logger logmon = null;
 
   /**
    * Initializes a new <code>Engine</code> object (can only be used by
@@ -178,9 +178,9 @@ abstract class Engine implements Runnable, MessageConsumer {
   protected Engine() {
     name = "Engine#" + AgentServer.getServerId();
 
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getMonitor(Debug.A3Engine +
-                              ".#" + AgentServer.getServerId());
+    // Get the logging monitor from current server MonologLoggerFactory
+    logmon = Debug.getLogger(Debug.A3Engine +
+                             ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, getName() + " created.");
 
     qin = new MessageQueue();
@@ -330,17 +330,17 @@ abstract class Engine implements Runnable, MessageConsumer {
                        getName() + ": " + agent + ".react(" +
                        msg.from + ", " + msg.not + ")");
 	  try {
-	    if(AgentServer.MONITOR_AGENT) {
-	      if(agent.monitored) {
-	        agent.notifyInputListeners(msg.not);
-	      }
-	    }
+// 	    if(AgentServer.MONITOR_AGENT) {
+// 	      if(agent.monitored) {
+// 	        agent.notifyInputListeners(msg.not);
+// 	      }
+// 	    }
             agent.react(msg.from, msg.not);
-	    if(AgentServer.MONITOR_AGENT) {
-	      if(agent.monitored) {
-		agent.onReactionEnd();
-	      }
-	    }
+// 	    if(AgentServer.MONITOR_AGENT) {
+// 	      if(agent.monitored) {
+// 		agent.onReactionEnd();
+// 	      }
+// 	    }
           } catch (Exception exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ": Uncaught exception during react, " +

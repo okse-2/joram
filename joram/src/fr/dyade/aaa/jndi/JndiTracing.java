@@ -23,14 +23,14 @@
  */
 package fr.dyade.aaa.jndi;
 
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>JndiTracing</code> class centralizes the log tracing for jndi.
  */
 public class JndiTracing
 {
-  public static Monitor dbg = null;
+  public static Logger dbg = null;
   private static boolean initialized = false;
 
 
@@ -39,6 +39,6 @@ public class JndiTracing
    */
   static
   {
-    dbg = fr.dyade.aaa.agent.Debug.getMonitor("fr.dyade.aaa.jndi");
+    dbg = fr.dyade.aaa.agent.Debug.getLogger("fr.dyade.aaa.jndi");
   }
 }

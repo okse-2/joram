@@ -26,8 +26,8 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -134,14 +134,14 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   public final static short NULL_ID = -1;
 
   private static short serverId;
 
-  private static Monitor logmon = null;
+  private static Logger logmon = null;
 
   public final static short getServerId() {
     return serverId;
@@ -438,7 +438,9 @@ public final class AgentServer {
     engine = Engine.newInstance(true);
     consumers[0] = engine;
     // Creates the network MessageConsumer and initialize it.
-    consumers[1] = new TransientNetworkServer();
+    
+    consumers[1] = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkServer").newInstance();
+    ((Network) consumers[1]).init("transient", -1, null);
 
     // Gets the descriptor of gateway server.
     A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(root.gateway));
@@ -500,7 +502,7 @@ public final class AgentServer {
       if (! network.domain.equals("transient")) {
 	A3CMLDomain domain = (A3CMLDomain) a3configHdl.domains.get(network.domain);
 	domain.gateway = rootid;
-	toExplore.add(domain);
+	toExplore.addElement(domain);
 
 	// Creates the corresponding MessageConsumer.
 	try {
@@ -509,7 +511,7 @@ public final class AgentServer {
 	  // is kept in consumer, don't reuse it!!
 	  short[] domainSids = new short[domain.servers.size()];
 	  for (int i=0; i<domainSids.length; i++) {
-	    domainSids[i] = ((A3CMLServer) domain.servers.get(i)).sid;
+	    domainSids[i] = ((A3CMLServer) domain.servers.elementAt(i)).sid;
 	  }
 	  consumer.init(domain.name, network.port, domainSids);
 	  consumersTempHT.put(network.domain, consumer);
@@ -528,17 +530,18 @@ public final class AgentServer {
 	  A3CMLServer server = (A3CMLServer) s.nextElement();
 	  if ((server instanceof A3CMLTServer)  &&
 	      (((A3CMLTServer) server).gateway == rootid)) {
-	    tdomain.add(server);
+	    tdomain.addElement(server);
 	  }
 	}
 	if (tdomain.size() > 0) {
 	  short[] domainSids = new short[tdomain.size()];
 	  for (int i=0; i<domainSids.length; i++) {
-	    domainSids[i] = ((A3CMLServer) tdomain.get(i)).sid;
+	    domainSids[i] = ((A3CMLServer) tdomain.elementAt(i)).sid;
 	  }
 	  // Creates a transient server's proxy and initializes it.
-	  consumersTempHT.put(network.domain,
-			new TransientNetworkProxy(network.port, domainSids));
+          TransientNetworkProxy consumer = (TransientNetworkProxy) Class.forName("fr.dyade.aaa.agent.TransientNetworkProxy").newInstance();
+          consumer.init("transient", network.port, domainSids);
+	  consumersTempHT.put(network.domain, consumer);
 	}
       }
     }
@@ -555,7 +558,8 @@ public final class AgentServer {
 
     servers = new ServerDesc[a3configHdl.maxid +1];
     while (toExplore.size() > 0) {
-      A3CMLDomain domain = (A3CMLDomain) toExplore.remove(0);
+      A3CMLDomain domain = (A3CMLDomain) toExplore.elementAt(0);
+      toExplore.removeElementAt(0);
       A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(domain.gateway));
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
@@ -584,7 +588,7 @@ public final class AgentServer {
 		  d2.gateway = server.sid;
 		else
 		  d2.gateway = server.gateway;
-		toExplore.add(d2);
+		toExplore.addElement(d2);
 	      } else if (d2 != domain) {
 		// More than one route to this domain.
 		throw new Exception("more than one route to: " + domain);
@@ -698,7 +702,7 @@ public final class AgentServer {
     String path = args[1];
 
     Debug.init(serverId);
-    logmon = Debug.getMonitor(Debug.A3Debug + ".AgentServer" +
+    logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
 
     // Read and parse the configuration file.
@@ -735,19 +739,22 @@ public final class AgentServer {
 
     try {
       if (isTransient) {
-	transaction = new SimpleTransaction(path);
+	transaction = new SimpleTransaction();
       } else {
-	String tname = getProperty("Transaction", "JTransaction");
-	if (tname.equals("NullTransaction")) {
-	  transaction = new NullTransaction(path);
-	} else if (tname.equals("FSTransaction")) {
-	  transaction = new FSTransaction(path);
-	} else if (tname.equals("ATransaction")) {
-	  transaction = new ATransaction(path);
-	} else {
-	  transaction = new JTransaction(path);
-	}
+	String tname = getProperty("Transaction",
+                                   "fr.dyade.aaa.util.JTransaction");
+        Class tclass = Class.forName(tname);
+        transaction = (Transaction) tclass.newInstance();
       }
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId +
+                 ", can't instanciate transaction manager", exc);
+      throw new Exception("Can't instanciate transaction manager");
+    }
+
+    try {
+      transaction.init(path);
     } catch (IOException exc) {
       logmon.log(BasicLevel.FATAL,
                  "AgentServer#" + serverId +

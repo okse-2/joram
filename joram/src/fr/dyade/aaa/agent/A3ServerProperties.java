@@ -38,8 +38,8 @@ import java.util.Properties;
  */
 public final class A3ServerProperties extends Notification {
 
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: A3ServerProperties.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3ServerProperties.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /**
    * The current system properties. 

@@ -27,17 +27,15 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Category;
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 
-import org.objectweb.monolog.wrapper.log4j.MonologMonitorFactory;
+import org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
-import org.objectweb.monolog.api.MonitorFactory;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
 
 /**
  * This class controls the debug traces printed to the audit file.
@@ -62,13 +60,13 @@ import org.objectweb.monolog.api.MonitorFactory;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
 
-  static MonitorFactory factory = null;
+  static LoggerFactory factory = null;
 
   /** Property name for A3 debug configuration directory */
   public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_DIR";
@@ -99,21 +97,37 @@ public final class Debug {
                                               DEFAULT_DEBUG_FILE);
 
     File debugFile = new File(debugDir, debugFileName);
+    // Instanciate the MonologLoggerFactory
+    factory = (LoggerFactory) new MonologLoggerFactory();
+
     if ((debugFile == null) ||
         (!debugFile.exists()) ||
         (!debugFile.isFile()) ||
         (debugFile.length() == 0)) {
-      BasicConfigurator.configure();
-      basic = true;
+      try {
+        ((MonologLoggerFactory) factory).configure(null);
+        basic = true;
+      } catch (Exception e) {
+        System.out.println("Unable to configure monolog wrapper");
+        System.exit(1);
+      }
     } else {
       try {
-        PropertyConfigurator.configure(debugFile.getCanonicalPath());
+        Properties prop = new Properties();
+        prop.put("log4jConfiguration", "property");
+        prop.put("log4jConfigurationFile", debugDir + "/" +  debugFileName);
+        ((MonologLoggerFactory) factory).configure(prop);
       } catch (Exception exc) {
-        BasicConfigurator.configure();
-        basic = true;
+        try {
+          ((MonologLoggerFactory)factory).configure(null);
+          basic = true;
+        } catch (Exception e) {
+          System.out.println("Unable to configure monolog wrapper");
+          System.exit(1);
+        }
       }
     }
-
+    
     Category root = Category.getRoot();
     if (basic) {
       root.setPriority(org.apache.log4j.Priority.ERROR);
@@ -128,8 +142,6 @@ public final class Debug {
       } catch (Exception exc) { }
     }
 
-    // Instanciate the MonologMonitorFactory
-    factory = (MonitorFactory) new MonologMonitorFactory();
   }
 
     // sets dynamic debug variables for other packages
@@ -194,11 +206,11 @@ public final class Debug {
   public static final String A3Daemon = A3Debug + ".Daemon";
   public static final String A3Proxy = A3Agent + ".ProxyAgent";
 
-  public static Monitor getMonitor(String topic) {
+  public static Logger getLogger(String topic) {
     if (factory == null)
       init((short) -1);
 
-    return factory.getMonitor(topic);
+    return factory.getLogger(topic);
   }
 
 //   static void dump(byte[] buf, int size) {

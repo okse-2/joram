@@ -27,8 +27,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -68,8 +68,8 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -82,7 +82,7 @@ public abstract class Agent implements Serializable {
   /** Number of agents pinned in memory. */
   static int nbFixedAgents;
 
-  static Monitor xlogmon = null;
+  static Logger xlogmon = null;
 
   /**
    * Before any agent may be used, the environment, including the hash table,
@@ -95,8 +95,8 @@ public abstract class Agent implements Serializable {
   static void init() throws Exception {
     agents = new Hashtable();
 
-    // Get the logging monitor from current server MonologMonitorFactory
-    xlogmon = Debug.getMonitor(Debug.A3Agent +
+    // Get the logging monitor from current server MonologLoggerFactory
+    xlogmon = Debug.getLogger(Debug.A3Agent +
                                ".#" + AgentServer.getServerId());
 
     // Initialize 
@@ -138,8 +138,8 @@ public abstract class Agent implements Serializable {
       factory = new AgentFactory();
       agents.put(factory.getId(), factory);
       factory.initialize(true);
-      AgentAdmin admin = new AgentAdmin();
-      factory.createAgent(admin);
+//       AgentAdmin admin = new AgentAdmin();
+//       factory.createAgent(admin);
       factory.save();
       xlogmon.log(BasicLevel.WARN,
                   "AgentServer#" + AgentServer.getServerId() +
@@ -297,7 +297,7 @@ public abstract class Agent implements Serializable {
    */
   protected transient boolean fixed;
   
-  protected transient Monitor logmon = null;
+  protected transient Logger logmon = null;
 
   /**
    * Returns default log topic for agents. Its method should be overridden
@@ -310,25 +310,25 @@ public abstract class Agent implements Serializable {
 
   private static String nullName = "";
 
-  /**
-   * If <code>true</code> the agent notifies its listeners when a
-   * monitoring event occurs.
-   */
-  transient boolean monitored = false;
+//   /**
+//    * If <code>true</code> the agent notifies its listeners when a
+//    * monitoring event occurs.
+//    */
+//   transient boolean monitored = false;
 
-  /**
-   * This transient table contains all the EventNot notifications 
-   * sent by the agent during a reaction. This table is cleared
-   * between each reaction.
-   */
-  private transient Hashtable eventNots;
+//   /**
+//    * This transient table contains all the EventNot notifications 
+//    * sent by the agent during a reaction. This table is cleared
+//    * between each reaction.
+//    */
+//   private transient Hashtable eventNots;
 
-  /**
-   * This table contains the listeners for each monitoring
-   * event type. The key is a <code>String</code> that describes the event
-   * type. The value is a <code>RoleMultiple</code>.
-   */
-  private transient Hashtable mListeners;
+//   /**
+//    * This table contains the listeners for each monitoring
+//    * event type. The key is a <code>String</code> that describes the event
+//    * type. The value is a <code>RoleMultiple</code>.
+//    */
+//   private transient Hashtable mListeners;
 
   private void writeObject(java.io.ObjectOutputStream out)
     throws IOException {
@@ -337,10 +337,10 @@ public abstract class Agent implements Serializable {
       out.writeInt(id.stamp);
       out.writeUTF(name);
       out.writeBoolean(fixed);
-      if(AgentServer.MONITOR_AGENT) {
-	  out.writeBoolean(monitored);
-	  if(monitored) out.writeObject(mListeners);
-      }      
+//       if(AgentServer.MONITOR_AGENT) {
+// 	  out.writeBoolean(monitored);
+// 	  if(monitored) out.writeObject(mListeners);
+//       }      
   }
 
   private void readObject(java.io.ObjectInputStream in)
@@ -349,10 +349,10 @@ public abstract class Agent implements Serializable {
       if ((name = in.readUTF()).equals(nullName))
 	name = nullName;
       fixed = in.readBoolean();
-      if(AgentServer.MONITOR_AGENT) {
-	  monitored = in.readBoolean();
-	  if(monitored) mListeners = (Hashtable)in.readObject();
-      }
+//       if(AgentServer.MONITOR_AGENT) {
+// 	  monitored = in.readBoolean();
+// 	  if(monitored) mListeners = (Hashtable)in.readObject();
+//       }
   }
 
   /**
@@ -487,8 +487,8 @@ public abstract class Agent implements Serializable {
       this.name = name;
     this.fixed = fixed;
     this.id = id;
-    // Get the logging monitor from current server MonologMonitorFactory
-    this.logmon = Debug.getMonitor(getLogTopic());
+    // Get the logging monitor from current server MonologLoggerFactory
+    this.logmon = Debug.getLogger(getLogTopic());
   }
 
   /**
@@ -659,8 +659,8 @@ public abstract class Agent implements Serializable {
    *	unspecialized exception
    */
   protected void initialize(boolean firstTime) throws Exception {
-    // Get the logging monitor from current server MonologMonitorFactory
-    this.logmon = Debug.getMonitor(getLogTopic());
+    // Get the logging monitor from current server MonologLoggerFactory
+    this.logmon = Debug.getLogger(getLogTopic());
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  "Agent" + id + " [" + name +
@@ -694,11 +694,11 @@ public abstract class Agent implements Serializable {
    */
   protected final void sendTo(Role role, Notification not) {
     if (role == null) return;
-    if (AgentServer.MONITOR_AGENT) {
-      if (monitored) {
-	notifyOutputListeners(role.getName(), not);
-      }
-    }
+//     if (AgentServer.MONITOR_AGENT) {
+//       if (monitored) {
+// 	notifyOutputListeners(role.getName(), not);
+//       }
+//     }
     sendTo(role.getListener(), not);
   }
  
@@ -712,11 +712,11 @@ public abstract class Agent implements Serializable {
   protected final void
   sendTo(RoleMultiple role, Notification not) {
     if (role == null) return;
-    if (AgentServer.MONITOR_AGENT) {
-      if (monitored) {
-	notifyOutputListeners(role.getName(),not);
-      }
-    }
+//     if (AgentServer.MONITOR_AGENT) {
+//       if (monitored) {
+// 	notifyOutputListeners(role.getName(),not);
+//       }
+//     }
     Enumeration to = role.getListeners();
     if (to == null)
       return;
@@ -849,10 +849,10 @@ public abstract class Agent implements Serializable {
       sendTo(from, new DupReply(newId));
     } else if (not instanceof DeleteNot) {
       delete(((DeleteNot) not).reply);
-    } else if (not instanceof SubscribeNot) {	
-	doReact(from,(SubscribeNot) not);
-    } else if (not instanceof GetStatusNot) {
-	doReact(from,(GetStatusNot) not);
+//     } else if (not instanceof SubscribeNot) {	
+// 	doReact(from,(SubscribeNot) not);
+//     } else if (not instanceof GetStatusNot) {
+// 	doReact(from,(GetStatusNot) not);
     } else if (not instanceof UnknownAgent) {
       if (AgentServer.MONITOR_AGENT) {
 	doReact((UnknownAgent) not);
@@ -890,305 +890,305 @@ public abstract class Agent implements Serializable {
     return "Agent" + id + " in memory = " + ag;
   } 
 
-  /**
-   * Fires an input event by sending an <code>InputEvent</code>
-   * to the listeners that subscribed to the event type. This method is
-   * called by the <code>Engine</code>.
-   * @param not The received notification.
-   * @see TransactionEngine#run
-   * @see TransientEngine#run
-   */
-  void notifyInputListeners(Notification not) {
-    String notifTypeName = not.getClass().getName();
-    String key = getInputEventKey(notifTypeName);
-    RoleMultiple listeners = getListeners(key);
-    if(listeners != null) {
-      Enumeration enum = listeners.getListeners();
-      while(enum.hasMoreElements()) {
-	sendEvent((AgentId)enum.nextElement(),new InputReport(not));
-      }
-    }
-  }
+//   /**
+//    * Fires an input event by sending an <code>InputEvent</code>
+//    * to the listeners that subscribed to the event type. This method is
+//    * called by the <code>Engine</code>.
+//    * @param not The received notification.
+//    * @see TransactionEngine#run
+//    * @see TransientEngine#run
+//    */
+//   void notifyInputListeners(Notification not) {
+//     String notifTypeName = not.getClass().getName();
+//     String key = getInputEventKey(notifTypeName);
+//     RoleMultiple listeners = getListeners(key);
+//     if(listeners != null) {
+//       Enumeration enum = listeners.getListeners();
+//       while(enum.hasMoreElements()) {
+// 	sendEvent((AgentId)enum.nextElement(),new InputReport(not));
+//       }
+//     }
+//   }
 
-  private void sendEvent(AgentId id,MonitoringReport report) {
-    if(eventNots == null) eventNots = new Hashtable(10);
-    // try to get the EventNot if there is already one.
-    EventNot not = (EventNot)eventNots.get(id);
-    if(not == null) {
-      not = new EventNot(name);
-      // Send the notification now in order to have a causal order.
-      // Notice that this notification is not monitored.
-      sendTo(id, not);
-      // Keep the notification if we have more events to send
-      // to the listener.
-      eventNots.put(id,not);      
-    }
-    not.events.addElement(report);
-  }
+//   private void sendEvent(AgentId id,MonitoringReport report) {
+//     if(eventNots == null) eventNots = new Hashtable(10);
+//     // try to get the EventNot if there is already one.
+//     EventNot not = (EventNot)eventNots.get(id);
+//     if(not == null) {
+//       not = new EventNot(name);
+//       // Send the notification now in order to have a causal order.
+//       // Notice that this notification is not monitored.
+//       sendTo(id, not);
+//       // Keep the notification if we have more events to send
+//       // to the listener.
+//       eventNots.put(id,not);      
+//     }
+//     not.events.addElement(report);
+//   }
 
-  /**
-   * Fires an output event by sending an <code>OutputEvent</code>
-   * to the listeners that subscribed to the event type. This method is
-   * called in the sendTo method.
-   * @param role the role name.
-   * @param not the sent notification.
-   */
-  private void notifyOutputListeners(String role,Notification not) {
-    String notifTypeName = not.getClass().getName();
-    String key = getOutputEventKey(role,notifTypeName);
-    RoleMultiple listeners = getListeners(key);
-    if(listeners != null) {
-      Enumeration enum = listeners.getListeners();
-      while(enum.hasMoreElements()) {
-	sendEvent((AgentId)enum.nextElement(),new OutputReport(role,not));
-      }
-    }
-  }
+//   /**
+//    * Fires an output event by sending an <code>OutputEvent</code>
+//    * to the listeners that subscribed to the event type. This method is
+//    * called in the sendTo method.
+//    * @param role the role name.
+//    * @param not the sent notification.
+//    */
+//   private void notifyOutputListeners(String role,Notification not) {
+//     String notifTypeName = not.getClass().getName();
+//     String key = getOutputEventKey(role,notifTypeName);
+//     RoleMultiple listeners = getListeners(key);
+//     if(listeners != null) {
+//       Enumeration enum = listeners.getListeners();
+//       while(enum.hasMoreElements()) {
+// 	sendEvent((AgentId)enum.nextElement(),new OutputReport(role,not));
+//       }
+//     }
+//   }
 
-  /**
-   * Fires a status event by sending a <code>StatusEvent</code>
-   * to the listeners that subscribed to the event type. This method is
-   * called in the specific agent code. It does nothing if the property
-   * <code>monitored</code> is set to false.
-   * @param status the name of the status attribute.
-   * @param report a monitoring report associated with the event.
-   */
-  protected final void notifyStatusListeners(String status, Serializable report) {
-    if(AgentServer.MONITOR_AGENT) {
-      if(!monitored) return;
-      String key = getStatusEventKey(status);
-      RoleMultiple listeners = getListeners(key);
-      if(listeners != null) {
-	Enumeration enum = listeners.getListeners();
-	while(enum.hasMoreElements()) {
-	  sendEvent((AgentId)enum.nextElement(),new StatusReport(status,report));
-	}
-      }
-    }
-  }
+//   /**
+//    * Fires a status event by sending a <code>StatusEvent</code>
+//    * to the listeners that subscribed to the event type. This method is
+//    * called in the specific agent code. It does nothing if the property
+//    * <code>monitored</code> is set to false.
+//    * @param status the name of the status attribute.
+//    * @param report a monitoring report associated with the event.
+//    */
+//   protected final void notifyStatusListeners(String status, Serializable report) {
+//     if(AgentServer.MONITOR_AGENT) {
+//       if(!monitored) return;
+//       String key = getStatusEventKey(status);
+//       RoleMultiple listeners = getListeners(key);
+//       if(listeners != null) {
+// 	Enumeration enum = listeners.getListeners();
+// 	while(enum.hasMoreElements()) {
+// 	  sendEvent((AgentId)enum.nextElement(),new StatusReport(status,report));
+// 	}
+//       }
+//     }
+//   }
 
-  /**
-   * Clears the EventNot table. This method is called by the 
-   * <code>Engine</code> at the end of each reaction.
-   * @see TransactionEngine#run
-   * @see TransientEngine#run
-   */
-  void onReactionEnd() {
-    if(eventNots != null) eventNots.clear();
-  }
+//   /**
+//    * Clears the EventNot table. This method is called by the 
+//    * <code>Engine</code> at the end of each reaction.
+//    * @see TransactionEngine#run
+//    * @see TransientEngine#run
+//    */
+//   void onReactionEnd() {
+//     if(eventNots != null) eventNots.clear();
+//   }
 
-  /**
-   * Creates a key for the <code>mListeners</code> table.
-   * @param notifType the type of the received notification.
-   * @return the key as a <code>String</code>.
-   */
-  private String getInputEventKey(String notifType) {
-    return "input/" + notifType;
-  }
+//   /**
+//    * Creates a key for the <code>mListeners</code> table.
+//    * @param notifType the type of the received notification.
+//    * @return the key as a <code>String</code>.
+//    */
+//   private String getInputEventKey(String notifType) {
+//     return "input/" + notifType;
+//   }
 
-  /**
-   * Creates a key for the <code>mListeners</code> table.
-   * @param role the role name.
-   * @param notifType the type of the sent notification.
-   * @return the key as a <code>String</code>.
-   */ 
-  private String getOutputEventKey(String role,String notifType) {
-    return "output/" + role + "/" + notifType;
-  }
+//   /**
+//    * Creates a key for the <code>mListeners</code> table.
+//    * @param role the role name.
+//    * @param notifType the type of the sent notification.
+//    * @return the key as a <code>String</code>.
+//    */ 
+//   private String getOutputEventKey(String role,String notifType) {
+//     return "output/" + role + "/" + notifType;
+//   }
 
-  /**
-   * Creates a key for the <code>mListeners</code> table.
-   * @param status the name of the status attribute.
-   * @return the key as a <code>String</code>.
-   */  
-  private String getStatusEventKey(String status) {
-    return "status/" + status;
-  }  
+//   /**
+//    * Creates a key for the <code>mListeners</code> table.
+//    * @param status the name of the status attribute.
+//    * @return the key as a <code>String</code>.
+//    */  
+//   private String getStatusEventKey(String status) {
+//     return "status/" + status;
+//   }  
  
-  /**
-   * Returns the property <code>monitored</code>.
-   * @return the property <code>monitored</code>.
-   */
-  public boolean isMonitored() {
-    return monitored;
-  }
+//   /**
+//    * Returns the property <code>monitored</code>.
+//    * @return the property <code>monitored</code>.
+//    */
+//   public boolean isMonitored() {
+//     return monitored;
+//   }
 
-  /**
-   * Sets the property <code>monitored</code>.
-   * If <code>true</code>, the agent notifies its 
-   * monitoring listeners when a monitoring event occurs.
-   * @param monitored indicates whether the agent works in monitoring mode
-   * or not.
-   */
-  public void setMonitored(boolean monitored) {
-    this.monitored = monitored;
-  }
+//   /**
+//    * Sets the property <code>monitored</code>.
+//    * If <code>true</code>, the agent notifies its 
+//    * monitoring listeners when a monitoring event occurs.
+//    * @param monitored indicates whether the agent works in monitoring mode
+//    * or not.
+//    */
+//   public void setMonitored(boolean monitored) {
+//     this.monitored = monitored;
+//   }
 
-  /**
-   * Dispatch the <code>SubscribeNot</code> notifications. 
-   */
-  private void doReact(AgentId from,SubscribeNot not) {
-    if(AgentServer.MONITOR_AGENT) {
-      if(not instanceof InputSubscribeNot) {        
-	doReact(from,(InputSubscribeNot)not);     
-      } else if(not instanceof OutputSubscribeNot) {
-	doReact(from,(OutputSubscribeNot)not);      
-      } else if(not instanceof StatusSubscribeNot) {
-        doReact(from,(StatusSubscribeNot)not);      
-      } else if(not.action == SubscribeNot.REMOVE) {
-        removeForAllEvents(from);
-      }
-    } else {
-      Exception exc = new IllegalStateException("The agent server " +
-						AgentServer.getServerId() + 
-						" is not monitored (AgentServer.MONITOR_AGENT=false).");
-      sendTo(from, new ExceptionNotification(getId(),not,exc));
-    }
-  }    
+//   /**
+//    * Dispatch the <code>SubscribeNot</code> notifications. 
+//    */
+//   private void doReact(AgentId from,SubscribeNot not) {
+//     if(AgentServer.MONITOR_AGENT) {
+//       if(not instanceof InputSubscribeNot) {        
+// 	doReact(from,(InputSubscribeNot)not);     
+//       } else if(not instanceof OutputSubscribeNot) {
+// 	doReact(from,(OutputSubscribeNot)not);      
+//       } else if(not instanceof StatusSubscribeNot) {
+//         doReact(from,(StatusSubscribeNot)not);      
+//       } else if(not.action == SubscribeNot.REMOVE) {
+//         removeForAllEvents(from);
+//       }
+//     } else {
+//       Exception exc = new IllegalStateException("The agent server " +
+// 						AgentServer.getServerId() + 
+// 						" is not monitored (AgentServer.MONITOR_AGENT=false).");
+//       sendTo(from, new ExceptionNotification(getId(),not,exc));
+//     }
+//   }    
 
-  private void doReact(AgentId from,InputSubscribeNot not) {    
-    String key = getInputEventKey(not.notifType);
-    subscribe(not.action,key,from);
-  }
+//   private void doReact(AgentId from,InputSubscribeNot not) {    
+//     String key = getInputEventKey(not.notifType);
+//     subscribe(not.action,key,from);
+//   }
 
-  private void doReact(AgentId from,OutputSubscribeNot not) {
-    String key = getOutputEventKey(not.roleName,not.notifType);
-    subscribe(not.action,key,from);
-  }
+//   private void doReact(AgentId from,OutputSubscribeNot not) {
+//     String key = getOutputEventKey(not.roleName,not.notifType);
+//     subscribe(not.action,key,from);
+//   }
 
-  private void doReact(AgentId from,StatusSubscribeNot not) {
-    String key = getStatusEventKey(not.statusName);
-    subscribe(not.action,key,from);
+//   private void doReact(AgentId from,StatusSubscribeNot not) {
+//     String key = getStatusEventKey(not.statusName);
+//     subscribe(not.action,key,from);
 
-    // send a first event in order to initialize the status value
-    // for the new monitoring listener.
-    Serializable status = getStatus(not.statusName);
+//     // send a first event in order to initialize the status value
+//     // for the new monitoring listener.
+//     Serializable status = getStatus(not.statusName);
     
-    // Send a status event to the listener.
-    sendEvent(from,new StatusReport(not.statusName,status));
-  }
+//     // Send a status event to the listener.
+//     sendEvent(from,new StatusReport(not.statusName,status));
+//   }
 
-  private void doReact(AgentId from,GetStatusNot not) {
-    sendTo(from, new StatusNot(new StatusReport(not.statusName,
-					       getStatus(not.statusName))));
-  }
+//   private void doReact(AgentId from,GetStatusNot not) {
+//     sendTo(from, new StatusNot(new StatusReport(not.statusName,
+// 					       getStatus(not.statusName))));
+//   }
 
-  private Serializable getStatus(String statusName) {
-    // look for the method getXxx()
-    String methName;
-    byte tmp[] = statusName.getBytes();
-    if ((tmp[0] >= 'a') && (tmp[0] <= 'z')){
-      // upcase the first letter of the attribute name.
-      tmp[0] = (byte) (tmp[0] - ('a'-'A'));      
-      methName = new String ("get" + new String(tmp));
-    } else { 
-      methName = new String ("get" + statusName);
-    }
+//   private Serializable getStatus(String statusName) {
+//     // look for the method getXxx()
+//     String methName;
+//     byte tmp[] = statusName.getBytes();
+//     if ((tmp[0] >= 'a') && (tmp[0] <= 'z')){
+//       // upcase the first letter of the attribute name.
+//       tmp[0] = (byte) (tmp[0] - ('a'-'A'));      
+//       methName = new String ("get" + new String(tmp));
+//     } else { 
+//       methName = new String ("get" + statusName);
+//     }
     
-    Class agClass = getClass();
-    try {    
-      Method setMeth = agClass.getMethod(methName,new Class[0]);
-      // Get the status value that must be Serializable.
-      Serializable report = (Serializable)setMeth.invoke(this,new Object[0]);
-      return report;
-    }  catch (Exception exc) {
-      // do nothing as the status value cannot be reached.
-      logmon.log(BasicLevel.ERROR,
-                 "Agent" + id + " [" + name +
-                 "] getStatus(" + statusName + ") raised ", exc);
-    }
-    return null;
-  }
+//     Class agClass = getClass();
+//     try {    
+//       Method setMeth = agClass.getMethod(methName,new Class[0]);
+//       // Get the status value that must be Serializable.
+//       Serializable report = (Serializable)setMeth.invoke(this,new Object[0]);
+//       return report;
+//     }  catch (Exception exc) {
+//       // do nothing as the status value cannot be reached.
+//       logmon.log(BasicLevel.ERROR,
+//                  "Agent" + id + " [" + name +
+//                  "] getStatus(" + statusName + ") raised ", exc);
+//     }
+//     return null;
+//   }
   
-  private void subscribe(int action,String key,AgentId id) {
-    switch(action) {
-    case SubscribeNot.ADD:
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "Agent" + id + " [" + name + "] add listener for " + key);
-      addListener(key,id);
-      break;
-    case SubscribeNot.REMOVE:
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "Agent" + id + " [" + name + "] remove listener for " + key);
-      removeListener(key,id);
-      break;
-    }
-  }
+//   private void subscribe(int action,String key,AgentId id) {
+//     switch(action) {
+//     case SubscribeNot.ADD:
+//       if (logmon.isLoggable(BasicLevel.DEBUG))
+//         logmon.log(BasicLevel.DEBUG,
+//                    "Agent" + id + " [" + name + "] add listener for " + key);
+//       addListener(key,id);
+//       break;
+//     case SubscribeNot.REMOVE:
+//       if (logmon.isLoggable(BasicLevel.DEBUG))
+//         logmon.log(BasicLevel.DEBUG,
+//                    "Agent" + id + " [" + name + "] remove listener for " + key);
+//       removeListener(key,id);
+//       break;
+//     }
+//   }
 
 
-  /**
-   * Encapsulates the access to the table mListeners in order to check
-   * whether it is null or not.
-   * @param key describes the event type.
-   * @return the listeners in a <code>RoleMultiple</code>.
-   */
-  private RoleMultiple getListeners(String key) {
-    if(mListeners == null) return null;
-    return (RoleMultiple)mListeners.get(key);
-  }	    
+//   /**
+//    * Encapsulates the access to the table mListeners in order to check
+//    * whether it is null or not.
+//    * @param key describes the event type.
+//    * @return the listeners in a <code>RoleMultiple</code>.
+//    */
+//   private RoleMultiple getListeners(String key) {
+//     if(mListeners == null) return null;
+//     return (RoleMultiple)mListeners.get(key);
+//   }	    
 
-  /**
-   * Adds the specified agent as a listener of the specified event type.
-   * @param key describes the event type.
-   * @param id the listener id.
-   */
-  private void addListener(String key,AgentId id) {
-    if(mListeners == null) {
-	mListeners = new Hashtable(10);
-	// The agent becomes monitored as soon as there is one 
-	// registered listener.
-	monitored = true;
-    }
-    RoleMultiple listeners = (RoleMultiple)mListeners.get(key);
-    if(listeners == null) {
-      listeners = new RoleMultiple();
-      mListeners.put(key,listeners);
-    }
-    if(!listeners.contains(id))
-	listeners.addListener(id);
-  }
+//   /**
+//    * Adds the specified agent as a listener of the specified event type.
+//    * @param key describes the event type.
+//    * @param id the listener id.
+//    */
+//   private void addListener(String key,AgentId id) {
+//     if(mListeners == null) {
+// 	mListeners = new Hashtable(10);
+// 	// The agent becomes monitored as soon as there is one 
+// 	// registered listener.
+// 	monitored = true;
+//     }
+//     RoleMultiple listeners = (RoleMultiple)mListeners.get(key);
+//     if(listeners == null) {
+//       listeners = new RoleMultiple();
+//       mListeners.put(key,listeners);
+//     }
+//     if(!listeners.contains(id))
+// 	listeners.addListener(id);
+//   }
 
-  /**
-   * Removes the specified agent as a listener of the specified event type.
-   * @param key describes the event type.
-   * @param id the listener id.
-   */
-  private void removeListener(String key,AgentId id) {
-    if(mListeners == null) return;
-    RoleMultiple listeners = (RoleMultiple)mListeners.get(key);
-    if(listeners != null) {
-      listeners.removeListener(id);
-      // If the RoleMultiple is empty, remove it from the table.
-      if(listeners.getListeners() == null) mListeners.remove(key);
-      if(mListeners.isEmpty()) {
-	monitored = false;
-	mListeners = null;
-      }
-    }
-  }
+//   /**
+//    * Removes the specified agent as a listener of the specified event type.
+//    * @param key describes the event type.
+//    * @param id the listener id.
+//    */
+//   private void removeListener(String key,AgentId id) {
+//     if(mListeners == null) return;
+//     RoleMultiple listeners = (RoleMultiple)mListeners.get(key);
+//     if(listeners != null) {
+//       listeners.removeListener(id);
+//       // If the RoleMultiple is empty, remove it from the table.
+//       if(listeners.getListeners() == null) mListeners.remove(key);
+//       if(mListeners.isEmpty()) {
+// 	monitored = false;
+// 	mListeners = null;
+//       }
+//     }
+//   }
 
-  /**
-   * Removes the specified agent for all the event type.
-   * @param id the listener id.
-   */
-  private void removeForAllEvents(AgentId id) {
-    if(mListeners == null) return;
-    Enumeration listeners = mListeners.elements();
-    Enumeration keys = mListeners.keys();
-    while(listeners.hasMoreElements()) {
-      Object key = keys.nextElement();
-      RoleMultiple rm = (RoleMultiple)listeners.nextElement();
-      rm.removeListener(id);
-      if(!rm.getListeners().hasMoreElements()) 
-	  mListeners.remove(key);
-    }
-    if(mListeners.isEmpty()) {
-      monitored = false;
-      mListeners = null;
-    }
-  }
+//   /**
+//    * Removes the specified agent for all the event type.
+//    * @param id the listener id.
+//    */
+//   private void removeForAllEvents(AgentId id) {
+//     if(mListeners == null) return;
+//     Enumeration listeners = mListeners.elements();
+//     Enumeration keys = mListeners.keys();
+//     while(listeners.hasMoreElements()) {
+//       Object key = keys.nextElement();
+//       RoleMultiple rm = (RoleMultiple)listeners.nextElement();
+//       rm.removeListener(id);
+//       if(!rm.getListeners().hasMoreElements()) 
+// 	  mListeners.remove(key);
+//     }
+//     if(mListeners.isEmpty()) {
+//       monitored = false;
+//       mListeners = null;
+//     }
+//   }
   
   /**
    * Checks that the notification responsible for the exception
@@ -1196,10 +1196,10 @@ public abstract class Agent implements Serializable {
    * removed from the listener list.
    */
   private void doReact(UnknownAgent not) {
-    if(not.not instanceof EventNot) {
-      // This means that a listener has disappeared.
-      // We have to unsubscribe it.
-      removeForAllEvents(not.agent);
-    }
+//     if(not.not instanceof EventNot) {
+//       // This means that a listener has disappeared.
+//       // We have to unsubscribe it.
+//       removeForAllEvents(not.agent);
+//     }
   }
 }

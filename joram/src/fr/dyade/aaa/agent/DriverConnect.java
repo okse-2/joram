@@ -23,8 +23,7 @@
  */
 package fr.dyade.aaa.agent;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
  * The <code>DriverConnect</code> class is used by <code>ProxyAgent</code>
