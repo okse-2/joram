@@ -72,7 +72,7 @@ public class Message implements Cloneable, Serializable
   /** The bytes body. */
   byte[] body_bytes = null;
   /** The map body. */
-  Map body_map = null;
+  HashMap body_map = null;
   /** The text body. */
   String body_text = null;
   /** <code>true</code> if the body is read-only. */
@@ -616,7 +616,7 @@ public class Message implements Cloneable, Serializable
    * @exception IOException  In case of an error while setting the map.
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setMap(Map map) throws Exception
+  public void setMap(HashMap map) throws Exception
   {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
@@ -843,7 +843,7 @@ public class Message implements Cloneable, Serializable
           ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
       }
       msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
-      msg.body_map = (Map) fieldsTb.get("body_map");
+      msg.body_map = (HashMap) fieldsTb.get("body_map");
       msg.body_text = (String) fieldsTb.get("body_text");
       msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
       msg.propertiesRO =
