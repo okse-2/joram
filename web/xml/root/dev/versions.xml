@@ -20,6 +20,7 @@
         in <code>org.objectweb.joram.client.connector.JoramAdapter</code>.
         </li>
       </ul>
+      </s2>
       <s2 name="Corrected bugs (latest: May 11, 2004)">
       <ul>
         <li>Dependency of a client class to a server class
