@@ -13,7 +13,7 @@
   <body>
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
-      the latest tagged version with small corrections and updates.</p>
+      the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications (latest: May 2003, 15th)">
       <ul>
       <li>Modification of the administration methods: they are now all

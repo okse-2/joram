@@ -12,19 +12,19 @@
 
   <body>
 
-    <s1 name="Welcome to the developers' corner!">
+    <s1 name="Getting involved">
   
     <p>JORAM, as an open source project, welcomes and even expects
-       contributions.</p>
+       <em>contributions</em>.</p>
 
     <p>Basically, any feature you need but you do not find implemented in
        JORAM may become a contribution topic. Simply send your ideas,
        documents and developments (if any) to the 
        <a href="mailto:joram-team@objectweb.org">joram team</a> .</p>
 
-    <p>You may also wish to get involved in an already undertaken work. The
-       list of hot topics is available
-       <connect href="topics.xml">there</connect> .</p>
+    <p>You may also wish to get involved in an already undertaken work. If not
+       already done, you may have a look at the 
+       <connect href="topics.xml">current developments page</connect>.</p>
 
     </s1>
 

@@ -22,10 +22,10 @@
 
     <menu>
       <legend>Developers' corner</legend>
-      <menuitem><a href="http://debian-sf.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
       <menuitem><connect href="dev/versions.xml">Releases info</connect></menuitem>
-      <menuitem><connect href="dev/contrib.xml">Getting involved</connect></menuitem>
       <menuitem><connect href="dev/topics.xml">Hot topics</connect></menuitem>
+      <menuitem><connect href="dev/contrib.xml">Getting involved</connect></menuitem>
+      <menuitem><a href="http://debian-sf.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
     </menu>
     
     <menu>
