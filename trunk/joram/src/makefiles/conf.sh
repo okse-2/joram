@@ -1,3 +1,5 @@
+# Copyright (C) 1996 - 2000 BULL
+# Copyright (C) 1996 - 2000 INRIA
 #
 # This file is intended to be executed in a bash session using the . command,
 # so that environment variables are set in the current session. Those variables
@@ -35,7 +37,7 @@ fi
 # //d notation, not the d: notation.
 # The value of this variable must be the output of the pwd command
 # executed in that directory. It is case sensitive.
-export ROOTDIR=//D/Users/
+export ROOTDIR=//d/Users/
 
 # directory for Java source files
 export SRCDIR=${ROOTDIR}/src
@@ -59,11 +61,24 @@ export GENERAL_MK=${SRCDIR}/makefiles/general.mk
 #
 
 # where java finds the language classes
-export JDKHOME=C:/java/jdk1.2.2
-export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
-# export JAVAC=C:/java/jikes/jikes
-export JAVAC="${JDKHOME}/bin/javac \
-     -bootclasspath \"${ROOTDIR}/lib/OB.jar;${JAVAPATH}\""
+export JDKHOME="C:/java/jdk1.2.2"
+export JAVAPATH="${JDKHOME}/jre/lib/rt.jar"
+export JAVAC="${JDKHOME}/bin/javac"
+export JAVADOC="${JDKHOME}/bin/javadoc"
+
+# doc use for -link option
+export JDKDOC="http://java.sun.com/products/jdk/1.2/docs/api/"
+
+# lib
+export A3PATH="${JAVAPATH}"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/a3agent.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/a3util.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/a3ip.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/a3mom.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/joram.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/xerces.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${LIBDIR}/jms.jar"
+export A3PATH="${A3PATH}${PATH_SEP}${ROOTDIR}/classes"
 
 
 #
