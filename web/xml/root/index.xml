@@ -57,17 +57,20 @@
   
       <s2 name="Specification">
 
-	<p>JORAM provides large support to <em>JMS 1.0.2b</em>.</p>
+	<p>JORAM provides full support to <em>JMS 1.0.2b</em>.</p>
 
 	<ul>
-	  <li>Point-to-Point (PTP) Model involving queues.</li>
-	  <li>Publish / Subscribe (Pub/Sub) Model involving topics.</li>
-	  <li>Message selection.</li>
-	  <li>ASF classes and methods for performing JMS operations
-	    through an application server.</li>
-	  <li>Plus a "light" <em>JNDI 1.1.2</em> implementation.</li>
+	  <li><em>Point-to-Point</em> (PTP) messaging model</li>
+	  <li></em>Publish / Subscribe</em> (Pub/Sub) messaging model</li>
+	  <li>Message selection</li>
+	  <li>Plus a distributed Topic destination</li>
+	  <li>Plus a "light" <em>JNDI 1.1.2</em> implementation</li>
 	</ul>
 	
+	<p>JORAM also implements the <em>ASF</em> interfaces and methods for performing JMS
+	  operations through an application server, and is integrated
+	  to <a href="http://www.objecweb.org/jonas">JOnAS</a> EJB
+	  platform.</p>
       </s2>
       
       <s2 name="Downloading JORAM">
