@@ -13,7 +13,7 @@
   <body>
 
     <s1 name="JORAM documentation">
-      <p>If available, the documents related to a given release will be
+      <p>If available, the documents related to a given release are
       identified by the same tag. Example, "Installing the 3.6 release" is
       what should be read for installing JORAM 3.6.</p>
       <p>It may happen that for a given release, no document matches. This means
@@ -27,6 +27,8 @@
 
     <subtitle>Installing</subtitle>
       <ul>
+        <li>Installing the <a href="../current/doc/joram3_7_INSTALL.pdf">
+        3.7 release</a>.</li>
         <li>Installing the <a href="../current/doc/joram3_6_INSTALL.pdf">
         3.6 release</a>.</li>
         <li>Installing the <a href="../current/doc/joram3_4_INSTALL.pdf">
@@ -35,6 +37,8 @@
 
     <subtitle>Administering</subtitle>
       <ul>
+        <li>Administering the <a href="../current/doc/joram3_7_ADMIN.pdf">
+        3.7 release</a>.</li>
         <li>Administering the <a href="../current/doc/joram3_6_3ADMIN.pdf">
         3.6.3 release</a>.</li>
         <li>Administering the <a href="../current/doc/joram3_6_ADMIN.pdf">
@@ -43,8 +47,14 @@
         3.4.2 release</a>.</li>
       </ul>
       <ul>
+        <li>Monitoring the <a href="../current/doc/joram3_7_MONITOR.pdf">
+        3.7 release</a>.</li>
         <li>Monitoring the <a href="../current/doc/joram3_4_2_MONITOR.pdf">
         3.4.2 release</a>.</li>
+      </ul>
+      <ul>
+        <li>Graphical administration and monitoring tool manual for the
+        <a href="../current/doc/joram3_7_GUI.pdf">3.7 release</a>.</li>
       </ul>
       <ul>
         <li>Advanced configuration tips for the
@@ -53,12 +63,12 @@
 
     <subtitle>Running the samples</subtitle>
       <ul>
+        <li>Running the <a href="../current/doc/joram3_7_SAMPLES.pdf">
+        3.7 release samples</a>.</li>
         <li>Running the <a href="../current/doc/joram3_6_SAMPLES.pdf">
         3.6 release samples</a>.</li>
         <li>Running the <a href="../current/doc/joram3_5_SAMPLES.pdf">
         3.5 release samples</a>.</li>
-        <li>Running the <a href="../current/doc/joram3_4_SAMPLES.pdf">
-        3.4 release samples</a>.</li>
       </ul>
       <ul>
         <li>Check the <a href="../current/doc/joram3_5_PERFS.pdf">performances
@@ -68,7 +78,7 @@
     <subtitle>API documentation</subtitle>
       <ul>
         <li>Browsing the <a href="../current/javadoc/joram/index.html">
-        3.6 release javadoc</a>.</li>
+        3.7 release javadoc</a>.</li>
       </ul>
     </s1>
 

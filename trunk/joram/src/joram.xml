@@ -170,7 +170,7 @@
   <!-- JAVADOC --> 
   <target name="javadoc" depends="prepare"
       description="--> Generates the Javadoc.">
-    <javadoc packagenames="fr.dyade.aaa.*"
+    <javadoc packagenames="fr.dyade.aaa.*, org.objectweb.joram.*"
       sourcepath="${src.dir}"
       classpathref="project.class.path"
       defaultexcludes="yes"

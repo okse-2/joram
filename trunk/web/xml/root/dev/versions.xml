@@ -14,7 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: October 29, 2003)">
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_7_0 (November 3, 2003)">
+      <p>This release introduces a graphical administration and monitoring
+      tool.</p>
+      <s2 name="Modifications">
       <ul>
         <li>Creation of a new sources branch: <code>org.objectweb.joram</code>,
         destinated to contain the JORAM client and MOM sources.</li>
@@ -23,14 +30,14 @@
         <code>org.objectweb.joram.client.tools.admin</code>.</li>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: November 3, 2003)">
+      <s2 name="Corrected bugs">
       <ul>
         <li>Recovery issue, found by 
         <a href="http://www.objectweb.org/wws/arc/joram/2003-10/msg00069.html">
         Dirk Muthorst</a>. When stopping a JORAM server during a PTP exchange,
-        and re-starting it, a <code>NullPointerException</code> is happening
-        from time to time. This is due to the fact that the consumer's 
-        proxy may deny twice a same message (the message currently exchanged
+        and re-starting it, a <code>NullPointerException</code> was happening
+        from time to time. This was due to the fact that the consumer's 
+        proxy would deny twice a same message (the message currently exchanged
         when the server stops), and that the queue could not handle this double
         deny. This bug is corrected, the corrected class is
         <code>fr.dyade.aaa.mom.dest.QueueImpl</code>.</li>
@@ -171,15 +178,6 @@
       algorithms. Check packages <code>fr.dyade.aaa.mom.dest</code> and
       <code>fr.dyade.aaa.mom.proxies</code>. Check also the new class
       <code>fr.dyade.aaa.mom.messages.PersistenceModule</code>.</p>
-      </s2>
-    </s1>
-    <s1 name="joram3_4_3 (June 2003, 17th)">
-      <p>This version provides a new Monolog initialization allowing a better
-      integration of Joram within Jonas.</p>
-      <s2 name="Modifications">
-      <p>Modified classes are <code>fr.dyade.aaa.agent.AgentServer</code>
-      and <code>fr.dyade.aaa.util.Debug</code>.
-      </p>
       </s2>
     </s1>
 
