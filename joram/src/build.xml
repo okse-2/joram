@@ -50,7 +50,6 @@
     <delete dir="${build.dir}"/>
     <delete dir="${ship.dir}"/>
     <delete dir="${doc.dir}"/>
-    <!-- Deletes bad files in src directory tree -->
   </target>
 
   <!-- Prepare compilation phase -->
