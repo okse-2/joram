@@ -21,7 +21,7 @@
 	pure JMS without any dependency to JORAM.</p>
       <p>All code is available from JORAM <a
 	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">cvs repository</a>. See the test suite
-	<a href="http://www.objectweb.org/joram/doc/tests/index.html">documentation</a> for more information.</p>
+	<a href="http://www.objectweb.org/joram/current/doc/tests/index.html">documentation</a> for more information.</p>
 
       <hr/>
 
