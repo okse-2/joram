@@ -1,3 +1,17 @@
++==============================================================================
+| 2005/03/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix in HttpNetwork allowing the usage of a (non HTTP 1.1) proxy.
++==============================================================================
+| 2005/03/21 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Joram client
+ - Deadlock between message listener and concurrent close.
+ - Methods getMetaData from Connection and receiveNoWait from MessageConsumer 
+   throw an IllegalStateException if a connection failure occured 
+   (e.g. TCP failure).
+ Bug fix: Admin GUI
+ - Closing the "abort dialog" aborts the running operation.
 ###############################################################################
 # 2005/03/11 | Joram 4.2.0 RC2 release.
 ###############################################################################
