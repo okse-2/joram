@@ -14,8 +14,21 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: February 20, 2004)"> 
+      <s2 name="Modifications (latest: March 16, 2004)">
       <ul>
+        <li>Submission of the new
+        <code>org/objectweb/joram/connector</code> package holding the classes
+        implementing the JCA 1.5 resource adapter for JORAM.</li>
+      </ul>
+      </s2>
+      <s2 name="Corrected bugs (latest: March 11, 2004)"> 
+      <ul>
+        <li>Blocking admin disconnection, found  by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00028.html">
+        Martin Thompson</a>. When disconnecting an administrator from a stopped
+        server, the <code>disconnect()</code> call would block and never
+        return. The bug is corrected, the updated class is
+        <code>org.objectweb.joram.client.admin.AdminModule</code>.</li>
         <li>Improper construction of the <code>mom.jar</code> library, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00102.html">
         Nigel Rantor</a>. The <code>fr.dyade.aaa.jndi2.distributed</code> 
