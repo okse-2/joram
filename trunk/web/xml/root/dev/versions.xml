@@ -28,7 +28,7 @@
       <code>org/objectweb/joram/client</code>,
       <code>org/objectweb/joram/mom</code> and
       <code>org/objectweb/joram/shared</code>. The main evolutions occured
-      in these latest packages, as well as in the 
+      in these latest packages, as well as in 
       <code>fr.dyade.aaa.agent</code> and <code>fr.dyade.aaa.jndi2</code>.</p>
       </s2>
     </s1>
