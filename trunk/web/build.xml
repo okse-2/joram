@@ -220,8 +220,10 @@
 common.html.dest=${common.html.dest}
 html.dest=${html.dest}
 cgi.dest=${cgi.dest}
+
 install.common=${install.common}
 validation.required=${validation.required}
+
 release-files=${release-files}
 
 ---- uncustomizable properties ----
