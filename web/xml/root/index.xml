@@ -15,12 +15,12 @@
     <s1 name="Recent news">
 
       <subtitle>ObjectWeb Consortium launch!</subtitle>
-      
-      <p>The <em>ObjectWeb Consortium</em> has been officially created
-      on 30 January 2002. ObjectWeb is now organised as an
-      international open consortium hosted by <a
-      href="http://www.inria.fr/index.en.html">INRIA</a>. More
-      informations to come.</p>
+
+      <p>The <em>ObjectWeb Consortium</em> has been officially created on 30
+      January 2002. ObjectWeb is now organised as an international open
+      consortium hosted by <a
+      href="http://www.inria.fr/index.en.html">INRIA</a> (<connect
+      href="doc/index.xml#annoucement">more informations</connect>).</p>
 
       <hr/>
 
@@ -52,13 +52,19 @@
       href="http://www.linuxexpoparis.com/FR/home/index.php?site=conferences_programme">Linux
       Expo program</a> in french).</p>
 
+      <p>The slides (<a href="doc/external/JOnASLinuxExpo02.pdf">pdf</a>) of the
+      presentation are now available.</p>
+
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
-   	
-      <p><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></p>
 
-      <p>Current release: 2.2</p>
+      <table border="0">
+	<tr>
+	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
+	  <td valign="middle">Current release: 2.2</td>
+	</tr>
+      </table>
       
       <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of
       <em>JMS</em> (Java Message Service API released by Sun Microsystem,
