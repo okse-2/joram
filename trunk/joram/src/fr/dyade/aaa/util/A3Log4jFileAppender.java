@@ -32,8 +32,8 @@ import fr.dyade.aaa.agent.AgentServer;
  * agent server id.
  */
 public class A3Log4jFileAppender extends FileAppender {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: A3Log4jFileAppender.java,v 1.7 2004-02-13 10:26:43 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jFileAppender.java,v 1.8 2004-03-16 10:03:45 fmaistre Exp $";
 
   /**
    * The default constructor does not do anything. 

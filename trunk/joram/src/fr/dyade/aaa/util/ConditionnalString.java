@@ -23,7 +23,7 @@ import java.util.*;
 
 public class ConditionnalString implements java.io.Serializable {
 
-  public static final String RCS_VERSION="@(#)$Id: ConditionnalString.java,v 1.6 2004-02-13 10:26:43 fmaistre Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ConditionnalString.java,v 1.7 2004-03-16 10:03:45 fmaistre Exp $";
 
   public static ConditionnalString valueOf(String s) throws Exception {
     StringTokenizer tokenizer = new StringTokenizer(s, "(),");

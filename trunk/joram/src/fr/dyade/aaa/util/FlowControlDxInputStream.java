@@ -40,7 +40,7 @@ import java.io.*;
  * @see		FlowControlDxOutputStream
  */
 public class FlowControlDxInputStream extends FilterInputStream {
-public static final String RCS_VERSION="@(#)$Id: FlowControlDxInputStream.java,v 1.10 2004-02-13 10:26:43 fmaistre Exp $";
+public static final String RCS_VERSION="@(#)$Id: FlowControlDxInputStream.java,v 1.11 2004-03-16 10:03:45 fmaistre Exp $";
 
   /** control output stream */
   FlowControlDxOutputStream control = null;

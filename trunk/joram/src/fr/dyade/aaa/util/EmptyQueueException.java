@@ -31,7 +31,7 @@ package fr.dyade.aaa.util;
  */
 public class EmptyQueueException extends RuntimeException {
 
-public static final String RCS_VERSION="@(#)$Id: EmptyQueueException.java,v 1.15 2004-02-13 10:26:43 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: EmptyQueueException.java,v 1.16 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /**
    * Constructs a new <code>EmptyQueueException</code> with no detail message.

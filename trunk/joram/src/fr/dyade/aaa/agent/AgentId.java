@@ -166,7 +166,7 @@ public final class AgentId implements Serializable {
    * A temporary string representation of object in order to improve
    * performances.
    */
-  transient String str;
+  transient String str = null;
 
   /**
    * The <code>writeObject</code> method is responsible for writing the
@@ -193,8 +193,6 @@ public final class AgentId implements Serializable {
     from = in.readShort();
     to = in.readShort();
     stamp = in.readInt();
-
-    str = "#" + from + '.' + to + '.' + stamp;
   }
  
   // ***** ***** ***** *****
@@ -326,8 +324,6 @@ public final class AgentId implements Serializable {
     this.from = from;
     this.to = to;
     this.stamp = stamp;
-
-    str = "#" + from + '.' + to + '.' + stamp;
   }
 
   /**
@@ -384,6 +380,8 @@ public final class AgentId implements Serializable {
    * @return	A string representation of this object. 
    */
   public final String toString() {
+    if (str == null) 
+      str = "#" + from + '.' + to + '.' + stamp;
     return str;
   }
 
