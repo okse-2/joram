@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -34,8 +34,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.14 2003-03-19 15:16:06 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.15 2003-05-20 11:35:34 fmaistre Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -209,7 +209,6 @@ public abstract class ProxyAgent extends Agent {
    */
   public abstract void disconnect() throws Exception;
 
-
   /**
    * Connects the streams provided by the user to this proxy agent
    * to two created drivers. The streams must be created by the
@@ -221,9 +220,18 @@ public abstract class ProxyAgent extends Agent {
    * 
    * @exception java.net.SocketException  If the server socket is being closed.
    */
-  void createDrivers() throws Exception
-  {
-    connect();
+  void createDrivers() throws Exception {
+    drvCnx.canStop = true;
+    try {
+      connect();
+    } catch (InterruptedException exc) {
+      logmon.log(BasicLevel.DEBUG, getName() + "InterruptedException");
+    } finally {
+      if (drvCnx != null)
+        drvCnx.canStop = false;
+    }
+
+    if ((drvCnx == null) || (! drvCnx.isRunning)) return;
 
     if (! multiConn) {  
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -253,7 +261,6 @@ public abstract class ProxyAgent extends Agent {
       }
     }
   }
-
 
   /**
    * Stops all drivers (non multiConn mode).
@@ -305,7 +312,6 @@ public abstract class ProxyAgent extends Agent {
     }
   }
 
-
   /** Method cleaning DriverOut. Single connection mode only. */
   public void cleanDriverOut() {
     if (! multiConn) {
@@ -313,7 +319,6 @@ public abstract class ProxyAgent extends Agent {
         drvOut.clean();
     }
   }
-
 
   /**
    * Method cleaning the <code>DriverOut</code> specified
@@ -330,41 +335,8 @@ public abstract class ProxyAgent extends Agent {
     }
   }
 
-
-  /**
-   * Finalizes this proxy agent execution. Calls <code>disconnect</code>
-   * to close the open streams, and <code>stop</code> to stop the drivers.
-   *
-   * @exception Throwable
-   *	unspecialized exception
-   */
-  protected final void finalize() throws Throwable
-  {
-    if (multiConn)
-      closeAllConnections();
-    else {
-      if (ois != null)
-        ois.close();
-      if (oos != null)
-        oos.close();
-    }
-
-    try {
-      disconnect();
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, "error in finalize", exc);
-    }
-
-    stop();
-
-    qout = null;
-    ois = null;
-    oos = null;
-  }
-
   /** Closes all the connections. */
-  protected void closeAllConnections()
-  {
+  protected void closeAllConnections() {
     Enumeration keys = driversTable.keys();
     while (keys.hasMoreElements()) {
       Integer key = (Integer) keys.nextElement();
@@ -390,7 +362,6 @@ public abstract class ProxyAgent extends Agent {
     driversTable.clear();
   }
 
-
   /** 
    * Method called by the ProxyAgent <code>DriverIn</code> instances to
    * forward the notifications they got from their input streams. 
@@ -402,8 +373,7 @@ public abstract class ProxyAgent extends Agent {
    * @param key  Driver identifier.
    * @param not  Notification to forward.
    */ 
-  protected void driverReact(int key, Notification not)
-  {
+  protected void driverReact(int key, Notification not) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "Proxy " + this + " gets not " + not 
                  + " from driver " + key);
@@ -420,8 +390,7 @@ public abstract class ProxyAgent extends Agent {
    * @exception Exception  If the driver to pass the notification to can't
    *              be retrieved from the key parameter.
    */
-  protected void sendOut(int key, Notification not) throws Exception
-  {
+  protected void sendOut(int key, Notification not) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "Proxy " + this + " gets not " + not 
                  + " to pass to driver " + key);
@@ -486,7 +455,6 @@ public abstract class ProxyAgent extends Agent {
     }
   }
 
-
   /**
    * Reacts to end of driver execution.
    * <p>
@@ -546,14 +514,39 @@ public abstract class ProxyAgent extends Agent {
   }
 
   /**
-   *
+   * Finalizes this proxy agent execution. Calls <code>disconnect</code> to
+   * close the open streams, and <code>stop</code> to stop the drivers.
    */
   public void agentFinalize() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "finalizes");
+      logmon.log(BasicLevel.DEBUG,
+                 toString() + " agentFinalize -> " + drvCnx);
 
     try {
-      finalize();
+      if (multiConn) {
+        closeAllConnections();
+      } else {
+        try {
+          ois.close();
+        } catch (Exception exc) {
+        }
+        try {
+          oos.close();
+        } catch (Exception exc) {
+        }
+      }
+
+      try {
+        disconnect();
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.WARN, "error in agentFinalize", exc);
+      }
+
+      stop();
+
+      qout = null;
+      ois = null;
+      oos = null;
     } catch (Throwable exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
       logmon.log(BasicLevel.ERROR, "error in finalize", exc);
