@@ -22,10 +22,10 @@
 # sensitive.
 
 # UNIX OS:
-#export ROOTDIR=/home/joram1_1_0
+#export ROOTDIR=/home/joram
 # WINDOWS OS:
-export ROOTDIR=//e/joram1_1_0
-export WINROOTDIR=e:/joram1_1_0
+export ROOTDIR=//e/joram
+export WINROOTDIR=e:/joram
 # where java finds the language classes.
 # UNIX OS:
 #export JDKHOME=/usr/local/jdk1.2.2
