@@ -226,7 +226,7 @@ public class TcpConnection implements fr.dyade.aaa.joram.ConnectionItf
             IllegalStateException jmsExc =
               new IllegalStateException("Could not open the connection"
                                         + " with server "
-                                        + serverAddr.toString()
+                                        + serverAddr
                                         + " on port " + serverPort
                                         + " after " + attemptsC
                                         + " attempts during "
