@@ -70,10 +70,6 @@
 		<option value="joram-3.0.0-src.tgz">JORAM 3.0.0 sources (tgz)</option>
 		<option value="joram-3.0.0-src.zip">JORAM 3.0.0 sources (zip)</option>
 
-		<option value="joram-2.2.tar.gz">JORAM 2.2 jars (tar.gz)</option>
-		<option value="joram-2.2.zip">JORAM 2.2 jars (zip)</option>
-		<option value="joram-2.2-src.tar.gz">JORAM 2.2 sources (tar.gz)</option>
-		<option value="joram-2.2-src.zip">JORAM 2.2 sources (zip)</option>
 	      </select>
 	    </td>
 	  </tr>

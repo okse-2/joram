@@ -32,17 +32,20 @@
     </s1>
 
     <s1 name="Test suite documentation" anchor="test_doc">
-      <p>The Teste Suite documentation has now its own <a
+      <p>The Test Suite has now its own <a
 	  href="../tests/doc.html">web page</a>.
       </p>
     </s1>
 
     <s1 name="Other documentation" anchor="other">
   
-      <subtitle>General documentation</subtitle>
+      <subtitle>Administration refactoring</subtitle>
 
       <ul>
-	<li>JORAM brochure (<a href="../../doc/JORAM.pdf">PDF</a>).</li>
+	<li>JORAM's administration is currently being completely
+        re-architectured.
+        A <a href="../current/doc/admin.pdf">PDF document</a>
+        is available.</li>
       </ul>
 
     </s1>
