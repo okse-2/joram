@@ -25,7 +25,7 @@ package org.objectweb.joram.mom.proxies;
 import fr.dyade.aaa.agent.AgentId;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.shared.client.ConsumerMessages;
-import org.objectweb.joram.shared.client.XASessPrepare;
+import org.objectweb.joram.shared.client.XACnxPrepare;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -47,6 +47,8 @@ class ClientContext implements java.io.Serializable
   private Vector tempDestinations;
   /** Identifiers of queues delivering messages. */
   private Hashtable deliveringQueues;
+  /** Prepared transactions objects waiting for commit. */
+  private Hashtable transactionsTable;
 
   /** <code>true</code> if the context is activated. */
   private transient boolean started;
@@ -59,9 +61,6 @@ class ClientContext implements java.io.Serializable
   private transient Vector activeSubs;
   /** Pending replies waiting for the context to be activated. */
   private transient Vector repliesBuffer;
-  /** Prepared transactions objects waiting for commit. */
-  private transient Hashtable transactionsTable;
-  
 
   /**
    * Constructs a <code>ClientContext</code> instance.
@@ -182,20 +181,32 @@ class ClientContext implements java.io.Serializable
   }
 
   /** Registers a given transaction "prepare". */
-  void registerTxPrepare(XASessPrepare prepare)
+  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception
   {
     if (transactionsTable == null)
       transactionsTable = new Hashtable();
 
-    transactionsTable.put(prepare.getId(), prepare);
+    if (! transactionsTable.containsKey(key))
+      transactionsTable.put(key, prepare);
+    else
+      throw new Exception("Prepare request already received by "
+                          + "TM for this transaction.");
   }
 
   /** Returns and deletes a given transaction "prepare". */
-  XASessPrepare getTxPrepare(String id)
+  XACnxPrepare getTxPrepare(Object key)
   {
-    XASessPrepare prepare = null;
+    XACnxPrepare prepare = null;
     if (transactionsTable != null)
-      prepare = (XASessPrepare) transactionsTable.remove(id);
+      prepare = (XACnxPrepare) transactionsTable.remove(key);
     return prepare;
+  }
+
+  /** Returns the identifiers of the prepared transactions. */
+  Enumeration getTxIds()
+  {
+    if (transactionsTable == null)
+      return new Hashtable().keys();
+    return transactionsTable.keys();
   }
 }   

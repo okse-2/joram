@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2003 Bull SA
+ * Copyright (C) 1996 - 2004 Bull SA
  * Copyright (C) 1996 - 2001 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -87,6 +87,13 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
    * <b>Value:</b> client subscription
    */
   private Hashtable subsTable;
+  /**
+   * Table holding the recovered transactions branches.
+   * <p>
+   * <b>Key:</b> transaction identifier<br>
+   * <b>Value:</b> <code>XACnxPrepare</code> instance
+   */
+  private Hashtable recoveredTransactions;
   /** The module used by the proxy's subscriptions for persisting messages. */
   private MessagePersistenceModule msgsPersistenceModule;
   /** Counter of message arrivals from topics. */ 
@@ -186,6 +193,29 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
                                   "Denies messages on queue "
                                   + destId.toString());
       }
+
+      // Saving the prepared transactions.
+      Enumeration xids = activeCtx.getTxIds();
+      Xid xid;
+      XACnxPrepare recoveredPrepare;
+      XACnxPrepare prepare;
+      while (xids.hasMoreElements()) {
+        if (recoveredTransactions == null)
+          recoveredTransactions = new Hashtable();
+
+        xid = (Xid) xids.nextElement();
+
+        recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
+        prepare = activeCtx.getTxPrepare(xid);
+
+        if (recoveredPrepare == null)
+          recoveredTransactions.put(xid, prepare);
+        else {
+          recoveredPrepare.getSendings().addAll(prepare.getSendings());
+          recoveredPrepare.getAcks().addAll(prepare.getAcks());
+        }
+      }
+
       // Deleting the temporary destinations:
       for (Enumeration tempDests = activeCtx.getTempDestinations();
            tempDests.hasMoreElements();) {
@@ -462,9 +492,10 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
    * <li><code>SessAckRequest</code></li>
    * <li><code>SessDenyRequest</code></li>
    * <li><code>TempDestDeleteRequest</code></li>
-   * <li><code>XASessPrepare</code></li>
-   * <li><code>XASessCommit</code></li>
-   * <li><code>XASessRollback</code></li>
+   * <li><code>XACnxPrepare</code></li>
+   * <li><code>XACnxCommit</code></li>
+   * <li><code>XACnxRollback</code></li>
+   * <li><code>XACnxRecoverRequest</code></li>
    * </ul>
    * <p>
    * A <code>JmsExceptReply</code> is sent back to the client when an
@@ -512,12 +543,14 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
         doReact((SessDenyRequest) request);
       else if (request instanceof TempDestDeleteRequest)
         doReact((TempDestDeleteRequest) request);
-      else if (request instanceof XASessPrepare)
-        doReact((XASessPrepare) request);
-      else if (request instanceof XASessCommit)
-        doReact((XASessCommit) request);
-      else if (request instanceof XASessRollback)
-        doReact((XASessRollback) request);
+      else if (request instanceof XACnxPrepare)
+        doReact((XACnxPrepare) request);
+      else if (request instanceof XACnxCommit)
+        doReact((XACnxCommit) request);
+      else if (request instanceof XACnxRollback)
+        doReact((XACnxRollback) request);
+      else if (request instanceof XACnxRecoverRequest)
+        doReact((XACnxRecoverRequest) request);
       else if (request instanceof CnxCloseRequest)
         doReact(key, (CnxCloseRequest) request);
     }
@@ -1103,26 +1136,42 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XASessPrepare</code> request holding messages and acknowledgements
+   * <code>XACnxPrepare</code> request holding messages and acknowledgements
    * produced in an XA transaction.
+   *
+   * @exception RequestException  If the proxy has already received a prepare
+   *                              order for the same transaction.
    */
-  private void doReact(XASessPrepare req)
+  private void doReact(XACnxPrepare req) throws RequestException
   {
-    activeCtx.registerTxPrepare(req);
-    doReply(new ServerReply(req));
+    try {
+      Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
+      activeCtx.registerTxPrepare(xid, req);
+      doReply(new ServerReply(req));
+    }
+    catch (Exception exc) {
+      throw new RequestException(exc.getMessage());
+    }
   }
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XASessCommit</code> request commiting the operations performed
+   * <code>XACnxCommit</code> request commiting the operations performed
    * in a given transaction.
    * <p>
    * This method actually processes the objects sent at the prepare phase,
    * and acknowledges the request.
+   * 
+   * @exception RequestException  If commiting an unknown transaction.
    */
-  private void doReact(XASessCommit req)
+  private void doReact(XACnxCommit req) throws RequestException
   {
-    XASessPrepare prepare = activeCtx.getTxPrepare(req.getId());
+    Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
+
+    XACnxPrepare prepare = activeCtx.getTxPrepare(xid);
+
+    if (prepare == null)
+      throw new RequestException("Unknown transaction identifier.");
 
     Vector sendings = prepare.getSendings();
     Vector acks = prepare.getAcks();
@@ -1145,12 +1194,12 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XASessRollback</code> request rolling back the operations performed
+   * <code>XACnxRollback</code> request rolling back the operations performed
    * in a given transaction.
    */
-  private void doReact(XASessRollback req)
+  private void doReact(XACnxRollback req)
   {
-    String id = req.getId();
+    Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
 
     String queueName;
     AgentId qId;
@@ -1180,7 +1229,8 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
       }
     }
 
-    XASessPrepare prepare = (XASessPrepare) activeCtx.getTxPrepare(id);
+   XACnxPrepare prepare = activeCtx.getTxPrepare(xid);
+
     if (prepare != null) {
       Vector acks = prepare.getAcks();
 
@@ -1198,7 +1248,44 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
                        new SyncReply(activeCtxId, new ServerReply(req)));
   }
 
-  
+  /**
+   * Reacts to a <code>XACnxRecoverRequest</code> request requesting the 
+   * identifiers of the prepared transactions.
+   * <p>
+   * Returns the identifiers of the recovered transactions, puts the prepared
+   * data into the active context for future commit or rollback.
+   *
+   * @exception RequestException  If a recovered transaction branch is already
+   *                              present in the context.
+   */
+  private void doReact(XACnxRecoverRequest req) throws RequestException
+  {
+    Vector bqs = new Vector();
+    Vector fis = new Vector();
+    Vector gtis = new Vector();
+    if (recoveredTransactions != null) {
+      Enumeration keys = recoveredTransactions.keys();
+      Xid xid;
+      while (keys.hasMoreElements()) {
+        xid = (Xid) recoveredTransactions.get(keys.nextElement());
+        bqs.add(xid.bq);
+        fis.add(new Integer(xid.fi));
+        gtis.add(xid.gti);
+        try {
+          activeCtx.registerTxPrepare(xid,
+                                      (XACnxPrepare)
+                                      recoveredTransactions.remove(xid));
+        }
+        catch (Exception exc) {
+          throw new RequestException("Recovered transaction branch has already"
+                                     + " been prepared by the RM.");
+        }
+      }
+    }
+    recoveredTransactions = null;
+    doReply(new XACnxRecoverReply(req, bqs, fis, gtis));
+  }
+
   /**
    * Method implementing the reaction to a <code>SetDMQRequest</code>
    * instance setting the dead message queue identifier for this proxy
@@ -1692,6 +1779,28 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
           MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
                                   + " destination " + destId.toString());
       }
+
+      // Saving the prepared transactions.
+      Enumeration xids = activeCtx.getTxIds();
+      Xid xid;
+      XACnxPrepare recoveredPrepare;
+      XACnxPrepare prepare;
+      while (xids.hasMoreElements()) {
+        if (recoveredTransactions == null)
+          recoveredTransactions = new Hashtable();
+
+        xid = (Xid) xids.nextElement();
+
+        recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
+        prepare = activeCtx.getTxPrepare(xid);
+
+        if (recoveredPrepare == null)
+          recoveredTransactions.put(xid, prepare);
+        else {
+          recoveredPrepare.getSendings().addAll(prepare.getSendings());
+          recoveredPrepare.getAcks().addAll(prepare.getAcks());
+        }
+      }
      
       // Finally, deleting the context: 
       contexts.remove(new Integer(key));
@@ -1854,4 +1963,40 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
   public AgentId getId() {
     return proxyAgent.getAgentId();
   }
-} 
+}
+
+/**
+ * The <code>Xid</code> internal class is a utility class representing
+ * a global transaction identifier.
+ */
+class Xid
+{
+  byte[] bq;
+  int fi;
+  byte[] gti;
+
+
+  Xid(byte[] bq, int fi, byte[] gti)
+  {
+    this.bq = bq;
+    this.fi = fi;
+    this.gti = gti;
+  }
+  
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof Xid))
+      return false;
+
+    Xid other = (Xid) o;
+
+    return java.util.Arrays.equals(bq, other.bq)
+           && fi == other.fi
+           && java.util.Arrays.equals(gti, other.gti);
+  }
+
+  public int hashCode()
+  {
+    return (new String(bq) + "-" + new String(gti)).hashCode();
+  }
+}
