@@ -33,7 +33,7 @@ import javax.naming.* ;
  * Test the headers of a message
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageHeaderTest.java,v 1.3 2002-04-02 12:12:36 joram Exp $
+ * @version $Id: MessageHeaderTest.java,v 1.4 2002-04-08 08:48:40 joram Exp $
  */
 public class MessageHeaderTest extends PTPTestCase {
 
@@ -181,12 +181,12 @@ public class MessageHeaderTest extends PTPTestCase {
 		       message.getJMSDestination() != anotherQueue);
 	    assertEquals("§3.4.1 After completion of the send it holds the destination object specified " +
 			 "by the sending method.\n",
-			 receiverQueue, message.getJMSDestination());
+			 senderQueue, message.getJMSDestination());
 
 	    Message msg = receiver.receive();
 	    assertEquals("§3.4.1 When a message is received, its destination value must be equivalent  " +
 			 " to the value assigned when it was sent.\n",
-			 message.getJMSDestination(), msg.getJMSDestination());
+			 ((Queue)message.getJMSDestination()).getQueueName(), ((Queue)msg.getJMSDestination()).getQueueName());
 
 	    admin.deleteQueue("anotherQueue");
 	} catch (JMSException e) {
@@ -213,7 +213,7 @@ public class MessageHeaderTest extends PTPTestCase {
 		       dest instanceof Queue);
 	    Queue replyTo = (Queue) dest;
 	    assertEquals("JMS ReplyTo header field should be equals to the sender queue",
-			 replyTo, senderQueue);
+			 ((Queue)replyTo).getQueueName(), ((Queue)senderQueue).getQueueName());
 	} catch (JMSException e) {
 	    fail(e);
 	}
@@ -237,7 +237,7 @@ public class MessageHeaderTest extends PTPTestCase {
 		       dest instanceof TemporaryQueue);
 	    Queue replyTo = (Queue) dest;
 	    assertEquals("JMS ReplyTo header field should be equals to the temporary queue",
-			 replyTo, tempQueue);
+			 ((Queue)replyTo).getQueueName(), ((Queue)tempQueue).getQueueName());
 	} catch (JMSException e) {
 	    fail(e);
 	}
