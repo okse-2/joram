@@ -58,6 +58,7 @@
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
+      <s2 name="More than 13,000 standalone downloads">
 
       <table border="0">
 	<tr>
@@ -75,6 +76,7 @@
       href="http://www.scalagent.com/">ScalAgent</a> agents based
       distributed platform. JORAM is a <em>free</em>, <em>open
       source</em> initiative.</p>
+      </s2>
 
       <s2 name="Specification">
 
