@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,7 +24,7 @@ import java.io.*;
 import java.util.*;
 
 public final class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.14 2003-09-11 09:54:24 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.15 2003-09-12 08:05:50 afreyssin Exp $"; 
 
   private File dir = null;
 
@@ -32,8 +33,21 @@ public final class SimpleTransaction implements Transaction {
   public void init(String path) throws IOException {
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
-    if (!dir.isDirectory()) {
-      // TODO: Error
+    if (!dir.isDirectory())
+      throw new FileNotFoundException(path + " is not a directory.");
+
+    // Saves the transaction classname in order to prevent use of a
+    // different one after restart (see AgentServer.init).
+    DataOutputStream dos = null;
+    try {
+      File tfc = new File(dir, "TFC");
+      if (! tfc.exists()) {
+        dos = new DataOutputStream(new FileOutputStream(tfc));
+        dos.writeUTF(getClass().getName());
+        dos.flush();
+      }
+    } finally {
+      if (dos != null) dos.close();
     }
   }
 

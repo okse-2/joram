@@ -802,6 +802,11 @@ public final class AgentServer {
     return 2;
   }
 
+  private static void reset() {
+    transaction = null;
+    a3config = null;
+  }
+
  /**
    * Initializes this agent server.
    * <code>start</code> function is then called to start this agent server
@@ -820,9 +825,6 @@ public final class AgentServer {
   public static void init(short sid,
                           String path,
                           LoggerFactory loggerFactory) throws Exception {
-    serverId = sid; 
-    if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
-
     synchronized(status) {
       if ((status.value != Status.INSTALLED) &&
           (status.value != Status.STOPPED))
@@ -830,8 +832,18 @@ public final class AgentServer {
       status.value = Status.INITIALIZING;
     }
 
+    serverId = sid; 
+
+    if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
     logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", init()", new Exception());
+    else
+      logmon.log(BasicLevel.WARN, getName() + ", init()");
+
+    reset();
 
     tgroup = new ThreadGroup(getName()) {
       public void uncaughtException(Thread t, Throwable e) {
@@ -880,7 +892,6 @@ public final class AgentServer {
     // object, then the configure method really initializes the server.
     // There are two steps because the configuration step needs the transaction
     // components to be initialized.
-
     if (transaction != null) {
       // Try to read the serialiazed configuration (trough transaction)
       try {
@@ -942,7 +953,6 @@ public final class AgentServer {
 
     if (transaction == null) {
       boolean isTransient = false;
-      DataOutputStream dos = null;
       try {
         String tname = null;
         if (a3config.isTransient(serverId))
@@ -951,22 +961,10 @@ public final class AgentServer {
           tname = getProperty("Transaction", "fr.dyade.aaa.util.ATransaction");
         Class tclass = Class.forName(tname);
         transaction = (Transaction) Class.forName(tname).newInstance();
-        dir = new File(path);
-        if (!dir.exists()) dir.mkdir();
-        if (!dir.isDirectory())
-          throw new FileNotFoundException(path + " is not a directory.");
-        File tfc = new File(dir, "TFC");
-        if (tfc.exists())
-          throw new Exception();
-        dos = new DataOutputStream(new FileOutputStream(tfc));
-        dos.writeUTF(tname);
-        dos.flush();
       } catch (Exception exc) {
         logmon.log(BasicLevel.FATAL,
                    getName() + ", can't instanciate transaction manager", exc);
         throw new Exception("Can't instanciate transaction manager");
-      } finally {
-        if (dos != null) dos.close();
       }
 
       try {
@@ -1138,7 +1136,8 @@ public final class AgentServer {
       logmon.log(BasicLevel.WARN, getName() + ", start()");
 
     synchronized(status) {
-      if (status.value != Status.INITIALIZED)
+      if ((status.value != Status.INITIALIZED) &&
+          (status.value != Status.STOPPED))
         throw new Exception("cannot start, bad status: " + status.value);
       status.value = Status.STARTING;
     }

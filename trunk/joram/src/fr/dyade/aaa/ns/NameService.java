@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -91,11 +91,6 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  * @see		SimpleReport
  */
 public class NameService extends Agent {
-  public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.11 2003-09-11 09:54:12 fmaistre Exp $";
-
-  /** initializes service only once */
-  private static boolean initialized = false;
-
   /**
    * Name of default name service, if any.
    * <p>
@@ -120,9 +115,6 @@ public class NameService extends Agent {
    *	unspecialized exception
    */
   public static void init(String args, boolean firstTime) throws Exception {
-    if (initialized) return;
-    initialized = true;
-
     if (! firstTime) return;
 
     NameService nameService = new NameService();
