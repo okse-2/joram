@@ -6,6 +6,7 @@
 
   <!-- uncustomizable properties -->
   <property name="common_web.archive" value="common_web.zip" />
+  <property name="lib.dir" value="${basedir}/lib" />
   <property name="xml.dir" value="${basedir}/xml" />
   <property name="html.src" value="${basedir}/html" />
   <property name="cgi.src" value="${basedir}/cgi-bin" />
@@ -24,7 +25,7 @@
 
   <!-- classpath -->
   <path id="externals.classpath">
-    <fileset dir="${common.dir}/lib">
+    <fileset dir="${lib.dir}">
       <include name="**/*.jar"/>
     </fileset>
   </path>
@@ -228,6 +229,7 @@ release-files=${release-files}
 
 ---- uncustomizable properties ----
 common_web.archive=${common_web.archive}
+lib.dir=${lib.dir}
 xml.dir=${xml.dir}
 html.src=${html.src}
 cgi.src=${cgi.src}
