@@ -3,43 +3,41 @@
 <!DOCTYPE project SYSTEM '../../../common/dtd/project.dtd'>
 
 <project>
-
   <title>JORAM</title>
 
   <description>JORAM (Java Open Reliable Asynchronous Messaging) is an open source implementation of the JMS (Java Message Service) API.</description>
 
   <keywords>JORAM,Java,Open,Reliable,Asynchronous,Messaging,JMS,Java,Message,Service,message,oriented,middleware,MOM,agent,Agents,Anytime,Anywhere,AAA,platform,ScalAgent,open,source,free,software,LGPL</keywords>
 
-  <body>
+  <body>    
+    <menu>
+      <connect href="index.xml">JORAM</connect>
+      <menuitem><connect href="download/index.xml">Download</connect></menuitem>
+      <menuitem><connect href="doc/index.xml">Documentation</connect></menuitem>
+      <menuitem><connect href="license.xml">License</connect></menuitem>
+      <menuitem><connect href="history.xml">History</connect></menuitem>
+    </menu>
+
+    <menu>
+      <connect href="tests/index.xml">Test Suite</connect>
+      <menuitem><connect href="tests/doc.xml">Documentation</connect></menuitem>
+      <menuitem><connect href="tests/download.xml">Download</connect></menuitem>
+      <menuitem><a href="current/javadoc/tests/index.html">Javadoc</a></menuitem>
+      <menuitem><connect href="tests/license.xml">License</connect></menuitem>
+    </menu>
     
-    <menu name="JORAM">
-      <connect href="index.xml">Home page</connect>
-      <connect href="download/index.xml">Download</connect>
-      <connect href="doc/index.xml">Documentation</connect>
-      <connect href="license.xml">License</connect>
-      <connect href="history.xml">History</connect>
+    <menu>
+      <legend>Resources</legend>
+      <menuitem><a href="http://www.objectweb.org/faq">FAQ</a></menuitem>
+      <menuitem><a href="http://www.objectweb.org/wws">Mailing Lists</a></menuitem>
+      <menuitem><connect href="../resources/search.xml">Search</connect></menuitem>
+      <menuitem><connect href="../resources/cvs.xml">CVS Repositories</connect></menuitem>
     </menu>
 
-    <menu name="Test Suite">
-      <connect href="tests/index.xml">Home page</connect>
-      <connect href="tests/doc.xml">Documentation</connect>
-      <connect href="tests/download.xml">Download</connect>
-      <a href="current/javadoc/tests/index.html">Javadoc</a>
-      <connect href="tests/license.xml">License</connect>
+    <menu>
+      <legend>Misc</legend>
+      <menuitem><a href="mailto:joram-team@objectweb.org">Contacts</a></menuitem>
+      <menuitem><connect href="team.xml">Team</connect></menuitem>
     </menu>
-    
-    <menu name="Resources">
-        <a href="http://www.objectweb.org/faq">FAQ</a>
-        <a href="http://www.objectweb.org/wws">Mailing Lists</a>
-        <connect href="../resources/search.xml">Search</connect>
-        <connect href="../resources/cvs.xml">CVS Repositories</connect>
-<!--        <connect href="../resources/bugs.xml">Bug database</connect> -->
-    </menu>
-
-    <menu name="Misc">
-      <a href="mailto:joram-team@objectweb.org">Contacts</a>
-      <connect href="team.xml">Team</connect>
-    </menu>
-
   </body>
 </project>
