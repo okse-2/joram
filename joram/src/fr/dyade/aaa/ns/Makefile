@@ -33,7 +33,9 @@ a3ns.jar_CLASSES = NameService \
 	LookupCommand \
 	LookupObject \
 	LookupReport \
-	LookupReportObject
+	LookupReportObject \
+	ListObject \
+	ListReportObject
 
 LIBS = a3util.jar:a3agent.jar
 
