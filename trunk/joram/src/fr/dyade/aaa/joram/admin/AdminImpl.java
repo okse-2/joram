@@ -201,13 +201,13 @@ public class AdminImpl implements AdminItf
    * The method never returns if the server is not part of the platform.
    *
    * @param serverId  Identifier of the server to stop.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Not thrown.
    */
-  public void stopServer(int serverId) throws ConnectException, AdminException
+  public void stopServer(int serverId)
   {
-    doRequest(new StopServerRequest(serverId));
+    try {
+      doRequest(new StopServerRequest(serverId));
+    }
+    catch (Exception exc) {}
   }
  
   /**
