@@ -102,6 +102,16 @@
       container such as Apache's <a href="http://jakarta.apache.org/tomcat/">
       Tomcat</a>.</p>
       </s2>
+      <s2 name="Corrected bug">
+      <ul>
+      <li><code>NullPointerException</code> occuring from time to time in
+          the server's side proxy of a subscriber, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2003-04/msg00019.html">
+          Laura Foster</a>. This bug occured when removing expired messages
+          delivered by a topic.
+      </li>
+      </ul>
+      </s2>
     </s1>
 
     <s1 name="joram3_3_1"> 
