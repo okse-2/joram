@@ -38,27 +38,28 @@ public class KProducer extends MIDlet {
 
     try {
       SoapNamingContext ictx = new SoapNamingContext("X.X.X.X",8080);
-      ConnectionFactory cf =  
-        new com.scalagent.kjoram.ksoap.SoapConnectionFactory("X.X.X.X", 8080, 36800);
+      ConnectionFactory cf = 
+        new com.scalagent.kjoram.ksoap.SoapConnectionFactory(
+          "X.X.X.X", 8080, 360000);
       Queue queue = (Queue) ictx.lookup("queue");
       Topic topic = (Topic) ictx.lookup("topic");
-
-    com.scalagent.kjoram.Connection cnx = cf.createConnection();
-    //Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    Session sess = cnx.createSession(true, 0);
-
-    MessageProducer producer = sess.createProducer(null);
-
-    TextMessage msg = sess.createTextMessage();
-
-    for (int i = 1; i < 2; i++) {
-      msg.setText("kJORAM test " + i);
-      producer.send(queue, msg);
-      producer.send(topic, msg);
-    }
-
-    sess.commit();
-    cnx.close();
+      
+      com.scalagent.kjoram.Connection cnx = cf.createConnection();
+      //Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Session sess = cnx.createSession(true, 0);
+      
+      MessageProducer producer = sess.createProducer(null);
+      
+      TextMessage msg = sess.createTextMessage();
+      
+      for (int i = 1; i < 2; i++) {
+        msg.setText("kJORAM test " + i);
+        producer.send(queue, msg);
+        producer.send(topic, msg);
+      }
+      
+      sess.commit();
+      cnx.close();
     } catch (Exception exc) {
       System.out.println("////////// EXCEPTION " + exc);
     }
