@@ -25,6 +25,16 @@
         </ul>
       </ul>
       </s2>
+      <s2 name="Corrected bugs (latest: October 6th, 2003)">
+      <ul>
+        <li>Impossible to bind <code>TopicSoapConnectionFactory</code> objects
+        when using JORAM JNDI through the SOAP protocol, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-10/msg00003.html">
+        Sabrina Tardelli</a>. The bug is corrected, the impacted classes are
+        <code>fr.dyade.aaa.joram.soap.TopicSoapConnectionFactory</code> and
+        <code>fr.dyade.aaa.joram.soap.QueueSoapConnectionFactory</code>.</li>
+      </ul>
+      </s2>
     </s1>
     <s1 name="joram3_6_2 (September 22, 2003)">
       <p>This release is integrated into JOnAS 3.3.</p>
