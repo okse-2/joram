@@ -28,7 +28,7 @@
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <!-- include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/ -->
       <include name="fr/dyade/aaa/agent/management/*.java"/>
-      <!-- include name="com/scalagent/jmx/*.java"/ -->
+      <include name="com/scalagent/jmx/*.java"/>
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
