@@ -18,6 +18,15 @@
       <p>None, so far...</p>
       </s2>
     </s1>
+    <s1 name="joram3_4_3 (June 2003, 17th)">
+      <p>This version provides a new Monolog initialization allowing a better
+      integration of Joram within Jonas.</p>
+      <s2 name="Modifications">
+      <p>Modified classes are <code>fr.dyade.aaa.agent.AgentServer</code>
+      and <code>fr.dyade.aaa.util.Debug</code>.
+      </p>
+      </s2>
+    </s1>
     <s1 name="joram3_4_2 (May 2003, 28th)">
       <p>Compared with the 3_4_1 release, this version introduces monitoring 
       methods and corrects bugs as described below.</p>
