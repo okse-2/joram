@@ -6,13 +6,13 @@ then
   exit 1
 fi
 
-if [ -n $2 ]
+if [ ! -z $2 ]
 then
   echo "!! Too many arguments !!"
   exit 1
 fi
 
-echo == Launching the $1 client ==
+echo "== Launching the $1 client =="
 
 . setHome.sh
 
