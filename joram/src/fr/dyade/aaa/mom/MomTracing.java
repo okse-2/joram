@@ -24,8 +24,8 @@
  */
 package fr.dyade.aaa.mom;
 
+import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
-import org.objectweb.monolog.api.Monitor;
 
 /**
  * The <code>MomTracing</code> class centralizes the log tracing for the MOM.
@@ -36,13 +36,13 @@ public class MomTracing
    * Logger used to trace destinations activity, to be set using topic
    * fr.dyade.aaa.mom.Destination
    */
-  public static Monitor dbgDestination = null;
+  public static Logger dbgDestination = null;
 
   /**
    * Logger used to trace proxies activity, to be set using topic
    * fr.dyade.aaa.mom.Proxy
    */
-  public static Monitor dbgProxy = null;
+  public static Logger dbgProxy = null;
 
   /**
    * <code>true</code> when <code>init</code> has been called.
@@ -55,7 +55,7 @@ public class MomTracing
    */
   static
   {
-    dbgDestination = Debug.getMonitor("fr.dyade.aaa.mom.Destination");
-    dbgProxy = Debug.getMonitor("fr.dyade.aaa.mom.Proxy");
+    dbgDestination = Debug.getLogger("fr.dyade.aaa.mom.Destination");
+    dbgProxy = Debug.getLogger("fr.dyade.aaa.mom.Proxy");
   }
 }
