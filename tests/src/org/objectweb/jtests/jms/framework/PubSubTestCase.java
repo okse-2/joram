@@ -41,7 +41,7 @@ import javax.jms.*;
  * <code>JMSTestCase</code>.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: PubSubTestCase.java,v 1.2 2002-03-20 10:37:14 joram Exp $
+ * @version $Id: PubSubTestCase.java,v 1.3 2002-04-08 08:47:16 joram Exp $
  */
 public class PubSubTestCase extends JMSTestCase {
 
@@ -121,12 +121,18 @@ public class PubSubTestCase extends JMSTestCase {
 	    publisherTCF = (TopicConnectionFactory)ctx.lookup(TCF_NAME);
 	    publisherTopic = (Topic)ctx.lookup(TOPIC_NAME);
 	    publisherConnection = publisherTCF.createTopicConnection();
+	    if (publisherConnection.getClientID() == null) {
+		publisherConnection.setClientID("publisherConnection");
+	    }
 	    publisherSession = publisherConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 	    publisher = publisherSession.createPublisher(publisherTopic);
 
 	    subscriberTCF = (TopicConnectionFactory)ctx.lookup(TCF_NAME);
 	    subscriberTopic = (Topic)ctx.lookup(TOPIC_NAME);
 	    subscriberConnection = subscriberTCF.createTopicConnection();
+	    if (subscriberConnection.getClientID() == null) {
+		subscriberConnection.setClientID("subscriberConnection");
+	    }
 	    subscriberSession = subscriberConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 	    subscriber = subscriberSession.createSubscriber(subscriberTopic);
 	    
