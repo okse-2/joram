@@ -126,14 +126,15 @@ a3mom.jar_CLASSES = \
 	RecoverObject\
 	RecoverTopic\
 	NotificationRecover\
-	XACommonClientAAA\
-	XARollbackTopicMOMExtern\
-	XARollbackQueueMOMExtern\
-	XAAgentClient\
-	NotificationXARollback\
-	XAQueue\
-	XATopic
+	MessageXAPrepare \
+	MessageXACommit \
+	MessageXARollback \
+	MessageXARecover \
+	MessageAckXAPrepare \
+	MessageAckXACommit \
+	MessageAckXARollback \
+	MessageAckXARecover
 
-LIBS = a3util.jar:a3agent.jar:a3ip.jar:jms.jar:joram.jar
+LIBS = a3util.jar:a3agent.jar:a3ip.jar:jms.jar:joram.jar:jta-spec1_0_1.jar
 
 include $(GENERAL_MK)

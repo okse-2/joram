@@ -22,24 +22,22 @@
  * All Rights Reserved.
  */
 
+package fr.dyade.aaa.mom;
 
-package fr.dyade.aaa.mom; 
- 
-import java.lang.*; 
- 
-/** 
- *	NotificationXARollback is the notification to specify to a Queue
- *	that a rollback was done by a client
- */ 
- 
-public class NotificationXARollback extends fr.dyade.aaa.mom.NotificationMOMRequest { 
-	 
-	/** identifier of a message sent by a Queue */ 
-	public java.lang.String messageID = null;  
-	 
-	public NotificationXARollback(long notMOMID, java.lang.String messageID) {
-		super(notMOMID);
-		this.messageID = messageID;
-	} 
- 
-}
+/**
+ * MessageAckXACommit.java
+ *
+ *
+ * Created: Mon Jun 26 10:53:49 2000
+ *
+ * @author Laurent Chauvirey
+ * @version 1.0
+ */
+
+public class MessageAckXACommit extends MessageMOMExtern {
+    
+    public MessageAckXACommit(long requestID) {
+	super(requestID);
+    }
+    
+} // MessageAckXACommit

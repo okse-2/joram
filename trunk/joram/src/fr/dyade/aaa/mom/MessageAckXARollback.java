@@ -22,28 +22,22 @@
  * All Rights Reserved.
  */
 
+package fr.dyade.aaa.mom;
 
-package fr.dyade.aaa.mom; 
- 
-/** 
- *	an XARollbackQueueMOMExtern allows a client to rollback a set
- *	of messages from a Queue
- * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
- */ 
- 
-public class XARollbackQueueMOMExtern extends MessageMOMExtern { 
-	
-	/** identifier of a message sent by a Queue */ 
-	protected java.lang.String sessionID = null;  
-	
-	/** the queue where was sent the message */
-	protected fr.dyade.aaa.mom.QueueNaming[] tabQueue;
-	
-	public XARollbackQueueMOMExtern(long requestID, java.lang.String sessionID, fr.dyade.aaa.mom.QueueNaming[] tabQueue) {
-		super(requestID);
-		this.sessionID = sessionID;
-		this.tabQueue = tabQueue;
-	}
-	
-}
+/**
+ * MessageAckXARollback.java
+ *
+ *
+ * Created: Thu Jun 29 13:25:04 2000
+ *
+ * @author Laurent Chauvirey
+ * @version 1.0
+ */
+
+public class MessageAckXARollback extends MessageMOMExtern {
+    
+    public MessageAckXARollback(long requestID) {
+	super(requestID);
+    }
+    
+} // MessageAckXARollback

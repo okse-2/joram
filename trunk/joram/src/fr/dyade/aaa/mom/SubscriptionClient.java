@@ -247,12 +247,6 @@ public class SubscriptionClient implements java.io.Serializable {
 		msgLastDelivered = -1;
 	}
 	
-  /** */
-  protected Message transactedRollbackDeliveredMsg(String messageID) throws Exception {
-    //TODO
-    return null;
-  }
-	
 	/** get the selector of the subcription */
 	public String getSelector() {
 		return this.selector;

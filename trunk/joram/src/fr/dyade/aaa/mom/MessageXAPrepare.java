@@ -22,25 +22,32 @@
  * All Rights Reserved.
  */
 
-
 package fr.dyade.aaa.mom;
 
+import java.util.*;
+import javax.transaction.xa.*;
+
 /**
- *	XAAgentClient is a subClass of the agentClient which reacts to the
- *	message which concerns the transaction, and consenquently the 
- *	interfaces of XA of the client JMS
+ * MessageXAPrepare.java
  *
- *	@see fr.dyade.aaa.mom.AgentClient.java
- *	@see fr.dyade.aaa.mom.XACommonClient.java
+ *
+ * Created: Mon Jun 19 15:48:20 2000
+ *
+ * @author Laurent Chauvirey
+ * @version 1.0
  */
 
-
-public class XAAgentClient extends fr.dyade.aaa.mom.AgentClient {
-
-	public XAAgentClient() {
-		super();
-		commonClient = new XACommonClientAAA(this);
-	}
-	
-	
-}
+public class MessageXAPrepare extends MessageMOMExtern {
+    
+    protected Vector ackVector;
+    protected Vector msgVector;
+    protected Xid xid;
+    
+    public MessageXAPrepare(long requestID, Vector ackVector, Vector msgVector, Xid xid) {
+	super(requestID);
+	this.ackVector = ackVector;
+	this.msgVector = msgVector;
+	this.xid = xid;
+    }
+    
+} // MessageXAPrepare

@@ -22,24 +22,30 @@
  * All Rights Reserved.
  */
 
+package fr.dyade.aaa.mom;
 
-package fr.dyade.aaa.mom; 
- 
-/** 
- *	an XARollbackTopicMOMExtern allows a client to rollback a set
- *	of messages from a Topic 
- * 
- *	@see	fr.dyade.aaa.mom.MessageMOMExtern 
- */ 
- 
-public class XARollbackTopicMOMExtern extends MessageMOMExtern { 
-	
-	/** identifier of a message sent by a Queue */ 
-	protected java.lang.String sessionID = null;  
-	
-	public XARollbackTopicMOMExtern(long requestID, java.lang.String sessionID) {
-		super(requestID);
-		this.sessionID = sessionID;
-	}
-	
-}
+import java.util.*;
+import javax.transaction.xa.*;
+
+/**
+ * MessageXARollback.java
+ *
+ *
+ * Created: Thu Jun 29 13:20:22 2000
+ *
+ * @author Laurent Chauvirey
+ * @version 1.0
+ */
+
+public class MessageXARollback extends MessageMOMExtern {
+
+    protected Xid xid;
+    protected Vector msgToRollbackVector;
+
+    public MessageXARollback(long requestID, Xid xid, Vector msgToRollbackVector) {
+	super(requestID);
+	this.xid = xid;
+	this.msgToRollbackVector = msgToRollbackVector;
+    }
+    
+} // MessageXARollback
