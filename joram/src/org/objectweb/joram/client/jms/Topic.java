@@ -54,6 +54,17 @@ public class Topic extends Destination implements javax.jms.Topic
   }
 
   /**
+   * Constructs a topic.
+   *
+   * @param agentId  Identifier of the topic agent.
+   * @param name     Name set by administrator.
+   */
+  public Topic(String agentId, String name)
+  {
+    super(agentId, name);
+  }
+
+  /**
    * Constructs an empty topic.
    */
   public Topic()
@@ -62,7 +73,9 @@ public class Topic extends Destination implements javax.jms.Topic
   /** Returns a String image of the topic. */
   public String toString()
   {
-    return "Topic:" + agentId;
+    if (adminName == null)
+      return "Topic:" + agentId;
+    return "Topic:" + agentId + "(" + adminName + ")";
   }
 
   /**
@@ -106,7 +119,7 @@ public class Topic extends Destination implements javax.jms.Topic
                 throws ConnectException, AdminException
   {
     String topicId = doCreate(serverId, name, className, prop);
-    return new Topic(topicId);
+    return new Topic(topicId, name);
   }
 
   /**

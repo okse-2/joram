@@ -44,6 +44,17 @@ public class DeadMQueue extends org.objectweb.joram.client.jms.Queue
     super(agentId);
   }
 
+  /**
+   * Constructs a <code>DeadMQueue</code> instance.
+   *
+   * @param agentId  Identifier of the dead message queue agent.
+   * @param name     Name set by administrator.
+   */
+  public DeadMQueue(String agentId, String name)
+  {
+    super(agentId, name);
+  }
+
   public String toString()
   {
     return "DeadMQueue:" + agentId;

@@ -51,6 +51,8 @@ public abstract class Destination
 {
   /** Identifier of the agent destination. */
   protected String agentId;
+  /** Name given by the administrator. */
+  protected String adminName;
 
   /** <code>true</code> if destination is a queue. */
   protected boolean isQueue = false;
@@ -71,6 +73,22 @@ public abstract class Destination
   }
 
   /**
+   * Constructs a destination.
+   *
+   * @param agentId  Identifier of the agent destination.
+   * @param name     Name set by administrator.
+   */ 
+  public Destination(String agentId, String name)
+  {
+    super(agentId);
+    this.agentId = agentId;
+    this.adminName = name;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+  }
+
+  /**
    * Constructs an empty destination.
    */ 
   public Destination()
@@ -81,6 +99,12 @@ public abstract class Destination
   public String getName()
   {
     return agentId;
+  }
+
+  /** Returns the admin name of the destination. */
+  public String getAdminName()
+  {
+    return adminName;
   }
 
   /**

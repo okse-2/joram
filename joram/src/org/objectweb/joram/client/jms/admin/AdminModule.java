@@ -421,23 +421,32 @@ public class AdminModule
 
     // Adding the queues, if any:
     dests = reply.getQueues();
+    String id;
+    String name;
     if (dests != null) {
-      for (int i = 0; i < dests.size(); i++)
-        list.add(new org.objectweb.joram.client.jms.Queue((String)
-                                                          dests.get(i)));
+      for (int i = 0; i < dests.size(); i++) {
+        id = (String) dests.get(i);
+        name = reply.getName(id);
+        list.add(new org.objectweb.joram.client.jms.Queue(id, name));
+      }
     }
     // Adding the dead messages queues, if any:
     dests = reply.getDeadMQueues();
     if (dests != null) {
-      for (int i = 0; i < dests.size(); i++)
-        list.add(new DeadMQueue((String) dests.get(i)));
+      for (int i = 0; i < dests.size(); i++) {
+        id = (String) dests.get(i);
+        name = reply.getName(id);
+        list.add(new DeadMQueue(id, name));
+      }
     }
     // Adding the topics, if any:
     dests = reply.getTopics();
     if (dests != null) {
-      for (int i = 0; i < dests.size(); i++)
-        list.add(new org.objectweb.joram.client.jms.Topic((String) 
-                                                          dests.get(i)));
+      for (int i = 0; i < dests.size(); i++) {
+        id = (String) dests.get(i);
+        name = reply.getName(id);
+        list.add(new org.objectweb.joram.client.jms.Topic(id, name));
+      }
     }
     return list;
   }
