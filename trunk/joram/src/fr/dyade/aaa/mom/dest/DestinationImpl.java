@@ -31,7 +31,7 @@ import fr.dyade.aaa.mom.excepts.*;
 
 import java.util.Vector;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>DestinationImpl</code> class provides the common behaviour of

@@ -24,17 +24,17 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
+import java.io.*;
+import java.util.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+
 import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.dest.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.jms.*;
-
-import java.io.*;
-import java.util.*;
-
-import org.objectweb.monolog.api.BasicLevel;
 
 /**
  * A <code>JmsAdminProxy</code> agent is a proxy for JMS administrators,

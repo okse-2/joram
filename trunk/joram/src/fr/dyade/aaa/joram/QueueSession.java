@@ -34,7 +34,7 @@ import java.util.*;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.QueueSession</code> interface.

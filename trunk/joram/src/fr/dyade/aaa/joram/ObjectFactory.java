@@ -30,7 +30,7 @@ import java.util.Hashtable;
 
 import javax.naming.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>ObjectFactory</code> class is used by the naming service

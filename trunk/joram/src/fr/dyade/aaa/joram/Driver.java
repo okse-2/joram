@@ -33,7 +33,7 @@ import java.net.*;
 
 import javax.jms.JMSException;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>Driver</code> daemon is attached to a connection for getting

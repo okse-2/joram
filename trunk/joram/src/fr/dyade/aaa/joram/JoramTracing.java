@@ -26,7 +26,7 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.util.ClientDebug;
 
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>JoramTracing</code> class centralizes the log tracing for joram.
@@ -37,12 +37,12 @@ public class JoramTracing
    * Logger used to trace joram admin activity, to be set using topic
    * fr.dyade.aaa.joram.Admin
    */
-  public static Monitor dbgAdmin = null;
+  public static Logger dbgAdmin = null;
   /**
    * Logger used to trace joram activity, to be set using topic
    * fr.dyade.aaa.joram.Client
    */
-  public static Monitor dbgClient = null;
+  public static Logger dbgClient = null;
 
   /**
    * <code>true</code> when <code>init</code> has been called.
@@ -55,7 +55,7 @@ public class JoramTracing
    */
   static
   {
-    dbgAdmin = ClientDebug.getMonitor("fr.dyade.aaa.joram.Admin");
-    dbgClient = ClientDebug.getMonitor("fr.dyade.aaa.joram.Client");
+    dbgAdmin = ClientDebug.getLogger("fr.dyade.aaa.joram.Admin");
+    dbgClient = ClientDebug.getLogger("fr.dyade.aaa.joram.Client");
   }
 }

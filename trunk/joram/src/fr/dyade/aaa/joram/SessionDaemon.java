@@ -26,7 +26,7 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>SessionDaemon</code> daemon is attached to a session for

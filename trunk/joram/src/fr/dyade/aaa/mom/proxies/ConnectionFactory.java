@@ -26,13 +26,13 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.MomTracing;
-
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.mom.MomTracing;
 
 /**
  * A <code>ConnectionFactory</code> proxy is started as a service in each
