@@ -83,6 +83,9 @@
     </s1>
 
     <s1 name="External documentation">
+      <subtitle>JORAM show</subtitle>
+      <p>The latest JORAM slides show, presented at the Objectweb conference
+      in Paris (20-21 November 2003), is available <a href="http://www.objectweb.org/phorum/read.php?f=36&i=66&t=51#reply_663">here</a>.</p>
       <subtitle>JMS related pages and documentation</subtitle>
       <ul>
         <li>JMS home: <a href="http://java.sun.com/products/jms/">
