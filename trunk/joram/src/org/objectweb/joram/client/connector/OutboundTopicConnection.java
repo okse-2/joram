@@ -18,13 +18,14 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundTopicConnection</code> instance is a handler for a
@@ -43,9 +44,13 @@ public class OutboundTopicConnection
    * @param xac        The underlying physical PubSub connection to handle.
    */
   OutboundTopicConnection(ManagedConnectionImpl managedCx,
-                          XATopicConnection xac)
-  {
+                          XATopicConnection xac) {
     super(managedCx, xac);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundTopicConnection(" + managedCx +
+                                    ", " + xac + ")");
   }
 
  
@@ -57,17 +62,25 @@ public class OutboundTopicConnection
    * @exception javax.jms.JMSException           Generic exception.
    */
   public TopicSession
-         createTopicSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
+      createTopicSession(boolean transacted, int acknowledgeMode)
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicSession(" + transacted +
+                                    ", " + acknowledgeMode + ")");
+    
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicSession sess = " + managedCx.session);
+
     Session sess = managedCx.session;
     if (sess == null)
-      sess = xac.createSession(transacted, acknowledgeMode);
+      sess = xac.createSession(false, acknowledgeMode);
 
-    return new OutboundTopicSession(sess, this);
+    return new OutboundTopicSession(sess, this, transacted);
   }
 
   /**
@@ -75,12 +88,11 @@ public class OutboundTopicConnection
    * throws a <code>IllegalStateException</code> instance.
    */
   public ConnectionConsumer
-         createConnectionConsumer(Topic topic,
-                                  String messageSelector,
-                                  ServerSessionPool sessionPool,
-                                  int maxMessages)
-         throws JMSException
-  {
+      createConnectionConsumer(Topic topic,
+                               String messageSelector,
+                               ServerSessionPool sessionPool,
+                               int maxMessages)
+    throws JMSException {
     throw new IllegalStateException("Forbidden call on a component's "
                                     + "connection.");
   }
