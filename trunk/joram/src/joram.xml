@@ -177,11 +177,6 @@
         <include name="ow_monolog.jar"/>
         <include name="xerces.jar"/>
       </fileset>
-      <fileset dir="${src.dir}">
-        <include name="licenses/APACHE_LICENSE.TXT"/>
-        <include name="licenses/CUP_LICENSE.TXT"/>
-        <include name="licenses/LGPL_HEADER.TXT"/>
-      </fileset>
     </jar>
     <delete dir="${lib.dir}/META-INF"/>
   </target>
