@@ -30,7 +30,7 @@
       <ul>
       <li>Timeout in MessageConsumer.receive not compliant, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-11/msg00018.html">
-          Gerald Schröder</a>.
+          Gerald Schroeder</a>.
           A MessageConsumer.receive(timeOut) would not return if the connection
           it belongs to was in stopped mode, even if the timer expired.
       </li>
@@ -61,11 +61,11 @@
       <ul>
       <li>Timeout in MessageConsumer.receive not compliant, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-09/msg00003.html">
-          Gerald Schröder</a>.
+          Gerald Schroeder</a>.
           A MessageConsumer.receive(0) behaved as a receiveNoWait() instead
           of behaving as a receive() (by waiting indefinitely for a message).</li>
       <li>Listener not active if set after its connection was started, found by
-          Gerald Schröder.
+          Gerald Schroeder.
           When setting a listener on a consumer belonging to a connection already
           started, the session thread for distributing the asynchronous deliveries
           was actually never started.</li>
@@ -83,7 +83,7 @@
       <li>Messages never delivered in the case of an incorrect listener
           removal, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00012.html">
-          Gerald Schröder</a>.
+          Gerald Schroeder</a>.
           When a listener is removed client side (by calling
           setMessageListener(null)), messages that reach the connection are
           denied. However, if the connection is stopped, the message were
