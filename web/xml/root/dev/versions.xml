@@ -110,7 +110,7 @@
       it also provides a SOAP link, based on HTTP and XML.</p>
      
       <p>For more info on SOAP, check
-      <a href="http://www.w3.org/TR/SOAP">W3C's SOAP</a> site.
+      <a href="http://www.w3.org/TR/SOAP/">W3C's SOAP</a> site.
       </p>
 
       <p>The support of the SOAP protocol led to re-architecturing 
