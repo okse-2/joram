@@ -321,6 +321,7 @@ public class ManagedConnectionImpl
       handle = (OutboundConnection) handles.remove(0);
       handle.cleanup();
     }
+    session = null;
   }
 
   /**
@@ -534,6 +535,7 @@ public class ManagedConnectionImpl
   {
     ConnectionEvent event =
       new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
+    event.setConnectionHandle(handle);
 
     ConnectionEventListener listener;
     for (int i = 0; i < listeners.size(); i++) {
