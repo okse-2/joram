@@ -32,14 +32,42 @@ import fr.dyade.aaa.util.*;
  * based on HTTP 1.1 protocol.
  */
 public class HttpNetwork extends FIFONetwork {
-  InetAddress proxy = null;
+  private InetAddress proxy = null;
+  /**
+   *  Hostname (or IP dotted address) of proxy host, if not defined there
+   * is a direct connection between the client and the server.
+   *  This value can be adjusted for all HttpNetwork components by setting
+   * <code>proxyhost</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.proxyhost</code>
+   * specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
   String proxyhost = null;
+  /**
+   *  Port number of proxy if any.
+   *  This value can be adjusted for all HttpNetwork components by setting
+   * <code>proxyport</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.proxyport</code>
+   * specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
   int proxyport = 0;
 
   /**
-   * Time between two activation of NetServerOut, it matchs to the time between
-   * two requests from the client to the server when there is no message to
-   * transmit from client to server.
+   *  Period of time between two activation of NetServerOut, it matchs to the
+   * time between two requests from the client to the server when there is no
+   * message to transmit from client to server.
+   *  This value can be adjusted for all HttpNetwork components by setting
+   * <code>ActivationPeriod</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.ActivationPeriod</code>
+   * specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
    */
   protected long activationPeriod = 10000L;
 
@@ -82,7 +110,7 @@ public class HttpNetwork extends FIFONetwork {
     super.init(name, port, servers);
 
     activationPeriod = Long.getLong("ActivationPeriod",
-                                    WDActivationPeriod).longValue();
+                                    activationPeriod).longValue();
     activationPeriod = Long.getLong(name + ".ActivationPeriod",
                                     activationPeriod).longValue();
     
@@ -497,8 +525,8 @@ public class HttpNetwork extends FIFONetwork {
 
             // Open the connection.
             socket = null;
+            boolean phase1 = true;
             while (true) {
-              boolean phase1 = true;
               if (proxy == null) {
                 try {
                   socket = createSocket(server.getAddr(), server.port);
