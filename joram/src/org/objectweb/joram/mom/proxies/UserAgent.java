@@ -348,13 +348,15 @@ public class UserAgent extends Agent
 
   private void doReact(ResetCollocatedConnectionsNot not) {
     if (connections != null) {
-      Enumeration values = connections.elements();
-      while (values.hasMoreElements()) {
-        Object obj = values.nextElement();
+      Collection values = connections.values();
+      Iterator iterator = values.iterator();
+      while (iterator.hasNext()) {
+        Object obj = iterator.next();
         if (obj instanceof ConnectionContext) {
           ConnectionContext cc = (ConnectionContext)obj;
           proxyImpl.reactToClientRequest(
             cc.key, new CnxCloseRequest());
+          iterator.remove();
         }
       }
     }
@@ -404,10 +406,16 @@ public class UserAgent extends Agent
     Integer objKey = new Integer(key);
     if (connections != null) {
       Object ctx = connections.get(objKey);
+      if (ctx != null) {
       if (ctx instanceof ReliableConnectionContext) {
         push((ReliableConnectionContext)ctx, reply);
+        } else if (ctx instanceof ConnectionContext) {
+          ((ConnectionContext)ctx).queue.push(reply);
       } else {
-        ((ConnectionContext)ctx).queue.push(reply);
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgProxy.log(
+              BasicLevel.ERROR, "Unexpected connection context: " + ctx);
+        }
       }
     }
     // else may happen. Drop the reply.
@@ -482,8 +490,12 @@ public class UserAgent extends Agent
         if (ctx instanceof ReliableConnectionContext) {
           ((ReliableConnectionContext)ctx).queue.push(
             new ProxyMessage(-1, -1, exc));
-        } else {
+        } else if (ctx instanceof ConnectionContext) {
           ((ConnectionContext)ctx).queue.push(exc);
+        } else {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgProxy.log(
+              BasicLevel.ERROR, "Unexpected context: " + ctx);
         }
       } else {
         start();
