@@ -23,9 +23,10 @@
       <s2 name="Modifications"> 
       <ul>
         <li>JMX MBeans introduced for the management of the JORAM destinations
-        and users. Impacted packages are <code>fr.dyade.aaa.mom.dest</code>
-        and <code>fr.dyade.aaa.mom.proxies</code>. Feature not
-        documented yet.</li>
+        and users. The "MBeanified" destinations are still hosted by the
+        <code>fr.dyade.aaa.mom.dest</code> package (more packages have been
+        impacted by the support of JMX). This new feature is not documented
+        yet.</li>
       </ul>
       </s2>
       <s2 name="Corrected bugs">
