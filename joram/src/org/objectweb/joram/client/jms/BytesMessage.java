@@ -299,7 +299,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       else if (value instanceof Integer)
         outputStream.writeInt(((Integer) value).intValue());
       else if (value instanceof Short)
-        outputStream.writeInt(((Short) value).shortValue());
+        outputStream.writeShort(((Short) value).shortValue());
       else if (value instanceof Long)
         outputStream.writeLong(((Long) value).longValue());
       else if (value instanceof Float)
