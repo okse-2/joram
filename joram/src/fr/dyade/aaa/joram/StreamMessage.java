@@ -666,7 +666,6 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   {
     oos.flush();
     momMsg.setStream(bos);
-    super.prepare();
   }
 
   /** 

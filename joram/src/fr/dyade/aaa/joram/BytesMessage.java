@@ -726,7 +726,6 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
   {
     dos.flush();
     momMsg.setBytes(bos.toByteArray());
-    super.prepare();
   }
 
   /** 
