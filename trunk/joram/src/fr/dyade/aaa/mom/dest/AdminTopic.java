@@ -59,6 +59,12 @@ public class AdminTopic extends Topic
   }
 
   /**
+   * Stops the <code>AdminTopic</code> service.
+   */ 
+  public static void stopService()
+  {}
+
+  /**
    * Specializes this <code>Agent</code> method called when (re)deploying 
    * the topic.
    */
