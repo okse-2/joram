@@ -59,6 +59,9 @@
     <delete file="${lib.dir}/joram-gui.jar" />
     <delete file="${lib.dir}/joram-mom.jar" />
     <delete file="${lib.dir}/joram-shared.jar" />
+    <!-- Deletes generated rar files -->
+    <delete file="${lib.dir}/joram_for_jonas_ra.rar" />
+    <delete file="${lib.dir}/joram.rar" />
   </target>
 
   <!-- Prepares compilation phase -->
@@ -216,9 +219,11 @@
     <mkdir dir="${lib.dir}/META-INF"/>
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${lib.dir}/META-INF/ra.xml"/>
-    <jar jarfile="${lib.dir}/joram.rar">
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/jonas-ra.xml"
+          todir="${lib.dir}/META-INF"/>
+    <jar jarfile="${lib.dir}/joram_for_jonas_ra.rar">
       <fileset dir="${lib.dir}">
-        <include name="META-INF/ra.xml"/>
+        <include name="META-INF/*.xml"/>
       </fileset>
     </jar>
     <delete dir="${lib.dir}/META-INF"/>
