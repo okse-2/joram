@@ -220,7 +220,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     // Administering as specified in the properties file.
     try {
-      File file = new File(platformConfigDir, adminFile);
+      File file = null;
+
+      if (platformConfigDir == null) {
+        java.net.URL url = ClassLoader.getSystemResource(adminFile);
+        file = new File(url.getFile());
+      }
+      else
+        file = new File(platformConfigDir, adminFile);
+
       FileReader fileReader = new FileReader(file);
       BufferedReader reader = new BufferedReader(fileReader);
 
@@ -840,11 +848,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       return new ObjectName("joram:type=JMSremoteServer,id="
                             + ((RemoteServer) bean).getRemoteServerId());
     else if (bean instanceof LocalQueue)
-      return new ObjectName("joram:type=JMSqueue,id="
-                            + ((LocalQueue) bean).getAgentId());
+      return new ObjectName("joram:type=JMSqueue,name="
+                            + ((LocalQueue) bean).getJndiName());
     else if (bean instanceof LocalTopic)
-      return new ObjectName("joram:type=JMStopic,id="
-                            + ((LocalTopic) bean).getAgentId());
+      return new ObjectName("joram:type=JMStopic,name="
+                            + ((LocalTopic) bean).getJndiName());
     else
       throw new Exception("Unknown MBean: " + bean.getClass().getName());
   }
