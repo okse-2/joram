@@ -42,7 +42,7 @@
       <table border="0">
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
-	  <td valign="middle">Current release: 2.2</td>
+	  <td valign="middle">Current release: 3.0.0</td>
 	</tr>
       </table>
       
@@ -57,7 +57,7 @@
   
       <s2 name="Specification">
 
-	<p>JORAM provides large support to <em>JMS 1.0.2a</em>.</p>
+	<p>JORAM provides large support to <em>JMS 1.0.2b</em>.</p>
 
 	<ul>
 	  <li>Point-to-Point (PTP) Model involving queues.</li>
@@ -79,22 +79,18 @@
 	  <li>Have a look at the <connect href="license.xml">license</connect>.</li>
 	  <li>Browse the <connect href="download/index.xml">download</connect> area for:
 	    <ul>
-	      <li><code>joram_jar.tar.gz</code> and <code>joram_jar.zip</code> including
-		JORAM jars and simple tests codes.</li>
+	      <li><code>joram-x.y.tgz</code> and <code>joram-x.y.zip</code> including
+		JORAM jars and samples (x.y being the version of JORAM
+		you want to download).</li>
 
-	      <li><code>joram_src_jar.tar.gz</code> and <code>joram_src_jar.zip</code>
-		including JORAM source, jars, tests and demo.</li>
+	      <li><code>joram-x.y-src.tgz</code> and <code>joram-x.y-src.zip</code>
+		including JORAM source, jars and samples.</li>
 	    </ul>
 	  </li>
 
 	  <li>JORAM source, tests and demo are also available through <connect
 	  href="../resources/cvs.xml">CVS</connect> (no tag
 	  should be used to get latest version).</li>
-
-	  <li>You may also download JORAM's html documentation: <a
-	  href="download/htmlDOC.zip">zip</a> or <a
-	  href="download/htmlDOC.tar.gz">tar.gz</a>.</li>
-
 	</ul>
 	
       </s2>
