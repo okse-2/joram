@@ -55,6 +55,18 @@ public class Queue extends Destination implements javax.jms.Queue
   }
 
   /** 
+   * Constructs a queue.
+   *
+   * @param agentId  Identifier of the queue agent.
+   * @param name     Name set by administrator.
+   */
+  public Queue(String agentId, String name)
+  {
+    super(agentId, name);
+    isQueue = true;
+  }
+
+  /** 
    * Constructs an empty queue.
    */
   public Queue()
@@ -63,7 +75,9 @@ public class Queue extends Destination implements javax.jms.Queue
   /** Returns a String image of the queue. */
   public String toString()
   {
-    return "Queue:" + agentId;
+    if (adminName == null)
+      return "Queue:" + agentId;
+    return "Queue:" + agentId + "(" + adminName + ")";
   }
 
   /**
@@ -106,7 +120,7 @@ public class Queue extends Destination implements javax.jms.Queue
                 throws ConnectException, AdminException
   {
     String queueId = doCreate(serverId, name, className, prop);
-    return new Queue(queueId);
+    return new Queue(queueId, name);
   }
 
   /**
