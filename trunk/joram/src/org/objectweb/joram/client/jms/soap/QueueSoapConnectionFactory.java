@@ -123,14 +123,13 @@ public class QueueSoapConnectionFactory
   {
     String host = (String) h.get("host");
     int port = ((Integer) h.get("port")).intValue();
-    int timer = ((Integer) h.get("cnxPendingTimer")).intValue();
+    int timer = ((Integer) h.get("cnxPendingTimer")).intValue() / 1000;
 
     QueueSoapConnectionFactory ret =
       new QueueSoapConnectionFactory(host, port, timer);
     FactoryParameters params = ret.getParameters();
     params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
     params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
-    params.cnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
 
     return ret;
   }
