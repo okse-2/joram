@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -28,6 +28,7 @@ import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundTopicConnectionFactory</code> instance is used for
@@ -46,9 +47,13 @@ public class OutboundTopicConnectionFactory
    * @param cxManager  Manager for connection pooling.
    */
   OutboundTopicConnectionFactory(ManagedConnectionFactoryImpl mcf,
-                                 ConnectionManager cxManager)
-  {
+                                 ConnectionManager cxManager) {
     super(mcf, cxManager);
+    
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "OutboundTopicConnectionFactory(" + mcf + 
+                                    ", " + cxManager + ")");
   }
 
 
@@ -61,8 +66,11 @@ public class OutboundTopicConnectionFactory
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.TopicConnection createTopicConnection() throws JMSException
-  {
+  public javax.jms.TopicConnection createTopicConnection() 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createTopicConnection()");
+    
     return createTopicConnection(mcf.userName, mcf.password);
   }
 
@@ -76,24 +84,31 @@ public class OutboundTopicConnectionFactory
    * @exception JMSException           Generic exception.
    */
   public javax.jms.TopicConnection
-         createTopicConnection(String userName, String password)
-         throws JMSException
-  {
+      createTopicConnection(String userName, String password)
+    throws JMSException {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicConnection(" + userName + 
+                                    ", " + password + ")");
+
     try {
       TopicConnectionRequest cxRequest =
         new TopicConnectionRequest(userName, password);
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createTopicConnection TopicConnection = " + o);
+
       return (javax.jms.TopicConnection) o;
-    }
-    catch (javax.resource.spi.SecurityException exc) {
+    } catch (javax.resource.spi.SecurityException exc) {
       throw new JMSSecurityException("Invalid user identification: " + exc);
-    }
-    catch (javax.resource.spi.CommException exc) {
+    } catch (javax.resource.spi.CommException exc) {
       throw new IllegalStateException("Could not connect to the JORAM server: "
                                       + exc);
-    }
-    catch (javax.resource.ResourceException exc) {
+    } catch (javax.resource.ResourceException exc) {
       throw new JMSException("Could not create connection: " + exc);
     }
   }

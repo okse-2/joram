@@ -18,12 +18,13 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
 import javax.resource.ResourceException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>ManagedConnectionMetaDataImpl</code> instance provides information
@@ -39,8 +40,10 @@ public class ManagedConnectionMetaDataImpl
   /**
    * Constructs a <code>ManagedConnectionMetaDataImpl</code> instance.
    */
-  public ManagedConnectionMetaDataImpl(String userName)
-  {
+  public ManagedConnectionMetaDataImpl(String userName) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "ManagedConnectionMetaDataImpl(" + userName + ")");
+
     this.userName = userName;
   }
 
@@ -54,7 +57,7 @@ public class ManagedConnectionMetaDataImpl
   /** Returns the current JORAM release number. */
   public String getEISProductVersion() throws ResourceException
   {
-    return "4.0";
+    return "4.0.5";
   }
 
   /** Returns 0 as JORAM as no upper limit of active connections. */

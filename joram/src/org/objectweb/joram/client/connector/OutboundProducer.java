@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -27,6 +28,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundProducer</code> instance wraps a JMS producer
@@ -49,8 +51,12 @@ public class OutboundProducer implements javax.jms.MessageProducer
    * @param producer  The JMS producer to wrap.
    * @param session   The OutboundSession this producer belongs to.
    */
-  OutboundProducer(MessageProducer producer, OutboundSession session)
-  {
+  OutboundProducer(MessageProducer producer, OutboundSession session) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundProducer(" + producer + 
+                                    ", " + session + ")");
+
     this.producer = producer;
     this.session = session;
   }
@@ -135,8 +141,10 @@ public class OutboundProducer implements javax.jms.MessageProducer
 
 
   /** Delegates the call to the wrapped producer. */
-  public void send(Message message) throws JMSException
-  {
+  public void send(Message message) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + message + ")");
+
     checkValidity();
     producer.send(message);
   }
@@ -146,15 +154,25 @@ public class OutboundProducer implements javax.jms.MessageProducer
                    int deliveryMode,
                    int priority,
                    long timeToLive)
-              throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + message + 
+                                    ", " + deliveryMode + 
+                                    ", " + priority + 
+                                    ", " + timeToLive + ")");
+
     checkValidity();
     producer.send(message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
-  public void send(Destination dest, Message message) throws JMSException
-  {
+  public void send(Destination dest, Message message) 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " send(" + dest + ", " + message + ")");
+
+    checkValidity();
     producer.send(dest, message);
   }
 
@@ -164,15 +182,23 @@ public class OutboundProducer implements javax.jms.MessageProducer
                    int deliveryMode,
                    int priority,
                    long timeToLive)
-              throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " send(" + dest + 
+                                    ", " + message + 
+                                    ", " + deliveryMode + 
+                                    ", " + priority + 
+                                    ", " + timeToLive + ")");
+
     checkValidity();
     producer.send(dest, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
-  public void close() throws JMSException
-  {
+  public void close() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close()");
+
     valid = false;
     producer.close();
   }

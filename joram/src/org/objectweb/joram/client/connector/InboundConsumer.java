@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -31,6 +31,8 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 
 import java.util.Vector;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 
 /**
@@ -96,8 +98,18 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                   boolean durable,
                   String subName,
                   boolean transacted,
-                  int maxWorks) throws ResourceException
-  {
+                  int maxWorks) throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager + 
+                                    ", " + endpointFactory +
+                                    ", " + cnx +
+                                    ", " + dest +
+                                    ", " + selector +
+                                    ", " + durable +
+                                    ", " + subName +
+                                    ", " + transacted +
+                                    ", " + maxWorks + ")");
+    
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
     this.cnx = cnx;
@@ -128,13 +140,12 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                               selector,
                                               this,
                                               1);
-      } 
-      else
+      } else
         cnxConsumer = cnx.createConnectionConsumer(dest,
                                                    selector,
                                                    this,
                                                    1);
-
+      
       cnx.start();
     }
     catch (JMSSecurityException exc) {
@@ -156,8 +167,11 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    *
    * @exception JMSException  Never thrown.
    */
-  public ServerSession getServerSession() throws JMSException
-  {
+  public ServerSession getServerSession() 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getServerSession()");
+    
     // No limit to work 
     if (maxWorks <= 0) {
       AdapterTracing.debugDEBUG("ServerSessionPool provides new ServerSession.");
@@ -197,9 +211,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
 
   /** Releases an <code>InboundSession</code> instance. */
-  void releaseSession(InboundSession session)
-  {
-    AdapterTracing.debugDEBUG("ServerSessionPool releases a ServerSession.");
+  void releaseSession(InboundSession session) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " releaseSession(" + session + ")");
+
     try {
       synchronized (pool) {
         pool.add(session);
@@ -210,8 +225,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   }
 
   /** Closes the consumer. */
-  void close()
-  {
+  void close() {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close()");
+
     try {
       cnxConsumer.close();
 

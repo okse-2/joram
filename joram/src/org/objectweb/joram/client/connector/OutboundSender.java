@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -26,6 +27,7 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundSender</code> instance wraps a JMS producer
@@ -37,15 +39,22 @@ public class OutboundSender extends OutboundProducer
   /**
    * Constructs an <code>OutboundSender</code> instance.
    */
-  OutboundSender(MessageProducer producer, OutboundSession session)
-  {
+  OutboundSender(MessageProducer producer, OutboundSession session) {
     super(producer, session);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundSender(" + producer + 
+                                    ", " + session + ")");
   }
 
  
   /** Delegates the call to the wrapped producer. */
-  public Queue getQueue() throws JMSException
-  {
+  public Queue getQueue() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " getQueue() = " + producer.getDestination());
+
     checkValidity();
     return (Queue) producer.getDestination();
   }
@@ -56,15 +65,27 @@ public class OutboundSender extends OutboundProducer
                    int deliveryMode, 
                    int priority,
                    long timeToLive)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " send(" + queue + 
+                                    ", " + message + 
+                                    ", " + deliveryMode + 
+                                    ", " + priority + 
+                                    ", " + timeToLive + ")");
+
     checkValidity();
     producer.send(queue, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
-  public void send(Queue queue, Message message) throws JMSException
-  {
+  public void send(Queue queue, Message message) 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " send(" + queue + 
+                                    ", " + message + ")");
+
     checkValidity();
     producer.send(queue, message);
   }

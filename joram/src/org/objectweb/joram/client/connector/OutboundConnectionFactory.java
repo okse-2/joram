@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -29,6 +29,7 @@ import javax.naming.Reference;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundConnectionFactory</code> instance is used for
@@ -54,8 +55,13 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
    * @param cxManager  Manager for connection pooling.
    */
   OutboundConnectionFactory(ManagedConnectionFactoryImpl mcf,
-                            ConnectionManager cxManager)
-  {
+                            ConnectionManager cxManager) {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundConnectionFactory(" + mcf + 
+                                    ", " + cxManager + ")");
+
     this.mcf = mcf;
     this.cxManager = cxManager;
   }
@@ -70,8 +76,11 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.Connection createConnection() throws JMSException
-  {
+  public javax.jms.Connection createConnection() 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnection()");
+
     return createConnection(mcf.userName, mcf.password);
   }
 
@@ -85,12 +94,21 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
    * @exception JMSException           Generic exception.
    */
   public javax.jms.Connection
-         createConnection(String userName, String password)
-         throws JMSException
-  {
+      createConnection(String userName, String password)
+    throws JMSException {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createConnection(" + userName + 
+                                    ", " + password + ")");
+
     try {
       ConnectionRequest cxRequest =
         new ConnectionRequest(userName, password);
+
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createConnection cxManager = " + cxManager);
 
       Object o = null;
 
@@ -99,16 +117,17 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
       else
         o = DefaultConnectionManager.getRef().allocateConnection(mcf, cxRequest);
 
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createConnection connection = " + o);
+
       return (javax.jms.Connection) o;
-    }
-    catch (javax.resource.spi.SecurityException exc) {
+    } catch (javax.resource.spi.SecurityException exc) {
       throw new JMSSecurityException("Invalid user identification: " + exc);
-    }
-    catch (javax.resource.spi.CommException exc) {
+    } catch (javax.resource.spi.CommException exc) {
       throw new IllegalStateException("Could not connect to the JORAM server: "
                                       + exc);
-    }
-    catch (javax.resource.ResourceException exc) {
+    } catch (javax.resource.ResourceException exc) {
       throw new JMSException("Could not create connection: " + exc);
     }
   }

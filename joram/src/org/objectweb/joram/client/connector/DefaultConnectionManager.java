@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -38,6 +38,7 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
  * The <code>DefaultConnectionManager</code> class is the default connection
@@ -74,6 +75,10 @@ public class DefaultConnectionManager
                                    ConnectionRequestInfo cxRequest)
                 throws ResourceException
   {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " allocateConnection(" + mcf + "," + cxRequest + ")");
+
     String userName;
     String password;
 

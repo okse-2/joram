@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -72,6 +72,8 @@ import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
  * A <code>JoramAdapter</code> instance manages connectivities to an
@@ -416,8 +418,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
                                  ActivationSpec spec)
-              throws ResourceException
-  {
+              throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " endpointActivation(" + endpointFactory + 
+                                    ", " + spec + ")");
+
     if (! started)
       throw new IllegalStateException("Non started resource adapter.");
     if (stopped)
@@ -491,6 +496,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       XAConnection cnx =
         connectionFactory.createXAConnection(userName, password);
 
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " endpointActivation cnx = " + cnx);
+
       // Creating and registering a consumer instance for this endpoint.
       InboundConsumer consumer =
         new InboundConsumer(workManager,
@@ -526,8 +535,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * Notifies the adapter to deactivate message delivery for a given endpoint.
    */
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
-                                   ActivationSpec spec)
-  {
+                                   ActivationSpec spec) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " endpointDeactivation(" + endpointFactory + ", " + spec + ")");
     if (! started || stopped)
       return;
 
@@ -548,8 +559,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * @exception ResourceException      Generic exception.
    */
   public XAResource[] getXAResources(ActivationSpec[] specs)
-                      throws ResourceException
-  {
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " getXAResources(" + specs + ")");
+    
     if (! started)
       throw new IllegalStateException("Non started resource adapter.");
     if (stopped)
@@ -597,6 +611,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   
           resources.add(connection.createXASession().getXAResource());
         }
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                        this + " getXAResources resources = " + resources);
       }
     }
     catch (javax.jms.JMSSecurityException exc) {
@@ -625,9 +642,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     JoramAdapter other = (JoramAdapter) o;
 
-    return collocated == other.collocated
-           && hostName.equals(other.hostName)
-           && serverPort == other.serverPort;
+    boolean res = 
+      collocated == other.collocated
+      && hostName.equals(other.hostName)
+      && serverPort == other.serverPort;
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " equals = " + res);
+    return res;
   }
 
   /**

@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>ManagedTopicConnectionFactoryImpl</code> instance manages
@@ -82,8 +83,11 @@ public class ManagedTopicConnectionFactoryImpl
    * @exception ResourceException  Never thrown.
    */
   public Object createConnectionFactory(ConnectionManager cxManager)
-                throws ResourceException
-  {
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createConnectionFactory(" + cxManager + ")");
+
     return new OutboundTopicConnectionFactory(this, cxManager);
   }
 
@@ -93,8 +97,11 @@ public class ManagedTopicConnectionFactoryImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory() throws ResourceException
-  {
+  public Object createConnectionFactory() 
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
+
     OutboundConnectionFactory factory = 
       new OutboundTopicConnectionFactory(this,
                                          DefaultConnectionManager.getRef());
@@ -131,8 +138,12 @@ public class ManagedTopicConnectionFactoryImpl
   public ManagedConnection
          createManagedConnection(Subject subject,
                                  ConnectionRequestInfo cxRequest)
-         throws ResourceException
-  {
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createManagedConnection(" + subject + 
+                                    ", " + cxRequest + ")");
+    
     String userName;
     String password;
 
@@ -166,34 +177,32 @@ public class ManagedTopicConnectionFactoryImpl
           XATopicConnectionFactory factory =
             XATopicLocalConnectionFactory.create();
           cnx = factory.createXATopicConnection(userName, password);
-        }
-        else {
+        } else {
           XAConnectionFactory factory = XALocalConnectionFactory.create();
           cnx = factory.createXAConnection(userName, password);
         }
-      }
-      else {
+      } else {
         if (cxRequest instanceof TopicConnectionRequest) {
           XATopicConnectionFactory factory =
             XATopicTcpConnectionFactory.create(hostName, serverPort);
           cnx = factory.createXATopicConnection(userName, password);
-        }
-        else {
+        } else {
           XAConnectionFactory factory =
             XATcpConnectionFactory.create(hostName, serverPort);
           cnx = factory.createXAConnection(userName, password);
         }
       }
-    }
-    catch (IllegalStateException exc) {
+
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createManagedConnection cnx = " + cnx);
+    } catch (IllegalStateException exc) {
       out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
-    }
-    catch (JMSSecurityException exc) {
+    } catch (JMSSecurityException exc) {
       out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
-    }
-    catch (JMSException exc) {
+    } catch (JMSException exc) {
       out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
@@ -204,6 +213,10 @@ public class ManagedTopicConnectionFactoryImpl
                                                             serverPort,
                                                             userName);
     managedCx.setLogWriter(out);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createManagedConnection managedCx = " + managedCx);
 
     return managedCx;
   }
@@ -223,8 +236,14 @@ public class ManagedTopicConnectionFactoryImpl
          matchManagedConnections(Set connectionSet,
                                  Subject subject,
                                  ConnectionRequestInfo cxRequest)
-         throws ResourceException
-  {
+    throws ResourceException {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " matchManagedConnections(" + connectionSet +
+                                    ", " + subject +
+                                    ", " + cxRequest + ")");
+
     String userName;
     String mode = "Unified";
 
@@ -252,11 +271,13 @@ public class ManagedTopicConnectionFactoryImpl
       try {
         managedCx = (ManagedConnectionImpl) it.next();
         matching = managedCx.matches(hostName, serverPort, userName, mode);
-      }
-      catch (ClassCastException exc) {}
+      } catch (ClassCastException exc) {}
     }
 
     if (matching) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " matchManagedConnections match " + managedCx);
       managedCx.setLogWriter(out);
       return managedCx;
     }
@@ -282,8 +303,14 @@ public class ManagedTopicConnectionFactoryImpl
 
     ManagedConnectionFactoryImpl other = (ManagedConnectionFactoryImpl) o;
   
-    return hostName.equals(other.hostName)
-           && serverPort == other.serverPort
-           && userName.equals(other.userName);
+    boolean res =
+      hostName.equals(other.hostName)
+      && serverPort == other.serverPort
+      && userName.equals(other.userName);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " equals = " + res);
+    return res;
   }
 }
