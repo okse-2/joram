@@ -31,6 +31,7 @@ import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 
 import fr.dyade.aaa.util.StoppedQueueException;
 
+import javax.jms.MessageListener;
 import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -75,11 +76,15 @@ class MessageConsumerListener implements ReplyListener {
   private int requestId;
 
   private int status;
+
+  private MessageListener listener;
   
   MessageConsumerListener(MessageConsumer consumer,
-                          Session session) {
+                          Session session,
+                          MessageListener listener) {
     this.consumer = consumer;
     this.session = session;
+    this.listener = listener;
     requestId = -1;
     setStatus(Status.INIT);
   }
@@ -143,7 +148,7 @@ class MessageConsumerListener implements ReplyListener {
     }
     
     // Out of the synchronized block because it could 
-    // lead to a dead lock between with 
+    // lead to a dead lock with 
     // the connection driver thread calling replyReceived.
     ConsumerUnsetListRequest unsetLR = 
       new ConsumerUnsetListRequest(
@@ -199,6 +204,10 @@ class MessageConsumerListener implements ReplyListener {
     return consumer;
   }
 
+  public final MessageListener getMessageListener() {
+    return listener;
+  }
+
   /**
    * Called by Session.
    */
@@ -212,7 +221,7 @@ class MessageConsumerListener implements ReplyListener {
       if (status == Status.RUN) {
         setStatus(Status.ON_MSG);
       } else {
-        throw new IllegalStateException("Status error");
+        throw new javax.jms.IllegalStateException("Status error");
       }
     }
 
@@ -222,12 +231,19 @@ class MessageConsumerListener implements ReplyListener {
         msg + ')');
 
     try {
-      consumer.onMessage(msg);
+      listener.onMessage(msg);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, " -> consumer.onMessage(" + 
           msg + ") returned");
+    } catch (RuntimeException re) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", re);
+      JMSException exc = new JMSException(re.toString());
+      exc.setLinkedException(re);
+      throw exc;
     } finally {
       synchronized (this) {
         setStatus(Status.RUN);

@@ -33,6 +33,7 @@ import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.UnknownServerException;
 import fr.dyade.aaa.agent.ConfigController;
+import fr.dyade.aaa.agent.ServerConfigHelper;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLNetwork;
@@ -246,7 +247,7 @@ public class AdminTopicImpl extends TopicImpl {
    */
   protected void doReact(AgentId from, AdminRequestNot adminNot) {
     // AF: verify that from is an AdminTopic
-    processAdminRequests(adminNot.replyTo, adminNot.msgId, adminNot.request);
+    processAdminRequests(adminNot.replyTo, adminNot.msgId, adminNot.request, from);
   }
 
   /**
@@ -635,7 +636,7 @@ public class AdminTopicImpl extends TopicImpl {
         distributeReply(replyTo, msgId, new AdminReply(false, info));
       } catch (Exception exc) {}
 
-      processAdminRequests(replyTo, msgId, request);
+      processAdminRequests(replyTo, msgId, request, null);
     }
   }
 
@@ -645,7 +646,8 @@ public class AdminTopicImpl extends TopicImpl {
    */ 
   private void processAdminRequests(AgentId replyTo,
                                     String msgId,
-                                    AdminRequest request) {
+                                    AdminRequest request,
+                                    AgentId from) {
     String info = null;
 
     try {
@@ -726,13 +728,13 @@ public class AdminTopicImpl extends TopicImpl {
       else if (request instanceof SpecialAdmin)
         doProcess((SpecialAdmin) request, replyTo, msgId);
       else if (request instanceof AddServerRequest)
-        doProcess((AddServerRequest) request, replyTo, msgId);
+        doProcess((AddServerRequest) request, replyTo, msgId, from);
       else if (request instanceof AddDomainRequest)
-        doProcess((AddDomainRequest) request, replyTo, msgId);
+        doProcess((AddDomainRequest) request, replyTo, msgId, from);
       else if (request instanceof RemoveServerRequest)
-        doProcess((RemoveServerRequest) request, replyTo, msgId);
+        doProcess((RemoveServerRequest) request, replyTo, msgId, from);
       else if (request instanceof RemoveDomainRequest)
-        doProcess((RemoveDomainRequest) request, replyTo, msgId);
+        doProcess((RemoveDomainRequest) request, replyTo, msgId, from);
       else if (request instanceof GetConfigRequest)
         doProcess((GetConfigRequest) request, replyTo, msgId);
       else if (request instanceof UserAdminRequest)
@@ -1945,30 +1947,39 @@ public class AdminTopicImpl extends TopicImpl {
 
   private void doProcess(AddDomainRequest request,
                          AgentId replyTo,
-                         String msgId) {
-    ConfigController ctrl = AgentServer.getConfigController();
+                         String msgId,
+                         AgentId from) {
     try {
-      ctrl.beginConfig();
-      ctrl.addDomain(request.getDomainName(),
-                     "fr.dyade.aaa.agent.SimpleNetwork");
-      ctrl.addNetwork((short)request.getServerId(),
-                      request.getDomainName(),
-                      request.getPort());
-      ctrl.commitConfig();
-      
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(
-          BasicLevel.DEBUG, 
-          " -> reply to client");
-      distributeReply(replyTo, msgId,
-                      new AdminReply(true, "Domain added"));
-      if (replyTo != null) {
-        broadcastRequest(request);
+      if (ServerConfigHelper.addDomain(request.getDomainName(),
+                                       request.getServerId(),
+                                       request.getPort())) {
+        distributeReply(replyTo, msgId,
+                        new AdminReply(true, "Domain added"));
       }
+      if (from == null) {
+        broadcastRequest(request, 
+                         -1, 
+                         replyTo, msgId);
+      }
+    } catch (ServerConfigHelper.NameAlreadyUsedException exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(
+                        false, 
+                        AdminReply.NAME_ALREADY_USED, 
+                        exc.getMessage(), null));
+    } catch (ServerConfigHelper.StartFailureException exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(
+                        false,
+                        AdminReply.START_FAILURE, 
+                        exc.getMessage(), null));
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1976,21 +1987,21 @@ public class AdminTopicImpl extends TopicImpl {
 
   private void doProcess(RemoveDomainRequest request,
                          AgentId replyTo,
-                         String msgId) {
-    ConfigController ctrl = AgentServer.getConfigController();
-    try {      
-      ctrl.beginConfig();
-      ctrl.removeDomain(request.getDomainName());
-      ctrl.commitConfig();
-      distributeReply(replyTo, msgId,
-                      new AdminReply(true, "Domain removed"));
-      if (replyTo != null) {
-        broadcastRequest(request);
+                         String msgId,
+                         AgentId from) {
+    try {
+      if (ServerConfigHelper.removeDomain(request.getDomainName())) {
+        distributeReply(replyTo, msgId,
+                        new AdminReply(true, "Domain removed"));
+      }
+      if (from == null) {
+        broadcastRequest(request, 
+                         -1, 
+                         replyTo, msgId);
       }
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1998,29 +2009,24 @@ public class AdminTopicImpl extends TopicImpl {
   
   private void doProcess(AddServerRequest request,
                          AgentId replyTo,
-                         String msgId) {
-    ConfigController ctrl = AgentServer.getConfigController();
-    try {      
-      ctrl.beginConfig();
-      ctrl.addServer(request.getServerName(),
-                     request.getHostName(),
-                     (short)request.getServerId());
-      ctrl.addNetwork(request.getServerName(),
-                      request.getDomainName(),
-                      request.getPort());
-      ctrl.addService(request.getServerName(),
-                      "org.objectweb.joram.mom.proxies.ConnectionManager",
-                      "root root");
-      ctrl.commitConfig();
+                         String msgId,
+                         AgentId from) {
+    try {
+      ServerConfigHelper.addServer(request.getServerId(),
+                                   request.getHostName(),
+                                   request.getDomainName(),
+                                   request.getPort(),
+                                   request.getServerName());
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server added"));
-      if (replyTo != null) {
-        broadcastRequest(request);
+      if (from == null) {
+        broadcastRequest(request, 
+                         request.getServerId(), 
+                         replyTo, msgId);
       }
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2028,23 +2034,38 @@ public class AdminTopicImpl extends TopicImpl {
 
   private void doProcess(RemoveServerRequest request,
                          AgentId replyTo,
-                         String msgId) {
+                         String msgId,
+                         AgentId from) {
     ConfigController ctrl = AgentServer.getConfigController();
     try {
-      ctrl.beginConfig();
-      ctrl.removeServer((short)request.getServerId());
-      ctrl.commitConfig();
+      ServerConfigHelper.removeServer(request.getServerId());
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server removed"));
-      if (replyTo != null) {
-        broadcastRequest(request);
+      if (from == null) {
+        broadcastRequest(request, 
+                         request.getServerId(), 
+                         replyTo, msgId);
       }
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void broadcastRequest(AdminRequest req,
+                                int avoidServerId,
+                                AgentId replyTo,
+                                String msgId) {
+    AdminRequestNot not = new AdminRequestNot(replyTo, msgId, req);
+    Enumeration ids = AgentServer.getServersIds();
+    while (ids.hasMoreElements()) {
+      short id = ((Short) ids.nextElement()).shortValue();
+      if (id != AgentServer.getServerId() &&
+          id != avoidServerId) {
+        Channel.sendTo(AdminTopic.getDefault(id), not);
+      }
     }
   }
 
@@ -2057,6 +2078,7 @@ public class AdminTopicImpl extends TopicImpl {
         new ByteArrayOutputStream();
       PrintWriter out = new PrintWriter(baos);
       A3CML.toXML(a3cmlConfig, out);
+      out.flush();
       baos.flush();
       baos.close();
       String config = baos.toString();
@@ -2117,18 +2139,7 @@ public class AdminTopicImpl extends TopicImpl {
       distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
-  }
-
-  private void broadcastRequest(AdminRequest req) {
-    AdminRequestNot not = new AdminRequestNot(null, null, req);
-    Enumeration ids = AgentServer.getServersIds();
-    while (ids.hasMoreElements()) {
-      short id = ((Short) ids.nextElement()).shortValue();
-      if (id != AgentServer.getServerId()) {
-        Channel.sendTo(AdminTopic.getDefault(id), not);
-      }
-    }
-  }
+  }  
 
   /** 
    * Returns <code>true</code> if a given server identification corresponds

@@ -68,9 +68,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   /** The selector for filtering messages. */
   String selector;
 
-  /** The message listener, if any. */
-  private javax.jms.MessageListener messageListener = null;
-
   /** <code>true</code> for a durable subscriber. */
   private boolean durableSubscriber;
 
@@ -259,17 +256,17 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
         "MessageConsumer.setMessageListener(" + 
         messageListener + ')');
     checkClosed();
-    if (this.messageListener != null) {
+    if (mcl != null) {
       if (messageListener == null) {
         sess.removeMessageListener(mcl, true);
-        this.messageListener = null;
         mcl = null;
       } else throw new IllegalStateException(
         "Message listener not null");
     } else {
       if (messageListener != null) {
-        mcl = sess.addMessageListener(this);
-        this.messageListener = messageListener;
+        mcl = sess.addMessageListener(
+          new MessageConsumerListener(
+            this, sess, messageListener));
       }
       // else idempotent
     }
@@ -283,7 +280,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   public synchronized javax.jms.MessageListener getMessageListener() 
     throws JMSException {
     checkClosed();
-    return messageListener;
+    return mcl.getMessageListener();
   }
 
   /**
@@ -343,11 +340,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   public javax.jms.Message receiveNoWait() 
     throws JMSException {
     checkClosed();
-    if (sess.getConnection().isStarted()) {
+    if (sess.getConnection().isStopped()) {
+      return null;
+    } else {
       return sess.receive(-1, 0, this, 
                           targetName, selector, queueMode);
-    } else {
-      return null;
     }
   }
 
@@ -356,22 +353,43 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *
    * @exception JMSException
    */
-  public synchronized void close() throws JMSException {
+  public void close() throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "MessageConsumer.close()");
+    new Closer().close();
+  }
 
-    // Ignoring the call if consumer is already closed:
-    if (status == Status.CLOSE) return;
+  /**
+   * This class synchronizes the close.
+   * Close can't be synchronized with 'this' 
+   * because the MessageConsumer must be accessed
+   * concurrently during its closure. So
+   * we need a second lock.
+   */
+  class Closer {
+    synchronized void close() throws JMSException {
+      doClose();
+    }
+  }
+
+  void doClose() throws JMSException {
+    synchronized (this) {
+      if (status == Status.CLOSE) 
+        return;
+    }
 
     sess.closeConsumer(this);
 
-    if (queueMode) {
-      if (messageListener != null) {
-        sess.removeMessageListener(mcl, false);
-      }
-    } else {
+    if (mcl != null) {
+      // 1- Stop and unsubscribe 
+      // the listener.
+      sess.removeMessageListener(mcl, false);
+    }
+
+    if (! queueMode) {
+      // 2- Remove the subscription.
       if (durableSubscriber) {
         sess.syncRequest(
           new ConsumerCloseSubRequest(targetName));
@@ -382,32 +400,5 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     }
 
     setStatus(Status.CLOSE);
-  }
-
-  /**
-   * Called by Session for passing an asynchronous message 
-   * delivery to the listener.
-   * Not synchronized because it could deadlock with close:
-   * the closing thread waits for the listener the thread
-   * to return from onMessage. The synchronization between
-   * close and onMessage is done in MessageConsumerListener.
-   */
-  void onMessage(Message msg) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.onMessage(" + msg + ')');
-    if (messageListener == null) 
-      throw new IllegalStateException("Null message listener");
-    try {
-      messageListener.onMessage(msg);
-    } catch (RuntimeException re) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, "", re);
-      JMSException exc = new JMSException(re.toString());
-      exc.setLinkedException(re);
-      throw exc;
-    }
   }
 }

@@ -139,7 +139,8 @@ public class Requestor
 
     if (status != Status.INIT) {
       if (status == Status.CLOSE) {
-        throw new javax.jms.IllegalStateException("Closed connection");
+        // throw new javax.jms.IllegalStateException("Closed requestor");
+        return null;
       } else {
         throw new javax.jms.IllegalStateException("Requestor already used");
       }

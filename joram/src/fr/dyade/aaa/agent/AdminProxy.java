@@ -546,6 +546,7 @@ public class AdminProxy {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintWriter out = new PrintWriter(baos);
             A3CML.toXML(a3CMLConfig, out);
+            out.flush();
             baos.flush();
             baos.close();
             byte[] bytes = baos.toByteArray();

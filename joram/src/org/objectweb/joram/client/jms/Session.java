@@ -369,7 +369,7 @@ public class Session implements javax.jms.Session {
    * the thread of control. If not, 
    * an IllegalStateException is raised.
    */
-  private void checkThreadOfControl() 
+  private synchronized void checkThreadOfControl() 
     throws IllegalStateException {
     if (singleThreadOfControl != null &&
         Thread.currentThread() != singleThreadOfControl)
@@ -1033,40 +1033,31 @@ public class Session implements javax.jms.Session {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "Session.close()");
+    new Closer().close();
+  }
+
+  /**
+   * This class synchronizes the close.
+   * Close can't be synchronized with 'this' 
+   * because the Session must be accessed
+   * concurrently during its closure. So
+   * we need a second lock.
+   */
+  class Closer {
+    synchronized void close() 
+      throws JMSException {
+      doClose();
+    }
+  }
+
+  void doClose() throws JMSException {
     synchronized (this) {
       if (status == Status.CLOSE) return;
-
-      // Should first unsubscribe the message listeners.
-      
-      try {
-        repliesIn.stop();
-      } catch (InterruptedException iE) {}
-      
-      // Stopping the session:
-      stop();
-
-      // The requestor must be closed because
-      // it could be used by a concurrent receive
-      // as it is not synchronized (see receive()).
-      receiveRequestor.close();
-      
-      // Denying the non acknowledged messages:
-      if (transacted) {
-        rollback();
-      } else {
-        deny();
-      }
-      
-      setStatus(Status.CLOSE);
     }
-
-    Vector browsersToClose = (Vector)browsers.clone();
-    browsers.clear();
-    for (int i = 0; i < browsersToClose.size(); i++) {
-      QueueBrowser qb = 
-        (QueueBrowser)browsersToClose.elementAt(i);
-      qb.close();
-    }
+    
+    // Don't synchronize the consumer closure because
+    // it could deadlock with message listeners or
+    // client threads still using the session.
 
     Vector consumersToClose = (Vector)consumers.clone();
     consumers.clear();
@@ -1076,6 +1067,14 @@ public class Session implements javax.jms.Session {
       mc.close();
     }
     
+    Vector browsersToClose = (Vector)browsers.clone();
+    browsers.clear();
+    for (int i = 0; i < browsersToClose.size(); i++) {
+      QueueBrowser qb = 
+        (QueueBrowser)browsersToClose.elementAt(i);
+      qb.close();
+    }
+    
     Vector producersToClose = (Vector)producers.clone();
     producers.clear();
     for (int i = 0; i < producersToClose.size(); i++) {
@@ -1083,8 +1082,30 @@ public class Session implements javax.jms.Session {
         (MessageProducer)producersToClose.elementAt(i);
       mp.close();
     }
+    
+    try {
+      repliesIn.stop();
+    } catch (InterruptedException iE) {}
+      
+    stop();
+
+    // The requestor must be closed because
+    // it could be used by a concurrent receive
+    // as it is not synchronized (see receive()).
+    receiveRequestor.close();
+      
+    // Denying the non acknowledged messages:
+    if (transacted) {
+      rollback();
+    } else {
+      deny();
+    }
 
     cnx.closeSession(this);
+      
+    synchronized (this) {
+      setStatus(Status.CLOSE);
+    }
   }
 
   /**
@@ -1140,6 +1161,18 @@ public class Session implements javax.jms.Session {
         "Session.stop()");
     if (status == Status.STOP ||
         status == Status.CLOSE) return;
+
+    // DF: According to JMS 1.1 java doc
+    // the method stop "blocks until receives in progress have completed." 
+    // But the JMS 1.1 specification doesn't mention this point. 
+    // So we don't implement it: a stop doesn't block until 
+    // receives have completed.
+
+//     while (requestStatus != RequestStatus.NONE) {
+//       try {
+//         wait();
+//       } catch (InterruptedException exc) {}
+//     }
 
     doStop();
 
@@ -1457,7 +1490,11 @@ public class Session implements javax.jms.Session {
 
     if (pendingMessageConsumer == mc) {
       if (requestStatus == RequestStatus.RUN) {
-        receiveRequestor.abortRequest();
+        // Close the requestor. A call to abortRequest() 
+        // is not enough because the receiving thread 
+        // may call request() just after this thread 
+        // calls abort().
+        receiveRequestor.close();
 
         // Wait for the end of the request
         try {
@@ -1465,6 +1502,9 @@ public class Session implements javax.jms.Session {
             wait();
           }
         } catch (InterruptedException exc) {}
+
+        // Create a new requestor.
+        receiveRequestor = new Requestor(mtpx);
       }
     }
   }
@@ -1509,18 +1549,16 @@ public class Session implements javax.jms.Session {
    * Called by MessageConsumer
    */
   synchronized MessageConsumerListener addMessageListener(
-    MessageConsumer consumer) throws JMSException {
+    MessageConsumerListener mcl) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
-        "Session.addMessageListener(" + consumer + ')');
+        "Session.addMessageListener(" + mcl + ')');
     checkClosed();
     checkThreadOfControl();
 
     checkSessionMode(SessionMode.LISTENER);
 
-    MessageConsumerListener mcl = new MessageConsumerListener(
-      consumer, this);
     mcl.start();
     
     if (status == Status.START &&
@@ -1537,7 +1575,7 @@ public class Session implements javax.jms.Session {
    * must be checked if the call results from a setMessageListener
    * but not from a close.
    */
-  synchronized void removeMessageListener(
+  void removeMessageListener(
     MessageConsumerListener mcl,
     boolean check) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -1551,12 +1589,20 @@ public class Session implements javax.jms.Session {
       checkThreadOfControl();
     }
     
+    // This may block if a message listener
+    // is currently receiving a message (onMessage is called)
+    // so we have to go out of the synchronized block.
     mcl.close();
     
-    listenerCount--;
-    if (status == Status.START &&
-        listenerCount == 0) {
-      doStop();
+    synchronized (this) {
+      listenerCount--;
+      if (status == Status.START &&
+          listenerCount == 0) {
+        // All the message listeners have been closed
+        // so we can call doStop() in a synchronized
+        // block. No deadlock possible.
+        doStop();
+      }
     }
   }
 
@@ -1694,6 +1740,9 @@ public class Session implements javax.jms.Session {
     try {
       consumerListener.onMessage(msg);
     } catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
       if (autoAck || consumerListener.isClosed()) {
         denyMessage(consumer.targetName, 
                     momMsg.getIdentifier(), 
@@ -1881,8 +1930,8 @@ public class Session implements javax.jms.Session {
         try {
           onMessages(ctx);
         } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
         }
       }
     }

@@ -121,6 +121,10 @@ public class RequestMultiplexer {
         Status.toString(status) + ')');
     this.status = status;
   }
+  
+  public boolean isClosed() {
+    return status == Status.CLOSE;
+  }
 
   public void setExceptionListener(
     javax.jms.ExceptionListener exceptionListener) {

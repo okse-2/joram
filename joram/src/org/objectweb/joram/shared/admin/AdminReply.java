@@ -29,14 +29,22 @@ package org.objectweb.joram.shared.admin;
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic and containing data or
  * information destinated to a client administrator.
  */
-public class AdminReply implements java.io.Serializable
-{
+public class AdminReply implements java.io.Serializable {
+
+  public final static int NAME_ALREADY_USED = 0;
+
+  public final static int START_FAILURE = 1;
+  
   /** <code>true</code> if this reply replies to a successful request. */
   private boolean success = false;
+
   /** Information. */
   private String info;
+
   /** Object. */
   private Object replyObj;
+
+  private int errorCode;
 
   /**
    * Constructs an <code>AdminReply</code> instance.
@@ -47,7 +55,7 @@ public class AdminReply implements java.io.Serializable
    */
   public AdminReply(boolean success, 
                     String info) {
-    this(success,info,null);
+    this(success, -1, info, null);
   }
 
   /**
@@ -60,9 +68,25 @@ public class AdminReply implements java.io.Serializable
    */
   public AdminReply(boolean success, 
                     String info,
-                    Object replyObj)
-  {
+                    Object replyObj) {
+    this(success, -1, info, replyObj);
+  }
+
+  /**
+   * Constructs an <code>AdminReply</code> instance.
+   *
+   * @param success  <code>true</code> if this reply replies to a successful
+   *          request.
+   * @param errorCode error code defining the type of the error
+   * @param info  Information to carry.
+   * @param replyObj Object to carry.
+   */
+  public AdminReply(boolean success, 
+                    int errorCode,
+                    String info,
+                    Object replyObj) {
     this.success = success;
+    this.errorCode = errorCode;
     this.info = info;
     this.replyObj = replyObj;
   }
@@ -70,26 +94,29 @@ public class AdminReply implements java.io.Serializable
   /**
    * Returns <code>true</code> if this reply replies to a successful request.
    */
-  public boolean succeeded()
-  {
+  public final boolean succeeded() {
     return success;
   }
 
   /** Returns the carried info. */
-  public String getInfo()
-  {
+  public final String getInfo() {
     return info;
   }
 
   /** Returns the carried object. */
-  public Object getReplyObject() {
+  public final Object getReplyObject() {
     return replyObj;
+  }
+
+  public final int getErrorCode() {
+    return errorCode;
   }
 
   public String toString() {
     return '(' + super.toString() + 
       ",success=" + success +
       ",info=" + info + 
+      ",errorCode=" + errorCode + 
       ",replyObj=" + replyObj + ')';
   }
 }

@@ -165,8 +165,8 @@ public class Connection implements javax.jms.Connection {
     this.status = status;
   }
 
-  boolean isStarted() {
-    return (status == Status.START);
+  boolean isStopped() {
+    return (status == Status.STOP);
   }
 
   /** String image of the connection. */
@@ -194,7 +194,8 @@ public class Connection implements javax.jms.Connection {
    */
   protected synchronized void checkClosed() 
     throws IllegalStateException {
-    if (status == Status.CLOSE) 
+    if (status == Status.CLOSE ||
+        mtpx.isClosed()) 
       throw new IllegalStateException(
         "Forbidden call on a closed connection.");
   }
@@ -389,21 +390,12 @@ public class Connection implements javax.jms.Connection {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
-        newTrace(".stop()")); 
-    synchronized (this) {
-      // If closed, throwing an exception:
-      checkClosed();
+        newTrace(".stop()"));
+    checkClosed();
 
-      // Ignoring the call if the connection is already stopped:
+    synchronized (this) {
       if (status == Status.STOP)
         return;
-
-      // Sending a synchronous "stop" request to the server:
-      requestor.request(new CnxStopRequest());
-
-      // Set the status as STOP as the following operations
-      // (Session.stop) can't fail.
-      setStatus(Status.STOP);
     }
 
     // At this point, the server won't deliver messages anymore,
@@ -416,6 +408,18 @@ public class Connection implements javax.jms.Connection {
     for (int i = 0; i < sessions.size(); i++) {
       Session session = (Session) sessions.get(i);
       session.stop();
+    }
+
+    synchronized (this) {
+      if (status == Status.STOP)
+        return;
+
+      // Sending a synchronous "stop" request to the server:
+      requestor.request(new CnxStopRequest());
+
+      // Set the status as STOP as the following operations
+      // (Session.stop) can't fail.
+      setStatus(Status.STOP);
     }
   }
 
@@ -453,25 +457,10 @@ public class Connection implements javax.jms.Connection {
         return;
       }
     }
-
-    try {
-      stop();
-    } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, "", exc);
-    }
-
-    // The sessions have been stopped so 
-    // the connection can be set
-    // closed.
-    synchronized (this) {
-      setStatus(Status.CLOSE);
-    }
-
+      
     Vector sessionsToClose = (Vector)sessions.clone();
     sessions.clear();
-
+    
     for (int i = 0; i < sessionsToClose.size(); i++) {
       Session session = 
         (Session) sessionsToClose.elementAt(i);
@@ -483,10 +472,10 @@ public class Connection implements javax.jms.Connection {
             BasicLevel.DEBUG, "", exc);
       }
     }
-
+    
     Vector consumersToClose = (Vector)cconsumers.clone();
     cconsumers.clear();
-
+    
     for (int i = 0; i < consumersToClose.size(); i++) {
       ConnectionConsumer consumer = 
         (ConnectionConsumer) consumersToClose.elementAt(i);
@@ -498,6 +487,7 @@ public class Connection implements javax.jms.Connection {
             BasicLevel.DEBUG, "", exc);
       }
     }
+
     
     try {
       CnxCloseRequest closeReq = new CnxCloseRequest();
@@ -507,9 +497,14 @@ public class Connection implements javax.jms.Connection {
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, "", exc);
     }
-
+    
     mtpx.close();
+    
+    synchronized (this) {
+      setStatus(Status.CLOSE);
+    }
   }
+
 
   /**
    * Used by OutboundConnection in the connector layer.
