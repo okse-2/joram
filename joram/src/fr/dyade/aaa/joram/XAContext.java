@@ -53,7 +53,7 @@ class XAContext
    * destination or subscription, in the transaction.
    * <p>
    * <b>Key:</b> destination or subscription name<br>
-   * <b>Object:</b> vector of message identifiers
+   * <b>Object:</b> corresponding <code>MessageAcks</code> instance
    */
   Hashtable deliveries;
 
@@ -100,23 +100,23 @@ class XAContext
   void addDeliveries(Hashtable newDeliveries)
   {
     String newName;
-    Vector newIds;
-    Vector storedIds;
+    MessageAcks newAcks;
+    MessageAcks storedAcks;
 
     // Browsing the destinations or subscriptions to which messages will have
     // to be acknowledged:
     Enumeration newNames = newDeliveries.keys();
     while (newNames.hasMoreElements()) {
       newName = (String) newNames.nextElement();
-      newIds = (Vector) newDeliveries.remove(newName);
-      storedIds = (Vector) deliveries.get(newName);
+      newAcks = (MessageAcks) newDeliveries.remove(newName);
+      storedAcks = (MessageAcks) deliveries.get(newName);
       // If there are no messages to acknowledge for this destination or 
       // subscription, storing the new vector:
-      if (storedIds == null)
-        deliveries.put(newName, newIds);
+      if (storedAcks == null)
+        deliveries.put(newName, newAcks);
       // Else, adding the new ids to the stored ones:
       else
-        storedIds.addAll(newIds);
+        storedAcks.addIds(newAcks.getIds());
     }
   }
 }

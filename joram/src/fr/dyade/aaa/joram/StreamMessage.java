@@ -168,7 +168,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
   public void writeBytes(byte[] value, int offset, int length)
-            throws JMSException
+              throws JMSException
   {
     if (RObody)
       throw new MessageNotWriteableException("Can't write a value as the"

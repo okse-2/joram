@@ -59,7 +59,20 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     bos = new ByteArrayOutputStream();
     dos = new DataOutputStream(bos);
   }
-  
+ 
+
+  /**
+   * API method.
+   *
+   * @exception MessageNotReadableException  If the message is WRITE-ONLY.
+   */
+  public long getBodyLength() throws JMSException
+  {
+    if (WObody)
+      throw new MessageNotReadableException("Can't get not readable message's"
+                                            + " size.");
+    return momMsg.getSize();
+  } 
 
   /** 
    * API method.
@@ -157,7 +170,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
   public void writeBytes(byte[] value, int offset, int length)
-            throws JMSException
+              throws JMSException
   {
     if (RObody)
       throw new MessageNotWriteableException("Can't write a value as the"

@@ -51,7 +51,7 @@ public class TopicConnectionFactory extends ConnectionFactory
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "TCF:" + serverAddr.toString();
+    return "TCF:" + config.serverAddr.toString();
   }
 
   /**
@@ -61,10 +61,10 @@ public class TopicConnectionFactory extends ConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.TopicConnection
-       createTopicConnection(String name, String password)
-       throws JMSException
+         createTopicConnection(String name, String password)
+         throws JMSException
   {
-    return new TopicConnection(this, serverAddr, port, name, password);
+    return new TopicConnection(config, name, password);
   }
 
   /**

@@ -27,6 +27,7 @@
 package fr.dyade.aaa.joram;
 
 import java.net.ConnectException;
+
 import javax.jms.JMSException;
 
 /**
@@ -50,7 +51,7 @@ public class QueueConnectionFactory extends ConnectionFactory
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "QCF:" + serverAddr.toString();
+    return "QCF:" + config.serverAddr.toString();
   }
 
   /**
@@ -60,9 +61,10 @@ public class QueueConnectionFactory extends ConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.QueueConnection
-       createQueueConnection(String name, String password) throws JMSException
+         createQueueConnection(String name, String password)
+         throws JMSException
   {
-    return new QueueConnection(this, serverAddr, port, name, password);
+    return new QueueConnection(config, name, password);
   }
 
   /**
@@ -77,4 +79,3 @@ public class QueueConnectionFactory extends ConnectionFactory
     return createQueueConnection("anonymous", "anonymous");
   }
 }
- 

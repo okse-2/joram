@@ -34,12 +34,12 @@ import javax.jms.JMSException;
 public class ConnectionMetaData implements javax.jms.ConnectionMetaData
 {
   private int jmsMajorVersion = 1;
-  private int jmsMinorVersion = 2;
+  private int jmsMinorVersion = 1;
   private String jmsProviderName = "Joram";
-  private String jmsVersion = "1.0.2b";
+  private String jmsVersion = "1.1";
   private int providerMajorVersion = 3;
-  private int providerMinorVersion = 0;
-  private String providerVersion = "3.0";
+  private int providerMinorVersion = 1;
+  private String providerVersion = "3.1";
 
   /**
    * API method.

@@ -1,7 +1,5 @@
 /*
  * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -26,39 +24,21 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.util.*;
-
-import javax.jms.JMSException;
-
 /**
- * Implements the <code>javax.jms.XAQueueSession</code> interface.
+ * A <code>FactoryConfiguration</code> instance holds a
+ * <code>ConnectionFactory</code> or a <code>XAConnectionFactory</code>
+ * configuration parameters.
  */
-public class XAQueueSession extends XASession 
-                            implements javax.jms.XAQueueSession
+class FactoryConfiguration
 {
-  /**
-   * Constructs an <code>XAQueueSession</code> instance.
-   *
-   * @param cnx  The connection the session belongs to.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  XAQueueSession(XAQueueConnection cnx) throws JMSException
-  {
-    super(cnx, new QueueSession(cnx, true, 0));
-  }
-
-  
-  /** Returns a String image of this session. */
-  public String toString()
-  {
-    return "XAQueueSess:" + ident;
-  }
-
-
-  /** API method. */ 
-  public javax.jms.QueueSession getQueueSession() throws JMSException
-  {
-    return (QueueSession) sess;
-  }
+  /** Address of the server. */
+  java.net.InetAddress serverAddr;  
+  /** Port on which the server is listening. */
+  int port; 
+  /** Url for connecting to the server. */
+  JoramUrl serverUrl;
+  /** Timer for opening a connection from the factory. */
+  int cnxTimer = 0;
+  /** Timer for pending transactions for the factory sessions. */
+  int txTimer = 0;
 }

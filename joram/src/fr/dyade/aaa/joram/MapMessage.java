@@ -70,6 +70,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Boolean(value));
   }
@@ -84,6 +86,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Byte(value));
   }
@@ -98,6 +102,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, value);
   }
@@ -108,11 +114,13 @@ public class MapMessage extends Message implements javax.jms.MapMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
   public void setBytes(String name, byte[] value, int offset, int length)
-            throws JMSException
+              throws JMSException
   {
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     byte[] buff = new byte[length];
     for (int i = 0; i < length; i++) {
@@ -131,6 +139,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Character(value));
   }
@@ -145,6 +155,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Double(value));
   }
@@ -159,6 +171,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Float(value));
   }
@@ -173,6 +187,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Integer(value));
   }
@@ -187,6 +203,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Long(value));
   }
@@ -202,6 +220,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     if (value instanceof Boolean || value instanceof Character 
         || value instanceof Number || value instanceof String
@@ -222,6 +242,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, new Short(value));
   }
@@ -236,6 +258,8 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
+    if (name == null || name.equals(""))
+      throw new NullPointerException("Invalid null or empty value name.");
 
     map.put(name, value);
   }

@@ -39,19 +39,41 @@ public class QueueConnection extends Connection
    * Constructs a <code>QueueConnection</code> instance and opens a TCP
    * connection with a given agent server.
    *
-   * @param qcf  The factory this connection is created by.
-   * @param serverAddr  Address of the server to connect to.
-   * @param port  Port the server is listening to.
+   * @param fConfig  The factory's configuration object.
    * @param name  User's name.
    * @param password  User's password.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  QueueConnection(QueueConnectionFactory qcf, java.net.InetAddress serverAddr,
-                  int port, String name, String password) throws JMSException
+  QueueConnection(FactoryConfiguration fConfig, String name,
+                  String password) throws JMSException
   {
-    super(qcf, serverAddr, port, name, password);
+    super(fConfig, name, password);
+  }
+
+
+  /**
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception InvalidSelectorException  If the selector syntax is wrong.
+   * @exception InvalidDestinationException  If the target destination does
+   *              not exist.
+   * @exception JMSSecurityException  If the user is not a READER on the dest.
+   * @exception JMSException  If the method fails for any other reason.
+   */
+  public javax.jms.ConnectionConsumer
+         createConnectionConsumer(javax.jms.Queue queue, String selector,
+                                  javax.jms.ServerSessionPool sessionPool,
+                                  int maxMessages) throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    return new ConnectionConsumer(this, (Queue) queue, selector,
+                                  sessionPool, maxMessages);
   }
 
   /**
@@ -61,37 +83,27 @@ public class QueueConnection extends Connection
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
   public javax.jms.QueueSession
-       createQueueSession(boolean transacted, int acknowledgeMode)
-       throws JMSException
+         createQueueSession(boolean transacted, int acknowledgeMode)
+         throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
 
-    return new QueueSession(nextSessionId(), this, transacted,
-                            acknowledgeMode);
+    return new QueueSession(this, transacted, acknowledgeMode);
   }
 
-  /**
+  /** 
    * API method.
-   * 
-   * @exception IllegalStateException  If the connection is closed.
-   * @exception InvalidSelectorException  If the selector syntax is wrong.
-   * @exception InvalidDestinationException  If the target queue does not
-   *              exist.
-   * @exception JMSSecurityException  If the user is not a READER on the queue.
-   * @exception JMSException  If one of the parameters is wrong.
+   *
+   * @exception IllegalStateException  Systematically.
    */
   public javax.jms.ConnectionConsumer
-       createConnectionConsumer(javax.jms.Queue queue, String selector,
-                                javax.jms.ServerSessionPool sessionPool,
-                                int maxMessages) throws JMSException
+         createDurableConnectionConsumer(javax.jms.Topic topic, String name,
+                                         String selector,
+                                         javax.jms.ServerSessionPool sessPool,
+                                         int maxMessages) throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new QueueConnectionConsumer(this, ((Queue) queue).getName(),
-                                       selector, sessionPool, maxMessages);
+    throw new IllegalStateException("Forbidden call on a QueueConnection.");
   }
 }

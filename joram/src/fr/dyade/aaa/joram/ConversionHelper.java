@@ -29,12 +29,12 @@ import javax.jms.MessageFormatException;
 /**
  * The <code>ConversionHelper</code> class provides the methods for
  * getting the message properties and converting them as authorized by
- * the JMS specification.
+ * the JMS specifications.
  */
 class ConversionHelper
 {
   static boolean getBoolean(Hashtable props, String name)
-               throws MessageFormatException
+                 throws MessageFormatException
   {
     if (props == null)
       return Boolean.valueOf(null).booleanValue();
@@ -52,7 +52,7 @@ class ConversionHelper
   }
   
   static byte getByte(Hashtable props, String name)
-            throws MessageFormatException
+              throws MessageFormatException
   {
     if (props == null)
       return Byte.valueOf(null).byteValue();
@@ -70,7 +70,7 @@ class ConversionHelper
   }
   
   static short getShort(Hashtable props, String name)
-             throws MessageFormatException
+               throws MessageFormatException
   {
     if (props == null)
       return Short.valueOf(null).shortValue();
@@ -106,7 +106,7 @@ class ConversionHelper
   }
   
   static long getLong(Hashtable props, String name)
-            throws MessageFormatException
+              throws MessageFormatException
   {
     if (props == null)
       return Long.valueOf(null).longValue();
@@ -125,7 +125,7 @@ class ConversionHelper
   }
 
   static float getFloat(Hashtable props, String name)
-             throws MessageFormatException
+               throws MessageFormatException
   {
     if (props == null)
       return Float.valueOf(null).floatValue();
@@ -143,7 +143,7 @@ class ConversionHelper
   }
   
   static double getDouble(Hashtable props, String name)
-              throws MessageFormatException
+                throws MessageFormatException
   {
     if (props == null)
       return Double.valueOf(null).doubleValue();
@@ -175,7 +175,7 @@ class ConversionHelper
   }
 
   static char getChar(Hashtable map, String name)
-            throws MessageFormatException
+              throws MessageFormatException
   {
     Object value = map.get(name);
     if (value == null)
@@ -188,7 +188,7 @@ class ConversionHelper
   }
 
   static byte[] getBytes(Hashtable map, String name)
-              throws MessageFormatException
+                throws MessageFormatException
   {
     Object value = map.get(name);
     if (value == null)

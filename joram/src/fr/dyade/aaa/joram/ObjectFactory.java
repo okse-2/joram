@@ -38,6 +38,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class ObjectFactory implements javax.naming.spi.ObjectFactory
 {
+  String cfClassName = "fr.dyade.aaa.joram.ConnectionFactory";
+  String xacfClassName = "fr.dyade.aaa.joram.XAConnectionFactory";
   String qcfClassName = "fr.dyade.aaa.joram.QueueConnectionFactory";
   String xaqcfClassName = "fr.dyade.aaa.joram.XAQueueConnectionFactory";
   String tcfClassName = "fr.dyade.aaa.joram.TopicConnectionFactory";
@@ -51,20 +53,73 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
   {
     Reference ref = (Reference) obj;
 
-    if (ref.getClassName().equals(qcfClassName)) {
+    if (ref.getClassName().equals(xaqcfClassName)) {
+      String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+
+      XAQueueConnectionFactory xaqcf =
+        (XAQueueConnectionFactory)
+        ConnectionFactory.getInstance(xaqcfClassName + "/" + url);
+
+      if (xaqcf == null)
+        xaqcf = new XAQueueConnectionFactory(url);
+      else 
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + xaqcf + " retrieved by naming service.");
+
+      xaqcf.setCnxTimer(cnxTimer.intValue());
+      return xaqcf;
+    }
+    else if (ref.getClassName().equals(xatcfClassName)) {
+      String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+
+      XATopicConnectionFactory xatcf =
+        (XATopicConnectionFactory)
+        ConnectionFactory.getInstance(xatcfClassName + "/" + url);
+
+      if (xatcf == null)
+        xatcf = new XATopicConnectionFactory(url);
+      else 
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + xatcf + " retrieved by naming service.");
+
+      xatcf.setCnxTimer(cnxTimer.intValue());
+      return xatcf;
+    }
+    else if (ref.getClassName().equals(xacfClassName)) {
+      String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+
+      XAConnectionFactory xacf =
+        (XAConnectionFactory)
+        ConnectionFactory.getInstance(xacfClassName + "/" + url); 
+
+      if (xacf == null)
+        xacf = new XAConnectionFactory(url);
+      else 
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + xacf + " retrieved by naming service.");
+
+      xacf.setCnxTimer(cnxTimer.intValue());
+      return xacf;
+    }
+    else if (ref.getClassName().equals(qcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
       Integer cnxTimer =
         new Integer((String) ref.get("cFactory.cnxT").getContent());
       Integer txTimer = 
         new Integer((String) ref.get("cFactory.txT").getContent());
 
-      ConnectionFactory cf =
-        (ConnectionFactory) ConnectionFactory.getInstance(url); 
-
-      QueueConnectionFactory qcf = null;
-
-      if (cf instanceof QueueConnectionFactory)
-        qcf = (QueueConnectionFactory) cf;
+      QueueConnectionFactory qcf =
+        (QueueConnectionFactory)
+        ConnectionFactory.getInstance(qcfClassName + "/" + url); 
 
       if (qcf == null)
         qcf = new QueueConnectionFactory(url);
@@ -77,31 +132,6 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       qcf.setTxTimer(txTimer.intValue());
       return qcf;
     }
-    else if (ref.getClassName().equals(xaqcfClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
-      Integer cnxTimer =
-        new Integer((String) ref.get("cFactory.cnxT").getContent());
-      Integer txTimer = 
-        new Integer((String) ref.get("cFactory.txT").getContent());
-
-      ConnectionFactory cf =
-        (ConnectionFactory) ConnectionFactory.getInstance(url);
-
-      XAQueueConnectionFactory xaqcf = null;
-
-      if (cf instanceof XAQueueConnectionFactory)
-        xaqcf = (XAQueueConnectionFactory) cf;
-
-      if (xaqcf == null)
-        xaqcf = new XAQueueConnectionFactory(url);
-      else 
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
-                                     + xaqcf + " retrieved by naming service.");
-
-      xaqcf.setCnxTimer(cnxTimer.intValue());
-      return xaqcf;
-    }
     else if (ref.getClassName().equals(tcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
       Integer cnxTimer =
@@ -109,13 +139,9 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       Integer txTimer = 
         new Integer((String) ref.get("cFactory.txT").getContent());
 
-      ConnectionFactory cf =
-        (ConnectionFactory) ConnectionFactory.getInstance(url);
-
-      TopicConnectionFactory tcf = null;
-
-      if (cf instanceof TopicConnectionFactory)
-        tcf = (TopicConnectionFactory) cf;
+      TopicConnectionFactory tcf =
+        (TopicConnectionFactory)
+        ConnectionFactory.getInstance(xatcfClassName + "/" + url);
 
       if (tcf == null)
         tcf = new TopicConnectionFactory(url);
@@ -128,7 +154,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       tcf.setTxTimer(txTimer.intValue());
       return tcf;
     }
-    else if (ref.getClassName().equals(xatcfClassName)) {
+    else if (ref.getClassName().equals(cfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
       Integer cnxTimer =
         new Integer((String) ref.get("cFactory.cnxT").getContent());
@@ -136,22 +162,19 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
         new Integer((String) ref.get("cFactory.txT").getContent());
 
       ConnectionFactory cf =
-        (ConnectionFactory) ConnectionFactory.getInstance(url);
+        (ConnectionFactory)
+        ConnectionFactory.getInstance(xacfClassName + "/" + url); 
 
-      XATopicConnectionFactory xatcf = null;
-
-      if (cf instanceof XATopicConnectionFactory)
-        xatcf = (XATopicConnectionFactory) cf;
-
-      if (xatcf == null)
-        xatcf = new XATopicConnectionFactory(url);
+      if (cf == null)
+        cf = new ConnectionFactory(url);
       else 
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
-                                     + xatcf + " retrieved by naming service.");
+                                     + cf + " retrieved by naming service.");
 
-      xatcf.setCnxTimer(cnxTimer.intValue());
-      return xatcf;
+      cf.setCnxTimer(cnxTimer.intValue());
+      cf.setTxTimer(txTimer.intValue());
+      return cf;
     }
     else if (ref.getClassName().equals(qClassName)) {
       String qName = (String) ref.get("dest.name").getContent();

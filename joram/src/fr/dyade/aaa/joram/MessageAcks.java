@@ -1,7 +1,5 @@
 /*
  * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -26,39 +24,53 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.util.*;
-
-import javax.jms.JMSException;
+import java.util.Vector;
 
 /**
- * Implements the <code>javax.jms.XAQueueSession</code> interface.
+ * A <code>MessageAcks</code> instance holds the identifiers of messages to
+ * acknowledge on a queue or on a proxy subscription.
  */
-public class XAQueueSession extends XASession 
-                            implements javax.jms.XAQueueSession
+class MessageAcks
 {
+  /** The vector of messages identifiers. */
+  private Vector ids;
+  /** <code>true</code> if the messages to acknowledge are on a queue. */
+  private boolean queueMode;
+
   /**
-   * Constructs an <code>XAQueueSession</code> instance.
+   * Constructs a <code>MessageAcks</code> instance.
    *
-   * @param cnx  The connection the session belongs to.
-   *
-   * @exception JMSException  Actually never thrown.
+   * @param queueMode  <code>true</code> for queue messages.
    */
-  XAQueueSession(XAQueueConnection cnx) throws JMSException
+  MessageAcks(boolean queueMode)
   {
-    super(cnx, new QueueSession(cnx, true, 0));
+    this.queueMode = queueMode;
+    ids = new Vector();
   }
 
-  
-  /** Returns a String image of this session. */
-  public String toString()
+  /** Adds a message identifier. */
+  void addId(String id)
   {
-    return "XAQueueSess:" + ident;
+    ids.add(id);
   }
 
-
-  /** API method. */ 
-  public javax.jms.QueueSession getQueueSession() throws JMSException
+  /** Adds a vector of message identifiers. */
+  void addIds(Vector ids)
   {
-    return (QueueSession) sess;
+    this.ids.addAll(ids);
   }
-}
+
+  /** Returns the vector of message identifiers. */
+  Vector getIds()
+  {
+    return ids;
+  }
+
+  /**
+   * Returns <code>true</code> if the messages to acknowledge are on a queue.
+   */
+  boolean getQueueMode()
+  {
+    return queueMode;
+  }
+} 

@@ -39,9 +39,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class MessageProducer implements javax.jms.MessageProducer
 {
-  /** <code>true</code> if the producer's destination is identified. */
-  private boolean identified = true;
-
   /** Default delivery mode. */
   private int deliveryMode = javax.jms.DeliveryMode.PERSISTENT;
   /** Default priority. */
@@ -56,6 +53,8 @@ public class MessageProducer implements javax.jms.MessageProducer
   private boolean messageIDDisabled = false;
   /** <code>true</code> if the time stamp is disabled. */
   private boolean timestampDisabled = false;
+  /** <code>true</code> if the producer's destination is identified. */
+  private boolean identified = true;
 
   /** <code>true</code> if the producer is closed. */
   protected boolean closed = false;
@@ -170,6 +169,19 @@ public class MessageProducer implements javax.jms.MessageProducer
    *
    * @exception IllegalStateException  If the producer is closed.
    */
+  public javax.jms.Destination getDestination() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed producer.");
+
+    return dest;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the producer is closed.
+   */
   public boolean getDisableMessageID() throws JMSException
   {
     if (closed)
@@ -230,6 +242,105 @@ public class MessageProducer implements javax.jms.MessageProducer
     return timestampDisabled;
   }
 
+
+  /**
+   * Sends a message with the default delivery parameters.
+   *
+   * @exception UnsupportedOperationException  If the dest is unidentified.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Message message) throws JMSException
+  {
+    if (! identified)
+      throw new UnsupportedOperationException("Can't send message to"
+                                              + " an unidentified"
+                                              + " destination.");
+    // Actually producing it:
+    doSend(dest, message, deliveryMode, priority, timeToLive);
+  }
+
+  /**
+   * Sends a message with given delivery parameters.
+   *
+   * @exception UnsupportedOperationException  If the dest is unidentified.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Message message, int deliveryMode,
+                   int priority, long timeToLive) throws JMSException
+  {
+    if (! identified)
+      throw new UnsupportedOperationException("Can't send message to"
+                                              + " an unidentified"
+                                              + " destination.");
+    // Actually producing it:
+    doSend(dest, message, deliveryMode, priority, timeToLive);
+  }
+
+  /**
+   * Sends a message with default delivery parameters for an unidentified 
+   * message producer.
+   *
+   * @exception UnsupportedOperationException  When the producer did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified destination.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Destination dest,
+                   javax.jms.Message message) throws JMSException
+  {
+    if (identified)
+      throw new UnsupportedOperationException("An unidentified message"
+                                              + " producer can't use this"
+                                              + " identified message"
+                                              + " producer.");
+    if (dest == null)
+      throw new UnsupportedOperationException("Can't send message to"
+                                              + " an unidentified"
+                                              + " destination.");
+    // Checking user's access permission:
+    sess.cnx.isWriter(((Destination) dest).getName());
+
+    doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
+  }
+
+  /**
+   * Sends a message with given delivery parameters for an unidentified
+   * message producer.
+   *
+   * @exception UnsupportedOperationException  When the producer did not
+   *              properly identify itself.
+   * @exception JMSSecurityException  If the user if not a WRITER on the
+   *              specified destination.
+   * @exception IllegalStateException  If the producer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void send(javax.jms.Destination dest, javax.jms.Message message,
+                   int deliveryMode, int priority,
+                   long timeToLive) throws JMSException
+  {
+    if (identified)
+      throw new UnsupportedOperationException("An unidentified message"
+                                              + " producer can't use this"
+                                              + " identified message"
+                                              + " producer.");
+    if (dest == null)
+      throw new UnsupportedOperationException("Can't send message to"
+                                              + " an unidentified"
+                                              + " destination.");
+    // Checking user's access permission:
+    sess.cnx.isWriter(((Destination) dest).getName());
+
+    doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
+  }
+
   /**
    * API method.
    *
@@ -254,115 +365,17 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
-   * Produces a message with the default delivery parameters.
-   *
-   * @exception UnsupportedOperationException  If the dest is unidentified.
-   * @exception IllegalStateException  If the producer is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  protected void produce(javax.jms.Message message) throws JMSException
-  {
-    if (! identified)
-      throw new UnsupportedOperationException("Can't produce message to"
-                                              + " an unidentified"
-                                              + " destination.");
-    // Actually producing it:
-    doProduce(dest, message, deliveryMode, priority, timeToLive);
-  }
-
-  /**
-   * Produces a message with given delivery parameters.
-   *
-   * @exception UnsupportedOperationException  If the dest is unidentified.
-   * @exception IllegalStateException  If the producer is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  protected void produce(javax.jms.Message message, int deliveryMode,
-                         int priority, long timeToLive) throws JMSException
-  {
-    if (! identified)
-      throw new UnsupportedOperationException("Can't produce message to"
-                                              + " an unidentified"
-                                              + " destination.");
-    // Actually producing it:
-    doProduce(dest, message, deliveryMode, priority, timeToLive);
-  }
-
-  /**
-   * Produces a message with default delivery parameters for an unidentified 
-   * message producer.
-   *
-   * @exception UnsupportedOperationException  When the producer did not
-   *              properly identify itself.
-   * @exception JMSSecurityException  If the user if not a WRITER on the
-   *              specified destination.
-   * @exception IllegalStateException  If the producer is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  protected void produce(Destination dest,
-                         javax.jms.Message message) throws JMSException
-  {
-    if (identified)
-      throw new UnsupportedOperationException("An unidentified message"
-                                              + " producer can't use this"
-                                              + " identified message"
-                                              + " producer.");
-    if (dest == null)
-      throw new UnsupportedOperationException("Can't produce message to"
-                                              + " an unidentified"
-                                              + " destination.");
-    // Checking user's access permission:
-    sess.cnx.isWriter(dest.getName());
-
-    doProduce(dest, message, deliveryMode, priority, timeToLive);
-  }
-
-  /**
-   * Produces a message with given delivery parameters for an unidentified
-   * message producer.
-   *
-   * @exception UnsupportedOperationException  When the producer did not
-   *              properly identify itself.
-   * @exception JMSSecurityException  If the user if not a WRITER on the
-   *              specified destination.
-   * @exception IllegalStateException  If the producer is closed, or if the
-   *              connection is broken.
-   * @exception JMSException  If the request fails for any other reason.
-   */
-  protected void produce(Destination dest, javax.jms.Message message,
-                         int deliveryMode, int priority,
-                         long timeToLive) throws JMSException
-  {
-    if (identified)
-      throw new UnsupportedOperationException("An unidentified message"
-                                              + " producer can't use this"
-                                              + " identified message"
-                                              + " producer.");
-    if (dest == null)
-      throw new UnsupportedOperationException("Can't produce message to"
-                                              + " an unidentified"
-                                              + " destination.");
-    // Checking user's access permission:
-    sess.cnx.isWriter(dest.getName());
-
-    doProduce(dest, message, deliveryMode, priority, timeToLive);
-  }
-
-  /**
    * Actually sends a message to a given destination.
    *
-   * @exception MessageFormatException  If the message to produce is invalid.
+   * @exception MessageFormatException  If the message to send is invalid.
    * @exception InvalidDestinationException  If the specified destination is
    *              invalid.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  private void doProduce(Destination dest, javax.jms.Message message,
-                         int deliveryMode, int priority,
-                         long timeToLive) throws JMSException
+  private void doSend(Destination dest, javax.jms.Message message,
+                      int deliveryMode, int priority,
+                      long timeToLive) throws JMSException
   {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
@@ -385,12 +398,12 @@ public class MessageProducer implements javax.jms.MessageProducer
       message.setJMSTimestamp(System.currentTimeMillis());
 
     fr.dyade.aaa.mom.messages.Message momMsg = null;
-    // If the message to produce is a proprietary one, getting the MOM message
+    // If the message to send is a proprietary one, getting the MOM message
     // it wraps:
     if (message instanceof fr.dyade.aaa.joram.Message)
       momMsg = ((Message) message).getMomMessage();
 
-    // If the message to produce is a non proprietary JMS message, building
+    // If the message to send is a non proprietary JMS message, building
     // a proprietary message and then getting the MOM message it wraps:
     else if (message instanceof javax.jms.Message) {
       try {
@@ -426,12 +439,9 @@ public class MessageProducer implements javax.jms.MessageProducer
       pM.addMessage(momMsg);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending "+ momMsg);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending " + momMsg);
       
       sess.cnx.syncRequest(pM);
     }
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": produced msg: " 
-                                 + msgID);
   }
 }

@@ -42,9 +42,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  * An XA session actually extends the behaviour of a normal session by
  * providing an XA resource representing it to a Transaction Manager, so that
- * it is part of a distributed transaction.
+ * it is part of a distributed transaction. The XASession wraps what looks like
+ * a "normal"Session object. This object takes care of producing and
+ * consuming messages, the actual sendings and acknowledgement being managed
+ * by this XA wrapper.
  */
-public abstract class XASession extends Session implements javax.jms.XASession
+public class XASession extends Session implements javax.jms.XASession
 {
   /** The XA resource representing the session to the transaction manager. */
   private XAResource xaResource;
@@ -55,19 +58,27 @@ public abstract class XASession extends Session implements javax.jms.XASession
    * <b>Object:</b> <code>XAContext</code> instance
    */
   protected Hashtable transactionsTable;
+  /**
+   * An XA Session actually wraps what looks like a "normal" session object.
+   */
+  protected Session sess;
 
 
   /**
    * Constructs an <code>XASession</code>.
    *
-   * @param ident  Identifier of the session.
    * @param cnx  The connection the session belongs to.
    *
    * @exception JMSException  Actually never thrown.
    */
-  XASession(String ident, Connection cnx) throws JMSException
+  XASession(Connection cnx) throws JMSException
   {
-    super(ident, cnx, true, 0);
+    super(cnx, true, 0);
+    sess = new Session(cnx, true, 0);
+    // The wrapped session is removed from the connection's list, as it
+    // is to be only seen by the wrapping XA session.
+    cnx.sessions.remove(sess);
+
     xaResource = new XAResource(this);
     transactionsTable = new Hashtable();
 
@@ -77,7 +88,54 @@ public abstract class XASession extends Session implements javax.jms.XASession
     sendings = null;
     deliveries = null;
   }
- 
+
+  /**
+   * Constructs an <code>XASession</code>.
+   * <p>
+   * This constructor is called by subclasses.
+   *
+   * @param cnx  The connection the session belongs to.
+   * @param sess  The wrapped "regular" session.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  XASession(Connection cnx, Session sess) throws JMSException
+  {
+    super(cnx, true, 0);
+    this.sess = sess;
+    // The wrapped session is removed from the connection's list, as it
+    // is to be only seen by the wrapping XA session.
+    cnx.sessions.remove(sess);
+
+    xaResource = new XAResource(this);
+    transactionsTable = new Hashtable();
+
+    // This session's resources are not used by XA sessions:
+    consumers = null;
+    producers = null;
+    sendings = null;
+    deliveries = null;
+  }
+
+   /** Returns a String image of this session. */
+  public String toString()
+  {
+    return "XASess:" + ident;
+  }
+
+  
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed.
+   */
+  public javax.jms.Session getSession() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    return sess;
+  }
  
   /** API method. */  
   public javax.transaction.xa.XAResource getXAResource()
@@ -127,52 +185,57 @@ public abstract class XASession extends Session implements javax.jms.XASession
    *
    * @exception JMSException  Actually never thrown.
    */
-  public abstract void close() throws JMSException;
+  public void close() throws JMSException
+  {
+    // Ignoring the call if the session is already closed:
+    if (closed)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "---" + this
+                                 + ": closing..."); 
+
+    // Stopping the wrapped session:
+    sess.stop();
+
+    // Closing the wrapped session's resources:
+    while (! sess.consumers.isEmpty())
+      ((MessageConsumer) sess.consumers.get(0)).close();
+    while (! sess.producers.isEmpty())
+      ((MessageProducer) sess.producers.get(0)).close();
+
+    sess.closed = true;
+
+    cnx.sessions.remove(this);
+
+    closed = true;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
+  }
 
   
   /** 
    * API method inherited from session, but intercepted here for
    * adapting its behaviour to the XA context.
-   */
-  public abstract void run();
-
-  /** 
-   * This abstract method inherited from session is empty and does nothing.
    * <p>
-   * Its purpose is to force the <code>QueueSession</code> and
-   * <code>TopicSession</code> classes to specifically take care of
-   * acknowledging the consumed messages. The messages consumed by an XA
-   * session are consumed through the wrapped session, and acknowledgement
-   * is not done through the same mechanism.
+   * This method processes asynchronous deliveries coming from a connection
+   * consumer by passing them to the wrapped session.
    */
-  void acknowledge() throws IllegalStateException
-  {}
+  public void run()
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": running...");
+    sess.messageListener = super.messageListener;
+    sess.connectionConsumer = super.connectionConsumer;
+    sess.repliesIn = super.repliesIn;
+    sess.run();
+    super.repliesIn.removeAllElements();
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": runned.");
+  }
 
-  /** 
-   * This abstract method inherited from session is empty and does nothing.
-   * <p>
-   * Its purpose is to force the <code>QueueSession</code> and
-   * <code>TopicSession</code> classes to specifically take care of
-   * denying the consumed messages. The messages consumed by an XA
-   * session are consumed through the wrapped session, and denying
-   * is not done through the same mechanism.
-   */
-  void deny()
-  {}
-
-  /** 
-   * This abstract method inherited from session is empty and does nothing.
-   * <p>
-   * Its purpose is to force the <code>QueueSession</code> and
-   * <code>TopicSession</code> classes to specifically take care of
-   * distributing the asynchronous deliveries destinated to their consumers.
-   * An XA session actually does not directly manage consumers, this is done
-   * by the session it wraps.
-   */
-  void distribute(AbstractJmsReply reply)
-  {}
-   
- 
   /** 
    * Method called by the XA resource to involve the session in a given
    * transaction.
@@ -243,14 +306,31 @@ public abstract class XASession extends Session implements javax.jms.XASession
   }
 
   /** 
-   * The purpose of this abstract method is to force the
-   * <code>XAQueueSession</code> and <code>XATopicSession</code> classes to
-   * specifically react to their delisting from the transaction.
+   * This method is called by the wrapped <code>XAResource</code> for saving
+   * the "state" of the wrapped session for later modifying it or commiting it.
+   * <p>
+   * The word "state" actually means the messages produced by the session's
+   * producers, and the acknowledgements due to its consumers.
    *
    * @exception XAException  If the session is not involved with this
    *              transaction. 
    */
-  abstract void saveTransaction(Xid xid) throws XAException;
+  void saveTransaction(Xid xid) throws XAException
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": saves transaction "
+                                 + xid.toString()); 
+    
+    xaC.addSendings(sess.sendings);
+    xaC.addDeliveries(sess.deliveries);
+  }
 
   /** 
    * Method called by the XA resource when it is enlisted again to a given
@@ -269,16 +349,54 @@ public abstract class XASession extends Session implements javax.jms.XASession
   }
 
   /** 
-   * The purpose of this abstract method is to force the
-   * <code>XAQueueSession</code> and <code>XATopicSession</code> classes to
-   * specifically react to a preparing transaction.
+   * This method is called by the wrapped <code>XAResource</code> for
+   * preparing the session by sending the corresponding messages and
+   * acknowledgements previously saved.
    *
    * @exception XAException  If the session is not involved with this
    *              transaction.
    * @exception JMSException If the prepare failed because of the
    *              Joram server.
    */
-  abstract void prepareTransaction(Xid xid) throws Exception;
+  void prepareTransaction(Xid xid) throws Exception
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": prepares transaction "
+                                 + xid.toString()); 
+
+    Enumeration targets;    
+    String target;
+    Vector pMs = new Vector();
+    MessageAcks acks;
+    Vector sessAcks = new Vector();
+
+    // Getting all the ProducerMessages to send:
+    targets = xaC.sendings.keys();
+    while (targets.hasMoreElements()) {
+      target = (String) targets.nextElement();
+      pMs.add(xaC.sendings.remove(target));
+    }
+
+    // Getting all the SessAckRequest to send:
+    targets = xaC.deliveries.keys();
+    while (targets.hasMoreElements()) {
+      target = (String) targets.nextElement();
+      acks = (MessageAcks) xaC.deliveries.remove(target);
+      sessAcks.add(new SessAckRequest(target, acks.getIds(),
+                                      acks.getQueueMode()));
+    }
+
+    // Sending to the proxy:
+    sess.cnx.syncRequest(new XASessPrepare(ident + " " + xid.toString(),
+                                           pMs, sessAcks));
+  }
 
   /** 
    * Method called by the XA resource when the transaction commits.
@@ -310,7 +428,38 @@ public abstract class XASession extends Session implements javax.jms.XASession
    *              transaction.
    * @exception JMSException  If the rollback fails because of Joram server.
    */
-  abstract void rollbackTransaction(Xid xid) throws Exception;
+  void rollbackTransaction(Xid xid) throws Exception
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": rolls back transaction "
+                                 + xid.toString()); 
+
+    Enumeration targets; 
+    String target;
+    MessageAcks acks;
+
+    XASessRollback rollbackRequest;
+
+    targets = xaC.deliveries.keys();
+
+    rollbackRequest = new XASessRollback(ident + " " + xid.toString());
+
+    while (targets.hasMoreElements()) {
+      target = (String) targets.nextElement();
+      acks = (MessageAcks) xaC.deliveries.remove(target);
+      rollbackRequest.add(target, acks.getIds(), acks.getQueueMode());
+    }
+
+    // Sending to the proxy:
+    sess.cnx.syncRequest(rollbackRequest);
+  }
 
   /**
    * Returns an array of the identifiers of the prepared transactions the

@@ -75,7 +75,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
       sess = (Session) cnx.sessions.get(i);
       for (int j = 0; j < sess.consumers.size(); j++) {
         cons = (MessageConsumer) sess.consumers.get(j);
-        if (agentId.equals(cons.destName))
+        if (agentId.equals(cons.targetName))
           throw new JMSException("Consumers still exist for this temp."
                                  + " queue.");
       }

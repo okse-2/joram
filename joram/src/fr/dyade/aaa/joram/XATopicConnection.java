@@ -39,20 +39,34 @@ public class XATopicConnection extends TopicConnection
    * Constructs an <code>XATopicConnection</code> instance and opens a TCP
    * connection with a given agent server.
    *
-   * @param cf  The factory this connection is created by.
-   * @param serverAddr  Address of the server to connect to.
-   * @param port  Port the server is listening to.
+   * @param fConfig  The factory's configuration object.
    * @param name  User's name.
    * @param password  User's password.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  XATopicConnection(XATopicConnectionFactory cf,
-                    java.net.InetAddress serverAddr, int port, String name,
+  XATopicConnection(FactoryConfiguration fConfig, String name,
                     String password) throws javax.jms.JMSException
   {
-    super(cf, serverAddr, port, name, password);
+    super(fConfig, name, password);
+  }
+
+  /**
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
+   */
+  public javax.jms.TopicSession
+         createTopicSession(boolean transacted, int acknowledgeMode)
+         throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    
+    return new TopicSession(this, transacted, acknowledgeMode);
   }
 
   /** 
@@ -65,6 +79,36 @@ public class XATopicConnection extends TopicConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XATopicSession(nextSessionId(), this);
+    return new XATopicSession(this);
+  }
+
+  /** 
+   * Method inherited from interface <code>XAConnection</code>.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
+   */
+  public javax.jms.Session
+         createSession(boolean transacted, int acknowledgeMode)
+         throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    return new Session(this, transacted, acknowledgeMode);
+  }
+
+  /** 
+   * Method inherited from interface <code>XAConnection</code>.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public javax.jms.XASession createXASession() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    return new XASession(this);
   }
 }

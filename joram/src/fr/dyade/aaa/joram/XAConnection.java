@@ -30,13 +30,12 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
 /**
- * Implements the <code>javax.jms.XAQueueConnection</code> interface.
+ * Implements the <code>javax.jms.XAConnection</code> interface.
  */
-public class XAQueueConnection extends QueueConnection
-                               implements javax.jms.XAQueueConnection
+public class XAConnection extends Connection implements javax.jms.XAConnection
 {
   /**
-   * Constructs an <code>XAQueueConnection</code> instance and opens a TCP
+   * Constructs an <code>XAConnection</code> instance and opens a TCP
    * connection with a given agent server.
    *
    * @param fConfig  The factory's configuration object.
@@ -46,45 +45,15 @@ public class XAQueueConnection extends QueueConnection
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  XAQueueConnection(FactoryConfiguration fConfig, String name,
-                    String password) throws javax.jms.JMSException
+  XAConnection(FactoryConfiguration fConfig, String name,
+               String password) throws javax.jms.JMSException
   {
     super(fConfig, name, password);
   }
 
-  
-  /**
-   * API method.
-   * 
-   * @exception IllegalStateException  If the connection is closed.
-   * @exception JMSException  In case of an invalid acknowledge mode.
-   */
-  public javax.jms.QueueSession
-         createQueueSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new QueueSession(this, transacted, acknowledgeMode);
-  }
 
   /** 
    * API method.
-   *
-   * @exception IllegalStateException  If the connection is closed.
-   */
-  public javax.jms.XAQueueSession createXAQueueSession() throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XAQueueSession(this);
-  }
-
-  /** 
-   * Method inherited from interface <code>XAConnection</code>.
    *
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
@@ -101,7 +70,7 @@ public class XAQueueConnection extends QueueConnection
   }
 
   /** 
-   * Method inherited from interface <code>XAConnection</code>.
+   * API method.
    *
    * @exception IllegalStateException  If the connection is closed.
    */
