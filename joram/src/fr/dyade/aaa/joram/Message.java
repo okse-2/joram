@@ -26,6 +26,7 @@
  */
 package fr.dyade.aaa.joram;
 
+import fr.dyade.aaa.mom.messages.DestinationInfo;
 import fr.dyade.aaa.mom.messages.MessageType;
 
 import java.util.*;
@@ -54,13 +55,19 @@ public class Message implements javax.jms.Message
   /** The session that consumes the message, if any. */
   protected Session sess = null;
 
+  /**
+   * <code>true</code> if this message is consumed and thus, acknowledgable. 
+   */
+  private boolean consumed = false;
+
 
   /**
    * Constructs a <code>Message</code>.
    */
-  Message()
+  Message(Session sess)
   {
     momMsg = new fr.dyade.aaa.mom.messages.Message();
+    this.sess = sess;
   }
 
 
@@ -73,7 +80,7 @@ public class Message implements javax.jms.Message
    */
   public void acknowledge() throws JMSException
   {
-    if (sess == null
+    if (! consumed
         || sess.transacted
         || sess.acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE)
       return;
@@ -168,10 +175,22 @@ public class Message implements javax.jms.Message
   public void setJMSDestination(javax.jms.Destination destination)
             throws JMSException
   {
-    if (destination instanceof Queue)
-      momMsg.setDestination(((Queue) destination).getQueueName(), true);
+    DestinationInfo dest = null;
+
+    if (destination instanceof TemporaryQueue)
+      dest = new DestinationInfo(((Queue) destination).getQueueName(),
+                                 true, true);
+    else if (destination instanceof Queue)
+      dest = new DestinationInfo(((Queue) destination).getQueueName(),
+                                 true, false);
+    else if (destination instanceof TemporaryTopic)
+      dest = new DestinationInfo(((Topic) destination).getTopicName(),
+                                 false, true);
     else if (destination instanceof Topic)
-      momMsg.setDestination(((Topic) destination).getTopicName(), false);
+      dest = new DestinationInfo(((Topic) destination).getTopicName(),
+                                 false, false);
+
+    momMsg.setDestination(dest);
   }
 
   /**
@@ -201,10 +220,22 @@ public class Message implements javax.jms.Message
    */
   public void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException
   {
-    if (replyTo instanceof Queue)
-      momMsg.setReplyTo(((Queue) replyTo).getQueueName(), true);
+    DestinationInfo dest = null;
+
+    if (replyTo instanceof TemporaryQueue)
+      dest = new DestinationInfo(((Queue) replyTo).getQueueName(),
+                                 true, true);
+    else if (replyTo instanceof Queue)
+      dest = new DestinationInfo(((Queue) replyTo).getQueueName(),
+                                 true, false);
+    else if (replyTo instanceof TemporaryTopic)
+      dest = new DestinationInfo(((Topic) replyTo).getTopicName(),
+                                 false, true);
     else if (replyTo instanceof Topic)
-      momMsg.setReplyTo(((Topic) replyTo).getTopicName(), false);
+      dest = new DestinationInfo(((Topic) replyTo).getTopicName(),
+                                 false, false);
+
+    momMsg.setReplyTo(dest);
   }
   
   /**
@@ -299,10 +330,19 @@ public class Message implements javax.jms.Message
    */
   public javax.jms.Destination getJMSDestination() throws JMSException
   {
-    if (momMsg.getPTP())
-      return new Queue(momMsg.getDestination());
+    DestinationInfo dest = momMsg.getDestination();
+
+    if (dest == null)
+      return null;
+
+    if (dest.isQueue() && dest.isTemporary())
+      return new TemporaryQueue(dest.getName(), sess.cnx);
+    else if (dest.isQueue() && ! dest.isTemporary())
+      return new Queue(dest.getName());
+    else if (! dest.isQueue() && dest.isTemporary())
+      return new TemporaryTopic(dest.getName(), sess.cnx);
     else
-      return new Topic(momMsg.getDestination());
+      return new Topic(dest.getName());
   }
 
   /**
@@ -332,10 +372,19 @@ public class Message implements javax.jms.Message
    */
   public javax.jms.Destination getJMSReplyTo() throws JMSException
   {
-    if (momMsg.replyToQueue())
-      return new Queue(momMsg.getReplyTo());
+    DestinationInfo dest = momMsg.getReplyTo();
+
+    if (dest == null)
+      return null;
+
+    if (dest.isQueue() && dest.isTemporary())
+      return new TemporaryQueue(dest.getName(), sess.cnx);
+    else if (dest.isQueue() && ! dest.isTemporary())
+      return new Queue(dest.getName());
+    else if (! dest.isQueue() && dest.isTemporary())
+      return new TemporaryTopic(dest.getName(), sess.cnx);
     else
-      return new Topic(momMsg.getReplyTo());
+      return new Topic(dest.getName());
   }
 
   /**
@@ -627,22 +676,22 @@ public class Message implements javax.jms.Message
 
     try {
       if (momMsg.type == MessageType.SIMPLE)
-        msg = new Message();
+        msg = new Message(sess);
       else if (momMsg.type == MessageType.TEXT)
-        msg = new TextMessage();
+        msg = new TextMessage(sess);
       else if (momMsg.type == MessageType.MAP)
-        msg = new MapMessage();
+        msg = new MapMessage(sess);
       else if (momMsg.type == MessageType.OBJECT)
-        msg = new ObjectMessage();
+        msg = new ObjectMessage(sess);
       else if (momMsg.type == MessageType.STREAM)
-        msg = new StreamMessage();
+        msg = new StreamMessage(sess);
       else if (momMsg.type == MessageType.BYTES)
-        msg = new BytesMessage();
+        msg = new BytesMessage(sess);
 
-      msg.sess = sess;
       msg.momMsg = momMsg;
       msg.ROproperties = true;
       msg.RObody = true;
+      msg.consumed = true;
       msg.restore();
       return msg;
     }
@@ -659,21 +708,22 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  If the Joram message creation fails.
    */
-  static Message convertJMSMessage(javax.jms.Message jmsMsg)
+  static Message convertJMSMessage(Session sess, javax.jms.Message jmsMsg)
        throws JMSException
   {
     Message msg = null;
     if (jmsMsg instanceof javax.jms.TextMessage)
-      msg = new TextMessage(((javax.jms.TextMessage) jmsMsg).getText());
+      msg = new TextMessage(sess, ((javax.jms.TextMessage) jmsMsg).getText());
     else if (jmsMsg instanceof javax.jms.ObjectMessage)
-      msg = new ObjectMessage(((javax.jms.ObjectMessage) jmsMsg).getObject());
+      msg = new ObjectMessage(sess,
+                              ((javax.jms.ObjectMessage) jmsMsg).getObject());
     else if (jmsMsg instanceof javax.jms.StreamMessage) {
-      msg = new StreamMessage();
+      msg = new StreamMessage(sess);
       ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage)
                                          jmsMsg).readObject());
     }
     else if (jmsMsg instanceof javax.jms.BytesMessage) {
-      msg = new BytesMessage();
+      msg = new BytesMessage(sess);
       try {
         while (true)
           ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage)
@@ -681,8 +731,24 @@ public class Message implements javax.jms.Message
       }
       catch (MessageEOFException mE) {}
     }
+    else if (jmsMsg instanceof javax.jms.MapMessage) {
+      msg = new MapMessage(sess);
+      try {
+        Enumeration mapNames = ((javax.jms.MapMessage) jmsMsg).getMapNames();
+
+        String mapName;
+        while (mapNames.hasMoreElements()) {
+          mapName = (String) mapNames.nextElement();
+
+          ((javax.jms.MapMessage) msg).setObject(mapName, 
+                                                 ((javax.jms.MapMessage)
+                                                  jmsMsg).getObject(mapName));
+        }
+      }
+      catch (MessageEOFException mE) {}
+    }
     else
-      msg = new Message();
+      msg = new Message(sess);
 
     msg.setJMSCorrelationID(jmsMsg.getJMSCorrelationID());
     msg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
