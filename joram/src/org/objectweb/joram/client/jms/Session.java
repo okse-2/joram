@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -98,6 +98,7 @@ public class Session implements javax.jms.Session
   /** The connection consumer delivering messages to the session, if any. */
   ConnectionConsumer connectionConsumer = null;
 
+  volatile boolean toRecover = false;
 
   /**
    * Opens a session.
@@ -158,16 +159,20 @@ public class Session implements javax.jms.Session
    */
   public int getAcknowledgeMode() throws JMSException
   {
+    if (getTransacted())
+      return Session.SESSION_TRANSACTED;
     return acknowledgeMode;
   }
 
   /**
    * API method.
    *
-   * @exception JMSException  Actually never thrown.
+   * @exception IllegalStateException  If the session is closed.
    */
   public boolean getTransacted() throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Invalid state: session is closed.");
     return transacted;
   }
 
@@ -694,25 +699,44 @@ public class Session implements javax.jms.Session
    *
    * @exception IllegalStateException  If the session is closed, or transacted.
    */
-  public void recover() throws JMSException
-  {
+  public void recover() throws JMSException {
     if (transacted)
       throw new IllegalStateException("Can't recover a transacted session.");
-
+    
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + " recovering...");
 
+    toRecover = true;
+
+    if (daemon != null &&  
+        daemon.isCurrentThread()) {
+      Thread t = new Thread() {
+          public void run() {
+            try {
+              _recover();
+            } catch (JMSException exc) {}
+          }
+        };
+      t.setDaemon(true);
+      t.start();
+    } else {
+      _recover();
+    }
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": recovered.");
+  }
+  
+  void _recover() throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + " _recover");
     // Stopping the session, denying the received messages:
     stop();
     deny();
     // Re-starting the session:
     start();
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": recovered.");
   }
-
 
   /**
    * API method.
@@ -725,12 +749,17 @@ public class Session implements javax.jms.Session
    */
   public void unsubscribe(String name) throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
     MessageConsumer cons;
-    for (int i = 0; i < consumers.size(); i++) {
-      cons = (MessageConsumer) consumers.get(i);
-      if (! cons.queueMode && cons.targetName.equals(name))
-        throw new JMSException("Can't delete durable subscription " + name
-                               + " as long as an active subscriber exists.");
+    if (consumers != null) {
+      for (int i = 0; i < consumers.size(); i++) {
+        cons = (MessageConsumer) consumers.get(i);
+        if (! cons.queueMode && cons.targetName.equals(name))
+          throw new JMSException("Can't delete durable subscription " + name
+                                 + " as long as an active subscriber exists.");
+      }
     }
     cnx.syncRequest(new ConsumerUnsubRequest(name));
   }
