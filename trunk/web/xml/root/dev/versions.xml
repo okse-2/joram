@@ -73,6 +73,9 @@
       </s2>
       <s2 name="Corrected bugs">
       <ul>
+        <li>Destinations were not removed from internal lists when being
+        deleted. Bug corrected in
+        <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.</li>
         <li>Bug related to the <code>MessageConsumer</code>
         <code>noLocal</code> attribute, found by 
         <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00020.html">
