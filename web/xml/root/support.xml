@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>Support</title>
+    <filename>support.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Support">
+      
+      <subtitle>JORAM support, provided by ScalAgent Distributed
+      Technologies</subtitle>
+      <p><a href="http://www.scalagent.com/">ScalAgent DT</a> provides
+      professional support for JORAM. Check the 
+      <a href="doc/Scalagent_JoramSupport.pdf">brochure</a>.</p>
+
+      <subtitle>JORAM/JOnAS support, provided by Bull</subtitle>
+      <p>Bull provides professional Support Service for JOnAS, including
+      specific issues related to using and defining an appropriate JORAM
+      configuration within JOnAS.
+      Several coverage options are available, including a full 24X7 coverage.
+      This is an enterprise class support service that can be provided
+      thanks to the involvment of key developers of JOnAS and JORAM ObjectWeb
+      teams. A detailed description is provided
+      <a href="http://jonas.objectweb.org/doc/JOnAS_Support.pdf">here
+      (pdf file)</a>.
+      Fore more information please send
+      a mail to
+      <a href="mailto:srv.services@bull.net">srv.services at bull.net</a>.
+      </p>
+    </s1>
+  </body>
+</document>
+
