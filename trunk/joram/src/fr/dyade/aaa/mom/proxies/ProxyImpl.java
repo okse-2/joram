@@ -1189,13 +1189,16 @@ public class ProxyImpl implements java.io.Serializable
 
     if (cnx.transactionsTable != null) {
       XASessPrepare prepare = (XASessPrepare) cnx.transactionsTable.remove(id);
-      Vector acks = prepare.getAcks();
 
-      SessAckRequest ack;
-      while (! acks.isEmpty()) {
-        ack = (SessAckRequest) acks.remove(0);
-        doReact(new SessDenyRequest(ack.getTarget(), ack.getIds(),
-                                    ack.getQueueMode(), true));
+      if (prepare != null) {
+        Vector acks = prepare.getAcks();
+
+        SessAckRequest ack;
+        while (! acks.isEmpty()) {
+          ack = (SessAckRequest) acks.remove(0);
+          doReact(new SessDenyRequest(ack.getTarget(), ack.getIds(),
+                                      ack.getQueueMode(), true));
+        }
       }
 
       if (cnx.transactionsTable.isEmpty())
