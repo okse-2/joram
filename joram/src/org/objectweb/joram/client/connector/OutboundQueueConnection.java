@@ -65,7 +65,7 @@ public class OutboundQueueConnection
     if (managedCx.session == null)
       managedCx.session = xac.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-    return new OutboundQueueSession(managedCx.session);
+    return new OutboundQueueSession(managedCx.session, this);
   }
 
   /**
@@ -79,6 +79,9 @@ public class OutboundQueueConnection
                                   int maxMessages)
          throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }

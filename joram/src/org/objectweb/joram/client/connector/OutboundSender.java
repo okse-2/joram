@@ -36,18 +36,17 @@ public class OutboundSender extends OutboundProducer
 {
   /**
    * Constructs an <code>OutboundSender</code> instance.
-   *
-   * @param producer  The JMS producer to wrap.
    */
-  OutboundSender(MessageProducer producer)
+  OutboundSender(MessageProducer producer, OutboundSession session)
   {
-    super(producer);
+    super(producer, session);
   }
 
  
   /** Delegates the call to the wrapped producer. */
   public Queue getQueue() throws JMSException
   {
+    checkValidity();
     return (Queue) producer.getDestination();
   }
 
@@ -59,12 +58,14 @@ public class OutboundSender extends OutboundProducer
                    long timeToLive)
          throws JMSException
   {
+    checkValidity();
     producer.send(queue, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void send(Queue queue, Message message) throws JMSException
   {
+    checkValidity();
     producer.send(queue, message);
   }
 }
