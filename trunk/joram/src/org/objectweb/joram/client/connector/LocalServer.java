@@ -71,7 +71,7 @@ public class LocalServer implements LocalServerMBean
 
   public String getRelease()
   {
-    return "4.0.1";
+    return "4.0.3";
   }
 
   public String getRunningMode()
