@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -37,8 +37,8 @@ import javax.jms.MessageNotWriteableException;
  */
 public class MapMessage extends Message implements javax.jms.MapMessage
 {
-  /** The wrapped hashtable. */
-  private Hashtable map;
+  /** The wrapped hashmap. */
+  private HashMap map;
   /** <code>true</code> if the message body is read-only. */
   private boolean RObody = false;
 
@@ -49,7 +49,7 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   MapMessage()
   {
     super();
-    map = new Hashtable();
+    map = new HashMap();
   }
 
   /**
@@ -67,7 +67,7 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   {
     super(sess, momMsg);
     try {
-      map = momMsg.getMap();
+      map = (HashMap) momMsg.getMap();
     }
     catch (Exception exc) {
       MessageFormatException jE =
@@ -384,9 +384,16 @@ public class MapMessage extends Message implements javax.jms.MapMessage
    *
    * @exception JMSException  Actually never thrown.
    */   
-  public String getString(String name) throws JMSException
-  {
-    return ConversionHelper.toString(map.get(name));
+  public String getString(String name) 
+    throws JMSException {
+    try {
+      return ConversionHelper.toString(map.get(name));
+    } catch (Exception exc) {
+      MessageFormatException mfe =
+        new MessageFormatException(exc.getMessage());
+      mfe.setLinkedException(exc);
+      throw mfe;
+    }
   }
 
   /**
@@ -404,9 +411,14 @@ public class MapMessage extends Message implements javax.jms.MapMessage
    *
    * @exception JMSException  Actually never thrown.
    */
-  public Enumeration getMapNames() throws JMSException
-  {
-    return map.keys();
+  public Enumeration getMapNames() 
+    throws JMSException {
+    Vector vec = new Vector();
+    if (map.keySet() != null) {
+      for (Iterator it = map.keySet().iterator(); it.hasNext(); )
+        vec.add(it.next());
+    }
+    return vec.elements();
   }
  
 
