@@ -47,8 +47,8 @@ import fr.dyade.aaa.util.Daemon;
  * @see		AgentServer
  */
 final class TransientNetworkServer extends Network {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransientNetworkServer.java,v 1.5 2002-05-27 15:17:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkServer.java,v 1.6 2002-10-21 08:41:13 maistrfr Exp $";
 
   /**  */
   NetServerIn netServerIn = null;

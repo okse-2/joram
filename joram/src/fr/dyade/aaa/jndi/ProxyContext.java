@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -21,7 +22,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.jndi;
 
 import fr.dyade.aaa.agent.*;
@@ -33,11 +33,11 @@ import java.net.*;
 import java.util.*;
 import javax.naming.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * <code>ProxyClient<code\> is a TcpMultiServerProxy to bind, rebind, 
  * unbind and lookup an Referencebale object in the Name Service.
- *
- * @author Nicolas Tachker
  *
  * @see fr.dyade.aaa.ip.TcpMultiServerProxy
  * @see fr.dyade.aaa.ns.NameService
@@ -47,11 +47,10 @@ public class ProxyContext extends TcpMultiServerProxy {
 
   /**
    * Id of the naming server.
-   * Currently it is the default naming service,
-   * i.e. the local server naming service.
-   * it seems not useful to configure it
-   * because this JNDI proxy should work
-   * on the same site as the naming.
+   * Currently it is the default naming service, i.e. the local server
+   * naming service.
+   * It seems not useful to configure it because this JNDI proxy should
+   * work on the same site as the naming.
    */
   private AgentId nsid;
   
@@ -81,22 +80,23 @@ public class ProxyContext extends TcpMultiServerProxy {
    * @param firstTime	<code>true</code> when agent server starts anew
    */
   public static void init(String args, boolean firstTime) throws Exception {
-	if (! firstTime)
-	  return;
-	// gets the optional port number
-	int listenPort = WKNPort;
-	if (args != null) {
-	  try {
-		listenPort = Integer.parseInt(args);
-	  } catch (NumberFormatException exc) {
-		throw new IllegalArgumentException("Bad port number for NWTcpServer: " + args);
-	  }
-	}
-	// creates the server
-	ProxyContext proxyContext = new ProxyContext(NameService.getDefault(),listenPort);
-	proxyContext.deploy();
+    if (! firstTime)
+      return;
+    // gets the optional port number
+    int listenPort = WKNPort;
+    if (args != null) {
+      try {
+        listenPort = Integer.parseInt(args);
+      } catch (NumberFormatException exc) {
+        throw new IllegalArgumentException(
+          "Bad port number for JNDI ProxyContext: " + args);
+      }
+    }
+    // creates the server
+    ProxyContext proxyContext = new ProxyContext(NameService.getDefault(),listenPort);
+    proxyContext.deploy();
   }
-  
+ 
   /**
    * Reacts to <code>ProxyContext</code> specific notifications.
    *
@@ -107,39 +107,43 @@ public class ProxyContext extends TcpMultiServerProxy {
    *  unspecialized exception
    */
   public void react(AgentId from, Notification not) throws Exception {
-	if (not instanceof NotificationContext) {
-	  NotificationContext n = (NotificationContext) not;
-	  if ( (n.cmd).equals("lookup") ) {
-		sendTo(nsid, new LookupObject(getId(), n.name));
-	  } else if ( (n.cmd).equals("rebind") ) {
-		sendTo(nsid, new RegisterObject(getId(), n.name, n.obj));
-	  } else if ( (n.cmd).equals("bind") ) {
-		sendTo(nsid, new BindObject(getId(), n.name, n.obj));
-	  } else if ( (n.cmd).equals("unbind") ) {
-		sendTo(nsid, new UnregisterCommand(getId(), n.name));
-	  } else if ( (n.cmd).equals("list") ) {
-		sendTo(nsid, new ListObject(getId(), n.name));
-	  }
-	} else if (not instanceof LookupReportObject) {
-	  qout.push(not);
-	} else if (not instanceof ListReportObject) {
-	  qout.push(not);
-	} else if (not instanceof BindReportObject) {
-	  if (((BindReportObject) not).getStatus() == fr.dyade.aaa.ns.SimpleReport.Status.FAIL) {
-		qout.push(new NotificationNamingException(" already bound, use rebind."));
-	  } else {
-		qout.push(null);
-	  }
-	} else if (not instanceof SimpleReport) {
-	  if (((SimpleReport) not).getStatus() == fr.dyade.aaa.ns.SimpleReport.Status.FAIL) {
-		SimpleCommand cmd = ((SimpleReport) not).getCommand();
-		if (cmd instanceof LookupObject) {
-		  qout.push(new NotificationNamingException(null));
-		}
-	  }
-	} else {
-	  super.react(from, not);
-	}
+    if (not instanceof NotificationContext) {
+      NotificationContext n = (NotificationContext) not;
+
+      JndiTracing.dbg.log(BasicLevel.DEBUG, "React to command" + n.cmd);
+
+      if ( (n.cmd).equals("lookup") ) {
+        sendTo(nsid, new LookupObject(getId(), n.name));
+      } else if ( (n.cmd).equals("rebind") ) {
+        sendTo(nsid, new RegisterObject(getId(), n.name, n.obj));
+      } else if ( (n.cmd).equals("bind") ) {
+        sendTo(nsid, new BindObject(getId(), n.name, n.obj));
+      } else if ( (n.cmd).equals("unbind") ) {
+        sendTo(nsid, new UnregisterCommand(getId(), n.name));
+      } else if ( (n.cmd).equals("list") ) {
+        sendTo(nsid, new ListObject(getId(), n.name));
+      }
+    } else if (not instanceof LookupReportObject) {
+      qout.push(not);
+    } else if (not instanceof ListReportObject) {
+      qout.push(not);
+    } else if (not instanceof BindReportObject) {
+      if (((BindReportObject) not).getStatus() 
+          == fr.dyade.aaa.ns.SimpleReport.Status.FAIL) {
+        qout.push(new NotificationNamingException("already bound, use rebind."));
+      } else {
+        qout.push(null);
+      }
+    } else if (not instanceof SimpleReport) {
+      if (((SimpleReport) not).getStatus() == fr.dyade.aaa.ns.SimpleReport.Status.FAIL) {
+        SimpleCommand cmd = ((SimpleReport) not).getCommand();
+        if (cmd instanceof LookupObject) {
+          qout.push(new NotificationNamingException(null));
+        }
+      }
+    } else {
+      super.react(from, not);
+    }
   }
 
   /**

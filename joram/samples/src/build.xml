@@ -2,7 +2,7 @@
 
   <!-- Initializes the environment paths and properties -->
   <target name="init">
-    <!-- Initialize the directory structure properties -->
+    <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="../../lib"/>
@@ -20,7 +20,7 @@
     <property name="project.class.path" refid="project.class.path"/>
   </target>
 
-  <!-- Clean samples - delete generated files -->
+  <!-- Cleans samples - deletes generated files -->
   <target name="clean" depends="init"
           description="--> delete generated files">
     <delete dir="${obj.dir}"/>
@@ -168,7 +168,7 @@
   <!-- Runs a chat client -->
   <target name="chat1" depends="init"
     description="--> Run chat client as user1">
-    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
+    <java classname="chat.SimpleChat" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
       <arg line="user1"/>
     </java>
@@ -177,7 +177,7 @@
   <!-- Runs an other chat client -->
   <target name="chat2" depends="init"
     description="--> Run chat client as user2">
-    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
+    <java classname="chat.SimpleChat" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
       <arg line="user2"/>
     </java>
@@ -321,6 +321,54 @@
   <!-- Runs the cluster publisher -->
   <target name="cluster_pub" depends="init">
     <java classname="cluster.Publisher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the topic tree configuration -->
+  <target name="tree_admin" depends="init"
+    description="--> Runs the topic tree administration">
+    <java classname="topicTree.TreeAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the tree consumer client -->
+  <target name="tree_consumer" depends="init"
+    description="--> Starts a tree Consumer client">
+    <java classname="topicTree.Consumer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the tree producer client -->
+  <target name="tree_producer" depends="init"
+    description="--> Starts a tree Producer client">
+    <java classname="topicTree.Producer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Setup the dead message queue configuration -->
+  <target name="dmq_admin" depends="init"
+    description="--> Sets up a dead message queue administration (for a centralized architecture)">
+    <java classname="deadMQueue.DMQAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the dead message queue watcher client -->
+  <target name="dmq_watcher" depends="init"
+    description="--> Starts a dead message queue watcher client">
+    <java classname="deadMQueue.DMQWatcher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the dead message queue client -->
+  <target name="dmq_client" depends="init"
+    description="--> Starts a dead message queue client">
+    <java classname="deadMQueue.DMQClient" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>

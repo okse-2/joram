@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,6 +25,8 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -40,7 +43,7 @@ import fr.dyade.aaa.util.*;
  *   // get next message in channel
  *   Message msg = qin.get();
  *   // get the agent to process event
- *   Agent agent = Agent.load(msg.to);
+ *   Agent agent = load(msg.to);
  *   // execute relevant reaction, all notification sent during this
  *   // reaction is inserted into persistant queue in order to processed
  *   // by the channel.
@@ -82,8 +85,8 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.11 2002-05-27 15:17:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
@@ -104,6 +107,17 @@ abstract class Engine implements Runnable, MessageConsumer {
    * each reaction)
    */
   protected volatile boolean canStop;
+
+  /** This table is used to maintain a list of agents already in memory
+   * using the AgentId as primary key.
+   */
+  Hashtable agents;
+  /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
+  long now = 0;
+  /** Maximum number of memory loaded agents. */
+  int NbMaxAgents;
+  /** Number of agents pinned in memory. */
+  int nbFixedAgents;
 
   /**
    * The current agent running.
@@ -159,14 +173,19 @@ abstract class Engine implements Runnable, MessageConsumer {
   /**
    * Creates a new instance of Engine (real class depends of server type).
    *
-   * @param isTransient	the transactionnal type of server.
    * @return		the corresponding <code>engine</code>'s instance.
    */
-  static Engine newInstance(boolean isTransient) throws Exception {
-    if (isTransient)
-      return new TransientEngine();
-    else
-      return new TransactionEngine();
+  static Engine newInstance() throws Exception {
+    String ename = System.getProperty("Engine");
+    if (ename == null) {
+      if (AgentServer.isTransient()) {
+        ename = "fr.dyade.aaa.agent.TransientEngine";
+      } else {
+        ename = "fr.dyade.aaa.agent.TransactionEngine";
+      }
+    }
+    Class eclass = Class.forName(ename);
+    return (Engine) eclass.newInstance();
   }
 
   protected Logger logmon = null;
@@ -184,10 +203,228 @@ abstract class Engine implements Runnable, MessageConsumer {
     logmon.log(BasicLevel.DEBUG, getName() + " created.");
 
     qin = new MessageQueue();
-
+ 
     isRunning = false;
     canStop = false;
     thread = null;   
+  }
+
+  void init() throws Exception {
+    // Before any agent may be used, the environment, including the hash table,
+    // must be initialized.
+
+    agents = new Hashtable();
+
+    // Creates or initializes AgentFactory, then loads and initializes
+    // all fixed agents.
+    nbFixedAgents = 0;
+    AgentFactory factory = null;
+    try {
+      factory = (AgentFactory) load(AgentId.factoryId);
+
+      // Initializes factory
+      factory.initialize(false);
+
+      // loads all fixed agents
+      AgentId[] id = new AgentId[nbFixedAgents];
+      int i = 0;
+      for (Enumeration e = factory.getFixedAgentIdList() ;
+	   e.hasMoreElements() ;) {
+        id[i++] = (AgentId) e.nextElement();
+      }
+      for (i--; i>=0; i--) {
+	try {
+	  Agent ag = load(id[i]);
+	} catch (UnknownAgentException exc) {
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ", can't restore fixed agent#" + id, exc);
+	  factory.removeFixedAgentId(id[i]);
+	}
+      }
+      factory.save();
+    } catch (UnknownAgentException exc) {
+      // Creates factory and all "system" agents...
+      factory = new AgentFactory();
+      agents.put(factory.getId(), factory);
+      factory.initialize(true);
+      factory.save();
+      logmon.log(BasicLevel.WARN,
+                 getName() + ", factory created");
+    } catch (IOException exc) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", can't initialize");
+      throw exc;
+    }
+    logmon.log(BasicLevel.DEBUG,
+               getName() + ", initialized");
+  }
+
+  void terminate() {
+    logmon.log(BasicLevel.DEBUG, getName() + ", ends");
+    Agent[] ag = new Agent[agents.size()];
+    int i = 0;
+    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = (Agent) e.nextElement();
+    }
+    for (i--; i>=0; i--) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
+      agents.remove(ag[i].id);
+      ag[i].agentFinalize();
+      ag[i] = null;
+    }
+  }
+
+  /**
+   *  The <code>garbage</code> method should be called regularly , to swap out
+   * from memory all the agents which have not been accessed for a time.
+   */
+  void garbage() {
+    logmon.log(BasicLevel.WARN, getName() + ", garbaged");
+    long deadline = now - NbMaxAgents;
+    Agent[] ag = new Agent[agents.size()];
+    int i = 0;
+    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = (Agent) e.nextElement();
+    }
+    for (i--; i>=0; i--) {
+      if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+	  logmon.log(BasicLevel.DEBUG,
+                     "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
+	agents.remove(ag[i].id);
+        ag[i].agentFinalize();
+        ag[i] = null;
+      }
+    }
+  }
+
+  /**
+   *   Method used for debug and monitoring. It returns an enumeration
+   * of all agents loaded.
+   */
+  AgentId[] getLoadedAgentIdlist() {
+    AgentId list[] = new AgentId[agents.size()];
+    int i = 0;
+    for (Enumeration e = agents.elements(); e.hasMoreElements() ;)
+      list[i++] = ((Agent) e.nextElement()).id;
+    return list;
+  }
+
+  String dumpAgent(AgentId id)
+    throws IOException, ClassNotFoundException, Exception {
+    Agent ag = (Agent) agents.get(id);
+    if (ag == null) {
+      ag = (Agent) AgentServer.transaction.load(id.toString());
+      if (ag == null) return "Agent" + id + " unknown";
+      return "Agent" + id + " on disk = " + ag;
+    }
+    return "Agent" + id + " in memory = " + ag;
+  } 
+
+  /**
+   *  The <code>load</code> method return the <code>Agent</code> object
+   * designed by the <code>AgentId</code> parameter. If the <code>Agent</code>
+   * object is not already present in the server memory, it is loaded from
+   * the storage.
+   *
+   *  Be carefull, if the save method can be overloaded to optimize the save
+   * processus, the load procedure used by engine is always load.
+   *
+   * @param	id		The agent identification.
+   * @return			The corresponding agent.
+   *
+   * @exception	IOException
+   *	If an I/O error occurs.
+   * @exception	ClassNotFoundException
+   *	Should never happen (the agent has already been loaded in deploy).
+   * @exception	UnknownAgentException
+   *	There is no correponding agent on secondary storage.
+   * @exception Exception
+   *	when executing class specific initialization
+   */
+  Agent load(AgentId id)
+    throws IOException, ClassNotFoundException, Exception {
+    now += 1;
+    Agent ag = (Agent) agents.get(id);
+    if (ag == null) {
+      if (agents.size() > (NbMaxAgents + nbFixedAgents))
+	garbage();
+      
+      if ((ag = (Agent) AgentServer.transaction.load(id.toString())) != null) {
+        ag.deployed = true;
+	agents.put(ag.id, ag);
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+	  logmon.log(BasicLevel.DEBUG,
+                     getName() + ",Agent" + ag.id +
+                     " [" + ag.name + "] loaded");
+
+        try {
+          ag.initialize(false); // initializes agent
+        } catch (Throwable exc) {
+          // AF: May be we have to delete the agent or not to allow
+          // reaction on it.
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ", Can't initialize Agent" + ag.id +
+                     " [" + ag.name + "]",
+                     exc);
+        }
+        if (ag.logmon == null)
+          ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                                      ".#" + AgentServer.getServerId());
+      } else {
+	throw new UnknownAgentException();
+      }
+    }
+
+    ag.last = now;
+    return ag;
+  }
+
+  /**
+   * The <code>reload</code> method return the <code>Agent</code> object
+   * loaded from the storage.
+   *
+   * @param	id		The agent identification.
+   * @return			The corresponding agent.
+   *
+   * @exception IOException
+   *	when accessing the stored image
+   * @exception ClassNotFoundException
+   *	if the stored image class may not be found
+   * @exception Exception
+   *	unspecialized exception
+   */
+  Agent reload(AgentId id)
+    throws IOException, ClassNotFoundException, Exception {
+    Agent ag = (Agent) AgentServer.transaction.load(id.toString());
+    if (ag  != null) {
+      ag.deployed = true;
+      agents.put(ag.id, ag);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + "Agent" + ag.id +
+                   " [" + ag.name + "] reloaded");
+
+      try {
+        ag.initialize(false); // initializes agent
+      } catch (Throwable exc) {
+        // AF: May be we have to delete the agent or not to allow
+        // reaction on it.
+        logmon.log(BasicLevel.ERROR,
+                   getName() + "Can't initialize Agent" + ag.id +
+                   " [" + ag.name + "]",
+                   exc);
+      }
+      if (ag.logmon == null)
+        ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                                    ".#" + AgentServer.getServerId());
+    } else {
+      throw new UnknownAgentException();
+    }
+    ag.last = now;
+    return ag;
   }
 
   /**
@@ -301,7 +538,7 @@ abstract class Engine implements Runnable, MessageConsumer {
 	if (! isRunning) break;
 
 	try {
-	  agent = Agent.load(msg.to);
+	  agent = load(msg.to);
 	} catch (UnknownAgentException exc) {
           //  The destination agent don't exists, send an error
           // notification to sending agent.
@@ -373,6 +610,7 @@ abstract class Engine implements Runnable, MessageConsumer {
       canStop = false;
       AgentServer.stop();
     } finally {
+      terminate();
       logmon.log(BasicLevel.DEBUG, getName() + ": Stopped.");
     }
   }
@@ -420,6 +658,9 @@ final class TransactionEngine extends Engine {
 
   TransactionEngine() throws Exception {
     super();
+
+    NbMaxAgents = Integer.getInteger("NbMaxAgents", 100).intValue();
+
     restore();
     if (modified) save();
   }
@@ -501,7 +742,7 @@ final class TransactionEngine extends Engine {
     AgentServer.transaction.begin();
     // Reload the state of agent.
     try {
-      agent = Agent.reload(msg.to);
+      agent = reload(msg.to);
     } catch (Exception exc2) {
       logmon.log(BasicLevel.ERROR,
                  getName() + ", can't reload Agent" + msg.to, exc2);
@@ -528,6 +769,8 @@ final class TransactionEngine extends Engine {
 final class TransientEngine extends Engine {
   TransientEngine() {
     super();
+    // in order to avoid swap-out.
+    NbMaxAgents = Integer.MAX_VALUE;
   }
 
   /**

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,23 +22,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
-package fr.dyade.aaa.mom.comm;
+package fr.dyade.aaa.joram.admin;
 
 /**
- * A <code>PongReply</code> is used by a <b>destination</b> agent for replying
- * to a client <code>PingRequest</code>.
+ * The <code>DeadMQueue</code> class allows administrators to manipulate
+ * dead message queues.
  */
-public class PongReply extends AbstractReply
+public class DeadMQueue extends fr.dyade.aaa.joram.Queue
 {
-  /**
-   * Constructs a <code>PongReply</code> instance.
+  /** 
+   * Constructs a <code>DeadMQueue</code> instance.
    *
-   * @param ping  The replied <code>PingRequest</code>.
+   * @param agentId  Identifier of the dead message queue agent.
    */
-  public PongReply(PingRequest ping)
+  public DeadMQueue(String agentId)
   {
-    super(ping.getConnectionKey(), ping.getRequestId());
+    super(agentId);
   }
 }

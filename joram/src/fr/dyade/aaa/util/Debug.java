@@ -27,12 +27,6 @@ package fr.dyade.aaa.util;
 import java.io.*;
 import java.util.*;
 
-import org.apache.log4j.Category;
-import org.apache.log4j.Appender;
-import org.apache.log4j.FileAppender;
-
-import org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
@@ -43,32 +37,63 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.2 2002-06-06 10:27:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2002-10-21 08:41:14 maistrfr Exp $";
 
+  /** Property name for monolog logger factory implementation class */
+  public final static String LOGGER_FACTORY_PROPERTY = "LOGGER_FACTORY";
+  /** Default classname for monolog logger factory implementation */
+  public final static String DEFAULT_LOGGER_FACTORY = "org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory";
+
+  /**
+   * Property name for A3 debug configuration directory.
+   * If not defined, the configuration file is searched from the search
+   * path used to load classes.
+   */
+  public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.DEBUG_DIR";
   /** Property name for A3 debug configuration filename */
   public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.DEBUG_FILE";
   /** Default filename for A3 debug configuration */
   public final static String DEFAULT_DEBUG_FILE = "a3debug.cfg";
 
-  /** Directory holding the debug files */
-  public static File directory = null;
   /** */
-  private static LoggerFactory factory;
+  protected static LoggerFactory factory;
 
   /**
    * Initializes the package.
-   *
-   * @param serverId	this server id
    */
-  public static void init(short serverId) {
-    boolean basic = false;
-
+  protected static void init() {
+    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY);
     String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
                                               DEFAULT_DEBUG_FILE);
+    if (debugDir != null) {
+      File debugFile = new File(debugDir, debugFileName);
+      try {
+        if ((debugFile != null) &&
+            (debugFile.length() != 0) &&
+            debugFile.exists() &&
+            debugFile.isFile()) {
+          debugFileName = debugFile.getPath();
+        } else {
+          throw new IOException();
+        }
+      } catch (IOException exc) {
+        // debug configuration file seems not exist, search it from the
+        // search path used to load classes.
+        System.err.println("Unable to find \"" + debugFile.getPath() + "\".");
+        debugDir = null;
+      }
+    }
 
     // Instanciate the MonologLoggerFactory
-    factory = (LoggerFactory) new MonologLoggerFactory();
+    String loggerFactory = System.getProperty(LOGGER_FACTORY_PROPERTY,
+                                              DEFAULT_LOGGER_FACTORY);
+    try {
+      factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
+    } catch (Exception exc) {
+      System.err.println("Unable to instantiate monolog wrapper");
+      System.exit(1);
+    }
 
     try {
       Properties prop = new Properties();
@@ -76,30 +101,28 @@ public class Debug {
                Configurable.PROPERTY);
       prop.put(Configurable.LOG_CONFIGURATION_FILE,
                debugFileName);
-      prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
-      ((MonologLoggerFactory) factory).configure(prop);
+      if (debugDir == null) {
+        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
+      } else {
+        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
+      }
+      ((Configurable) factory).configure(prop);
     } catch (Exception exc) {
       try {
-        ((MonologLoggerFactory)factory).configure(null);
+        ((Configurable) factory).configure(null);
+        Logger[] loggers = factory.getLoggers();
+        for (int i=0; i<loggers.length; i++) {
+          loggers[i].setIntLevel(BasicLevel.ERROR);
+        }
       } catch (Exception e) {
         System.err.println("Unable to configure monolog wrapper");
         System.exit(1);
       }
     }
-    
-    Category root = Category.getRoot();
-    if (serverId >= 0) {
-      try {
-        // Try to create local appender if defined...
-        FileAppender local = (FileAppender) root.getAppender("local");
-        File auditFile = new File("server#" + serverId + ".audit");
-        local.setFile(auditFile.getCanonicalPath());
-      } catch (Exception exc) { }
-    }
   }
 
   public static Logger getLogger(String topic) {
-    if (factory == null) init((short) -1);
+    if (factory == null) init();
     return factory.getLogger(topic);
   }
 }

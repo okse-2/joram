@@ -32,7 +32,9 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.9 2002-10-21 08:41:14 maistrfr Exp $";
+
+  public static final String EMPTY_STRING = new String();
 
   // State of the transaction monitor.
   private int phase;
@@ -53,16 +55,17 @@ public final class ATransaction implements Transaction, Runnable {
     static final int COMMIT = 3;
  
     int type;
+    String dirName;
     String name;
     byte[] value;
 
-    Operation(int type, String name) {
-      this.type = type;
-      this.name = name;
+    Operation(int type, String dirName, String name) {
+      this(type, dirName, name, null);
     }
 
-    Operation(int type, String name, byte[] value) {
+    Operation(int type, String dirName, String name, byte[] value) {
       this.type = type;
+      this.dirName = dirName;
       this.name = name;
       this.value = value;
     }
@@ -170,15 +173,21 @@ public final class ATransaction implements Transaction, Runnable {
       try {
 	while (true) {
 	  int op;
+          String dirName;
 	  String name;
 	  while ((op = logFile.read()) != Operation.COMMIT) {
+            dirName = logFile.readUTF();
+            if (dirName.length() == 0) dirName = null;
 	    name = logFile.readUTF();
+
+            Object key = OperationKey.newKey(dirName, name);
+
 	    if (op == Operation.SAVE) {
 	      byte buf[] = new byte[logFile.readInt()];
 	      logFile.readFully(buf);
-	      log.put(name, new Operation(op, name, buf));
+	      log.put(key, new Operation(op, dirName, name, buf));
 	    } else {
-	      log.put(name, new Operation(op, name));
+	      log.put(key, new Operation(op, dirName, name));
 	    }
 	  }
 	  commit(log);
@@ -219,6 +228,10 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   public void save(Serializable obj, String name) throws IOException {
+    save(obj, null, name);
+  }
+
+  public final void save(Serializable obj, String dirName, String name) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(obj);
@@ -226,20 +239,21 @@ public final class ATransaction implements Transaction, Runnable {
 
     Hashtable log = (Hashtable) ctx.get();
     // We are during a transaction put the new state in the log.
-    log.put(name, new Operation(Operation.SAVE,
-				name,
-				bos.toByteArray()));
+    Object key = OperationKey.newKey(dirName, name);
+    log.put(key, new Operation(Operation.SAVE,
+                               dirName,
+                               name,
+                               bos.toByteArray()));
   }
 
-  private final Object getFromLog(Hashtable log, String name)
+  private final Object getFromLog(Hashtable log, Object key)
     throws IOException, ClassNotFoundException {
     // Searchs in the log a new value for the object.
-    Operation op = (Operation) log.get(name);
+    Operation op = (Operation) log.get(key);
     if (op != null) {
       if (op.type == Operation.SAVE) {
 	ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
-	ObjectInputStream ois = new ObjectInputStream(bis);
-	  
+	ObjectInputStream ois = new ObjectInputStream(bis);	  
 	return ois.readObject();
       } else if (op.type == Operation.DELETE) {
 	// The object was deleted.
@@ -250,21 +264,32 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   public Object load(String name) throws IOException, ClassNotFoundException {
+    return load(null, name);
+  }
+
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+    Object key = OperationKey.newKey(dirName, name);
     Object obj;
 
     // First searchs in the logs a new value for the object.
     Hashtable log = (Hashtable) ctx.get();
     try {
-      if ((obj = getFromLog(log, name)) != null)
+      if ((obj = getFromLog(log, key)) != null)
         return obj;
 
-      if (((obj = getFromLog(clog, name)) != null) ||
-	  ((obj = getFromLog(plog, name)) != null)) {
+      if (((obj = getFromLog(clog, key)) != null) ||
+	  ((obj = getFromLog(plog, key)) != null)) {
         return obj;
       }
 
-      // Gets it from disk.
-      File file = new File(dir, name);
+      // Gets it from disk.      
+      File file;
+      if (dirName == null) {
+        file = new File(dir, name);
+      } else {
+        File parentDir = new File(dir, dirName);
+        file = new File(parentDir, name);
+      }
       FileInputStream fis = new FileInputStream(file);
       
       // I'm not sure we can directly read the object without use
@@ -280,9 +305,15 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   public void delete(String name) {
+    delete(null, name);
+  }
+  
+  public final void delete(String dirName, String name) {
+    Object key = OperationKey.newKey(dirName, name);
+
     // We are during a transaction mark the object deleted in the log.
     Hashtable log = (Hashtable) ctx.get();
-    log.put(name, new Operation(Operation.DELETE, name));
+    log.put(key, new Operation(Operation.DELETE, dirName, name));
   }
 
   int nbc = 0; // Number of commited transaction in clog.
@@ -299,15 +330,22 @@ public final class ATransaction implements Transaction, Runnable {
     
     nbc += 1; // AF: Monitoring
     Hashtable log = (Hashtable) ctx.get();
+    Enumeration keys = log.keys();
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
       Operation op = (Operation) e.nextElement();
+      Object key = keys.nextElement();
       nbo += 1; // AF: Monitoring
 
       // Reports all committed operation in clog
-      clog.put(op.name, op);
+      clog.put(key, op);
 
       // Save the log to disk
       logFile.writeByte(op.type);
+      if (op.dirName != null) {
+        logFile.writeUTF(op.dirName);
+      } else {
+        logFile.writeUTF(EMPTY_STRING);
+      }
       logFile.writeUTF(op.name);
       if (op.type == Operation.SAVE) {
 	logFile.writeInt(op.value.length);
@@ -377,20 +415,44 @@ public final class ATransaction implements Transaction, Runnable {
       if (op.type == Operation.SAVE) {
 	if (logmon.isLoggable(BasicLevel.DEBUG))
 	  logmon.log(BasicLevel.DEBUG,
-		     "ATransaction, Save " + op.name);
-	FileOutputStream fos = new FileOutputStream(new File(dir, op.name));
+		     "ATransaction, Save (" + op.dirName + ',' + op.name + ')');
+        
+        File file;
+        if (op.dirName == null) {
+          file = new File(dir, op.name);
+        } else {
+          File parentDir = new File(dir, op.dirName);
+          if (!parentDir.exists()) {
+            parentDir.mkdirs();
+          }
+          file = new File(parentDir, op.name);
+        }
+
+	FileOutputStream fos = new FileOutputStream(file);
 	fos.write(op.value);
 	fos.getFD().sync();
 	fos.close();
       } else if (op.type == Operation.DELETE) {
 	if (logmon.isLoggable(BasicLevel.DEBUG))
 	  logmon.log(BasicLevel.DEBUG,
-		     "ATransaction, Delete " + op.name);
-	if ((! new File(dir, op.name).delete()) &&
-	    (new File(dir, op.name).exists()))
-	  logmon.log(BasicLevel.ERROR,
+		     "ATransaction, Delete (" + op.dirName + ',' + op.name + ')');
+
+        File file;
+        boolean deleted;
+        if (op.dirName == null) {
+          file = new File(dir, op.name);
+          deleted = file.delete();
+        } else {
+          File parentDir = new File(dir, op.dirName);
+          file = new File(parentDir, op.name);
+          deleted = file.delete();
+          deleteDir(parentDir);
+        }
+
+	if (!deleted && file.exists())
+          logmon.log(BasicLevel.ERROR,
 		     "ATransaction, can't delete " +
-		     new File(dir, op.name).getCanonicalPath());
+		     file.getCanonicalPath());
       }
     }
 
@@ -398,6 +460,25 @@ public final class ATransaction implements Transaction, Runnable {
       logmon.log(BasicLevel.INFO,
 		 "ATransaction, Commit(" + log + ") - end");
 
+  }
+
+  /**
+   * Delete the specified directory if it is empty.
+   * Also recursively delete the parent directories if
+   * they are empty.
+   */
+  private void deleteDir(File dir) {
+    // Check the disk state. It may be false
+    // according to the transaction log but
+    // it doesn't matter because directories
+    // are lazily created.
+    if (dir.list().length == 0) {
+      dir.delete();
+      if (dir.getAbsolutePath().length() > 
+          this.dir.getAbsolutePath().length()) {
+        deleteDir(dir.getParentFile());
+      }
+    }
   }
 
   public final synchronized void stop() {
@@ -472,6 +553,43 @@ public final class ATransaction implements Transaction, Runnable {
       if (logmon.isLoggable(BasicLevel.INFO))
 	  logmon.log(BasicLevel.INFO,
 		     "ATransaction,  exits.");
+    }
+  }
+
+  private static class OperationKey {
+
+    static Object newKey(String dirName, String name) {
+      if (dirName == null) {
+        return name;
+      } else {
+        return new OperationKey(dirName, name);
+      }
+    }
+
+    private String dirName;
+    private String name;
+
+    private OperationKey(String dirName,
+                        String name) {
+      this.dirName = dirName;
+      this.name = name;
+    }
+
+    public int hashCode() {
+      // Should compute a specific one.
+      return dirName.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj instanceof OperationKey) {
+        OperationKey opk = (OperationKey)obj;
+        if (opk.name.length() != name.length()) return false;
+        if (opk.dirName.length() != dirName.length()) return false;
+        if (!opk.dirName.equals(dirName)) return false;            
+        return opk.name.equals(name);
+      }
+      return false;
     }
   }
 }

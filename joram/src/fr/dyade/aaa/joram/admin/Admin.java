@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram.admin;
 
@@ -304,6 +305,155 @@ public class Admin
     return new Topic(getReply());
   }
 
+  
+  /**
+   * Creates and deploys a dead message queue agent and instanciates the
+   * corresponding <code>DeadMQueue</code> object.
+   *
+   * @param name  Name of the queue to create.
+   * @return  A Joram DeadMQueue.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed, or
+   *              if the queue could not be deployed, or if its name is
+   *              already taken by a destination on this server.
+   */
+  public DeadMQueue createDeadMQueue(String name) throws Exception
+  {
+    CreateDeadMQueue createDMQ = new CreateDeadMQueue(name);
+    sendRequest(createDMQ);
+    return new DeadMQueue(getReply());
+  }
+
+  /**
+   * Sets a <code>DeadMQueue</code> instance as the default DMQ for the
+   * destinations and the users hosted by the administered server.
+   *
+   * @param dmq  The DeadMQueue instance.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void setDefaultDMQ(DeadMQueue dmq) throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(null, dmq.getQueueName(), false);
+    sendRequest(setDMQ);
+    getReply();
+  }
+
+  /**
+   * Sets a <code>DeadMQueue</code> instance as the DMQ for a given
+   * destination.
+   *
+   * @param name  The name of the destination to attribute the DMQ to.
+   * @param dmq  The DeadMQueue instance.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed, or if the
+   *              destination is not administered by this administrator.
+   */
+  public void setDestinationDMQ(String name, DeadMQueue dmq) throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(name, dmq.getQueueName(), false);
+    sendRequest(setDMQ);
+    getReply();
+  }
+
+  /**
+   * Unsets the default DMQ for the destinations and the users hosted by the
+   * administered server.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void unsetDefaultDMQ() throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(null, null, false);
+    sendRequest(setDMQ);
+    getReply();
+  }
+
+  /**
+   * Unsets the DMQ of a given destination.
+   *
+   * @param name  The name of the destination which DMQ must be unset.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed, or if the
+   *              destination is not administered by this administrator.
+   */
+  public void unsetDestinationDMQ(String name) throws Exception
+  {
+    SetDeadMQueue setDMQ = new SetDeadMQueue(name, null, false);
+    sendRequest(setDMQ);
+    getReply();
+  }
+
+  /**
+   * Sets a threshold value of authorized delivery attempts before sending
+   * a message to the DMQ, at the server's level.
+   *
+   * @param threshold  The number of authorized delivery attempts.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void setDefaultThreshold(int threshold) throws Exception
+  {
+    SetThreshold setT = new SetThreshold(null, new Integer(threshold), false);
+    sendRequest(setT);
+    getReply();
+  }
+
+  /**
+   * Sets a threshold value of authorized delivery attempts before sending
+   * a message to the DMQ, for a given queue.
+   *
+   * @param queue  The queue.
+   * @param threshold  The number of authorized delivery attempts.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed, or if
+   *              the queue is not administered by this administrator.
+   */
+  public void setQueueThreshold(javax.jms.Queue queue, int threshold)
+              throws Exception
+  {
+    SetThreshold setT = new SetThreshold(queue.getQueueName(),
+                                         new Integer(threshold), false);
+    sendRequest(setT);
+    getReply();
+  }
+
+  /**
+   * Unsets the default threshold value of the administered server.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed.
+   */
+  public void unsetDefaultThreshold() throws Exception
+  {
+    SetThreshold setT = new SetThreshold(null, null, false);
+    sendRequest(setT);
+    getReply();
+  }
+
+  /**
+   * Unsets the threshold value of a given queue.
+   *
+   * @param queue  The queue.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed, or if
+   *              the queue is not administered by this administrator.
+   */
+  public void unsetQueueThreshold(javax.jms.Queue queue) throws Exception
+  {
+    SetThreshold setT = new SetThreshold(queue.getQueueName(), null, false);
+    sendRequest(setT);
+    getReply();
+  }
+
   /**
    * Creates a <code>ConnectionFactory</code> instance.
    *
@@ -426,6 +576,25 @@ public class Admin
       // this Admin instance.
       return null;
     }
+  }
+
+  /**
+   * Sets a given topic as the subtopic of an administered one.
+   *
+   * @exception ConnectException  If the connection with the server is lost.
+   * @exception AdminException  If the admin session has been closed or if
+   *              there is a problem with the administered topic.
+   */
+  public void setSubTopic(String topicName, javax.jms.Topic subTopic)
+              throws Exception
+  {
+    if (disconnected)
+      throw new AdminException("Forbidden method call as the admin has"
+                               + " disconnected.");
+
+    SetSubTopic setSubT = new SetSubTopic(topicName, subTopic.getTopicName());
+    sendRequest(setSubT);
+    getReply();
   }
 
   /**

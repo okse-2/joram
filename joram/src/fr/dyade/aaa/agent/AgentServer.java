@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -134,12 +135,12 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.10 2002-05-27 15:17:12 jmesnil Exp $"; 
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   public final static short NULL_ID = -1;
 
-  private static short serverId;
+  private static short serverId = NULL_ID;
 
   private static Logger logmon = null;
 
@@ -220,7 +221,9 @@ public final class AgentServer {
     try {
       return isTransient(getServerId());
     } catch (UnknownServerException exc) {
-      // can't never happened.
+      // should never happened.
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + serverId + ", not already initialized", exc);
       return false;
     }
   }
@@ -402,23 +405,33 @@ public final class AgentServer {
    */
   private static void configure() throws Exception {
     if (a3configHdl == null) {
+      throw new Exception("Cannot find configuration file");
+
       // It's an isolated server.
-
       // Creates the local MessageConsumer: the Engine.
-      engine = Engine.newInstance(false);
-      consumers = new MessageConsumer[1];
-      consumers[0] = engine;
+//       engine = Engine.newInstance();
+//       consumers = new MessageConsumer[1];
+//       consumers[0] = engine;
 
-      servers = new ServerDesc[1];
-      servers[0] = new ServerDesc(serverId, "default", "localhost");
-      servers[0].isTransient = false;
-      servers[0].domain = engine;
+//       servers = new ServerDesc[1];
+//       servers[0] = new ServerDesc(serverId, "default", "localhost");
+//       servers[0].isTransient = false;
+//       servers[0].domain = engine;
     } else {
       A3CMLServer root;
       root = (A3CMLServer) a3configHdl.servers.get(new Short(serverId));
+      //Allocates the descriptors array for each server.
+      servers = new ServerDesc[a3configHdl.maxid +1];
+      // Initialized the descriptor of current server in order to permit
+      // Channel and Engine initialization (use of isTransient method).
+      servers[root.sid] = new ServerDesc(root.sid,
+                                         root.name,
+                                         root.hostname);
       if (root instanceof A3CMLPServer) {
+	servers[root.sid].isTransient = false;
 	configure((A3CMLPServer) root);
       } else if (root instanceof A3CMLTServer) {
+	servers[root.sid].isTransient = true;
 	configure((A3CMLTServer) root);
       } else {
 	throw new Exception("Unknown agent server type: " + serverId);
@@ -435,7 +448,7 @@ public final class AgentServer {
     // route all remote messages to the proxy server.
     consumers = new MessageConsumer[2];
     // Creates the local MessageConsumer: the Engine.
-    engine = Engine.newInstance(true);
+    engine = Engine.newInstance();
     consumers[0] = engine;
     // Creates the network MessageConsumer and initialize it.
     
@@ -445,16 +458,18 @@ public final class AgentServer {
     // Gets the descriptor of gateway server.
     A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(root.gateway));
     // Initializes the descriptors of each server.
-    servers = new ServerDesc[a3configHdl.maxid +1];
     for (Enumeration s = a3configHdl.servers.elements(); s.hasMoreElements();) {
       A3CMLServer server = (A3CMLServer) s.nextElement();
-      servers[server.sid] = new ServerDesc(server.sid,
-					   server.name,
-					   server.hostname);
-      if (server instanceof A3CMLPServer) {
-	servers[server.sid].isTransient = false;
-      } else if (server instanceof A3CMLTServer) {
-	servers[server.sid].isTransient = true;
+      if (server.sid != rootid) {
+        // ServerDesc already initialized for current server
+        servers[server.sid] = new ServerDesc(server.sid,
+                                             server.name,
+                                             server.hostname);
+        if (server instanceof A3CMLPServer) {
+          servers[server.sid].isTransient = false;
+        } else if (server instanceof A3CMLTServer) {
+          servers[server.sid].isTransient = true;
+        }
       }
       servers[server.sid].gateway = root.gateway;
       servers[server.sid].domain = consumers[1];
@@ -492,7 +507,7 @@ public final class AgentServer {
 
     Hashtable consumersTempHT = new Hashtable();
     // Creates the local MessageConsumer: the Engine.
-    engine = Engine.newInstance(false);
+    engine = Engine.newInstance();
     consumersTempHT.put("local", engine);
     
     // Search alls directly accessible domains.
@@ -539,8 +554,8 @@ public final class AgentServer {
 	    domainSids[i] = ((A3CMLServer) tdomain.elementAt(i)).sid;
 	  }
 	  // Creates a transient server's proxy and initializes it.
-          TransientNetworkProxy consumer = (TransientNetworkProxy) Class.forName("fr.dyade.aaa.agent.TransientNetworkProxy").newInstance();
-          consumer.init("transient", network.port, domainSids);
+          MessageConsumer consumer = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkProxy").newInstance();
+          ((Network) consumer).init("transient", network.port, domainSids);
 	  consumersTempHT.put(network.domain, consumer);
 	}
       }
@@ -701,7 +716,6 @@ public final class AgentServer {
    
     String path = args[1];
 
-    Debug.init(serverId);
     logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
 
@@ -739,7 +753,8 @@ public final class AgentServer {
 
     try {
       if (isTransient) {
-	transaction = new SimpleTransaction();
+        Class tclass = Class.forName("fr.dyade.aaa.util.SimpleTransaction");
+	transaction = (Transaction) tclass.newInstance();
       } else {
 	String tname = getProperty("Transaction",
                                    "fr.dyade.aaa.util.JTransaction");
@@ -763,15 +778,6 @@ public final class AgentServer {
     }
 
     try {
-      // Configure the agent server.
-      configure();
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't configure", exc);
-      throw new Exception("Can't configure server");
-    }
-
-    try {
       // Initialize AgentId class's variables.
       AgentId.init();
     } catch (ClassNotFoundException exc) {
@@ -784,6 +790,16 @@ public final class AgentServer {
                  "AgentServer#" + serverId + ", can't initialize AgentId",
                  exc);
       throw new Exception("Can't initialize AgentId, storage problems");
+    }
+
+
+    try {
+      // Configure the agent server.
+      configure();
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't configure", exc);
+      throw new Exception("Can't configure server");
     }
 
     try {
@@ -814,18 +830,10 @@ public final class AgentServer {
       throw new Exception("Can't restore messages, storage problems");
     }
 
-    // initialize channel before initializing fixed agents
+    // initializes channel before initializing fixed agents
     Channel.newInstance();
-
-    try {
-      //  Initialize Agent component: load AgentFactory and all
-      // fixed agents.
-      Agent.init();
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't initialize agents", exc);
-      throw new Exception("Can't initialize agents");
-    }
+    // initializes fixed agents
+    engine.init();
 
     try {
       //  Initialize and start services.
@@ -966,12 +974,13 @@ public final class AgentServer {
       if (consumers[i] != null) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     "AgentServer#" + serverId + ", stop " + consumers[i]);
+                     "AgentServer#" + serverId +
+                     ", stop " + consumers[i].getName());
         consumers[i].stop();
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      "AgentServer#" + serverId + ", " +
-                     consumers[i] + "stopped");
+                     consumers[i].getName() + " stopped");
       }
     }
     // Stop all services.
@@ -981,6 +990,10 @@ public final class AgentServer {
 
     // Stop the transaction manager.
     if (transaction != null) transaction.stop();
+
+    Runtime.getRuntime().gc();
+    System.runFinalization();
+
     logmon.log(BasicLevel.WARN,
                "AgentServer#" + serverId + ", stopped at " + new Date());
   }
@@ -1012,8 +1025,8 @@ public final class AgentServer {
     } catch (Exception exc) {
       System.out.println("AgentServer#" + getServerId() + " failed: " +
                          exc.toString());
-      // AF: TODO ?
-//    AgentServer.stop();
+
+
       System.exit(1);
     }
   }

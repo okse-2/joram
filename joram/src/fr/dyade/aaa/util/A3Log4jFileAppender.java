@@ -22,32 +22,29 @@
  *
  * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.mom.jms;
+package fr.dyade.aaa.util;
+
+import java.io.*;
+import java.util.*;
+
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Layout;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * A <code>CnxAccessRequest</code> is used by a <code>Connection</code>
- * for checking its access permission on a destination.
+ * A3Log4jFileAppender appends log events to a file depending of the
+ * agent server id.
  */
-public class CnxAccessRequest extends AbstractJmsRequest
-{
-  /** The requested access. */
-  int right;
+public class A3Log4jFileAppender extends FileAppender {
+  /** RCS version number of this file: $Revision: 1.1 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jFileAppender.java,v 1.1 2002-10-21 08:42:00 maistrfr Exp $";
 
   /**
-   * Constructs a <code>CnxAccessRequest</code> instance.
-   *
-   * @param dest  The destination on which checking the access.
-   * @param right  Requested right (1 for READ, 2 for WRITE).
+   * The default constructor does not do anything. 
    */
-  public CnxAccessRequest(String dest, int right)
-  {
-    super(dest);
-    this.right = right;
-  }
-
-  /** Returns the right requested. */
-  public int getRight()
-  {
-    return right;
+  public A3Log4jFileAppender() {
+    super();
+    fileName = "server#" + AgentServer.getServerId() + ".audit";
+    activateOptions();
   }
 }

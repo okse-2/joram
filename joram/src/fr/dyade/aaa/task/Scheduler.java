@@ -78,8 +78,8 @@ import fr.dyade.aaa.ip.*;
  * @see		SchedulerProxy
  */
 public class Scheduler extends ProxyAgent {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: Scheduler.java,v 1.2 2002-03-26 16:09:59 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Scheduler.java,v 1.3 2002-10-21 08:41:14 maistrfr Exp $"; 
 
   /** initializes service only once */
   private static boolean initialized = false;

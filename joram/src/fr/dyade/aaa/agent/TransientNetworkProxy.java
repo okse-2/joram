@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -27,6 +28,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.Daemon;
@@ -52,8 +54,8 @@ import fr.dyade.aaa.util.Arrays;
  * @see		AgentServer
  */
 final class TransientNetworkProxy extends Network {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.5 2002-05-27 15:17:13 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.6 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;
@@ -221,7 +223,7 @@ final class TransientNetworkProxy extends Network {
    * local persistent agent server.
    */
   final class Manager extends Daemon {
-    Manager(String name, org.objectweb.util.monolog.api.Logger logmon) {
+    Manager(String name, Logger logmon) {
       super(name + ".manager");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -307,7 +309,7 @@ final class TransientNetworkProxy extends Network {
   final class Listener extends Daemon {
     ServerSocket listen = null;
 
-    Listener(String name, org.objectweb.util.monolog.api.Logger logmon) {
+    Listener(String name, Logger logmon) {
       super(name + ".listener");
       // Overload logmon definition in Daemon
       this.logmon = logmon;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,19 +27,13 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
- * XML SAX Handler for A3 configuration file.
+ * Generic XML Handler for A3 configuration file.
  */
-public class A3CMLHandler extends DefaultHandler {
-  static final boolean PARSEDBG = false;
-
+public class A3CMLHandler {
   /** Syntaxic name for config element */
   static final String ELT_CONFIG = "config";
   /** Syntaxic name for domain element */
@@ -74,27 +69,6 @@ public class A3CMLHandler extends DefaultHandler {
   /** Syntaxic name for value attribute */
   static final String ATT_VALUE = "value";
 
-  String conf = null;
-  /**
-   * Working attribute used during domain's definition between start and
-   * end element.
-   */
-  A3CMLDomain domain = null;
-  /**
-   * Working attribute used during server's definition (persitent or transient)
-   * between start and end element.
-   */
-  A3CMLServer server = null;
-  /**
-   * Working attribute used during network's definition between start and
-   * end element.
-   */
-  A3CMLNetwork network = null;
-  /**
-   * Working attribute used during service's definition between start and
-   * end element.
-   */
-  A3CMLService service = null;
   /**
    * Working attribute used to aggregate services during server's definition
    * between start and end element.
@@ -111,25 +85,17 @@ public class A3CMLHandler extends DefaultHandler {
    */
   public Hashtable servers = null;
 
-  /**
-   * A3CML file is always parsed in regard to a particular server: serverId.
-   */
-  short serverId = -1;
-
-  /**
-   * Name of configuration to get from the file.
-   */
-  String configName = "default";
-
   public final static String CFG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3CONF_DIR";
-  public final static String DEFAULT_CFG_DIR = ".";
+  public final static String DEFAULT_CFG_DIR = null;
+
   public final static String CFG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3CONF_FILE";
   public final static String DEFAULT_CFG_FILE = "a3servers.xml";
   
   final static String CFG_NAME_PROPERTY = "fr.dyade.aaa.agent.A3CONF_NAME";
   final static String DEFAULT_CFG_NAME = "default";
 
-  static String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
+  final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
+  final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.A3CMLSaxWrapper";
 
   /**
    * Gets static configuration of agent servers from a file. This method
@@ -143,226 +109,88 @@ public class A3CMLHandler extends DefaultHandler {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public static A3CMLHandler getConfig(short serverId) throws Exception {
+    // Get the logging monitor from current server MonologMonitorFactory
+    Logger logmon =  Debug.getLogger("fr.dyade.aaa.agent.A3CMLWrapper");
+
     String cfgDir = System.getProperty(CFG_DIR_PROPERTY, DEFAULT_CFG_DIR);
     String cfgFileName = System.getProperty(CFG_FILE_PROPERTY,
 					    DEFAULT_CFG_FILE);
 
-    File cfgFile = new File(cfgDir, cfgFileName);
-    if ((cfgFile == null) || (!cfgFile.exists()) || (!cfgFile.isFile()))
-      return null;
+    Reader reader = null;
+    if (cfgDir != null) {
+      File cfgFile = new File(cfgDir, cfgFileName);
+      
+      try {
+        if ((cfgFile != null) &&
+            (cfgFile.length() != 0) &&
+            cfgFile.exists() &&
+            cfgFile.isFile()) {
+          cfgFileName = cfgFile.getPath();
+        } else {
+          throw new IOException();
+        }
+        reader = new FileReader(cfgFile);
+      } catch (IOException exc) {
+        // configuration file seems not exist, search it from the
+        // search path used to load classes.
+        logmon.log(BasicLevel.ERROR,
+                   "Unable to find configuration file \"" +
+                   cfgFile.getPath() + "\".");
+        reader = null;
+      }
+    }
+
+    if (reader == null) {
+      ClassLoader classLoader = null;
+      InputStream is = null;
+      try {
+        classLoader = A3CMLHandler.class.getClassLoader();
+        if (classLoader != null) {
+          logmon.log(BasicLevel.WARN,
+                     "Trying to find [" + cfgFileName + "] using " +
+                     classLoader + " class loader.");
+          is = classLoader.getResourceAsStream(cfgFileName);
+        }
+      } catch(Throwable t) {
+        logmon.log(BasicLevel.WARN,
+                   "Can't find [" + cfgFileName + "] using " +
+                   classLoader + " class loader.",
+                   t);
+        is = null;
+      }
+      
+      if (is == null) {
+        // Last ditch attempt: get the resource from the class path.
+        logmon.log(BasicLevel.WARN,
+                   "Trying to find [" + cfgFileName +
+                   "] using ClassLoader.getSystemResource().");
+        is = ClassLoader.getSystemResourceAsStream(cfgFileName);
+      }
+      if (is == null) {
+        throw new FileNotFoundException("configuration file " + cfgFileName +
+                                        " not found in classpath");
+      }
+      reader = new InputStreamReader(is);
+    }
 
     String cfgName = System.getProperty(CFG_NAME_PROPERTY, DEFAULT_CFG_NAME);
 
-    XMLReader reader =
-      XMLReaderFactory.createXMLReader(
-	System.getProperty("org.xml.sax.driver",
-			   "org.apache.xerces.parsers.SAXParser"));
-    A3CMLHandler a3configHdl = new A3CMLHandler(cfgName, serverId);
-    reader.setContentHandler(a3configHdl);
-    reader.setErrorHandler(a3configHdl);
-    reader.parse(cfgFile.getCanonicalPath());
+    String wrpCName = System.getProperty(A3CMLWRP_PROPERTY, DEFAULT_A3CMLWRP);
+    Class wrpClass = Class.forName(wrpCName);
+
+    A3CMLWrapper wrapper = (A3CMLWrapper) wrpClass.newInstance();
+    A3CMLHandler a3configHdl = wrapper.parse(reader, cfgName, serverId);
 
     if (a3configHdl.servers == null)
       throw new Exception("Empty configuration \"" + cfgName + "\" in " +
-			  cfgFile.getCanonicalPath() + " configuration file.");
+			  cfgFileName + " configuration file.");
 
     return a3configHdl;
   }
 
-  private A3CMLHandler(String name, short serverId) {
+  A3CMLHandler() {
     super();
-    if (name != null)
-      configName = name;
-    this.serverId = serverId;
     this.servers = new Hashtable();
-  }
-
-  /**
-   * Handles notification of a non-recoverable parser error.
-   *
-   * @param e	The warning information encoded as an exception.
-   *
-   * @exception SAXException
-   *	Any SAX exception, possibly wrapping another exception.
-   */
-  public void fatalError(SAXParseException e) throws SAXException {
-    if (PARSEDBG)
-      System.err.println("fatal error parsing " + e.getPublicId() +
-	" at " + e.getLineNumber() + "." + e.getColumnNumber());
-    throw e;
-  }
-
-  /**
-   * Handles notification of a recoverable parser error.
-   *
-   * @param e	The warning information encoded as an exception.
-   *
-   * @exception SAXException
-   *	Any SAX exception, possibly wrapping another exception.
-   */
-  public void error(SAXParseException e) throws SAXException {
-    if (PARSEDBG)
-      System.err.println("error parsing " + e.getPublicId() +
-	" at " + e.getLineNumber() + "." + e.getColumnNumber());
-    throw e;
-  }
-
-
-  /**
-   * Handles notification of a parser warning.
-   *
-   * @param e	The warning information encoded as an exception.
-   *
-   * @exception SAXException
-   *	Any SAX exception, possibly wrapping another exception.
-   */
-  public void warning(SAXParseException e) throws SAXException {
-    if (PARSEDBG)
-      System.err.println("warning parsing " + e.getPublicId() +
-	" at " + e.getLineNumber() + "." + e.getColumnNumber());
-    throw e;
-  }
-
-  /**
-   * Initializes parsing of a document.
-   *
-   * @exception SAXException
-   *	unspecialized error
-   */
-  public void startDocument() throws SAXException {
-    if (PARSEDBG)
-      System.out.println("startDocument");
-  }
-
-  /**
-   * Receive notification of the start of an element.
-   *
-   * @param uri		The Namespace URI
-   * @param localName	The local name
-   * @param rawName	The qualified name
-   * @param atts	The attributes attached to the element.
-   *
-   * @exception SAXException
-   *	unspecialized error
-   */
-  public void startElement(String uri,
-			   String localName,
-			   String rawName,
-			   Attributes atts) throws SAXException {
-    String name = rawName;
-
-    if (PARSEDBG)
-      System.out.println("startElement: " + name);
-
-    if (name.equals(ELT_CONFIG)) {
-      conf = atts.getValue(A3CMLHandler.ATT_NAME);
-      if (conf == null) conf = configName;
-    } else if (configName.equals(conf)) {
-      if (name.equals(ELT_DOMAIN)) {
-	domain = new A3CMLDomain(atts);
-      } else if (name.equals(ELT_SERVER)) {
-	server = new A3CMLPServer(atts);
-      } else if (name.equals(ELT_TRANSIENT)) {
-	server = new A3CMLTServer(atts);
-      } else if (name.equals(ELT_NETWORK)) {
-	network = new A3CMLNetwork(atts);
-      } else if (name.equals(ELT_SERVICE)) {
-	service = new A3CMLService(atts);
-      } else if (name.equals(ELT_PROPERTY)) {
-	if ((server ==  null) ||	   // Global property
-	    (server.sid == serverId)) {    // Server property
-// 1.2 	  System.setProperty(atts.getValue(ATT_NAME),
-// 1.2                       atts.getValue(ATT_VALUE));
-          System.getProperties().put(atts.getValue(ATT_NAME),
-                                     atts.getValue(ATT_VALUE));
-	}
-      } else {
-	throw new SAXException("unknown element \"" + name + "\"");
-      }
-    }
-  }
-
-  /**
-   * Receive notification of the end of an element.
-   *
-   * @param uri		The Namespace URI
-   * @param localName	The local name
-   * @param rawName	The qualified name
-   * @param atts	The attributes attached to the element.
-   *
-   * @exception SAXException
-   *	unspecialized error
-   */
-  public void endElement(String uri,
-			 String localName,
-			 String rawName) throws SAXException {
-    String name = rawName;
-
-    if (PARSEDBG)
-      System.out.println("endElement: " + name);
-
-    if (name.equals(ELT_CONFIG)) {
-      conf = null;
-    } else if (configName.equals(conf)) {
-      if (name.equals(ELT_DOMAIN)) {
-	if (domains == null)
-	  domains = new Hashtable();
-	domains.put(domain.name, domain);
-	domain = null;
-      } else if (name.equals(ELT_SERVER) || name.equals(ELT_TRANSIENT)) {
-	if (server.sid > maxid)
-	  maxid = server.sid;
-	servers.put(new Short(server.sid), server);
-	server = null;
-      } else if (name.equals(ELT_NETWORK)) {
-	if ((server != null) &&
-	    (server instanceof A3CMLPServer)) {
-	  A3CMLPServer pserver = (A3CMLPServer) server;
-	  if (pserver.networks == null)
-	    pserver.networks = new Vector();
-	  pserver.networks.add(network);
-	  // Add the server to the corresponding domains
-	  // AF: This step should be done at the end of parsing, in order
-	  // to avoid to declare domains first.
-	  if (! network.domain.equals("transient")) {
-	    A3CMLDomain d = null;
-	    if (domains != null)
-	      d = (A3CMLDomain) domains.get(network.domain);
-	    if (d != null) {
-	      d.addServer((A3CMLPServer) server);
-	    } else {
-	      throw new SAXException("Unknown domain \"" + network.domain +
-				     "\" for server \"" + server.name + "\".");
-	    }
-	  }
-	} else {
-	  // Can never happen (see DTD).
-	}
-	network = null;
-      } else if (name.equals(ELT_SERVICE)) {
-	if (server != null) {
-	  if (server.services == null)
-	    server.services = new Vector();
-	  server.services.addElement(service);
-	} else {
-	  // Can never happen (see DTD).
-	}
-      } else if (name.equals(ELT_PROPERTY)) {
-      } else {
-	throw new SAXException("unknown element \"" + name + "\"");
-      }
-    }
-  }
-
-  /**
-   * Finalizes parsing of a document.
-   *
-   * @exception SAXException
-   *	unspecialized error
-   */
-  public void endDocument() throws SAXException {
-    if (PARSEDBG)
-      System.out.println("endDocument");
   }
 
   /**

@@ -1,4 +1,8 @@
 /*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
+ *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
  * 
@@ -18,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is JC Waeny.
+ * Initial developer(s): Jose Carlos Waeny
+ * Contributor(s):
  */
 package chat;
 

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
@@ -52,11 +55,19 @@ public abstract class DestinationImpl implements java.io.Serializable
   /** <code>true</code> if the ADMIN access is granted to everybody. */
   private  boolean freeAdmin = false;
 
+  /** Counter of received messages. */
+  private long messagesCounter = 0;
+
   /**
    * <code>AgentId</code> identifier of the agent representing the
    * destination.
    */
   protected AgentId destId;
+  /**
+   * Identifier of the dead message queue attributed to this destination, if
+   * any.
+   */
+  protected AgentId dmqId = null;
   /** <code>true</code> if the destination processed a deletion request. */
   protected boolean deleted = false;
 
@@ -91,11 +102,11 @@ public abstract class DestinationImpl implements java.io.Serializable
   /**
    * Distributes the requests to the appropriate destination methods.
    * <p>
-   * Accepted requests are:
+   * The accepted request is:
    * <ul>
-   * <li><code>PingRequest</code> notifications,</li>
+   * <li><code>SetRightRequest</code> notifications.</li>
    * <li><code>SetRightRequest</code> notifications,</li>
-   * <li><code>AccessRequest</code> notifications.</li>
+   * <li><code>SetDMQRequest</code> notifications,</li>
    * </ul>
    * <p>
    * An <code>ExceptionReply</code> notification is sent back in the case of
@@ -104,12 +115,10 @@ public abstract class DestinationImpl implements java.io.Serializable
   public void doReact(AgentId from, AbstractRequest req)
   {
     try {
-      if (req instanceof PingRequest)
-        doReact(from, (PingRequest) req);
-      else if (req instanceof SetRightRequest)
+      if (req instanceof SetRightRequest)
         doReact(from, (SetRightRequest) req);
-      else if (req instanceof AccessRequest)
-        doReact(from, (AccessRequest) req);
+      else if (req instanceof SetDMQRequest)
+        doReact(from, (SetDMQRequest) req);
       else
         throw new RequestException("Unexpected request!");
     }
@@ -120,17 +129,6 @@ public abstract class DestinationImpl implements java.io.Serializable
       ExceptionReply eR = new ExceptionReply(req, mE);
       Channel.sendTo(from, eR);
     }
-  }
-
-  /**
-   * Method implementing the destination reaction to a
-   * <code>PingRequest</code> instance checking its existence.
-   * <p>
-   * The method sends a <code>PongReply</code> notification back.
-   */
-  private void doReact(AgentId from, PingRequest ping)
-  {
-    Channel.sendTo(from, new PongReply(ping));
   }
 
   /**
@@ -157,32 +155,19 @@ public abstract class DestinationImpl implements java.io.Serializable
   }
 
   /**
-   * Method implementing the destination reaction to an
-   * <code>AccessRequest</code> instance checking if a given right is granted
-   * to a user.
-   * <p>
-   * The method sends an <code>AccessReply</code> reply back.
+   * Method implementing the destination reaction to a
+   * <code>SetDMQRequest</code> instance setting the dead message queue
+   * identifier for this destination.
+   *
+   * @exception AccessException  If the requester is not an administrator.
    */
-  private void doReact(AgentId from, AccessRequest not)
+  private void doReact(AgentId from, SetDMQRequest not) throws AccessException
   {
-    int right = not.getRight();
-    boolean result;
+    if (! isAdministrator(from))
+      throw new AccessException("The needed ADMIN right is not granted"
+                                + " on dest " + destId);
 
-    if (right == 1 && isReader(from))
-      result = true;
-    else if (right == 2 && isWriter(from))
-      result = true;
-    else if (right == 3 && isAdministrator(from))
-      result = true;
-    else
-      result = false;
-
-    Channel.sendTo(from, new AccessReply(not, result));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "User "
-                                    + from + " right " + right
-                                    + " has been checked as " + result);
+    dmqId = not.getDmqId();
   }
 
   /**
@@ -284,6 +269,34 @@ public abstract class DestinationImpl implements java.io.Serializable
     if (freeAdmin || admins.contains(client))
       return true;
     return false;
+  }
+
+  /** Returns the next message count value. */
+  protected long nextMessageCount()
+  {
+    if (messagesCounter == Long.MAX_VALUE)
+      messagesCounter = 0;
+ 
+    return messagesCounter++;
+  }
+
+  /**
+   * Sends dead messages to the appropriate dead message queue.
+   *
+   * @param deadMessages  The vector of dead messages.
+   * @param dmqId  Identifier of the dead message queue to use,
+   *          <code>null</code> if not provided.
+   */
+  protected void sendToDMQ(Vector deadMessages, AgentId dmqId)
+  {
+    if (dmqId != null)
+      Channel.sendTo(dmqId, new ClientMessages(null, deadMessages));
+    else if (this.dmqId != null)
+      Channel.sendTo(this.dmqId, new ClientMessages(null, deadMessages));
+    else if (DeadMQueueImpl.id != null) {
+      Channel.sendTo(DeadMQueueImpl.id,
+                     new ClientMessages(null, deadMessages));
+    }
   }
 
   /**

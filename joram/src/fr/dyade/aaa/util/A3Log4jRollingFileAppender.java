@@ -22,41 +22,29 @@
  *
  * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.mom.comm;
+package fr.dyade.aaa.util;
+
+import java.io.*;
+import java.util.*;
+
+import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.Layout;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * An <code>AccessReply</code> is used by a <b>destination</b> agent for 
- * replying to an <code>AccessRequest</code> client request.
+ * A3Log4jFileAppender appends log events to a file depending of the
+ * agent server id.
  */
-public class AccessReply extends AbstractReply
-{
-  /** Right requested. */
-  private int right;
-  /** <code>true</code> if the requested right is granted. */
-  private boolean granted;
+public class A3Log4jRollingFileAppender extends RollingFileAppender {
+  /** RCS version number of this file: $Revision: 1.1 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jRollingFileAppender.java,v 1.1 2002-10-21 08:42:00 maistrfr Exp $";
 
   /**
-   * Constructs an <code>AccessReply</code> instance.
-   *
-   * @param request  The replied request.
-   * @param granted  <code>true</code> if the requested right is granted.
+   * The default constructor does not do anything. 
    */
-  public AccessReply(AccessRequest request, boolean granted)
-  {
-    super(request.getConnectionKey(), request.getRequestId());
-    this.right = request.getRight();
-    this.granted = granted;
-  }
-
-  /** Returns the right requested. */
-  public int getRight()
-  {
-    return right;
-  }
-
-  /** Returns <code>true</code> if the right is granted. */
-  public boolean getGranted()
-  {
-    return granted;
+  public A3Log4jRollingFileAppender() {
+    super();
+    fileName = "server#" + AgentServer.getServerId() + ".audit";
+    activateOptions();
   }
 }

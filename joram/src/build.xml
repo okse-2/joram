@@ -3,15 +3,15 @@
 <project default="ship.joram" basedir=".">
   <!-- Initializes properties -->
   <target name="init">
-    <!-- Create the time stamp -->
+    <!-- Creates the time stamp -->
     <tstamp/>
-    <!-- Initialize the environment properties, use ${env.name} -->
+    <!-- Initializes the environment properties, uses ${env.name} -->
     <property environment="env"/>
   
-    <!-- Get the user defined properties from file -->
+    <!-- Gets the user defined properties from file -->
     <property file="build.properties"/>
 
-    <!-- Initialize the directory structure properties -->
+    <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="../lib"/>
@@ -46,27 +46,28 @@
     </path>
   </target>
 
-  <!-- Clean all generated files -->
+  <!-- Cleans all generated files -->
   <target name="clean" depends="init"
       description="--> Clean all generated files">
     <delete dir="${obj.dir}"/>
     <delete dir="${build.dir}"/>
     <delete dir="${doc.dir}"/>
-    <!-- delete generated jar files -->
+    <!-- Deletes generated jar files -->
     <delete file="${lib.dir}/mom.jar" />
     <delete file="${lib.dir}/joram.jar" />
   </target>
 
-  <!-- Prepare compilation phase -->
+  <!-- Prepares compilation phase -->
   <target name="prepare" depends="init">
-    <!-- Create the directory structure -->
+    <!-- Creates the directory structure -->
     <mkdir dir="${obj.dir}"/>
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${doc.dir}"/>
   </target>
 
+  <!-- Compilation phase -->
   <target name="compile" depends="prepare"
-      description="--> Compile JORAM">
+      description="--> Compiles Joram sources.">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
            debug="on"
@@ -87,18 +88,14 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      - Joram specific build target
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- JARS BUILDING -->
   <target name="build.joram" depends="init,compile"
-      description="--> Build JORAM jar files">
-    <!-- Build mom jar file -->
+      description="--> Builds Joram server and client jars.">
     <jar jarfile="${build.dir}/mom.jar"
          manifest="${src.dir}/mom.mf">
       <fileset dir="${obj.dir}">
-        <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
         <include name="fr/dyade/aaa/ip/*.class"/>
-        <include name="fr/dyade/aaa/scbean/*.class"/>
-        <include name="fr/dyade/aaa/task/*.class"/>
-        <include name="fr/dyade/aaa/ns/*.class"/>
         <include name="fr/dyade/aaa/jndi/*.class"/>
         <include name="fr/dyade/aaa/mom/*.class"/>
         <include name="fr/dyade/aaa/mom/comm/*.class"/>
@@ -108,31 +105,37 @@
         <include name="fr/dyade/aaa/mom/messages/*.class"/>
         <include name="fr/dyade/aaa/mom/proxies/*.class"/>
         <include name="fr/dyade/aaa/mom/selectors/*.class"/>
-        <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
+        <include name="fr/dyade/aaa/ns/*.class"/>
+        <include name="fr/dyade/aaa/task/*.class"/>
+        <include name="fr/dyade/aaa/util/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram.jar">
       <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/jndi/MessageContext.class"/>
+        <include name="fr/dyade/aaa/jndi/NamingContext.class"/>
+        <include name="fr/dyade/aaa/jndi/NamingContextFactory.class"/>
+        <include name="fr/dyade/aaa/joram/*.class"/>
+        <include name="fr/dyade/aaa/joram/admin/*.class"/>
         <include name="fr/dyade/aaa/mom/excepts/*.class"/>
         <include name="fr/dyade/aaa/mom/jms/*.class"/>
         <include name="fr/dyade/aaa/mom/messages/*.class"/>
         <include name="fr/dyade/aaa/mom/selectors/*.class"/>
-        <include name="fr/dyade/aaa/joram/*.class"/>
-        <include name="fr/dyade/aaa/joram/admin/*.class"/>
-        <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
+        <include name="fr/dyade/aaa/util/*.class"/>
       </fileset>
     </jar>
   </target>
 
-  <!-- Specific Joram shipment -->
+  <!-- SHIPMENT -->
   <target name="ship.joram" depends="build.joram"
-      description="--> Create a shipment of JORAM">
+      description="--> Creates a Joram shipment.">
     <copy file="${build.dir}/joram.jar" todir="${lib.dir}"/>
     <copy file="${build.dir}/mom.jar" todir="${lib.dir}"/>
   </target>
- 
+
+  <!-- JAVADOC --> 
   <target name="javadoc" depends="prepare"
-      description="--> Generate Javadoc">
+      description="--> Generates the Javadoc.">
   <!-- Path needed to create the javadoc  -->
   <path id="doc.class.path">
     <fileset dir="${lib.dir}">
@@ -159,12 +162,13 @@
     </javadoc>
   </target>
 
+  <!-- RELEASES -->
   <target name="releases" depends="release.src, release.jar"
     if="version"
-    description="--> Create two releases (source and jars) (version is specified by -Dversion=x.y.z)" />
+    description="--> Creates two releases (sources and jars) (version is specified by -Dversion=x.y.z)." />
   
   <target name="release.jar" depends="clean,ship.joram" if="version"
-    description="--> Create a release jar files (version is specified by -Dversion=x.y.z)">
+    description="--> Creates a jars only release (version is specified by -Dversion=x.y.z).">
     <copy todir="../../joram-${version}" includeEmptyDirs="no">
       <fileset dir="../../joram">
 	<exclude name="build/**" />
@@ -185,7 +189,7 @@
   </target>
 
   <target name="release.src" depends="clean" if="version"
-    description="--> Create a release with source (version is specified by -Dversion=x.y.z)">
+    description="--> Creates a sources release (version is specified by -Dversion=x.y.z)">
     <copy todir="../../joram-${version}-src" includeEmptyDirs="no">
       <fileset dir="../../joram">
 	<exclude name="build/**" />

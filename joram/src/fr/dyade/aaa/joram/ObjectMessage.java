@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,13 +22,17 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
-import java.io.Serializable;
+import fr.dyade.aaa.mom.excepts.*;
+
+import java.io.*;
 
 import javax.jms.JMSException;
+import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
 /**
@@ -35,27 +41,57 @@ import javax.jms.MessageNotWriteableException;
 public class ObjectMessage extends Message implements javax.jms.ObjectMessage
 {
   /** The wrapped object. */
-  private Serializable obj = null;
- 
- 
-  /**
-   * Instanciates an empty <code>ObjectMessage</code>.
-   */
-  ObjectMessage(Session sess)
-  {
-    super(sess);
-  }
+  private Serializable object = null;
+  /** <code>true</code> if the message body is read-only. */
+  private boolean RObody = false;
 
 
   /**
-   * Instanciates an <code>ObjectMessage</code> wrapping a given object.
+   * Instanciates a bright new <code>ObjectMessage</code>.
    */
-  ObjectMessage(Session sess, Serializable obj)
+  ObjectMessage()
   {
-    super(sess);
-    this.obj = obj;
+    super();
   }
-  
+
+  /**
+   * Instanciates an <code>ObjectMessage</code> wrapping a
+   * consumed MOM message containing an object.
+   *
+   * @param sess  The consuming session.
+   * @param momMsg  The MOM message to wrap.
+   *
+   * @exception MessageFormatException  In case of a problem when getting the
+   *              MOM message data.
+   */
+  ObjectMessage(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
+  throws MessageFormatException
+  {
+    super(sess, momMsg);
+    try {
+      object = (Serializable) momMsg.getObject();
+    }
+    catch (Exception exc) {
+      MessageFormatException jE =
+        new MessageFormatException("Error while getting the body.");
+      jE.setLinkedException(exc);
+      throw jE;
+    }
+    RObody = true;
+  }
+
+
+  /** 
+   * API method.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void clearBody() throws JMSException
+  {
+    super.clearBody();
+    object = null;
+    RObody = false;
+  }
 
   /**
    * API method.
@@ -66,49 +102,31 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   public void setObject(Serializable obj) throws JMSException
   {
     if (RObody)
-      throw new MessageNotWriteableException("Can't set an object on a"
-                                             + " read-only message.");
-    this.obj = obj;
+      throw new MessageNotWriteableException("Can't set an object as the"
+                                             + " message body is read-only.");
+    this.object = obj;
   }
 
   /**
    * API method.
-   *
+   * 
    * @exception JMSException  Actually never thrown.
    */
-  public Serializable getObject() throws JMSException
+  public Serializable getObject() throws MessageFormatException
   {
-    return obj;
+    return object;
   }
 
   /**
-   * API method.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  public void clearBody() throws JMSException
-  {
-    super.clearBody();
-    obj = null;
-  }
-
-  /**
-   * Method actually serializing the wrapped object into the MOM message.
+   * Method actually preparing the message for sending by transfering the
+   * local body into the wrapped MOM message.
    *
    * @exception Exception  If an error occurs while serializing.
    */
   protected void prepare() throws Exception
   {
-    momMsg.setObject(obj);
-  }
-
-  /** 
-   * Method actually deserializing the MOM body as the wrapped object.
-   *
-   * @exception Exception  If an error occurs while deserializing.
-   */
-  protected void restore() throws Exception
-  {
-    obj = (Serializable) momMsg.getObject();
+    super.prepare();
+    momMsg.clearBody();
+    momMsg.setObject(object);
   }
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,11 +22,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 /*
   Subset of SQL 92 grammar for message selectors.
-  Author: Frederic Maistre, ScalAgent, February 2002.
+  Author: Frederic Maistre, INRIA, February 2002.
 */
 
 /* ----------------------Preliminary Declarations Section--------------------*/
@@ -314,12 +315,15 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id IN LPAREN strings:sts RPAREN
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  else if (message.getField(id) instanceof String)
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
                     RESULT =
-                      new Boolean(sts.indexOf((String) message.getField(id))
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
                                               != -1);
 
                   // Comparison of non like values returns FALSE.
@@ -329,12 +333,15 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id NOT IN LPAREN strings:sts RPAREN
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  else if (message.getField(id) instanceof String)
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
                     RESULT =
-                      new Boolean(sts.indexOf((String) message.getField(id))
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
                                               == -1);
 
                   // Comparison of non like values returns FALSE.
@@ -344,10 +351,11 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id LIKE STRING:st
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  if (message.getField(id) instanceof String) {
+                  if (Interpreter.interpret(id, message, syntaxType)
+                      instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
                     stBuff.insert(0, '^');
@@ -367,7 +375,9 @@ non terminal Object expr, lit_expr;
                     org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
 
                     RESULT =
-                      new Boolean(regExp.match((String) message.getField(id)));
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
@@ -376,10 +386,11 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id NOT LIKE STRING:st
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  else if (message.getField(id) instanceof String) {
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
                     stBuff.insert(0, '^');
@@ -398,8 +409,9 @@ non terminal Object expr, lit_expr;
                     st = stBuff.toString(); 
                     org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
                     RESULT =
-                      new Boolean(!
-                                  regExp.match((String) message.getField(id)));
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
@@ -408,10 +420,11 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id LIKE STRING:st1 ESCAPE STRING:st2
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  else if (message.getField(id) instanceof String) {
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st1.substring(1, st1.length() - 1));
                     stBuff.insert(0, '^');
@@ -434,7 +447,9 @@ non terminal Object expr, lit_expr;
                       new org.apache.regexp.RE(st1);
 
                     RESULT =
-                      new Boolean(regExp.match((String) message.getField(id)));
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -444,10 +459,11 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id NOT LIKE STRING:st1 ESCAPE STRING:st2
                 {:
-                  if (message.getField(id) == null)
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
                     RESULT = null;
 
-                  else if (message.getField(id) instanceof String) {
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st1.substring(1, st1.length() - 1));
                     stBuff.insert(0, '^');
@@ -470,8 +486,9 @@ non terminal Object expr, lit_expr;
                       new org.apache.regexp.RE(st1);
 
                     RESULT =
-                      new Boolean(!
-                                  regExp.match((String) message.getField(id)));
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -481,12 +498,16 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id IS NULL
                 {:
-                  RESULT = new Boolean(message.getField(id) == null);
+                  RESULT = new Boolean(Intrepreter.interpret(id, message,
+                                                             syntaxType)
+                                       == null);
                 :}
                 |
                 ID:id IS NOT NULL
                 {:
-                  RESULT = new Boolean(message.getField(id) != null);
+                  RESULT = new Boolean(Intrepreter.interpret(id, message,
+                                                             syntaxType)
+                                       != null);
                 :}
                 |
                 expr:e
@@ -575,7 +596,7 @@ non terminal Object expr, lit_expr;
                 |
                 ID:id
                 {:
-                  RESULT = message.getField(id);
+                  RESULT = Interpreter.interpret(id, message, syntaxType);
                 :}
                 |
                 DOUBLE:db

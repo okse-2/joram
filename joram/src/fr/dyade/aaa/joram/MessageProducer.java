@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -70,8 +71,6 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @param sess  The session the producer belongs to.
    * @param dest  The destination the producer sends messages to.
    *
-   * @exception JMSSecurityException  If the client is not a WRITER on the
-   *              queue.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
@@ -80,10 +79,7 @@ public class MessageProducer implements javax.jms.MessageProducer
     this.sess = sess;
     this.dest = dest;
 
-    // Checking user's access permission:
-    if (dest != null)
-      sess.cnx.isWriter(dest.getName());
-    else
+    if (dest == null)
       identified = false;
 
     sess.producers.add(this);
@@ -304,8 +300,6 @@ public class MessageProducer implements javax.jms.MessageProducer
       throw new UnsupportedOperationException("Can't send message to"
                                               + " an unidentified"
                                               + " destination.");
-    // Checking user's access permission:
-    sess.cnx.isWriter(((Destination) dest).getName());
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
   }
@@ -335,8 +329,6 @@ public class MessageProducer implements javax.jms.MessageProducer
       throw new UnsupportedOperationException("Can't send message to"
                                               + " an unidentified"
                                               + " destination.");
-    // Checking user's access permission:
-    sess.cnx.isWriter(((Destination) dest).getName());
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
   }
@@ -377,12 +369,12 @@ public class MessageProducer implements javax.jms.MessageProducer
                       int deliveryMode, int priority,
                       long timeToLive) throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed producer.");
+
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": producing...");
-
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed producer.");
 
     // Updating the message property fields:
     String msgID = sess.cnx.nextMessageId();
@@ -407,7 +399,7 @@ public class MessageProducer implements javax.jms.MessageProducer
     // a proprietary message and then getting the MOM message it wraps:
     else if (message instanceof javax.jms.Message) {
       try {
-        Message joramMessage = Message.convertJMSMessage(sess, message);
+        Message joramMessage = Message.convertJMSMessage(message);
         momMsg = joramMessage.getMomMessage();
       }
       catch (JMSException jE) {
@@ -430,12 +422,13 @@ public class MessageProducer implements javax.jms.MessageProducer
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Buffering the message.");
 
-      sess.prepareSend(dest.getName(),
+      sess.prepareSend(dest,
                        (fr.dyade.aaa.mom.messages.Message) momMsg.clone());
     }
     // If not, building a new request and sending it:
     else {
       ProducerMessages pM = new ProducerMessages(dest.getName());
+
       pM.addMessage(momMsg);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -26,13 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 /**
  * The class <code>A3CMLTServer</code> describes a transient agent server.
  */
@@ -40,17 +34,17 @@ public class A3CMLTServer extends A3CMLServer{
   /** Server Id. of proxy used to access this transient server. */
   public short gateway = -1;
 
-  A3CMLTServer(Attributes atts) throws SAXException {
-    super(atts);
+  A3CMLTServer(String sid,
+               String name,
+               String hostname,
+               String gateway) throws Exception {
+    super(sid, name, hostname);
 
-    String attribute = atts.getValue(A3CMLHandler.ATT_SERVER);
     try {
-      gateway = Short.parseShort(attribute);
+      this.gateway = Short.parseShort(gateway);
     } catch (NumberFormatException exc) {
-      throw new SAXException("bad value \"" +
-			     attribute +
-			     "\" for attribute \"" + 
-			     A3CMLHandler.ATT_SERVER + "\"");
+      throw new Exception("bad value \"" + gateway + "\" for attribute \"" +
+                          A3CMLHandler.ATT_SERVER + "\"");
     }
   }
 }

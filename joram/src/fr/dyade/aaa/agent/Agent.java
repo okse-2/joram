@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -68,210 +69,8 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.11 2002-06-10 08:33:44 jmesnil Exp $"; 
-
-  /** This table is used to maintain a list of agents already in memory
-   * using the AgentId as primary key.
-   */
-  static Hashtable agents;
-  /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
-  static long now = 0;
-  /** Maximum number of memory loaded agents. */
-  static int NbMaxAgents;
-  /** Number of agents pinned in memory. */
-  static int nbFixedAgents;
-
-  static Logger xlogmon = null;
-
-  /**
-   * Before any agent may be used, the environment, including the hash table,
-   * must be initialized with its static init method.
-   *
-   * @see Server#init
-   *
-   * @exception Exception	unspecialized exception
-   */
-  static void init() throws Exception {
-    agents = new Hashtable();
-
-    // Get the logging monitor from current server MonologLoggerFactory
-    xlogmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
-                              ".#" + AgentServer.getServerId());
-
-    // Initialize 
-    if ((AgentServer.isTransient()) ||
-	(AgentServer.transaction instanceof NullTransaction)) {
-      // in order to avoid swap-out.
-      NbMaxAgents = Integer.MAX_VALUE;
-    } else {
-      NbMaxAgents = Integer.getInteger("NbMaxAgents", 100).intValue();
-    }
-
-    // Creates or initializes AgentFactory, then loads and initializes
-    //  all fixed agents.
-    nbFixedAgents = 0;
-    AgentFactory factory = null;
-    try {
-      factory = (AgentFactory) Agent.load(AgentId.factoryId);
-
-      // Initializes factory
-      factory.initialize(false);
-
-      // loads all fixed agents
-      for (Enumeration e = factory.getFixedAgentIdList() ;
-	   e.hasMoreElements() ;) {
-	AgentId id = (AgentId) e.nextElement();
-	try {
-	  Agent ag = Agent.load(id);
-          nbFixedAgents += 1;
-	} catch (UnknownAgentException exc) {
-          xlogmon.log(BasicLevel.ERROR,
-                      "AgentServer#" + AgentServer.getServerId() +
-                      ".Agent, can't restore fixed agent#" + id, exc);
-	  factory.removeFixedAgentId(id);
-	}
-      }
-      factory.save();
-    } catch (UnknownAgentException exc) {
-      // Creates factory and all "system" agents...
-      factory = new AgentFactory();
-      agents.put(factory.getId(), factory);
-      factory.initialize(true);
-//       AgentAdmin admin = new AgentAdmin();
-//       factory.createAgent(admin);
-      factory.save();
-      xlogmon.log(BasicLevel.WARN,
-                  "AgentServer#" + AgentServer.getServerId() +
-                  ".Agent, factory created");
-    }
-    xlogmon.log(BasicLevel.DEBUG,
-                "AgentServer#" + AgentServer.getServerId() +
-                ".Agent, initialized");
-  }
-
-  /**
-   *  The <code>garbage</code> method should be called regularly , to swap out
-   * from memory all the agents which have not been accessed for a time.
-   */
-  static void garbage() {
-    xlogmon.log(BasicLevel.WARN, "AgentServer#" + AgentServer.getServerId() +
-                ".Agent, garbaged");
-    long deadline = now - NbMaxAgents;
-    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
-      Agent ag = (Agent) e.nextElement();
-      if ((ag.last <= deadline) && (!ag.fixed)) {
-        if (xlogmon.isLoggable(BasicLevel.DEBUG))
-	  xlogmon.log(BasicLevel.DEBUG,
-                      "Agent" + ag.id + " [" + ag.name + "] garbaged");
-	agents.remove(ag.id);
-      }
-    }
-  }
-
-  /**
-   *  the <code>last</code> variable contains the virtual time of the
-   * last access. It is used by swap-out policy.
-   *
-   * @see garbage
-   */
-  transient long last;
-
-  /**
-   *  The <code>load</code> method return the <code>Agent</code> object
-   * designed by the <code>AgentId</code> parameter. If the <code>Agent</code>
-   * object is not already present in the server memory, it is loaded from
-   * the storage.
-   *
-   *  Be carefull, if the save method can be overloaded to optimize the save
-   * processus, the load procedure used by engine is always Agent.load.
-   *
-   * @param	id		The agent identification.
-   * @return			The corresponding agent.
-   *
-   * @exception	IOException
-   *	If an I/O error occurs.
-   * @exception	ClassNotFoundException
-   *	Should never happen (the agent has already been loaded in deploy).
-   * @exception	UnknownAgentException
-   *	There is no correponding agent on secondary storage.
-   * @exception Exception
-   *	when executing class specific initialization
-   */
-  static Agent load(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
-    now += 1;
-    Agent ag = (Agent) agents.get(id);
-    if (ag == null) {
-      if (agents.size() > (NbMaxAgents + nbFixedAgents))
-	garbage();
-      
-      if ((ag = (Agent) AgentServer.transaction.load(id.toString())) != null) {
-        ag.deployed = true;
-	agents.put(ag.id, ag);
-        if (xlogmon.isLoggable(BasicLevel.DEBUG))
-	  xlogmon.log(BasicLevel.DEBUG,
-                      "Agent" + ag.id + " [" + ag.name + "] loaded");
-
-        try {
-          ag.initialize(false); // initializes agent
-        } catch (Throwable exc) {
-          // AF: May be we have to delete the agent or not to allow
-          // reaction on it.
-          xlogmon.log(BasicLevel.ERROR,
-                      "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
-                      exc);
-        }
-        if (ag.logmon == null) ag.logmon = xlogmon;
-      } else {
-	throw new UnknownAgentException();
-      }
-    }
-
-    ag.last = now;
-    return ag;
-  }
-
-  /**
-   * The <code>reload</code> method return the <code>Agent</code> object
-   * loaded from the storage.
-   *
-   * @param	id		The agent identification.
-   * @return			The corresponding agent.
-   *
-   * @exception IOException
-   *	when accessing the stored image
-   * @exception ClassNotFoundException
-   *	if the stored image class may not be found
-   * @exception Exception
-   *	unspecialized exception
-   */
-  static Agent reload(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
-    Agent ag = (Agent) AgentServer.transaction.load(id.toString());
-    if (ag  != null) {
-      ag.deployed = true;
-      agents.put(ag.id, ag);
-      if (xlogmon.isLoggable(BasicLevel.DEBUG))
-        xlogmon.log(BasicLevel.DEBUG,
-                    "Agent" + ag.id + " [" + ag.name + "] reloaded");
-
-      try {
-        ag.initialize(false); // initializes agent
-      } catch (Throwable exc) {
-        // AF: May be we have to delete the agent or not to allow
-        // reaction on it.
-        xlogmon.log(BasicLevel.ERROR,
-                    "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
-                    exc);
-      }
-      if (ag.logmon == null) ag.logmon = xlogmon;
-    } else {
-      throw new UnknownAgentException();
-    }
-    ag.last = now;
-    return ag;
-  }
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   protected void save() throws IOException {
     AgentServer.transaction.save(this, id.toString());
@@ -309,6 +108,14 @@ public abstract class Agent implements Serializable {
   }
 
   private static String nullName = "";
+
+  /**
+   *  the <code>last</code> variable contains the virtual time of the
+   * last access. It is used by swap-out policy.
+   *
+   * @see garbage
+   */
+  transient long last;
 
 //   /**
 //    * If <code>true</code> the agent notifies its listeners when a
@@ -459,9 +266,11 @@ public abstract class Agent implements Serializable {
     try {
       id = new AgentId(to);
     } catch (IOException exc) {
-      xlogmon.log(BasicLevel.ERROR,
-                  "AgentServer#" + AgentServer.getServerId() +
-                  ".Agent, can't allocate new AgentId", exc);
+      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                               ".#" + AgentServer.getServerId());
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".Agent, can't allocate new AgentId", exc);
       // TODO: throw an exception...
     }
     initState(name, fixed, id);
@@ -512,9 +321,11 @@ public abstract class Agent implements Serializable {
   public Agent(String name, boolean fixed, int stamp) {
     if (stamp < AgentId.MinWKSIdStamp ||
 	stamp > AgentId.MaxWKSIdStamp) {
-      xlogmon.log(BasicLevel.ERROR,
-                  "AgentServer#" + AgentServer.getServerId() +
-                  ".Agent, well known service stamp out of range: " +
+      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                               ".#" + AgentServer.getServerId());
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".Agent, well known service stamp out of range: " +
                   stamp);
       throw new IllegalArgumentException(
 	"Well known service stamp out of range: " + stamp);
@@ -651,7 +462,8 @@ public abstract class Agent implements Serializable {
    * each time the agent server is restarted.
    * <p>
    * This function is not declared <code>final</code> so that derived classes
-   * may change their reload policy.
+   * may change their reload policy. The implementation of this method provided
+   * by the <code>Agent</code> class does nothing.
    *
    * @param firstTime		true when first called by the factory
    *
@@ -866,29 +678,6 @@ public abstract class Agent implements Serializable {
       sendTo(from, new UnknownNotification(id, not));
     }
   }
-
-  /**
-   *  Static method used for debug and monitoring. It returns an
-   * enumeration of all agents loaded.
-   */
-  static AgentId[] getLoadedAgentIdlist() {
-    AgentId list[] = new AgentId[agents.size()];
-    int i = 0;
-    for (Enumeration e = agents.elements(); e.hasMoreElements() ;)
-      list[i++] = ((Agent) e.nextElement()).id;
-    return list;
-  }
-
-  static String dumpAgent(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
-    Agent ag = (Agent) agents.get(id);
-    if (ag == null) {
-      ag = (Agent) AgentServer.transaction.load(id.toString());
-      if (ag == null) return "Agent" + id + " unknown";
-      return "Agent" + id + " on disk = " + ag;
-    }
-    return "Agent" + id + " in memory = " + ag;
-  } 
 
 //   /**
 //    * Fires an input event by sending an <code>InputEvent</code>
@@ -1202,4 +991,17 @@ public abstract class Agent implements Serializable {
 //       removeForAllEvents(not.agent);
 //     }
   }
+
+  /**
+   * Called to inform this agent that it is garbaged and that it should free
+   * any active ressources that it has allocated.
+   * A subclass of <code>Agent</code> should override this method if it has
+   * any operation that it wants to perform before it is garbaged. For example,
+   * an agent with threads (a ProxyAgent for example) would use the initialize
+   * method to create the threads and the <code>agentFinalize</code> method to
+   * stop them.
+   * The implementation of this method provided by the <code>Agent</code> class
+   * does nothing.
+   */
+  public void agentFinalize() { }
 }

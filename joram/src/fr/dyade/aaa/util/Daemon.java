@@ -57,8 +57,8 @@ import org.objectweb.util.monolog.api.Logger;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.7 2002-06-06 10:27:38 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.8 2002-10-21 08:41:14 maistrfr Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -124,11 +124,25 @@ public abstract class Daemon implements Runnable {
    * @param name	the name of the new Daemon
    */
   protected Daemon(String name) {
+    this(name, null);
+  }
+
+  /**
+   * Allocates a new Daemon object.
+   *
+   * @param name	the name of the new Daemon
+   * @param logmon	inherited logging monitor
+   */
+  protected Daemon(String name, Logger logmon) {
     this.name = name;
 
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getLogger(getClass().getName() + '.' + name);
-    logmon.log(BasicLevel.DEBUG, getName() + ", created.");
+    if (logmon == null) {
+      // Get a default logging monitor from MonologMonitorFactory
+      this.logmon = Debug.getLogger(getClass().getName() + '.' + name);
+      this.logmon.log(BasicLevel.DEBUG, getName() + ", created.");
+    } else {
+      this.logmon = logmon;
+    }
 
     running = false;
     canStop = false;

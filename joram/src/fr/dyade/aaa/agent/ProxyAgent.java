@@ -34,8 +34,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.11 2002-03-26 16:08:39 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -137,8 +137,8 @@ public abstract class ProxyAgent extends Agent {
 
   /**
    * Initializes the transient members of this agent.
-   * This function is first called by the factory agent,
-   * then by the system each time the agent server is restarted.
+   * This function is first called by the factory agent, then by the system
+   * each time the agent server is restarted.
    * <p>
    * This function is not declared final so that derived classes
    * may change their reload policy.
@@ -218,16 +218,14 @@ public abstract class ProxyAgent extends Agent {
    * If the connection step blocks, this function is executed
    * in a separate thread controled by <code>drvCnx</code> (see
    * <code>Initialize</code>).
+   * 
+   * @exception java.net.SocketException  If the server socket is being closed.
    */
-  void createDrivers() {
-    try {
-      connect();
-    } catch (EOFException exc) {
-      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
-    } catch (Exception exc) { 
-      logmon.log(BasicLevel.ERROR, "error in createDrivers()", exc);
-    }
-    if (!multiConn) {  
+  void createDrivers() throws Exception
+  {
+    connect();
+
+    if (! multiConn) {  
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", connected");
       if (oos != null) {
@@ -342,12 +340,15 @@ public abstract class ProxyAgent extends Agent {
    */
   protected final void finalize() throws Throwable
   {
-    if (! multiConn) {
-      if (ois == null && oos == null)
-        return;
-    }
-    else
+    if (multiConn)
       closeAllConnections();
+    else {
+      if (ois != null)
+        ois.close();
+      if (oos != null)
+        oos.close();
+    }
+
     try {
       disconnect();
     } catch (Exception exc) {
@@ -359,7 +360,6 @@ public abstract class ProxyAgent extends Agent {
     qout = null;
     ois = null;
     oos = null;
-
   }
 
   /** Closes all the connections. */
@@ -546,4 +546,18 @@ public abstract class ProxyAgent extends Agent {
     } 
   }
 
+  /**
+   *
+   */
+  public void agentFinalize() {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "finalizes");
+
+    try {
+      finalize();
+    } catch (Throwable exc) {
+      if (logmon.isLoggable(BasicLevel.ERROR))
+      logmon.log(BasicLevel.ERROR, "error in finalize", exc);
+    }
+  }
 }

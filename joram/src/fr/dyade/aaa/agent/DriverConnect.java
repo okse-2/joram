@@ -52,11 +52,23 @@ class DriverConnect extends Driver {
   }
 
   public void run() {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", started");
-    do {
-      proxy.createDrivers();
-    } while (multipleCnx);
+    try {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", started");
+
+      do {
+        proxy.createDrivers();
+      } while (multipleCnx);
+    }
+    catch (java.net.SocketException exc) {
+      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
+    }
+    catch (java.io.EOFException exc) {
+      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
+    }
+    catch (Exception exc) { 
+      logmon.log(BasicLevel.ERROR, "error in createDrivers()", exc);
+    }
   }
 
   public void close() {}

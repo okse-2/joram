@@ -25,13 +25,14 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.util.Date;
+
 import fr.dyade.aaa.util.*;
 
 /**
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.10 2002-04-18 13:36:17 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $"; 
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -175,4 +176,57 @@ class Message implements Serializable {
     this.deadline = deadline;
   }
 
+  private static Pool stack = null;
+
+  static {
+    stack = new Pool(50, 10);
+    for (int i=0; i<50; i++) {
+      stack.addElement(new Message());
+    }
+  }
+
+  static Message alloc(AgentId from, AgentId to, Notification not) {
+    Message msg = null;
+    
+    try {
+      msg = (Message) stack.removeLastElement();
+    } catch (Exception exc) {
+      msg = new Message();
+    }
+    msg.set(from, to, not);
+    return msg;
+  }
+
+  void free() {
+    this.from = null;
+    this.to = null;
+    this.not = null;
+    this.deadline = -1L;
+    stack.addElement(this);
+  }
+
+  private Message() {}
+  
+  private void set(AgentId from, AgentId to, Notification not) {
+    this.from = (AgentId) from;
+    this.to = (AgentId) to;
+    // Be careful, normally we have to clone the notification !!!
+    this.not = (Notification) not;
+    this.deadline = -1L;
+  }
+
+  static class Pool extends java.util.Vector {
+    public Pool(int initialCapacity, int capacityIncrement) {
+      super(initialCapacity, capacityIncrement);
+    }
+
+    public final synchronized Object removeLastElement() throws Exception {
+      if (elementCount == 0) throw new Exception();
+      elementCount--;
+      Object obj = elementData[elementCount];
+      elementData[elementCount] = null; /* to let gc do its work */
+    
+      return obj;
+    }
+  }
 }

@@ -22,47 +22,29 @@
  *
  * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.mom.messages;
+package fr.dyade.aaa.util;
 
-/** 
- * The <code>DestinationInfo</code> class is used to store a destination 
- * information carried by a <code>Message</code> instance.
+import java.io.*;
+import java.util.*;
+
+import org.apache.log4j.DailyRollingFileAppender;
+import org.apache.log4j.Layout;
+import fr.dyade.aaa.agent.AgentServer;
+
+/**
+ * A3Log4jFileAppender appends log events to a file depending of the
+ * agent server id.
  */
-public class DestinationInfo implements java.io.Serializable
-{
-  /** Identifier of the destination. */
-  private String name;
-  /** <code>true</code> if the destination is a queue. */
-  private boolean queue;
-  /** <code>true</code> if the destination is temporary. */
-  private boolean temporary;
+public class A3Log4jDailyRollingFileAppender extends DailyRollingFileAppender {
+  /** RCS version number of this file: $Revision: 1.1 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jDailyRollingFileAppender.java,v 1.1 2002-10-21 08:42:00 maistrfr Exp $";
 
   /**
-   * Constructs a <code>DestinationInfo</code> instance.
+   * The default constructor does not do anything. 
    */
-  public DestinationInfo(String name, boolean queue, boolean temporary)
-  {
-    this.name = name;
-    this.queue = queue;
-    this.temporary = temporary;
-  }
-
-
-  /** Returns the identifier of the destination. */
-  public String getName()
-  {
-    return name;
-  }
-
-  /** Returns <code>true</code> if the destination is a queue. */
-  public boolean isQueue()
-  {
-    return queue;
-  }
-
-  /** Returns <code>true</code> if the destination is temporary. */
-  public boolean isTemporary()
-  {
-    return temporary;
+  public A3Log4jDailyRollingFileAppender() {
+    super();
+    fileName = "server#" + AgentServer.getServerId() + ".audit";
+    activateOptions();
   }
 }

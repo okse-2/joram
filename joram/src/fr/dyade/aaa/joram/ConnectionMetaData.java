@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,9 +22,12 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
+
+import java.util.*;
 
 import javax.jms.JMSException;
 
@@ -33,13 +36,21 @@ import javax.jms.JMSException;
  */
 public class ConnectionMetaData implements javax.jms.ConnectionMetaData
 {
-  private int jmsMajorVersion = 1;
-  private int jmsMinorVersion = 1;
-  private String jmsProviderName = "Joram";
-  private String jmsVersion = "1.1";
-  private int providerMajorVersion = 3;
-  private int providerMinorVersion = 1;
-  private String providerVersion = "3.1";
+  private static int jmsMajorVersion = 1;
+  private static int jmsMinorVersion = 1;
+  private static String jmsProviderName = "Joram";
+  private static String jmsVersion = "1.1";
+  private static int providerMajorVersion = 3;
+  private static int providerMinorVersion = 1;
+  private static String providerVersion = "3.1";
+  private static Vector jmsxProperties = new Vector();
+
+  static
+  {
+    jmsxProperties.add("JMSXDeliveryCount");
+    jmsxProperties.add("JMSXGroupID");
+    jmsxProperties.add("JMSXGroupSeq");
+  }
 
   /**
    * API method.
@@ -86,9 +97,9 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData
    *
    * @exception JMSException  Actually never thrown.
    */
-  public java.util.Enumeration getJMSXPropertyNames() throws JMSException
+  public Enumeration getJMSXPropertyNames() throws JMSException
   {
-    return null;
+    return jmsxProperties.elements();
   }
 
   /**
@@ -121,3 +132,5 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData
     return providerVersion;
   }
 }
+
+

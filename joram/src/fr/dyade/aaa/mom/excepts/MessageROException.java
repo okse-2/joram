@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,36 +22,24 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
-package fr.dyade.aaa.mom.comm;
+package fr.dyade.aaa.mom.excepts;
 
 /**
- * A <code>PingRequest</code> is used by a <b>client</b> agent for checking
- * the existence of a destination agent.
+ * A <code>MessageROException</code> is thrown when trying to write on a
+ * READ-ONLY part of a message.
  */
-public class PingRequest extends AbstractRequest
+public class MessageROException extends MessageException
 {
   /**
-   * Constructs a <code>PingRequest</code> involved in an external client -
-   * MOM interaction.
+   * Constructs a <code>MessageROException</code> instance.
    *
-   * @param key  See superclass.
-   * @param requestId  See superclass.
+   * @param s  See superclass.
    */
-  public PingRequest(int key, String requestId)
+  public MessageROException(String s)
   {
-    super(key, requestId);
-  }
-
-  /**
-   * Constructs a <code>PingRequest</code> not involved in an external client -
-   * MOM interaction.
-   *
-   * @param requestId  See superclass.
-   */
-  public PingRequest(String requestId)
-  {
-    super(0, requestId);
+    super(s);
   }
 }

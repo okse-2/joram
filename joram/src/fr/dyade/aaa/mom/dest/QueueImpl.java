@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.dest;
 
@@ -42,14 +45,21 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class QueueImpl extends DestinationImpl
 {
+  /**
+   * Threshold value for loging messages to the DMQ, 0 or negative value for
+   * no threshold value, <code>null</code> for value not set.
+   */
+  private Integer threshold = null;
+  
   /** Vector holding messages before delivery and acknowledgement. */
-  private Vector messages;
+  protected Vector messages;
   /** Vector holding requests before reply or expiry. */
-  private Vector requests;
+  protected Vector requests;
   /** Id of Scheduler for checking the stored requests validity. */
-  private AgentId scheduler;
+  protected AgentId scheduler;
   /** Number of non delivered messages. */
-  private int deliverables = 0;
+  protected int deliverables = 0;
+
 
   /**
    * Constructs a <code>QueueImpl</code> instance.
@@ -60,6 +70,7 @@ public class QueueImpl extends DestinationImpl
   public QueueImpl(AgentId queueId, AgentId adminId)
   {
     super(queueId, adminId);
+
     messages = new Vector();
     requests = new Vector();
     scheduler = Scheduler.getDefault();
@@ -79,6 +90,7 @@ public class QueueImpl extends DestinationImpl
    * <p>
    * Accepted requests are:
    * <ul>
+   * <li><code>SetThreshRequest</code> notifications,</li>
    * <li><code>ClientMessages</code> notifications,</li>
    * <li><code>ReceiveRequest</code> notifications,</li>
    * <li><code>BrowseRequest</code> notifications,</li>
@@ -97,7 +109,9 @@ public class QueueImpl extends DestinationImpl
                                     + " with id: " + req.getRequestId()
                                     + " from: " + from.toString());
     try {
-      if (req instanceof ClientMessages)
+      if (req instanceof SetThreshRequest)
+        doReact(from, (SetThreshRequest) req);
+      else if (req instanceof ClientMessages)
         doReact(from, (ClientMessages) req);
       else if (req instanceof ReceiveRequest)
         doReact(from, (ReceiveRequest) req);
@@ -119,55 +133,82 @@ public class QueueImpl extends DestinationImpl
     }
   }
 
+  
+  /**
+   * Method implementing the queue reaction to a
+   * <code>SetThreshRequest</code> instance setting the threshold value
+   * for this queue.
+   *
+   * @exception AccessException  If the requester is not an administrator.
+   */
+  private void doReact(AgentId from, SetThreshRequest not)
+               throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("The needed ADMIN right is not granted"
+                                + " on queue " + destId);
+
+    threshold = not.getThreshold();
+  }
+
   /**
    * Method implementing the queue reaction to a <code>ClientMessages</code>
    * instance holding messages sent by a client agent.
    * <p>
-   * This method stores the valid messages and launches a delivery sequence.
+   * This method stores the messages and launches a delivery sequence.
+   * If sender is not a writer on the queue, the messages are sent to the
+   * valid DMQ.
    *
    * @exception AccessException  If the sender is not a WRITER.
    */
   private void doReact(AgentId from, ClientMessages not) throws AccessException
   {
-    // If sender is not a writer, throwing an exception:
-    if (! super.isWriter(from))
+    Vector recM = not.getMessages();
+
+    // If sender is not a writer, sending the messages to the DMQ, and
+    // throwing an exception:
+    if (! super.isWriter(from)) {
+      for (int i = 0; i < recM.size(); i++) {
+        try {
+          ((Message) recM.get(i)).notWritable = true;
+        }
+        // Invalid message: removing it.
+        catch (ClassCastException cE) {
+          recM.remove(i);
+          i--;
+        }
+      }
+      sendToDMQ(recM, not.getDMQId());
       throw new AccessException("The needed WRITE right is not granted"
                                 + " on queue " + destId);
-
-    Vector recM = not.getMessages();
+    }
 
     Message msg;
     int priority;
     int k;
     Message storedMsg;
 
-    // For each sent message:
+    // Storing each message according to its priority:
     for (int i = 0; i < recM.size(); i++) {
       try {
         msg = (Message) recM.get(i);
+        priority = msg.getPriority();
+        k = 0;
+        while (k < messages.size()) {
+          storedMsg = (Message) messages.get(k);
+          if (priority > storedMsg.getPriority())
+            break;
+          else
+            k++;
+        }
+        messages.insertElementAt(msg, k);
+        deliverables++;
 
-        // Checking if the message is valid:
-        if (msg.isValid()) {
-
-          // Storing the message according to its priority:
-          priority = msg.getPriority();
-          k = 0;
-          while (k < messages.size()) {
-            storedMsg = (Message) messages.get(k);
-            if (priority > storedMsg.getPriority())
-              break;
-            else
-              k++;
-          }
-          messages.insertElementAt(msg, k);
-          deliverables++;
-
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                          + msg.getIdentifier() + " stored"
-                                          + " at pos " + k);
-        } 
-      }
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+                                        + msg.getIdentifier() + " stored"
+                                        + " at pos " + k);
+      } 
       catch (ClassCastException cE) {
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
           MomTracing.dbgDestination.log(BasicLevel.WARN, "Invalid message: "
@@ -225,7 +266,7 @@ public class QueueImpl extends DestinationImpl
       } 
 
       // If it is an immediate delivery request, sending a null:
-      else if (not.getTimeOut() == 0) {
+      else if (not.getTimeOut() == -1) {
         requests.remove(not);
         QueueMsgReply reply = new QueueMsgReply(not, null);
         Channel.sendTo(from, reply);
@@ -241,7 +282,8 @@ public class QueueImpl extends DestinationImpl
    * Method implementing the queue reaction to a <code>BrowseRequest</code>
    * instance, requesting an enumeration of the messages on the queue.
    * <p>
-   * The method sends a <code>BrowseReply</code> back to the client.
+   * The method sends a <code>BrowseReply</code> back to the client. Expired
+   * messages are sent to the DMQ.
    *
    * @exception AccessException  If the sender is not a reader.
    */
@@ -258,6 +300,7 @@ public class QueueImpl extends DestinationImpl
     // Adding the deliverable messages to it:
     int i = 0;
     Message message;
+    Vector deadM = null;
     while (deliverables > 0 && i < messages.size()) {
       message = (Message) messages.get(i);
    
@@ -270,10 +313,17 @@ public class QueueImpl extends DestinationImpl
 
         i++;
       }
-      // Invalid message: removing it:
+      // Invalid message: removing it and adding it to the vector of dead
+      // messages:
       else {
         messages.remove(i);
         deliverables--;
+
+        if (deadM == null)
+          deadM = new Vector();
+
+        message.expired = true;
+        deadM.add(message);
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
@@ -281,6 +331,10 @@ public class QueueImpl extends DestinationImpl
                                         + " removed.");
       }
     }
+    // Sending the dead messages to the DMQ, if needed:
+    if (deadM != null)
+      sendToDMQ(deadM, null);
+
     // Delivering the reply:
     Channel.sendTo(from, rep);
 
@@ -323,6 +377,7 @@ public class QueueImpl extends DestinationImpl
    * instance, requesting messages to be denied.
    * <p>
    * This method denies the messages and launches a delivery sequence.
+   * Messages considered as undeliverable are sent to the DMQ.
    *
    * @exception RequestException  If the request is invalid.
    */
@@ -331,21 +386,42 @@ public class QueueImpl extends DestinationImpl
     // Checking the parameters and getting the acknowledged msg indexes:
     Vector indexes = getIndexes(from.toString(), not.getMsgIds());
     int index;
+    int shift = 0;
     Message msg;
+    Vector deadM = null;
 
     while (! indexes.isEmpty()) {
-      index = ((Integer) indexes.remove(0)).intValue();
+      index = ((Integer) indexes.remove(0)).intValue() - shift;
       // Denying message:
       msg = (Message) messages.get(index);
       msg.denied = true;
-      msg.consId = null;
-      deliverables++;
+
+      // If message considered as undeliverable, removing it and adding it
+      // to the vector of dead messages:
+      if (isUndeliverable(msg)) {
+        messages.remove(index);
+        shift++;
+
+        if (deadM == null)
+          deadM = new Vector();
+
+        msg.undeliverable = true;
+        deadM.add(msg);
+      }
+      else {
+        msg.consId = null;
+        deliverables++;
+      }
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
                                       + msg.getIdentifier()
                                       + " denied.");
     }
+    // Sending the dead messages to the DMQ, if needed:
+    if (deadM != null)
+      sendToDMQ(deadM, null);
+
     // Lauching a delivery sequence:
     deliverMessages(0);
   }
@@ -402,30 +478,67 @@ public class QueueImpl extends DestinationImpl
    * requester which does not exist anymore. In that case, the messages sent
    * to this requester and not yet acknowledged are marked as "denied"
    * for delivery to an other requester, and a new delivery sequence is
-   * launched.
+   * launched. Messages considered as undeliverable are removed and sent to
+   * the DMQ.
+   * <p>
+   * This case might also happen when sending a <code>ClientMessages</code>
+   * to a dead message queue. In that case, the invalid DMQ identifier is set
+   * to null.
    */ 
   public void removeDeadClient(UnknownAgent uA)
   {
     AgentId client = uA.agent;
+    Notification not = uA.not;
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
       MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
                                     + " notified of a dead client: "
                                     + client.toString());
-  
-    Message msg;
-    for (int i = 0; i < messages.size(); i++) {
-      msg = (Message) messages.get(i);
-      if (msg.consId.equals(client.toString())) {
-        msg.denied = true;
-        msg.consId = null;
-        deliverables++;
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-          MomTracing.dbgDestination.log(BasicLevel.WARN, "Message "
-                                        + msg.getIdentifier() + " denied.");
+    Vector deadM = new Vector();
+
+    // If the dead client is in fact a dead message queue, updating its
+    // identifier to null:
+    if (dmqId != null && client.equals(dmqId)) {
+      dmqId = null;
+      deadM.addAll(((ClientMessages) not).getMessages());
+    }
+    else if (DeadMQueueImpl.id != null && client.equals(DeadMQueueImpl.id)) {
+      DeadMQueueImpl.id = null;
+      deadM.addAll(((ClientMessages) not).getMessages());
+    }
+    // Else, denying the messages consumed by this client, if any:
+    else {
+      Message msg;
+      for (int i = 0; i < messages.size(); i++) {
+        msg = (Message) messages.get(i);
+        if (msg.consId.equals(client.toString())) {
+          msg.denied = true;
+
+          // If message considered as undeliverable, removing it and adding it
+          // to the vector of dead messages:
+          if (isUndeliverable(msg)) {
+            messages.remove(i);
+            i--;
+ 
+            msg.undeliverable = true; 
+            deadM.add(msg);
+          }
+          else {
+            msg.consId = null;
+            deliverables++;
+          }
+
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+            MomTracing.dbgDestination.log(BasicLevel.WARN, "Message "
+                                          + msg.getIdentifier() + " denied.");
+        }
       }
     }
+    // Sending dead messages to the DMQ, if needed:
+    if (! deadM.isEmpty())
+      sendToDMQ(deadM, null);
+
     // Launching a delivery sequence:
     deliverMessages(0);
   }
@@ -437,7 +550,7 @@ public class QueueImpl extends DestinationImpl
    * <p>
    * The notification is ignored if the sender is not an admin of the queue.
    * Otherwise, <code>ExceptionReply</code> replies are sent to the pending
-   * receivers.
+   * receivers. The remaining messages are sent to the DMQ.
    */
   public void delete(AgentId from)
   {
@@ -471,6 +584,13 @@ public class QueueImpl extends DestinationImpl
       
       Channel.sendTo(rec.requester, excRep);
     }
+    // Sending the remaining messages to the DMQ, if needed:
+    if (! messages.isEmpty()) {
+      for (int i = 0; i < messages.size(); i++)
+        ((Message) messages.get(i)).deletedDest = true;
+      sendToDMQ(messages, null);
+    }
+
     deleted = true;
   }
 
@@ -479,7 +599,7 @@ public class QueueImpl extends DestinationImpl
    * <p>
    * The method may send <code>QueueMsgReply</code> replies to clients and
    * <code>fr.dyade.aaa.task.RemoveConditionListener</code> notifications
-   * to the scheduler.
+   * to the scheduler. Expired messages are sent to the DMQ.
    *
    * @param index  Index where starting to "browse" the requests.
    */
@@ -490,6 +610,7 @@ public class QueueImpl extends DestinationImpl
     int j = 0;
     Message msg;
     QueueMsgReply notMsg;
+    Vector deadM = null;
 
     // Processing each request as long as there are deliverable messages:
     while (deliverables > 0 && index < requests.size()) { 
@@ -506,6 +627,7 @@ public class QueueImpl extends DestinationImpl
           // sending it:
           if (msg.consId == null
               && Selector.matches(msg, notRec.getSelector())) {
+            msg.deliveryCount++;
             notMsg = new QueueMsgReply(notRec, msg);
             Channel.sendTo(notRec.requester, notMsg);
 
@@ -546,10 +668,17 @@ public class QueueImpl extends DestinationImpl
           else
             j++;
         }
-        // If message is invalid, removing it:
+        // If message is invalid, removing it and adding it to the vector of
+        // dead messages:
         else {
           messages.remove(j);
           deliverables--;
+
+          if (deadM == null)
+            deadM = new Vector();
+
+          msg.expired = true;
+          deadM.add(msg);
 
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired"
@@ -562,6 +691,9 @@ public class QueueImpl extends DestinationImpl
       if (! replied)
         index++;
     }
+    // If needed, sending the dead messages to the DMQ:
+    if (deadM != null)
+      sendToDMQ(deadM, null);
   }
   
   /**
@@ -605,5 +737,19 @@ public class QueueImpl extends DestinationImpl
       }
     }
     return indexes;
+  }
+
+  /**
+   * Returns <code>true</code> if a given message is considered as 
+   * undeliverable, because its delivery count matches the queue's or default
+   * threshold.
+   */
+  private boolean isUndeliverable(Message message)
+  {
+    if (threshold != null)
+      return message.deliveryCount == threshold.intValue();
+    else if (DeadMQueueImpl.threshold != null)
+      return message.deliveryCount == DeadMQueueImpl.threshold.intValue();
+    return false;
   }
 }

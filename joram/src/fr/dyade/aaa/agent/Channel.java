@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -39,8 +40,8 @@ import fr.dyade.aaa.util.*;
  * localizing the target agent.
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   static Channel channel = null;
 
@@ -48,12 +49,20 @@ abstract public class Channel {
 
   /**
    * Creates a new instance of channel (result depends of server type).
+   *
+   * @return	the corresponding <code>Channel</code>'s instance.
    */
-  static Channel newInstance() {
-    if (AgentServer.isTransient())
-      channel = new TransientChannel();
-    else // if (type == AgentServer.TRANSACTION)
-      channel = new TransactionChannel();
+  static Channel newInstance() throws Exception {
+    String cname = System.getProperty("Channel");
+    if (cname == null) {
+      if (AgentServer.isTransient()) {
+        cname = "fr.dyade.aaa.agent.TransientChannel";
+      } else {
+        cname = "fr.dyade.aaa.agent.TransactionChannel";
+      }
+    }
+    Class cclass = Class.forName(cname);
+    channel = (Channel) cclass.newInstance();
     return channel;
   }
 
@@ -65,7 +74,8 @@ abstract public class Channel {
    */
   protected Channel() {
     // Get the logging monitor from current server MonologLoggerFactory
-    logmon = Debug.getLogger(Debug.A3Engine);
+    logmon = Debug.getLogger(Debug.A3Engine +
+                             ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
 
     this.mq = new Queue();
@@ -263,8 +273,8 @@ abstract public class Channel {
 }
 
 final class TransactionChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
@@ -350,8 +360,8 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /**
    * Constructs a new <code>TransientChannel</code> object. this method

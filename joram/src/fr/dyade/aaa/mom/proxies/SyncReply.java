@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -20,19 +22,21 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.proxies;
 
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 
 /**
- * A <code>ProxySyncAck</code> notification is used by a proxy to wrap
- * an <code>JmsAbstractReply</code> it can't directly send for causal reasons.
+ * A <code>SyncReply</code> instance wraps a reply that has to be sent to
+ * a proxy's client.
  * <p>
- * The proxy actually sends this notification to itself.
+ * A <code>SyncReply</code> is sent by a proxy to itself for integrating
+ * the reply it wraps into the causal chain.
  */
-class ProxySyncAck extends fr.dyade.aaa.agent.Notification
+class SyncReply extends fr.dyade.aaa.agent.Notification
 {
   /**
    * The key of the connection through which the reply will have to be sent.
@@ -42,12 +46,12 @@ class ProxySyncAck extends fr.dyade.aaa.agent.Notification
   AbstractJmsReply reply;
 
   /**
-   * Constructs a <code>ProxySyncAck</code> instance.
+   * Constructs a <code>SyncReply</code> instance.
    *
    * @param key  The connection key the reply will be sent on.
    * @param reply  The reply to send.
    */
-  ProxySyncAck(int key, AbstractJmsReply reply)
+  SyncReply(int key, AbstractJmsReply reply)
   {
     this.reply = reply;
     this.key = key;

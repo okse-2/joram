@@ -27,7 +27,9 @@ import java.io.*;
 import java.util.*;
 
 public class JTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.10 2002-10-21 08:41:14 maistrfr Exp $";
+
+  public static final String EMPTY_STRING = new String();
 
   private File dir = null;
 
@@ -41,15 +43,19 @@ public class JTransaction implements Transaction {
   static final int DELETE = 2;
 
   class Operation implements Serializable {
+    String dirName;
+    String name;
     int type;
     byte[] value = null;
 
-    Operation(int type) {
-      this.type = type;
+    Operation(int type, String dirName, String name) {
+      this(type, dirName, name, null);
     }
 
-    Operation(int type, byte[] value) {
+    Operation(int type, String dirName, String name, byte[] value) {
       this.type = type;
+      this.dirName = dirName;
+      this.name = name;
       this.value = value;
     }
   }
@@ -87,13 +93,16 @@ public class JTransaction implements Transaction {
 	int op;
 	String name;
 	while (!(name = logFile.readUTF()).equals("")) {
+          String dirName = logFile.readUTF();
+          if (dirName.length() == 0) dirName = null;
+          Object key = OperationKey.newKey(dirName, name);
 	  op = logFile.read();
 	  if (op == SAVE) {
 	    byte buf[] = new byte[logFile.readInt()];
 	    logFile.readFully(buf);
-	    log.put(name, new Operation(SAVE, buf));
+	    log.put(key, new Operation(SAVE, dirName, name, buf));
 	  } else {
-	    log.put(name, new Operation(op));
+	    log.put(key, new Operation(op, dirName, name));
 	  }
 	}
       }
@@ -127,8 +136,12 @@ public class JTransaction implements Transaction {
   public String[] getList(String prefix) {
     return dir.list(new StartWithFilter(prefix));
   }
-
+  
   public void save(Serializable obj, String name) throws IOException {
+    save(obj, null, name);
+  }
+
+  public final void save(Serializable obj, String dirName, String name) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(obj);
@@ -137,21 +150,37 @@ public class JTransaction implements Transaction {
 
     if (phase == RUN) {
       // We are during a transaction put the new state in the log.
-      log.put(name, new Operation(SAVE, bobj));
+      Object key = OperationKey.newKey(dirName, name);
+      log.put(key, new Operation(SAVE, dirName, name, bobj));
     } else {
       // Save the new state on the disk.
-      FileOutputStream fos = new FileOutputStream(new File(dir, name));
+      File file;
+      if (dirName == null) {
+        file = new File(dir, name);
+      } else {
+        File parentDir = new File(dir, dirName);
+        if (!parentDir.exists()) {
+          parentDir.mkdirs();
+        }
+        file = new File(parentDir, name);
+      }
+      FileOutputStream fos = new FileOutputStream(file);
       fos.write(bobj);
       fos.close();
     }
   }
 
   public Object load(String name) throws IOException, ClassNotFoundException {
+    return load(null, name);
+  }
+
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     Object obj;
 
     if (phase == RUN) {
       // first search in the log a new value for the object.
-      Operation op = (Operation) log.get(name);
+      Object key = OperationKey.newKey(dirName, name);
+      Operation op = (Operation) log.get(key);
       if (op != null) {
 	if (op.type == SAVE) {
 	  ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
@@ -166,7 +195,13 @@ public class JTransaction implements Transaction {
     }
 
     try {
-      File file = new File(dir, name);
+      File file;
+      if (dirName == null) {
+        file = new File(dir, name);
+      } else {
+        File parentDir = new File(dir, dirName);
+        file = new File(parentDir, name);
+      }
       FileInputStream fis = new FileInputStream(file);
       
       // I'm not sure we can directly read the object without use
@@ -183,12 +218,40 @@ public class JTransaction implements Transaction {
   }
 
   public void delete(String name) {
+    delete(null, name);
+  }
+
+  public final void delete(String dirName, String name) {
     if (phase == RUN) {
       // We are during a transaction mark the object deleted in the log.
-      log.put(name, new Operation(DELETE));
+      Object key = OperationKey.newKey(dirName, name);
+      log.put(key, new Operation(DELETE, dirName, name));
     } else {
-      File file = new File(dir, name);
-      file.delete();
+      File file;
+      if (dirName == null) {
+        file = new File(dir, name);
+        file.delete();
+      } else {
+        File parentDir = new File(dir, dirName);
+        file = new File(parentDir, name);
+        file.delete();
+        deleteDir(parentDir);
+      }      
+    }
+  }
+
+  /**
+   * Delete the specified directory if it is empty.
+   * Also recursively delete the parent directories if
+   * they are empty.
+   */
+  private void deleteDir(File dir) {
+    if (dir.list().length == 0) {
+      dir.delete();
+      if (dir.getAbsolutePath().length() > 
+          this.dir.getAbsolutePath().length()) {
+        deleteDir(dir.getParentFile());
+      }
     }
   }
 
@@ -198,11 +261,14 @@ public class JTransaction implements Transaction {
     
     // Save the log to disk
     logFile.seek(4L);
-    for (Enumeration e = log.keys(); e.hasMoreElements(); ) {
-      String name = (String) e.nextElement();
-      Operation op = (Operation) log.get(name);
-
-      logFile.writeUTF(name);
+    for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+      Operation op = (Operation) e.nextElement();      
+      logFile.writeUTF(op.name);
+      if (op.dirName != null) {
+        logFile.writeUTF(op.dirName);
+      } else {
+        logFile.writeUTF(EMPTY_STRING);
+      }
       logFile.writeByte(op.type);
       if (op.type == SAVE) {
 	logFile.writeInt(op.value.length);
@@ -216,18 +282,35 @@ public class JTransaction implements Transaction {
   }
 
   private void _commit() throws IOException {    
-    for (Enumeration e = log.keys(); e.hasMoreElements(); ) {
-      String name = (String) e.nextElement();
-      Operation op = (Operation) log.get(name);
+    for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+      Operation op = (Operation) e.nextElement();
 
       if (op.type == SAVE) {
-	FileOutputStream fos = new FileOutputStream(new File(dir, name));
+        File file;
+        if (op.dirName == null) {
+          file = new File(dir, op.name);
+        } else {
+          File parentDir = new File(dir, op.dirName);
+          if (!parentDir.exists()) {
+            parentDir.mkdirs();
+          }
+          file = new File(parentDir, op.name);
+        }
+	FileOutputStream fos = new FileOutputStream(file);
 	fos.write(op.value);
 	fos.getFD().sync();
 	fos.close();
       } else if (op.type == DELETE) {
-	File file = new File(dir, name);
-	file.delete();
+        File file;
+        if (op.dirName == null) {
+          file = new File(dir, op.name);
+          file.delete();
+        } else {
+          File parentDir = new File(dir, op.dirName);
+          file = new File(parentDir, op.name);
+          file.delete();
+          deleteDir(parentDir);
+        } 
       } else {
 	throw new InvalidObjectException("Unknow object in log.");
       }
@@ -251,4 +334,41 @@ public class JTransaction implements Transaction {
   }
 
   public final void stop() {}
+
+  private static class OperationKey {
+
+    static Object newKey(String dirName, String name) {
+      if (dirName == null) {
+        return name;
+      } else {
+        return new OperationKey(dirName, name);
+      }
+    }
+
+    private String dirName;
+    private String name;
+
+    private OperationKey(String dirName,
+                        String name) {
+      this.dirName = dirName;
+      this.name = name;
+    }
+
+    public int hashCode() {
+      // Should compute a specific one.
+      return dirName.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj instanceof OperationKey) {
+        OperationKey opk = (OperationKey)obj;
+        if (opk.name.length() != name.length()) return false;
+        if (opk.dirName.length() != dirName.length()) return false;
+        if (!opk.dirName.equals(dirName)) return false;            
+        return opk.name.equals(name);
+      }
+      return false;
+    }
+  }
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.joram;
 
@@ -107,9 +108,6 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
     if (maxMessages <= 0)
       throw new JMSException("Invalid maxMessages parameter: " + maxMessages);
     
-    // Checking the user's access permission:
-    cnx.isReader(dest.getName());
-
     this.cnx = cnx;
     this.selector = selector;
     this.sessionPool = sessionPool;
@@ -205,6 +203,9 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
    */
   public void close() throws JMSException
   {
+    cnx.requestsTable.remove(currentReq.getRequestId());
+    ccDaemon.stop();
+
     // If the consumer is a subscriber, managing the subscription closing: 
     if (! queueMode) {
       try {
@@ -213,12 +214,9 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
         else
           cnx.syncRequest(new ConsumerUnsubRequest(targetName));
       }
+      // A JMSException might be caught if the connection is broken.
       catch (JMSException jE) {}
     }
-
-    cnx.requestsTable.remove(currentReq.getRequestId());
-    ccDaemon.stop();
-
     cnx.cconsumers.remove(this);
   }
 
@@ -350,6 +348,9 @@ class CCDaemon extends fr.dyade.aaa.util.Daemon
 
   /** Releases the daemon's resources. */
   public void close()
-  {}
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "CCDaemon finished.");
+  }
 }
 }

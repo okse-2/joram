@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -22,7 +22,8 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
  */
 package fr.dyade.aaa.mom.selectors;
 
@@ -35,31 +36,6 @@ import fr.dyade.aaa.mom.messages.Message;
  */
 public class Selector
 {
-  /**
-   * Destinations call this method to filter a message according to a selector.
-   *
-   * @return  <code>true</code> when the selection matches, <code>false</code>
-   *          otherwise.
-   */
-  public static boolean matches(Message message, String selector)
-  {
-    if (selector == null || selector.equals(""))
-      return true;
-
-    try {
-      Filter filter = new Filter(new Lexer(selector), message);
-      Boolean result = (Boolean) filter.parse().value;
-
-      if (result == null)
-        return false;
-    
-      return result.booleanValue();
-    }
-    catch (Throwable t) {
-      return false;
-    }
-  }
-
   /**
    * Clients call this method to check a selector syntax.
    *
@@ -80,6 +56,31 @@ public class Selector
     }
     catch (Throwable t) {
       throw new SelectorException("Invalid selector: " + t.getMessage());
+    }
+  }
+
+  /**
+   * Destinations call this method to filter a message according to a selector.
+   *
+   * @return  <code>true</code> when the selection matches, <code>false</code>
+   *          otherwise.
+   */
+  public static boolean matches(Message message, String selector)
+  {
+    if (selector == null || selector.equals(""))
+      return true;
+
+    try {
+      Filter filter = new Filter(new Lexer(selector), message, "JMS");
+      Boolean result = (Boolean) filter.parse().value;
+
+      if (result == null)
+        return false;
+    
+      return result.booleanValue();
+    }
+    catch (Throwable t) {
+      return false;
     }
   }
 }

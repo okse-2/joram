@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2002 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -46,12 +47,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Connsections may also be accepted even if the target proxy is busy. This
  * leads to a new connection set creation (drivers pair, qout, ois, oos,...).
  * Only true when the ProxyAgent is set as multiConn.
- *
- * @author	The Freyssinet Andre
- * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.9 2002-05-06 14:19:35 jmesnil Exp $";
+  public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $";
+
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */

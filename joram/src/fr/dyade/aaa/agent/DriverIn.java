@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
  * Input driver.
  */
 class DriverIn extends Driver {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
 
   /** Proxy this <code>DriverIn<code> belongs to. */
   private ProxyAgent proxy;
@@ -103,13 +103,6 @@ class DriverIn extends Driver {
            int key) {
     this(id, proxy, in, maxNotSent);
     this.key = key;
-  }
-
-  /**
-   * Returns name of driver.
-   */
-  public String getName() {
-    return name;
   }
 
   /**
