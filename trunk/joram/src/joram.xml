@@ -44,7 +44,7 @@
     </path>
   </target>
 
-  <!-- Builds all needed jars -->
+  <!-- Builds all needed jars, except kjoram (needs 1.1 compiler) -->
   <target name="build.joram" depends="init.joram,compile"
       description="--> Builds Joram server and client jars.">
     <mkdir dir="${build.dir}/META-INF"/>
@@ -109,10 +109,38 @@
     </jar>
   </target>
 
+  <!-- Builds kjoram (needs 1.1 compiler) -->
+  <target name="build.kjoram" depends="prepare"
+      description="--> Builds kjoram jars.">
+    <!-- Compilation phase -->
+    <javac target="1.1"
+           bootclasspath="${lib.dir}/midpapi.jar"
+           classpath="${lib.dir}/kxml.jar"
+           srcdir="${src.dir}:${obj.dir}"
+           destdir="${obj.dir}"
+           debug="on"
+           deprecation="${deprecation}"
+           optimize="false"
+           nowarn="${nowarn}"
+           verbose="${verbose}">
+      <include name="com/scalagent/ksoap/**/*.java"/>
+      <include name="com/scalagent/kjndi/**/*.java"/>
+      <include name="com/scalagent/kjoram/**/*.java"/>
+    </javac>
+    <!-- jars building -->
+    <jar jarfile="${build.dir}/joram-kclient.jar">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/ksoap/**/*.class"/>
+        <include name="com/scalagent/kjndi/**/*.class"/>
+        <include name="com/scalagent/kjoram/**/*.class"/>
+      </fileset>
+    </jar>
+  </target>
+
   <!-- Ships a JORAM distribution -->
   <target name="ship.joram" depends="ship"/>
 
-  <target name="ship" depends="build.joram,javadoc"
+  <target name="ship" depends="build.joram,build.kjoram"
     description="--> Creates a Joram shipment.">
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
@@ -128,11 +156,14 @@
     <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
     <!-- copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/ -->
     <!-- copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/midpapi.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-kclient.jar" todir="${ship.dir}/lib"/>
     <mkdir dir="${ship.dir}/licences"/>
     <copy todir="${ship.dir}/licences" flatten="yes">
       <fileset dir="${licenses.dir}">
@@ -141,21 +172,6 @@
         <include name="LGPL_HEADER.TXT"/>
       </fileset>
     </copy>
-    <mkdir dir="${ship.dir}/samples"/>
-    <copy todir="${ship.dir}/samples">
-      <fileset dir="${samples.dir}">
-        <include name="bin/*"/>
-        <include name="config/*"/>
-        <include name="src/joram/**"/>
-      </fileset>
-    </copy>
-    <mkdir dir="${ship.dir}/apidoc"/>
-    <copy todir="${ship.dir}/apidoc">
-      <fileset dir="${doc.dir}">
-        <include name="**"/>
-      </fileset>
-    </copy>
-
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter -->
@@ -238,63 +254,53 @@
   </target>
 
   <!-- RELEASES -->
-  <target name="releases" depends="release.src, release.jar"
-    if="version"/>
+  <target name="releases"
+          depends="clean,release.src,release.jar"
+          if="version"/>
 
-  <target name="release.jar" depends="clean,ship" if="version">
-    <copy todir="../joram-${version}" includeEmptyDirs="no">
-      <fileset dir="..">
-	<exclude name="build.xml" />
-	<exclude name="src/**" />
-	<exclude name="classes/**" />
-	<exclude name="lib/jmxri.jar" />
-	<exclude name="lib/jmxtools.jar" />
-	<exclude name="lib/kxml.jar" />
-	<exclude name="lib/midpapi.jar" />
-	<exclude name="releases/**" />
-        <exclude name="samples/config/jmxable_a3servers.xml" />
-	<exclude name="samples/src/kjoram/**" />
-      </fileset>
-    </copy>
-    <tar tarfile="joram-${version}.tar"
-      longfile="gnu"
-      basedir=".."
-      includes="joram-${version}/**" />
-    <gzip zipfile="joram-${version}.tgz" src="joram-${version}.tar" />
-    <delete file="joram-${version}.tar" /> 
-    <delete dir="../joram-${version}" /> 
-    <mkdir dir="${releases.dir}" />
-    <move file="joram-${version}.tgz" todir="${releases.dir}" />
+  <target name="release.jar" depends="ship.joram,javadoc" if="version">
+    <mkdir dir="${releases.dir}"/>
+    <tar tarfile="${releases.dir}/joram-${version}.tar"
+         longfile="gnu">
+      <tarfileset dir="${doc.dir}" prefix="joram-${version}/doc"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+      <tarfileset dir="${samples.dir}" prefix="joram-${version}/samples"
+                  username="joram" group="joram">
+        <include name="src/**"/>
+        <include name="config/**"/>
+        <include name="bin/**"/>
+      </tarfileset>
+      <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-${version}.tar.tgz"/>
+    <gzip src="${releases.dir}/joram-${version}.tar"
+          zipfile="${releases.dir}/joram-${version}.tgz"/>
+    <delete file="${releases.dir}/joram-${version}.tar"/>
   </target>
 
-  <target name="release.src" depends="clean" if="version">
-    <copy todir="../joram-${version}-src" includeEmptyDirs="no">
-      <fileset dir="..">
-	<exclude name="build.xml" />
-	<exclude name="src/fr/dyade/aaa/ns/**" />
-	<exclude name="classes/**" />
-        <exclude name="lib/jmxri.jar" />
-	<exclude name="lib/jmxtools.jar" />
-	<exclude name="lib/kxml.jar" />
-	<exclude name="lib/midpapi.jar" />
-	<exclude name="releases/**" />
-	<exclude name="samples/config/jmxable_a3servers.xml" />
-	<exclude name="samples/src/kjoram/**" />
-	<exclude name="src/com/**" />
-	<exclude name="src/kjoram.xml" />
-      </fileset>
-    </copy>
-    <move file="../joram-${version}-src/src/joram.xml"
-          tofile="../joram-${version}-src/src/build.xml" />
-    <tar tarfile="joram-${version}-src.tar"
-      longfile="gnu"
-      basedir=".."
-      includes="joram-${version}-src/**" />
-    <gzip zipfile="joram-${version}-src.tgz" src="joram-${version}-src.tar" />
-    <delete file="joram-${version}-src.tar" /> 
-    <delete dir="../joram-${version}-src" /> 
-    <mkdir dir="${releases.dir}" />
-    <move file="joram-${version}-src.tgz" todir="${releases.dir}" />
+  <target name="release.src" depends="init.joram" if="version">
+   <mkdir dir="${releases.dir}"/>
+     <tar tarfile="${releases.dir}/joram-${version}-src.tar"
+          longfile="gnu">
+      <tarfileset dir=".." prefix="joram-${version}"
+                  username="joram" group="joram">
+        <include name="lib/**"/>
+        <include name="src/**"/>
+        <include name="samples/src/**"/>
+        <include name="samples/config/**"/>
+        <include name="samples/bin/**"/>
+        <include name="licences/**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-${version}-src.tar.tgz"/>
+    <gzip src="${releases.dir}/joram-${version}-src.tar"
+          zipfile="${releases.dir}/joram-${version}-src.tgz"/>
+    <delete file="${releases.dir}/joram-${version}-src.tar"/> 
   </target>
 
   <target name="crlfbin" depends="init.joram">
