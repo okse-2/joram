@@ -27,64 +27,28 @@
  */
 package fr.dyade.aaa.joram.admin;
 
-import fr.dyade.aaa.joram.*;
-import fr.dyade.aaa.mom.jms.*;
+import fr.dyade.aaa.mom.admin.*;
 
-import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Vector;
 
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * An <code>Admin</code> instance is used by an administrator for performing
- * administrative tasks on a server through the server's
- * <code>JmsAdminProxy</code> agent.
- * <p>
- * An <code>Admin</code> instance is connected to a specific proxy agent
- * and holds a given administrator identification. If this identification is
- * incorrect, the connection to the server is refused.
- * <p>
- * Each server administering is done through its local
- * <code>JmsAdminProxy</code> agent. That means that it is not possible from a
- * proxy located on a server to administer agents located on an other server.
- * <p>
- * An <code>Admin</code> instance communicates with its
- * <code>JmsAdminProxy</code> proxy through a request
- * (<code>JmsAdminRequest</code> notifications) / reply
- * (<code>JmsAdminReply</code> notification) mechanism.
+ * Old administration class.
+ *
+ * @deprecated  This class is temporary kept but the methods of the new
+ *              <code>AdminItf</code> interface should be used instead.
  */
 public class Admin
 {
-  /** Administrator name. */
+  private AdminImpl adminImpl;
   private String adminName;
-  /** Administrator password. */
-  private String adminPass;
+  private int serverId;
+  private String host;
+  private int port;
+  private boolean disconnected = true;
 
-  /** IP address of the server to administer. */
-  private InetAddress serverAddr;
-  /** Listening port of the server. */
-  private int serverPort;
-  /** JoramUrl address of the server. */
-  private JoramUrl serverUrl;
-  /** Time in seconds allowed for connecting to the server. */
-  private int timer;
- 
-  /** Connection socket. */ 
-  private Socket socket = null;
-  /** Connection data output stream. */
-  private DataOutputStream dos = null;
-  /** Connection data input stream. */
-  private DataInputStream dis = null;
-  /** Connection object output stream. */
-  private ObjectOutputStream oos = null;
-  /** Connection object input stream. */
-  private ObjectInputStream ois = null;
-  /** <code>true</code> if the admin is disconnected. */
-  private boolean disconnected;
-
-  /** Requests counter. */
-  private long requestsCounter = 0; 
+  private javax.naming.Context jndiCtx = null;
 
   
   /**
@@ -102,54 +66,33 @@ public class Admin
   public Admin(String url, String adminName, String adminPass, int timer)
          throws Exception
   {
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "--- Connecting admin"
-                                + " session: " + this);
     try {
-      // Setting the server url:
-      serverUrl = new JoramUrl(url);
-      serverAddr = InetAddress.getByName(serverUrl.getHost());
-      serverPort = serverUrl.getPort();
-    }
-    catch (MalformedURLException mE) {
-      ConnectException cE = new ConnectException("Can't open admin as"
-                                                 + " server's url is incorrect"
-                                                 + ": " + url);
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgAdmin.log(BasicLevel.ERROR, "Exception in " + this
-                                  + ": " + cE);
-      throw cE;
-    }
-    catch (UnknownHostException uE) {
-      ConnectException cE = new ConnectException("Can't open admin as the host"
-                                                 + " is incorrect in server's"
-                                                 + " url: " + url);
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgAdmin.log(BasicLevel.ERROR, "Exception in " + this
-                                  + ": " + cE);
-      throw cE;
-    }
+      fr.dyade.aaa.joram.JoramUrl jUrl = new fr.dyade.aaa.joram.JoramUrl(url);
 
-    this.adminName = adminName;
-    this.adminPass = adminPass;
-    if (timer >= 0)
-      this.timer = timer;
-    else
-      this.timer = 60;
+      host = jUrl.getHost();
+      port = jUrl.getPort();
 
-    try {
-      connect();
+      adminImpl = new AdminImpl();
+      adminImpl.connect(host, port, adminName, adminPass, timer);
+
+      this.adminName = adminName;
 
       disconnected = false;
 
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, this + ": connected.");
+      jndiCtx = new javax.naming.InitialContext();
+
+      serverId = adminImpl.getServerId();
     }
-    catch (Exception e) {
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgAdmin.log(BasicLevel.ERROR, e);
-     
-      throw e;
+    catch (MalformedURLException mE) {
+      throw new ConnectException("Can't open admin as server's url is"
+                                 + " incorrect: " + url);
+    }
+    catch (UnknownHostException exc) {
+      throw new ConnectException("Can't open admin as the host is incorrect"
+                                 + " in server's url: " + url);
+    }
+    catch (javax.naming.NamingException exc) {
+      throw new AdminException("Can't access any naming server");
     }
   }
 
@@ -192,11 +135,6 @@ public class Admin
          adminPass, timer);
   }
 
-  /** Returns a String image of this <code>Admin</code> instance. */
-  public String toString()
-  {
-    return "Admin::"+ serverUrl +"::"+ adminName;
-  }
 
   /**
    * Adds an admin identification for connecting to the admin proxy.
@@ -209,9 +147,10 @@ public class Admin
    */
   public void addAdminId(String name, String pass) throws Exception
   {
-    AddAdminId addAd = new AddAdminId(name, pass);
-    sendRequest(addAd);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.doRequest(new OldAddAdminId(serverId, name, pass));
   }
 
   /**
@@ -225,13 +164,14 @@ public class Admin
    */
   public void delAdminId(String name) throws Exception
   {
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
     if (name.equals(adminName))
       throw new AdminException("Can't remove the currently used "
                                + name + " identification.");
 
-    DelAdminId delAd = new DelAdminId(name);
-    sendRequest(delAd);
-    getReply();
+    adminImpl.doRequest(new OldDelAdminId(serverId, name));
   }
 
   /**
@@ -246,11 +186,22 @@ public class Admin
    *              if the queue could not be deployed, or if its name is
    *              already taken by a destination on this server.
    */
-  public Queue createQueue(String name) throws Exception
+  public javax.jms.Queue createQueue(String name) throws Exception
   {
-    CreateQueue createQ = new CreateQueue(name);
-    sendRequest(createQ);
-    return new Queue(getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    String mName = serverId + ":oldAdmin:" + name;
+
+    try {
+      jndiCtx.lookup(mName);
+      throw new AdminException("Name [" + name + "] is already taken");
+    }
+    catch (javax.naming.NamingException exc) {
+      javax.jms.Queue queue = adminImpl.createQueue(serverId);
+      jndiCtx.bind(mName, queue);
+      return queue;
+    }
   }
 
   /**
@@ -263,11 +214,24 @@ public class Admin
    * @exception AdminException  If the admin session has been closed, or
    *              if the queue does not exist.
    */
-  public Queue getQueue(String name) throws Exception
+  public javax.jms.Queue getQueue(String name) throws Exception
   {
-    GetQueue getQ = new GetQueue(name);
-    sendRequest(getQ);
-    return new Queue(getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    try {
+      String mName = serverId + ":oldAdmin:" + name;
+
+      Object obj = jndiCtx.lookup(mName);
+
+      if (! (obj instanceof javax.jms.Queue))
+        throw new AdminException("Queue [" + name + "] does not exist");
+
+      return (javax.jms.Queue) obj;
+    }
+    catch (javax.naming.NamingException exc) {
+      throw new AdminException("Queue [" + name + "] does not exist");
+    }
   }
 
   /**
@@ -281,11 +245,22 @@ public class Admin
    *              if the topic could not be deployed, or if its name is
    *              already taken by a destination on this server.
    */
-  public Topic createTopic(String name) throws Exception
+  public javax.jms.Topic createTopic(String name) throws Exception
   {
-    CreateTopic createT = new CreateTopic(name);
-    sendRequest(createT);
-    return new Topic(getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    String mName = serverId + ":oldAdmin:" + name;
+
+    try {
+      jndiCtx.lookup(mName);
+      throw new AdminException("Name [" + name + "] is already taken");
+    }
+    catch (javax.naming.NamingException exc) {
+      javax.jms.Topic topic = adminImpl.createTopic(serverId);
+      jndiCtx.bind(mName, topic);
+      return topic;
+    }
   }
 
   /**
@@ -298,11 +273,24 @@ public class Admin
    * @exception AdminException  If the admin session has been closed, or
    *              if the topic does not exist.
    */
-  public Topic getTopic(String name) throws Exception
+  public javax.jms.Topic getTopic(String name) throws Exception
   {
-    GetTopic getT = new GetTopic(name);
-    sendRequest(getT);
-    return new Topic(getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    try {
+      String mName = serverId + ":oldAdmin:" + name;
+
+      Object obj = jndiCtx.lookup(mName);
+
+      if (! (obj instanceof javax.jms.Topic))
+        throw new AdminException("Topic [" + name + "] does not exist");
+
+      return (javax.jms.Topic) obj;
+    }
+    catch (javax.naming.NamingException exc) {
+      throw new AdminException("Topic [" + name + "] does not exist");
+    }
   }
 
   
@@ -320,9 +308,20 @@ public class Admin
    */
   public DeadMQueue createDeadMQueue(String name) throws Exception
   {
-    CreateDeadMQueue createDMQ = new CreateDeadMQueue(name);
-    sendRequest(createDMQ);
-    return new DeadMQueue(getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    String mName = serverId + ":oldAdmin:" + name;
+
+    try {
+      jndiCtx.lookup(mName);
+      throw new AdminException("Name [" + name + "] is already taken");
+    }
+    catch (javax.naming.NamingException exc) {
+      DeadMQueue queue = adminImpl.createDeadMQueue(serverId);
+      jndiCtx.bind(mName, queue);
+      return queue;
+    }
   }
 
   /**
@@ -336,9 +335,10 @@ public class Admin
    */
   public void setDefaultDMQ(DeadMQueue dmq) throws Exception
   {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(null, dmq.getQueueName(), false);
-    sendRequest(setDMQ);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.setDefaultDMQ(serverId, dmq);
   }
 
   /**
@@ -354,9 +354,19 @@ public class Admin
    */
   public void setDestinationDMQ(String name, DeadMQueue dmq) throws Exception
   {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(name, dmq.getQueueName(), false);
-    sendRequest(setDMQ);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination dest = null;
+
+    try {
+      dest = getQueue(name);
+    }
+    catch (AdminException exc) {
+      dest = getTopic(name);
+    }
+
+    adminImpl.setDestinationDMQ(dest, dmq);
   }
 
   /**
@@ -368,9 +378,10 @@ public class Admin
    */
   public void unsetDefaultDMQ() throws Exception
   {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(null, null, false);
-    sendRequest(setDMQ);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.unsetDefaultDMQ(serverId);
   }
 
   /**
@@ -384,9 +395,19 @@ public class Admin
    */
   public void unsetDestinationDMQ(String name) throws Exception
   {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(name, null, false);
-    sendRequest(setDMQ);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination dest = null;
+
+    try {
+      dest = getQueue(name);
+    }
+    catch (AdminException exc) {
+      dest = getTopic(name);
+    }
+
+    adminImpl.unsetDestinationDMQ(dest);
   }
 
   /**
@@ -400,9 +421,10 @@ public class Admin
    */
   public void setDefaultThreshold(int threshold) throws Exception
   {
-    SetThreshold setT = new SetThreshold(null, new Integer(threshold), false);
-    sendRequest(setT);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.setDefaultThreshold(serverId, threshold);
   }
 
   /**
@@ -419,10 +441,10 @@ public class Admin
   public void setQueueThreshold(javax.jms.Queue queue, int threshold)
               throws Exception
   {
-    SetThreshold setT = new SetThreshold(queue.getQueueName(),
-                                         new Integer(threshold), false);
-    sendRequest(setT);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.setQueueThreshold(queue, threshold);
   }
 
   /**
@@ -433,9 +455,10 @@ public class Admin
    */
   public void unsetDefaultThreshold() throws Exception
   {
-    SetThreshold setT = new SetThreshold(null, null, false);
-    sendRequest(setT);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.unsetDefaultThreshold(serverId);
   }
 
   /**
@@ -449,9 +472,10 @@ public class Admin
    */
   public void unsetQueueThreshold(javax.jms.Queue queue) throws Exception
   {
-    SetThreshold setT = new SetThreshold(queue.getQueueName(), null, false);
-    sendRequest(setT);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    adminImpl.unsetQueueThreshold(queue);
   }
 
   /**
@@ -459,13 +483,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public ConnectionFactory createConnectionFactory() throws AdminException
+  public javax.jms.ConnectionFactory createConnectionFactory()
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new ConnectionFactory(serverUrl.toString());
+      return adminImpl.createConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -479,14 +504,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public QueueConnectionFactory createQueueConnectionFactory()
+  public javax.jms.QueueConnectionFactory createQueueConnectionFactory()
          throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new QueueConnectionFactory(serverUrl.toString());
+      return adminImpl.createQueueConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -500,14 +525,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public TopicConnectionFactory createTopicConnectionFactory()
+  public javax.jms.TopicConnectionFactory createTopicConnectionFactory()
          throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new TopicConnectionFactory(serverUrl.toString());
+      return adminImpl.createTopicConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -521,13 +546,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public XAConnectionFactory createXAConnectionFactory() throws AdminException
+  public javax.jms.XAConnectionFactory createXAConnectionFactory()
+         throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new XAConnectionFactory(serverUrl.toString());
+      return adminImpl.createXAConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -541,14 +567,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public XAQueueConnectionFactory createXAQueueConnectionFactory()
+  public javax.jms.XAQueueConnectionFactory createXAQueueConnectionFactory()
          throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new XAQueueConnectionFactory(serverUrl.toString());
+      return adminImpl.createXAQueueConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -562,14 +588,14 @@ public class Admin
    *
    * @exception AdminException  If the admin session has been closed.
    */
-  public XATopicConnectionFactory createXATopicConnectionFactory()
+  public javax.jms.XATopicConnectionFactory createXATopicConnectionFactory()
          throws AdminException
   {
     if (disconnected)
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
     try {
-      return new XATopicConnectionFactory(serverUrl.toString());
+      return adminImpl.createXATopicConnectionFactory(host, port);
     }
     catch (Exception e) {
       // Can't happen as the url parameter has already been checked by
@@ -592,9 +618,8 @@ public class Admin
       throw new AdminException("Forbidden method call as the admin has"
                                + " disconnected.");
 
-    SetSubTopic setSubT = new SetSubTopic(topicName, subTopic.getTopicName());
-    sendRequest(setSubT);
-    getReply();
+    javax.jms.Topic topic = getTopic(topicName);
+    adminImpl.setFather(topic, subTopic);
   }
 
   /**
@@ -608,11 +633,24 @@ public class Admin
    */
   public void createCluster(Cluster cluster) throws Exception
   {
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    if (cluster.locked)
+      return;
+
+    String initId = (String) cluster.topics.get(0);
+    String joiningId;
+    for (int i = 1; i < cluster.topics.size(); i++) {
+      joiningId = (String) cluster.topics.get(i);
+      adminImpl.doSend(new SetCluster(initId, joiningId));
+    }
     cluster.locked = true;
-    CreateCluster createC = new CreateCluster(cluster.getName(),
-                                              cluster.getTopics());
-    sendRequest(createC);
-    getReply();
+
+    try {
+      jndiCtx.bind(serverId + ":oldAdmin:" + cluster.id, cluster);
+    }
+    catch (javax.naming.NamingException exc) {}
   }
 
   /**
@@ -626,9 +664,27 @@ public class Admin
    */
   public void destroyCluster(String name) throws Exception
   {
-    DismantleCluster disC = new DismantleCluster(name);
-    sendRequest(disC);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    try {
+      String mName = serverId + ":oldAdmin:" + name;
+      Object obj = jndiCtx.lookup(mName);
+
+      if (obj == null || ! (obj instanceof Cluster))
+        throw new AdminException("Cluster [" + name + "] does not exist");
+
+      Cluster cluster = (Cluster) obj;
+
+      String id;
+      for (int i = 0; i < cluster.topics.size(); i++) {
+        id = (String) cluster.topics.get(i);
+        adminImpl.doSend(new UnsetCluster(id));
+      }
+      
+      jndiCtx.unbind(mName);
+    }
+    catch (javax.naming.NamingException exc) {}
   }
 
   /**
@@ -642,9 +698,21 @@ public class Admin
    */
   public void deleteDestination(String name) throws Exception
   {
-    DestroyDest destrD = new DestroyDest(name);
-    sendRequest(destrD);
-    getReply();
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination dest = null;
+
+    try {
+      dest = getQueue(name);
+    }
+    catch (AdminException exc) {
+      dest = getTopic(name);
+    }
+
+    adminImpl.deleteDestination(dest);
+
+    jndiCtx.unbind(serverId + ":oldAdmin:" + name);
   }
 
   /**
@@ -659,9 +727,22 @@ public class Admin
    */
   public User createUser(String name, String pass) throws Exception
   {
-    CreateUser createU = new CreateUser(name, pass);
-    sendRequest(createU);
-    return new User(this, name, getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+   
+    String mName = serverId + ":oldAdmin:" + name;
+
+    try {
+      jndiCtx.lookup(mName);
+
+      throw new AdminException("Name [" + name + "] is already taken");
+    }
+    catch (javax.naming.NamingException exc) {
+      User user = adminImpl.createUser(name, pass, serverId);
+      user.adminImpl = adminImpl;
+      jndiCtx.bind(mName, user);
+      return user;
+    }
   }
 
   /**
@@ -676,9 +757,23 @@ public class Admin
    */
   public User getUser(String name) throws Exception
   {
-    GetUser getU = new GetUser(name);
-    sendRequest(getU);
-    return new User(this, name, getReply());
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+    
+    try {
+      String mName = serverId + ":oldAdmin:" + name;
+
+      Object obj = jndiCtx.lookup(mName);
+
+      if (obj == null || ! (obj instanceof User))
+        throw new AdminException("User [" + name + "] does not exist");
+
+      ((User) obj).adminImpl = adminImpl;
+      return (User) obj;
+    }
+    catch (javax.naming.NamingException exc) {
+      return null;
+    }
   }
 
   /**
@@ -693,7 +788,19 @@ public class Admin
    */
   public void setReader(User user, String dest) throws Exception
   {
-    setUserRight(user, dest, 1);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.setReader(user, jDest);
   }
 
   /**
@@ -707,7 +814,19 @@ public class Admin
    */
   public void unsetReader(User user, String dest) throws Exception
   {
-    setUserRight(user, dest, -1);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.unsetReader(user, jDest);
   }
 
   /**
@@ -721,7 +840,19 @@ public class Admin
    */
   public void setFreeReading(String dest) throws Exception
   {
-    setUserRight(null, dest, 1);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.setFreeReading(jDest);
   }
 
   /**
@@ -735,7 +866,19 @@ public class Admin
    */
   public void unsetFreeReading(String dest) throws Exception
   {
-    setUserRight(null, dest, -1);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.unsetFreeReading(jDest);
   }
 
   /**
@@ -749,7 +892,19 @@ public class Admin
    */
   public void setWriter(User user, String dest) throws Exception
   {
-    setUserRight(user, dest, 2);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.setWriter(user, jDest);
   }
 
   /**
@@ -763,7 +918,19 @@ public class Admin
    */
   public void unsetWriter(User user, String dest) throws Exception
   {
-    setUserRight(user, dest, -2);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.unsetWriter(user, jDest);
   }
 
   /**
@@ -777,7 +944,19 @@ public class Admin
    */
   public void setFreeWriting(String dest) throws Exception
   {
-    setUserRight(null, dest, 2);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.setFreeWriting(jDest);
   }
 
   /**
@@ -791,7 +970,19 @@ public class Admin
    */
   public void unsetFreeWriting(String dest) throws Exception
   {
-    setUserRight(null, dest, -2);
+    if (disconnected)
+      throw new AdminException("Admin session has been closed.");
+
+    javax.jms.Destination jDest = null;
+
+    try {
+      jDest = getQueue(dest);
+    }
+    catch (AdminException exc) {
+      jDest = getTopic(dest);
+    }
+
+    adminImpl.unsetFreeWriting(jDest);
   }
  
   /** Closes the connection with the server. */
@@ -800,270 +991,21 @@ public class Admin
     if (disconnected)
       return;
 
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "--- " + this
-                                + " disconnecting...");
-
-    disconnected = true;
-
-    try {
-      dos.close();
-    }
-    catch (IOException iE) {}
-    try {
-      dis.close();
-    }
-    catch (IOException iE) {}
-    try {
-      oos.close();
-    }
-    catch (IOException iE) {}
-    try {
-      ois.close();
-    }
-    catch (IOException iE) {}
-    try {
-      socket.close();
-    }
-    catch (IOException iE) {}
-
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, this + ": disconnected...");
+    adminImpl.disconnect();
   }
 
-  /**
-   * Actually tries to open the TCP connection with the server.
-   *
-   * @exception AdminException  If the admin identification is incorrect.
-   * @exception ConnectException  If the connection attempt fails for any
-   *              other reason.
-   */
-  private void connect() throws AdminException, ConnectException
-  {
-    // Setting the timer values:
-    long startTime = System.currentTimeMillis();
-    long endTime = startTime + timer * 1000;
-    long currentTime;
-    long nextSleep = 2000;
-    int attemptsC = 0;
-
-    while (true) {
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Trying to connect to the"
-                                  + " server.");
-      attemptsC++;
-      try {
-        // Opening the connection with the server:
-        socket = new Socket(serverAddr, serverPort);
-        if (socket != null) {
-          socket.setTcpNoDelay(true);
-          socket.setSoTimeout(0);
-          socket.setSoLinger(true, 1000);
-
-          dos = new DataOutputStream(socket.getOutputStream());
-          dis = new DataInputStream(socket.getInputStream());
-
-          // Sending the connection request to the server:
-          dos.writeUTF("ADMIN: " + adminName + " " + adminPass);
-          String reply = (String) dis.readUTF();
-
-          // Processing the server's reply:
-          int status = Integer.parseInt(reply.substring(0,1));
-          int index = reply.indexOf("INFO: ");
-          String info = null;
-          if (index != -1)
-            info = reply.substring(index + 6);
-
-          // If successful, opening the connection with the admin proxy:
-          if (status == 0) {
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
-
-            if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Connected!");
-
-            break;
-          }
-          // If unsuccessful because of an admin id error, throwing an
-          // AdminException:
-          if (status == 1)
-            throw new AdminException("Can't open the connection with"
-                                     + " server " + serverAddr.toString()
-                                     + " on port " + serverPort
-                                     + ": " + info);
-        }
-        // If socket can't be created, throwing an IO exception:
-        else
-          throw new IOException("Can't create the socket connected to"
-                                + " server " + serverAddr.toString()
-                                + ", port " + serverPort);
-      }
-      catch (Exception e) {
-        // IOExceptions notify that the connection could not be opened,
-        // possibly because the server is not listening: trying again.
-        if (e instanceof IOException) {
-          // Keep on trying as long as timer is ok:
-          currentTime = System.currentTimeMillis();
-          if (currentTime < endTime) {
-
-            if (currentTime + nextSleep > endTime)
-              nextSleep = endTime - currentTime;
-
-            // Sleeping for a while:
-            try {
-              Thread.sleep(nextSleep);
-            }
-            catch (InterruptedException iE) {}
-
-            // Trying again!
-            nextSleep = nextSleep * 2;
-            continue;
-          }
-          // If timer is over, throwing a ConnectException:
-          else {
-            long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-            throw new ConnectException("Could not open the connection with"
-                                       + " server " + serverAddr.toString()
-                                       + " on port " + serverPort + " after "
-                                       + attemptsC + " attempts during "
-                                       + attemptsT + " secs: server is not"
-                                       + " listening" );
-          }
-        }
-        else if (e instanceof AdminException)
-          throw (AdminException) e;
-      }
-    }
-  }
-
-  /**
-   * Actually builds and sends the request for setting users rights.
-   *
-   * @param user  User, or <code>null</code> for all.
-   * @param dest  Name of the destination.
-   * @param right  Rights to set.
-   * @exception ConnectException  If the connection with the server is lost.
-   * @exception AdminException  If the request fails.
-   */
-  private void setUserRight(User user, String dest, int right) throws Exception
-  {
-    SetUserRight setU = null;
-
-    if (user != null)
-      setU = new SetUserRight(user.getProxyName(), dest, right);
-    else
-      setU = new SetUserRight(null, dest, right);
-
-    sendRequest(setU);
-    getReply();
-  }
-
-  /** Increments the requests counter and returns a string image of it. */
-  String nextRequestId()
-  {
-    if (requestsCounter == Long.MAX_VALUE)
-      requestsCounter = 0;
-    return (new Long(requestsCounter++)).toString();
-  }
-
-  /**
-   * Sends an admin request to the admin proxy.
-   *
-   * @param request  The request to send to the proxy.
-   * @exception AdminException  If the administrator did disconnect.
-   * @exception ConnectException  If the connection with the server is lost
-   *              and can't be re-opened.
-   */
-  void sendRequest(JmsAdminRequest request)
-       throws AdminException, ConnectException
-  {
-    if (disconnected)
-      throw new AdminException("Forbidden method call as " + this
-                               + " has disconnected.");
-
-    request.setIdentifier(nextRequestId());
-  
-    try {
-      oos.writeObject(request);
-      oos.flush();
-      oos.reset();
-
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, this + ": sent request "
-                                  + request.getClass().getName()
-                                  + " with id: " + request.getRequestId());
-    }
-    // Connection is lost:
-    catch (IOException iE) {
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgAdmin.log(BasicLevel.WARN, "Lost the connection"
-                                  + " with the server.");
-      // Trying to reconnect:
-      try {
-        connect();
-      }
-      catch (Exception e) {
-        ConnectException cE = new ConnectException("Could not send request"
-                                                   + " because the connection"
-                                                   + " has been lost.");
-        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
-          JoramTracing.dbgAdmin.log(BasicLevel.WARN, cE);
-	throw cE;
-      }
-      // If reconnected, trying again to send the request:
-      sendRequest(request);
-    }
-  }
-
-  /**
-   * Gets a reply back from the admin proxy.
-   *
-   * @return  The information contained in the reply.
-   * @exception AdminException  If the reply notifies an unsuccessful request.
-   * @exception ConnectException  In case of an unexpected object found in the
-   *              connection or if it is broken.
-   */
-  String getReply() throws AdminException, ConnectException
+ 
+  /** Extracts the identifier of a server from a name. */ 
+  private int getServer(String name)
   {
     try {
-      // Getting the reply:
-      JmsAdminReply reply = (JmsAdminReply) ois.readObject();
-      String info = reply.getInfo();
+      int ind0 = name.indexOf(".");
+      int ind1 = name.indexOf(".", ind0);
 
-      // Successful reply, returning the information:
-      if (reply.succeeded()) {
-        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "... received"
-                                    + " successful reply to request "
-                                    + reply.getCorrelationId() + ": "
-                                    + info);
-        return info;
-      }
-      // Unsuccessful reply, throwing an AdminException:
-      else {
-        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
-          JoramTracing.dbgAdmin.log(BasicLevel.WARN, "... received"
-                                    + " unsuccessful reply to request "
-                                    + reply.getCorrelationId() + ": "
-                                    + info);
-        throw new AdminException((String) info);
-      }
+      return Integer.parseInt(name.substring(ind0 + 1, ind1));
     }
-    catch (Exception e) {
-      ConnectException cE = null;
-      if (e instanceof AdminException)
-        throw (AdminException) e;
-      // Broken connection: 
-      else if (e instanceof IOException)
-        cE = new ConnectException("Could not get the reply from the server"
-                                  + " as the connection is broken.");
-      else 
-        cE = new ConnectException("Unexpected reply received from the"
-                                  + " server: " + e);
-
-      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgAdmin.log(BasicLevel.ERROR, cE); 
-      throw cE;
+    catch (Exception exc) {
+      return -1;
     }
   }
 }

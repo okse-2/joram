@@ -135,8 +135,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -757,7 +757,7 @@ public final class AgentServer {
 	transaction = (Transaction) tclass.newInstance();
       } else {
 	String tname = getProperty("Transaction",
-                                   "fr.dyade.aaa.util.JTransaction");
+                                   "fr.dyade.aaa.util.ATransaction");
         Class tclass = Class.forName(tname);
         transaction = (Transaction) tclass.newInstance();
       }
@@ -806,18 +806,31 @@ public final class AgentServer {
       // then restores all messages.
       String[] list = transaction.getList("@");
       for (int i=0; i<list.length; i++) {
-	Message msg = Message.load(list[i]);
+        Message msg = Message.load(list[i]);
+
 	if (msg.update.getFromId() == serverId) {
 	  // The update has been locally generated, the message is ready to
 	  // deliver to its consumer (Engine or Network component). So we have
 	  // to insert it in the queue of this consumer.
-	  servers[msg.update.getToId()].domain.insert(msg);
+          try {
+            servers[msg.update.getToId()].domain.insert(msg);
+          } catch (ArrayIndexOutOfBoundsException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       "AgentServer#" + serverId + ", bad server id.");
+            continue;
+          }
 	} else {
 	  // The update has been generated on a remote server. If the message
 	  // don't have a local update, It is waiting to be delivered. So we
 	  // have to insert it in waiting list of the network component that
 	  // received it.
-	  servers[msg.update.getFromId()].domain.insert(msg);
+          try {
+            servers[msg.update.getFromId()].domain.insert(msg);
+          } catch (ArrayIndexOutOfBoundsException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       "AgentServer#" + serverId + ", bad server id.");
+            continue;
+          }
 	}
       }
     } catch (ClassNotFoundException exc) {
@@ -831,9 +844,7 @@ public final class AgentServer {
     }
 
     // initializes channel before initializing fixed agents
-    Channel.newInstance();
-    // initializes fixed agents
-    engine.init();
+    Channel.newInstance();    
 
     try {
       //  Initialize and start services.
@@ -866,6 +877,9 @@ public final class AgentServer {
                  exc);
       throw new Exception("Can't initialize services");
     }
+
+    // initializes fixed agents
+    engine.init();
 
     // May be ProcessManager should become a service.
     try {

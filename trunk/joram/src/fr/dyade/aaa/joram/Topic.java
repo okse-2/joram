@@ -26,6 +26,9 @@
  * Contributor(s):
  */
 package fr.dyade.aaa.joram;
+
+import fr.dyade.aaa.mom.jms.GetAdminTopicRequest;
+import fr.dyade.aaa.mom.jms.GetAdminTopicReply;
  
 import javax.jms.JMSException;
 
@@ -47,7 +50,7 @@ public class Topic extends Destination implements javax.jms.Topic
   /** Returns a String image of the topic. */
   public String toString()
   {
-    return "Topic:" + agentId;
+    return "Topic:" + getName();
   }
 
   /**
@@ -57,6 +60,6 @@ public class Topic extends Destination implements javax.jms.Topic
    */
   public String getTopicName() throws JMSException
   {
-    return super.agentId;
+    return getName();
   }
 }

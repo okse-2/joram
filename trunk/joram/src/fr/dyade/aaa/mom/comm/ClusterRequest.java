@@ -29,52 +29,32 @@ package fr.dyade.aaa.mom.comm;
 
 import fr.dyade.aaa.agent.AgentId;
 
-import java.util.Vector;
-
 /**
  * A <code>ClusterRequest</code> instance is used by a <b>client</b> agent
- * for notifying a topic that it is part of a cluster.
+ * for notifying a topic of the identifier of an other topic to form a
+ * cluster with.
  */
 public class ClusterRequest extends AbstractRequest
 {
-  /** Vector holding the identifier of the topic agents part of the cluster. */
-  private Vector topics;
+  /** The identifier of the topic to form a cluster with. */
+  private AgentId topicId;
 
 
   /**
-   * Constructs a <code>ClusterRequest</code> instance involved in an
-   * external client - MOM interaction.
-   *
-   * @param key  See superclass.
-   * @param requestId  See superclass.
-   */
-  public ClusterRequest(int key, String requestId)
-  {
-    super(key, requestId);
-    topics = new Vector();
-  }
-
-  /**
-   * Constructs a <code>ClusterRequest</code> instance not involved in an
-   * external client - MOM interaction.
+   * Constructs a <code>ClusterRequest</code> instance.
    *
    * @param requestId  See superclass.
+   * @param topicId  The identifier of the topic to form a cluster with.
    */
-  public ClusterRequest(String requestId)
+  public ClusterRequest(String requestId, AgentId topicId)
   {
-    this(0, requestId);
+    super(0, requestId);
+    this.topicId = topicId;
   }
 
-
-  /** Adds a topic identifier to the request. */
-  public void addTopic(AgentId topicId)
+  /** Returns the identifier of a topic to form a cluster with. */
+  public AgentId getTopicId()
   {
-    topics.add(topicId);
-  }
-
-  /** Returns the vector of topic identifiers. */
-  public Vector getTopics()
-  {
-    return topics;
+    return topicId;
   }
 } 

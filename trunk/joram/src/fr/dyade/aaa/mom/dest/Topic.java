@@ -28,13 +28,10 @@
 package fr.dyade.aaa.mom.dest;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.MomTracing;
-import fr.dyade.aaa.mom.comm.*;
 
 /**
- * A <code>Topic</code> agent is an agent behaving as a MOM topic.
- * <p>
- * Its behaviour is provided by a <code>TopicImpl</code> instance.
+ * A <code>Topic</code> agent is an agent which behaviour is provided
+ * by a <code>TopicImpl</code> instance.
  *
  * @see TopicImpl
  */
@@ -44,49 +41,50 @@ public class Topic extends Agent
    * The reference to the <code>TopicImpl</code> object providing this
    * agent with its behaviour.
    */
-  private TopicImpl topicImpl;
+  protected TopicImpl topicImpl;
 
   /**
    * Constructs a <code>Topic</code> agent. 
-   *
-   * @param creator  The identifier of the agent creating the topic, and which
-   *          will be its original admin.
+   * 
+   * @param adminId  Identifier of the agent which will be the administrator
+   *          of the topic.
    */ 
-  public Topic(AgentId creator) 
+  public Topic(AgentId adminId) 
   {
-    topicImpl = new TopicImpl(this.getId(), creator);
+    topicImpl = new TopicImpl(this.getId(), adminId);
+  }
+
+  /**
+   * Empty constructor used by subclasses.
+   *
+   * @param fixed  <code>true</code> to pine agent in memory.
+   */
+  protected Topic(boolean fixed)
+  {
+    super(fixed);
   }
 
 
   /**
-   * Overrides the <code>Agent.react(...)</code> method for providing
-   * topic agents with their specific behaviour.
-   * <p>
-   * Topic agents accept:
-   * <ul>
-   * <li><code>AbstractRequest</code> MOM requests,</li>
-   * <li><code>ExceptionReply</code> MOM reply,</li>
-   * <li><code>fr.dyade.aaa.agent.UnknownAgent</code> notifications,</li>
-   * <li><code>fr.dyade.aaa.agent.DeleteNot</code> notifications.</li>
-   * </ul>
-   * <p>
-   * Reactions to these notifications are implemented in the
+   * Reactions to notifications are implemented in the
    * <code>TopicImpl</code> class.
+   * <p>
+   * A <code>DeleteNot</code> notification is finally processed at the
+   * <code>Agent</code> level when its processing went successful in
+   * the <code>DestinationImpl</code> instance.
    *
-   * @exception Exception  Thrown at super class level.
+   * @exception Exception  See superclass.
    */
   public void react(AgentId from, Notification not) throws Exception
   {
-    if (not instanceof AbstractRequest)
-      topicImpl.doReact(from, (AbstractRequest) not);
-    else if (not instanceof ExceptionReply)
-      topicImpl.removeTopic(from);
-    else if (not instanceof UnknownAgent)
-      topicImpl.removeDeadClient((UnknownAgent) not);
-    else if (not instanceof DeleteNot) {
-      topicImpl.delete(from);
-      if (topicImpl.canBeDeleted())
+    try {
+      topicImpl.react(from, not);
+
+      if (not instanceof DeleteNot && topicImpl.canBeDeleted()) 
         super.react(from, not);
+    }
+    catch (UnknownNotificationException exc) {
+      super.react(from, not);
     }
   }
 }

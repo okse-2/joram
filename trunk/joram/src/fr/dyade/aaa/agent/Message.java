@@ -26,13 +26,18 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.Date;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.util.*;
 
 /**
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $"; 
+
+  static final long serialVersionUID =  -2179939607085028300L;
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -49,7 +54,7 @@ class Message implements Serializable {
    * The deadline of current message specified in number of milliseconds
    * since the standard base time known as "the epoch".
    */
-  transient long deadline;
+//   transient long deadline;
 
   /**
    * Returns a string representation for this object.
@@ -64,9 +69,9 @@ class Message implements Serializable {
     strbuf.append(to).append(",not=[");
     strbuf.append(not).append("],update=[");
     strbuf.append(update).append(']');
-    if (deadline != -1L) {
-      strbuf.append(",deadline=").append(new Date(deadline));
-    }
+//     if (deadline != -1L) {
+//       strbuf.append(",deadline=").append(new Date(deadline));
+//     }
     strbuf.append(')');
     
     return strbuf.toString();
@@ -85,7 +90,7 @@ class Message implements Serializable {
     out.writeShort(to.from);
     out.writeShort(to.to);
     out.writeInt(to.stamp);
-    out.writeLong(deadline);
+//     out.writeLong(deadline);
     out.writeObject(not);
     // In order to optimize the serialization, we serialize each update...
     Update next = update;
@@ -106,7 +111,7 @@ class Message implements Serializable {
        throws IOException, ClassNotFoundException {
     from = new AgentId(in.readShort(), in.readShort(), in.readInt());
     to = new AgentId(in.readShort(), in.readShort(), in.readInt());
-    deadline = in.readLong();
+//     deadline = in.readLong();
     not = (Notification) in.readObject();
     short l;
     while ((l = in.readShort()) != -1) {
@@ -161,7 +166,7 @@ class Message implements Serializable {
     this.from = from;
     this.to = to;
     this.not = (Notification) not.clone();
-    this.deadline = -1L;
+//     this.deadline = -1L;
   }
 
   /**
@@ -171,38 +176,34 @@ class Message implements Serializable {
    * @param not    	Notification to be signaled.
    * @param deadline	Deadline.
    */
-  public Message(AgentId from, AgentId to, Notification not, long deadline) {
-    this(from, to, not);
-    this.deadline = deadline;
-  }
+//   public Message(AgentId from, AgentId to, Notification not, long deadline) {
+//     this(from, to, not);
+//     this.deadline = deadline;
+//   }
 
-  private static Pool stack = null;
+  private static Pool pool = null;
 
   static {
-    stack = new Pool(50, 10);
-    for (int i=0; i<50; i++) {
-      stack.addElement(new Message());
-    }
+    int size = Integer.getInteger("fr.dyade.aaa.Message$Pool.size", 50).intValue();
+    pool = new Pool(size);
   }
 
   static Message alloc(AgentId from, AgentId to, Notification not) {
     Message msg = null;
     
     try {
-      msg = (Message) stack.removeLastElement();
+      msg = (Message) pool.allocElement();
     } catch (Exception exc) {
-      msg = new Message();
+      return new Message(from, to, not);
     }
     msg.set(from, to, not);
     return msg;
   }
 
   void free() {
-    this.from = null;
-    this.to = null;
-    this.not = null;
-    this.deadline = -1L;
-    stack.addElement(this);
+    this.not = null;	/* to let gc do its work */
+    this.update = null; /* to let gc do its work */
+    pool.freeElement(this);
   }
 
   private Message() {}
@@ -211,20 +212,43 @@ class Message implements Serializable {
     this.from = (AgentId) from;
     this.to = (AgentId) to;
     // Be careful, normally we have to clone the notification !!!
-    this.not = (Notification) not;
-    this.deadline = -1L;
+    this.not = (Notification) not.clone();
+//     this.deadline = -1L;
   }
 
-  static class Pool extends java.util.Vector {
-    public Pool(int initialCapacity, int capacityIncrement) {
-      super(initialCapacity, capacityIncrement);
+  static class Pool {
+    int elementCount = 0;
+    Object[] elementData =  null;
+
+    private Logger logmon = null;
+    private long cpt1, cpt2;
+
+    public Pool(int capacity) {
+      elementData = new Object[capacity];
+      logmon = Debug.getLogger(getClass().getName());
     }
 
-    public final synchronized Object removeLastElement() throws Exception {
+    public final synchronized void freeElement(Object obj) {
+      // If there is enough free element, let the gc get this element. 
+      if (elementCount == elementData.length)
+        return;
+      elementData[elementCount] = obj;
+      elementCount += 1;
+    }
+
+    public final synchronized Object allocElement() throws Exception {
       if (elementCount == 0) throw new Exception();
-      elementCount--;
+      elementCount -= 1;
       Object obj = elementData[elementCount];
       elementData[elementCount] = null; /* to let gc do its work */
+
+      cpt1 += 1; cpt2 += elementCount;
+      if ((cpt1 & 0xFFFFFL) == 0L) {
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          logmon.log(BasicLevel.DEBUG,
+                     "Message$Pool=" + (cpt2/cpt1) + '/' + elementCount);
+        }
+      }
     
       return obj;
     }

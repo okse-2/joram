@@ -27,13 +27,16 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.mom.MomTracing;
+import fr.dyade.aaa.mom.dest.AdminTopic;
+import fr.dyade.aaa.mom.dest.AdminTopicImpl;
+
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.MomTracing;
 
 /**
  * A <code>ConnectionFactory</code> proxy is started as a service in each
@@ -47,17 +50,34 @@ import fr.dyade.aaa.mom.MomTracing;
  * the ConnectionFactory uses to retrieve the right proxy agent to pass
  * the connection to. This latest agent is a proxy agent inheriting
  * from this class but no actively listening on a port. It is just waiting for
- * the server's ConnectionFactory service to pass a connection. Those sub
- * proxies are the <code>JmsProxy</code> agent, representative of a JMS client,
- * and the <code>JmsAdminProxy</code> agent, representative of a JMS
- * administrator.
+ * the server's ConnectionFactory service to pass a connection. This sub
+ * proxy is the <code>JmsProxy</code> agent, representative of a JMS client,
+ * or of a JMS administrator.
+ * <p>
+ * To pass the connections to the right proxies, the
+ * <code>ConnectionFactory</code> accesses data contained in the local
+ * <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.
  */
 public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
 {
+
+  /**
+   * The listen socket of the proxy is statically
+   * created (@see init).
+   */
+  private static ServerSocket serverSocket;
+  
+  /**
+   * Overrides the default behavior that creates a
+   * server socket. The socket is statically created
+   * (@see init).
+   */
+  protected ServerSocket getServerSocket() {
+    return serverSocket;
+  }
+
   /** Default port the <code>ConnectionFactory</code> service listens to. */
   static final int defaultPort = 16010;
-  /** Identifier of the admin proxy. */
-  private AgentId adminId;
 
   /**
    * Constructs a <code>ConnectionFactory</code> listening to a given port.
@@ -95,53 +115,73 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
   }
 
   /**
-   * Initializes the <code>ConnectionFactory</code> as a service and creates
-   * and deploys a JMS admin proxy.
+   * Initializes the <code>ConnectionFactory</code> as a service, creates
+   * and deploys a <code>fr.dyade.aaa.dest.AdminTopic</code> topic, and
+   * if requested, creates and deploys a <code>JmsProxy</code> proxy for
+   * an administrator client.
    *
    * @param args  Port parameter from the configuration file.
    * @param firstTime  <code>true</code> when the agent server starts.
    * @exception Exception  Thrown when processing the String argument
    *              or in case of a problem when deploying the ConnectionFactory
-   *              or the JmsAdminProxy.
+   *              or the admin topic.
    */
   public static void init(String args, boolean firstTime) throws Exception
   {
-    if (! firstTime)
-      return;
+    try {
+      int port;
+      String name = null;
+      String pass = null;
 
-    int port;
-    if (args != null)
-      port = Integer.parseInt(args);
-    else
-      port = defaultPort;
+      if (args != null) {
+        StringTokenizer st = new StringTokenizer(args);
 
-    ConnectionFactory cF = new ConnectionFactory(port);
-    cF.createAdminProxy(cF.getId());
-    cF.deploy();
+        port = Integer.parseInt(st.nextToken());
+      
+        if (st.hasMoreTokens()) {
+          name = st.nextToken();
+          pass = st.nextToken();
+        }
+      }
+      else
+        port = defaultPort;
+
+      // Create the socket here in order to throw an exception
+      // if the socket can't be created (even if firstTime is false).
+      serverSocket = new ServerSocket(port);
+
+      if (! firstTime)
+        return;
+
+      ConnectionFactory cF = new ConnectionFactory(port);
+      cF.deploy();
+      AdminTopic adminTopic = new AdminTopic();
+      adminTopic.deploy();
+
+      if (name != null) {
+        JmsProxy adminProxy = new JmsProxy(name, pass, adminTopic.getId());
+        adminProxy.deploy();
+      }
+    }
+    catch (NoSuchElementException exc) {
+      throw new Exception("Could not parse arguments");
+    }
+    catch (IOException exc) {
+      throw new Exception("Could not deploy an agent");
+    }
   }
 
   /**
-   * Creates a JMS admin proxy.
-   *
-   * @exception Exception  Thrown if the JmsAdminProxy can't be deployed.
-   */
-  protected void createAdminProxy(AgentId id) throws Exception
-  {
-    JmsAdminProxy jmsAdmin = new JmsAdminProxy();
-    jmsAdmin.deploy();
-
-    adminId = jmsAdmin.getId();
+   * Stops the <code>ConnectionFactory</code> service.
+   */ 
+  public static void stopService() {
+    // Do nothing
   }
 
   /**
    * Retrieves a proxy identifier given a String request.
-   * <p>
-   * The ConnectionFactory understands strings beginning with:
-   * <ul>
-   * <li>ADMIN: administrator connection request,</li>
-   * <li>USER: user connection request.</li>
-   * </ul>
-   * @exception Exception  In case of an invalid String parameter.
+   *
+   * @exception Exception  In case of an invalid request or identification.
    */
   protected AgentId idFromString(String header) throws Exception
   {
@@ -149,39 +189,13 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": got request: "
                               + header);
     try {
-      // Administrator connection request:
-      if (header.startsWith("ADMIN:")) {
+      if (header.startsWith("USER:")) {
         StringTokenizer st = new StringTokenizer(header);
         String tmp = st.nextToken();
-        String name = st.nextToken();
-        String pass = st.nextToken();
-        // Checking admins in the admin proxy table:
-        UserContext uc = (UserContext) JmsAdminProxy.ref.usersTable.get(name);
-        if (uc != null && pass.equals(uc.password) && uc.admin)
-          return adminId;
-        else if (uc == null)
-          throw new Exception("Admin " + name + " does not exist.");
-        else if (! uc.admin)
-          throw new Exception("User " + name + " is not an admin.");
-        else
-          throw new Exception("Incorrect password for admin " + name);
-      }
-      // User connection request:
-      else if (header.startsWith("USER:")) {
-        StringTokenizer st = new StringTokenizer(header);
-        String tmp = st.nextToken();
-        String name = st.nextToken();
-        String pass = st.nextToken();
-        // Checking users in the admin proxy table:
-        UserContext uc = (UserContext) JmsAdminProxy.ref.usersTable.get(name);
-        if (uc != null && pass.equals(uc.password) && uc.proxyId != null)
-          return uc.proxyId;
-        else if (uc == null)
-          throw new Exception("User " + name + " does not exist.");
-        else if (uc.proxyId == null)
-          throw new Exception("No proxy has been deployed for user " + name);
-        else
-          throw new Exception("Incorrect password for user " + name);
+        String readName = st.nextToken();
+        String readPass = st.nextToken();
+
+        return AdminTopicImpl.ref.getProxyId(readName, readPass);
       }
       else
         throw new Exception("Incorrect request read on stream.");

@@ -28,6 +28,7 @@
 package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.*;
+import fr.dyade.aaa.util.TimerTask;
 
 import java.util.Vector;
 
@@ -57,6 +58,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * request.
    */
   private boolean receiving = false;
+  /** Task for replying to a pending synchronous "receive" with timer. */
+  private TimerTask replyingTask = null;
 
   /** The destination the consumer gets its messages from. */
   protected Destination dest;
@@ -334,6 +337,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                               queueMode);
       pendingReq.setIdentifier(sess.cnx.nextRequestId());
       receiving = true;
+
+      // In case of a timer, scheduling the receive:
+      if (timeOut > 0) {
+        replyingTask = new ConsumerReplyTask(pendingReq.getRequestId());
+        sess.schedule(replyingTask, timeOut);
+      }
     }
 
     // Expecting an answer:
@@ -345,10 +354,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       receiving = false;
       pendingReq = null;
 
+      if (replyingTask != null)
+        replyingTask.cancel();
+
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
                                    + " reply.");
-    
+   
       if (reply.getMessage() != null) {
         String msgId = reply.getMessage().getIdentifier();
         // Auto ack: acknowledging the message:
@@ -543,6 +555,53 @@ public class MessageConsumer implements javax.jms.MessageConsumer
     catch (JMSException jE) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, this + ": " + jE);
+    }
+  }
+
+  /**
+   * The <code>ConsumerReplyTask</code> class is used by "receive" requests
+   * with timer for taking care of answering them if the timer expires.
+   */
+  private class ConsumerReplyTask extends TimerTask
+  {
+    /** The identifier of the request to answer. */
+    private String requestId;
+    /** The reply to put in the connection's table. */
+    private ConsumerMessages nullReply;
+
+    /**
+     * Constructs a <code>ConsumerReplyTask</code> instance.
+     *
+     * @param requestId  The identifier of the request to answer.
+     */
+    ConsumerReplyTask(String requestId)
+    {
+      this.requestId = requestId;
+      this.nullReply = new ConsumerMessages(requestId, targetName, queueMode);
+    }
+
+    /**
+     * Method called when the timer expires, actually putting a null answer
+     * in the replies table and unlocking the requester.
+     */
+    public void run()
+    {
+      try {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN, "Receive request" +
+                                     " answered because timer expired");
+
+        Lock lock = (Lock) sess.cnx.requestsTable.remove(requestId);
+
+        if (lock == null)
+          return;
+
+        synchronized (lock) {
+          sess.cnx.repliesTable.put(requestId, nullReply);
+          lock.notify();
+        }
+      }
+      catch (Exception e) {}
     }
   }
 }

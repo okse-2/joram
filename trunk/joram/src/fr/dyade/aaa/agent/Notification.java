@@ -30,7 +30,9 @@ import java.io.*;
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
+
+  static final long serialVersionUID = 3007264908616389613L;
 
   /**
    * Context of the notification.
@@ -62,11 +64,7 @@ public class Notification implements Serializable, Cloneable {
    */
   public synchronized Object clone() {
     try {
-      if (context != null) {
-        Notification not = (Notification)super.clone();
-        not.context = context;
-        return not;
-      } else return super.clone();
+      return super.clone();
     } catch (CloneNotSupportedException e) { 
       // this shouldn't happen, since we are Cloneable
       throw new InternalError();

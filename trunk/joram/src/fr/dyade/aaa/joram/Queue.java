@@ -47,7 +47,7 @@ public class Queue extends Destination implements javax.jms.Queue
   /** Returns a String image of the queue. */
   public String toString()
   {
-    return "Queue:" + agentId;
+    return "Queue:" + getName();
   }
 
   /**
@@ -57,6 +57,6 @@ public class Queue extends Destination implements javax.jms.Queue
    */
   public String getQueueName() throws JMSException
   {
-    return agentId;
+    return getName();
   }
 }

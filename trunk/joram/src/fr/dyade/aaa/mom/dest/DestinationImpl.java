@@ -31,176 +31,138 @@ import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
+import fr.dyade.aaa.mom.messages.Message;
 
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * The <code>DestinationImpl</code> class provides the common behaviour of
- * MOM destinations, mainly for controlling access and administering.
+ * The <code>DestinationImpl</code> class implements the common behaviour of
+ * MOM destinations.
  */
 public abstract class DestinationImpl implements java.io.Serializable
 {
-  /** Vector of the destination administrators ids. */
-  private Vector admins;
-  /** Vector of the destination readers ids. */
-  private Vector readers;
-  /** Vector of the destination writers ids. */
-  private Vector writers;
-  /** <code>true</code> if the READ access is granted to everybody. */
-  private  boolean freeReading = false;
-  /** <code>true</code> if the WRITE access is granted to everybody. */
-  private  boolean freeWriting = false;
-  /** <code>true</code> if the ADMIN access is granted to everybody. */
-  private  boolean freeAdmin = false;
-
-  /** Counter of received messages. */
-  private long messagesCounter = 0;
+  /** Identifier of the destination's administrator. */
+  private AgentId adminId;
 
   /**
-   * <code>AgentId</code> identifier of the agent representing the
-   * destination.
+   * <code>true</code> if the destination successfully processed a deletion
+   * request.
    */
+  private boolean deletable = false;
+
+  /** Identifier of the agent hosting this DestinationImpl. */
   protected AgentId destId;
+
+  /** <code>true</code> if the READ access is granted to everybody. */
+  protected boolean freeReading = false;
+  /** <code>true</code> if the WRITE access is granted to everybody. */
+  protected boolean freeWriting = false;
+  /** Vector of the destination readers ids. */
+  protected Vector readers;
+  /** Vector of the destination writers ids. */
+  protected Vector writers;
+
   /**
-   * Identifier of the dead message queue attributed to this destination, if
-   * any.
+   * Identifier of the dead message queue this destination must send its
+   * dead messages to, if any.
    */
   protected AgentId dmqId = null;
-  /** <code>true</code> if the destination processed a deletion request. */
-  protected boolean deleted = false;
 
   /** READ access value. */
   public static int READ = 1;
   /** WRITE access value. */
   public static int WRITE = 2;
-  /** ADMIN access value. */
-  public static int ADMIN = 3;
 
 
   /**
    * Constructs a <code>DestinationImpl</code>.
    *
-   * @param destId  Identifier of the agent representing the MOM destination.
-   * @param adminId  Identifier of the agent creating the destination, and
-   *          which is its default administrator.
+   * @param destId  Identifier of the agent hosting the DestinationImpl.
+   * @param adminId  Identifier of the administrator of this destination.
    */ 
   public DestinationImpl(AgentId destId, AgentId adminId) 
   {
     this.destId = destId;
+    this.adminId = adminId;
 
-    admins = new Vector();
     readers = new Vector();
     writers = new Vector();
 
-    admins.add(adminId);
-    readers.add(adminId);
-    writers.add(adminId);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
+  }
+
+  
+  /** Returns <code>true</code> if the destination might be deleted. */
+  public boolean canBeDeleted()
+  {
+    return deletable;
   }
 
   /**
-   * Distributes the requests to the appropriate destination methods.
-   * <p>
-   * The accepted request is:
-   * <ul>
-   * <li><code>SetRightRequest</code> notifications.</li>
-   * <li><code>SetRightRequest</code> notifications,</li>
-   * <li><code>SetDMQRequest</code> notifications,</li>
-   * </ul>
-   * <p>
-   * An <code>ExceptionReply</code> notification is sent back in the case of
-   * an error when processing a request.
+   * Distributes the received notifications to the appropriate reactions.
+   *
+   * @exception UnknownNotificationException  If a received notification is
+   *              unexpected by the destination.
    */
-  public void doReact(AgentId from, AbstractRequest req)
+  public void react(AgentId from, Notification not)
+              throws UnknownNotificationException
   {
     try {
-      if (req instanceof SetRightRequest)
-        doReact(from, (SetRightRequest) req);
-      else if (req instanceof SetDMQRequest)
-        doReact(from, (SetDMQRequest) req);
+      if (not instanceof SetRightRequest)
+        doReact(from, (SetRightRequest) not);
+      else if (not instanceof SetDMQRequest)
+        doReact(from, (SetDMQRequest) not);
+      else if (not instanceof ClientMessages)
+        doReact(from, (ClientMessages) not);
+      else if (not instanceof UnknownAgent)
+        doReact(from, (UnknownAgent) not);
+      else if (not instanceof DeleteNot)
+        doReact(from, (DeleteNot) not);
       else
-        throw new RequestException("Unexpected request!");
+        throw new UnknownNotificationException(not.getClass().getName());
     }
-    catch (MomException mE) {
+    // MOM Exceptions are sent to the requester.
+    catch (MomException exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, mE);
+        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
 
-      ExceptionReply eR = new ExceptionReply(req, mE);
-      Channel.sendTo(from, eR);
+      AbstractRequest req = (AbstractRequest) not;
+      Channel.sendTo(from, new ExceptionReply(req, exc));
     }
   }
 
   /**
-   * Method implementing the destination reaction to a
-   * <code>SetRightRequest</code> instance requesting rights to be set for
-   * a user.
+   * Method implementing the reaction to a <code>SetRightRequest</code>
+   * notification requesting rights to be set for a user.
    *
-   * @exception AccessException  If the requester is not an administrator.
-   * @exception RequestException  If the right value is invalid.
+   * @exception AccessException  If the requester is not the administrator.
+   * @exception RequestException If the right requested is invalid.
    */
-  private void doReact(AgentId from, SetRightRequest not) throws MomException
+  protected void doReact(AgentId from, SetRightRequest not) throws MomException
   {
     if (! isAdministrator(from))
-      throw new AccessException("The needed ADMIN right is not granted"
-                                + " on dest " + destId);
+      throw new AccessException("ADMIN right not granted");
 
-    AgentId client = not.getClient();
-    setUserRight(client, not.getRight());
+    AgentId user = not.getClient();
+    int right = not.getRight();
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "User "
-                                    + client + " right " + not.getRight()
-                                    + " has been set.");
-  }
-
-  /**
-   * Method implementing the destination reaction to a
-   * <code>SetDMQRequest</code> instance setting the dead message queue
-   * identifier for this destination.
-   *
-   * @exception AccessException  If the requester is not an administrator.
-   */
-  private void doReact(AgentId from, SetDMQRequest not) throws AccessException
-  {
-    if (! isAdministrator(from))
-      throw new AccessException("The needed ADMIN right is not granted"
-                                + " on dest " + destId);
-
-    dmqId = not.getDmqId();
-  }
-
-  /**
-   * Sets a given user's right.
-   *
-   * @param user  User which right is to be set, <code>null</code> for "all".
-   * @param right  Right to set.
-   * @exception RequestException  In case of an incorrect right value.
-   */
-  protected void setUserRight(AgentId user, int right) throws RequestException
-  {
     // Setting "all" users rights:
     if (user == null) {
       if (right == READ)
         freeReading = true;
       else if (right == WRITE)
         freeWriting = true;
-      else if (right == ADMIN) {
-        freeReading = true;
-        freeWriting = true;
-        freeAdmin = true;
-      }
-      else if (right == -READ)
+      else if (right == -READ) {
         freeReading = false;
+        specialProcess(not);
+      }
       else if (right == -WRITE)
         freeWriting = false;
-      else if (right == 0 || right == -ADMIN) {
-        freeReading = false;
-        freeWriting = false;
-        freeAdmin = false;
-      }
       else
-        throw new RequestException("Incorrect right value: " + right);
+        throw new RequestException("Invalid right value: " + right);
     }
     // Setting a specific user right:
     else {
@@ -212,29 +174,127 @@ public abstract class DestinationImpl implements java.io.Serializable
         if (! writers.contains(user))
           writers.add(user);
       }
-      else if (right == ADMIN) {
-        if (! admins.contains(user)) {
-          admins.add(user);
-          if (! readers.contains(user))
-            readers.add(user);
-          if (! writers.contains(user))
-            writers.add(user);
-        }
-      }
-      else if (right == -READ) 
+      else if (right == -READ) {
         readers.remove(user);
+        specialProcess(not);
+      }
       else if (right == -WRITE)
         writers.remove(user);
-      else if (right == 0 || right == -ADMIN) {
-        readers.remove(user);
-        writers.remove(user);
-        admins.remove(user);
-      }
       else
-        throw new RequestException("Incorrect right value: " + right);
+        throw new RequestException("Invalid right value: " + right);
+    }
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "User " + user 
+                                    + " right set to " + right);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetDMQRequest</code>
+   * notification setting the dead message queue identifier for this
+   * destination.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, SetDMQRequest not)
+                 throws MomException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    dmqId = not.getDmqId();
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "DMQ id set to "
+                                    + dmqId);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>ClientMessages</code>
+   * notification holding messages sent by a client.
+   * <p>
+   * If the sender is not a writer on the destination the messages are
+   * sent to the DMQ and an exception is thrown. Otherwise, the processing of
+   * the received messages is performed in subclasses.
+   *
+   * @exception AccessException  If the sender is not a WRITER on the
+   *              destination.
+   */
+  protected void doReact(AgentId from, ClientMessages not)
+                 throws AccessException
+  {
+    Vector messages = not.getMessages();
+
+    // If sender is not a writer, sending the messages to the DMQ, and
+    // throwing an exception:
+    if (! isWriter(from)) {
+      for (int i = 0; i < messages.size(); i++) {
+        try {
+          ((Message) messages.get(i)).notWritable = true;
+        }
+        // Invalid message class: removing it.
+        catch (ClassCastException cE) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR, "Invalid message"
+                                          + " class: " + cE);
+          messages.remove(i);
+          i--;
+        }
+      }
+      sendToDMQ(messages, not.getDMQId());
+      throw new AccessException("WRITE right not granted");
+    }
+    specialProcess(not);
+  }
+
+  /**
+   * Method implementing the reaction to an <code>UnknownAgent</code>
+   * notification.
+   * <p>
+   * If the unknown agent is a DMQ, its identifier is set to null. If it
+   * is a client of the destination, it is removed. Specific processing is
+   * also done in subclasses.
+   */
+  protected void doReact(AgentId from, UnknownAgent not)
+  {
+    if (not.agent.equals(adminId)) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR, "Admin of dest "
+                                          + destId
+                                          + " does not exist anymore.");
+    }
+    else if (not.agent.equals(dmqId))
+      dmqId = null;
+    else if (not.agent.equals(DeadMQueueImpl.id))
+      DeadMQueueImpl.id = null;
+    else {
+      readers.remove(not.agent);
+      writers.remove(not.agent);
+      specialProcess(not);
     }
   }
 
+  /**
+   * Method implementing the reaction to a <code>DeleteNot</code>
+   * notification requesting the deletion of the destination.
+   * <p>
+   * The processing is done in subclasses if the sender is an administrator.
+   */
+  protected void doReact(AgentId from, DeleteNot not)
+  {
+    if (! isAdministrator(from)) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        MomTracing.dbgDestination.log(BasicLevel.WARN, "Deletion request"
+                                      + " received from non administrator"
+                                      + " client " + from);
+    }
+    else {
+      specialProcess(not);
+      deletable = true;
+    }
+  }
+
+  
   /**
    * Checks the reading permission of a given client agent.
    *
@@ -242,9 +302,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected boolean isReader(AgentId client)
   {
-    if (freeReading || readers.contains(client))
-      return true;
-    return false;
+    return isAdministrator(client) || freeReading || readers.contains(client);
   }
 
   /**
@@ -254,9 +312,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected boolean isWriter(AgentId client)
   {
-    if (freeWriting || writers.contains(client))
-      return true;
-    return false;
+    return isAdministrator(client) || freeWriting || writers.contains(client);
   }
 
   /**
@@ -266,18 +322,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected boolean isAdministrator(AgentId client)
   {
-    if (freeAdmin || admins.contains(client))
-      return true;
-    return false;
-  }
-
-  /** Returns the next message count value. */
-  protected long nextMessageCount()
-  {
-    if (messagesCounter == Long.MAX_VALUE)
-      messagesCounter = 0;
- 
-    return messagesCounter++;
+    return client.equals(adminId);
   }
 
   /**
@@ -289,10 +334,13 @@ public abstract class DestinationImpl implements java.io.Serializable
    */
   protected void sendToDMQ(Vector deadMessages, AgentId dmqId)
   {
+    // Sending the dead messages to the provided DMQ:
     if (dmqId != null)
       Channel.sendTo(dmqId, new ClientMessages(null, deadMessages));
+    // Sending the dead messages to the destination's DMQ:
     else if (this.dmqId != null)
       Channel.sendTo(this.dmqId, new ClientMessages(null, deadMessages));
+    // Sending the dead messages to the server's default DMQ:
     else if (DeadMQueueImpl.id != null) {
       Channel.sendTo(DeadMQueueImpl.id,
                      new ClientMessages(null, deadMessages));
@@ -300,11 +348,8 @@ public abstract class DestinationImpl implements java.io.Serializable
   }
 
   /**
-   * Returns <code>true</code> if the destination processed a deletion 
-   * request. 
+   * Abstract method to be implemented by subclasses for specifically
+   * processing notifications.
    */
-  public boolean canBeDeleted()
-  {
-    return deleted;
-  }
+  protected abstract void specialProcess(Notification not);
 }

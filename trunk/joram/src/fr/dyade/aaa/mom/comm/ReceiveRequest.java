@@ -42,6 +42,8 @@ public class ReceiveRequest extends AbstractRequest
    * is valid.
    */
   private long timeOut;
+  /** The expiration time of the request. */
+  private long expirationTime;
   /**
    * If <code>true</code>, the consumed message will be immediately
    * deleted on the queue.
@@ -114,5 +116,20 @@ public class ReceiveRequest extends AbstractRequest
   public boolean getAutoAck()
   {
     return autoAck;
+  }
+
+  /** Updates the expiration time field, if needed. */
+  public void setExpiration(long currentTime)
+  {
+    if (timeOut > 0)
+      this.expirationTime = currentTime + timeOut;
+  }
+
+  /** Returns <code>false</code> if the request expired. */
+  public boolean isValid()
+  {
+    if (timeOut > 0)
+      return System.currentTimeMillis() < expirationTime;
+    return true;
   }
 } 

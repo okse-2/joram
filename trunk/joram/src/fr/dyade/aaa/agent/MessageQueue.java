@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
+ * Copyright (C) 2001 - 2002 SCALAGENT
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -26,6 +27,10 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.util.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -38,12 +43,14 @@ import fr.dyade.aaa.util.*;
  * Use of stamp information in Message in order to restore the queue from
  * persistent storage at initialization time, so there is no longer need 
  * to save <code>MessageQueue</code> object state.
- *
- * @author  Andre Freyssinet
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $";
+
+  private Logger logmon = null;
+  private String logmsg = null;
+  private long cpt1, cpt2;
 
   /**
    * The <code>Vector</code> into which <code>Message</code> objects are
@@ -56,6 +63,8 @@ public final class MessageQueue {
   MessageQueue() {
     data = new Vector();
     last = 0;
+    logmon = Debug.getLogger(getClass().getName());
+    logmsg = "MessageQueue.#" + hashCode() + ": ";
   }
 
   /**
@@ -132,6 +141,14 @@ public final class MessageQueue {
    *		current thread.
    */
   synchronized Message get() throws InterruptedException {
+    cpt1 += 1; cpt2 += last;
+    if ((cpt1 & 0xFFFFL) == 0L) {
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        logmon.log(BasicLevel.DEBUG,
+                   logmsg + ((cpt2*100)/cpt1) + '/' + last);
+      }
+    }
+    
     while (last == 0) {
       wait();
     }

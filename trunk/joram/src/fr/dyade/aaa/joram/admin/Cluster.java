@@ -29,17 +29,19 @@ package fr.dyade.aaa.joram.admin;
 
 import java.util.Vector;
 
-/**
- * The <code>Cluster</code> class is used by administrators for creating 
- * clusters of topics.
- */
-public class Cluster
-{
-  /** Cluster name. */
-  private String name;
-  /** Vector of topic names. */
-  private Vector topics;
+import javax.naming.*;
 
+
+/**
+ * Old administration class.
+ *
+ * @deprecated  This class is temporary kept but the methods of the new
+ *              <code>AdminItf</code> interface should be used instead.
+ */
+public class Cluster extends AdministeredObject
+{
+  /** Vector of topic names. */
+  Vector topics;
   /** <code>true</code> when the cluster object has been sent to the MOM. */
   boolean locked;
 
@@ -51,11 +53,9 @@ public class Cluster
    */
   public Cluster(String name)
   {
-    this.name = name;
-    topics = new Vector();
+    super(name);
     locked = false;
   }
-
 
   /**
    * Adds a topic to the cluster.
@@ -68,19 +68,28 @@ public class Cluster
     if (locked)
       throw new AdminException("Forbidden method call as the cluster has been"
                                + " already created.");
-        
+  
+    if (topics == null)
+      topics = new Vector();
+      
     topics.add(topic.getName());
   }
 
-  /** Returns the name of the cluster. */
-  String getName()
-  {
-    return name;
-  }
 
-  /** Returns the vector of topic names. */
-  Vector getTopics()
+  /** Sets the naming reference of a cluster. */
+  public Reference getReference() throws NamingException
   {
-    return topics;
-  } 
+    Reference ref = super.getReference();
+
+    String vector = null;
+    int i;
+    for (i = 0; i < topics.size() - 1; i++)
+      vector = vector + (String) topics.get(i) + " ";
+    vector = vector + (String) topics.get(i);
+
+    ref.add(new StringRefAddr("cluster.topics", vector));
+    ref.add(new StringRefAddr("cluster.locked",
+                              (new Boolean(locked)).toString()));
+    return ref;
+  }
 }

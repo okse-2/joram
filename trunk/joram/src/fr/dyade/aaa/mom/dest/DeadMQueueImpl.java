@@ -32,28 +32,23 @@ import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
-import fr.dyade.aaa.mom.selectors.*;
-import fr.dyade.aaa.task.*;
+import fr.dyade.aaa.mom.selectors.Selector;
 
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * The <code>DeadMQueueImpl</code> class provides the MOM dead message queue
+ * The <code>DeadMQueueImpl</code> class implements the MOM dead message queue
  * behaviour, basically storing dead messages and delivering them upon clients
  * requests.
- * <p>
- * A dead message queue is very similar to a queue except that the messages
- * consumed on it are not supposed to be acknowledged or denied, because
- * they are remove right after consumption.
  */
 public class DeadMQueueImpl extends QueueImpl
 {
   /** Static value holding the default DMQ identifier for a server. */
-  public static AgentId id = null;
+  static AgentId id = null;
   /** Static value holding the default threshold for a server. */
-  public static Integer threshold = null;
+  static Integer threshold = null;
 
 
   /**
@@ -67,104 +62,104 @@ public class DeadMQueueImpl extends QueueImpl
     super(queueId, adminId);
   }
 
-  /** Returns a string view of this queue implementation. */
+  /** Returns a string view of this DeadMQueueImpl instance. */
   public String toString()
   {
     return "DeadMQueueImpl:" + destId.toString();
   }
 
-  /**
-   * Distributes the requests to the appropriate dead message queue methods.
-   * <p>
-   * Accepted requests are:
-   * <ul>
-   * <li><code>ClientMessages</code> notifications,</li>
-   * <li><code>BrowseRequest</code> notifications,</li>
-   * <li><code>AcknowledgeRequest</code> notifications,</li>
-   * <li><code>DenyRequest</code> notifications.</li>
-   * </ul>
-   * <p>
-   * An <code>ExceptionReply</code> notification is sent back in the case
-   * of an error while processing a request.
-   */
-  public void doReact(AgentId from, AbstractRequest req)
+  /** Static method returning the default DMQ identifier. */
+  public static AgentId getId()
   {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
-                                    + ": got " + req.getClass().getName()
-                                    + " with id: " + req.getRequestId()
-                                    + " from: " + from.toString());
-    try {
-      if (req instanceof ClientMessages)
-        doReact(from, (ClientMessages) req);
-      else if (req instanceof BrowseRequest)
-        doReact(from, (BrowseRequest) req);
-      else if (req instanceof AcknowledgeRequest)
-        doReact(from, (AcknowledgeRequest) req);
-      else if (req instanceof DenyRequest)
-        doReact(from, (DenyRequest) req);
-      else
-        super.doReact(from, req);
-    }
-    catch (MomException mE) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, mE);
-
-      ExceptionReply eR = new ExceptionReply((AbstractRequest) req, mE);
-      Channel.sendTo(from, eR);
-    }
+    return id;
   }
-
-
-  /**
-   * Method implementing the queue reaction to a <code>ClientMessages</code>
-   * instance holding dead messages.
-   */
-  private void doReact(AgentId from, ClientMessages not)
+  
+  /** Static method returning the default threshold. */
+  public static Integer getThreshold()
   {
-    Vector deadMessages = not.getMessages();
-    Message msg;
-
-    while (! deadMessages.isEmpty()) {
-      msg = (Message) deadMessages.remove(0);
-      messages.add(msg);
-      deliverables++;
-    }
-
-    // Lauching a delivery sequence:
-    deliverMessages(0); 
+    return threshold;
   }
 
   /**
-   * Method implementing the queue reaction to a <code>BrowseRequest</code>
-   * instance, requesting an enumeration of the messages on the queue.
-   * <p>
-   * The method sends a <code>BrowseReply</code> back to the client.
+   * Overrides this <code>DestinationImpl</code> method; the
+   * <code>SetDMQRequest</code> request actually sets the default DMQ for 
+   * the local server.
    *
-   * @exception AccessException  If the sender is not a reader.
+   * @exception AccessException  If the requester is not the administrator.
    */
-  private void doReact(AgentId from, BrowseRequest not) throws AccessException
+  protected void doReact(AgentId from, SetDMQRequest req)
+                 throws AccessException
   {
-    // If the client is not a reader, throwing an AccessException:
-    if (! super.isReader(from))
-      throw new AccessException("The needed READ right is not granted"
-                                + " on queue " + destId);
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    id = req.getDmqId();
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Default DMQ id set to "
+                                    + dmqId);
+  }
+  
+  /**
+   * Overrides this <code>DestinationImpl</code> method; the messages carried 
+   * by the <code>ClientMessages</code> instance are stored in their arrival
+   * order, WRITE right is not checked.
+   *
+   * @exception AccessException  Never thrown.
+   */
+  protected void doReact(AgentId from, ClientMessages not)
+                 throws AccessException
+  {
+    messages.addAll(not.getMessages());
+    // Lauching a delivery sequence:
+    deliverMessages(0);
+  }
+
+  /**
+   * Overrides this <code>QueueImpl</code> method; the
+   * <code>SetThreshRequest</code> request actually sets the default
+   * threshold value for the local server.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, SetThreshRequest req)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    threshold = req.getThreshold();
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Default threshold set"
+                                                      + " to " + threshold);
+  }
+
+  /**
+   * Overrides this <code>QueueImpl</code> method; messages matching the
+   * request's selector are actually sent as a reply; no cleaning nor DMQ
+   * sending is done.
+   *
+   * @exception AccessException  If the requester is not a reader.
+   */
+  protected void doReact(AgentId from, BrowseRequest not)
+                 throws AccessException
+  {
+    // If client is not a reader, throwing an exception.
+    if (! isReader(from))
+      throw new AccessException("READ right not granted");
 
     // Building the reply:
     BrowseReply rep = new BrowseReply(not);
 
-    // Adding the matching messages to it:
-    int i = 0;
+    // Adding the messages to it:
     Message message;
-    while (deliverables > 0 && i < messages.size()) {
+    for (int i = 0; i < messages.size(); i++) {
       message = (Message) messages.get(i);
-   
+      // Message matching the selector: adding it.
       if (Selector.matches(message, not.getSelector()))
         rep.addMessage(message);
-
-      i++;
     }
-
     // Delivering the reply:
     Channel.sendTo(from, rep);
 
@@ -172,119 +167,55 @@ public class DeadMQueueImpl extends QueueImpl
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Request answered.");
   }
 
-
   /**
-   * Method implementing the queue reaction to an
-   * <code>AcknowledgeRequest</code> instance, requesting messages to be
-   * acknowledged.
-   * <p>
-   * A dead message queue does not react to acknowledgements.
+   * Overrides this <code>QueueImpl</code> method;
+   * <code>AcknowledgeRequest</code> requests are actually not processed
+   * in dead message queues.
    *
    * @exception RequestException  Never thrown.
    */
-  private void doReact(AgentId from,
-                       AcknowledgeRequest not) throws RequestException
+  protected void doReact(AgentId from, AcknowledgeRequest not)
+                 throws RequestException
   {}
-
+ 
   /**
-   * Method implementing the queue reaction to a <code>DenyRequest</code>
-   * instance, requesting messages to be denied.
-   * <p>
-   * A dead message queue does not react to denyings.
+   * Overrides this <code>QueueImpl</code> method;
+   * <code>DenyRequest</code> requests are actually not processed
+   * in dead message queues.
    *
    * @exception RequestException  Never thrown.
    */
-  private void doReact(AgentId from, DenyRequest not) throws RequestException
+  protected void doReact(AgentId from, DenyRequest not)
+                 throws RequestException
   {}
 
-  /** 
-   * Method implementing the queue reaction to a
-   * <code>fr.dyade.aaa.agent.UnknownAgent</code> notification sent by the
-   * engine if the queue tried to send a reply to a non existing agent.
-   * <p>
-   * This case might happen when sending a <code>QueueMsgReply</code> to a
-   * requester which does not exist anymore. In that case, the messages sent
-   * to this requester are put back in the queue.
-   */ 
-  public void removeDeadClient(UnknownAgent uA)
+  /**
+   * Overrides this <code>QueueImpl</code> method; if the sent notification
+   * was a <code>QueueMsgReply</code> instance, putting the sent message back
+   * in queue.
+   */
+  protected void doProcess(UnknownAgent uA)
   {
     AgentId client = uA.agent;
+    Notification not = uA.not;
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
-                                    + " notified of a dead client: "
-                                    + client.toString());
-
-    if (uA.not instanceof QueueMsgReply) {
-      messages.add(((QueueMsgReply) uA.not).getMessage());
-  
-      // Launching a delivery sequence:
-      deliverMessages(0);
-    }
-  }
-
-  /** 
-   * Method implementing the queue reaction to a
-   * <code>fr.dyade.aaa.agent.DeleteNot</code> notification requesting it
-   * to be deleted.
-   * <p>
-   * The notification is ignored if the sender is not an admin of the queue.
-   * Otherwise, <code>ExceptionReply</code> replies are sent to the pending
-   * receivers, and the remaining messages are sent to an other DMQ.
-   */
-  public void delete(AgentId from)
-  {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
-                                    + " notified to be deleted by "
-                                    + from.toString());
-
-    // If the sender is not an admin, ignoring the notification:
-    if (! super.isAdministrator(from)) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, "Deletion request"
-                                      + " sent by invalid admin.");
+    // If the notification is not a delivery, doing nothing. 
+    if (! (not instanceof QueueMsgReply))
       return;
-    }
 
-    // Building the exception to send to the pending receivers:
-    DestinationException exc = new DestinationException("Dead Message Queue "
-                                                        + destId
-                                                        + " is deleted.");
-    ReceiveRequest rec;
-    ExceptionReply excRep;
-    // Sending it to the pending receivers:
-    for (int i = 0; i < requests.size(); i++) {
-      rec = (ReceiveRequest) requests.elementAt(i);
-      excRep = new ExceptionReply(rec, exc);
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
-                                      + rec.requester
-                                      + " notified of the queue deletion.");
-      
-      Channel.sendTo(rec.requester, excRep);
-    }
-
-    if (id != null && this.id.equals(id))
-      id = null;
-
-    // Sending the remaining messages to an other DMQ:
-    sendToDMQ(messages, null);
-
-    deleted = true;
+    // Putting the message back in queue:
+    messages.add(((QueueMsgReply) not).getMessage());
+    // Launching a delivery sequence:
+    deliverMessages(messages.size() - 1); 
   }
 
   /**
-   * Actually tries to answer the pending "receive" requests.
-   * <p>
-   * The method may send <code>QueueMsgReply</code> replies to clients and
-   * <code>fr.dyade.aaa.task.RemoveConditionListener</code> notifications
-   * to the scheduler.
-   *
-   * @param index  Index where starting to "browse" the requests.
-   */
-  private void deliverMessages(int index)
+   * Overrides this <code>QueueImpl</code> method; delivered messages are not
+   * kept for acknowledgement or denying; validity of messages is
+   * not checked and message fields are not updated; also, no sending to
+   * any DMQ.
+   */ 
+  protected void deliverMessages(int index)
   {
     ReceiveRequest notRec = null;
     boolean replied;
@@ -293,15 +224,15 @@ public class DeadMQueueImpl extends QueueImpl
     QueueMsgReply notMsg;
 
     // Processing each request as long as there are deliverable messages:
-    while (deliverables > 0 && index < requests.size()) { 
+    while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
       replied = false;
 
       // Checking the deliverable messages:
-      while (deliverables > 0 && j < messages.size()) {
+      while (j < messages.size()) {
         msg = (Message) messages.get(j);
 
-        // If selector matches, sending it:
+        // If the selector matches, sending it:
         if (Selector.matches(msg, notRec.getSelector())) {
           notMsg = new QueueMsgReply(notRec, msg);
           Channel.sendTo(notRec.requester, notMsg);
@@ -314,25 +245,11 @@ public class DeadMQueueImpl extends QueueImpl
                                           + " as a reply to "
                                           + notRec.getRequestId());
 
-          // If request timeOut is positive, removing the condition
-          // listener:
-          if (notRec.getTimeOut() > 0) {
-            RemoveConditionListener remL =
-              new RemoveConditionListener(notRec.requester.toString()
-                                          + notRec.getRequestId());
-            Channel.sendTo(scheduler, remL);
-  
-            if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Condition"
-                                              + " listener removed from"
-                                              + " Scheduler."); 
-          }
           // Removing the message:
           messages.remove(j);
           // Removing the request.
           replied = true;
           requests.remove(index);
-          deliverables--;
           break;
         }
         // If selector does not match: going on
@@ -345,4 +262,11 @@ public class DeadMQueueImpl extends QueueImpl
         index++;
     }
   }
+
+  /** 
+   * Overwrites this <code>DestinationImpl</code> method so that no messages
+   * may be sent by the DMQ to itself.
+   */
+  protected void sendToDMQ(Vector deadMessages, AgentId dmqId)
+  {}
 }

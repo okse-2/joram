@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * a time.
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.8 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.9 2002-12-11 11:22:12 maistrfr Exp $";
 
   Vector sendList;
 
@@ -275,7 +275,8 @@ class SingleCnxNetwork extends StreamNetwork {
   final class NetServerIn extends Daemon {
     ServerSocket listen = null;
 
-    WatchDog watchDog = null;
+// AF: To be deleted
+//     WatchDog watchDog = null;
 
     NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");

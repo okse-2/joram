@@ -84,13 +84,13 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
       sess = (Session) cnx.sessions.get(i);
       for (int j = 0; j < sess.consumers.size(); j++) {
         cons = (MessageConsumer) sess.consumers.get(j);
-        if (agentId.equals(cons.targetName))
+        if (getName().equals(cons.targetName))
           throw new JMSException("Subscribers still exist"
                                  + " for this temp. topic.");
       }
     }
     // Sending the request to the server:
-    cnx.syncRequest(new TempDestDeleteRequest(agentId));
+    cnx.syncRequest(new TempDestDeleteRequest(getName()));
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");

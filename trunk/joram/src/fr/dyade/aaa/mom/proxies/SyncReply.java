@@ -30,9 +30,6 @@ package fr.dyade.aaa.mom.proxies;
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 
 /**
- * A <code>SyncReply</code> instance wraps a reply that has to be sent to
- * a proxy's client.
- * <p>
  * A <code>SyncReply</code> is sent by a proxy to itself for integrating
  * the reply it wraps into the causal chain.
  */

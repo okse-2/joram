@@ -49,23 +49,6 @@ public class SetRightRequest extends AbstractRequest
    * Constructs a <code>SetRightRequest</code> involved in an external
    * client - MOM interaction.
    *
-   * @param key  See superclass.
-   * @param requestId  See superclass.
-   * @param client  AgentId of client which right is to be set,
-   *          <code>null</code> for all users.
-   * @param right  Right to grant, authorized values: -3, -2, -1, 1, 2, 3.
-   */
-  public SetRightRequest(int key, String requestId, AgentId client, int right)
-  {
-    super(key, requestId);
-    this.client = client;
-    this.right = right;
-  }
-
-  /**
-   * Constructs a <code>SetRightRequest</code> not involved in an external
-   * client - MOM interaction.
-   *
    * @param requestId  See superclass.
    * @param client  AgentId of client which right is to be set,
    *          <code>null</code> for all users.
@@ -73,7 +56,9 @@ public class SetRightRequest extends AbstractRequest
    */
   public SetRightRequest(String requestId, AgentId client, int right)
   {
-    this(0, requestId, client, right);
+    super(0, requestId);
+    this.client = client;
+    this.right = right;
   }
 
  

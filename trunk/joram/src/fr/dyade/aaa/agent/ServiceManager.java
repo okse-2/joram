@@ -40,8 +40,8 @@ import fr.dyade.aaa.util.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.9 2002-10-21 08:41:13 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.10 2002-12-11 11:22:12 maistrfr Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
@@ -156,7 +156,7 @@ public class ServiceManager implements Serializable {
     if (! desc.running)
       throw new Exception("Service already stopped");
     Class service = Class.forName(desc.getClassName());
-    Method stop = service.getMethod("stop", new Class[0]);
+    Method stop = service.getMethod("stopService", new Class[0]);
     stop.invoke(null, new Object[0]);
     desc.running = false;
   }

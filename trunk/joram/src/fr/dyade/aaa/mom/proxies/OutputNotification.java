@@ -27,8 +27,6 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
-import fr.dyade.aaa.mom.jms.AbstractJmsReply;
-
 /**
  * <code>OutputNotification</code> notifications are used by proxy agents for
  * wrapping objects destinated to external clients.

@@ -31,8 +31,7 @@ import fr.dyade.aaa.agent.AgentId;
 
 /**
  * A <code>SetDMQRequest</code> instance is used by a <b>client</b> agent
- * for notifying a destination or a proxy which dead message queue is
- * attributed to it.
+ * for notifying a destination which dead message queue is attributed to it.
  */
 public class SetDMQRequest extends AbstractRequest
 {
@@ -41,23 +40,7 @@ public class SetDMQRequest extends AbstractRequest
 
 
   /**
-   * Constructs a <code>SetDMQRequest</code> instance involved in an
-   * external client - MOM interaction.
-   *
-   * @param key  See superclass.
-   * @param requestId  See superclass.
-   * @param dmqId  The dead message queue identifier, <code>null</code> for
-   *          none.
-   */
-  public SetDMQRequest(int key, String requestId, AgentId dmqId)
-  {
-    super(key, requestId);
-    this.dmqId = dmqId;
-  }
-
-  /**
-   * Constructs a <code>setDMQRequest</code> instance not involved in an
-   * external client - MOM interaction.
+   * Constructs a <code>SetDMQRequest</code> instance.
    *
    * @param requestId  See superclass.
    * @param dmqId  The dead message queue identifier, <code>null</code> for
@@ -65,10 +48,10 @@ public class SetDMQRequest extends AbstractRequest
    */
   public SetDMQRequest(String requestId, AgentId dmqId)
   {
-    this(0, requestId, dmqId);
+    super(0, requestId);
+    this.dmqId = dmqId;
   }
 
-  
   /**
    * Returns the dead message queue identifier, <code>null</code> for none.
    */

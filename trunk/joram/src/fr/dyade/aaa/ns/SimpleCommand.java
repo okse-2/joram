@@ -39,7 +39,7 @@ import fr.dyade.aaa.util.Strings;
  */
 public class SimpleCommand extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: SimpleCommand.java,v 1.7 2002-10-21 08:41:14 maistrfr Exp $";
+public static final String RCS_VERSION="@(#)$Id: SimpleCommand.java,v 1.8 2002-12-11 11:26:41 maistrfr Exp $";
 
   /** agent to report completion status to */
   private AgentId report;

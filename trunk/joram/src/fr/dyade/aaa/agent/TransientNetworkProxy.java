@@ -54,8 +54,8 @@ import fr.dyade.aaa.util.Arrays;
  * @see		AgentServer
  */
 final class TransientNetworkProxy extends Network {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.6 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.7 2002-12-11 11:22:12 maistrfr Exp $";
 
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;
@@ -309,8 +309,20 @@ final class TransientNetworkProxy extends Network {
   final class Listener extends Daemon {
     ServerSocket listen = null;
 
-    Listener(String name, Logger logmon) {
+    Listener(String name, Logger logmon) throws IOException {
       super(name + ".listener");
+      // creates a server socket listening on configured port
+      for (int i=0; ; i++) {
+	try {
+	  listen = new ServerSocket(port);
+	  break;
+	} catch (BindException exc) {
+	  if (i > 10) throw exc;
+	  try {
+	    Thread.currentThread().sleep(i * 250);
+	  } catch (InterruptedException e) {}
+	}
+      }
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -330,25 +342,6 @@ final class TransientNetworkProxy extends Network {
      * 
      */
     public void run() {
-      // creates a server socket listening on configured port
-      try {
-        for (int i=0; ; i++) {
-          try {
-            listen = new ServerSocket(port);
-            break;
-          } catch (BindException exc) {
-            if (i > 20) throw exc;
-            try {
-              Thread.currentThread().sleep(i * 250);
-            } catch (InterruptedException e) {}
-          }
-        }
-      } catch (IOException exc) {
-	this.logmon.log(BasicLevel.ERROR,
-                             this.getName() + ", error in initialization", exc);
-	AgentServer.stop();
-      }
-
       try {
 	/** Connected socket. */
 	Socket sock = null;
