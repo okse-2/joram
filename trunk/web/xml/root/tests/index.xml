@@ -12,6 +12,22 @@
 
   <body>
     <s1 name="Recent news">
+      <subtitle>18th June 2002: Branch of the Test Suite to add JMS
+        1.1 support</subtitle>
+      <p>The CVS repository of the Test Suite has been branched to
+        support JMS 1.1 tests:
+      </p>
+      <ul>
+        <li>the main branch of CVS will be for JMS 1.1 tests</li>
+        <li>the branch <em>jms-1.0.2b</em> will be for JMS 1.0.2b
+          ones</li>
+      </ul>
+      <p>Of course, contributions and feedbacks for both tests are
+        still welcome. If tests are right for both JMS specifications,
+        they will be added to the 2 branches.</p>
+
+      <hr />
+
       <subtitle>6th June 2002: SwiftMQ 3.2.0 supports the Test
         Suite</subtitle>
       <p>Thanks to <a href="mailto:am@iit.de">Andreas Mueller</a>,
