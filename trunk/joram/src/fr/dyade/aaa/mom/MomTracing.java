@@ -54,10 +54,7 @@ public class MomTracing
    */
   static
   {
-    try {
-      dbgDestination = Debug.getLogger("fr.dyade.aaa.mom.Destination");
-      dbgProxy = Debug.getLogger("fr.dyade.aaa.mom.Proxy");
-    }
-    catch (Exception exc) {}
+    dbgDestination = Debug.getLogger("fr.dyade.aaa.mom.Destination");
+    dbgProxy = Debug.getLogger("fr.dyade.aaa.mom.Proxy");
   }
 }
