@@ -19,9 +19,11 @@
         <li><code>NullPointerException</code> thrown by a single user's proxy
         which subscribed to various leafs of a same topic hierarchy, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00019.html">
-        Mark Anderson</a>. This bug is due to an improper processing of
-        duplicated incoming messages. It has been corrected, the impacted class
-        is <code>fr.dyade.aaa.mom.proxies.ClientSubscription</code>.
+        Mark Anderson</a>. This bug is due to messages not being cloned in the
+        topic leafs and to an improper processing of duplicated incoming
+        messages. It has been corrected, the impacted classes
+        are  <code>fr.dyade.aaa.mom.dest.TopicImpl</code> and
+        <code>fr.dyade.aaa.mom.proxies.ClientSubscription</code>.
         </li>
         <li>Improper message delivery in a topic hierarchy when set on a
         single server, and when consumers subscribe to various leafs of the
