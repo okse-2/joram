@@ -12,6 +12,18 @@
 
   <body>
     <s1 name="Recent news">
+      <subtitle>23rd April 2002: Pramati supports the Test
+      Suite</subtitle>
+      <p>Thanks to <a href="mailto:rajdeep@pramati.com">Rajdeep
+	  Dua</a>, <a href="http://www.pramati.com">Pramati</a> has
+	contributed to the Test Suite and offered 
+	an Admin implementation to use the Test Suite with both their
+	Application Server and Message Server. Thanks Rajdeep!</p>
+      <p>The <a href="../download/tests.tgz">package available for
+	  download</a> has been updated with Pramati Admin
+	implementation. For more information, see the <a
+	  href="doc.html">documentation</a>
+      </p>
       <subtitle>15th April 2002: Test Suite web pages and package available</subtitle>
       <p>The Test Suite has now its own web pages. Any feedback is
       welcome</p>
@@ -24,14 +36,19 @@
 	<em>pure JMS<sup>TM</sup> without dependency from any vendor</em>.
       </p>
       <p>Technically, the administration step is done through a simple interface
-	that any provider can implement. For the moment, we provide a
-	<a href="http://www.objectweb.org/joram">JORAM</a> and
-	a <a
-	  href="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ</a>
-	example (<a href="http://www.pramati.com">Pramati</a> and <a
-	  href="http://www.swiftmq.com/">SwiftMQ</a> ones will be provided 
-	soon);
-	we suggest that other JMS providers implement this
+	that any provider can implement. For the moment, we provide
+	implementations for</p>
+      <ul>
+	<li><a href="http://www.objectweb.org/joram">JORAM</a></li>
+	<li><a
+	    href="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ</a></li>
+	<li><a href="http://www.pramati.com">Pramati</a></li>
+      </ul>
+      <p>(a <a
+	  href="http://www.swiftmq.com/">SwiftMQ</a> one will be provided 
+	soon).
+      </p>
+      <p>We suggest that other JMS providers implement this
 	interface so that the suite can be used by potential users to test
 	implementations with respect to well known test scenarios.
       </p>
