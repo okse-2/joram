@@ -39,19 +39,19 @@ public class QueueConnection extends Connection
    * Constructs a <code>QueueConnection</code> instance and opens a TCP
    * connection with a given agent server.
    *
+   * @param qcf  The factory this connection is created by.
    * @param serverAddr  Address of the server to connect to.
    * @param port  Port the server is listening to.
    * @param name  User's name.
    * @param password  User's password.
-   * @param timer  Time in seconds allowed for (re-)connecting.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  QueueConnection(java.net.InetAddress serverAddr, int port, String name,
-                  String password, int timer) throws javax.jms.JMSException
+  QueueConnection(QueueConnectionFactory qcf, java.net.InetAddress serverAddr,
+                  int port, String name, String password) throws JMSException
   {
-    super(serverAddr, port, name, password, timer);
+    super(qcf, serverAddr, port, name, password);
   }
 
   /**

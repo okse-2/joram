@@ -89,6 +89,9 @@ public abstract class Session implements javax.jms.Session
    */
   Hashtable deliveries;
 
+  /** Timer for terminating pending transactions. */
+  private Timer transactimer = null;
+
 
   /**
    * Opens a session.
@@ -287,6 +290,11 @@ public abstract class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
+    if (transactimer != null) {
+      transactimer.cancel();
+      transactimer = null;
+    }
+
     // Sending client messages:
     try {
       Enumeration dests = sendings.keys();
@@ -333,6 +341,11 @@ public abstract class Session implements javax.jms.Session
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
+
+    if (transactimer != null) {
+      transactimer.cancel();
+      transactimer = null;
+    }
 
     // Denying the received messages:
     deny();
@@ -501,12 +514,23 @@ public abstract class Session implements javax.jms.Session
    */
   void prepareSend(String name, fr.dyade.aaa.mom.messages.Message msg)
   {
+    boolean rearmTimer = false;
+    if (transactimer != null) {
+      transactimer.cancel();
+      rearmTimer = true;
+    }
+
     ProducerMessages pM = (ProducerMessages) sendings.get(name);
     if (pM == null) {
       pM = new ProducerMessages(name);
       sendings.put(name, pM);
     }
     pM.addMessage(msg);
+
+    if (rearmTimer) {
+      transactimer = new Timer();
+      transactimer.schedule(new TxTimerTask(this), cnx.factory.txTimer * 1000);
+    }
   }
 
   /** 
@@ -519,12 +543,20 @@ public abstract class Session implements javax.jms.Session
    */
   void prepareAck(String name, String id)
   {
+    if (transactimer != null) 
+      transactimer.cancel();
+
     Vector ids = (Vector) deliveries.get(name);
     if (ids == null) {
       ids = new Vector();
       deliveries.put(name, ids);
     }
     ids.add(id);
+
+    if (cnx.factory.txTimer != 0) {
+      transactimer = new Timer();
+      transactimer.schedule(new TxTimerTask(this), cnx.factory.txTimer * 1000);
+    }
   }
 
   /**

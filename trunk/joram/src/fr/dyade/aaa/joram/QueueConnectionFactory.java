@@ -62,7 +62,7 @@ public class QueueConnectionFactory extends ConnectionFactory
   public javax.jms.QueueConnection
        createQueueConnection(String name, String password) throws JMSException
   {
-    return new QueueConnection(serverAddr, port, name, password, timer);
+    return new QueueConnection(this, serverAddr, port, name, password);
   }
 
   /**

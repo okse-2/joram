@@ -53,6 +53,10 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
 
     if (ref.getClassName().equals(qcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+      Integer txTimer = 
+        new Integer((String) ref.get("cFactory.txT").getContent());
 
       ConnectionFactory cf =
         (ConnectionFactory) ConnectionFactory.getInstance(url); 
@@ -68,10 +72,17 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
                                      + qcf + " retrieved by naming service.");
+
+      qcf.setCnxTimer(cnxTimer.intValue());
+      qcf.setTxTimer(txTimer.intValue());
       return qcf;
     }
     else if (ref.getClassName().equals(xaqcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+      Integer txTimer = 
+        new Integer((String) ref.get("cFactory.txT").getContent());
 
       ConnectionFactory cf =
         (ConnectionFactory) ConnectionFactory.getInstance(url);
@@ -87,10 +98,16 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
                                      + xaqcf + " retrieved by naming service.");
+
+      xaqcf.setCnxTimer(cnxTimer.intValue());
       return xaqcf;
     }
     else if (ref.getClassName().equals(tcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+      Integer txTimer = 
+        new Integer((String) ref.get("cFactory.txT").getContent());
 
       ConnectionFactory cf =
         (ConnectionFactory) ConnectionFactory.getInstance(url);
@@ -106,10 +123,17 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
                                      + tcf + " retrieved by naming service.");
+
+      tcf.setCnxTimer(cnxTimer.intValue());
+      tcf.setTxTimer(txTimer.intValue());
       return tcf;
     }
     else if (ref.getClassName().equals(xatcfClassName)) {
       String url = (String) ref.get("cFactory.url").getContent();
+      Integer cnxTimer =
+        new Integer((String) ref.get("cFactory.cnxT").getContent());
+      Integer txTimer = 
+        new Integer((String) ref.get("cFactory.txT").getContent());
 
       ConnectionFactory cf =
         (ConnectionFactory) ConnectionFactory.getInstance(url);
@@ -125,6 +149,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
                                      + xatcf + " retrieved by naming service.");
+
+      xatcf.setCnxTimer(cnxTimer.intValue());
       return xatcf;
     }
     else if (ref.getClassName().equals(qClassName)) {

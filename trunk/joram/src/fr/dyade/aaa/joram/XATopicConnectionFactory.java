@@ -65,7 +65,7 @@ public class XATopicConnectionFactory
        createXATopicConnection(String name, String password)
        throws JMSException
   {
-    return new XATopicConnection(serverAddr, port, name, password, timer);
+    return new XATopicConnection(this, serverAddr, port, name, password);
   }
 
   /**
@@ -80,5 +80,9 @@ public class XATopicConnectionFactory
   {
     return createXATopicConnection("anonymous", "anonymous");
   }
+
+  /** Overrides this method for keeping the txTimer parameter to 0. */
+  public void setTxTimer(int timer)
+  {}
 }
  
