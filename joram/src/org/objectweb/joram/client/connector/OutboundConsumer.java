@@ -57,23 +57,23 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
 
   /**
    * Forbidden call on a component's outbound consumer, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public void setMessageListener(javax.jms.MessageListener messageListener)
               throws JMSException
   {
     checkValidity();
-    throw new JMSException("Component's consumer can't be asynchronous.");
+    throw new IllegalStateException("Invalid call on a component's producer.");
   }
 
   /**
    * Forbidden call on a component's outbound consumer, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public javax.jms.MessageListener getMessageListener() throws JMSException
   {
     checkValidity();
-    throw new JMSException("Component's consumer can't be asynchronous.");
+    throw new IllegalStateException("Invalid call on a component's producer.");
   }
 
   /**
