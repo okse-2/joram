@@ -45,6 +45,11 @@ public class A3CMLServer implements Serializable {
    * value is statically fixed.
    */
   public short gateway = -1;
+  /**
+   * Logical distance between this server and the root one, i.e. the number
+   * of hops to reach it from the local one.
+   */
+  public int hops = -1;
 
   public A3CMLServer(short sid,
                      String name,
@@ -59,8 +64,23 @@ public class A3CMLServer implements Serializable {
     this.networks = new Vector();
   }
 
-  public void addService(A3CMLService service) {
-    services.addElement(service);
+  public void addService(A3CMLService newService) throws Exception {
+    for (int i = 0; i < services.size(); i++) {
+      A3CMLService service = (A3CMLService)services.elementAt(i);
+      if (service.classname.equals(newService.classname)) {
+        throw new Exception("Service " + newService.classname + "already added");
+      }
+    }
+    services.addElement(newService);
+  }
+
+  public void removeService(String serviceClassName) {
+    for (int i = 0; i < services.size(); i++) {
+      A3CMLService service = (A3CMLService)services.elementAt(i);
+      if (service.classname.equals(serviceClassName)) {
+        services.removeElementAt(i);
+      }
+    }
   }
 
   public A3CMLProperty addProperty(A3CMLProperty prop) {
@@ -161,6 +181,7 @@ public class A3CMLServer implements Serializable {
     strBuf.append(",properties=").append(properties);
     strBuf.append(",nat=").append(nat);
     strBuf.append(",gateway=").append(gateway);
+    strBuf.append(",hops=").append(hops);
     strBuf.append(")");
     return strBuf.toString();
   }

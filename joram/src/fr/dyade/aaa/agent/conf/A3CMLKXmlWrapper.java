@@ -33,13 +33,9 @@ import org.kxml.*;
  * A3CML XML parser using kxml.
  */
 public class A3CMLKXmlWrapper implements A3CMLWrapper {
-  protected Logger logmon = null;
   protected A3CMLConfig a3cmlconfig = null;
 
-  public A3CMLKXmlWrapper() {
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getLogger("fr.dyade.aaa.agent.A3CMLWrapper");
-  }
+  public A3CMLKXmlWrapper() { }
 
   public static final String getValue(Vector atts, String qName) {
     if(atts != null){

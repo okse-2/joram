@@ -39,8 +39,23 @@ public class A3CMLPServer extends A3CMLServer implements Serializable {
     super(sid, name, hostname);
   }
 
-  public void addNetwork(A3CMLNetwork network) {
-    networks.addElement(network);
+  public void addNetwork(A3CMLNetwork newNetwork) throws Exception {
+    for (int i = 0; i < networks.size(); i++) {
+      A3CMLNetwork network = (A3CMLNetwork)networks.elementAt(i);
+      if (network.domain.equals(newNetwork.domain)) {
+        throw new Exception("Network " + newNetwork.domain + "already added");
+      }
+    }
+    networks.addElement(newNetwork);
+  }
+
+  public void removeNetwork(String domainName) {
+    for (int i = 0; i < networks.size(); i++) {
+      A3CMLNetwork network = (A3CMLNetwork)networks.elementAt(i);
+      if (network.domain.equals(domainName)) {
+        networks.removeElementAt(i);
+      }
+    }
   }
 
   public A3CMLPServer duplicate(Hashtable context) throws Exception {

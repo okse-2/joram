@@ -21,6 +21,8 @@ package fr.dyade.aaa.agent.conf;
 import java.io.*;
 import java.util.*;
 
+import org.objectweb.util.monolog.api.*;
+
 /**
  * The class <code>A3CMLDomain</code> describes an agent server domain.
  */
@@ -36,6 +38,11 @@ public class A3CMLDomain implements Serializable {
    * if -1 the domain is not accessible.
    */
   public short gateway = -1;
+  /**
+   * Logical distance between the server of this domain and the root one, i.e.
+   * the number of hops to reach a server from the local one.
+   */
+  public int hops = -1;
 
 //   transient MessageConsumer consumer = null;
 
@@ -51,6 +58,9 @@ public class A3CMLDomain implements Serializable {
   }
   
   public void addServer(A3CMLServer server) {
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, 
+                     "A3CMLDomain.addServer(" + server + ')');
     if (servers == null) servers = new Vector();
     servers.addElement(server);
   }
@@ -58,6 +68,16 @@ public class A3CMLDomain implements Serializable {
   public void removeServer(A3CMLServer server) {
     if (servers == null) return;
     servers.removeElement(server);
+  }
+
+  public void removeServer(short sid) {
+    if (servers == null) return;
+    for (int i = 0; i < servers.size(); i++) {
+      A3CMLServer serv = (A3CMLServer) servers.elementAt(i);
+      if (serv.sid == sid) {
+        servers.removeElementAt(i);
+      }
+    }
   }
 
 //   public boolean containsServer(A3CMLServer server) {
@@ -103,6 +123,7 @@ public class A3CMLDomain implements Serializable {
     strBuf.append(",network=").append(network);
     strBuf.append(",servers=").append(servers);
     strBuf.append(",gateway=").append(gateway);
+    strBuf.append(",hops=").append(hops);
     strBuf.append(")");
 
     return strBuf.toString();
