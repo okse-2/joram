@@ -14,8 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: November 20, 2003)">
+      <s2 name="Corrected bugs (latest: December 3, 2003)">
       <ul>
+        <li>Improper message delivery in a topic hierarchy when set on a
+        single server, and when consumers subscribe to various leafs of the
+        tree. Messages were not appropriately cloned and this resulted in
+        subscribers never getting any message. The bug is corrected and the
+        impacted class is <code>fr.dyade.aaa.mom.dest.TopicImpl</code>.
+        </li>
         <li>Messages delivered in an incorrect order after a rollback or
         disconnection, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2003-11/msg00080.html">
