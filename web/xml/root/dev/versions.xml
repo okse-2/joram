@@ -14,8 +14,13 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far...</p>
+      <s2 name="Bug corrections (latest: October 27, 2003)">
+      <ul>
+        <li><code>NullPointerException</code> occuring when requesting the
+        defaut DMQ settings of a server in a distributed configuration; 
+        corrected class is <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>. 
+        </li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram3_6_3 (October 14, 2003)">
