@@ -26,7 +26,9 @@ a3mom_selec.jar_CLASSES = \
 	Lexer \
 	lr_parser \
 	parser \
+	CUPparseractions \
 	checkParser \
+	CUPcheckParseractions \
 	Scanner \
 	Symbol \
 	virtual_parse_stack \
