@@ -12,7 +12,34 @@
 
   <body>
     <s1 name="JORAM History">
-      <subtitle>January 10, 2005: JORAM 4.2 release candidate 1 is available</subtitle>
+<subtitle>March 31, 2005: JORAM 4.2 final release is available</subtitle>
+	<p>The Joram 4.2 release features high availability, enhanced management facilities and improved performances.
+        </p>
+	<ul>
+	  <li><strong>High Availability</strong> Joram 4.2 provides the active replication of Joram servers and 
+          underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover 
+          and server failover. This version currently relies on the use of  JGroups.</li>
+	  <li><strong>Dynamic Configuration</strong> Joram 4.2 provide facilities to remotely add and remove Joram
+          servers dynamically, using the Joram Administration API. This key feature, combined with upgraded JMX 
+          implementation, initiates a new set of management facilities for Joram.</li>
+	  <li><strong>Upgraded JMX management</strong></li>
+	  <li><strong>Architecture and Performance improvements</strong>. Joram V4.2 provides a packaged version of
+          a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
+          improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
+          preventing backward compatibility with prior Joram versions.</li>
+	  <li>JDK 1.5 support</li>
+	</ul>
+
+        <p>This version has been partly sponsored by France Telecom R&amp;D</p>
+	<p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@objectweb.org if you want
+        to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
+        proprietary messaging system.</p>
+
+	<subtitle>March 11,2005: JORAM 4.2 release candidate 2 is available.</subtitle>
+	<p>The JORAM 4.2 RC2 contains mainly bug and fixes along with upgraded JMX management facilites.</p>
+
+	<subtitle>January 10, 2005: JORAM 4.2 release candidate 1 is available</subtitle>
 	<p>Joram 4.2 RC1 provides new features as high-availability, dynamic configuration, 
         and a lot of fixes and improvements.</p>
 	<ul>
