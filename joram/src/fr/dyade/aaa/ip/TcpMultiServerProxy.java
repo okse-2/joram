@@ -51,7 +51,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.8 2002-03-26 16:08:48 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.9 2002-05-06 14:19:35 jmesnil Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */
@@ -239,6 +239,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.8 
       // this is a listening server
       Integer key = null;
       Socket sock = listenSocket.accept();
+      sock.setTcpNoDelay(true);
       synchronized(lock) {
         key = new Integer(keyIdx++);
         sockets.put(key, sock);
