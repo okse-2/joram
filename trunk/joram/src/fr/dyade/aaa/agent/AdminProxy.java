@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -185,7 +185,7 @@ public class AdminProxy {
   static final String DUMP = "dump";
 
   // update traces configuration
-  public static final String UPDATE_TRACES = "updateTraces";
+  public static final String LOG = "log";
 
   /**
    * Provides a string image for this object.
@@ -554,14 +554,33 @@ public class AdminProxy {
             writer.println("Can't load configuration: " + exc.getMessage());
             if (debug) exc.printStackTrace(writer);
           }
-        } else if (cmd.equals(UPDATE_TRACES)){
+        } else if (cmd.equals(LOG)){
           PrintStream oldErr = System.err;
-          try{
+          try {
             System.setErr(new PrintStream(socket.getOutputStream()));
-            Debug.reinit();
-          }catch(Exception exc){
+            String topic = st.nextToken();
+            String level = st.nextToken();
+            int intLevel;
+            if (level.equals("DEBUG")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.DEBUG;
+            } else if (level.equals("ERROR")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.ERROR;
+            } else if (level.equals("FATAL")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.FATAL;
+            } else if (level.equals("INFO")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.INFO;
+            } else if (level.equals("INHERIT")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.INHERIT;
+            } else if (level.equals("WARN")) {
+              intLevel = org.objectweb.util.monolog.api.BasicLevel.WARN;
+            } else {
+              writer.println("Unknown level: " + level);
+              return;
+            }
+            Debug.setLoggerLevel(topic, intLevel);
+          } catch(Exception exc){
             writer.println(exc.getMessage());
-          }finally{
+          } finally{
             System.setErr(oldErr);
             writer.println("OK");
           }
