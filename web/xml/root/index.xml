@@ -12,7 +12,25 @@
 
   <body>
 
-    <s1 name="Recent News">
+    <s1 name="Latest News">
+      <subtitle>June 23rd, 2003: JORAM 3.5 is available under the
+                LGPL licence!</subtitle>
+      <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
+      as packaged. This version is based on the 3.4 release and
+      includes the <em>SOAP</em> proxy. On top of that, it provides a totally
+      refactored <em>message persistence</em> management.
+      </p>
+      <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
+      <p>The details of all the modifications and bug corrections which occured
+      to the 3.4 release can ben found in the
+      <a href="dev/versions.html">releases page</a>.</p>
+      <p><a href="doc/index.html">Documentation</a> has been updated.
+      Particularly, a comparison between the 3.4 and the 3.5 releases
+      performances may be found.</p>
+      <p>
+      JORAM is now released under the <em>LGPL</em> licence.</p>
+      <hr />
+
       <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
       <p>JORAM 3.3 is now available as a packaged version.
       As a reminder, it provides a new administration implementation. In CVS it
@@ -25,32 +43,16 @@
       server side, and the JMS connection client side, for supporting multiple 
       protocols (currently TCP and SOAP).
       </p>
-      <p>Both versions features are detailed in the
-      <a href="dev/versions.html">releases page</a> and
-      <a href="doc/index.html">documented</a>.</p>
-      <hr />
-
-      <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
-      available in the CVS distribution.</subtitle>
-      <p>This new version provides a refactored <em>administration</em> 
-      protocol. Administration is now based on JMS communication and is much
-      more flexible than the past implementation. Hopefully it will make
-      contributing easier; JORAM's administration still misses graphical tools
-      and JMX support, and any contribution would be highly appreciated.
-      </p>
-      <p>This new administration implementation comes with a new administration
-      interface. Old administration codes should go on working even if they now
-      use deprecated methods. 
-      </p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
       <table border="0">
 	<tr>
-	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
-	  <td valign="middle"><p>Current packaged release: 3.3.1</p>
-	                      <p>Latest CVS tag: joram3_4_2</p></td>
+	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
+               width="287" border="0" hspace="2"/></td>
+	  <td valign="middle"><p>Current packaged release: 3.5.0</p>
+	                      <p>Latest CVS tag: joram3_5_0</p></td>
 	</tr>
       </table>
       

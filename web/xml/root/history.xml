@@ -14,6 +14,17 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>June 23rd, 2003: JORAM 3.5 is available.</subtitle>
+      <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
+      as packaged. This version is based on the 3.4 release and includes
+      the <em>SOAP</em> proxy.
+      On top of that, it provides a totally refactored <em>message
+      persistence</em> management.
+      </p>
+      <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
+      <p>JORAM is now released under the <em>LGPL</em> licence.</p>
+      <hr />
+
      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
      <p>JORAM 3.3 is now available as a packaged version.
      As a reminder, it provides a new administration implementation. In CVS it
