@@ -33,9 +33,33 @@ import javax.jms.*;
  * Test the message selector features of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorTest.java,v 1.5 2002-05-15 09:25:46 jmesnil Exp $
+ * @version $Id: SelectorTest.java,v 1.6 2002-05-15 13:50:35 jmesnil Exp $
  */
 public class SelectorTest extends PTPTestCase {
+
+    public void testStringLiterals() {
+        try {
+            receiverConnection.stop();
+            receiver = receiverSession.createReceiver(receiverQueue, "string = 'literal''s'");
+            receiverConnection.start();
+            
+            TextMessage dummyMessage = senderSession.createTextMessage();
+            dummyMessage.setStringProperty("string", "literal");
+            dummyMessage.setText("testStringLiterals:1");
+            sender.send(dummyMessage);
+            
+            TextMessage message = senderSession.createTextMessage();
+            message.setStringProperty("string", "literal's");
+            message.setText("testStringLiterals:2");
+            sender.send(message);
+
+            TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
+            assertTrue("No message was received", msg != null);
+            assertEquals("testStringLiterals:2", msg.getText());
+        } catch (JMSException e) {
+            fail(e);
+        }
+    }       
 
     /**
      * Test that the JMS property <code>JMSDeliveryMode</code> is treated as having the values <code>'PERSISTENT'</code>
@@ -44,19 +68,19 @@ public class SelectorTest extends PTPTestCase {
     public void testJMSDeliveryModeInSelector() {
         try {
             receiverConnection.stop();
-            receiver  = receiverSession.createReceiver(receiverQueue, "JMSDeliveryMode = 'PERSISTENT'");
+            receiver = receiverSession.createReceiver(receiverQueue, "JMSDeliveryMode = 'PERSISTENT'");
             receiverConnection.start();
-            
+         
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setText("testJMSDeliveryModeInSelector:1");
             // send a dummy message in *non persistent* mode
             sender.send(dummyMessage, DeliveryMode.NON_PERSISTENT, sender.getPriority(), sender.getTimeToLive());
-      
+   
             TextMessage message = senderSession.createTextMessage();
             message.setText("testJMSDeliveryModeInSelector:2");
             // send a message in *persistent*
             sender.send(message, DeliveryMode.PERSISTENT, sender.getPriority(), sender.getTimeToLive());
-            
+         
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertTrue("No message was received", msg != null);
             // only the message sent in persistent mode should be received.
@@ -75,14 +99,14 @@ public class SelectorTest extends PTPTestCase {
     public void testIdentifierConversion() {
         try {
             receiverConnection.stop();
-            receiver  = receiverSession.createReceiver(receiverQueue, "NumberOfOrders > 1");
+            receiver = receiverSession.createReceiver(receiverQueue, "NumberOfOrders > 1");
             receiverConnection.start();
 
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setStringProperty("NumberOfOrders", "2");
             dummyMessage.setText("testIdentifierConversion:1");
             sender.send(dummyMessage);
-      
+   
             TextMessage message = senderSession.createTextMessage();
             message.setIntProperty("NumberOfOrders", 2);
             message.setText("testIdentifierConversion:2");
@@ -94,7 +118,7 @@ public class SelectorTest extends PTPTestCase {
             fail(e);
         }
     }
-    
+ 
     /**
      * Test the message selector using the filter example provided by the JMS specifications.
      * <br />
@@ -105,7 +129,7 @@ public class SelectorTest extends PTPTestCase {
     public void testSelectorExampleFromSpecs() {
         try {
             receiverConnection.stop();
-            receiver  = receiverSession.createReceiver(receiverQueue, "JMSType = 'car' AND color = 'blue' AND weight > 2500");
+            receiver = receiverSession.createReceiver(receiverQueue, "JMSType = 'car' AND color = 'blue' AND weight > 2500");
             receiverConnection.start();
 
             TextMessage dummyMessage = senderSession.createTextMessage();
@@ -114,7 +138,7 @@ public class SelectorTest extends PTPTestCase {
             dummyMessage.setLongProperty("weight", 3000);
             dummyMessage.setText("testSelectorExampleFromSpecs:1");
             sender.send(dummyMessage);
-      
+   
             TextMessage message = senderSession.createTextMessage();
             message.setJMSType("car");
             message.setStringProperty("color", "blue");
@@ -141,17 +165,17 @@ public class SelectorTest extends PTPTestCase {
             receiverConnection.stop();
             receiver  = receiverSession.createReceiver(receiverQueue, "weight > 2500");
             receiverConnection.start();
-      
+   
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setLongProperty("weight", 1000);
             dummyMessage.setText("testGreaterThan:1");
             sender.send(dummyMessage);
-      
+   
             TextMessage message = senderSession.createTextMessage();
             message.setLongProperty("weight", 3000);
             message.setText("testGreaterThan:2");
             sender.send(message);
-      
+   
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertEquals("testGreaterThan:2", msg.getText());
         } catch (JMSException e) {
@@ -171,17 +195,17 @@ public class SelectorTest extends PTPTestCase {
             receiverConnection.stop();
             receiver  = receiverSession.createReceiver(receiverQueue, "weight = 2500");
             receiverConnection.start();
-   
+
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setLongProperty("weight", 1000);
             dummyMessage.setText("testEquals:1");
             sender.send(dummyMessage);
-     
+  
             TextMessage message = senderSession.createTextMessage();
             message.setLongProperty("weight", 2500);
             message.setText("testEquals:2");
             sender.send(message);
-       
+    
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertEquals("testEquals:2", msg.getText());
         } catch (JMSException e) {
@@ -201,17 +225,17 @@ public class SelectorTest extends PTPTestCase {
             receiverConnection.stop();
             receiver  = receiverSession.createReceiver(receiverQueue, "weight <> 2500");
             receiverConnection.start();
-   
+
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setLongProperty("weight", 2500);
             dummyMessage.setText("testEquals:1");
             sender.send(dummyMessage);
-     
+  
             TextMessage message = senderSession.createTextMessage();
             message.setLongProperty("weight", 1000);
             message.setText("testEquals:2");
             sender.send(message);
-       
+    
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertEquals("testEquals:2", msg.getText());
         } catch (JMSException e) {
@@ -249,7 +273,7 @@ public class SelectorTest extends PTPTestCase {
             assertTrue("Message of another test: "+ msg.getText(),
                        msg.getText().startsWith("testBetween"));
             assertEquals("testBetween:2", msg.getText());
-      
+   
         } catch (JMSException e) {
             fail(e);
         }
@@ -272,24 +296,24 @@ public class SelectorTest extends PTPTestCase {
             dummyMessage.setStringProperty("Country", "Peru");
             dummyMessage.setText("testIn:1");
             sender.send(dummyMessage);
-  
+
             TextMessage message = senderSession.createTextMessage();
             message.setStringProperty("Country", "UK");
             message.setText("testIn:2");
             sender.send(message);
-  
+
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertTrue("Message not received",
                        msg != null);
             assertTrue("Message of another test: "+ msg.getText(),
                        msg.getText().startsWith("testIn"));
             assertEquals("testIn:2", msg.getText());
-      
+   
         } catch (JMSException e) {
             fail(e);
         }
     }
-  
+
     /**
      * Test the LIKE ... ESCAPE condition in message selector
      * <br />
@@ -319,7 +343,7 @@ public class SelectorTest extends PTPTestCase {
             assertTrue("Message of another test: "+ msg.getText(),
                        msg.getText().startsWith("testLikeEscape"));
             assertEquals("testLikeEscape:2", msg.getText());
-      
+   
         } catch (JMSException e) {
             fail(e);
         }
@@ -354,7 +378,7 @@ public class SelectorTest extends PTPTestCase {
             assertTrue("Message of another test: "+ msg.getText(),
                        msg.getText().startsWith("testLike_2"));
             assertEquals("testLike_2:2", msg.getText());
-      
+   
         } catch (JMSException e) {
             fail(e);
         }
@@ -388,12 +412,12 @@ public class SelectorTest extends PTPTestCase {
             assertTrue("Message of another test: "+ msg.getText(),
                        msg.getText().startsWith("testLike_1"));
             assertEquals("testLike_1:2", msg.getText());
-      
+
         } catch (JMSException e) {
             fail(e);
         }
     }
-    
+
     /**
      * Test the <code>NULL</code> value in message selector.
      * <br />
@@ -406,16 +430,16 @@ public class SelectorTest extends PTPTestCase {
             receiverConnection.stop();
             receiver  = receiverSession.createReceiver(receiverQueue, "prop_name IS NULL");
             receiverConnection.start();
-   
+
             TextMessage dummyMessage = senderSession.createTextMessage();
             dummyMessage.setStringProperty("prop_name", "not null");
             dummyMessage.setText("testNull:1");
             sender.send(dummyMessage);
-     
+
             TextMessage message = senderSession.createTextMessage();
             message.setText("testNull:2");
             sender.send(message);
-       
+ 
             TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
             assertTrue(msg != null);
             assertEquals("testNull:2", msg.getText());
