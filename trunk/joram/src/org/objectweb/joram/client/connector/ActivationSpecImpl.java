@@ -77,7 +77,8 @@ public class ActivationSpecImpl
    */
   public void validate() throws InvalidPropertyException
   {
-    if (! destinationType.equals("javax.jms.Queue")
+    if (destinationType != null
+        && ! destinationType.equals("javax.jms.Queue")
         && ! destinationType.equals("javax.jms.Topic"))
       throw new InvalidPropertyException("Invalid destination type: " 
                                          + destinationType);
@@ -85,14 +86,18 @@ public class ActivationSpecImpl
     if (destination == null)
       throw new InvalidPropertyException("Missing destination property.");
 
-    if (subscriptionDurability.equals("Durable")
-        && destinationType.equals("javax.jms.Queue"))
-      throw new InvalidPropertyException("Can't set a durable subscription "
-                                         + "on a JMS queue.");
 
-    if (subscriptionDurability.equals("Durable")
-        && subscriptionName == null)
-      throw new InvalidPropertyException("Missing durable subscription name.");
+    if (subscriptionDurability != null) {
+
+      if (subscriptionDurability.equals("Durable")
+          && destinationType.equals("javax.jms.Queue"))
+        throw new InvalidPropertyException("Can't set a durable subscription "
+                                           + "on a JMS queue.");
+
+      if (subscriptionDurability.equals("Durable")
+          && subscriptionName == null)
+        throw new InvalidPropertyException("Missing durable subscription name.");
+    }
   }
 
 
