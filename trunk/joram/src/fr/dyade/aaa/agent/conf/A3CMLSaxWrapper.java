@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002-2004 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,13 +40,9 @@ import org.xml.sax.SAXParseException;
  * XML SAX Wrapper for A3 configuration file.
  */
 public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
-  protected Logger logmon = null;
   protected A3CMLConfig a3cmlConfig = null;
 
-  public A3CMLSaxWrapper() {
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getLogger("fr.dyade.aaa.agent.A3CMLWrapper");
-  }
+  public A3CMLSaxWrapper() {}
 
   /**
    * Name of configuration to get from the file.
@@ -89,6 +85,11 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    * end element.
    */
   A3CMLNat nat = null;
+  /**
+   * Working attribute used during cluster' definition between  start and
+   * end element.
+   */
+  A3CMLCluster cluster = null;
 
   /**
    * Parses the xml file named <code>cfgFileName</code> and calls handler 
@@ -124,9 +125,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void fatalError(SAXParseException e) throws SAXException {
-    logmon.log(BasicLevel.ERROR,
-               "fatal error parsing " + e.getPublicId() +
-               " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    Log.logger.log(BasicLevel.ERROR,
+                   "fatal error parsing " + e.getPublicId() +
+                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -139,9 +140,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void error(SAXParseException e) throws SAXException {
-    logmon.log(BasicLevel.ERROR,
-               "error parsing " + e.getPublicId() +
-               " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    Log.logger.log(BasicLevel.ERROR,
+                   "error parsing " + e.getPublicId() +
+                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -155,9 +156,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void warning(SAXParseException e) throws SAXException {
-    logmon.log(BasicLevel.ERROR,
-               "warning parsing " + e.getPublicId() +
-               " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    Log.logger.log(BasicLevel.ERROR,
+                   "warning parsing " + e.getPublicId() +
+                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -168,8 +169,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	unspecialized error
    */
   public void startDocument() throws SAXException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "startDocument");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "startDocument");
   }
 
   /**
@@ -189,8 +190,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
 			   Attributes atts) throws SAXException {
     String name = rawName;
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "startElement: " + name);
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "startElement: " + name);
 
     if (name.equals(A3CML.ELT_CONFIG)) {
       conf = atts.getValue(A3CML.ATT_NAME);
@@ -215,6 +216,20 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           server = new A3CMLPServer(sid,
                                     atts.getValue(A3CML.ATT_NAME),
                                     atts.getValue(A3CML.ATT_HOSTNAME));
+        } catch (Exception exc) {
+          throw new SAXException(exc.getMessage());
+        }
+      } else if (name.equals(A3CML.ELT_CLUSTER)) {
+        try {
+          short sid;
+          try {
+            sid = Short.parseShort(atts.getValue(A3CML.ATT_ID));
+          } catch (NumberFormatException exc) {
+            throw new Exception("bad value for cluster id: " +
+                                atts.getValue(A3CML.ATT_ID));
+          }
+          cluster = new A3CMLCluster(sid,
+                                     atts.getValue(A3CML.ATT_NAME));
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage());
         }
@@ -266,8 +281,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
 			 String rawName) throws SAXException {
     String name = rawName;
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "endElement: " + name);
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "endElement: " + name);
 
     if (name.equals(A3CML.ELT_CONFIG)) {
       conf = null;
@@ -277,8 +292,14 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           a3cmlConfig.addDomain(domain);
           domain = null;
         } else if (name.equals(A3CML.ELT_SERVER)) {
-          a3cmlConfig.addServer(server);
+          if (cluster == null)
+            a3cmlConfig.addServer(server);
+          else
+            cluster.addServer(server);
           server = null;
+        } else if (name.equals(A3CML.ELT_CLUSTER)) {
+          a3cmlConfig.addCluster(cluster);
+          cluster = null;
         } else if (name.equals(A3CML.ELT_NETWORK)) {
           if ((server != null) &&
               (server instanceof A3CMLPServer)) {
@@ -298,10 +319,12 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           }
           service = null;
         } else if (name.equals(A3CML.ELT_PROPERTY)) {
-          if (server ==  null)
+          if (server ==  null && cluster == null)
             a3cmlConfig.addProperty(property);	// Global property
-          else
+          else if (server !=  null)
             server.addProperty(property); 	// Server property
+          else if (server ==  null && cluster != null)
+            cluster.addProperty(property); 	// Cluster property
           property = null;
         } else if (name.equals(A3CML.ELT_NAT)) {
           if (server !=  null)
@@ -310,6 +333,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
         } else if (name.equals(A3CML.ELT_JVM_ARGS)) {
           if (server != null && jvmArgs != null)
             server.jvmArgs = jvmArgs;
+          else if (server ==  null && cluster != null)
+            cluster.jvmArgs = jvmArgs;
           jvmArgs = null;
         } else {
           throw new SAXException("unknown element \"" + name + "\"");
@@ -329,7 +354,7 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	unspecialized error
    */
   public void endDocument() throws SAXException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "endDocument");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "endDocument");
   }
 }

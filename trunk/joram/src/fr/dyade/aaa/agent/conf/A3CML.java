@@ -31,8 +31,6 @@ import fr.dyade.aaa.agent.AgentServer;
  * Defines XML syntactic element for A3CML configuration file.
  */
 public class A3CML {
-  static Logger logmon = null;
-
   /** Syntaxic name for config element */
   static final String ELT_CONFIG = "config";
   /** Syntaxic name for domain element */
@@ -47,6 +45,8 @@ public class A3CML {
   static final String ELT_PROPERTY = "property";
   /** Syntaxic name for nat element */
   static final String ELT_NAT = "nat";
+  /** Syntaxic name for cluster element */
+  static final String ELT_CLUSTER = "cluster";
   /** Syntaxic name for id attribute */
   static final String ATT_ID = "id";
   /** Syntaxic name for name attribute */
@@ -123,85 +123,130 @@ public class A3CML {
          e.hasMoreElements();) {
       Object obj = e.nextElement();
 
-      if (obj instanceof A3CMLPServer) {
-        A3CMLPServer server = (A3CMLPServer) obj;
-        out.write(TAB + "<" + ELT_SERVER + " " + ATT_HOSTNAME + "=\"");
-        out.write(server.hostname);
-        out.write("\" " + ATT_ID + "=\"");
-        out.write(Short.toString(server.sid));
-        out.write("\" " + ATT_NAME + "=\"");
-        out.write(server.name);
-        out.write("\">\n");
-          
-        // jvm args
-        if (server.jvmArgs != null && server.jvmArgs.length() > 0) {
-          out.write(TAB2 + "<" + ELT_JVM_ARGS + " " + ATT_VALUE + "=\"");
-          out.write(server.jvmArgs);
-          out.write("\"/>\n");
-        }
-
-        // write all property
-        if (server.properties != null) {
-          for (Enumeration enum = server.properties.elements();
-               enum.hasMoreElements();) {
-            A3CMLProperty p = (A3CMLProperty) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_PROPERTY + " " + ATT_NAME + "=\"");
-            out.write(p.name);
-            out.write("\" " + ATT_VALUE + "=\"");
-            out.write(p.value);
-            out.write("\"/>\n");
-          }
-        }
-
-        // write all Nat
-        if (server.nat != null) {
-          for (Enumeration enum = server.nat.elements();
-               enum.hasMoreElements();) {
-            A3CMLNat n = (A3CMLNat) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_NAT + " " + ATT_SID + "=\"");
-            out.write(Short.toString(n.sid));
-            out.write("\" " + ATT_HOSTNAME + "=\"");
-            out.write(n.host);
-            out.write("\" " + ATT_PORT + "=\"");
-            out.write(Integer.toString(n.port));
-            out.write("\"/>\n");
-          }
-        }
-
-        // network
-        if (server.networks != null) {
-          for (Enumeration enum = server.networks.elements();
-               enum.hasMoreElements();) {
-            A3CMLNetwork n = (A3CMLNetwork) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_NETWORK + " " + ATT_DOMAIN + "=\"");
-            out.write(n.domain);
-            out.write("\" " + ATT_PORT + "=\"");
-            out.write(Integer.toString(n.port));
-            out.write("\"/>\n");
-          }
-        }
-
-        //service
-        if (server.services != null) {
-          for (Enumeration enum = server.services.elements();
-               enum.hasMoreElements();) {
-            A3CMLService service = (A3CMLService) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_SERVICE + " " + ATT_CLASS + "=\"");
-            out.write(service.classname);
-            out.write("\" " + ATT_ARGS + "=\"");
-            if ((service.args != null) && (service.args.length() > 0)) {
-              out.write(service.args);
-            }
-            out.write("\"/>\n");
-          }
-        }
-        out.write(TAB + "</" + ELT_SERVER + ">\n");
-      }
+      if (obj instanceof A3CMLPServer)
+        writeToXMLServer(obj,out);
       out.write("\n");
     }
 
+    // write all know cluster.
+    for (Enumeration e = config.clusters.elements();
+         e.hasMoreElements();) {
+      Object obj = e.nextElement();
+
+      if (obj instanceof A3CMLCluster) {
+        A3CMLCluster cluster = (A3CMLCluster) obj;
+        out.write(TAB + "<" + ELT_CLUSTER + " " + ATT_ID + "=\"");
+        out.write(Short.toString(cluster.sid));
+        out.write("\" " + ATT_NAME + "=\"");
+        out.write(cluster.name);
+        out.write("\">\n");
+
+        // write all cluster property
+        for (Enumeration enum = cluster.properties.elements();
+             enum.hasMoreElements();) {
+          A3CMLProperty p = (A3CMLProperty) enum.nextElement();
+          out.write(TAB +
+                    "<" + ELT_PROPERTY + " " +
+                    ATT_NAME + "=\"");
+          out.write(p.name);
+          out.write("\" " +
+                    ATT_VALUE + "=\"");
+          out.write(p.value);
+          out.write("\"/>\n");
+        }
+        out.write("\n");
+        
+        for (Enumeration enum = cluster.servers.elements();
+             enum.hasMoreElements();) {
+          Object o = enum.nextElement();
+          if (o instanceof A3CMLPServer)
+            writeToXMLServer(o,out);
+        }
+        out.write(TAB + "</" + ELT_CLUSTER + ">\n");
+      }
+      out.write("\n");
+    }
+    
     out.write("</" + ELT_CONFIG + ">\n");
     out.close();
+  }
+
+  private static final void writeToXMLServer(Object obj,
+                                             PrintWriter out) {
+    if (obj instanceof A3CMLPServer) {
+      A3CMLPServer server = (A3CMLPServer) obj;
+      out.write(TAB + "<" + ELT_SERVER + " " + ATT_HOSTNAME + "=\"");
+      out.write(server.hostname);
+      out.write("\" " + ATT_ID + "=\"");
+      out.write(Short.toString(server.sid));
+      out.write("\" " + ATT_NAME + "=\"");
+      out.write(server.name);
+      out.write("\">\n");
+          
+      // jvm args
+      if (server.jvmArgs != null && server.jvmArgs.length() > 0) {
+        out.write(TAB2 + "<" + ELT_JVM_ARGS + " " + ATT_VALUE + "=\"");
+        out.write(server.jvmArgs);
+        out.write("\"/>\n");
+      }
+
+      // write all property
+      if (server.properties != null) {
+        for (Enumeration enum = server.properties.elements();
+             enum.hasMoreElements();) {
+          A3CMLProperty p = (A3CMLProperty) enum.nextElement();
+          out.write(TAB2 + "<" + ELT_PROPERTY + " " + ATT_NAME + "=\"");
+          out.write(p.name);
+          out.write("\" " + ATT_VALUE + "=\"");
+          out.write(p.value);
+          out.write("\"/>\n");
+        }
+      }
+
+      // write all Nat
+      if (server.nat != null) {
+        for (Enumeration enum = server.nat.elements();
+             enum.hasMoreElements();) {
+          A3CMLNat n = (A3CMLNat) enum.nextElement();
+          out.write(TAB2 + "<" + ELT_NAT + " " + ATT_SID + "=\"");
+          out.write(Short.toString(n.sid));
+          out.write("\" " + ATT_HOSTNAME + "=\"");
+          out.write(n.host);
+          out.write("\" " + ATT_PORT + "=\"");
+          out.write(Integer.toString(n.port));
+          out.write("\"/>\n");
+        }
+      }
+
+      // network
+      if (server.networks != null) {
+        for (Enumeration enum = server.networks.elements();
+             enum.hasMoreElements();) {
+          A3CMLNetwork n = (A3CMLNetwork) enum.nextElement();
+          out.write(TAB2 + "<" + ELT_NETWORK + " " + ATT_DOMAIN + "=\"");
+          out.write(n.domain);
+          out.write("\" " + ATT_PORT + "=\"");
+          out.write(Integer.toString(n.port));
+          out.write("\"/>\n");
+        }
+      }
+
+      //service
+      if (server.services != null) {
+        for (Enumeration enum = server.services.elements();
+             enum.hasMoreElements();) {
+          A3CMLService service = (A3CMLService) enum.nextElement();
+          out.write(TAB2 + "<" + ELT_SERVICE + " " + ATT_CLASS + "=\"");
+          out.write(service.classname);
+          out.write("\" " + ATT_ARGS + "=\"");
+          if ((service.args != null) && (service.args.length() > 0)) {
+            out.write(service.args);
+          }
+          out.write("\"/>\n");
+        }
+      }
+      out.write(TAB + "</" + ELT_SERVER + ">\n");
+    }
   }
 
   /**
@@ -242,11 +287,8 @@ public class A3CML {
   }
 
   public static A3CMLConfig getXMLConfig(String path) throws Exception {
-    // Get the logging monitor from current server MonologMonitorFactory
-    Logger logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");
-    
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,"Config.getXMLConfig(" + path + ")");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG,"Config.getXMLConfig(" + path + ")");
     
     A3CMLConfig a3cmlconfig = null;    
     Reader reader = null;
@@ -261,9 +303,9 @@ public class A3CML {
     } catch (IOException exc) {
       // configuration file seems not exist, search it from the
       // search path used to load classes.
-      logmon.log(BasicLevel.WARN,
-                 "Unable to find configuration file \"" +
-                 cfgFile.getPath() + "\".");
+      Log.logger.log(BasicLevel.WARN,
+                     "Unable to find configuration file \"" +
+                     cfgFile.getPath() + "\".");
       reader = null;
     }
       
@@ -274,24 +316,24 @@ public class A3CML {
       try {
         classLoader = A3CMLConfig.class.getClassLoader();
         if (classLoader != null) {
-          logmon.log(BasicLevel.WARN,
-                     "Trying to find [" + path + "] using " +
-                     classLoader + " class loader.");
+          Log.logger.log(BasicLevel.WARN,
+                         "Trying to find [" + path + "] using " +
+                         classLoader + " class loader.");
           is = classLoader.getResourceAsStream(path);
         }
       } catch (Throwable t) {
-        logmon.log(BasicLevel.WARN,
-                   "Can't find [" + path + "] using " +
-                   classLoader + " class loader.",
-                   t);
+        Log.logger.log(BasicLevel.WARN,
+                       "Can't find [" + path + "] using " +
+                       classLoader + " class loader.",
+                       t);
         is = null;
       }
       
       if (is == null) {
         // Last ditch attempt: get the resource from the class path.
-        logmon.log(BasicLevel.WARN,
-                   "Trying to find [" + path +
-                   "] using ClassLoader.getSystemResource().");
+        Log.logger.log(BasicLevel.WARN,
+                       "Trying to find [" + path +
+                       "] using ClassLoader.getSystemResource().");
         is = ClassLoader.getSystemResourceAsStream(path);
       }
       if (is != null) {
@@ -301,8 +343,8 @@ public class A3CML {
       a3cmlconfig = getConfig(reader);
     }
     
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "a3cmlconfig = " + a3cmlconfig);
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "a3cmlconfig = " + a3cmlconfig);
     
     if (a3cmlconfig == null)
       throw new FileNotFoundException("xml configuration file not found.");
@@ -325,11 +367,8 @@ public class A3CML {
    */
   public static A3CMLConfig getConfig(Reader reader) 
     throws Exception {
-    if (logmon == null)
-      logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");
-    
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.getConfig(" + reader + ")");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.getConfig(" + reader + ")");
     
     String cfgName = System.getProperty(AgentServer.CFG_NAME_PROPERTY, 
                                         AgentServer.DEFAULT_CFG_NAME);
@@ -342,7 +381,7 @@ public class A3CML {
     try {
       a3config = wrapper.parse(reader,cfgName);
     } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR,
+        Log.logger.log(BasicLevel.ERROR,
                    "Config.getConfig : " + exc.getMessage(), 
                    exc);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,19 +32,20 @@ public class A3CMLConfig implements Serializable {
   /** use serialVersionUID for interoperability */
   private static final long serialVersionUID = -2497621374376654935L;
 
-  static Logger logmon = null;
-
   /** Hashtable of all domains */
   public Hashtable domains = null;
   /** Hashtable of all servers (persitent and transient) */
   public Hashtable servers = null;
   /** Hashtable of all global properties */
   public Hashtable properties = null;
+  /** Hashtable of all clusters */
+  public Hashtable clusters = null;
 
   public A3CMLConfig() {
     domains = new Hashtable();
     servers = new Hashtable();
     properties = new Hashtable();
+    clusters = new Hashtable();
   }
 
   /**
@@ -103,6 +104,123 @@ public class A3CMLConfig implements Serializable {
   }
 
   /**
+   * Adds a cluster.
+   *
+   * @param cluster 	The description of added cluster.
+   * @exception DuplicateClusterException
+   *			If the cluster already exist.
+   */
+  public final void addCluster(A3CMLCluster cluster) throws DuplicateClusterException {
+    Short id = new Short(cluster.sid);
+    if (clusters.containsKey(id))
+      throw new DuplicateClusterException("Duplicate cluster " + cluster.sid);
+    clusters.put(id, cluster);
+  }
+
+  /**
+   * Returns the description of a cluster.
+   *
+   * @param sid 	The cluster identifier.
+   * @return	 	The cluster description if exist.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public final A3CMLCluster getCluster(short sid) throws UnknownClusterException {
+    A3CMLCluster cluster = (A3CMLCluster) clusters.get(new Short(sid));
+    if (cluster == null)
+      throw new UnknownClusterException("Unknown cluster id. #" + sid);
+    return cluster;
+  }
+  
+  /**
+   * Returns the description of a cluster.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster description if exist.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public final A3CMLCluster getCluster(String name) throws UnknownClusterException {
+    for (Enumeration c = clusters.elements(); c.hasMoreElements(); ) {
+      A3CMLCluster cluster = (A3CMLCluster) c.nextElement();
+      if (cluster.name.equals(name)) return cluster;
+    }
+    throw new UnknownClusterException("Unknown cluster id for cluster " + name);
+  }
+
+  /**
+   * Gets a cluster identifier from its name.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster identifier.
+   * @exception UnknownClusterException
+   * 		 	If the cluster does not exist.
+   */
+  public short getClusterIdByName(String name) throws UnknownClusterException {
+    for (Enumeration c = clusters.elements(); c.hasMoreElements(); ) {
+      A3CMLCluster cluster = (A3CMLCluster) c.nextElement();
+      if (cluster.name.equals(name)) return cluster.sid;
+    }
+    throw new UnknownClusterException("Unknown cluster " + name);
+  }
+
+
+  /**
+   * Returns true if the configuration contains a cluster with specified name.
+   *
+   * @param name cluster name
+   * @return	 true if contain name; false otherwise.
+   */
+  public final boolean containsCluster(String name) {
+    try {
+      getClusterIdByName(name);
+    } catch (UnknownClusterException exc) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns true if the configuration contains a cluster with specified id.
+   *
+   * @param sid  cluster id
+   * @return	 true if contain sid; false otherwise.
+   */
+  public final boolean containsCluster(short sid) {
+    return clusters.containsKey(new Short(sid));
+  }
+
+  /**
+   * Removes a cluster.
+   *
+   * @param sid  	The unique cluster identifier.
+   * @return	 	The cluster description if exists.
+   * @exception UnknownClusterException
+   * 		 	If the server does not exist.
+   */
+  public final A3CMLCluster removeCluster(short sid) throws UnknownClusterException {
+    A3CMLCluster cluster = null;
+    Short id = new Short(sid);
+    if (clusters.containsKey(id))
+      cluster = (A3CMLCluster) clusters.remove(id);
+    else
+      throw new UnknownClusterException("Unknown cluster id. #" + sid);
+    return cluster;
+  }
+  
+  /**
+   * Remove a cluster.
+   *
+   * @param name 	The cluster name.
+   * @return	 	The cluster description if exists.
+   * @exception UnknownClusterException
+   *			If the server does not exist.
+   */
+  public final A3CMLCluster removeCluster(String name) throws UnknownClusterException {
+    return removeCluster(getClusterIdByName(name));
+  }
+
+  /**
    * Adds a server.
    *
    * @param server	The description of added server.
@@ -127,10 +245,18 @@ public class A3CMLConfig implements Serializable {
   public final A3CMLServer removeServer(short sid) throws UnknownServerException {
     A3CMLServer server = null;
     Short id = new Short(sid);
-    if (servers.containsKey(id))
+    if (servers.containsKey(id)) {
       server = (A3CMLServer) servers.remove(id);
-    else
+    } else {
       throw new UnknownServerException("Unknown server id. #" + sid);
+    }
+
+    for (int i = 0; i < server.networks.size(); i++) {
+      A3CMLNetwork network = (A3CMLNetwork)server.networks.elementAt(i);
+      A3CMLDomain domain = (A3CMLDomain)domains.get(network.domain);
+      domain.removeServer(sid);
+    }
+
     return server;
   }
   
@@ -190,13 +316,37 @@ public class A3CMLConfig implements Serializable {
   /**
    * Returns the description of a server.
    *
-   * @param name 	The server identifier.
+   * @param sid 	The server identifier.
    * @return	 	The server description if exist.
    * @exception UnknownServerException
    * 		 	If the server does not exist.
    */
   public final A3CMLServer getServer(short sid) throws UnknownServerException {
-    A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
+    return getServer(sid, AgentServer.NULL_ID);
+  }
+
+  /**
+   * Returns the description of a server.
+   *
+   * @param sid 	The server identifier.
+   * @param cid 	The cluster identifier.
+   * @return	 	The server description if exist.
+   * @exception UnknownServerException
+   * 		 	If the server does not exist.
+   */
+  public final A3CMLServer getServer(short sid, short cid) throws UnknownServerException {
+    A3CMLServer server = null;
+    if (cid == AgentServer.NULL_ID)
+      server = (A3CMLServer) servers.get(new Short(sid));
+    else {
+      try {
+        A3CMLCluster cluster = getCluster(sid);
+        server = cluster.getServer(cid);
+      } catch (Exception exc) {
+        throw new UnknownServerException(exc.getMessage());
+      }
+    }
+    
     if (server == null)
       throw new UnknownServerException("Unknown server id. #" + sid);
     return server;
@@ -256,6 +406,25 @@ public class A3CMLConfig implements Serializable {
    */
   public final A3CMLProperty getProperty(String name) {
     return (A3CMLProperty) properties.get(name);
+  }
+
+  /**
+   * Returns the specified property.
+   */
+  public final A3CMLProperty getProperty(String name, short sid, short cid) 
+    throws Exception {
+    A3CMLProperty prop = null;
+    if (cid == AgentServer.NULL_ID) {
+      A3CMLServer server = getServer(sid);
+      prop = (A3CMLProperty) server.getProperty(name);
+    } else {
+      A3CMLCluster cluster = getCluster(sid);
+      A3CMLServer server = cluster.getServer(cid);
+      prop = (A3CMLProperty) server.getProperty(name);
+      if (prop == null)
+        prop = (A3CMLProperty) cluster.getProperty(name);
+    }
+    return prop;
   }
 
   /**
@@ -344,14 +513,16 @@ public class A3CMLConfig implements Serializable {
 
       A3CMLDomain domain = (A3CMLDomain) domains.get(network.domain);
       domain.gateway = rootid;
+      domain.hops = 1;
       toExplore.addElement(domain);
 
-      logmon.log(BasicLevel.DEBUG,
-                 "configure - toExplore.add(" + domain + ")");
+      Log.logger.log(BasicLevel.DEBUG,
+                     "configure - toExplore.add(" + domain + ")");
     }
     
     root.visited = true;
     root.gateway = -1;
+    root.hops = 0;
     root.domain = "local";
 
     while (toExplore.size() > 0) {
@@ -359,8 +530,8 @@ public class A3CMLConfig implements Serializable {
       toExplore.removeElementAt(0);
       A3CMLPServer gateway = (A3CMLPServer) servers.get(new Short(domain.gateway));
 
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "configure - explore(" + domain + ")");
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG, "configure - explore(" + domain + ")");
 
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
@@ -369,8 +540,8 @@ public class A3CMLConfig implements Serializable {
 
         if (server.visited) continue;
 
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, "configure - explore(" + server + ")");
+        if (Log.logger.isLoggable(BasicLevel.DEBUG))
+          Log.logger.log(BasicLevel.DEBUG, "configure - explore(" + server + ")");
 
         server.visited = true;
         if (domain.gateway == rootid) {
@@ -381,32 +552,41 @@ public class A3CMLConfig implements Serializable {
           server.gateway = domain.gateway;
           server.domain = gateway.domain;
         }
+        server.hops = domain.hops;
 
         // If the server is a router then add the accessible domains
         // to the list.
         for (Enumeration n = server.networks.elements();
              n.hasMoreElements();) {
           A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
-
           A3CMLDomain d2 = (A3CMLDomain) domains.get(network.domain);
 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, "configure - parse(" + d2 + ")");
+          if (Log.logger.isLoggable(BasicLevel.DEBUG))
+            Log.logger.log(BasicLevel.DEBUG, "configure - parse(" + d2 + ")");
 
           if (d2 == domain) {
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG, "configure - setPort(" + network.port + ")");
+            if (Log.logger.isLoggable(BasicLevel.DEBUG))
+              Log.logger.log(BasicLevel.DEBUG, "configure - setPort(" + network.port + ")");
             // The server is directly accessible from root server by
             // this network interface; fixes the communication port
             // for this server.
+            
+            // AF 03/11/2004 - It seems in fact the domain is the one we are
+            // exploring, so if the server is directly accessible its listen
+            // port is the one of this network...
             server.port = network.port;
             continue;
           }
 
           // If the domain is already explored then there is more
           // than one route to this domain.
-          if (d2.gateway != -1)
-            throw new Exception("more than one route to: " + domain);
+          
+          //if (d2.gateway != -1)
+          // throw new Exception("more than one route to: " + domain);
+            
+          // if (d2.hops != -1)
+//             throw new Exception("more than one route to: " + domain);
+          d2.hops = domain.hops +1;
 
           // The domain is not already explored.
           if (server.gateway == -1)
@@ -415,8 +595,8 @@ public class A3CMLConfig implements Serializable {
             d2.gateway = server.gateway; // the server itself is routed
           toExplore.addElement(d2);
 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, "configure - toExplore.add(" + d2 + ")");
+          if (Log.logger.isLoggable(BasicLevel.DEBUG))
+            Log.logger.log(BasicLevel.DEBUG, "configure - toExplore.add(" + d2 + ")");
         }
       }
     }
@@ -424,8 +604,8 @@ public class A3CMLConfig implements Serializable {
     // verify that all declared servers are accessible
     for (Enumeration s = servers.elements(); s.hasMoreElements();) {
       A3CMLServer server = (A3CMLServer) s.nextElement();
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "configure - verify " + server);
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG, "configure - verify " + server);
       if (server instanceof A3CMLPServer) {
         if (! server.visited)
           throw new Exception(server + " inaccessible");
@@ -446,9 +626,9 @@ public class A3CMLConfig implements Serializable {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public A3CMLConfig getDomainConfig(String domainName) throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "Config.getDomainConfig(" + domainName + ")");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG,
+                     "Config.getDomainConfig(" + domainName + ")");
 
     A3CMLConfig domainConf = new A3CMLConfig();
 
@@ -485,8 +665,8 @@ public class A3CMLConfig implements Serializable {
           i++;
       }
     } catch (UnknownServerException exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "", exc);
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG, "", exc);
     }
 
     return domainConf;
@@ -505,9 +685,9 @@ public class A3CMLConfig implements Serializable {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public A3CMLConfig getDomainConfig(String[] listDomainName) throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "Config.getDomainConfig(" + listDomainName + ")");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG,
+                     "Config.getDomainConfig(" + listDomainName + ")");
 
     Hashtable context = new Hashtable();
 
@@ -562,8 +742,8 @@ public class A3CMLConfig implements Serializable {
           i++;
       }
     } catch (UnknownServerException exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "", exc);
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG, "", exc);
     }
 
     return domainConf;
@@ -577,12 +757,8 @@ public class A3CMLConfig implements Serializable {
    * @see AgentServer.DEFAULT_SER_CFG_FILE
    */
   public void save() throws IOException {
-    // Get the logging monitor from current server MonologMonitorFactory
-    if (logmon == null)
-      logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.save(" + this + ")");
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.save(" + this + ")");
 
     AgentServer.getTransaction().save(this, AgentServer.DEFAULT_SER_CFG_FILE);
   }
@@ -597,22 +773,20 @@ public class A3CMLConfig implements Serializable {
    * @exception           Exception
    */
   public static A3CMLConfig load() throws Exception {
-    // Get the logging monitor from current server MonologMonitorFactory
-    if (logmon == null)
-      logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.load()");
+    // Get the logging monitor from current server MonoLog.loggeritorFactory
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.load()");
     
     A3CMLConfig a3config = (A3CMLConfig) AgentServer.getTransaction().load(AgentServer.DEFAULT_SER_CFG_FILE);
 
     if (a3config == null) {
-      logmon.log(BasicLevel.WARN,
-                 "Unable to find configuration file.");
+      Log.logger.log(BasicLevel.WARN,
+                     "Unable to find configuration file.");
       throw new IOException("Unable to find configuration file .");
     }
     
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.load : a3cmlconfig = " + a3config);
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.load : a3cmlconfig = " + a3config);
     return a3config;
   }
 
@@ -627,20 +801,17 @@ public class A3CMLConfig implements Serializable {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public static A3CMLConfig getConfig(String path) throws Exception {
-    // Get the logging monitor from current server MonologMonitorFactory
-    if (logmon == null)
-      logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.load(" + path + ")");
+    // Get the logging monitor from current server MonoLog.loggeritorFactory
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.load(" + path + ")");
     
     A3CMLConfig a3config = null;
     
     File cfgFile = new File(path);
     if (cfgFile.exists() && cfgFile.isFile()) {
       if ((cfgFile.length() == 0)) {
-        logmon.log(BasicLevel.ERROR,
-                   " \"" + cfgFile.getPath() + "\", is empty.");
+        Log.logger.log(BasicLevel.ERROR,
+                       " \"" + cfgFile.getPath() + "\", is empty.");
         throw new IOException(" \"" + cfgFile.getPath() + "\", is empty.");
       }
       
@@ -650,14 +821,14 @@ public class A3CMLConfig implements Serializable {
         ObjectInputStream ois = new ObjectInputStream(fis);
         a3config = (A3CMLConfig) ois.readObject();
       } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN, "Can't load configuration: " + path, exc);
+        Log.logger.log(BasicLevel.WARN, "Can't load configuration: " + path, exc);
       } finally {
         if (fis != null) fis.close();
       }
 
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "Config.load : a3cmlconfig = " + a3config);
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG,
+                       "Config.load : a3cmlconfig = " + a3config);
       return a3config;
     }
 
@@ -667,21 +838,21 @@ public class A3CMLConfig implements Serializable {
     try {
       classLoader = A3CMLConfig.class.getClassLoader();
       if (classLoader != null) {
-        logmon.log(BasicLevel.WARN,
-                   "Trying to find [" + path + "] using " +
-                   classLoader + " class loader.");
+        Log.logger.log(BasicLevel.WARN,
+                       "Trying to find [" + path + "] using " +
+                       classLoader + " class loader.");
         is = classLoader.getResourceAsStream(path);
       }
     } catch(Throwable t) {
-      logmon.log(BasicLevel.WARN,
-                 "Can't find [" + path + "] using " +
-                 classLoader + " class loader.", t);
+      Log.logger.log(BasicLevel.WARN,
+                     "Can't find [" + path + "] using " +
+                     classLoader + " class loader.", t);
       is = null;
     }
     if (is == null) {
       // Last ditch attempt: get the resource from the system class path.
-      logmon.log(BasicLevel.WARN,
-                 "Trying to find serialized config using ClassLoader.getSystemResource().");
+      Log.logger.log(BasicLevel.WARN,
+                     "Trying to find serialized config using ClassLoader.getSystemResource().");
       is = ClassLoader.getSystemResourceAsStream(path);
     }
     if (is != null) {
@@ -690,13 +861,13 @@ public class A3CMLConfig implements Serializable {
     }
 
     if (a3config == null) {
-      logmon.log(BasicLevel.WARN,
-                 "Unable to find configuration file: " + path);
+      Log.logger.log(BasicLevel.WARN,
+                     "Unable to find configuration file: " + path);
       throw new IOException("Unable to find configuration file: " + path);
     }
     
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "Config.load : a3cmlconfig = " + a3config);
+    if (Log.logger.isLoggable(BasicLevel.DEBUG))
+      Log.logger.log(BasicLevel.DEBUG, "Config.load : a3cmlconfig = " + a3config);
     return a3config;
   }
 
@@ -704,13 +875,13 @@ public class A3CMLConfig implements Serializable {
 //     Transaction transaction = AgentServer.getTransaction();
 //     if (transaction != null) {
 //       // use transaction to save this obj
-//       if (logmon.isLoggable(BasicLevel.DEBUG))
-//         logmon.log(BasicLevel.DEBUG,
+//       if (Log.logger.isLoggable(BasicLevel.DEBUG))
+//         Log.logger.log(BasicLevel.DEBUG,
 //                    "Config.save with AgentServer.transaction");
 // //     AgentServer.getTransaction().save(obj,cfgDir,cfgFileName);
 //     } else {
-//       if (logmon.isLoggable(BasicLevel.DEBUG))
-//         logmon.log(BasicLevel.DEBUG,
+//       if (Log.logger.isLoggable(BasicLevel.DEBUG))
+//         Log.logger.log(BasicLevel.DEBUG,
 //                    "Config.save without transaction");
 //       File file = new File(cfgDir, cfgFileName);
 //       File temp = new File(cfgDir, cfgFileName+"_temp");
@@ -740,7 +911,7 @@ public class A3CMLConfig implements Serializable {
 //       }
 //     }
 
-//     if (logmon.isLoggable(BasicLevel.DEBUG)) {
+//     if (Log.logger.isLoggable(BasicLevel.DEBUG)) {
 //       try {
 //         A3CML.toXML(this, null, "debugServers.xml");
 //       } catch (Exception exc) {}
@@ -752,6 +923,7 @@ public class A3CMLConfig implements Serializable {
     strBuf.append(",properties=").append(properties);
     strBuf.append(",domains=").append(domains);
     strBuf.append(",servers=").append(servers);
+    strBuf.append(",clusters=").append(clusters);
     strBuf.append(")");
 
     return strBuf.toString();
