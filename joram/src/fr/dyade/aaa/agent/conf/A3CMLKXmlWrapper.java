@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002-2004 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,6 @@ import org.kxml.*;
  * A3CML XML parser using kxml.
  */
 public class A3CMLKXmlWrapper implements A3CMLWrapper {
-
   protected Logger logmon = null;
   protected A3CMLConfig a3cmlconfig = null;
 
@@ -64,8 +63,8 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
    */
   A3CMLDomain domain = null;
   /**
-   * Working attribute used during server's definition (persitent or transient)
-   * between start and end element.
+   * Working attribute used during server's definition between start and
+   * end element.
    */
   A3CMLServer server = null;
   /**
@@ -144,25 +143,6 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
               sid,
               getValue(atts, A3CML.ATT_NAME),
               getValue(atts, A3CML.ATT_HOSTNAME));
-          } else if (name.equals(A3CML.ELT_TRANSIENT)) {
-            short sid, gateway;
-            try {
-              sid = Short.parseShort(getValue(atts, A3CML.ATT_ID));
-            } catch (NumberFormatException exc) {
-              throw new Exception("bad value for server id: " +
-                                  getValue(atts, A3CML.ATT_ID));
-            }
-            try {
-              gateway = Short.parseShort(getValue(atts, A3CML.ATT_SERVER));
-            } catch (NumberFormatException exc) {
-              throw new Exception("bad value for gateway server id: " +
-                                  getValue(atts, A3CML.ATT_SERVER));
-            }
-            server = new A3CMLTServer(
-              sid,
-              getValue(atts, A3CML.ATT_NAME),
-              getValue(atts, A3CML.ATT_HOSTNAME),
-              gateway);
           } else if (name.equals(A3CML.ELT_NETWORK)) {
             int port;
             try {
@@ -203,8 +183,7 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
           if (name.equals(A3CML.ELT_DOMAIN)) {
             a3cmlconfig.addDomain(domain);
             domain = null;
-          } else if (name.equals(A3CML.ELT_SERVER) ||
-                     name.equals(A3CML.ELT_TRANSIENT)) {
+          } else if (name.equals(A3CML.ELT_SERVER)) {
             a3cmlconfig.addServer(server);
             server = null;
           } else if (name.equals(A3CML.ELT_NETWORK)) {
@@ -215,8 +194,7 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
               // Add the server to the corresponding domains
               // AF: This step should be done at the end of parsing, in order
               // to avoid to declare domains first.
-              if (! network.domain.equals("transient"))
-                a3cmlconfig.getDomain(network.domain).addServer(server);
+              a3cmlconfig.getDomain(network.domain).addServer(server);
             } else {
               // Can never happen (see DTD).
             }
