@@ -110,7 +110,7 @@ public class ManagedConnectionFactoryImpl
   public Object createConnectionFactory() throws ResourceException
   {
     OutboundConnectionFactory factory = 
-      new OutboundConnectionFactory(this, DefaultConnectionManager.getRef());
+      new OutboundConnectionFactory(this, null);
 
     Reference ref =
       new Reference(factory.getClass().getName(),

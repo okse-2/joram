@@ -92,7 +92,13 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
       ConnectionRequest cxRequest =
         new ConnectionRequest(userName, password);
 
-      Object o = cxManager.allocateConnection(mcf, cxRequest);
+      Object o = null;
+
+      if (cxManager != null)
+        o = cxManager.allocateConnection(mcf, cxRequest);
+      else
+        o = DefaultConnectionManager.getRef().allocateConnection(mcf, cxRequest);
+
       return (javax.jms.Connection) o;
     }
     catch (javax.resource.spi.SecurityException exc) {
