@@ -73,7 +73,7 @@ if ($MESSAGE eq "") {
   print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-bin.tar.gz\">JORAM jar (tar.gz file)</a></li>\n";
   print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-bin.zip\">JORAM jar (zip file)</a></li>\n";
   print "</ol>\n";
-  print "<li>\n";
+  print "</li>\n";
   print "</ul>";
  
 
