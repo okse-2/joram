@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.connector;
 
+import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
@@ -105,7 +106,7 @@ public class LocalServer implements LocalServerMBean
 
   public String getRelease()
   {
-    return "4.1.0";
+    return ConnectionMetaData.providerVersion;
   }
 
   public String getRunningMode()
