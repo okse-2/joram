@@ -24,7 +24,6 @@
     </tstamp>
 
     <!-- deal with dtds, stylesheets and project files (menus) dependencies -->
-<!--
     <mkdir dir="${html.dest}"/>
     <dependset>
        <srcfileset dir="${dtd.dir}" includes="*.dtd"/>
@@ -34,7 +33,7 @@
 		     includes="**/*.html"
 		     excludes="${release-files}"/>
     </dependset> 
--->
+
     <!-- static html files -->
     <copy todir="${html.dest}">
       <fileset dir="${html.src}">
@@ -86,7 +85,7 @@
 	   includes="**/*.xml">
 
       <classpath refid="externals.classpath"/>      
-      <param name="project-file" expression="${project.file}" />
+      <param name="project-file" expression="${xml.dir}/${project.file}" />
       <param name="last-modified" expression="${touch.time}"/>
       <param name="path-to-objectweb" expression=".."/>
     </style>        
@@ -108,7 +107,7 @@
 	   includes="**/*.xml">
 
       <classpath refid="externals.classpath"/>      
-      <param name="project-file" expression="${project.file}" />
+      <param name="project-file" expression="${xml.dir}/${project.file}" />
       <param name="last-modified" expression="${touch.time}"/>
       <param name="path-to-objectweb" expression=".."/>
     </style>
