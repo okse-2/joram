@@ -127,7 +127,6 @@
       <exclude name="**/CVS/**/*.java"/>
     </javac>
   </target>
-
  
   <target name="javadoc" depends="init"
     description="--> Generate Javadoc">
@@ -218,5 +217,18 @@
       dir="${test.dir}">
       <classpath refid="project.class.path"/>
     </java>    
+  </target>
+
+  <target name="package" depends="init, clean, compile, compile.joram,
+    javadoc"
+    description="--> Create a package for the test suite">
+    <delete file="tests.tgz" />
+    <tar tarfile="tests.tar"
+      longfile="gnu"
+      basedir=".."
+      includes="tests/**"
+      excludes="**/CVS, providers/fiorano/**"/>
+    <gzip zipfile="tests.tgz" src="tests.tar" />
+    <delete file="tests.tar" /> 
   </target>
 </project>
