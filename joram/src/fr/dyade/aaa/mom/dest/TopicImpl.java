@@ -795,7 +795,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
           }
         }  
       }
-      // There are message to send.
+      // There are messages to send.
       if (! deliverables.isEmpty())
         Channel.sendTo(subscriber, new TopicMsgsReply(deliverables));
     }
