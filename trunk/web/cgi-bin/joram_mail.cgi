@@ -58,12 +58,23 @@ if ($MESSAGE eq "") {
   print "Name:    $MAIL_NAME<br>\n";
   print "Email:   $MAIL_EMAIL<br>\n";
   print "Company: $MAIL_COMPANY<br>\n";
-  print "<p>You must choose one of these options:</p><ol>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.zip\">JORAM sources and jar (zip file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_src_jar.tar.gz\">JORAM sources and jar (tar.gz file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.zip\">JORAM jar (zip file)</a></li>\n";
-  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram_jar.tar.gz\">JORAM jar (tar.gz file)</a></li>\n";
+  print "<p>You must choose one of these options:</p><ul>\n";
+  print "<li>JORAM 2.2\n";
+  print "<ol>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.2-src.tar.gz\">JORAM  sources (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.2-src.zip\">JORAM  sources(zip file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.2-bin.tar.gz\">JORAM jar (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.2-bin.zip\">JORAM jar (zip file)</a></li>\n";
   print "</ol>\n";
+  print "</li><li>JORAM 2.1\n";
+  print "<ol>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-src.tar.gz\">JORAM  sources (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-src.zip\">JORAM  sources(zip file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-bin.tar.gz\">JORAM jar (tar.gz file)</a></li>\n";
+  print "<li><a HREF=\"http://www.objectweb.org/joram/download/joram-2.1-bin.zip\">JORAM jar (zip file)</a></li>\n";
+  print "</ol>\n";
+  print "<li>\n";
+  print "</ul>";
   print "<p><em>NOTE:The distribution does not contain the javax.jms.* package; you need to fetch that yourself</em>, (see the <em>Installation Guide</em>).</p>";
 
 } 
