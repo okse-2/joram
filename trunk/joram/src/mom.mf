@@ -4,5 +4,5 @@ Specification-Title: Java Message Service
 Specification-Version: 1.0.2b
 Specification-Vendor: Sun Microsystems Inc. 
 Implementation-Title: JORAM MOM
-Implementation-Version: 3.0.1 
+Implementation-Version: 3.0.4 
 Implementation-Vendor: ObjectWeb Consortium
