@@ -1772,7 +1772,7 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
       reply = new Monitor_GetDMQSettingsRep(id, DeadMQueueImpl.threshold);
       distributeReply(replyTo, msgId, reply);
     }
-    else {
+    else if (request.getTarget() != null) {
       AgentId target = AgentId.fromString(request.getTarget());
 
       if (target.getTo() == serverId) {
