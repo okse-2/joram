@@ -9,7 +9,8 @@ CONFIG_HOME=$JORAM_HOME/samples/config
 RUN_DIR=$JORAM_HOME/samples/run
 
 # Building the Classpath
-CLASSPATH=$JORAM_LIBS/mom.jar
+CLASSPATH=$JORAM_LIBS/joram-mom.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/xerces.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jakarta-regexp-1.2.jar
