@@ -2,8 +2,9 @@
 HOW TO RUN THE SAMPLES
 ######################
 
-You can have a list of Ant targets by typing:
-	ant -projecthelp
+Type
+        ant -projecthelp
+to have a list of available Ant targets for samples
 
 0. COMPILING THE SAMPLES
 Simply type:
@@ -13,33 +14,41 @@ Simply type:
 The classic samples aim at illustrating very basic JMS operations under
 a simple and centralized architecture.
 
-a. Setting the configuration up:
+a. Starting a server in centralized architecture:
 Type:
-	ant classic_conf
+	ant single_server
 
-b. Running the classic sender client:
+b. Setup the configuration:
+Type:
+	ant classic_admin
+
+c. Running the classic sender client:
 Type:
 	ant sender
 
-c. Running the classic receiver client:
+d. Running the classic receiver client:
 Type:
 	ant receiver
 
-d. etc...
+e. etc...
 
 
 2. RUNNING THE CHAT SAMPLE
 The chat sample also runs under a simple and centralized architecture.
 
-a. Setting the configuration up:
+a. Starting a server in centralized architecture:
 Type:
-	ant chat_conf
+	ant single_server
 
-b. Running the first chat client:
+b. Setting the configuration up:
+Type:
+	ant chat_admin
+
+c. Running the first chat client:
 Type:
 	ant chat1
 
-c. Running the second chat client:
+d. Running the second chat client:
 Type:
 	ant chat2
 
@@ -49,17 +58,21 @@ The dotcom demo simulates what could be a commercial transaction on the
 web, involving a client and various servers (shop, bank, ...). It also uses
 a centralized server.
 
-a. Setting the configuration up:
+a. Starting a server in centralized architecture:
 Type:
-	ant dotcom_conf
+	ant single_server
 
-b. Running the servers:
+b. Setting the configuration up:
+Type:
+	ant dotcom_admin
+
+c. Running the servers:
 Type:
 	ant webServers
 
-c. Running the client server:
+d. Running the client server:
 Type:
-	ant clientServer
+	ant webClient
 
 
 4. RUNNING THE CLUSTER DEMO
@@ -72,11 +85,11 @@ a. Starting server0:
 Type:
 	ant server0
 
-a. Starting server1:
+b. Starting server1:
 Type:
 	ant server1
 
-a. Starting server2:
+c. Starting server2:
 Type:
 	ant server2
 
@@ -88,11 +101,11 @@ e. Running the subscriber on server1:
 Type:
 	ant subscriber10
 
-e. Running the first subscriber on server2:
+f. Running the first subscriber on server2:
 Type:
 	ant subscriber20
 
-e. Running the second subscriber on server2:
+g. Running the second subscriber on server2:
 Type:
 	ant subscriber21
 
@@ -112,11 +125,11 @@ a. Starting server0:
 Type:
 	ant server0
 
-a. Starting server1:
+b. Starting server1:
 Type:
 	ant server1
 
-a. Starting server2:
+c. Starting server2:
 Type:
 	ant server2
 
@@ -128,11 +141,11 @@ e. Running the receiver on server2:
 Type:
 	ant archi_receiver
 
-e. Running the subscriber on server2:
+f. Running the subscriber on server2:
 Type:
 	ant archi_sub
 
-e. Running the sender on server0:
+g. Running the sender on server0:
 Type:
 	ant archi_sender
 
