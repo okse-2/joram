@@ -14,8 +14,13 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
+      <s2 name="Modifications (latest: July 24th, 2003)">
       <ul>
+      <li>Improvement of the closing of a dead connection; particularly, calling
+        <code>Connection.close()</code> within the <code>onException</code> method of
+        an <code>ExceptionListener</code> would generate an infinite closing loop.
+        The impacted class is <code>fr.dyade.aaa.joram.Driver</code>.
+      </li>
       <li><code>setConfig(...)</code> method in
         <code>fr.dyade.aaa.agent.AgentServer</code> has now a public access 
         for configuration purposes; calling it after the server has been
