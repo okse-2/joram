@@ -1458,7 +1458,8 @@ public class ProxyImpl implements java.io.Serializable {
     try {
       // Updating the active context:
       setCtx(rep.getClientContext());
-      doReply(new QBrowseReply(rep));
+      doReply(new QBrowseReply(rep.getCorrelationId(), 
+                               rep.getMessages()));
     }
     // The context is lost; nothing to do.
     catch (ProxyException pE) {}

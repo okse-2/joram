@@ -41,22 +41,6 @@ public class QBrowseReply extends AbstractJmsReply
   /** The vector of messages carried by this reply. */
   private Vector messages = null;
 
-
-  /**
-   * Constructs a <code>QBrowseReply</code> instance.
-   *
-   * @param destReply  The queue reply actually forwarded.
-   */
-  public QBrowseReply(org.objectweb.joram.mom.notifications.BrowseReply destReply)
-  {
-    super(destReply.getCorrelationId());
-    Vector vec = destReply.getMessages();
-    if (vec != null && vec.size() == 1)
-      message = (Message) vec.get(0);
-    else
-      messages = vec;
-  }
-
   /**
    * Constructs an empty <code>QBrowseReply</code>.
    */
@@ -77,7 +61,7 @@ public class QBrowseReply extends AbstractJmsReply
   /**
    * Constructs a <code>QBrowseReply</code>.
    */
-  private QBrowseReply(int correlationId, Vector messages)
+  public QBrowseReply(int correlationId, Vector messages)
   {
     super(correlationId);
     this.messages = messages;
