@@ -26,7 +26,7 @@ package fr.dyade.aaa.agent;
 
 public final class A3ServersList extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.2 2000-08-01 09:13:25 tachkeni Exp $";
 
  /**
    * A3Node contains informations about an agent server.

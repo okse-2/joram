@@ -49,7 +49,7 @@ import java.net.*;
  */
 public class TransientServer extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: TransientServer.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TransientServer.java,v 1.2 2000-08-01 09:13:31 tachkeni Exp $"; 
 
 
   static final int DRIVER_IN = 0;

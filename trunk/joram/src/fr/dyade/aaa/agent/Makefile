@@ -118,7 +118,8 @@ a3agent.jar_CLASSES = \
 	StatusReport \
 	Role \
 	GetStatusNot \
-	StatusNot
+	StatusNot \
+	HttpDriver
 
 LIBS = a3util.jar:xerces.jar
 

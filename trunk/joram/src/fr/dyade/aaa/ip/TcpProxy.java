@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.*;
   */
 public abstract class TcpProxy extends ProxyAgent {
 
-public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.2 2000-08-01 09:13:51 tachkeni Exp $"; 
 
 
   protected int localPort = -1;		/** in server: required listening port, may be 0 */

@@ -37,7 +37,7 @@ import java.util.*;
 // This interface is use by Administred Server 
 // to notify Events to a listener (now the UdpAdminProxy)
 public interface AdminEventReactor {
-public static final String RCS_VERSION="@(#)$Id: AdminEventReactor.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: AdminEventReactor.java,v 1.2 2000-08-01 09:13:25 tachkeni Exp $";
     
     /**
      * this method is called to now if an event is listen by somebody

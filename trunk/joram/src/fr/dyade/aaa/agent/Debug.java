@@ -52,7 +52,7 @@ import java.lang.reflect.*;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.2 2000-08-01 09:13:26 tachkeni Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;

@@ -29,7 +29,7 @@ package fr.dyade.aaa.agent;
  * Subscribe notification to output events.
  */
 public class OutputSubscribeNot extends SubscribeNot {
-public static final String RCS_VERSION="@(#)$Id: OutputSubscribeNot.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: OutputSubscribeNot.java,v 1.2 2000-08-01 09:13:29 tachkeni Exp $";
     
     /**
      * The name of the role to listen to.

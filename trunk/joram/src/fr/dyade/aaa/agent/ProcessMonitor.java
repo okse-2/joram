@@ -42,8 +42,8 @@ import java.io.*;
   */
 class ProcessMonitor extends Driver implements Serializable {
 
-  /** RCS version number of this file: $Revision: 1.1.1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.1.1.1 2000-05-30 11:45:24 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.2 2000-08-01 09:13:29 tachkeni Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */
