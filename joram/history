@@ -1,14 +1,45 @@
 ###############################################################################
+# 2005/01/10 | Joram 4.2.0 RC1 release.
+###############################################################################
++==============================================================================
+| 2005/01/10 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: topic subscriber not registered (class Session in client/jms).
++==============================================================================
+| 2005/01/07 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Dynamic configuration: Add/Remove Server/domain.
++==============================================================================
+| 2005/01/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Provides High-Avaibility version of ScalAgent server, Joram client and
+server.Use JGroups to provide active replication of ScalAgent server (Engine
+and Network synchronization).
+ Architecture and performances improvments in Engine and Network (not
+compatible with previous protocol version).
+ JMS message improvment, numerous bug fixes.
+###############################################################################
+# 2005/01/04 | Joram 4.1.5 release.
+###############################################################################
++==============================================================================
+| 2005/01/04 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Dynamic logging configuration.
++==============================================================================
+| 2004/12/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ JDK1.5 compatibility.
+ Adds JMX management: server, engine, network, agent...
+ Transaction: Factorize definition in interface, allows to release a
+non-commited transaction
+ Adds configuration of connection in ra-remote.xml.
+###############################################################################
 # 2004/12/21 | Joram 4.1.4 release.
 ###############################################################################
 +==============================================================================
 | 2004/12/21 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
  Bug fixes: invalid mesage removal in ClientSubscription.
- JDK1.5 compatibility.
- Adds JMX management: server, engine, network, agent...
- Transaction: Factorize definition in interface, allows to release a
-non-commited transaction
  Code cleaning.
 +==============================================================================
 | 2004/12/21 | Nicolas Tachker - Bull S.A.
