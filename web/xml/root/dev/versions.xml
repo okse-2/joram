@@ -14,7 +14,13 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: February 2, 2004)">
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_7_1 (February 3, 2004)">
+      <p>This version has been tagged for integration within JOnAS 3.3.6.</p>
+      <s2 name="Modifications">
       <ul>
         <li><code>ObjectMessage</code> optimization [2]. When a 
         <code>getObject()</code> call fails, an other trial is performed
@@ -39,7 +45,7 @@
         <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.</li>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: January 9, 2004)">
+      <s2 name="Corrected bugs">
       <ul>
         <li>Expired message monitored as pending messages.
         When monitoring a queue's messages, the expired messages are now
