@@ -54,8 +54,8 @@ public class ActivationSpecImpl
   /** Durable subscription name, if any. */
   private String subscriptionName;
 
-  /** Maximum number of requested threads. */
-  private String maxNumberOfThreads;
+  /** Maximum number of work instances to be submitted (0 for infinite). */
+  private String maxNumberOfWorks = "0";
 
   /** Resource adapter central authority. */
   private transient ResourceAdapter ra = null;
@@ -166,10 +166,10 @@ public class ActivationSpecImpl
     this.subscriptionName = subscriptionName;
   }
 
-  /** Sets the maximum number of requested threads. */
-  public void setMaxNumberOfThreads(String maxNumberOfThreads)
+  /** Sets the maximum number of work instances to be submitted. */
+  public void setMaxNumberOfWorks(String maxNumberOfWorks)
   {
-    this.maxNumberOfThreads = maxNumberOfThreads;
+    this.maxNumberOfWorks = maxNumberOfWorks;
   }
 
   /** Returns the destination type. */
@@ -214,9 +214,9 @@ public class ActivationSpecImpl
     return subscriptionName;
   }
 
-  /** Returns the maximum number of requested threads. */
-  public String getMaxNumberOfThreads()
+  /** Returns the maximum number of work instances to be submitted. */
+  public String getMaxNumberOfWorks()
   {
-    return maxNumberOfThreads;
+    return maxNumberOfWorks;
   }
 }
