@@ -189,7 +189,8 @@ class TimerDaemon extends Daemon
   public synchronized void interrupt()
   {
     if (waiting)
-      thread.interrupt();
+      //thread.interrupt();
+      stop();
   }
 
   /** Shuts the daemon down. */

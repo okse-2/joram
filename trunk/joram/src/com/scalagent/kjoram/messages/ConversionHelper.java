@@ -40,13 +40,14 @@ public class ConversionHelper
   public static boolean toBoolean(Object value) throws MessageValueException
   {
     if (value == null)
-      return Boolean.valueOf(null).booleanValue();
+      throw new RuntimeException("toBoolean value = null");
 
     if (value instanceof Boolean)
       return ((Boolean) value).booleanValue();
-    else if (value instanceof String)
-      return Boolean.valueOf((String) value).booleanValue();
-    else
+    else if (value instanceof String) {
+      String s = ((String) value).toUpperCase();
+      return s.equals("TRUE") || s.equals("YES");
+    } else
       throw new MessageValueException("Type " + value.getClass().getName()
                                       + " can't be converted to Boolean.");
   }
@@ -60,12 +61,12 @@ public class ConversionHelper
   public static byte toByte(Object value) throws MessageValueException
   {
     if (value == null)
-      return Byte.valueOf(null).byteValue();
+      throw new RuntimeException("toByte value = null");
 
     if (value instanceof Byte )
       return ((Byte) value).byteValue();
     else if (value instanceof String)      
-      return Byte.valueOf((String) value).byteValue();
+      return Byte.parseByte((String) value);
     else
       throw new MessageValueException("Type " + value.getClass().getName() 
                                       + " can't be converted to Byte.");
@@ -80,14 +81,14 @@ public class ConversionHelper
   public static short toShort(Object value) throws MessageValueException
   {
     if (value == null)
-      return Short.valueOf(null).shortValue();
+      throw new RuntimeException("toShort value = null");
 
     if (value instanceof Byte)
-      return ((Byte) value).shortValue();
+      return Short.parseShort(((Byte) value).toString());
     else if (value instanceof Short)
       return ((Short) value).shortValue();
     else if (value instanceof String)
-      return Short.valueOf((String) value).shortValue();
+      return Short.parseShort((String) value);
     else
       throw new MessageValueException("Type " + value.getClass().getName() 
                                       + " can't be converted to Short.");
@@ -105,9 +106,9 @@ public class ConversionHelper
       return Integer.valueOf(null).intValue();
 
     if (value instanceof Byte)
-      return ((Byte) value).intValue();
+      return Integer.parseInt(((Byte) value).toString());
     else if (value instanceof Short )
-      return ((Short) value).intValue();
+      return Integer.parseInt(((Short) value).toString());
     else if (value instanceof Integer)
       return ((Integer) value).intValue();
     else if (value instanceof String)
@@ -126,18 +127,18 @@ public class ConversionHelper
   public static long toLong(Object value) throws MessageValueException
   {
     if (value == null)
-      return Long.valueOf(null).longValue();
+      throw new RuntimeException("toLong value = null");
 
     if (value instanceof Byte)
-      return ((Byte) value).longValue();
+      return Byte.parseByte(((Byte) value).toString());
     else if (value instanceof Short)
-      return ((Short) value).longValue();
+      return Long.parseLong(((Short) value).toString());
     else if (value instanceof Integer)
       return ((Integer) value).longValue();
     else if (value instanceof Long)
       return ((Long) value).longValue();
     else if (value instanceof String)
-      return Long.valueOf((String) value).longValue();
+      return Long.parseLong((String) value);
     else
       throw new MessageValueException("Type " + value.getClass().getName() 
                                       + " can't be converted to Long.");
@@ -149,19 +150,19 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a float value.
    */
-  public static float toFloat(Object value) throws MessageValueException
-  {
-    if (value == null)
-      return Float.valueOf(null).floatValue();
+//    public static float toFloat(Object value) throws MessageValueException
+//    {
+//      if (value == null)
+//        return Float.valueOf(null).floatValue();
 
-    if (value instanceof Float)
-      return ((Float) value).floatValue();
-    else if (value instanceof String)
-      return Float.valueOf((String) value).floatValue();
-    else
-      throw new MessageValueException("Type " + value.getClass().getName() 
-                                      + " can't be converted to Float.");
-  }
+//      if (value instanceof Float)
+//        return ((Float) value).floatValue();
+//      else if (value instanceof String)
+//        return Float.valueOf((String) value).floatValue();
+//      else
+//        throw new MessageValueException("Type " + value.getClass().getName() 
+//                                        + " can't be converted to Float.");
+//    }
  
   /**
    * Gets the double value of the given object.
@@ -169,21 +170,21 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a double value.
    */ 
-  public static double toDouble(Object value) throws MessageValueException
-  {
-    if (value == null)
-      return Double.valueOf(null).doubleValue();
+//    public static double toDouble(Object value) throws MessageValueException
+//    {
+//      if (value == null)
+//        return Double.valueOf(null).doubleValue();
 
-    if (value instanceof Float)
-      return ((Float) value).doubleValue();
-    else if (value instanceof Double)
-      return ((Double) value).doubleValue();
-    else if (value instanceof String)
-      return Double.valueOf((String) value).doubleValue();
-    else
-      throw new MessageValueException("Type " + value.getClass().getName() 
-                                      + " can't be converted to Double.");
-  }
+//      if (value instanceof Float)
+//        return ((Float) value).doubleValue();
+//      else if (value instanceof Double)
+//        return ((Double) value).doubleValue();
+//      else if (value instanceof String)
+//        return Double.valueOf((String) value).doubleValue();
+//      else
+//        throw new MessageValueException("Type " + value.getClass().getName() 
+//                                        + " can't be converted to Double.");
+//    }
 
   /** Gets the String value of the given object. */
   public static String toString(Object value)

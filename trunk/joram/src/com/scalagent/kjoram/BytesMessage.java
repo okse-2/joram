@@ -207,21 +207,21 @@ public class BytesMessage extends Message
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeDouble(double value) throws JMSException
-  {
-    writeObject(new Double(value));
-  }
+//    public void writeDouble(double value) throws JMSException
+//    {
+//      writeObject(new Double(value));
+//    }
  
-  /** 
-   * API method.
-   *
-   * @exception MessageNotWriteableException  If the message body is read-only.
-   * @exception JMSException  If the value could not be written on the stream.
-   */   
-  public void writeFloat(float value) throws JMSException
-  {
-    writeObject(new Float(value));
-  }
+//    /** 
+//     * API method.
+//     *
+//     * @exception MessageNotWriteableException  If the message body is read-only.
+//     * @exception JMSException  If the value could not be written on the stream.
+//     */   
+//    public void writeFloat(float value) throws JMSException
+//    {
+//      writeObject(new Float(value));
+//    }
  
   /** 
    * API method.
@@ -298,10 +298,10 @@ public class BytesMessage extends Message
         outputStream.writeInt(((Integer) value).intValue());
       else if (value instanceof Long)
         outputStream.writeLong(((Long) value).longValue());
-      else if (value instanceof Float)
-        outputStream.writeFloat(((Float) value).floatValue());
-      else if (value instanceof Double)
-        outputStream.writeDouble(((Double) value).doubleValue());
+//        else if (value instanceof Float)
+//          outputStream.writeFloat(((Float) value).floatValue());
+//        else if (value instanceof Double)
+//          outputStream.writeDouble(((Double) value).doubleValue());
       else if (value instanceof String)
         outputStream.writeUTF((String) value);
       else if (value instanceof byte[])
@@ -524,24 +524,24 @@ public class BytesMessage extends Message
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
-  public float readFloat() throws JMSException
-  {
-    if (WObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
-    try {
-      return inputStream.readFloat();
-    }
-    catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
-    }
-  }
+//    public float readFloat() throws JMSException
+//    {
+//      if (WObody)
+//        throw new MessageNotReadableException("Can't read the message body as"
+//                                              + " it is write-only.");
+//      try {
+//        return inputStream.readFloat();
+//      }
+//      catch (Exception e) {
+//        JMSException jE = null;
+//        if (e instanceof EOFException)
+//          jE = new MessageEOFException("Unexpected end of bytes array.");
+//        else if (e instanceof IOException)
+//          jE = new JMSException("Could not read the bytes array.");
+//        jE.setLinkedException(e);
+//        throw jE;
+//      }
+//    }
 
   /**
    * API method.
@@ -549,24 +549,24 @@ public class BytesMessage extends Message
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
-  public double readDouble() throws JMSException
-  {
-    if (WObody)
-      throw new MessageNotReadableException("Can't read the message body as"
-                                            + " it is write-only.");
-    try {
-      return inputStream.readDouble();
-    }
-    catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
-    }
-  }
+//    public double readDouble() throws JMSException
+//    {
+//      if (WObody)
+//        throw new MessageNotReadableException("Can't read the message body as"
+//                                              + " it is write-only.");
+//      try {
+//        return inputStream.readDouble();
+//      }
+//      catch (Exception e) {
+//        JMSException jE = null;
+//        if (e instanceof EOFException)
+//          jE = new MessageEOFException("Unexpected end of bytes array.");
+//        else if (e instanceof IOException)
+//          jE = new JMSException("Could not read the bytes array.");
+//        jE.setLinkedException(e);
+//        throw jE;
+//      }
+//    }
 
   /**
    * API method.

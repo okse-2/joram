@@ -146,20 +146,20 @@ public class MapMessage extends Message
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setDouble(String name, double value) throws JMSException
-  {
-    setObject(name, new Double(value));
-  }
+//    public void setDouble(String name, double value) throws JMSException
+//    {
+//      setObject(name, new Double(value));
+//    }
  
   /** 
    * API method.
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
-  public void setFloat(String name, float value) throws JMSException
-  {
-    setObject(name, new Float(value));
-  }
+//    public void setFloat(String name, float value) throws JMSException
+//    {
+//      setObject(name, new Float(value));
+//    }
  
   /** 
    * API method.
@@ -218,15 +218,20 @@ public class MapMessage extends Message
     if (value == null)
       return;
 
-    if (value instanceof Boolean || value instanceof Character 
-        || value instanceof Number || value instanceof String
+    if (value instanceof Boolean || 
+        value instanceof Character
+        || value instanceof Long
+        || value instanceof Short
+        || value instanceof Byte
+        || value instanceof Integer 
+        || value instanceof String
         || value instanceof byte[])
       map.put(name, value);
     else
       throw new MessageFormatException("Can't set non Java primitive type as"
                                        + " a map value.");
   }
-  
+
   /**
    * API method.
    *
@@ -292,30 +297,30 @@ public class MapMessage extends Message
    *
    * @exception MessageFormatException  If the value type is invalid.
    */   
-  public double getDouble(String name) throws JMSException
-  {
-    try {
-      return ConversionHelper.toDouble(map.get(name));
-    }
-    catch (MessageValueException mE) {
-      throw new MessageFormatException(mE.getMessage());
-    }
-  }
+//    public double getDouble(String name) throws JMSException
+//    {
+//      try {
+//        return ConversionHelper.toDouble(map.get(name));
+//      }
+//      catch (MessageValueException mE) {
+//        throw new MessageFormatException(mE.getMessage());
+//      }
+//    }
 
   /**
    * API method.
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public float getFloat(String name) throws JMSException
-  {
-    try {
-      return ConversionHelper.toFloat(map.get(name));
-    }
-    catch (MessageValueException mE) {
-      throw new MessageFormatException(mE.getMessage());
-    }
-  }
+//    public float getFloat(String name) throws JMSException
+//    {
+//      try {
+//        return ConversionHelper.toFloat(map.get(name));
+//      }
+//      catch (MessageValueException mE) {
+//        throw new MessageFormatException(mE.getMessage());
+//      }
+//    }
 
   /**
    * API method.

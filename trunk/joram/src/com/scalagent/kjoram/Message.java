@@ -469,10 +469,10 @@ public class Message
    * @exception MessageNotWriteableException  If the message is read-only.
    * @exception JMSException  If the property name is invalid.
    */
-  public void setDoubleProperty(String name, double value) throws JMSException
-  {
-    doSetProperty(name, new Double(value));
-  }
+//    public void setDoubleProperty(String name, double value) throws JMSException
+//    {
+//      doSetProperty(name, new Double(value));
+//    }
 
   /**
    * API method.
@@ -480,10 +480,10 @@ public class Message
    * @exception MessageNotWriteableException  If the message is read-only.
    * @exception JMSException  If the property name is invalid.
    */
-  public void setFloatProperty(String name, float value) throws JMSException
-  {
-    doSetProperty(name, new Float(value));
-  }
+//    public void setFloatProperty(String name, float value) throws JMSException
+//    {
+//      doSetProperty(name, new Float(value));
+//    }
 
   /**
    * API method.
@@ -580,15 +580,15 @@ public class Message
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
    */
-  public double getDoubleProperty(String name) throws JMSException
-  {
-    try {
-      return ConversionHelper.toDouble(doGetProperty(name));
-    }
-    catch (MessageValueException mE) {
-      throw new MessageFormatException(mE.getMessage());
-    }
-  }
+//    public double getDoubleProperty(String name) throws JMSException
+//    {
+//      try {
+//        return ConversionHelper.toDouble(doGetProperty(name));
+//      }
+//      catch (MessageValueException mE) {
+//        throw new MessageFormatException(mE.getMessage());
+//      }
+//    }
 
   /**
    * API method.
@@ -596,15 +596,15 @@ public class Message
    * @exception MessageFormatException  If the property type is invalid.
    * @exception JMSException  If the name is invalid.
    */
-  public float getFloatProperty(String name) throws JMSException
-  {
-    try {
-      return ConversionHelper.toFloat(doGetProperty(name));
-    }
-    catch (MessageValueException mE) {
-      throw new MessageFormatException(mE.getMessage());
-    }
-  }
+//    public float getFloatProperty(String name) throws JMSException
+//    {
+//      try {
+//        return ConversionHelper.toFloat(doGetProperty(name));
+//      }
+//      catch (MessageValueException mE) {
+//        throw new MessageFormatException(mE.getMessage());
+//      }
+//    }
 
   /**
    * API method.
@@ -690,6 +690,8 @@ public class Message
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid property name: " + name);
 
+    String upName = name.toUpperCase();
+
     try {
       if (name.startsWith("JMSX")) {
         if (name.equals("JMSXGroupID"))
@@ -707,17 +709,17 @@ public class Message
       else if (name.startsWith("JMS"))
         throw new JMSException("Property names with prefix 'JMS' are"
                                + " reserved.");
-      else if (name.equalsIgnoreCase("NULL")
-               || name.equalsIgnoreCase("TRUE")
-               || name.equalsIgnoreCase("FALSE")
-               || name.equalsIgnoreCase("NOT")
-               || name.equalsIgnoreCase("AND")
-               || name.equalsIgnoreCase("OR")
-               || name.equalsIgnoreCase("BETWEEN")
-               || name.equalsIgnoreCase("LIKE")
-               || name.equalsIgnoreCase("IN")
-               || name.equalsIgnoreCase("IS")
-               || name.equalsIgnoreCase("ESCAPE"))
+      else if (upName.equals("NULL")
+               || upName.equals("TRUE")
+               || upName.equals("FALSE")
+               || upName.equals("NOT")
+               || upName.equals("AND")
+               || upName.equals("OR")
+               || upName.equals("BETWEEN")
+               || upName.equals("LIKE")
+               || upName.equals("IN")
+               || upName.equals("IS")
+               || upName.equals("ESCAPE"))
         throw new JMSException("Invalid property name: " + name + " is a"
                                + " SQL terminal.");
       else
