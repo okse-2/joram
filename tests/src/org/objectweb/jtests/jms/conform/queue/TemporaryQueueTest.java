@@ -34,7 +34,7 @@ import javax.jms.*;
  * Test the <code>javax.jms.TemporaryQueue</code> features.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TemporaryQueueTest.java,v 1.1 2002-03-19 16:32:42 joram Exp $
+ * @version $Id: TemporaryQueueTest.java,v 1.2 2002-03-26 16:45:24 joram Exp $
  */
 public class TemporaryQueueTest extends PTPTestCase {
 
@@ -67,9 +67,6 @@ public class TemporaryQueueTest extends PTPTestCase {
       assertTrue(m instanceof TextMessage);
       TextMessage msg = (TextMessage)m;
       assertEquals("testTemporaryQueue", msg.getText());
-
-      tempQueue.delete();
-      tempReceiver.close();
     } catch (JMSException e) {
       fail(e);
     }
