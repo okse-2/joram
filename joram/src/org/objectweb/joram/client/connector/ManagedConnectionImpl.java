@@ -81,7 +81,10 @@ public class ManagedConnectionImpl
   String mode;
   /** User identification. */
   String userName;
-  /** Unique session for the use of managed components. */
+  /**
+   * Unique session for the use of managed components, involved in local or
+   * distributed transactions.
+   */
   Session session = null;
 
 
