@@ -1,16 +1,27 @@
-A lib/ directory must be created in the current directory
-and the following librairies must be added in it:
-jms.jar, jndi.jar, jta-spec1_0_1.jar, xerces.jar, jakarta-regexp-1.2.jar
+######################
+# JORAM Installation #
+######################
 
-Edit and execute joramConfig.sh:
- - source joramConfig.sh
+You must have a proper Ant environment to compile JORAM
+(see <http://jakarta.apache.org/ant/manual/install.html>).
 
-Recompile the sources under src/:
- - make all
+In the src/ directory, type:
+ $ ant -projecthelp
+to have a list of available Ant targets for JORAM
 
+ $ ant
+will create a new shipment of JORAM with all the needed libraries to use it
+in ship/lib/ (default target is ship.joram)
 
-Testing JORAM:
-src/fr/dyade/aaa/joram/tests
-src/fr/dyade/aaa/joram/demo/commerce
+ $ ant javadoc
+to generate Javadoc
 
-See the READMEs and JORAM website.
+ $ ant clean
+to clean all generated files
+
+###########################
+# JORAM Samples and Demos #
+###########################
+
+You can find samples of JORAM in the samples/ directory.
+See samples/src/README for more information.
