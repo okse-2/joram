@@ -298,17 +298,22 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(factory);
         factory.agentInitialize(true);
+        factory.save();
         logmon.log(BasicLevel.WARN, getName() + ", factory created");
       }
 
       // loads all fixed agents
       for (int i=0; i<fixedAgentIdList.size(); ) {
 	try {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ", loads fixed agent" +
+                       fixedAgentIdList.elementAt(i));
 	  Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
           i += 1;
 	} catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
-                     getName() + ", can't restore fixed agent#" + 
+                     getName() + ", can't restore fixed agent" + 
                      fixedAgentIdList.elementAt(i), exc);
           fixedAgentIdList.removeElementAt(i);
 	}
