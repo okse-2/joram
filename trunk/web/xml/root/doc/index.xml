@@ -29,11 +29,14 @@
 	href="../current/doc/tutorial/index.html">tutorial</a> (<a
 	    href="../current/doc/tutorial.pdf">PDF</a>).</li>
       </ol>
-<!--
-      The documentation is now made with <a
-      href="http://www.docbook.org">DocBook</a> and available in CVS
-      in doc/joram-www.
--->
+    </s1>
+
+    <s1 name="Test suite documentation">
+      <p>To use JMS test suite, have a look a the <a
+	  href="../current/doc/tests/index.html">test suite
+	  documentation</a> (<a
+	  href="../current/doc/tests.pdf">PDF</a>).
+      </p>
     </s1>
 
     <s1 name="Other documentation" anchor="other">
