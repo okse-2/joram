@@ -96,6 +96,15 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       throw (new JMSException("ServerSessionPool parameter is null!"));
 
     try {
+      if (messageSelector != null && ! messageSelector.equals("")) {
+        fr.dyade.aaa.mom.selectors.checkParser parser =
+          new fr.dyade.aaa.mom.selectors.checkParser(
+          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+        Object result = parser.parse().value;
+       }
+
       boolean durable = false;
       String subName = "";
       // Building the connectionConsumer.
@@ -104,6 +113,10 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       connectionConsumer.setConnection(this);
     } catch (JMSException jE) {
       throw(jE);
+    } catch (Exception e) {
+      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
+      jE.setLinkedException(e);
+      throw jE;
     }
 
     return (javax.jms.ConnectionConsumer) this.connectionConsumer;
@@ -131,6 +144,15 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       throw (new JMSException("ServerSessionPool parameter is null!"));
 
     try {
+      if (messageSelector != null && ! messageSelector.equals("")) {
+        fr.dyade.aaa.mom.selectors.checkParser parser =
+          new fr.dyade.aaa.mom.selectors.checkParser(
+          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+        Object result = parser.parse().value;
+      }
+
       boolean durable = true;
       // Building the connectionConsumer.
       this.connectionConsumer = doCreateConnectionConsumer(topic, messageSelector,
@@ -138,6 +160,10 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
       connectionConsumer.setConnection(this);
     } catch (JMSException jE) {
       throw(jE);
+    } catch (Exception e) {
+      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
+      jE.setLinkedException(e);
+      throw jE;
     }
  
     return (javax.jms.ConnectionConsumer) this.connectionConsumer;
