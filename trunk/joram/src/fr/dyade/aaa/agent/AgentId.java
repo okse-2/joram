@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 class AgentIdStamp implements Serializable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
@@ -262,6 +262,16 @@ public final class AgentId implements Serializable, Cloneable {
    * @see AgentAdmin
    */
   static AgentId adminId;
+
+  /**
+   * Returns the <code>AgentId</code> for a remote factory agent.
+   *
+   * @param sid	remote server id.
+   * @return	the <code>AgentId</code> for a remote factory agent.
+   */
+  public final static AgentId factoryId(short sid) {
+    return new AgentId(sid, sid, FactoryIdStamp);
+  }
 
   /**
    * Statically initializes <code>AgentId</code> class.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,12 +15,14 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
 package fr.dyade.aaa.agent;
 
@@ -31,8 +34,8 @@ import org.objectweb.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.9 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.10 2002-03-06 16:50:00 joram Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -67,7 +70,7 @@ public abstract class ProxyAgent extends Agent {
    * Used in multi-connections context for identifying each
    * connection.
    */
-  private int driversKey ;
+  private int driversKey = 1;
 
   /**
    * Returns default log topic for proxies. Its method  overriddes
@@ -132,10 +135,6 @@ public abstract class ProxyAgent extends Agent {
     multiConn = true;
   }
 
-  public int getProxyDriversKey() {
-    return driversKey;
-  }
-
   /**
    * Initializes the transient members of this agent.
    * This function is first called by the factory agent,
@@ -155,12 +154,10 @@ public abstract class ProxyAgent extends Agent {
     // In single connection mode, creating qout once:
     if (!multiConn)
       qout = new Queue();
-    // In multi connections mode, creating the driversTable and initializing
-    // the driversKey:
-    else {
-      driversKey = 1;
+    // In multi connections mode, creating the driversTable:
+    else
       driversTable = new Hashtable();
-    }
+
     reinitialize();
   }
 
@@ -185,10 +182,9 @@ public abstract class ProxyAgent extends Agent {
       DriverMonitor dMonitor = new DriverMonitor(drvIn, drvOut, qout, ois, oos,
                                                  drvCnx);
 
-      driversTable.put(new Integer(driversKey), dMonitor);
+      driversTable.put(new Integer(driversKey), dMonitor); 
       driversKey++;
     }
-
   }
 
   /** input stream, created by subclass during connect */
@@ -233,14 +229,14 @@ public abstract class ProxyAgent extends Agent {
     }
     if (!multiConn) {  
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "connected");
-      if (ois != null) {
-        drvIn = new DriverIn(DRIVER_IN, this, ois, inFlowControl);
-        drvIn.start();
-      }
+        logmon.log(BasicLevel.DEBUG, getName() + ", connected");
       if (oos != null) {
         drvOut = new DriverOut(DRIVER_OUT, this, qout, oos);
         drvOut.start();
+      }
+      if (ois != null) {
+        drvIn = new DriverIn(DRIVER_IN, this, ois, inFlowControl);
+        drvIn.start();
       }
     }
     // If the ProxyAgent is multiConn, creating drvIn and drvOut with
@@ -350,32 +346,8 @@ public abstract class ProxyAgent extends Agent {
       if (ois == null && oos == null)
         return;
     }
-    else {
-      Enumeration keys = driversTable.keys();
-      while (keys.hasMoreElements()) {
-        Integer key = (Integer) keys.nextElement();
-        DriverMonitor dMonitor = (DriverMonitor) driversTable.get(key);
-
-        if (dMonitor != null) {
-          if (dMonitor.ois != null || dMonitor.oos != null) {
-	    try {
-	      (dMonitor.ois).close();
-	    } catch (IOException exc) {}
-	    try {
-	      (dMonitor.oos).close();
-	    } catch (IOException exc) {}
-  
-            stop(key.intValue());
-  
-            dMonitor.ois = null;
-            dMonitor.oos = null;
-            dMonitor.qout = null;
-          }
-        }
-      }
-      driversTable.clear();
-    }
-
+    else
+      closeAllConnections();
     try {
       disconnect();
     } catch (Exception exc) {
@@ -390,27 +362,80 @@ public abstract class ProxyAgent extends Agent {
 
   }
 
+  /** Closes all the connections. */
+  protected void closeAllConnections()
+  {
+    Enumeration keys = driversTable.keys();
+    while (keys.hasMoreElements()) {
+      Integer key = (Integer) keys.nextElement();
+      System.out.println("Closing " + key.intValue());
+
+      DriverMonitor dMonitor = (DriverMonitor) driversTable.get(key);
+      if (dMonitor != null) {
+        if (dMonitor.ois != null || dMonitor.oos != null) {
+          try {
+           (dMonitor.ois).close();
+          } catch (IOException exc) {}
+          try {
+           (dMonitor.oos).close();
+          } catch (IOException exc) {}
+  
+          stop(key.intValue());
+  
+          dMonitor.ois = null;
+          dMonitor.oos = null;
+          dMonitor.qout = null;
+        }
+      }
+    }
+    driversTable.clear();
+  }
+
 
   /** 
-   * Method called by <code>DriverIn</code> instances to forward the 
-   * notifications they get. 
+   * Method called by the ProxyAgent <code>DriverIn</code> instances to
+   * forward the notifications they got from their input streams. 
    * <p>
    * May be overridden for specific behaviour as long as the proxy state
    * is not modified by the method, because it does not occur within a
    * transaction.
    *
-   * @param key  Identifier of the driver calling the method.
-   * @param not  Forwarded notification.
+   * @param key  Driver identifier.
+   * @param not  Notification to forward.
    */ 
-  void getDriverInNotification(int key, Notification not)
+  protected void driverReact(int key, Notification not)
   {
-    if (key != 0) 
-      sendTo(this.getId(), new DriverNotification(key, not));
-    else
-      sendTo(this.getId(), not);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "Proxy " + this + " gets not " + not 
+                 + " from driver " + key);
+
+    sendTo(this.getId(), not);
   }
 
-
+  /**
+   * Method called by subclasses to directly send their notifications
+   * to the right <code>DriverOut</code>.
+   *
+   * @param key  Driver identifier.
+   * @param not  Notification to send out.
+   * @exception Exception  If the driver to pass the notification to can't
+   *              be retrieved from the key parameter.
+   */
+  protected void sendOut(int key, Notification not) throws Exception
+  {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "Proxy " + this + " gets not " + not 
+                 + " to pass to driver " + key);
+    try {
+      DriverMonitor dMon = (DriverMonitor) driversTable.get(new Integer(key));
+      (dMon.getQout()).push(not);
+    }
+    catch (Exception e ) {
+      throw new Exception("Can't forward notification " + not
+                           + " to driver out " + key + ": " + e);
+    }
+  }
+    
   /**
    * Method implementing the <code>ProxyAgent</code> reactions to
    * notifications.
@@ -443,18 +468,13 @@ public abstract class ProxyAgent extends Agent {
         else
           drvIn.recvFlowControl((FlowControlNot) not);
       }
+      else if (not instanceof DeleteNot) {
+        closeAllConnections();
+        super.react(from, not);
+      } 
       // If notification comes from an identified agent:
-      else if (! from.equals(this.getId())) {
-        // If not is a DriverNotification, pushing it into the right queue out.
-        if (not instanceof DriverNotification) {
-          drvKey = ((DriverNotification) not).getDriverKey();
-          dMon = (DriverMonitor) driversTable.get(new Integer(drvKey));
-          qo = dMon.qout;
-          qo.push(((DriverNotification) not).getNotification());
-        }
-        else
-          qout.push(not);
-      }
+      else if (! from.equals(this.getId()))
+        qout.push(not);
       else
         super.react(from, not);
     } catch (Exception exc) {

@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * An element of the matrix clock.
  */
 class MatClockElt {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
   /** Element value. */
   int stamp;
@@ -50,8 +50,8 @@ class MatClockElt {
  * Matrix clock realization. 
  */
 class MatrixClock implements Serializable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -198,8 +198,41 @@ class MatrixClock implements Serializable {
    * Returns the index of the specified server.
    */
   private final int index(short id) {
-    return java.util.Arrays.binarySearch(servers, id);
+//   private final int index(short id) throws UnknownServerException {
+    int idx = java.util.Arrays.binarySearch(servers, id);
+//     if (idx < 0)
+//       throw new UnknownServerException("Unknow server id. #" + id);
+    return idx;
   }
+
+  /**
+   *  Adjust matrix clock and status table. It should only be
+   * used in testRecvUpdate and getSendUpdate, so there is no
+   * need of synchronisation.
+   */
+//   private void grow(short sid) {
+//     int newSize = sid +1;
+//     int newStatus[] = new int[newSize];
+//     MatClockElt newMatClock[][] = new MatClockElt[newSize][newSize];
+
+//     // Copy matrix clock and status table in the right sized table.
+//     int i, j;
+//     for (i=0; i<size; i++) {
+//       for (j=0; j<size; j++)
+// 	newMatClock[i][j] = matClock[i][j];
+//       for (; j<newSize; j++)
+// 	newMatClock[i][j] = new MatClockElt();
+//       newStatus[i] = status[i];
+//     }
+//     for (; i<newSize; i++) {
+//       for (j=0; j<newSize; j++)
+// 	newMatClock[i][j] = new MatClockElt();
+//       newStatus[i] = 0;
+//     }
+//     size = newSize;
+//     status = newStatus;
+//     matClock = newMatClock;
+//   }
 
   /** The message can be delivered. */
   static final int DELIVER = 0;

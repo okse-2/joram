@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,103 +15,55 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-import javax.jms.*;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
 
 /**
- * XAQueueConnection provides the same create options as QueueConnection
- * (optional). The only difference is that an XAConnection is by definition
- * transacted.
- *
- * @author Laurent Chauvirey
- * @version 1.0
+ * Implements the <code>javax.jms.XAQueueConnection</code> interface.
  */
+public class XAQueueConnection extends QueueConnection
+                               implements javax.jms.XAQueueConnection
+{
+  /**
+   * Constructs an <code>XAQueueConnection</code> instance and opens a TCP
+   * connection with a given agent server.
+   *
+   * @param serverAddr  Address of the server to connect to.
+   * @param port  Port the server is listening to.
+   * @param name  User's name.
+   * @param password  User's password.
+   * @param timer  Time in seconds allowed for (re-)connecting.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  XAQueueConnection(java.net.InetAddress serverAddr, int port, String name,
+                    String password, int timer) throws javax.jms.JMSException
+  {
+    super(serverAddr, port, name, password, timer);
+  }
 
-public class XAQueueConnection extends XAConnection implements javax.jms.XAQueueConnection {
-
-  private QueueConnection qc;
-    
-    /**
-     * Construct an <code>XAQueueConnection</code>. The difference with
-     * <code>Connection</code> is that a <code>XAConnection</code>
-     * is by definition transacted.
-     */
-    public XAQueueConnection(String proxyAgentIdString,
-			     InetAddress proxyAddress, int proxyPort,
-			     String login, String passwd) throws javax.jms.JMSException {
-	qc = new QueueConnection(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
-    }
-
-    /**
-     * Create an <code>XAQueueSession</code>.
-     */
-    public javax.jms.XAQueueSession createXAQueueSession() throws JMSException {
-	long sessionID = getNextSessionID();
-	return new XAQueueSession(sessionID, qc);
-    }
-
-    /**
-     * Create a <code>QueueSession</code>.
-     */
-    public javax.jms.QueueSession createQueueSession(boolean transacted,
-						     int acknowledgeMode) throws JMSException {
-	  long sessionID = getNextSessionID();
-	  return new QueueSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, qc);
-    }
-
-    /*
-     * Create a connection consumer for this connection. This is an expert
-     * facility not used by regular JMS clients.
-     */
-    public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Queue queue,
-								 String messageSelector,
-								 javax.jms.ServerSessionPool sessionPool,
-								 int maxMessages) throws JMSException {
-      return qc.createConnectionConsumer(queue, messageSelector, sessionPool, maxMessages);
-    }
-
-    public void close() throws JMSException
-    {
-      qc.close();
-    }
-    public void start() throws JMSException
-    {
-      qc.start();
-    }
-    public void stop() throws JMSException
-    {
-      qc.stop();
-    }
-    public String getClientID() throws JMSException 
-    {
-      return qc.getClientID();
-    }
-    public void setClientID(String clientID) throws JMSException
-    {
-      qc.setClientID(clientID);
-    }
-    public javax.jms.ConnectionMetaData getMetaData() throws JMSException
-    {
-      return qc.getMetaData();
-    }
-    public ExceptionListener getExceptionListener() throws JMSException
-    {
-      return qc.getExceptionListener();
-    }
-    public void setExceptionListener(ExceptionListener listener) throws JMSException
-    {
-      qc.setExceptionListener(listener);
-    } 
-
-
-} // XAQueueConnection
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public javax.jms.XAQueueSession createXAQueueSession() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    return new XAQueueSession(nextSessionId(), this);
+  }
+}

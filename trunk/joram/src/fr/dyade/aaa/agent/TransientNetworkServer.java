@@ -52,6 +52,8 @@ final class TransientNetworkServer implements MessageConsumer {
   /** The <code>MessageQueue</code> associated with this network component */
   MessageQueue qout;
   /**  */
+  TransientNetworkServer server = null;
+  /**  */
   NetServerIn netServerIn = null;
   /**  */
   NetServerOut netServerOut = null;
@@ -72,6 +74,8 @@ final class TransientNetworkServer implements MessageConsumer {
    * component.
    */
   TransientNetworkServer() {
+    server = this;
+
     qout = new MessageQueue();
 
     name = "AgentServer#" + AgentServer.getServerId() + ".transient";
@@ -189,6 +193,27 @@ final class TransientNetworkServer implements MessageConsumer {
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
+  private boolean stopping = false;
+
+  /**
+   * Asynchronously stop the AgentServer. Creates a thread to execute
+   * AgentServer.stop in order to allow TransientNetworkConsumer stopping
+   * and avoid deadlock.
+   */
+  private synchronized void stopAgentServer() {
+    if (stopping) return;
+
+    Thread t = new Thread() {
+        public void run() {
+          AgentServer.stop();
+        }
+      };
+    t.setDaemon(true);
+    t.start();
+
+    stopping = true;
+  }
+
   /**
    * Tests if the network component is alive.
    *
@@ -232,7 +257,11 @@ final class TransientNetworkServer implements MessageConsumer {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {
+      server.close();
+    }
+
+    protected void shutdown() {
       close();
     }
 
@@ -295,12 +324,8 @@ final class TransientNetworkServer implements MessageConsumer {
 	// TODO:
 	this.logmon.log(BasicLevel.ERROR, this.getName() + ", exited", exc);
       } finally {
-	this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
-	close();
-	running = false;
-	thread = null;
-
-	AgentServer.stop();
+        finish();
+	stopAgentServer();
       }
     }
   }
@@ -312,7 +337,11 @@ final class TransientNetworkServer implements MessageConsumer {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {
+      server.close();
+    }
+
+    protected void shutdown() {
       close();
     }
 
@@ -354,12 +383,8 @@ final class TransientNetworkServer implements MessageConsumer {
 	  qout.pop();
 	}
       } finally {
-        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
-	close();
-	running = false;
-	thread = null;
-
-	AgentServer.stop();
+        finish();
+	stopAgentServer();
       }
     }
   }

@@ -31,8 +31,8 @@ import java.io.*;
  * @author	Andr* Freyssinet
  */
 final class Update implements Serializable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Update.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Update.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   //  Declares all fileds transient in order to avoid useless
   // description of each during serialization.

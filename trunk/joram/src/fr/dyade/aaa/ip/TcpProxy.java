@@ -37,8 +37,8 @@ import fr.dyade.aaa.agent.*;
   * is identified by a -1 <code>localPort</code> value.
   */
 public abstract class TcpProxy extends ProxyAgent {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: TcpProxy.java,v 1.7 2002-03-06 16:55:06 joram Exp $"; 
 
 
   protected int localPort = -1;		/** in server: required listening port, may be 0 */

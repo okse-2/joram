@@ -42,7 +42,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class UdpInput implements NotificationInputStream {
 
-public static final String RCS_VERSION="@(#)$Id: UdpInput.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: UdpInput.java,v 1.7 2002-03-06 16:55:06 joram Exp $"; 
 
   protected DatagramSocket server = null;
   protected byte[] buffer = null;

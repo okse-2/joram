@@ -30,7 +30,7 @@ package fr.dyade.aaa.agent;
  */
 public class UnknownServerException extends Exception {
 
-public static final String RCS_VERSION="@(#)$Id: UnknownServerException.java,v 1.4 2002-01-16 12:46:47 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: UnknownServerException.java,v 1.5 2002-03-06 16:50:00 joram Exp $"; 
 
   /**
    *  Constructs a new <code>UnknownServerException</code> with no

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,219 +15,110 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.IllegalStateException;
 
 /**
- * A <code>TopicConnection</code> is an active connection to a JMS Pub/Sub
- * provider.<br>
- * A client uses a <code>TopicConnection</code> to create one or more
- * <code>TopicSession</code>s for producing and consuming messages.
- *
- * @author Frederic Maistre
+ * Implements the <code>javax.jms.TopicConnection</code> interface.
  */
-public class TopicConnection extends Connection implements javax.jms.TopicConnection
+public class TopicConnection extends Connection
+                             implements javax.jms.TopicConnection
 {
-  /** Constructor. */
-  public TopicConnection(String proxyAgentIdString, InetAddress proxyAddress,
-    int proxyPort, String login, String passwd) throws JMSException
-  {
-    super(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
-  }
-
-
-  /** Method creating a <code>TopicSession</code>. */
-  public javax.jms.TopicSession createTopicSession(boolean transacted,
-    int acknowledgeMode) throws JMSException
-  {
-    try {
-      long sessionCounterNew = sessionCounter;
-      sessionCounter = calculateMessageID(sessionCounter);
- 
-      fr.dyade.aaa.joram.TopicSession session =
-        new fr.dyade.aaa.joram.TopicSession(transacted, acknowledgeMode,
-        sessionCounterNew, this);
-
-      if (session == null) {
-        sessionCounter = sessionCounter - 1;
-        throw (new javax.jms.JMSException("Error when creating the TopicSession"));
-      }
-      else {
-        sessions.put(new Long(sessionCounterNew), session);
-        return session;
-      }
-
-    } catch (JMSException jE) {
-      throw(jE);
-    } catch (Exception e) {
-      javax.jms.JMSException jE = new JMSException("Internal error");
-      jE.setLinkedException(e);
-      throw(jE);
-    }
-  }
-
-
   /**
-   * Method creating a non durable <code>ConnectionConsumer</code> for this
-   * connection.
-   * <br>
-   * This is an expert facility not used by regular JMS clients.
+   * Constructs a <code>TopicConnection</code> instance and opens a TCP
+   * connection with a given agent server.
    *
-   * @param topic  The Topic which messages will be consumed by this consumer.
-   * @param messageSelector  The selector to filter the consumed messages.
-   * @param sessionPool  The pool from which Sessions are got.
-   * @param maxMessages  The number of messages passed to a given Session.
+   * @param serverAddr  Address of the server to connect to.
+   * @param port  Port the server is listening to.
+   * @param name  User's name.
+   * @param password  User's password.
+   * @param timer  Time in seconds allowed for (re-)connecting.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Topic topic,
-    String messageSelector, javax.jms.ServerSessionPool sessionPool, int maxMessages)
-    throws JMSException
+  TopicConnection(java.net.InetAddress serverAddr, int port, String name,
+                  String password, int timer) throws javax.jms.JMSException
   {
-    if (this.connectionConsumer != null)
-      throw (new JMSException("A ConnectionConsumer already exists for this Connection"));
-    if (sessionPool == null)
-      throw (new JMSException("ServerSessionPool parameter is null!"));
-
-    try {
-      if (messageSelector != null && ! messageSelector.equals("")) {
-        fr.dyade.aaa.mom.selectors.checkParser parser =
-          new fr.dyade.aaa.mom.selectors.checkParser(
-          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
-
-        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
-        Object result = parser.parse().value;
-       }
-
-      boolean durable = false;
-      String subName = "";
-      // Building the connectionConsumer.
-      this.connectionConsumer = doCreateConnectionConsumer(topic, messageSelector,
-        sessionPool, maxMessages, durable, subName);
-      connectionConsumer.setConnection(this);
-    } catch (JMSException jE) {
-      throw(jE);
-    } catch (Exception e) {
-      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
-      jE.setLinkedException(e);
-      throw jE;
-    }
-
-    return (javax.jms.ConnectionConsumer) this.connectionConsumer;
+    super(serverAddr, port, name, password, timer);
   }
 
   /**
-   * Method creating a durable <code>ConnectionConsumer</code> for this
-   * connection.
-   * <br>
-   * This is an expert facility not used by regular JMS clients.
-   *
-   * @param topic  The Topic which messages will be consumed by this consumer.
-   * @param subscriptionName  The name of this consumer subscription.
-   * @param messageSelector  The selector to filter the consumed messages.
-   * @param sessionPool  The pool from which Sessions are got.
-   * @param maxMessages  The number of messages passed to a given Session.
-   *
-   * @author Frederic Maistre
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.ConnectionConsumer createDurableConnectionConsumer(javax.jms.Topic topic,
-    String subscriptionName, String messageSelector, javax.jms.ServerSessionPool sessionPool,
-    int maxMessages) throws javax.jms.JMSException
+  public javax.jms.TopicSession
+       createTopicSession(boolean transacted, int acknowledgeMode)
+       throws JMSException
   {
-    if (sessionPool == null)
-      throw (new JMSException("ServerSessionPool parameter is null!"));
-
-    try {
-      if (messageSelector != null && ! messageSelector.equals("")) {
-        fr.dyade.aaa.mom.selectors.checkParser parser =
-          new fr.dyade.aaa.mom.selectors.checkParser(
-          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
-
-        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
-        Object result = parser.parse().value;
-      }
-
-      boolean durable = true;
-      // Building the connectionConsumer.
-      this.connectionConsumer = doCreateConnectionConsumer(topic, messageSelector,
-        sessionPool, maxMessages, durable, subscriptionName);
-      connectionConsumer.setConnection(this);
-    } catch (JMSException jE) {
-      throw(jE);
-    } catch (Exception e) {
-      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
-      jE.setLinkedException(e);
-      throw jE;
-    }
- 
-    return (javax.jms.ConnectionConsumer) this.connectionConsumer;
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    
+    return new TopicSession(nextSessionId(), this, transacted, acknowledgeMode);
   }
-  
 
   /**
-   * Method constructing a durable or non durable <code>ConnectionConsumer</code>.
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception InvalidSelectorException  If the selector syntax is wrong.
+   * @exception InvalidDestinationException  If the target topic does not
+   *              exist.
+   * @exception JMSSecurityException  If the user is not a READER on the topic.
+   * @exception JMSException  If the method fails for any other reason.
    */
-  private ConnectionConsumer doCreateConnectionConsumer (javax.jms.Topic topic,
-    String selector, javax.jms.ServerSessionPool ssp, int maxMessages, boolean durable,
-    String subscriptionName) throws JMSException
+  public javax.jms.ConnectionConsumer
+       createConnectionConsumer(javax.jms.Topic topic, String selector,
+                                javax.jms.ServerSessionPool sessionPool,
+                                int maxMessages) throws JMSException
   {
-    fr.dyade.aaa.mom.MessageMOMExtern subMsg;
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
 
-    // Building the connectionConsumer.
-    ConnectionConsumer cCons = new ConnectionConsumer(topic, selector, ssp, maxMessages);
-
-    long requestID = super.getMessageMOMID();
-    Long longRequestID = new Long(requestID); 
-    boolean noLocal = false;
-    String sessionID = "";
-    int ackMode = 0;
-    boolean cConsBool = true;
-
-    // Creating a ConnectionConsumer on a Topic is as subscribing to this
-    // Topic.
-    if (! durable) {
-      subMsg =
-        new fr.dyade.aaa.mom.SubscriptionNoDurableMOMExtern(requestID,
-        subscriptionName, (fr.dyade.aaa.mom.TopicNaming) topic, selector);
-    }
-    else {
-      subMsg =
-        new fr.dyade.aaa.mom.SubscriptionMessageMOMExtern(requestID,
-        subscriptionName, (fr.dyade.aaa.mom.TopicNaming) topic, selector);
-    }
-
-    Object lock = new Object();
-    synchronized (lock) {
-      super.waitThreadTable.put(longRequestID, lock);
-      this.sendMsgToAgentClient(subMsg);
-      try {
-        lock.wait();
-      } catch (InterruptedException iE) {
-        JMSException jE = new JMSException("Error while waiting for MOM acknowledgement");
-        jE.setLinkedException(iE);
-        throw (jE);
-      }
-    }
-
-    fr.dyade.aaa.mom.MessageMOMExtern momMsg;
-
-    if (!super.messageJMSMOMTable.containsKey(longRequestID))
-      throw (new JMSException("Error in MOM's acknowledgement"));
-
-    momMsg = (fr.dyade.aaa.mom.MessageMOMExtern) messageJMSMOMTable.remove(longRequestID);
-
-    if (momMsg instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-      return cCons;
-    }
-    else
-      throw (new JMSException("Error in MOM's acknowledgement"));  
+    return new TopicConnectionConsumer(this, ((Topic) topic).getName(),
+                                       selector,
+                                       sessionPool, maxMessages,
+                                       this.toString(), false);
   }
 
+  /**
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception InvalidSelectorException  If the selector syntax is wrong.
+   * @exception InvalidDestinationException  If the target topic does not
+   *              exist.
+   * @exception JMSSecurityException  If the user is not a READER on the topic.
+   * @exception JMSException  If the method fails for any other reason.
+   */
+  public javax.jms.ConnectionConsumer
+       createDurableConnectionConsumer(javax.jms.Topic topic, String subName,
+                                       String selector,
+                                       javax.jms.ServerSessionPool sessionPool,
+                                       int maxMessages) throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    return new TopicConnectionConsumer(this, ((Topic) topic).getName(),
+                                       selector,
+                                       sessionPool, maxMessages,
+                                       subName, true);
+  }
 }

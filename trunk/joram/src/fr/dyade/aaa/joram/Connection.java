@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,838 +15,851 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
- */
-package fr.dyade.aaa.joram; 
- 
-import javax.jms.*;
-import java.lang.*; 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-
-/**
- * A JMS Connection is a client's active connection to its JMS provider.
- * It will typically allocate provider resources outside the Java virtual
- * machine.
  *
- * @author Richard Mathis
- * @version 1.1
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-public abstract class Connection implements javax.jms.Connection {
-  
-    /** The identifier of the proxy agent */
-    protected String agentClient;
-    /** The IP address of the proxy agent */
-    protected InetAddress proxyAddress;
-    /** The port of the proxy agent */
-    protected int proxyPort;
-  
-    /** The socket that connects the client to the proxy agent */
-    protected Socket socket;
-  
-    /** The security reference */
-    private String userName; 
-    private String password; 
-  
-    /** The clientId of the current client */
-    private String clientID;
-  
-    /** The output stream to write data to the proxy */
-    protected ObjectOutputStream oos;
-    /** The input stream to read data from the proxy */
-    protected ObjectInputStream ois;
-  
-    /** Whether or not the connection is closed */
-    protected boolean isClosed;
+package fr.dyade.aaa.joram;
 
-    /** The state of the connection */
-    private boolean started;
-    private Boolean startedObject;
-  
-    /** The exceptionListener of the Connection */
-    protected javax.jms.ExceptionListener exceptionListener = null;
-  
-    /** the counter of messages 2^63-1*/
-    private long messageCounter;
-    /** counter for message identifier */
-    protected long sessionCounter;
- 
-    /**
-     * Hashtable with all threads waiting for a response.<br>
-     * key : Long requestID.<br>
-     * Object : the object on which the Thread is blocking or a ResponseAckObject.
-     */
-    public Hashtable waitThreadTable;
-	
-    /**
-     * Hashtable containing the message received by the client
-     * so as to the corresponding Thread retrieves it.<br>
-     *	key : long requestID.<br>
-     *	Object : MessageMOMExtern.
-     */
-    public Hashtable messageJMSMOMTable;
-  
-    /** the thread listening the socket */
-    private Driver driver;
-  
-    /**
-     * Hashtable with all Session Threads waiting a response.<br>
-     * key : fr.dyade.aaa.mom.KeyConnectionSubscription.<br>
-     * Object : fr.dyade.aaa.joram.Session.<br>
-     * Optimisation for non durable subscription not yet implemented because the
-     * using is not proved.
-     */
-    public Hashtable subscriptionListenerTable;
+import fr.dyade.aaa.mom.excepts.*;
+import fr.dyade.aaa.mom.jms.*;
 
-  /** The ConnectionConsumer on this Connection, if any. */
-  protected ConnectionConsumer connectionConsumer = null;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
-  /**
-   * <code>FifoQueue</code> in which messages to be passed to
-   * <code>MessageListener</code>s are stored.
-   */
-  protected FifoQueue messagesToDeliver;
+import javax.jms.InvalidDestinationException;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSSecurityException;
+import javax.jms.JMSException;
 
-  protected Hashtable sessionsTable;
-
-  protected Hashtable sessions;
-
-
-    public Connection(String agentClient,
-		      java.net.InetAddress proxyAddress, int proxyPort,
-		      String userName, String password) throws javax.jms.JMSException {
-	try {
-	    /* parameters of the connection */
-	    this.agentClient = agentClient;
-	    this.proxyAddress = proxyAddress;
-	    this.proxyPort = proxyPort;
-	    this.userName = userName; 
-	    this.password = password;
-      
-	    /* initialization of the counter of messages */
-	    messageCounter = 0;
-	    /* initialization of the hashtable with objects waiting */
-	    waitThreadTable = new Hashtable();
-	    /* initialization of the hashtable with messageJMS */
-	    messageJMSMOMTable = new Hashtable();
-	    /* initialisation of the subscriptionListenerTable */
-	    subscriptionListenerTable = new Hashtable();
-
-        messagesToDeliver = new FifoQueue();
-
-	    /* initialisation of the sesion counter */
-	    sessionCounter = 1;
-
-	    /* stop mode */
-	    started = false;
-	    startedObject = new Boolean(true);
-	    /* Connection opened */
-	    isClosed = false;
-
-
-	    socket = new Socket(proxyAddress, proxyPort); 
-	    socket.setTcpNoDelay(true);
-	    socket.setSoTimeout(0);
-	    socket.setSoLinger(true,1000);
-			
-	    /* send the name of the agentClient */
-	    DataOutputStream dos = new DataOutputStream(socket.getOutputStream()); 
-	    dos.writeUTF(agentClient);
-	    dos.flush();		
-
-	    /* creation of the objectinputStream and ObjectOutputStream */
-	    oos = new ObjectOutputStream(socket.getOutputStream()); 
-	    ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-        
-	    /* creation of the thread listening */
-	    driver = new Driver(this, ois);
-
-        sessionsTable = new Hashtable();
-        sessions = new Hashtable();
-
-	} catch (IOException exc) {
-	    fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("IOException Error Sending Message: ",JMSAAAException.ERROR_CONNECTION_MOM);
-	    except.setLinkedException(exc);
-	    throw(except);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-
-    public Connection() {}
-  
-  /**
-   * Close the connection and run garbage collection.
-   */
-  public void close() throws JMSException {
-  try {
-    if (!isClosed) {
-        Enumeration sessionsKeys = sessions.keys();
-        while (sessionsKeys.hasMoreElements()) {
-          Object key = sessionsKeys.nextElement();
-          Session session = (Session) sessions.get(key);
-          if (session.listener != null) 
-            session.listener.stop();
-	  sessions.remove(key);
-        }
-      driver.stop();
-      try {
-	oos.close();
-      } catch (IOException exc) {}
-      try {
-	ois.close();
-      } catch (IOException exc) {}
-      try {
-	socket.close();
-      } catch (IOException exc) {}
-      socket = null;
-      messageJMSMOMTable.clear();
-      waitThreadTable.clear();
-      subscriptionListenerTable.clear();
-      System.gc();
-    isClosed = true;
-    }
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-  }
-	
-    /**
-     * Get the client identifier for this connection.
-     * @return the unique client identifier.
-     */
-    public java.lang.String getClientID() throws JMSException {
-      return clientID;
-    }
- 
-    /**
-     * Set the client identifier for this connection.
-     * @param clientID the unique client identifier.
-     */
-  public void setClientID(java.lang.String clientID) throws javax.jms.JMSException
-  {
-    throw new javax.jms.IllegalStateException("ClientID is administratively set by JORAM.");
-  }
-	
-    /**
-     * Get the meta data for this connection.
-     * @return the connection meta data.
-     */
-    public javax.jms.ConnectionMetaData getMetaData() throws javax.jms.JMSException {
-	if (isClosed) throw new JMSException("Connection closed");
-	try {
-	    Object obj = new Object();
-	    long messageJMSMOMID = this.getMessageMOMID();
-	    Long longMsgID = new Long(messageJMSMOMID);
-			
-	    /* construction of the REquest MetaDAta MessageJMSMOM */
-	    fr.dyade.aaa.mom.MetaDataRequestMOMExtern msgMetaDataReq = new fr.dyade.aaa.mom.MetaDataRequestMOMExtern(messageJMSMOMID);
-		
-	    /*	synchronization because it could arrive that the notify was
-	     *	called before the wait 
-	     */
-	    synchronized(obj) {
-		/* the processus of the client waits the response */
-		waitThreadTable.put(longMsgID, obj);
-		/* get the messageJMSMOM identifier */
-		this.sendMsgToAgentClient(msgMetaDataReq);
-				
-		obj.wait();
-	    }
-					
-	    /* the clients wakes up */
-	    fr.dyade.aaa.mom.MessageMOMExtern msgResponse;
-		
-	    /* tests if the key exists 
-	     * dissociates the message null (on receiveNoWait) and internal error
-	     */
-	    if(!messageJMSMOMTable.containsKey(longMsgID))
-		throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-				
-	    /* get the the message back or the exception*/
-	    msgResponse = (fr.dyade.aaa.mom.MessageMOMExtern) messageJMSMOMTable.remove(longMsgID);
-	    if(msgResponse instanceof fr.dyade.aaa.mom.MetaDataMOMExtern) {
-		fr.dyade.aaa.mom.MetaData metaData = ((fr.dyade.aaa.mom.MetaDataMOMExtern)msgResponse).metaData;
-		return(new fr.dyade.aaa.joram.ConnectionMetaData(metaData.getJMSVersion(), metaData.getJMSMajorVersion(), metaData.getJMSMinorVersion(), metaData.getJMSProviderName(), metaData.getProviderVersion(), metaData.getProviderMajorVersion() ,metaData.getProviderMinorVersion()));
-			
-	    } else if(msgResponse instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-				/* exception sent back to the client */
-		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgResponse;
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		except.setLinkedException(msgExc.exception); 
-		throw(except);
-	    } else {
-		/* unknown message */
-		/* should never arrived */
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		throw(except);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-
-    /**
-     * Get the ExceptionListener for this Connection.<br>
-     * NOT IMPLEMENTED.
-     */
-    public javax.jms.ExceptionListener getExceptionListener() throws javax.jms.JMSException {
-	throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-    }
-	
-    /**
-     * Set an exception listener for this connection.
-     * @param listener the exception listener.
-     */
-    public void setExceptionListener(javax.jms.ExceptionListener listener) throws javax.jms.JMSException {
-	if (isClosed) throw new JMSException("Connection closed");
-	try {
-	    /* set the exceptionListener*/
-	    this.exceptionListener = listener;
-      
-	    Object obj = new Object();
-	    long messageJMSMOMID = this.getMessageMOMID();
-	    Long longMsgID = new Long(messageJMSMOMID);
-      
-	    /* warns the agentClient of the set of the ExcpetionListener */
-	    fr.dyade.aaa.mom.SettingExcListenerMOMExtern msgExcListen;
-	    if(exceptionListener==null)
-		msgExcListen = new fr.dyade.aaa.mom.SettingExcListenerMOMExtern(messageJMSMOMID, false);
-	    else
-		msgExcListen = new fr.dyade.aaa.mom.SettingExcListenerMOMExtern(messageJMSMOMID, true);
-			
-	    /*	synchronization because it could arrive that the notify was
-	     *	called before the wait 
-	     */
-	    synchronized(obj) {
-		/* the processus of the client waits the response */
-		waitThreadTable.put(longMsgID,obj);
-		/* get the messageJMSMOM identifier */
-		this.sendMsgToAgentClient(msgExcListen);
-				
-		obj.wait();
-	    }
-					
-	    /* the clients wakes up */
-	    fr.dyade.aaa.mom.MessageMOMExtern msgResponse;
-		
-	    /* tests if the key exists 
-	     * dissociates the message null (on receiveNoWait) and internal error
-	     */
-	    if(!messageJMSMOMTable.containsKey(longMsgID))
-		throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-				
-	    /* get the the message back or the exception*/
-	    msgResponse = (fr.dyade.aaa.mom.MessageMOMExtern) messageJMSMOMTable.remove(longMsgID);
-	    if(msgResponse instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-				/* OK */ 
-	    } else if(msgResponse instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-				/* exception sent back to the client */
-		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgResponse;
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		except.setLinkedException(msgExc.exception); 
-		throw(except);
-	    } else {
-				/* unknown message */
-				/* should never arrived */
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		throw(except);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-	
-    /**
-     * Start (or restart) a <code>Connection</code>'s delivery of incoming
-     * messages.
-     */
-    public void start() throws javax.jms.JMSException {
-	try {
-	    /* to avoid conflict with start and stop mode in concurrency levels */
-	    synchronized(startedObject) {
-		if(!started) {
-		    started = true;
-	  
-		    Object obj = new Object();
-		    long messageJMSMOMID = this.getMessageMOMID();
-		    Long longMsgID = new Long(messageJMSMOMID);
-			
-		    /* send to the agentClient to start delivery of the messages  */
-		    fr.dyade.aaa.mom.StateListenMessageMOMExtern msgListen = new fr.dyade.aaa.mom.StateListenMessageMOMExtern(messageJMSMOMID, true);
-		
-		    /*	synchronization because it could arrive that the notify was
-		     *	called before the wait 
-		     */
-		    synchronized(obj) {
-			/* the processus of the client waits the response */
-			waitThreadTable.put(longMsgID,obj);
-			/* get the messageJMSMOM identifier */
-			this.sendMsgToAgentClient(msgListen);
-						
-			obj.wait();
-		    }
-					
-		    /* the clients wakes up */
-		    fr.dyade.aaa.mom.MessageMOMExtern msgResponse;
-		
-		    /* tests if the key exists 
-		     * dissociates the message null (on receiveNoWait) and internal error
-		     */
-		    if(!messageJMSMOMTable.containsKey(longMsgID))
-			throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-				
-		    /* get the the message back or the exception*/
-		    msgResponse = (fr.dyade.aaa.mom.MessageMOMExtern) messageJMSMOMTable.remove(longMsgID);
-		    if(msgResponse instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-			/* OK */ 
-		    } else if(msgResponse instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-			/* exception sent back to the client */
-			fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgResponse;
-			fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-			except.setLinkedException(msgExc.exception); 
-			throw(except);
-		    } else {
-			/* unknown message */
-			/* should never arrived */
-			fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-			throw(except);
-		    }
-		}
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-	
-    /**
-     * Used to temporarily stop a <code>Connection</code>'s delivery of
-     * incoming messages.
-     */
-    public void stop() throws javax.jms.JMSException {
-	try {
-	    /* to avoid conflict with start and stop mode in concurrency levels */
-	    synchronized(startedObject) {
-		if(started) {
-		    started = false;
-	  
-		    Object obj = new Object();
-		    long messageJMSMOMID = this.getMessageMOMID();
-		    Long longMsgID = new Long(messageJMSMOMID);
-			
-		    /* send to the agentClient to stop delivery of the messages  */
-		    fr.dyade.aaa.mom.StateListenMessageMOMExtern msgListen = new fr.dyade.aaa.mom.StateListenMessageMOMExtern(messageJMSMOMID, false);
-		
-		    /*	synchronization because it could arrive that the notify was
-		     *	called before the wait 
-		     */
-		    synchronized(obj) {
-			/* the processus of the client waits the response */
-			waitThreadTable.put(longMsgID,obj);
-			/* get the messageJMSMOM identifier */
-			this.sendMsgToAgentClient(msgListen);
-						
-			obj.wait();
-		    }
-					
-		    /* the clients wakes up */
-		    fr.dyade.aaa.mom.MessageMOMExtern msgResponse;
-		
-		    /* tests if the key exists 
-		     * dissociates the message null (on receiveNoWait) and internal error
-		     */
-		    if(!messageJMSMOMTable.containsKey(longMsgID))
-			throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-				
-		    /* get the the message back or the exception*/
-		    msgResponse = (fr.dyade.aaa.mom.MessageMOMExtern) messageJMSMOMTable.remove(longMsgID);
-		    if(msgResponse instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-			/* OK */ 
-		    } else if(msgResponse instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-			/* exception sent back to the client */
-			fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgResponse;
-			fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-			except.setLinkedException(msgExc.exception); 
-			throw(except);
-		    } else {
-			/* unknown message */
-			/* should never arrived */
-			fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-			throw(except);
-		    }
-		}
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-
-    /**
-     * Send a message to the proxy agent through the socket.
-     */
-    public synchronized void sendMsgToAgentClient(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) throws javax.jms.JMSException{
-	if (isClosed) throw new JMSException("Connection closed");
-	try {
-	    /* add the id of the messageJMSMOM */
-	    if(Debug.debug)
-		if(Debug.connect)
-		    System.out.println("METHOD sendMsgToAgentClient "+msgMOM.getMessageMOMExternID()+" "+msgMOM.getClass().getName());	 
-		
-			
-	    if (msgMOM instanceof fr.dyade.aaa.mom.SendingMessageQueueMOMExtern) {
-		fr.dyade.aaa.mom.SendingMessageQueueMOMExtern msgSend = (fr.dyade.aaa.mom.SendingMessageQueueMOMExtern) msgMOM;
-		/* update the timeStamp */
-		msgSend.message.setJMSTimestamp(System.currentTimeMillis() - msgSend.message.getJMSTimestamp());
-	    } else if(msgMOM instanceof fr.dyade.aaa.mom.SendingMessageTopicMOMExtern) {
-		fr.dyade.aaa.mom.SendingMessageTopicMOMExtern msgSend = (fr.dyade.aaa.mom.SendingMessageTopicMOMExtern) msgMOM;
-		/* update the timeStamp */
-		msgSend.message.setJMSTimestamp(System.currentTimeMillis() - msgSend.message.getJMSTimestamp());
-	    }
-
-	    /* send the message to the socket */
-	    oos.writeObject(msgMOM);
-	    oos.flush();
-	    oos.reset();
-			
-	} catch (IOException exc) {
-	    exc.printStackTrace();
-	    if ( msgMOM instanceof fr.dyade.aaa.mom.AckTopicMessageMOMExtern )
-		System.out.println("Socket close : can't write Ack");
-	    else {
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("IOException Error Sending Message: ",JMSAAAException.ERROR_CONNECTION_MOM);
-		except.setLinkedException(exc);
-		throw(except);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-
-    
-    /**
-     * Extract message from the socket
-     */
-    protected void extractMessage(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) throws Exception {
-	try {
-	    if (msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
-		deliverMsgFromQueue((fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) {
-        deliverMsgFromTopic((fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.SendingBackMessageMOMExtern) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-		deliveryException((fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckTransactedVector) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckTransactedRollback) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckXAPrepare) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckXACommit) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckXARollback) {
-		deliveryRequestAgree(msgMOM);
-	    } else if (msgMOM instanceof fr.dyade.aaa.mom.MessageAckXARecover) {
-		deliveryRequestAgree(msgMOM);
-	    } else {
-		/* if no messageID presents in the hashtable, it's an exception 
-		 *	to deliver to the ExceptionListener
-		 */
-		//      if (exceptionListener!=null)
-		//	  exceptionListener.onException(( javax.jms.JMSException) exc);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    /* delivery to the ExceptionListener */
-	    if(exceptionListener!=null)
-		exceptionListener.onException(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    /* delivery to the ExceptionListener */ 
-	    if(exceptionListener!=null)
-		exceptionListener.onException(except);
-	}
-    }
-	
-    /**
-     * Receives the ExceptionMessageMOMExtern, checks if the associated
-     * method exists, checks if its multiple acknowledgments, puts the message
-     * received in a queue so as to the client is able to get it, finally
-     * wakes up the client.
-     */
-    private void deliveryException(fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgMOM) throws Exception {
-	Object objWait;
-	Long longMsgID = new Long(msgMOM.getMessageMOMExternID());
-		
-	/* search of the correspondant request */
-	if((objWait = waitThreadTable.get(longMsgID))==null)
-	    throw new fr.dyade.aaa.joram.JMSAAAException("No request for this message",
-							 JMSAAAException.NO_SUCH_REQUEST_SENT);
-    
-	/* case of multiple acknowledgments*/
-	if(objWait instanceof ResponseAckObject) {
-	    ResponseAckObject responseObj = (ResponseAckObject) objWait;
-	    /* add the messageJMSMOM in the hashtable so as to the corresponding 
-	     *	Thread retrieves it
-	     */
-	    messageJMSMOMTable.put(longMsgID, msgMOM);
-		
-	    /* wake up the Thread */
-	    synchronized(responseObj.obj) {
-		(responseObj.obj).notify();
-	    }
-	} else {
-	    /* add the messageJMSMOM in the hashtable so as to the corresponding 
-	     *	Thread retrieves it
-	     */
-	    messageJMSMOMTable.put(longMsgID, msgMOM);
-		
-	    /* wake up the Thread */
-	    synchronized(objWait) {
-		objWait.notify();
-	    }
-	}
-    }
-	
-    /** receives the MessageJMSMOM
-     *	checks if the associated method exists
-     *	checks if its multiple acknowledgments
-     *	puts the message received in a queue so as to the client is able to
-     *	get it 
-     *	finally wakes up the client
-     */
-    private void deliveryRequestAgree(fr.dyade.aaa.mom.MessageMOMExtern msgMOM) throws Exception{
-	Object objWait;
-	Long longMsgID = new Long(msgMOM.getMessageMOMExternID());
-
-	/* search of the correspondant request */
-	if((objWait = waitThreadTable.get(longMsgID))==null) {
-	    throw new fr.dyade.aaa.joram.JMSAAAException("No request for this message",
-							 JMSAAAException.NO_SUCH_REQUEST_SENT);
-	}
-
-	/* case of multiple acknowledgments*/
-	if(objWait instanceof ResponseAckObject) {
-	    /* decrementation of the counter */
-	    ResponseAckObject responseObj = (ResponseAckObject) objWait;
-	    responseObj.responseCounter--;
-			
-	    /* wake up the Thread if all the responses are arrived */
-	    if(responseObj.responseCounter==0) {
-		/* Add the messageJMSMOM in the hashtable so as to the corresponding 
-		 * thread retrieves it
-		 */
-		messageJMSMOMTable.put(longMsgID, msgMOM);
-		/* wake up the Thread */
-		synchronized(responseObj.obj) {
-		    (responseObj.obj).notify();
-		}
-	    }
-	} else {
-	    /* add the messageJMSMOM in the hashtable so as to the corresponding 
-	     *	Thread retrieves it
-	     */
-	    messageJMSMOMTable.put(longMsgID, msgMOM);
-
-        if (msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
-        fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msg =
-          (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM;
-        if (msg.toListener) {
-          Session session = (Session) sessionsTable.remove(longMsgID);
-          session.listenersRequests.push(longMsgID); 
-        }
-        else {	
-	    /* wake up the Thread */
-	    synchronized(objWait) {
-		objWait.notify();
-	    }
-        }
-        }
-        else {
-	    /* wake up the Thread */
-	    synchronized(objWait) {
-		objWait.notify();
-        }
-        }
-	}
-    }
-
-	
-  /**
-   * Method delivering a message from a <code>fr.dyade.aaa.mom.Topic</code>.
-   *
-   * @author Frederic Maistre
-   */
-  private void deliverMsgFromTopic(fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msgMOM)
-    throws Exception
-  {
-    if (msgMOM.connectionConsumer) {
-      if (connectionConsumer == null)
-        throw (new JMSException("Can't find a ConnectionConsumer for this message"));
-      connectionConsumer.getMessage(msgMOM);
-    }
-    else if (msgMOM.toListener) {
-      fr.dyade.aaa.mom.TopicNaming topic =
-        (fr.dyade.aaa.mom.TopicNaming) msgMOM.message.getJMSDestination();
-
-      KeyConnectionSubscription key =
-        new KeyConnectionSubscription(msgMOM.nameSubscription,
-        topic.getTopicName(), msgMOM.theme);
-
-      Session session = (Session) subscriptionListenerTable.get(key); 
-
-      if (session == null)
-        throw (new JMSException("Can't find a session for this message"));
-
-      session.addNewMessage(msgMOM);
-    }
-    else
-      deliveryRequestAgree(msgMOM);
-  }
-
-  private void deliverMsgFromQueue(fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern momMsg)
-    throws Exception
-  {
-      deliveryRequestAgree(momMsg);
-  }
-
-
-	
-    /** incrementation of the counter with the syntax
-     *	a,b,c,...,z,aa,ab,ac,...,az,ba,... 
-     * this counter serves to give a name to not durable subscription
-     *
-     public static String calculateMessageID(String objectID) {
-     char[] chtmp;
-     int i=0;
-     int length = objectID.length();
-
-     chtmp = objectID.toCharArray();
-     while(i<length) {
-     if(chtmp[length-1-i]=='z') {
-     chtmp[length-1-i] = 'a';
-     i++;
-     }
-     else {
-     chtmp[length-1-i] = (char) (chtmp[length-1-i] + 1);
-     break;
-     }
-     } 		
-     if(i==length)
-     objectID = (new String(chtmp))+"a";
-     else
-     objectID = (new String(chtmp));
-		
-     return objectID;
-     }
-    */
-
-
-    /** incrementation of the counter */
-    public static long calculateMessageID(long objectID) {
-	return objectID + 1;
-    }
-
-
-    /**
-     * Get the next message ID and increase the counter.
-     */
-    protected synchronized long getMessageMOMID() {
-	if (messageCounter < Long.MAX_VALUE) messageCounter++;
-	else messageCounter = 0;
-	return messageCounter;
-    }
-
-    
-    /**
-     * Get the next session ID and increase the counter.
-     */
-    public synchronized long getNextSessionID() {
-	if (sessionCounter < Long.MAX_VALUE) sessionCounter++;
-	else sessionCounter = 0;
-	return sessionCounter;
-    }
-} 
-
+import org.objectweb.monolog.api.BasicLevel;
 
 /**
- * A driver listens to the socket for incoming messages from the proxy.
+ * Implements the <code>javax.jms.Connection</code> interface.
+ * <p>
+ * A connection object actually wraps a TCP connection to a given agent server.
  */
-class Driver implements java.lang.Runnable {
-    boolean stopDriver;
+public abstract class Connection implements javax.jms.Connection
+{ 
+  /** Server's address. */
+  private InetAddress serverAddr;
+  /** Server's listening port. */
+  private int serverPort;
+  /** User's name. */
+  private String userName;
+  /** Connection socket. */ 
+  private Socket socket = null;
+  /** Connection data output stream. */
+  private DataOutputStream dos = null;
+  /** Connection data input stream. */
+  private DataInputStream dis = null;
+  /** Connection object output stream. */
+  private ObjectOutputStream oos = null;
+  /** Connection object input stream. */
+  private ObjectInputStream ois = null;
+  /** Connection listening daemon. */
+  private Driver driver = null;
+  /** Time in seconds allowed for connecting. */
+  private int timer;
+  /** Client's agent proxy identifier. */
+  private String proxyId;
+  /** Connection key. */
+  private int key;
 
-    /* reference to the connection object to */
-    protected fr.dyade.aaa.joram.Connection refConnection;
-	
-    /*  inputStream of the socket */
-    protected ObjectInputStream ois;
-	
-    /* The effecient thread */
-    protected java.lang.Thread processListening;
-	
-    Driver(fr.dyade.aaa.joram.Connection refConnection, ObjectInputStream ois) {
-	this.refConnection = refConnection;
-	this.ois = ois;
-	processListening = new Thread(this);
-	processListening.setDaemon(true);
-	processListening.start();
-	stopDriver = false;
+  /** Connection meta data. */
+  private ConnectionMetaData metaData = null;
+  /** The connection's exception listener, if any. */
+  private javax.jms.ExceptionListener excListener = null;
+
+  /** Requests counter. */
+  private long requestsC = 0;
+  /** Sessions counter. */
+  private long sessionsC = 0;
+  /** Messages counter. */
+  private long messagesC = 0;
+  /** Buffer of destinations accessible for READ operations. */
+  private Vector readables;
+  /** Buffer of destinations accessible for WRITE operations. */
+  private Vector writables;
+  /** Buffer of deleted destinations. */
+  private Vector deleteds;
+
+  /** <code>true</code> if the connection is started. */
+  boolean started = false;
+  /** <code>true</code> if the connection is closed. */
+  boolean closed = false;
+  /** Vector of the connection's sessions. */
+  Vector sessions;
+  /** Vector of the connection's consumers. */
+  Vector cconsumers;
+  /** 
+   * Table holding requests related objects, either locks of synchronous
+   * requests, or asynchronous consumers.
+   * <p>
+   * <b>Key:</b> request's identifier<br>
+   * <b>Object:</b> request related object
+   */
+  Hashtable requestsTable;
+  /**
+   * Table holding the server replies to synchronous requests.
+   * <p>
+   * <b>Key:</b> reply's identifier<br>
+   * <b>Object:</b> reply object
+   */
+  Hashtable repliesTable;
+
+  /**
+   * Opens a connection.
+   *
+   * @param serverAddr  Address of the server to connect to.
+   * @param port  Port the server is listening to.
+   * @param name  User's name.
+   * @param password  User's password.
+   * @param timer  Time in seconds during which (re-)connecting is attempted.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  Connection(InetAddress serverAddr, int port, String name, String password,
+             int timer) throws JMSException
+  {
+    this.serverAddr = serverAddr;
+    this.serverPort = port;
+    this.userName = name;
+    this.timer = timer;
+
+    sessions = new Vector();
+    requestsTable = new Hashtable();
+    repliesTable = new Hashtable();
+    
+    readables = new Vector();
+    writables = new Vector();
+    deleteds = new Vector();
+
+    try {
+      // Opening the connection:
+      connect(name, password);
+  
+      // Creating and starting the listening daemon:
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                   + ": starts the Driver.");
+      driver = new Driver(this, ois);
+      driver.setDaemon(true);
+      driver.start();
+
+      // Requesting the connection key:
+      CnxConnectRequest req = new CnxConnectRequest();
+      CnxConnectReply rep = (CnxConnectReply) syncRequest(req);
+      key = rep.getKey();
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": opened."); 
+    }
+    // Connection could not be established:
+    catch (JMSException jE) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, jE);
+      throw jE;
+    }
+  }
+
+  /** String image of the connection. */
+  public String toString()
+  {
+    return "Cnx:" + proxyId + "-" + key;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public void setExceptionListener(javax.jms.ExceptionListener listener)
+            throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    this.excListener = listener;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public javax.jms.ExceptionListener getExceptionListener() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    return excListener;
+  }
+
+  /**
+   * Passes an asynchronous exception to the exception listener, if any.
+   *
+   * @param jE  The asynchronous JMSException.
+   */
+  synchronized void onException(JMSException jE)
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgClient.log(BasicLevel.WARN, this + ": " + jE);
+
+    if (excListener != null)
+      excListener.onException(jE);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically thrown.
+   */
+  public void setClientID(String clientID) throws JMSException
+  {
+    throw new IllegalStateException("ClientID is already set by the"
+                                    + " provider.");
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public String getClientID() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    return proxyId;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public javax.jms.ConnectionMetaData getMetaData() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    if (metaData == null)
+      metaData = new ConnectionMetaData();
+    return metaData;
+  }
+
+  /**
+   * API method for starting the connection.
+   *
+   * @exception IllegalStateException  If the connection is closed or broken.
+   */
+  public void start() throws JMSException
+  {
+    // If closed, throwing an exception:
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    // Ignoring the call if the connection is started:
+    if (started)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": starting..."); 
+
+    // Starting the sessions:
+    Session session;
+    for (int i = 0; i < sessions.size(); i++) {
+      session = (Session) sessions.get(i);
+      session.start();
+    }
+    // Sending a start request to the server:
+    asyncRequest(new CnxStartRequest());
+
+    started = true;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": started."); 
+  }
+
+  /**
+   * API method for stopping the connection; even if the connection appears
+   * to be broken, stops the sessions.
+   *
+   * @exception IllegalStateException  If the connection is closed or broken.
+   */
+  public void stop() throws JMSException
+  {
+    IllegalStateException isE = null;
+
+    // If closed, throwing an exception:
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    // Ignoring the call if the connection is already stopped:
+    if (! started)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": stopping..."); 
+
+    // Sending a synchronous "stop" request to the server:
+    try {
+      syncRequest(new CnxStopRequest());
+    }
+    // Catching an IllegalStateException if the connection is broken:
+    catch (IllegalStateException caughtISE) {
+      isE = caughtISE;
     }
 
-    public void run() {
-	while(true) {
-	    try {
-		if(stopDriver)
-		    break;
-        Object obj = ois.readObject();
-		if(obj instanceof fr.dyade.aaa.mom.MessageMOMExtern) {
-		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) obj;
-		    refConnection.extractMessage(msgMOM);
-		}
-	    } catch (Exception exc) {
-		javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-		except.setLinkedException(exc);
-		if(refConnection.exceptionListener!=null)
-		    refConnection.exceptionListener.onException(except);
-	    }
-	}
+    // At this point, the server won't deliver messages anymore,
+    // stopping the sessions when they have processed their asynchronous
+    // deliveries:
+    Session session;
+    for (int i = 0; i < sessions.size(); i++) {
+      session = (Session) sessions.get(i);
+
+      try {
+        session.repliesIn.stop();
+      }
+      catch (InterruptedException iE) {}
+
+      session.stop();
     }
 
-    public void stop() {
-	stopDriver = true;
+    started = false;
+
+    if (isE != null) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
+      throw isE;
     }
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": is stopped."); 
+  }
+
+
+  /**
+   * API method for closing the connection; even if the connection appears
+   * to be broken, closes the sessions.
+   *
+   * @exception IllegalStateException  If the connection is broken.
+   */
+  public void close() throws JMSException
+  {
+    IllegalStateException isE = null;
+
+    // Ignoring the call if the connection is closed:
+    if (closed)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this 
+                                 + ": closing...");
+
+    // Stopping the connection:
+    try {
+      stop();
+    }
+    // Catching a JMSException if the connection is broken:
+    catch (IllegalStateException caughtISE) {
+      isE = caughtISE;
+    }
+
+    // Closing the sessions:
+    Session session;
+    while (! sessions.isEmpty()) {
+      session = (Session) sessions.get(0);
+      try {
+        session.close();
+      }
+      // Catching a JMSException if the connection is broken:
+      catch (IllegalStateException caughtISE2) {
+        isE = caughtISE2;
+      }
+    }
+
+    // Closing the connection consumers:
+    if (cconsumers != null) {
+      ConnectionConsumer cc;
+      while (! cconsumers.isEmpty()) {
+        cc = (ConnectionConsumer) cconsumers.remove(0);
+        cc.close();
+      }
+    }
+    
+    closed = true;
+
+    // Shutting the driver down:
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                 + ": stops the Driver.");
+    driver.stop();
+    driver = null;
+
+    try {
+      dos.close();
+    }
+    catch (IOException iE) {}
+    try {
+      dis.close();
+    }
+    catch (IOException iE) {}
+    try {
+      oos.close();
+    }
+    catch (IOException iE) {}
+    try {
+      ois.close();
+    }
+    catch (IOException iE) {}
+    try {
+      socket.close();
+    }
+    catch (IOException iE) {}
+
+    requestsTable.clear();
+    requestsTable = null;
+    repliesTable.clear();
+    repliesTable = null;
+
+    if (isE != null) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
+      throw isE;
+    }
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed.");
+  }
+
+  /**
+   * Actually tries to open the TCP connection with the server.
+   *
+   * @param name  The user's name.
+   * @param password  The user's password.
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  private void connect(String name, String password) throws JMSException
+  {
+    // Setting the timer values:
+    long startTime = System.currentTimeMillis();
+    long endTime = startTime + timer * 1000;
+    long currentTime;
+    long nextSleep = 2000;
+    int attemptsC = 0;
+
+    while (true) {
+      attemptsC++;
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Trying to connect"
+                                   + " to the server...");
+
+      try {
+        // Opening the connection with the server:
+        socket = new Socket(serverAddr, serverPort);
+
+        if (socket != null) {
+          socket.setTcpNoDelay(true);
+          socket.setSoTimeout(0);
+          socket.setSoLinger(true, 1000);
+
+          dos = new DataOutputStream(socket.getOutputStream());
+          dis = new DataInputStream(socket.getInputStream());
+   
+          // Sending the connection request to the server:    
+          dos.writeUTF("USER: " + name + " " + password);
+          String reply = (String) dis.readUTF();
+
+          // Processing the server's reply:
+          int status = Integer.parseInt(reply.substring(0,1));
+          int index = reply.indexOf("INFO: ");
+          String info = null;
+          if (index != -1)
+            info = reply.substring(index + 6);
+ 
+          // If successfull, opening the connection with the client proxy: 
+          if (status == 0) {
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
+            proxyId = info;
+  
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "... connected!");
+
+            break;
+          }
+          // If unsuccessful because of an user id error, throwing a
+          // JMSSecurityException:
+          if (status == 1) 
+            throw new JMSSecurityException("Can't open the connection with the"
+                                           + " server "
+                                           + serverAddr.toString()
+                                           + " on port " + serverPort
+                                           + ": " + info);
+        }
+        // If socket can't be created, throwing an IO exception:
+        else
+          throw new IOException("Can't create the socket connected to server "
+                                + serverAddr.toString()
+                                + ", port " + serverPort);
+      }
+      catch (Exception e) {
+        // IOExceptions notify that the connection could not be opened,
+        // possibly because the server is not listening: trying again.
+        if (e instanceof IOException) {
+          currentTime = System.currentTimeMillis();
+          // Keep on trying as long as timer is ok:
+          if (currentTime < endTime) {
+
+            if (currentTime + nextSleep > endTime)
+              nextSleep = endTime - currentTime;
+
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sleeping for "
+                                         + nextSleep / 1000 + " and trying"
+                                         + " again to reconnect.");
+
+            // Sleeping for a while:
+            try {
+              Thread.sleep(nextSleep);
+            }
+            catch (InterruptedException iE) {}
+
+            // Trying again!
+            nextSleep = nextSleep * 2;
+            continue;
+          }
+          // If timer is over, throwing an IllegalStateException:
+          else {
+            long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+            IllegalStateException isE =
+              new IllegalStateException("Could not open the connection"
+                                        + " with server "
+                                        + serverAddr.toString()
+                                        + " on port " + serverPort
+                                        + " after " + attemptsC
+                                        + " attempts during "
+                                        + attemptsT + " secs: server is"
+                                        + " not listening" );
+            isE.setLinkedException(e);
+            throw isE;
+          }
+        }
+        else if (e instanceof JMSSecurityException)
+          throw (JMSSecurityException) e;
+      }
+    }
+  }
+
+  /** Returns a new request identifier. */
+  public synchronized String nextRequestId()
+  {
+    if (requestsC == Long.MAX_VALUE)
+      requestsC = 0;
+    requestsC++;
+    return "c" + key + "r" + requestsC;
+  }
+
+  /** Returns a new session identifier. */
+  protected synchronized String nextSessionId()
+  {
+    if (sessionsC == Long.MAX_VALUE)
+      sessionsC = 0;
+    sessionsC++;
+    return "c" + key + "s" + sessionsC;
+  }
+ 
+  /** Returns a new message identifier. */
+  synchronized String nextMessageId()
+  {
+    if (messagesC == Long.MAX_VALUE)
+      messagesC = 0;
+    messagesC++;
+    return "ID:" + proxyId + "c" + key + "m" + messagesC;
+  }
+  
+  /**
+   * Returns <code>true</code> if the client is a READER on a destination.
+   *
+   * @exception InvalidDestinationException  If the destination no longer
+   *              exists.
+   * @exception JMSSecurityException  If the client isn't a READER on the dest.
+   * @exception IllegalStateException  If the connection is actually broken.
+   */
+  boolean isReader(String destName) throws JMSException
+  {
+    if (deleteds.contains(destName))
+      throw new InvalidDestinationException("Destination " + destName
+                                            + " no longer exists.");
+    if (readables.contains(destName))
+      return true;
+
+    boolean result = checkAccessibility(destName, 1);
+    
+    if (result)
+      readables.add(destName);
+    else
+      throw new JMSSecurityException("READ right not granted on destination "
+                                     + destName);
+    return result;
+  }
+
+  /**
+   * Returns <code>true</code> if the client is a WRITER on a destination.
+   *
+   * @exception InvalidDestinationException  If the destination no longer
+   *              exists.
+   * @exception JMSSecurityException  If the client isn't a WRITER on the dest.
+   * @exception IllegalStateException  If the connection is actually broken.
+   */
+  boolean isWriter(String destName) throws JMSException
+  {
+    if (deleteds.contains(destName))
+      throw new InvalidDestinationException("Destination " + destName
+                                            + " no longer exists.");
+    if (writables.contains(destName))
+      return true;
+    
+    boolean result = checkAccessibility(destName, 2);
+
+    if (result)
+      writables.add(destName);
+    else
+      throw new JMSSecurityException("WRITE right not granted on destination "
+                                     + destName);
+    return result;
+  }
+
+  /**
+   * Actually checks the accessibility of a destination.
+   *
+   * @param destName  The name of the destination to check.
+   * @param right  The right to check.
+   *
+   * @return <code>true</code> if destination is accessible for this right.
+   *
+   * @exception InvalidDestinationException  If the dest no longer exists.
+   * @exception IllegalStateException  If the connection is actually broken.
+   */
+  private boolean checkAccessibility(String destName, int right)
+                throws JMSException
+  {
+    try {
+      CnxAccessRequest req = new CnxAccessRequest(destName, right);
+      CnxAccessReply rep = (CnxAccessReply) syncRequest(req);
+      return rep.getGranted();
+    }
+    catch (InvalidDestinationException iDE) {
+      deleteds.add(destName);
+      throw iDE;
+    }
+  }
+
+  /**
+   * Actually sends a synchronous request to the server and waits for its
+   * answer.
+   *
+   * @return The server reply.
+   *
+   * @exception IllegalStateException  If the connection is closed or broken.
+   * @exception JMSSecurityException  When sending a request to a destination
+   *              not accessible because of security.
+   * @exception InvalidDestinationException  When sending a request to a
+   *              destination that no longer exists.
+   * @exception JMSException  If the request failed for any other reason.
+   */
+  AbstractJmsReply syncRequest(AbstractJmsRequest request) throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+
+    String requestId = nextRequestId(); 
+    request.setIdentifier(requestId);
+
+    try {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": sends request: "
+                                   + request.getClass().getName()
+                                   + " with id: " + requestId);
+
+      Lock lock = new Lock();  
+      requestsTable.put(requestId, lock);
+      synchronized(lock) {
+        // Writing the request on the stream:
+        synchronized(this) {
+          oos.writeObject(request);
+          oos.reset();
+        }
+        lock.wait();
+        requestsTable.remove(requestId);
+      }
+    }
+    // Catching an exception because of...
+    catch (Exception e) {
+      JMSException jE = null;
+      // ... a broken connection:
+      if (e instanceof IOException)
+        jE = new IllegalStateException("Connection is broken.");
+      // ... an interrupted exchange:
+      else if (e instanceof InterruptedException)
+        jE = new JMSException("Interrupted request.");
+
+      jE.setLinkedException(e);
+
+      // Unregistering the request:
+      requestsTable.remove(requestId);
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, jE);
+      throw jE;
+    }
+
+    // Finally, returning the reply:
+    AbstractJmsReply reply = (AbstractJmsReply) repliesTable.remove(requestId);
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply.");
+
+    // If the reply is null, it means that the requester has been unlocked
+    // by the driver, because it detected a connection failure:
+    if (reply == null)
+      throw new IllegalStateException("Connection is broken.");
+    // Else, if the reply notifies of an error: throwing the appropriate exc: 
+    else if (reply instanceof MomExceptionReply) {
+      MomException mE = ((MomExceptionReply) reply).getException();
+
+      if (mE instanceof AccessException)
+        throw new JMSSecurityException(mE.getMessage());
+      else if (mE instanceof DestinationException)
+        throw new InvalidDestinationException(mE.getMessage());
+      else
+        throw new JMSException(mE.getMessage());
+    }
+    // Else: returning the reply:
+    else
+      return reply;
+  }
+
+  /**
+   * Actually sends an asynchronous request to the server.
+   *
+   * @exception IllegalStateException  If the connection is closed or broken.
+   */
+  void asyncRequest(AbstractJmsRequest request) throws IllegalStateException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    try {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": sends request: "
+                                   + request.getClass().getName()
+                                   + " with id: " + request.getRequestId());
+      synchronized(this) {
+        oos.writeObject(request);
+        oos.reset();
+      }
+    }
+    // In the case of a broken connection:
+    catch (IOException iE) {
+      IllegalStateException isE =
+        new IllegalStateException("Can't send request as connection"
+                                  + " is broken.");
+      isE.setLinkedException(iE);
+
+      // Removes the potentially stored requester:
+      requestsTable.remove(request.getRequestId());
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
+      throw isE;
+    }
+  }
+
+  /**
+   * Method called by the driver for distributing the server replies
+   * it gets on the connection.
+   * <p>
+   * Server replies are either synchronous replies to client requests,
+   * or asynchronous message deliveries, or asynchronous exceptions
+   * notifications.
+   */
+  void distribute(AbstractJmsReply reply)
+  {
+    // Getting the correlation identifier:
+    String correlationId = reply.getCorrelationId();
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply: "
+                                   + correlationId);
+
+    // Getting the object related to the replied request:
+    Object obj = requestsTable.get(correlationId);
+
+    // If the request is a synchronous request, putting the reply in the
+    // replies table and unlocking the requester:
+    if (obj instanceof Lock) {
+      repliesTable.put(correlationId, reply);
+
+      synchronized(obj) {
+        obj.notify();
+      }
+    }
+    // If the reply is an asynchronous exception, passing it:
+    else if (reply instanceof MomExceptionReply) {
+      MomException mE = ((MomExceptionReply) reply).getException();
+      JMSException jE = new JMSException(mE.getMessage());
+      onException(jE);
+    }
+    // Else, if the reply is an asynchronous delivery:
+    else if (obj != null) {
+      // Passing the reply to its consumer:
+      if (obj instanceof ConnectionConsumer)
+        ((ConnectionConsumer) obj).repliesIn.push(reply);
+      else if (obj instanceof MessageConsumer)
+        ((MessageConsumer) obj).sess.repliesIn.push(reply);
+    }
+    // Finally, if the requester disappeared, denying the delivery(ies):
+    else {
+      try {
+        if (reply instanceof QueueMessage) {
+          QueueMessage qM = (QueueMessage) reply;
+
+          if (qM.getMessage() != null) {
+            syncRequest(new QRecDenyRequest(qM.getMessage().getDestination(),
+                                            qM.getMessage().getIdentifier()));
+          }
+        }
+        else if (reply instanceof SubMessages) {
+          SubMessages sM = (SubMessages) reply;
+          Vector msgs = sM.getMessages();
+          fr.dyade.aaa.mom.messages.Message msg;
+          Vector ids = new Vector();
+
+          while (! msgs.isEmpty()) {
+            msg = (fr.dyade.aaa.mom.messages.Message) msgs.remove(0);
+            ids.add(msg.getIdentifier());
+          }
+
+          asyncRequest(new TSessDenyRequest(sM.getSubName(), ids));
+        }
+      }
+      // If sthg goes wrong while denying, nothing more can be done!
+      catch (JMSException jE) {}
+    }
+  }
 }

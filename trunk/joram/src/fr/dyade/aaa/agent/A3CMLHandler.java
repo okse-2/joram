@@ -110,11 +110,6 @@ public class A3CMLHandler extends DefaultHandler {
    * configuration parsing.
    */
   public Hashtable servers = null;
-  /**
-   * Properties defined in A3CML file, either global properties or properties
-   * defined for server serverId.
-   */
-  public Properties properties = null;
 
   /**
    * A3CML file is always parsed in regard to a particular server: serverId.
@@ -276,9 +271,8 @@ public class A3CMLHandler extends DefaultHandler {
       } else if (name.equals(ELT_PROPERTY)) {
 	if ((server ==  null) ||	   // Global property
 	    (server.sid == serverId)) {    // Server property
-	  if (properties == null) properties = new Properties();
-	  properties.setProperty(atts.getValue(ATT_NAME),
-				 atts.getValue(ATT_VALUE));
+	  System.setProperty(atts.getValue(ATT_NAME),
+                             atts.getValue(ATT_VALUE));
 	}
       } else {
 	throw new SAXException("unknown element \"" + name + "\"");

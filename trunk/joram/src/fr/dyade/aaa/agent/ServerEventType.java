@@ -31,7 +31,7 @@ import java.lang.*;
  * this class group the ServerEventType constants.
  */
 public final class ServerEventType {
-public static final String RCS_VERSION="@(#)$Id: ServerEventType.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: ServerEventType.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
 public final static int ERROR = 10;
 

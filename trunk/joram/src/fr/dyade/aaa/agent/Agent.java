@@ -68,8 +68,8 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -725,12 +725,23 @@ public abstract class Agent implements Serializable {
   }
 
   /**
-   * Permits this agent to destroy it. If necessary (fixed agent by
-   * example), its method should be overloaded to work properly.
+   * Permits this agent to destroy it. If necessary, its method should be 
+   * overloaded to work properly.
    */
-  protected void delete() {
-    sendTo(new AgentId(id.to, id.to, AgentId.FactoryIdStamp),
-	   new AgentDeleteRequest());
+  public void delete() {
+    delete(null);
+  }
+
+  /**
+   * Permits this agent to destroy it. If necessary, its method should be
+   *overloaded to work properly. 
+   *
+   * @param agent	Id of agent to notify.
+   */
+  public void delete(AgentId agent) {
+    if (deployed)
+      sendTo(new AgentId(id.to, id.to, AgentId.FactoryIdStamp),
+	     new AgentDeleteRequest(agent));
   }
 
   protected void setField(SetField not) throws Exception {
@@ -831,22 +842,20 @@ public abstract class Agent implements Serializable {
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof SetField) {
       setField((SetField) not);
-      if (((SetField) not).reply!= null ) 
+      if (((SetField) not).reply != null) 
         sendTo(((SetField) not).reply, new SetFieldAck());
     } else if (not instanceof DupRequest) {
       AgentId newId = dup((DupRequest) not, null);
       sendTo(from, new DupReply(newId));
     } else if (not instanceof DeleteNot) {
-      delete();
-      if (((DeleteNot) not).reply!= null ) 
-        sendTo(((DeleteNot) not).reply, new DeleteAck());
+      delete(((DeleteNot) not).reply);
     } else if (not instanceof SubscribeNot) {	
-	doReact(from,(SubscribeNot)not);
+	doReact(from,(SubscribeNot) not);
     } else if (not instanceof GetStatusNot) {
-	doReact(from,(GetStatusNot)not);
+	doReact(from,(GetStatusNot) not);
     } else if (not instanceof UnknownAgent) {
       if (AgentServer.MONITOR_AGENT) {
-	doReact((UnknownAgent)not);
+	doReact((UnknownAgent) not);
       }
     } else if (not instanceof UnknownNotification) {
     } else if (not instanceof ExceptionNotification) {

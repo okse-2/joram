@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,106 +15,230 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
+package fr.dyade.aaa.joram;
+
+import fr.dyade.aaa.mom.jms.*;
+
+import javax.jms.InvalidSelectorException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+
+import org.objectweb.monolog.api.BasicLevel;
+
+/**
+ * Implements the <code>javax.jms.MessageConsumer</code> interface.
+ */
+public abstract class MessageConsumer implements javax.jms.MessageConsumer
+{
+  /** The session the consumer belongs to. */
+  protected Session sess;
+  /** The selector for filtering messages. */
+  protected String selector;
+  /** The message listener, if any. */
+  protected javax.jms.MessageListener messageListener = null;
+  /** <code>true</code> if the consumer is closed. */
+  protected boolean closed = false;
+
+  /** <code>true</code> if a listener is set for this consumer. */
+  protected boolean listenerSet = false;
+  /** Pending "receive" or listener request. */
+  protected AbstractJmsRequest pendingReq = null;
+  /**
+   * <code>true</code> if the consumer has a pending synchronous "receive"
+   * request.
+   */
+  protected boolean receiving = false;
+
+  /** The destination the consumer gets its messages from. */
+  Destination dest;
+  /** The destination name. */
+  String destName;
 
 
-package fr.dyade.aaa.joram; 
-
-import java.lang.*; 
- 
-/** 
- *	a MessageConsumer is as JMS specifications 
- * 
- *	@see         subclasses
- *	javax.jms.MessageConsumer 
- */ 
- 
-public class MessageConsumer implements javax.jms.MessageConsumer { 
-	
-	/** reference to the COnnection Object to retrieve Message from Connection */
-	protected fr.dyade.aaa.joram.Connection refConnection;
-	
-	/** reference to the Session Object so send Message to the socket */
-	protected fr.dyade.aaa.joram.Session refSession;
-	
-	/** identifier of MessageConsumer : consumerID */
-    protected String consumerID;
-	
-	/** the selector for the corresponding Queue/Topic */
-	protected java.lang.String selector;
-	
-	/** the Message Listener associated to the MessageConsumer */
-	protected javax.jms.MessageListener messageListener;
-	
-	/** this boolean allows to th session to only deliver a message
-	 *	from the same Topic
-	 *	false -> no delivery
-	 */
-	private boolean deliveryMessage = true;
-	
-	/*	this constructeur is uused due to in error in the super in queueReceiver 
-	 *	"println"
-	 */
-	public MessageConsumer() {}
-
-	/** constructor with selector chosen by the client */
-    public MessageConsumer(String  consumerIDNew, fr.dyade.aaa.joram.Connection refConnectionNew, fr.dyade.aaa.joram.Session refSessionNew, String selectorNew) {
-		consumerID = consumerIDNew;
-		refConnection = refConnectionNew;
-		refSession = refSessionNew;
-		selector = selectorNew;
-		messageListener = null;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public java.lang.String getMessageSelector() throws javax.jms.JMSException {
-		return selector;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.MessageListener getMessageListener() throws javax.jms.JMSException {
-		return messageListener;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void setMessageListener(javax.jms.MessageListener listener) throws javax.jms.JMSException {
-		throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-	}
-
-  public javax.jms.Message receive() throws javax.jms.JMSException
+  /**
+   * Constructs a consumer.
+   *
+   * @param sess  The session the consumer belongs to.
+   * @param queue  The destination the consumer gets messages from.
+   * @param selector  Selector for filtering messages.
+   *
+   * @exception InvalidSelectorException  If the selector syntax is invalid.
+   * @exception JMSSecurityException  If the user is not a READER on the 
+   *              destination.
+   * @exception IllegalStateException  If the connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  MessageConsumer(Session sess, Destination dest,
+                  String selector) throws JMSException
   {
-    return receive((long) -1);
+    if (dest == null)
+      throw new InvalidDestinationException("Invalid destination: " + dest);
+
+    try {
+      fr.dyade.aaa.mom.selectors.Selector.checks(selector);
+    }
+    catch (fr.dyade.aaa.mom.excepts.SelectorException sE) {
+      throw new InvalidSelectorException("Invalid selector syntax: " + sE);
+    }
+
+    this.sess = sess;
+    this.dest = dest;
+    this.selector = selector;
+    destName = dest.getName();
+
+    // Checking the user's access permission:
+    sess.cnx.isReader(destName);
+
+    sess.consumers.add(this);
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  public javax.jms.Message receiveNoWait() throws javax.jms.JMSException
+  /**
+   * API method specialized in subclasses.
+   *
+   * @exception IllegalStateException  If the consumer is closed.
+   */
+  public void setMessageListener(javax.jms.MessageListener messageListener)
+            throws JMSException
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": setting MessageListener to "
+                                 + messageListener);
+
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed consumer.");
+
+    if (sess.cnx.started) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+        JoramTracing.dbgClient.log(BasicLevel.WARN, this + ": improper call"
+                                   + " on a started connection.");
+    }
+
+    // If unsetting the listener:
+    if (this.messageListener != null && messageListener == null) {
+      sess.msgListeners--;
+      // Stopping the daemon if not needed anymore:
+      if (sess.msgListeners == 0 && sess.started) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": stops the"
+                                     + " session daemon.");
+        sess.daemon.stop();
+        sess.daemon = null;
+      }
+      listenerSet = false;
+    }
+    // Else, if setting a new listener:
+    else if (this.messageListener == null && messageListener != null) {
+      sess.msgListeners++;
+
+      if (sess.msgListeners == 1 && sess.started) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": starts the"
+                                     + " session daemon.");
+        sess.daemon = new SessionDaemon(sess);
+        sess.daemon.setDaemon(true);
+        sess.daemon.start();
+      }
+      listenerSet = true;
+    }
+    this.messageListener = messageListener;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the consumer is closed.
+   */
+  public javax.jms.MessageListener getMessageListener() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed consumer.");
+
+    return messageListener;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the consumer is closed.
+   */
+  public String getMessageSelector() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed consumer.");
+
+    return selector;
+  }
+
+  /** API method implemented in subclasses. */
+  public abstract javax.jms.Message receive(long timeOut) throws JMSException;
+
+  /** 
+   * API method.
+   * 
+   * @exception IllegalStateException  If the consumer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public javax.jms.Message receive() throws JMSException
+  {
+    return receive(-1);
+  }
+
+  /** 
+   * API method.
+   * 
+   * @exception IllegalStateException  If the consumer is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public javax.jms.Message receiveNoWait() throws JMSException
   {
     return receive(0);
   }
 
-  public javax.jms.Message receive(long timeOut) throws javax.jms.JMSException
+  /**
+   * API method specialized in subclasses.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void close() throws JMSException
   {
-    throw (new javax.jms.JMSException("Not implemented at this level"));
+    // Ignoring the call if consumer is already closed:
+    if (closed)
+      return;
+
+    sess.consumers.remove(this);
+    closed = true;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed.");
   }
 
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void close()  throws javax.jms.JMSException {
-	  System.gc();
-	}
-	
-	/** session updates the boolean to allow delivery or not */
-	protected void setDeliveryMessage(boolean deliveryMessageNew) {
-		deliveryMessage = deliveryMessageNew;
-	}
-	
-	/** session reads the boolean to allow delivery or not */
-	protected boolean getDeliveryMessage() {
-		return deliveryMessage ;
-	}
+  /**
+   * Returns when the consumer isn't busy executing a "onMessage" or a
+   * "receive" anymore; method called for synchronization purposes.
+   */
+  synchronized void syncro() {}
+  
+  /**
+   * The purpose of this abstract method is to force the
+   * <code>QueueReceiver</code> and <code>TopicSubscriber</code> classes to
+   * specifically manage the distribution of asynchronous deliveries to their
+   * message listeners.
+   */
+  abstract void onMessage(fr.dyade.aaa.mom.messages.Message message);
 }

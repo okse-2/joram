@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,165 +15,335 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-
 package fr.dyade.aaa.joram;
 
-import javax.jms.*;
-import javax.transaction.xa.*;
+import fr.dyade.aaa.mom.jms.*;
+
 import java.util.*;
-import java.io.*;
-import fr.dyade.aaa.mom.*;
+
+import javax.jms.JMSException;
+import javax.jms.IllegalStateException;
+import javax.jms.TransactionInProgressException;
+import javax.transaction.xa.*;
+
+import org.objectweb.monolog.api.BasicLevel;
 
 /**
- * XASession extends the capability of Session by adding access to a
- * JMS provider's support for JTA. This support takes the form of a
- * <code>javax.transaction.xa.XAResource</code> object. The functionality
- * of this object closely resembles that defined by the standard X/Open XA
- * Resource interface.
- *
- * @author Laurent Chauvirey
- * @version 1.0
+ * Implements the <code>javax.jms.XASession</code> interface.
+ * <p>
+ * An XA session actually extends the behaviour of a normal session by
+ * providing an XA resource representing it to a Transaction Manager, so that
+ * it is part of a distributed transaction.
  */
-
-public abstract class XASession extends Session implements javax.jms.XASession {
-
-    /** The XAResource associated to this session */
-    private XAResource xar;
-
-    /** The number of consumers */
-    private int consumerCounter;
-
-    /** The object both commit and rollback synchronizes on */
-    //private Object synchroObj;
-
-    /** The object containing the vectors of messages and acks to send. */
-    public XidTable xidTable;
+public abstract class XASession extends Session implements javax.jms.XASession
+{
+  /** The XA resource representing the session to the transaction manager. */
+  private XAResource xaResource;
+  /**
+   * The table of transaction contexts the session is involved in.
+   * <p>
+   * <b>Key:</b> transaction id<br>
+   * <b>Object:</b> <code>XAContext</code> instance
+   */
+  protected Hashtable transactionsTable;
 
 
-    //public XASession(long sessionID, XAConnection refConnection) {
-    public XASession(long sessionID, Connection refConnection) {
-	super(true, fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED, sessionID, (Connection) refConnection);
-	isClosed = false;
+  /**
+   * Constructs an <code>XASession</code>.
+   *
+   * @param ident  Identifier of the session.
+   * @param cnx  The connection the session belongs to.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  XASession(String ident, Connection cnx) throws JMSException
+  {
+    super(ident, cnx, true, 0);
+    xaResource = new XAResource(this);
+    transactionsTable = new Hashtable();
 
-	xar = new XAResource(this);
-	xidTable = new XidTable();
-    }
+    // This session's resources are not used by XA sessions:
+    consumers = null;
+    producers = null;
+    sendings = null;
+    deliveries = null;
+  }
+ 
+ 
+  /** API method. */  
+  public javax.transaction.xa.XAResource getXAResource()
+  {
+    return xaResource;
+  }
+
+  /**
+   * API method. 
+   *
+   * @exception IllegalStateException  If the session is closed.
+   */
+  public boolean getTransacted() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+    return true;
+  }
+
+  /**
+   * API method inherited from session, but intercepted here for
+   * forbidding its use in the XA context (as defined by the API).
+   *
+   * @exception TransactionInProgressException  Systematically thrown.
+   */
+  public void commit() throws JMSException
+  {
+    throw new TransactionInProgressException("Forbidden call on an XA"
+                                             + " session.");
+  }
+
+  /**
+   * API method inherited from session, but intercepted here for
+   * forbidding its use in the XA context (as defined by the API).
+   *
+   * @exception TransactionInProgressException  Systematically thrown.
+   */
+  public void rollback() throws JMSException
+  {
+    throw new TransactionInProgressException("Forbidden call on an XA"
+                                             + " session.");
+  }
+
+  /**
+   * API method inherited from session, but intercepted here for
+   * adapting its behaviour to the XA context.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public abstract void close() throws JMSException;
+
+  
+  /** 
+   * API method inherited from session, but intercepted here for
+   * adapting its behaviour to the XA context.
+   */
+  public abstract void run();
+
+  /** 
+   * This abstract method inherited from session is empty and does nothing.
+   * <p>
+   * Its purpose is to force the <code>QueueSession</code> and
+   * <code>TopicSession</code> classes to specifically take care of
+   * acknowledging the consumed messages. The messages consumed by an XA
+   * session are consumed through the wrapped session, and acknowledgement
+   * is not done through the same mechanism.
+   */
+  void acknowledge() throws IllegalStateException
+  {}
+
+  /** 
+   * This abstract method inherited from session is empty and does nothing.
+   * <p>
+   * Its purpose is to force the <code>QueueSession</code> and
+   * <code>TopicSession</code> classes to specifically take care of
+   * denying the consumed messages. The messages consumed by an XA
+   * session are consumed through the wrapped session, and denying
+   * is not done through the same mechanism.
+   */
+  void deny()
+  {}
+
+  /** 
+   * This abstract method inherited from session is empty and does nothing.
+   * <p>
+   * Its purpose is to force the <code>QueueSession</code> and
+   * <code>TopicSession</code> classes to specifically take care of
+   * distributing the asynchronous deliveries destinated to their consumers.
+   * An XA session actually does not directly manage consumers, this is done
+   * by the session it wraps.
+   */
+  void distribute(AbstractJmsReply reply)
+  {}
+   
+ 
+  /** 
+   * Method called by the XA resource to involve the session in a given
+   * transaction.
+   *
+   * @exception XAException  If the session is already involved in this
+   *              transaction. 
+   */
+  void getInvolvedIn(Xid xid) throws XAException
+  {
+    if (transactionsTable.containsKey(xid))
+      throw new XAException("Resource already involved in specified"
+                            + " transaction.");
+
+    transactionsTable.put(xid, new XAContext());
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": involved in transaction "
+                                 + xid.toString()); 
+  }
+
+  /** 
+   * Method called by the XA resource when a transaction has either
+   * committed or rolledback, and is therefor terminated.
+   */
+  void removeTransaction(Xid xid)
+  {
+    transactionsTable.remove(xid);
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": terminated transaction "
+                                 + xid.toString()); 
+  }
+
+  /** 
+   * Method called by the XA resource to set the status of a given transaction.
+   *
+   * @exception XAException  If the session is not involved in this
+   *              transaction. 
+   */
+  void setTransactionStatus(Xid xid, int status) throws XAException
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    xaC.status = status;
+  }
+
+  /** 
+   * Method called by the XA resource to get the status of a given transaction.
+   *
+   * @exception XAException  If the session is not involved in this
+   *              transaction. 
+   */
+  int getTransactionStatus(Xid xid) throws XAException
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    return xaC.status;
+  }
+
+  /** 
+   * The purpose of this abstract method is to force the
+   * <code>XAQueueSession</code> and <code>XATopicSession</code> classes to
+   * specifically react to their delisting from the transaction.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction. 
+   */
+  abstract void saveTransaction(Xid xid) throws XAException;
+
+  /** 
+   * Method called by the XA resource when it is enlisted again to a given
+   * transaction.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction. 
+   */
+  void resumeTransaction(Xid xid) throws XAException
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+  }
+
+  /** 
+   * The purpose of this abstract method is to force the
+   * <code>XAQueueSession</code> and <code>XATopicSession</code> classes to
+   * specifically react to a preparing transaction.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction.
+   * @exception JMSException If the prepare failed because of the
+   *              Joram server.
+   */
+  abstract void prepareTransaction(Xid xid) throws Exception;
+
+  /** 
+   * Method called by the XA resource when the transaction commits.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction.
+   * @exception JMSException  If the commit fails because of Joram server.
+   */
+  void commitTransaction(Xid xid) throws Exception
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
     
-    public javax.transaction.xa.XAResource getXAResource() {
-	return xar;
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": commits transaction "
+                                 + xid.toString()); 
+
+    cnx.syncRequest(new XASessCommit(ident + " " + xid.toString())); 
+  }
+
+  /** 
+   * Method called by the XA resource when the transaction rolls back.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction.
+   * @exception JMSException  If the rollback fails because of Joram server.
+   */
+  void rollTransactionBack(Xid xid) throws Exception
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": rolls transaction "
+                                 + xid.toString() + " back."); 
+
+    cnx.syncRequest(new XASessRollback(ident + " " + xid.toString())); 
+  }
+
+  /**
+   * Returns an array of the identifiers of the prepared transactions the
+   * session is involved in.
+   */
+  Xid[] getPreparedTransactions()
+  {
+    Enumeration keys = transactionsTable.keys();
+    Xid key;
+    XAContext xaC;
+    Vector ids = new Vector();
+    while (keys.hasMoreElements()) {
+      key = (Xid) keys.nextElement();
+      xaC = (XAContext) transactionsTable.get(key);
+      if (xaC.status == XAResource.PREPARED)
+        ids.add(key);
     }
-
-    public boolean getTransacted() throws JMSException {
-	return true;
-    }
-
-    /**
-     * Throws TransactionInProgressException since it should not be called
-     * for an XASession object.
-     */
-    public void commit() throws JMSException {
-	throw new TransactionInProgressException("Use of a session's commit is prohibited in a distributed transaction");
-    }
-
-    /**
-     * Throws TransactionInProgressException since it should not be called
-     * for an XASession object.
-     */
-    public void rollback() throws JMSException {
-	throw new TransactionInProgressException("Use of a session's rollback is prohibited in a distributed transaction");
-    }
-
-    /**
-     * Closes the session and runs the garbage collector.
-     */
-    public void close() throws JMSException {
-	isClosed = true;
-	System.gc();
-    }
-
-
-    public void recover() throws JMSException {
-	throw new JMSException("Not implemented");
-    }
-
-    public void acknowledgeMessage(String messageID) throws JMSException {
-	throw new JMSException("Prohibited in a distributed transaction");
-    }
-
-    
-    protected Vector preparesTransactedAck(long messageJMSMOMID) throws JMSException {
-	throw new JMSException("Forbidden function call");
-    }
-
-
-    protected abstract Vector preparesTransactedAck(javax.transaction.xa.Xid xid,
-						    long messageJMSMOMID) throws JMSException;
-
-
-    public void acknowledgeTransactedMessage(javax.transaction.xa.Xid xid) throws JMSException {
-	throw new JMSException("Forbidden function call");
-    }
-
-
-    protected Vector preparesHandlyAck(String messageID, long messageJMSMOMID) throws JMSException {
-	throw new JMSException("Forbidden function call");
-    }
-
-
-    protected abstract void rollbackDeliveryMsg() throws JMSException;
-
-
-    protected abstract Vector createAckRollbackVector(javax.transaction.xa.Xid xid) throws JMSException;
-    
-
-    /**
-     * Send a message via the connection and wait for the answer.
-     */
-    protected MessageMOMExtern sendMessageGetAnswer(MessageMOMExtern msg) throws JMSException {
-	Long messageID = new Long(msg.getMessageMOMExternID());
-	Object synchroObj = new Object();
-
-	synchronized(synchroObj) {
-	    refConnection.waitThreadTable.put(messageID, synchroObj);
-	    sendToConnection(msg);
-	    try {
-		synchroObj.wait();
-	    } catch (InterruptedException ie) {
-		ie.printStackTrace();
-	    }
-	}
-	return ((MessageMOMExtern) refConnection.messageJMSMOMTable.remove(messageID));
-    }
-
-
-    /**
-     * Get the vector of messages to send.
-     */
-    public abstract Vector getMessageToSendVector();
-
-
-    /**
-     * Set the vector of messages to send.
-     */
-    public abstract void setMessageToSendVector(Vector v);
-
-
-    /*
-     * Get the vector of acks to send.
-     */
-    public abstract Vector getMessageToAckVector();
-
-
-    /**
-     * Set the vector of acks to send.
-     */
-    public abstract void setMessageToAckVector(Vector v);
-
-} // XASession
+    Xid[] array = new Xid[ids.size()];
+    ids.copyInto(array);
+    return array;
+  }
+}

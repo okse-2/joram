@@ -40,8 +40,8 @@ import fr.dyade.aaa.util.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.5 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.6 2002-03-06 16:50:00 joram Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;

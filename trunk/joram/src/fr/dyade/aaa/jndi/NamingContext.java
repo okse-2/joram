@@ -29,6 +29,8 @@ import java.net.*;
 import java.util.*;
 import javax.naming.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+
 /**
  *
  *  @author Nicolas Tachker
@@ -42,19 +44,69 @@ public class NamingContext implements Context {
   protected int port;
   protected String host;
 
+  /** Time in seconds during which trying to open the server connection. */
+  private int timer = 120;
+
   public NamingContext () throws Exception {
 	this("localhost",16400);
   }
 
-  public NamingContext (String host, int port) throws Exception {
-	sock = new Socket(host, port);
-	if (sock != null) {
-	  sock.setTcpNoDelay(true);
-	  sock.setSoTimeout(0);
-	  sock.setSoLinger(true,1000);
-	  out = new ObjectOutputStream(sock.getOutputStream());
-	  in = new ObjectInputStream(sock.getInputStream());
-	}
+  public NamingContext(String host, int port) throws Exception
+  {
+    long startTime = System.currentTimeMillis();
+    long lastSleep = 1000;
+    int attemptsC = 0;
+
+    this.host = host;
+    this.port = port;
+
+    while (true) {
+      attemptsC++;
+      try {
+        sock = new Socket(host, port);
+        if (sock != null) {
+          sock.setTcpNoDelay(true);
+          sock.setSoTimeout(0);
+          sock.setSoLinger(true,1000);
+          out = new ObjectOutputStream(sock.getOutputStream());
+          in = new ObjectInputStream(sock.getInputStream());
+
+          break;
+        }
+        else
+          throw new IOException("Can't create the socket connected to server "
+                                + host + " on port " + port);
+             
+      }
+      catch (IOException ioE) {
+        // DF: removes the trace because it uses aaa.agent.Debug
+        // which is not in the client jar.
+        // Should use aaa.util.ClientDebug.
+        // if (JndiTracing.dbg.isLoggable(BasicLevel.WARN))
+        // JndiTracing.dbg.log(BasicLevel.WARN, "Exception in JNDI while"
+        // + " trying to open the connection with server "
+        // + host + ", port " + port + " because it is not"
+        // + " listening; trying again.");
+
+        if (System.currentTimeMillis() < startTime + timer * 1000) {
+          lastSleep = lastSleep * 2;
+          try {
+            Thread.sleep(lastSleep);
+          }
+          catch (InterruptedException iE) {}
+
+          continue;
+        }
+        else {
+          long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+          throw new Exception("The connection with the naming service failed:\n"
+                              + " - host: " + host + '\n'
+                              + " - port: " + port + '\n'
+                              + '(' + attemptsC + " attempts "
+                              + " during " + attemptsT + " s)");
+        }
+      }
+    }
   }
 
   private Object readWrite(String name, String cmd) {
@@ -104,7 +156,7 @@ public class NamingContext implements Context {
 	  try {
 		obj = javax.naming.spi.NamingManager.getObjectInstance(obj,null,null,null);
 	  } catch (Exception e) {
-		throw(new NamingException("NamingContext lookup : getObjectInstance()"));
+		throw(new NamingException(e.getMessage()));
 	  }
 	}
 	return obj;
@@ -192,6 +244,73 @@ public class NamingContext implements Context {
 	}
   }
 
+  /** 
+   * Actually opens the connection with the agent server.
+   *
+   * @exception Exception  If the server is not listening.
+   */
+  private void connect() throws Exception
+  {
+    long startTime = System.currentTimeMillis();
+    long lastSleep = 1000;
+    int attemptsC = 0;
+
+    while (true) {
+      try {
+        sock = new Socket(host, port);
+        if (sock != null) {
+          sock.setTcpNoDelay(true);
+          sock.setSoTimeout(0);
+          sock.setSoLinger(true,1000);
+          out = new ObjectOutputStream(sock.getOutputStream());
+          in = new ObjectInputStream(sock.getInputStream());
+
+          break;
+        }
+        else throw new Exception("Can't create the socket connected to"
+                                   + " server " + host + " on port " + port);
+             
+      }
+      catch (IOException ioE) {
+        if (System.currentTimeMillis() < startTime + timer * 1000) {
+          lastSleep = lastSleep * 2;
+          try {
+            Thread.sleep(lastSleep);
+          }
+          catch (InterruptedException iE) {}
+
+          continue;
+        }
+        else {
+          long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+          throw new Exception("Could not open the connection with server "
+                              + host + " on port " + port + " after "
+                              + attemptsC + " attempts, during " + attemptsT
+                              + " secs: server is not listening." );
+        }
+      }
+    }
+  }
+
+  /**
+   * <p>Retrieves the environment in effect for this context. See class
+   * description for more details on environment properties.<p>
+   * 
+   * <p>The caller should not make any changes to the object returned: their
+   * effect on the context is undefined. The environment of this context may be
+   * changed using <code>addToEnvironment()</code> and
+   * <code>removeFromEnvironment()</code>.</p>
+   *
+   * @return the environment of this context; never null
+   * @exception NamingException if a naming exception is encountered
+   */
+  public Hashtable getEnvironment() throws NamingException {
+    Hashtable env = new Hashtable();
+    env.put("java.naming.provider.host", host);
+    env.put("java.naming.provider.port", new Integer(port).toString());
+    return env;
+  }
+
   //============================ begin not yet available ===========================
   public Object addToEnvironment(Name propName, Object propVal) throws NamingException {
 	return addToEnvironment(propName.toString(),propVal);
@@ -215,9 +334,6 @@ public class NamingContext implements Context {
 	destroySubcontext(name.toString());
   }
   public void destroySubcontext(String name) throws NamingException {
-	throw(new NamingException("Not yet available"));
-  }
-  public Hashtable getEnvironment() throws NamingException {
 	throw(new NamingException("Not yet available"));
   }
   public String getNameInNamespace() throws NamingException {

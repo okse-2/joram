@@ -32,8 +32,8 @@ import org.objectweb.monolog.api.Monitor;
  * Input driver.
  */
 class DriverIn extends Driver {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
 
   /** Proxy this <code>DriverIn<code> belongs to. */
   private ProxyAgent proxy;
@@ -187,7 +187,8 @@ class DriverIn extends Driver {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", read " + m);
 
-        proxy.getDriverInNotification(key, m);
+        // "Passes" the notification to the proxy:
+        proxy.driverReact(key, m);
         nbNotSent += 1;
       }
     }

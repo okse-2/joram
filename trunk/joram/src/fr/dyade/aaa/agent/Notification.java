@@ -30,7 +30,7 @@ import java.io.*;
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Notification.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
   /**
    * Returns a clone of this notification.
