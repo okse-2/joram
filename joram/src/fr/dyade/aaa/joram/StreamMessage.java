@@ -47,13 +47,15 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   /** The stream for reading the data. */
   private ObjectInputStream inputStream = null;
 
-  /** Local bytes array. */
-  private byte[] bytes = null;
-
   /** <code>true</code> if the message body is read-only. */
   private boolean RObody = false; 
   /** <code>true</code> if the message body is write-only. */
   private boolean WObody = true;
+
+  /** Local bytes array. */
+  private byte[] bytes = null;
+  /** <code>true</code> if the message has been sent since its last modif. */
+  private boolean prepared = false;
 
 
   /**
@@ -131,6 +133,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       bytes = null;
       RObody = false;
       WObody = true;
+      prepared = false;
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while closing the stream"
@@ -149,9 +152,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */
   public void writeBoolean(boolean value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeBoolean(value);
     }
@@ -170,9 +172,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */ 
   public void writeByte(byte value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeByte(value);
     }
@@ -191,9 +192,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */   
   public void writeBytes(byte[] value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.write(value);
     }
@@ -213,9 +213,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   public void writeBytes(byte[] value, int offset, int length)
               throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.write(value, offset, length);
     }
@@ -234,9 +233,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */ 
   public void writeChar(char value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeChar(value);
     }
@@ -255,9 +253,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */ 
   public void writeDouble(double value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeDouble(value);
     }
@@ -276,9 +273,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */   
   public void writeFloat(float value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeFloat(value);
     }
@@ -297,9 +293,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */  
   public void writeInt(int value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeInt(value);
     }
@@ -318,9 +313,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */ 
   public void writeLong(long value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeLong(value);
     }
@@ -339,9 +333,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */  
   public void writeShort(short value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeShort(value);
     }
@@ -360,9 +353,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */   
   public void writeString(String value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
+
     try {
       outputStream.writeUTF(value);
     }
@@ -382,9 +374,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    */ 
   public void writeObject(Object value) throws JMSException
   {
-    if (RObody)
-      throw new MessageNotWriteableException("Can't write a value as the"
-                                             + " message body is read-only.");
+    prepareWrite();
 
     if (! (value instanceof Boolean) && ! (value instanceof Character)
         && ! (value instanceof Number) && ! (value instanceof String)
@@ -734,9 +724,36 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
     if (WObody) {
       outputStream.flush();
       bytes = outputBuffer.toByteArray();
+      prepared = true;
     }
 
     momMsg.clearBody();
     momMsg.setStream(bytes);
   } 
+
+  /**
+   * Internal method called before each writing operation.
+   *
+   * @exception MessageNotWriteableException  If the message body is READ only.
+   * @exception JMSException  If the stream could not be prepared for the
+   *              writing operation.
+   */
+  private void prepareWrite() throws JMSException
+  {
+    if (RObody)
+      throw new MessageNotWriteableException("Can't write a value as the"
+                                             + " message body is read-only.");
+    if (prepared) {
+      prepared = false;
+      outputBuffer = new ByteArrayOutputStream();
+
+      try {
+        outputStream = new ObjectOutputStream(outputBuffer);
+      }
+      catch (IOException exc) {
+        throw new JMSException("Can prepare stream for writing operation: "
+                               + exc);
+      }
+    }
+  }
 }
