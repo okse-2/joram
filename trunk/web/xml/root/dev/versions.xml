@@ -28,7 +28,8 @@
       </s2>
     </s1>
     <s1 name="joram3_6_1 (September 11, 2003)">
-      <p>This release is integrated in JOnAS 3.3.</p>
+      <p>This release introduces MBeans classes for standard JMX management.
+      It is also integrated into JOnAS 3.3.</p>
       <s2 name="Modifications"> 
       <ul>
         <li>JMX MBeans introduced for the management of the JORAM destinations
