@@ -20,6 +20,14 @@
       <connect href="history.xml">History</connect>
     </menu>
 
+    <menu name="Test Suite">
+      <connect href="tests/index.xml">Home page</connect>
+      <connect href="tests/doc.xml">Documentation</connect>
+      <connect href="tests/download.xml">Download</connect>
+      <a href="current/javadoc/tests/index.html">Javadoc</a>
+      <connect href="tests/license.xml">License</connect>
+    </menu>
+    
     <menu name="Resources">
         <a href="http://www.objectweb.org/faq">FAQ</a>
         <a href="http://www.objectweb.org/wws">Mailing Lists</a>
