@@ -41,7 +41,7 @@ import javax.jms.*;
  * <code>JMSTestCase</code>.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: PubSubTestCase.java,v 1.1 2002-03-18 13:34:58 joram Exp $
+ * @version $Id: PubSubTestCase.java,v 1.2 2002-03-20 10:37:14 joram Exp $
  */
 public class PubSubTestCase extends JMSTestCase {
 
@@ -129,7 +129,7 @@ public class PubSubTestCase extends JMSTestCase {
 	    subscriberConnection = subscriberTCF.createTopicConnection();
 	    subscriberSession = subscriberConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 	    subscriber = subscriberSession.createSubscriber(subscriberTopic);
-
+	    
 	    publisherConnection.start();
 	    subscriberConnection.start();
 	    //end of client step
@@ -144,7 +144,6 @@ public class PubSubTestCase extends JMSTestCase {
      */
     protected void tearDown() {
 	try {
-
 	    publisherConnection.close();
 	    subscriberConnection.close();
 
@@ -161,6 +160,12 @@ public class PubSubTestCase extends JMSTestCase {
 	    publisherTCF = null;
 	    publisherSession = null;
 	    publisherConnection = null;
+
+	    subscriberTopic = null;
+	    subscriber = null;
+	    subscriberTCF = null;
+	    subscriberSession = null;
+	    subscriberConnection = null;
 	}
     }
     
