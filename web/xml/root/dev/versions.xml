@@ -14,6 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
+      <s2 name="Corrected bugs">
+      <ul>
+        <li>Blocking <code>AdminItf.stopServer</code> method. The processing of
+        this method disapeared from the administration topic server side since
+        release 3.5, probably due to an invalid CVS merge. The code is back
+        now in class <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.</li>
+      </ul>
+      </s2>
     </s1>
     <s1 name="joram3_6_0 (August 7, 2003)"> 
       <p>This version provides the kJORAM libraries allowing J2ME applications
