@@ -1623,6 +1623,9 @@ public class ProxyImpl implements java.io.Serializable {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "ProxyImpl.setCtx(" + key + ')');
 
+    if (key < 0)
+      throw new StateException("Context " + key + " is invalid.");
+
     // If the required context is the last used, no need to update the
     // references:
     if (key == activeCtxId) return;
