@@ -31,6 +31,7 @@ import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.admin.*;
 import fr.dyade.aaa.mom.admin.AdminRequest;
+import fr.dyade.aaa.mom.admin.AdminReply;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
@@ -77,6 +78,8 @@ public class AdminTopicImpl extends TopicImpl
    */
   private Hashtable soapTable;
 
+  /** Table keeping the replyTo identifiers per request. */
+  private Hashtable requestsTable;
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
 
@@ -96,6 +99,7 @@ public class AdminTopicImpl extends TopicImpl
     usersTable = new Hashtable();
     soapTable = new Hashtable();
     proxiesTable = new Hashtable();
+    requestsTable = new Hashtable();
   }
 
   /** Returns a string view of this AdminTopicImpl instance. */
@@ -182,8 +186,8 @@ public class AdminTopicImpl extends TopicImpl
       doReact(from, (AdminNotification) not);
     else if (not instanceof SimpleReport)
       doReact(from, (SimpleReport) not);
-    else if (not instanceof ExceptionReply)
-      doReact(from, (ExceptionReply) not);
+    else if (not instanceof fr.dyade.aaa.mom.comm.AdminReply)
+      doReact(from, (fr.dyade.aaa.mom.comm.AdminReply) not);
     else
       super.react(from, not);
   }
@@ -228,9 +232,8 @@ public class AdminTopicImpl extends TopicImpl
                                       + " linking admin topics, platform is"
                                       + " not administerable");
     }
-   
     // LookupReport: it carries the identifier of the initial AdminTopic. 
-    if (report instanceof LookupReport) {
+    else if (report instanceof LookupReport) {
       AgentId adminTopic0Id = ((LookupReport) report).getAgent();
       Channel.sendTo(adminTopic0Id, new ClusterNot(destId));
 
@@ -240,40 +243,49 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /**
-   * Method implementing the reaction to an <code>ExceptionReply</code>
-   * notification sent by a destination if an admin request went wrong.
+   * Method implementing the reaction to a
+   * <code>fr.dyade.aaa.mom.comm.AdminReply</code> notification replying to
+   * an administration request.
    * <p>
-   * The information is forwarded to the topics fellows and published to
-   * the subscribers.
-   */  
-  protected void doReact(AgentId from, ExceptionReply not)
+   * A reply is sent back if needed.
+   */ 
+  protected void doReact(AgentId from, fr.dyade.aaa.mom.comm.AdminReply not)
   {
-    distributeReply(null, not.getCorrelationId(),
-                    new AdminReply(false, not.getException().getMessage()));
+    String requestId = not.getRequestId();
+    if (requestId == null)
+      return;
+
+    AgentId replyTo = (AgentId) requestsTable.remove(requestId);
+    distributeReply(replyTo, requestId, new AdminReply(not.getSuccess(),
+                                                       not.getInfo()));
   }
 
   /**
    * Overrides this <code>DestinationImpl</code> method; AdminTopics do not
    * accept <code>SetRightRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception  AccessException  Not thrown.
    */ 
   protected void doReact(AgentId from, SetRightRequest request)
-                 throws MomException
+                 throws AccessException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   /**
    * Overrides this <code>DestinationImpl</code> method; AdminTopics do not
    * accept <code>SetDMQRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception  AccessException  Not thrown.
    */ 
-  protected void doReact(AgentId from, SetDMQRequest not)
-                 throws MomException
+  protected void doReact(AgentId from, SetDMQRequest request)
+                 throws AccessException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   /**
@@ -302,9 +314,9 @@ public class AdminTopicImpl extends TopicImpl
    */
   protected void doReact(AgentId from, DeleteNot not)
   {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-      MomTracing.dbgDestination.log(BasicLevel.ERROR, "--- " + this
-                                    + " notified to be deleted.");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + not);
   }
 
 
@@ -312,12 +324,14 @@ public class AdminTopicImpl extends TopicImpl
    * Overrides this <code>TopicImpl</code> method; AdminTopics do not
    * accept <code>ClusterRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception  AccessException  Not thrown.
    */ 
   protected void doReact(AgentId from, ClusterRequest request)
-                 throws MomException
+                 throws AccessException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   /**
@@ -333,29 +347,13 @@ public class AdminTopicImpl extends TopicImpl
 
   /**
    * Overrides this <code>TopicImpl</code> method; a <code>ClusterAck</code>
-   * acknowledges the process of creating a cluster of topics.
+   * is not expected by an AdminTopic.
    */ 
   protected void doReact(AgentId from, ClusterAck ack)
   {
-    // Extracting the replyTo and id identifiers from the identifier of the
-    // original request.
-    String reqId = ack.request.getRequestId();
-    int index = reqId.indexOf("-");
-    AgentId replyTo;
-    String id;
-
-    if (index == -1) {
-      replyTo = null;
-      id = reqId;
-    }
-    else {
-      replyTo = AgentId.fromString(reqId.substring(0, index));
-      id = reqId.substring(index);
-    }
-    distributeReply(replyTo, id, new AdminReply(ack.ok, ack.info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, ack.info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected notification: " + ack);
   }
 
   /**
@@ -388,24 +386,28 @@ public class AdminTopicImpl extends TopicImpl
    * Overrides this <code>TopicImpl</code> method; AdminTopics do not
    * accept <code>UnclusterRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception AccessException  Not thrown.
    */ 
   protected void doReact(AgentId from, UnclusterRequest request)
                  throws MomException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   /**
    * Overrides this <code>TopicImpl</code> method; AdminTopics do not
    * accept <code>SetFatherRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception  AccessException  Not thrown.
    */ 
   protected void doReact(AgentId from, SetFatherRequest request)
                  throws MomException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   /**
@@ -426,71 +428,33 @@ public class AdminTopicImpl extends TopicImpl
    */ 
   protected void doReact(AgentId from, FatherAck ack)
   {
-    // Extracting the replyTo and id identifiers from the identifier of the
-    // original request.
-    String reqId = ack.request.getRequestId();
-    int index = reqId.indexOf("-");
-    AgentId replyTo;
-    String id;
-
-    if (index == -1) {
-      replyTo = null;
-      id = reqId;
-    }
-    else {
-      replyTo = AgentId.fromString(reqId.substring(0, index));
-      id = reqId.substring(index);
-    }
-    distributeReply(replyTo, id, new AdminReply(ack.ok, ack.info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, ack.info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected notification: " + ack);
   }
 
   /**
    * Overrides this <code>TopicImpl</code> method; AdminTopics do not
    * accept <code>UnsetFatherRequest</code> notifications.
    *
-   * @exception  RequestException  Systematically thrown.
+   * @exception  AccessException  Not thrown.
    */ 
   protected void doReact(AgentId from, UnsetFatherRequest request)
                  throws MomException
   {
-    throw new RequestException("Unexpected request");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                    "Unexpected request: " + request);
   }
 
   
   /**
    * Overrides this <code>TopicImpl</code> method; the forwarded messages
-   * containing an admin request will be processed, whereas the forwarded
-   * messages containing an admin reply will be distributed.
+   * contain admin requests and will be processed.
    */
   protected void doReact(AgentId from, TopicForwardNot not)
   {
-    Vector messages = not.messages;
-
-    Message message;
-    Object obj;
-    Vector requests = new Vector();
-    Vector replies = new Vector();
-    while (! messages.isEmpty()) {
-      message = (Message) messages.remove(0);
-      try {
-        obj = message.getObject();
-      
-        if (obj instanceof AdminRequest)
-          requests.add(message);
-        else if (obj instanceof AdminReply)
-          replies.add(message);
-      }
-      catch (Exception exc) {}
-    }
-
-    if (! requests.isEmpty())
-      processAdminRequests(requests);
-
-    if (! replies.isEmpty())
-      processMessages(replies);
+    processAdminRequests(not.messages);
   }
 
   /**
@@ -502,26 +466,21 @@ public class AdminTopicImpl extends TopicImpl
     Notification not = uA.not;
 
     // For admin requests, notifying the administrator.
-    if (not instanceof AbstractRequest) {
-      String reqId = ((AbstractRequest) not).getRequestId();
-      int index = reqId.indexOf("-");
-      AgentId replyTo;
-      String id;
+    if (not instanceof fr.dyade.aaa.mom.comm.AdminRequest) {
+      String reqId = ((fr.dyade.aaa.mom.comm.AdminRequest) not).getId();
 
-      if (index == -1) {
-        replyTo = null;
-        id = reqId;
+      if (reqId != null) {
+        AgentId replyTo = (AgentId) requestsTable.remove(reqId);
+
+        String info = "Request ["
+                      + not.getClass().getName()
+                      + "], sent to AdminTopic on server ["
+                      + serverId
+                      + "], successful [false]: unknown agent ["
+                      + agId + "]";
+
+        distributeReply(replyTo, reqId, new AdminReply(false, info));
       }
-      else {
-        replyTo = AgentId.fromString(reqId.substring(0, index));
-        id = reqId.substring(index);
-      }
-
-      String info = "Request [" + not.getClass().getName()
-                    + "], sent to AdminTopic on server [" + serverId
-                    + "], successful [false]: unknown agent [" + agId + "]";
-
-      distributeReply(replyTo, id, new AdminReply(false, info));
     }
     super.doProcess(uA);
   }
@@ -677,7 +636,8 @@ public class AdminTopicImpl extends TopicImpl
                     + "], successful [true]: " + dest + " ["
                     + qId.toString() + "] has been created and deployed";
 
-      distributeReply(replyTo, msgId,
+      distributeReply(replyTo,
+                      msgId,
                       new CreateDestinationReply(qId.toString(), info));
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -712,7 +672,8 @@ public class AdminTopicImpl extends TopicImpl
                     + "], successful [true]: topic ["
                     + tId.toString() + "] has been created and deployed";
 
-      distributeReply(replyTo, msgId,
+      distributeReply(replyTo,
+                      msgId,
                       new CreateDestinationReply(tId.toString(), info));
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -762,13 +723,10 @@ public class AdminTopicImpl extends TopicImpl
     if (initId.getTo() != serverId)
       return;
 
-    ClusterRequest not;
-    if (replyTo == null)
-      not = new ClusterRequest(msgId, topId);
-    else   
-      not = new ClusterRequest(replyTo + "-" + msgId, topId);
+    Channel.sendTo(initId, new ClusterRequest(msgId, topId));
 
-    Channel.sendTo(initId, not);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -785,15 +743,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(topId, new UnclusterRequest(msgId));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: topic [" + topId
-                  + "], successfuly notified to leave cluster.";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -809,13 +760,11 @@ public class AdminTopicImpl extends TopicImpl
     if (sonId.getTo() != serverId)
       return;
 
-    SetFatherRequest not;
-    if (replyTo == null)
-      not = new SetFatherRequest(msgId, fatherId);
-    else   
-      not = new SetFatherRequest(replyTo + "-" + msgId, fatherId);
 
-    Channel.sendTo(sonId, not);
+    Channel.sendTo(sonId, new SetFatherRequest(msgId, fatherId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -832,15 +781,8 @@ public class AdminTopicImpl extends TopicImpl
     
     Channel.sendTo(topId, new UnsetFatherRequest(msgId));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: topic [" + topId
-                  + "], successfuly notified to unset its father.";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -904,7 +846,8 @@ public class AdminTopicImpl extends TopicImpl
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
 
-    distributeReply(replyTo, msgId,
+    distributeReply(replyTo,
+                    msgId,
                     new CreateUserReply(proxId.toString(), info));
   }
 
@@ -1088,17 +1031,8 @@ public class AdminTopicImpl extends TopicImpl
       right = - WRITE;
 
     Channel.sendTo(destId, new SetRightRequest(msgId, userId, right));
-  
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: user [" + userId
-                  + "] has been set with right [" + right
-                  + "] in destination [" + destId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1145,15 +1079,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(destId, new SetDMQRequest(msgId, dmqId));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: dmq [" + dmqId.toString()
-                  + "], has been notified to destination [" + destId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1172,15 +1099,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(userId, new SetDMQRequest(msgId, dmqId));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: dmq [" + dmqId.toString()
-                  + "], has been notified to user [" + userId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   } 
 
   /**
@@ -1225,15 +1145,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(destId, new SetThreshRequest(msgId, new Integer(thresh)));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: threshold [" + thresh
-                  + "], has been notified to queue [" + destId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1254,15 +1167,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(userId, new SetThreshRequest(msgId, new Integer(thresh)));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: threshold [" + thresh
-                  + "], has been notified to user [" + userId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1303,15 +1209,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(destId, new SetDMQRequest(msgId, null));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: dmq has been unset on"
-                  + " destination [" + destId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1328,15 +1227,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(userId, new SetDMQRequest(msgId, null));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: dmq has been unset on"
-                  + " user [" + userId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info); 
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1378,15 +1270,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(destId, new SetThreshRequest(msgId, null));
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: threshold "
-                  + "has been unset on queue [" + destId + "]";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /**
@@ -1404,12 +1289,8 @@ public class AdminTopicImpl extends TopicImpl
 
     Channel.sendTo(userId, new SetThreshRequest(msgId, null));
   
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: user [" + userId
-                  + "] threshold has been unset";
-
-    distributeReply(replyTo, msgId, new AdminReply(true, info));
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
 
   /** Temporary method kept for maintaining the old administration. */
@@ -1451,14 +1332,17 @@ public class AdminTopicImpl extends TopicImpl
  
   /** 
    * Actually sends an <code>AdminReply</code> object to an identified
-   * destination, if any, or to the AdminTopic subscribers and fellows.
+   * destination.
    *
-   * @param to  Identifier of a destination to send the reply to, if any.
+   * @param to  Identifier of a destination to send the reply to.
    * @param msgId  Identifier of the original request.
    * @param reply  The <code>AdminReply</code> instance to send.
    */
   private void distributeReply(AgentId to, String msgId, AdminReply reply)
   {
+    if (to == null)
+      return;
+
     Message message = new Message();
 
     if (msgCounter == Long.MAX_VALUE)
@@ -1476,14 +1360,8 @@ public class AdminTopicImpl extends TopicImpl
       Vector messages = new Vector();
       messages.add(message);
 
-      if (to != null) {
-        ClientMessages clientMessages = new ClientMessages(null, messages);
-        Channel.sendTo(to, clientMessages);
-      }
-      else {
-        forwardMessages(messages);
-        processMessages(messages);
-      }
+      ClientMessages clientMessages = new ClientMessages(null, messages);
+      Channel.sendTo(to, clientMessages);
     }
     catch (Exception exc) {}
   }
