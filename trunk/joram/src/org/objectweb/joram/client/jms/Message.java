@@ -161,9 +161,13 @@ public class Message implements javax.jms.Message {
    */
   public void setJMSDestination(javax.jms.Destination dest) 
     throws JMSException {
-    momMsg.setDestination(
-      ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
-      ((org.objectweb.joram.client.jms.Destination) dest).getType());
+    if (dest == null) {
+      momMsg.setDestination(null, null);
+    } else {
+      momMsg.setDestination(
+        ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
+        ((org.objectweb.joram.client.jms.Destination) dest).getType());
+    }
   }
 
   /**
@@ -193,9 +197,13 @@ public class Message implements javax.jms.Message {
    */
   public void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException
   {
-    momMsg.setReplyTo(
-      ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
-      ((org.objectweb.joram.client.jms.Destination) replyTo).getType());
+    if (replyTo == null) {
+      momMsg.setDestination(null, null);
+    } else {
+      momMsg.setReplyTo(
+        ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
+        ((org.objectweb.joram.client.jms.Destination) replyTo).getType());
+    }
   }
   
   /**
