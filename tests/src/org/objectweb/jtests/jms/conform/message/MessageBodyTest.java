@@ -25,6 +25,7 @@
 package org.objectweb.jtests.jms.conform.message;
 
 import org.objectweb.jtests.jms.framework.PTPTestCase;
+import org.objectweb.jtests.jms.framework.TestConfig;
 import javax.jms.*;
 import junit.framework.*;
 
@@ -32,7 +33,7 @@ import junit.framework.*;
  * Tests on message body.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageBodyTest.java,v 1.2 2002-03-18 13:36:53 joram Exp $
+ * @version $Id: MessageBodyTest.java,v 1.3 2002-04-23 08:36:13 jmesnil Exp $
  */
 public class MessageBodyTest extends PTPTestCase {
   
@@ -79,7 +80,7 @@ public class MessageBodyTest extends PTPTestCase {
       message.setText("foo");
       sender.send(message);
       
-      Message m = receiver.receive();
+      Message m = receiver.receive(TestConfig.TIMEOUT);
       assertTrue("The message should be an instance of TextMessage.\n",
 		 m instanceof TextMessage);
       TextMessage msg = (TextMessage)m;

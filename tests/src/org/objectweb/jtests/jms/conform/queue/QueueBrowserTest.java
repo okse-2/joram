@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * Test the <code>javax.jms.QueueBrowser</code> features.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: QueueBrowserTest.java,v 1.2 2002-04-02 12:13:46 joram Exp $
+ * @version $Id: QueueBrowserTest.java,v 1.3 2002-04-23 08:36:27 jmesnil Exp $
  */
 public class QueueBrowserTest extends PTPTestCase {
 
@@ -78,14 +78,14 @@ public class QueueBrowserTest extends PTPTestCase {
       assertEquals(2, count);
 
       // receive the first message...
-      Message m = receiver.receive();
+      Message m = receiver.receive(TestConfig.TIMEOUT);
       // ... and check it is the first which was sent.
       assertTrue (m instanceof TextMessage);
       TextMessage msg = (TextMessage)m;
       assertEquals("testBrowser:message_1", msg.getText());
 
       // receive the second message...
-      m = receiver.receive();
+      m = receiver.receive(TestConfig.TIMEOUT);
       // ... and check it is the second which was sent.
       assertTrue (m instanceof TextMessage);
       msg = (TextMessage)m;
