@@ -30,7 +30,7 @@ import javax.jms.*;
 import javax.naming.*;
 
 /**
- * Browses the queue.
+ * Browses the queue !
  */
 public class Browser
 {
