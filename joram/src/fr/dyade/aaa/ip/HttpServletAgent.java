@@ -31,8 +31,8 @@ import fr.dyade.aaa.agent.*;
  * A specific <code>ServletAgent</code> proxy for HTTP protocol.
  */
 public class HttpServletAgent extends ServletAgent {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: HttpServletAgent.java,v 1.3 2004-02-13 10:23:58 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: HttpServletAgent.java,v 1.4 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /**
    * Creates a ServletAgent proxy.

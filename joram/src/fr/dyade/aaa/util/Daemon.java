@@ -53,8 +53,8 @@ import org.objectweb.util.monolog.api.Logger;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.14 2004-02-13 10:26:43 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.15 2004-03-16 10:03:45 fmaistre Exp $";
 
   /**
    * Tests if this daemon is alive.

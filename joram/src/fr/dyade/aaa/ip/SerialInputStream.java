@@ -34,7 +34,7 @@ import java.io.*;
   */
 public class SerialInputStream implements NotificationInputStream {
 
-public static final String RCS_VERSION="@(#)$Id: SerialInputStream.java,v 1.9 2004-02-13 10:23:58 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: SerialInputStream.java,v 1.10 2004-03-16 10:03:45 fmaistre Exp $"; 
 
 
   ObjectInputStream in;

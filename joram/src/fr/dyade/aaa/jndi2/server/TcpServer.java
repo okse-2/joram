@@ -112,6 +112,9 @@ public class TcpServer {
                 BasicLevel.ERROR,
                 this.getName() + 
                 ", error during accept", exc);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException ie) {}
               continue loop;
             } else {
               break loop;

@@ -33,7 +33,6 @@ import fr.dyade.aaa.jndi2.msg.*;
 import fr.dyade.aaa.jndi2.msg.SerialOutputStream;
 import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.ip.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;

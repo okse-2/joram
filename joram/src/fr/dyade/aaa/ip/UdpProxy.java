@@ -34,8 +34,8 @@ import fr.dyade.aaa.agent.*;
  * onto the UDP socket.
  */
 public abstract class UdpProxy extends ProxyAgent {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.9 2004-02-13 10:23:58 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.10 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /** default max buffer size for reading datagrams */
   protected static final int BUF_SIZE = 8192;

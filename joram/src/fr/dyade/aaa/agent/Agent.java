@@ -520,14 +520,21 @@ public abstract class Agent implements Serializable {
    */
   protected final void
   sendTo(AgentId to, Notification not) {
-    try {
-      EngineThread thread = (EngineThread) Thread.currentThread();
-      // Use the engine's sendTo method that push message in temporary queue
-      // until the end of current reaction.
-      thread.engine.push(getId(), to, not);
-    } catch (ClassCastException exc) {
-      //  Be careful, the destination node use the from.to field to
-      // get the from node id.
+//     try {
+//       EngineThread thread = (EngineThread) Thread.currentThread();
+//       // Use the engine's sendTo method that push message in temporary queue
+//       // until the end of current reaction.
+//       thread.engine.push(getId(), to, not);
+//     } catch (ClassCastException exc) {
+//       //  Be careful, the destination node use the from.to field to
+//       // get the from node id.
+//       Channel.channel.directSendTo(getId(), to, not);
+//     }
+
+//  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
+    if (Thread.currentThread() == AgentServer.engine.thread) {
+      AgentServer.engine.push(getId(), to, not);
+    } else {
       Channel.channel.directSendTo(getId(), to, not);
     }
   }

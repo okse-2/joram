@@ -21,7 +21,7 @@ package fr.dyade.aaa.agent;
 
 public class UnknownDomainException extends Exception {
 
-public static final String RCS_VERSION="@(#)$Id: UnknownDomainException.java,v 1.4 2004-02-13 10:15:21 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: UnknownDomainException.java,v 1.5 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /**
    *  Constructs a new <code>UnknownDomainException</code> with no

@@ -71,7 +71,7 @@ import java.io.*;
  * @version	v1.0
  */
 public final class ObjectStreamWrapper {
-public static final String RCS_VERSION="@(#)$Id: ObjectStreamWrapper.java,v 1.10 2004-02-13 10:26:43 fmaistre Exp $";
+public static final String RCS_VERSION="@(#)$Id: ObjectStreamWrapper.java,v 1.11 2004-03-16 10:03:45 fmaistre Exp $";
 
   /**
    * if <code>true</code>, enables debug tracing code.

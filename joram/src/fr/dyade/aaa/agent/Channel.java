@@ -96,14 +96,21 @@ abstract public class Channel {
    */
   public final static void sendTo(AgentId to,
 				  Notification not) {
-    try {
-      EngineThread thread = (EngineThread) Thread.currentThread();
-      // Use the engine's sendTo method that push message in temporary queue
-      // until the end of current reaction.
-      thread.engine.push(AgentServer.engine.agent.getId(), to, not);
-    } catch (ClassCastException exc) {
-      //  Be careful, the destination node use the from.to field to
-      // get the from node id.
+//     try {
+//       EngineThread thread = (EngineThread) Thread.currentThread();
+//       // Use the engine's sendTo method that push message in temporary queue
+//       // until the end of current reaction.
+//       thread.engine.push(AgentServer.engine.agent.getId(), to, not);
+//     } catch (ClassCastException exc) {
+//       //  Be careful, the destination node use the from.to field to
+//       // get the from node id.
+//       channel.directSendTo(AgentId.localId, to, not);
+//     }
+
+//  if (Class.EngineThread.isAssignable(Thread.currentThread())) {
+    if (Thread.currentThread() == AgentServer.engine.thread) {
+      AgentServer.engine.push(AgentServer.engine.agent.getId(), to, not);
+    } else {
       channel.directSendTo(AgentId.localId, to, not);
     }
   }

@@ -153,10 +153,14 @@ public class StorageManager {
       return (NamingContext)transaction.load(
         ROOT, fileName);
     } catch (IOException exc) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", exc);
       NamingException ne = new NamingException(exc.getMessage());
       ne.setRootCause(exc);
       throw ne;
     } catch (ClassNotFoundException exc2) {
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "", exc2);
       NamingException ne = new NamingException(exc2.getMessage());
       ne.setRootCause(exc2);
       throw ne;
