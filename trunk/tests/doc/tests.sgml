@@ -218,11 +218,11 @@
 	  how to set it up. Go to the
 	  <filename>providers/joram</filename> directory and
 	  type:<simplelist>
-	    <member><command>java -DTransaction=NullTransaction -jar
+	    <member><command>java -DTransaction=fr.dyade.aaa.util.NullTransaction -jar
 		mom.jar 0 s0</command></member>
 	  </simplelist>
 	  <varname>Transaction</varname> property is set to
-	  <varname>NullTransaction</varname> to stipulate we don't
+	  <varname>fr.dyade.aaa.util.NullTransaction</varname> to stipulate we don't
 	  want persistence. <varname>0 s0</varname> is there to know
 	  which JORAM configuration is to be used (see
 	  <filename>a3servers.xml</filename> file).
