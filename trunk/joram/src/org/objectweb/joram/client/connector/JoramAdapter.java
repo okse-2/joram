@@ -97,6 +97,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * managed outbound messaging.
    */
   private transient Vector producers;
+  /**
+   * Table holding the adapter's <code>XAConnection</code> instances used for
+   * recovering the XA resources.
+   * <p>
+   * <b>Key:</b> user name<br>
+   * <b>Value:</b> <code>XAConnection</code> instance
+   */
+  private transient Hashtable connections;
+
   /** <code>true</code> if the adapter has been started. */
   private boolean started = false;
   /** <code>true</code> if the adapter has been stopped. */
@@ -315,6 +324,16 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     for (Enumeration keys = consumers.keys(); keys.hasMoreElements();)
       ((InboundConsumer) consumers.get(keys.nextElement())).close();
 
+    // Browsing the recovery connections, if any.
+    if (connections != null) {
+      for (Enumeration keys = connections.keys(); keys.hasMoreElements();) {
+        try {
+          ((XAConnection) connections.get(keys.nextElement())).close();
+        }
+        catch (Exception exc) {}
+      }
+    }
+
     // If JORAM server is collocated, stopping it.
     if (collocated) {
       try {
@@ -460,10 +479,16 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     ((InboundConsumer) consumers.remove(spec)).close();
   }
 
-  /** 
+  /**
+   * Returns XA resources given an array of ActivationSpec instances.
    *
    * @exception IllegalStateException  If the adapter is either not started,
    *                                   or stopped.
+   * @exception NotSupportedException  If provided activation parameters 
+   *                                   are invalid.
+   * @exception CommException          If the JORAM server is not reachable.
+   * @exception SecurityException      If connecting is not allowed.
+   * @exception ResourceException      Generic exception.
    */
   public XAResource[] getXAResources(ActivationSpec[] specs)
                       throws ResourceException
@@ -473,7 +498,59 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (stopped)
       throw new IllegalStateException("Stopped resource adapter.");
 
-    return null;
+    ActivationSpecImpl specImpl;
+    String userName;
+    String password;
+    XAConnectionFactory connectionFactory = null;
+    XAConnection connection;
+    Vector resources = new Vector();
+
+    if (connections == null)
+      connections = new Hashtable();
+
+    try {
+      for (int i = 0; i < specs.length; i++) {
+        if (! (specs[i] instanceof ActivationSpecImpl))
+          throw new ResourceException("Provided ActivationSpec instance is "
+                                      + "not a JORAM activation spec.");
+
+        specImpl = (ActivationSpecImpl) specs[i];
+
+        if (! specImpl.getResourceAdapter().equals(this))
+          throw new ResourceException("Supplied ActivationSpec instance "
+                                      + "associated to an other "
+                                      + "ResourceAdapter.");
+
+        userName = specImpl.getUserName();
+
+        // The connection does not already exist: creating it.
+        if (! connections.containsKey(userName)) {
+          password = specImpl.getPassword();
+
+          if (collocated)
+            connectionFactory = XALocalConnectionFactory.create();
+          else
+            connectionFactory =
+              XATcpConnectionFactory.create(hostName, serverPort);
+
+          connection =
+            connectionFactory.createXAConnection(userName, password);
+  
+          connections.put(userName, connection);
+  
+          resources.add(connection.createXASession().getXAResource());
+        }
+      }
+    }
+    catch (javax.jms.JMSSecurityException exc) {
+      throw new SecurityException("Invalid user identification: " + exc);
+    }
+    catch (javax.jms.JMSException exc) {
+      throw new CommException("Could not connect to the JORAM server: "
+                              + exc);
+    }
+
+    return (XAResource[]) resources.toArray();
   }
 
 
