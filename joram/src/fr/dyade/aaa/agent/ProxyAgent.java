@@ -30,7 +30,7 @@ import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.2 2000-08-01 09:13:29 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.3 2000-08-28 15:36:35 tachkeni Exp $"; 
 
 
   public static final int DRIVER_IN = 1;
@@ -192,6 +192,10 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.2 2000-08-0
     }
   }
 
+    public void cleanDriverOut() {
+	drvOut.clean();
+    }
+
   /**
    * Finalizes this proxy agent execution. Calls <code>disconnect</code>
    * to close the open streams, and <code>stop</code> to stop the drivers.
@@ -263,19 +267,19 @@ public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.2 2000-08-0
   protected void driverDone(DriverDone not) throws IOException {
     switch (not.getDriver()) {
     case DRIVER_IN:
-      if (ois != null) {
+      try {
 	ois.close();
-	ois = null;
-      }
+      } catch (Exception e) {}
+      ois = null;
       drvIn = null;
       break;
     case DRIVER_OUT:
-      if (oos != null) {
-	oos.close();
+	try {
+	    oos.close();
+	} catch (Exception e) {}
 	oos = null;
-      }
-      drvOut = null;
-      break;
+	drvOut = null;
+	break;
     }
   }
 }
