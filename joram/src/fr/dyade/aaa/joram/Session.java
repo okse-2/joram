@@ -174,7 +174,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new Message();
+    return new Message(this);
   }
 
   /**
@@ -187,7 +187,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new TextMessage();
+    return new TextMessage(this);
   }
 
   /**
@@ -201,7 +201,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new TextMessage(text);
+    return new TextMessage(this, text);
   }
 
   /**
@@ -215,7 +215,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new BytesMessage();
+    return new BytesMessage(this);
   }
 
   /**
@@ -229,7 +229,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
 
-    return new MapMessage();
+    return new MapMessage(this);
   }
 
   /**
@@ -243,7 +243,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new ObjectMessage();
+    return new ObjectMessage(this);
   }
 
   /**
@@ -257,7 +257,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new ObjectMessage(obj);
+    return new ObjectMessage(this, obj);
   }
 
   /**
@@ -271,7 +271,7 @@ public abstract class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
     
-    return new StreamMessage();
+    return new StreamMessage(this);
   }
   
   /**
