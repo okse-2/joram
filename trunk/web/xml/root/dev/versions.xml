@@ -14,17 +14,20 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
-      <s2 name="Modifications (latest: May 2003, 13th)">
+      <s2 name="Corrected bugs (latest: May 2003, 14th)">
       <ul>
+      <li>Bug concerning expiring messages in queues, found by Lorenzo
+      Scantamburlo: already delivered messages, but not yet acknowledged,
+      when expiring, were removed and a deliverables counter was wrongly
+      decreased. This resulted in having remaining messages on the queue
+      not delivered until further messages arrived. It is now
+      corrected; the impacted class is <code>QueueImpl</code> in the
+      <code>fr.dyade.aaa.mom.dest</code> package.</li>
       <li>Bug in bytes and stream messages: sequentially modifying and sending
       an instance of one of those messages resulted in always sending the same
       original message. The impacted classes are <code>BytesMessage</code> and
       <code>StreamMessage</code> in the <code>fr.dyade.aaa.joram</code>
       package.</li>
-      <li>Modification of the <code>Message</code> class in the
-      <code>fr.dyade.aaa.mom.messages</code> package: text and map bodies are
-      not serialized anymore for opening Joram to the ability to route non
-      Java clients' messages.</li>
       <li>Following
       <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00014.html">
       Huey-Siang Kam's</a> feedback, a bug in Joram's administration has been
@@ -33,13 +36,6 @@
       password, rather than both its name and password. Now, it is. The
       impacted class is <code>AdminTopicImpl</code> in the
       <code>fr.dyade.aaa.mom.dest</code> package.</li>
-      <li>Following
-      <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00000.html">
-      Knut's</a> feedback, the setting of JNDI's URL has evolved:
-      <code>java.naming.provider.url</code> might be set 
-      as <code>host:port</code> and not only as <code>joram://host:port</code>.
-      The impacted class is <code>NamingContextFactory</code> in the
-      <code>fr.dyade.aaa.jndi2.client</code> package.</li>
       <li>Bug in serial sending of a message with a transacted session:
       clearing an already sent (but not commited) message's properties,
       was actually clearing the properties (instead of clearing only the
@@ -53,6 +49,21 @@
       without the need for the server to "know" the objects' classes. The
       following packages should be updated: <code>fr.dyade.aaa.agent</code>,
       <code>fr.dyade.aaa.ip</code>, <code>fr.dyade.aaa.jndi2</code>.</li>
+      </ul>
+      </s2>
+      <s2 name="Modifications (latest: May 2003, 13th)">
+      <ul>
+      <li>Modification of the <code>Message</code> class in the
+      <code>fr.dyade.aaa.mom.messages</code> package: text and map bodies are
+      not serialized anymore for opening Joram to the ability to route non
+      Java clients' messages.</li>
+      <li>Following
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00000.html">
+      Knut's</a> feedback, the setting of JNDI's URL has evolved:
+      <code>java.naming.provider.url</code> might be set 
+      as <code>host:port</code> and not only as <code>joram://host:port</code>.
+      The impacted class is <code>NamingContextFactory</code> in the
+      <code>fr.dyade.aaa.jndi2.client</code> package.</li>
       </ul>
       </s2>
     </s1>
