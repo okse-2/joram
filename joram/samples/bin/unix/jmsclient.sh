@@ -1,8 +1,16 @@
 #!/bin/sh
 
-if [%1]==[]  goto no_arg
+if [ -z $1 ]
+then
+  echo "!! Missing file argument !!"
+  exit 1
+fi
 
-if not [%2]==[]  goto too_many_args
+if [ -n $2 ]
+then
+  echo "!! Too many arguments !!"
+  exit 1
+fi
 
 echo == Launching the $1 client ==
 
@@ -22,12 +30,3 @@ CLASSPATH=$CLASSPATH:$SAMPLE_CLASSES
 CLASSPATH=$CLASSPATH:$CONFIG_ENV
 
 $JAVA_HOME/bin/java $1
-goto :EOF
-
-:no_arg
-echo !! Missing file argument !!
-goto :EOF
-
-:too_many_args
-echo !! Too many arguments !!
-goto :EOF
