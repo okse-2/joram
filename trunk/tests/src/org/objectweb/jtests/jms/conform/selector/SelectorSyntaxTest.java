@@ -35,7 +35,7 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.1 2002-03-18 13:42:25 joram Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.2 2002-03-19 15:01:12 joram Exp $
  */
 public class SelectorSyntaxTest extends JMSTestCase {
   
@@ -77,7 +77,7 @@ public class SelectorSyntaxTest extends JMSTestCase {
     }
   
     /**
-     * Test syntax of "<em>identifier</em> [NOT] LIKE <em>pattern-value</em> [ESCAPE <em>escape-character</em>"
+     * Test syntax of "<em>identifier</em> [NOT] LIKE <em>pattern-value</em> [ESCAPE <em>escape-character</em>]"
      */
     public void testLike() {
 	try {
@@ -141,14 +141,13 @@ public class SelectorSyntaxTest extends JMSTestCase {
     }
 
     /**
-     * Test diffent syntax for zero as an exact or an approximate numeric literal (0, 0.0, 0., .0)
+     * Test diffent syntax for zero as an exact or an approximate numeric literal (0, 0.0, 0.)
      */
     public void testZero() {
 	try {
 	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0");
 	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.0");
 	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = .0");
 	} catch (JMSException e) {
 	    fail(e);
 	}
