@@ -36,7 +36,7 @@ import java.util.*;
  */
 public class Queue extends Vector
 {
-  public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.3 2004-02-13 08:11:06 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.4 2004-02-13 10:12:42 fmaistre Exp $"; 
 
   /**
    * <code>true</code> if a producer called the <code>stop()</code>

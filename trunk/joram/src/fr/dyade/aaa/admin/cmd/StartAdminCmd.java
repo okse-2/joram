@@ -22,6 +22,6 @@ package fr.dyade.aaa.admin.cmd;
 
 
 public interface StartAdminCmd {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: StartAdminCmd.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: StartAdminCmd.java,v 1.4 2004-02-13 10:13:20 fmaistre Exp $"; 
 }

@@ -38,8 +38,8 @@ import fr.dyade.aaa.agent.conf.*;
  * @see A3CMLConfig
  */
 public class Script implements Serializable, Cloneable {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: Script.java,v 1.3 2004-02-13 08:12:03 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: Script.java,v 1.4 2004-02-13 10:13:40 fmaistre Exp $"; 
 
   /** AdminCmd Vector */
   private Vector commands = null;
