@@ -17,7 +17,7 @@
     <property name="lib.dir" location="../lib"/>
     <property name="build.dir" location="../build"/>
     <property name="ship.dir" location="../ship"/>
-    <property name="doc.dir" location="../apidoc"/>
+    <property name="doc.dir" location="../javadoc"/>
 
     <!-- Base classpath needed for execution -->
     <path id="base.class.path">
