@@ -1,5 +1,6 @@
 <!-- ===================================================================== -->
 <!-- Build JORAM web site -->
+<!-- http://www.objectweb.org/joram -->
 <!-- ===================================================================== -->
 <project default="all" basedir=".">
 
@@ -22,14 +23,20 @@
       <format property="touch.time" pattern="yyyy-MM-dd hh:mm aa"/>
     </tstamp>
 
-    <!-- deal with stylesheets and project files (menus) dependencies -->
-    <uptodate property="rebuild.unneeded" targetfile="${html.dest}/index.html" >
-      <srcfiles dir= "${stylesheets.dir}" includes="*.xsl"/>
-      <srcfiles dir= "${xml.dir}" includes="**/*.xml"/>
-    </uptodate>
+    <!-- deal with dtds, stylesheets and project files (menus) dependencies -->
+    <mkdir dir="${html.dest}"/>
+    <dependset>
+       <srcfileset dir="${dtd.dir}" includes="*.dtd"/>
+       <srcfileset dir="${stylesheets.dir}" includes="*.xsl"/>
+       <srcfileset dir="${xml.dir}/project" includes="*.xml"/>
+      <!-- does not work if the ${html.dest} directory is missing -->
+      <targetfileset dir="${html.dest}" 
+		     includes="**/*.html"
+		     excludes="${release-files}"/>
+    </dependset> 
 
     <!-- static html files -->
-    <copy todir="${html.dest}" preservelastmodified="yes">
+    <copy todir="${html.dest}">
       <fileset dir="${html.src}">
 	<include name="**/**"/>
 	<exclude name="**/*CVS*"/>
@@ -37,7 +44,7 @@
     </copy>
 
     <!-- cgi scripts -->
-    <copy todir="${cgi.dest}" preservelastmodified="yes">
+    <copy todir="${cgi.dest}">
       <fileset dir="${cgi.src}">
 	<exclude name="**/*CVS*"/>
       </fileset>
@@ -69,12 +76,10 @@
   <!-- ===================================================================== -->
   <target name="html"
 	  depends="prepare"
-	  description="Build Web site (browsable version)"
-	  unless="rebuild.unneeded">
+	  description="Build Web site (browsable version)">
     
     <style basedir="${xml.dir}"
 	   destdir="${html.dest}"
-	   force="true"
 	   extension=".html"
 	   style="${stylesheet}"
 	   excludes="${project.file}"
@@ -93,12 +98,10 @@
   <!-- ===================================================================== -->
   <target name="html_print"
 	  depends="prepare"
-	  description="Build Web site (printable version)"
-	  unless="rebuild.unneeded">
+	  description="Build Web site (printable version)">
 
     <style basedir="${xml.dir}"
 	   destdir="${html.dest}"
-	   force="true"
 	   extension="_print.html"
 	   style="${stylesheet.printable}"
 	   excludes="${project.file}"
