@@ -26,6 +26,7 @@
     <path id="base.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
+	<include name="xalan.jar" />
         <include name="*.jar"/>
       </fileset>
     </path>
