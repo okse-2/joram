@@ -14,6 +14,38 @@
 
     <s1 name="JORAM History">
 
+     <subtitle>21st october 2002: JORAM 3.2 provides new features!</subtitle>
+      <p>The main added values of Joram 3.2.0 are the new implementations of
+         <em>hierarchical topics</em> and <em>dead message queues</em>.
+      </p>
+      <p>According to the JMS specification, topics might have a hierarchical
+         structure allowing clients to subscribe or publish to given subtopics.
+         Joram's fully distributed structure allows a topic hierarchy to be
+         spread over many servers.
+      </p>
+      <p>A dead message queue is a destination getting undeliverable messages.
+         Messages might be considered undeliverable because they expired 
+         before delivery, because they were sent on a non accessible
+         destination or because they are constantly denied when consumed.
+      </p>
+      <p>This new version also provides a <em>flow control mechanism</em> in
+         order to prevent a Joram platform to be overloaded by a heavily
+         producing client.
+      </p>
+      <p><em>Bugs</em> have also been corrected: check the
+         <a href="dev/versions.html">versions info</a> page.
+      </p> 
+      <hr />
+
+      <subtitle>18th June 2002: JMS Test Suite tests for JMS 1.1 support!
+                </subtitle>
+      <p>The <em>JMS Test Suite</em> has its own
+         <a href="tests/index.html">page</a>.<br />
+	 The suite tests JMS features. All code of the test suite is
+	 pure JMS without any dependency to JORAM.
+     </p>
+     <hr />
+
      <subtitle>10th june 2002: JORAM now implements the new JMS 1.1
         specification!</subtitle>
       <p><em>Joram 3.1.0 fully implements JMS 1.1</em> providing unified

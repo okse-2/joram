@@ -54,7 +54,9 @@
 	    <td align="right" valign="top">Release: </td>
 	    <td>
 	      <select name="file" size="2">
-		<option value="joram-3.1.0.tgz" selected="selected">JORAM 3.1.0 jars (tgz)</option>
+		<option value="joram-3.2.0.tgz" selected="selected">JORAM 3.2.0 jars (tgz)</option>
+		<option value="joram-3.2.0-src.tgz">JORAM 3.2.0 sources (tgz)</option>
+		<option value="joram-3.1.0.tgz">JORAM 3.1.0 jars (tgz)</option>
 		<option value="joram-3.1.0-src.tgz">JORAM 3.1.0 sources (tgz)</option>
 
 		<option value="joram-3.0.4.tgz">JORAM 3.0.4 jars (tgz)</option>
