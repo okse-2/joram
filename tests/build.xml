@@ -172,6 +172,25 @@
     </junitreport>
   </target>
 
+  <target name="test" depends="init.tests,compile"
+    description="--> Start one test (specified by -Dtest=&lt;class name&gt;)" >
+    <mkdir dir="${report.dir}"  />
+    <junit printsummary="yes" 
+           haltonfailure="no"
+	   haltonerror="no"
+	   fork="yes" >
+      <classpath refid="project.class.path" />
+      <formatter type="xml" />
+      <test name="${test}" todir="${report.dir}" />
+    </junit>
+    <junitreport todir="${report.dir}">
+      <fileset dir="${report.dir}">
+	<include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="./report/html"/>
+    </junitreport>
+  </target>
+
   <target name="junit.gui" depends="init.tests,compile"
     description="--> Use the GUI TestRunner of Junit">
     <java classname="junit.swingui.TestRunner"
