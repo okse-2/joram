@@ -104,7 +104,7 @@
   </target>
 
   <!-- Setup the classic configuration -->
-  <target name="classic_admin" depends="simple_init"
+  <target name="classic_admin" depends="init"
           description="--> Setup a classic administration (for a centralized architecture)">
     <java classname="classic.ClassicAdmin"
       failonerror="no" fork="yes"
@@ -155,7 +155,7 @@
 
 
   <!-- Setup the chat administration -->
-  <target name="chat_admin" depends="simple_init"
+  <target name="chat_admin" depends="init"
           description="--> Setup chat administration">
     <java classname="chat.ChatAdmin"
       failonerror="no" fork="yes"
@@ -184,7 +184,7 @@
 
   
   <!-- Setup the dotcom administration -->
-  <target name="dotcom_admin" depends="simple_init"
+  <target name="dotcom_admin" depends="init"
           description="--> Setup dotcom administration">
       <java classname="dotcom.DotcomAdmin"
           failonerror="no" fork="yes"
