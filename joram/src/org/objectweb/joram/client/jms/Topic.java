@@ -41,34 +41,24 @@ import javax.naming.NamingException;
  * Implements the <code>javax.jms.Topic</code> interface and provides
  * JORAM specific administration and monitoring methods.
  */
-public class Topic extends Destination implements javax.jms.Topic
-{
-  /**
-   * Constructs a topic.
-   *
-   * @param agentId  Identifier of the topic agent.
-   */
-  public Topic(String agentId)
-  {
-    super(agentId);
+public class Topic extends Destination implements javax.jms.Topic {
+
+  private final static String TOPIC_TYPE = "topic";
+
+  public static boolean isTopic(String type) {
+    return Destination.isAssignableTo(type, TOPIC_TYPE);
   }
 
-  /**
-   * Constructs a topic.
-   *
-   * @param agentId  Identifier of the topic agent.
-   * @param name     Name set by administrator.
-   */
-  public Topic(String agentId, String name)
-  {
-    super(agentId, name);
+  // Used by jndi2 SoapObjectHelper
+  public Topic() {}
+
+  public Topic(String name) {
+    super(name, TOPIC_TYPE);
   }
 
-  /**
-   * Constructs an empty topic.
-   */
-  public Topic()
-  {}
+  protected Topic(String name, String type) {
+    super(name, type);
+  }
 
   /** Returns a String image of the topic. */
   public String toString()
@@ -87,15 +77,6 @@ public class Topic extends Destination implements javax.jms.Topic
   {
     return getName();
   }
-
-
-  /**
-   * Decodes a <code>Topic</code> which traveled through the SOAP protocol.
-   */ 
-  public Object decode(Hashtable h) {
-    return new Topic((String) h.get("agentId"));
-  }
-
 
   /**
    * Admin method creating and deploying (or retrieving) a topic on a given
@@ -118,8 +99,10 @@ public class Topic extends Destination implements javax.jms.Topic
                              Properties prop)
                 throws ConnectException, AdminException
   {
-    String topicId = doCreate(serverId, name, className, prop);
-    return new Topic(topicId, name);
+    Topic topic = new Topic();
+    doCreate(serverId, name, className, 
+             prop, topic, TOPIC_TYPE);
+    return topic;
   }
 
   /**
@@ -194,7 +177,7 @@ public class Topic extends Destination implements javax.jms.Topic
   public static Topic create(String name)
                 throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer(),
+    return create(AdminModule.getLocalServerId(),
                   name,
                   "org.objectweb.joram.mom.dest.Topic",
                   null);
@@ -227,7 +210,7 @@ public class Topic extends Destination implements javax.jms.Topic
    */
   public static Topic create() throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer());
+    return create(AdminModule.getLocalServerId());
   }
 
   /**
@@ -289,5 +272,83 @@ public class Topic extends Destination implements javax.jms.Topic
     Monitor_GetNumberRep reply =
       (Monitor_GetNumberRep) AdminModule.doRequest(request);
     return reply.getNumber();
+  }
+
+  public String[] getSubscriberIds(javax.jms.Topic topic) 
+    throws AdminException, ConnectException {
+      GetSubscriberIdsRep reply = 
+        (GetSubscriberIdsRep)AdminModule.doRequest(
+          new GetSubscriberIds(agentId));
+      return reply.getSubscriberIds();
+    }
+
+  /**
+   * Adds a topic into the cluster this topic belongs to.
+   * If this topic doesn't belong to a cluster then a cluster is
+   * created by clustering this topic with the added topic.
+   * <p>
+   * The request fails if one or both of the topics are deleted, or
+   * can't belong to a cluster.
+   *
+   * @param addedTopic topic added to the cluster
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void addClusteredTopic(Topic addedTopic)
+    throws ConnectException, AdminException
+  {
+    AdminModule.doRequest(
+      new SetCluster(agentId,
+                     addedTopic.getName()));
+  }
+
+  /**
+   * Removes this topic from the cluster it belongs to.
+   * <p>
+   * The request fails if the topic does not exist or is not part of any 
+   * cluster.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void removeFromCluster()
+    throws ConnectException, AdminException
+  {
+    AdminModule.doRequest(new UnsetCluster(agentId));
+  }
+
+  /**
+   * Creates a hierarchical relationship between this topic
+   * and its father topic.
+   * <p>
+   * The request fails if one of the topics does not exist or can't be part
+   * of a hierarchy.
+   *
+   * @param parent
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void setParent(Topic parent)
+         throws ConnectException, AdminException
+  {
+    AdminModule.doRequest(
+      new SetFather(parent.getName(), agentId));
+  }
+
+  /**
+   * Unsets the father of this topic.
+   * <p>
+   * The request fails if the topic does not exist or is not part of any
+   * hierarchy.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetParent()
+         throws ConnectException, AdminException 
+  {
+    AdminModule.doRequest(new UnsetFather(agentId));
   }
 }

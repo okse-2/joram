@@ -55,7 +55,8 @@ public class HATcpConnection
     tcpClient = new ReliableTcpClient(
       params, 
       name,
-      password);
+      password,
+      true);
     StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
     if (! tokenizer.hasMoreElements()) 
       throw new javax.jms.JMSException("URL not valid:" + url);

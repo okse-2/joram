@@ -23,13 +23,15 @@ package org.objectweb.joram.client.tools.admin;
 
 import javax.swing.*;
 import javax.swing.tree.*;
-import javax.jms.*;
 
+import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 
 class DestinationTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  private AdminController c;
+  protected AdminController c;
   private Destination dest;
   
   public DestinationTreeNode(AdminController c, Destination dest)
@@ -93,5 +95,7 @@ class DestinationTreeNode extends DefaultMutableTreeNode
   		return name;
   }
 
-  public boolean getAllowsChildren() { return false; }
+  public boolean getAllowsChildren() { 
+    return true; 
+  }
 }

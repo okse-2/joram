@@ -155,12 +155,14 @@ public class IOControl {
         BasicLevel.DEBUG, "IOControl.close()");
     try { 
       if (bis != null) bis.close();
+      bis = null;
     } catch (IOException exc) {}
     try { 
-      sock.getOutputStream().close();
+      if (sock != null) sock.getOutputStream().close();
     } catch (IOException exc) {}
     try { 
-      sock.close();
+      if (sock != null) sock.close();
+      sock = null;
     } catch (IOException exc) {}
   }
 }

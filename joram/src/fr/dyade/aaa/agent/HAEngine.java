@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2004 - France Telecom R&D
- * Copyright (C) 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s):
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -36,14 +36,14 @@ import fr.dyade.aaa.util.*;
  *  Implementation of Engine that used JGroups in order to improve 
  *  fiability.
  */
-final class HATransactionEngine extends Engine {
+final class HAEngine extends Engine {
   /**  Queue of messages provide from external agent. */ 
   private Vector qinFromExt;
 
   /** JGroups component */
   private JGroups jgroups = null;
 
-  HATransactionEngine() throws Exception {
+  HAEngine() throws Exception {
     super();
 
     qinFromExt = new Vector();
@@ -267,13 +267,14 @@ final class HATransactionEngine extends Engine {
         id = (AgentId) ois.readObject();
         agent = (Agent) ois.readObject();
         agent.id = id;
+        agent.deployed = true;
         // If there is a bag associated with this agent don't initialize it!
         if (agent instanceof BagSerializer) {
           ((BagSerializer) agent).readBag(ois);
         } else {
           agent.agentInitialize(false);
         }
-        createAgent(id, agent);
+        createAgent(agent);
       }
     } catch (EOFException exc) {
     } finally {

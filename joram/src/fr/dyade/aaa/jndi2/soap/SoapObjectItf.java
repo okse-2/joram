@@ -43,5 +43,5 @@ public interface SoapObjectItf
   /**
    * Initializes a <code>SoapObjectItf</code> object given a coded Hashtable.
    */
-  public Object decode(Hashtable h);
+  public void decode(Hashtable h);
 }

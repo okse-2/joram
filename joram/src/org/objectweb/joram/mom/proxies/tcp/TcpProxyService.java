@@ -37,6 +37,16 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Starts a TCP entry point for MOM clients.
  */
 public class TcpProxyService {
+  public static final String SO_TIMEOUT_PROP = 
+      "org.objectweb.joram.mom.proxies.tcp.soTimeout";
+
+  public static final int DEFAULT_SO_TIMEOUT = 10000;
+
+  public static final String POOL_SIZE_PROP = 
+      "org.objectweb.joram.mom.proxies.tcp.poolSize";
+
+  public static final int DEFAULT_POOL_SIZE = 1;
+
   public static final int DEFAULT_PORT = 16010;
 
   /**
@@ -70,7 +80,14 @@ public class TcpProxyService {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    proxyService = new TcpProxyService(serverSocket);
+    int poolSize = Integer.getInteger(
+      POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+
+    int timeout = Integer.getInteger(
+      SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    
+    proxyService = new TcpProxyService(
+      serverSocket, poolSize, timeout);
     proxyService.start();
   }
 
@@ -99,21 +116,29 @@ public class TcpProxyService {
    * The thread listening to incoming
    * TCP connections.
    */
-  private TcpConnectionListener connectionListener;
+  private TcpConnectionListener[] connectionListeners;
 
-  public TcpProxyService(ServerSocket serverSocket) {
+  public TcpProxyService(ServerSocket serverSocket,
+                         int poolSize,
+                         int timeout) {
     this.serverSocket = serverSocket;
     this.connections = new Vector();
-    connectionListener = 
-      new TcpConnectionListener(
-        serverSocket, this);
+    connectionListeners = 
+      new TcpConnectionListener[poolSize];
+    for (int i = 0; i < poolSize; i++) {
+      connectionListeners[i] = 
+        new TcpConnectionListener(
+          serverSocket, this, timeout);
+    }
   }
 
   private void start() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.start()");
-    connectionListener.start();
+    for (int i = 0; i < connectionListeners.length; i++) {
+      connectionListeners[i].start();
+    }
   }
 
   void registerConnection(TcpConnection tcpConnection) {
@@ -132,6 +157,17 @@ public class TcpProxyService {
     connections.removeElement(tcpConnection);
   }
 
+  TcpConnection getConnection(AgentId proxyId, int key) {
+    for (int i = 0; i < connections.size(); i++) {
+      TcpConnection tc = (TcpConnection)connections.elementAt(i);
+      if (tc.getProxyId() == proxyId &&
+          tc.getKey() == key) {
+        return tc;
+      }
+    }
+    return null;
+  }
+
   private void stop() {
     Vector stopList = (Vector)connections.clone();
     for (int i = 0; i < stopList.size(); i++) {
@@ -139,6 +175,8 @@ public class TcpProxyService {
         (TcpConnection)stopList.elementAt(i);
       tc.close();
     }
-    connectionListener.stop();
+    for (int i = 0; i < connectionListeners.length; i++) {
+      connectionListeners[i].stop();
+    }
   }
 }

@@ -127,6 +127,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                   String selector,
                   String subName, 
                   boolean noLocal) throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "MessageConsumer.<init>(" + 
+        sess + ',' + dest + ',' + selector + ',' + 
+        subName + ',' + noLocal + ')');
+    
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
 
@@ -336,8 +343,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   public javax.jms.Message receiveNoWait() 
     throws JMSException {
     checkClosed();
-    return sess.receive(-1, 0, this, 
-                        targetName, selector, queueMode);
+    if (sess.getConnection().isStarted()) {
+      return sess.receive(-1, 0, this, 
+                          targetName, selector, queueMode);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -376,8 +387,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   /**
    * Called by Session for passing an asynchronous message 
    * delivery to the listener.
+   * Not synchronized because it could deadlock with close:
+   * the closing thread waits for the listener the thread
+   * to return from onMessage. The synchronization between
+   * close and onMessage is done in MessageConsumerListener.
    */
-  synchronized void onMessage(Message msg) throws JMSException {
+  void onMessage(Message msg) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 

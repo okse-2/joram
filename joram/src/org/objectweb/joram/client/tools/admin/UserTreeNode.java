@@ -32,50 +32,55 @@ class UserTreeNode extends DefaultMutableTreeNode
 {
   private AdminController c;
   private User user;
+
+  private SubscriptionRootTreeNode subscriptionRoot;
   
-  public UserTreeNode(AdminController c, User user)
-  {
-  	super(user);
-  	this.c = c;
-  	this.user = user;
+  public UserTreeNode(AdminController c, User user) {
+    super(user.getName() + ':' + 
+          user.getProxyId());
+    this.c = c;
+    this.user = user;
+    
+    subscriptionRoot = new SubscriptionRootTreeNode();
+    add(subscriptionRoot);
   }
 
   public void refresh(DefaultTreeModel treeModel)
-  {
-  }
+    {
+    }
 
   public String getDescription()
-  {
-    StringBuffer sb = new StringBuffer();
-    sb.append("<font face=Arial><b>User: </b>");
-    sb.append(user);
-    sb.append("<br><br>");
+    {
+      StringBuffer sb = new StringBuffer();
+      sb.append("<font face=Arial><b>User: </b>");
+      sb.append(user);
+      sb.append("<br><br>");
 
-    sb.append("</font>");
-    return sb.toString();
-  }
+      sb.append("</font>");
+      return sb.toString();
+    }
 
   public JPopupMenu getContextMenu()
-  {
-    JPopupMenu popup = new JPopupMenu("User");
+    {
+      JPopupMenu popup = new JPopupMenu("User");
 
-    ChangePasswordAction cpa = new ChangePasswordAction();
-    if (!c.isAdminConnected())
-      cpa.setEnabled(false);
-    popup.add(new JMenuItem(cpa));
+      ChangePasswordAction cpa = new ChangePasswordAction();
+      if (!c.isAdminConnected())
+        cpa.setEnabled(false);
+      popup.add(new JMenuItem(cpa));
 
-    DeleteUserAction dua = new DeleteUserAction();
-    if (!c.isAdminConnected())
-      dua.setEnabled(false);
-    popup.add(new JMenuItem(dua));
+      DeleteUserAction dua = new DeleteUserAction();
+      if (!c.isAdminConnected())
+        dua.setEnabled(false);
+      popup.add(new JMenuItem(dua));
 
-    return popup;
-  }
+      return popup;
+    }
 
   public ImageIcon getImageIcon()
-  {
-    return AdminToolConstants.userIcon;
-  }
+    {
+      return AdminToolConstants.userIcon;
+    }
 
   public User getUser() { return user; }
   
@@ -95,74 +100,74 @@ class UserTreeNode extends DefaultMutableTreeNode
     return (ServerTreeNode) getParent().getParent();
   }
 
-  public String toString() { return (String) user.code().get("name"); }
-
-  public boolean getAllowsChildren() { return false; }
+  public boolean getAllowsChildren() { 
+    return true; 
+  }
 
   private class DeleteUserAction extends AbstractAction
   {
     public DeleteUserAction()
-    {
-      super("Delete", AdminToolConstants.trashIcon);
-    }
+      {
+        super("Delete", AdminToolConstants.trashIcon);
+      }
 
     public void actionPerformed(java.awt.event.ActionEvent e)
-    {
-      try
       {
-        Object[] options = { "OK", "CANCEL" };
-        int conf = JOptionPane.showOptionDialog(AdminTool.getInstance(), "You are about to permanently delete this user. Please click OK to proceed.",
-                     "Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+        try
+          {
+            Object[] options = { "OK", "CANCEL" };
+            int conf = JOptionPane.showOptionDialog(AdminTool.getInstance(), "You are about to permanently delete this user. Please click OK to proceed.",
+                                                    "Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
-        if (conf == 0)
-          c.deleteUser(UserTreeNode.this);
+            if (conf == 0)
+              c.deleteUser(UserTreeNode.this);
+          }
+        catch (Exception x) {
+          x.printStackTrace();
+          JOptionPane.showMessageDialog(null, x.getMessage());
+        }
       }
-      catch (Exception x) {
-        x.printStackTrace();
-        JOptionPane.showMessageDialog(null, x.getMessage());
-      }
-    }
   }
 
   private class ChangePasswordAction extends AbstractAction
   {
     public ChangePasswordAction()
-    {
-      super("Change Password...");
-    }
+      {
+        super("Change Password...");
+      }
 
     public void actionPerformed(java.awt.event.ActionEvent e)
-    {
-      try
       {
-        while (true) {
-          CreateUserDialog cud = CreateUserDialog.showDialog(UserTreeNode.this.getUserName(), true);
+        try
+          {
+            while (true) {
+              CreateUserDialog cud = CreateUserDialog.showDialog(UserTreeNode.this.getUserName(), true);
 
-          if (cud.getActionCancelled()) {
-            break;
-          }
-          else {
-            String msg = "";
+              if (cud.getActionCancelled()) {
+                break;
+              }
+              else {
+                String msg = "";
 
-            if (cud.getPassword().length() == 0)
-              msg = "You have to enter a new password for the user. Please click OK to make corrections.";
-            else if (!cud.getPassword().equals(cud.getConfirmationPassword()))
-              msg = "The two passwords that you have entered do not match. Please click OK to make corrections.";
-            else {
-              c.updateUser(UserTreeNode.this, cud.getUserName(), cud.getPassword());
-              break;
+                if (cud.getPassword().length() == 0)
+                  msg = "You have to enter a new password for the user. Please click OK to make corrections.";
+                else if (!cud.getPassword().equals(cud.getConfirmationPassword()))
+                  msg = "The two passwords that you have entered do not match. Please click OK to make corrections.";
+                else {
+                  c.updateUser(UserTreeNode.this, cud.getUserName(), cud.getPassword());
+                  break;
+                }
+
+                Object[] options = { "OK" };
+                JOptionPane.showOptionDialog(AdminTool.getInstance(), msg,
+                                             "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+              }
             }
-
-            Object[] options = { "OK" };
-            JOptionPane.showOptionDialog(AdminTool.getInstance(), msg,
-            	"Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
           }
+        catch (Exception x) {
+          x.printStackTrace();
+          JOptionPane.showMessageDialog(null, x.getMessage());
         }
       }
-      catch (Exception x) {
-        x.printStackTrace();
-        JOptionPane.showMessageDialog(null, x.getMessage());
-      }
-    }
   }
 }

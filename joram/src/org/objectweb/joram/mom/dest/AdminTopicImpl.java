@@ -35,6 +35,9 @@ import fr.dyade.aaa.agent.UnknownServerException;
 import fr.dyade.aaa.agent.ConfigController;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CML;
+import fr.dyade.aaa.agent.conf.A3CMLNetwork;
+import fr.dyade.aaa.agent.conf.A3CMLDomain;
+import fr.dyade.aaa.agent.conf.A3CMLServer;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.shared.admin.AdminRequest;
@@ -51,6 +54,7 @@ import java.util.Vector;
 import java.util.Properties;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -59,18 +63,17 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * basically processing administration requests.
  */
 public class AdminTopicImpl extends TopicImpl {
+
   /** Reference of the server's local AdminTopicImpl instance. */
-  public static AdminTopicImpl ref;
+  private static AdminTopicImpl ref;
+  
+  public static AdminTopicImpl getReference() {
+    return ref;
+  }
 
   /** Identifier of the server this topic is deployed on. */
   private int serverId;
 
-  /** Vector holding the local server's queues' identifiers. */
-  private Vector queues;
-  /** Vector holding the local server's dead message queues' identifiers. */
-  private Vector deadMQueues;
-  /** Vector holding the local server's topics' identifiers. */
-  private Vector topics;
   /**
    * Table holding the local server's destinations names.
    * <p>
@@ -120,9 +123,6 @@ public class AdminTopicImpl extends TopicImpl {
   public AdminTopicImpl(AgentId topicId) {
     super(topicId, topicId);
     serverId = (new Short(AgentServer.getServerId())).intValue();
-    queues = new Vector();
-    deadMQueues = new Vector();
-    topics = new Vector();
     destinationsTable = new Hashtable();
     usersTable = new Hashtable();
     proxiesTable = new Hashtable();
@@ -163,8 +163,8 @@ public class AdminTopicImpl extends TopicImpl {
   /** Method used by proxies for retrieving their name. */
   public String getName(AgentId proxyId) {
     String name;
-    for (Enumeration enum = proxiesTable.keys(); enum.hasMoreElements();) {
-      name = (String) enum.nextElement();
+    for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
+      name = (String) e.nextElement();
       if (proxyId.equals(proxiesTable.get(name)))
         return name;
     }
@@ -174,8 +174,8 @@ public class AdminTopicImpl extends TopicImpl {
   /** Method used by proxies for retrieving their password. */
   public String getPassword(AgentId proxyId) {
     String name;
-    for (Enumeration enum = proxiesTable.keys(); enum.hasMoreElements();) {
-      name = (String) enum.nextElement();
+    for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
+      name = (String) e.nextElement();
       if (proxyId.equals(proxiesTable.get(name)))
         return (String) usersTable.get(name);;
     }
@@ -202,7 +202,7 @@ public class AdminTopicImpl extends TopicImpl {
               throws UnknownNotificationException {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
-                                    + ": got " + not.getClass().getName()
+                                    + ": got " + not
                                     + " from: " + from.toString());
 
     if (not instanceof AdminNotification)
@@ -215,6 +215,8 @@ public class AdminTopicImpl extends TopicImpl {
       doReact((GetProxyIdNot)not);
     else if (not instanceof GetProxyIdListNot)
       doReact((GetProxyIdListNot)not);
+    else if (not instanceof RegisterTmpDestNot)
+      doReact((RegisterTmpDestNot)not);
     else
       super.react(from, not);
   }
@@ -304,6 +306,30 @@ public class AdminTopicImpl extends TopicImpl {
     AgentId[] res = new AgentId[idList.size()];
     idList.copyInto(res);
     not.Return(res);
+  }
+
+  private void doReact(RegisterTmpDestNot not) {
+    String destName = not.getTmpDestId().toString();
+    if (not.toAdd()) {
+      String type;
+      String className;
+      if (not.isTopic()) {
+        type = "topic.tmp";
+        className = Topic.class.getName();
+      } else {
+        type = "queue.tmp";
+        className = Queue.class.getName();
+      }
+      DestinationDesc destDesc = 
+        new DestinationDesc(
+          not.getTmpDestId(),
+          destName,
+          className,
+          type);
+      destinationsTable.put(destName, destDesc);
+    } else {
+      destinationsTable.remove(destName);
+    }
   }
 
   /**
@@ -590,7 +616,7 @@ public class AdminTopicImpl extends TopicImpl {
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                         "--- " + this + ": got " 
-                                        + msg.getObject().getClass().getName());
+                                        + msg.getObject());
       } catch (ClassCastException exc) {
         MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                       "--- " + this + ": got bad object");
@@ -671,6 +697,10 @@ public class AdminTopicImpl extends TopicImpl {
         doProcess((UnsetUserThreshold) request, replyTo, msgId);
       else if (request instanceof Monitor_GetServersIds)
         doProcess((Monitor_GetServersIds) request, replyTo, msgId);
+      else if (request instanceof GetDomainNames)
+        doProcess((GetDomainNames) request, replyTo, msgId);
+      else if (request instanceof GetLocalServer)
+        doProcess((GetLocalServer) request, replyTo, msgId);
       else if (request instanceof Monitor_GetDestinations)
         doProcess((Monitor_GetDestinations) request, replyTo, msgId);
       else if (request instanceof Monitor_GetUsers)
@@ -705,6 +735,12 @@ public class AdminTopicImpl extends TopicImpl {
         doProcess((RemoveDomainRequest) request, replyTo, msgId);
       else if (request instanceof GetConfigRequest)
         doProcess((GetConfigRequest) request, replyTo, msgId);
+      else if (request instanceof UserAdminRequest)
+        doProcess((UserAdminRequest) request, replyTo, msgId);
+      else if (request instanceof GetSubscriberIds)
+        doProcess((GetSubscriberIds) request, replyTo, msgId);
+      else if (request instanceof QueueAdminRequest)
+        doProcess((QueueAdminRequest) request, replyTo, msgId);
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
@@ -769,16 +805,18 @@ public class AdminTopicImpl extends TopicImpl {
       String destName = request.getDestinationName();
       boolean destNameActivated = (destName != null && ! destName.equals(""));
 
-      AgentId destId;
+      DestinationDesc destDesc;
       
       Agent dest = null;
       String info;
-      String clazz = request.getClassName();
       Properties properties = request.getProperties();
-      
+
       // Retrieving an existing destination:
       if (destNameActivated && destinationsTable.containsKey(destName)) {
-        destId = (AgentId) destinationsTable.get(destName);
+        destDesc = (DestinationDesc) destinationsTable.get(destName);
+        if (! destDesc.isAssignableTo(request.getExpectedType())) {
+          throw new RequestException("Destination type not compliant");
+        }
         info = strbuf.append("Request [").append(request.getClass().getName())
           .append("], processed by AdminTopic on server [").append(serverId)
           .append("], successful [true]: destination [")
@@ -787,49 +825,74 @@ public class AdminTopicImpl extends TopicImpl {
       }
       // Instanciating the destination class.
       else {
+        String className = request.getClassName();
+        Class clazz;
+        String destType;
         try {
-          if ((clazz != null) && (clazz.length() > 0)) {
-            dest = (Agent) Class.forName(clazz).newInstance();
-            if (properties != null)
+          clazz = Class.forName(className);
+          dest = (Agent) clazz.newInstance();
+          if (destName != null) {
+            dest.name = destName;
+          }
+          if (properties != null) {
             ((AdminDestinationItf) dest).setProperties(properties);
-            ((AdminDestinationItf) dest).init(this.destId);
-          } else throw new Exception("Invalid empty class name.");
+          }
+          ((AdminDestinationItf) dest).init(this.destId);
+          
+          Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
+          destType = (String)getTypeM.invoke(null, new Object[0]);
         } catch (Exception exc) {
-          if (exc instanceof ClassCastException)
-            throw new RequestException("Class [" + clazz + "] is not a Destination class.");
-          else
-            throw new RequestException("Could not instanciate Destination class [" + clazz + "]: " + exc);
+          if (exc instanceof ClassCastException) {
+            throw new RequestException(
+              "Class [" + className + 
+              "] is not a Destination class.");
+          } else {
+            throw new RequestException(
+              "Could not instanciate Destination class [" + 
+              className + "]: " + exc);
+          }
         }
 
+        AgentId createdDestId = dest.getId();
+        
+        if (! destNameActivated)
+          destName = createdDestId.toString();
+        
+        destDesc = new DestinationDesc(createdDestId, destName, 
+                                       className, destType);
+        if (! destDesc.isAssignableTo(request.getExpectedType())) {
+          throw new RequestException("Destination type not compliant");
+        }
+        
         try {
           dest.deploy();
-          destId = dest.getId();
-          
-          if (dest instanceof DeadMQueue)
-            deadMQueues.add(destId);
-          else if (dest instanceof Topic)
-            topics.add(destId);
-          else if (dest instanceof Queue)
-            queues.add(destId);
-          
-          if (destNameActivated)
-            destinationsTable.put(destName, destId);
+          destinationsTable.put(destName, destDesc);
           
           info = strbuf.append("Request [").append(request.getClass().getName())
             .append("], processed by AdminTopic on server [").append(serverId)
-            .append("], successful [true]: ").append(clazz).append(" [")
-            .append(destId.toString()).append("] has been created and deployed")
+            .append("], successful [true]: ").append(className).append(" [")
+            .append(createdDestId.toString()).append("] has been created and deployed")
             .toString();
           strbuf.setLength(0);
         }
         catch (Exception exc) {
-          throw new RequestException("Error while deploying Destination [" + clazz + "]: " + exc);
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
+
+
+          throw new RequestException("Error while deploying Destination [" + 
+                                     clazz + "]: " + exc);
         }
       }
 
-      distributeReply(replyTo,
-                      msgId,
-                      new CreateDestinationReply(destId.toString(), info));
+      distributeReply(
+        replyTo,
+        msgId,
+        new CreateDestinationReply(
+          destDesc.getId().toString(), 
+          destDesc.getName(),
+          destDesc.getType(),
+          info));
       
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
@@ -855,18 +918,14 @@ public class AdminTopicImpl extends TopicImpl {
       // The destination is  local, process the request.
       String info;
 
-      queues.remove(destId);
-      topics.remove(destId);
-      deadMQueues.remove(destId);
-
-      String name;
-      AgentId id;
-      for (Enumeration names = destinationsTable.keys();
-           names.hasMoreElements();) {
-        name = (String) names.nextElement();
-        id = (AgentId) destinationsTable.get(name);
-        if (id.equals(destId))
-          destinationsTable.remove(name);
+      Enumeration destinations = destinationsTable.elements();
+      while (destinations.hasMoreElements()) {
+        DestinationDesc destDesc = 
+          (DestinationDesc)destinations.nextElement();
+        if (destDesc.getId().equals(destId)) {
+          destinationsTable.remove(destDesc.getName());
+          break;
+        }
       }
 
       Channel.sendTo(destId, new DeleteNot());
@@ -1009,6 +1068,9 @@ public class AdminTopicImpl extends TopicImpl {
         strbuf.setLength(0);
       } else {
         UserAgent proxy = new UserAgent();
+        if (name != null) {
+          proxy.name = name;
+        }
         proxId = proxy.getId();
 
         try {
@@ -1496,20 +1558,87 @@ public class AdminTopicImpl extends TopicImpl {
    */
   private void doProcess(Monitor_GetServersIds request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-  {
+                         String msgId) throws UnknownServerException {
     if (checkServerId(request.getServerId())) {
-      Enumeration enum = AgentServer.getServersIds();
-      Vector ids = new Vector();
-      while (enum.hasMoreElements())
-        ids.add(enum.nextElement());
-
-      Monitor_GetServersIdsRep reply = new Monitor_GetServersIdsRep(ids);
-      distributeReply(replyTo, msgId, reply);
+      try {
+        int[] ids;
+        String[] names;
+        String[] hostNames;
+        String domainName = request.getDomainName();
+        Enumeration servers;
+        A3CMLConfig config = AgentServer.getConfig();
+        int serversCount;
+        if (domainName != null) {
+          A3CMLDomain domain = config.getDomain(domainName);
+          servers = domain.servers.elements();
+          serversCount = domain.servers.size();
+        } else {
+          servers = config.servers.elements();
+          serversCount = config.servers.size();
+        }
+        ids = new int[serversCount];
+        names = new String[serversCount];
+        hostNames = new String[serversCount];
+        int i = 0;
+        while (servers.hasMoreElements()) {
+          A3CMLServer server = (A3CMLServer)servers.nextElement();
+          ids[i] = (int)server.sid;
+          names[i] = server.name;
+          hostNames[i] = server.hostname;
+          i++;
+        }
+        Monitor_GetServersIdsRep reply = new Monitor_GetServersIdsRep(
+          ids, names, hostNames);
+        distributeReply(replyTo, msgId, reply);
+      } catch (Exception exc) {
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+        distributeReply(replyTo, msgId,
+                        new AdminReply(false, exc.toString()));
+      }
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
              new AdminRequestNot(replyTo, msgId, request));
+    }
+  }
+
+  private void doProcess(GetLocalServer request,
+                         AgentId replyTo,
+                         String msgId) throws UnknownServerException {
+    try {
+      A3CMLConfig config = AgentServer.getConfig();
+      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId());
+      distributeReply(replyTo, msgId,
+                      new GetLocalServerRep(a3cmlServer.sid,
+                                            a3cmlServer.name,
+                                            a3cmlServer.hostname));
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(GetDomainNames request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      A3CMLConfig config = AgentServer.getConfig();
+      A3CMLServer server = config.getServer((short)request.getServerId());
+      String[] domainNames = new String[server.networks.size()];
+      for (int i = 0; i < server.networks.size(); i++) {
+        A3CMLNetwork nw = (A3CMLNetwork)server.networks.elementAt(i);
+        domainNames[i] = nw.domain;
+      }
+      GetDomainNamesRep reply = new GetDomainNamesRep(domainNames);
+      distributeReply(replyTo, msgId, reply);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
     }
   }
 
@@ -1524,17 +1653,21 @@ public class AdminTopicImpl extends TopicImpl {
                          String msgId) throws UnknownServerException
   {
     if (checkServerId(request.getServerId())) {
-      Monitor_GetDestinationsRep reply = new Monitor_GetDestinationsRep();
-
-      int i;
-      for (i = 0; i < queues.size(); i ++)
-        reply.addQueue(((AgentId) queues.get(i)).toString());
-      for (i = 0; i < deadMQueues.size(); i ++)
-        reply.addDeadMQueue(((AgentId) deadMQueues.get(i)).toString());
-      for (i = 0; i < topics.size(); i ++)
-        reply.addTopic(((AgentId) topics.get(i)).toString());
-      reply.setNames(destinationsTable);
-
+      Enumeration destinations = destinationsTable.elements();
+      String[] ids = new String[destinationsTable.size()];
+      String[] names = new String[destinationsTable.size()];
+      String[] types = new String[destinationsTable.size()];
+      int i = 0;
+      while (destinations.hasMoreElements()) {
+        DestinationDesc destDesc = 
+          (DestinationDesc)destinations.nextElement();
+        ids[i] = destDesc.getId().toString();
+        names[i] = destDesc.getName();
+        types[i] = destDesc.getType();
+        i++;
+      }
+      Monitor_GetDestinationsRep reply = 
+        new Monitor_GetDestinationsRep(ids, names, types);
       distributeReply(replyTo, msgId, reply);
     } else {
       // Forward the request to the right AdminTopic agent.
@@ -1813,15 +1946,20 @@ public class AdminTopicImpl extends TopicImpl {
   private void doProcess(AddDomainRequest request,
                          AgentId replyTo,
                          String msgId) {
+    ConfigController ctrl = AgentServer.getConfigController();
     try {
-      ConfigController ctrl = AgentServer.getConfigController();
       ctrl.beginConfig();
       ctrl.addDomain(request.getDomainName(),
                      "fr.dyade.aaa.agent.SimpleNetwork");
-      ctrl.addNetwork(request.getServerName(),
+      ctrl.addNetwork((short)request.getServerId(),
                       request.getDomainName(),
                       request.getPort());
       ctrl.commitConfig();
+      
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(
+          BasicLevel.DEBUG, 
+          " -> reply to client");
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Domain added"));
       if (replyTo != null) {
@@ -1830,6 +1968,7 @@ public class AdminTopicImpl extends TopicImpl {
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1838,8 +1977,8 @@ public class AdminTopicImpl extends TopicImpl {
   private void doProcess(RemoveDomainRequest request,
                          AgentId replyTo,
                          String msgId) {
-    try {
-      ConfigController ctrl = AgentServer.getConfigController();
+    ConfigController ctrl = AgentServer.getConfigController();
+    try {      
       ctrl.beginConfig();
       ctrl.removeDomain(request.getDomainName());
       ctrl.commitConfig();
@@ -1851,6 +1990,7 @@ public class AdminTopicImpl extends TopicImpl {
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1859,12 +1999,12 @@ public class AdminTopicImpl extends TopicImpl {
   private void doProcess(AddServerRequest request,
                          AgentId replyTo,
                          String msgId) {
-    try {
-      ConfigController ctrl = AgentServer.getConfigController();
+    ConfigController ctrl = AgentServer.getConfigController();
+    try {      
       ctrl.beginConfig();
       ctrl.addServer(request.getServerName(),
                      request.getHostName(),
-                     request.getServerId());
+                     (short)request.getServerId());
       ctrl.addNetwork(request.getServerName(),
                       request.getDomainName(),
                       request.getPort());
@@ -1880,6 +2020,7 @@ public class AdminTopicImpl extends TopicImpl {
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1888,10 +2029,10 @@ public class AdminTopicImpl extends TopicImpl {
   private void doProcess(RemoveServerRequest request,
                          AgentId replyTo,
                          String msgId) {
+    ConfigController ctrl = AgentServer.getConfigController();
     try {
-      ConfigController ctrl = AgentServer.getConfigController();
       ctrl.beginConfig();
-      ctrl.removeServer(request.getServerName());
+      ctrl.removeServer((short)request.getServerId());
       ctrl.commitConfig();
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server removed"));
@@ -1901,6 +2042,7 @@ public class AdminTopicImpl extends TopicImpl {
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      ctrl.release();
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1924,6 +2066,55 @@ public class AdminTopicImpl extends TopicImpl {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(UserAdminRequest request,
+                         AgentId replyTo,
+                         String requestMsgId) 
+    throws UnknownServerException {
+    AgentId userId = AgentId.fromString(request.getUserId());
+    if (checkServerId(userId.getTo())) {
+      // Delegate to the proxy
+      Channel.sendTo(userId, new UserAdminRequestNot(
+        request, replyTo, requestMsgId, createMessageId()));
+    } else {
+      // Forward the request to the right AdminTopic agent.
+      Channel.sendTo(AdminTopic.getDefault(userId.getTo()),
+                     new AdminRequestNot(
+                       replyTo, requestMsgId, request));
+    }
+  }
+
+  private void doProcess(GetSubscriberIds request,
+                         AgentId replyTo,
+                         String requestMsgId) 
+    throws UnknownServerException {
+    try {
+      AgentId topicId = AgentId.fromString(request.getTopicId());
+      Channel.sendTo(topicId, new DestinationAdminRequestNot(
+        request, replyTo, requestMsgId, createMessageId()));
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, requestMsgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(QueueAdminRequest request,
+                         AgentId replyTo,
+                         String requestMsgId) 
+    throws UnknownServerException {
+    try {
+      AgentId queueId = AgentId.fromString(request.getQueueId());
+      Channel.sendTo(queueId, new DestinationAdminRequestNot(
+        request, replyTo, requestMsgId, createMessageId()));
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
   }
@@ -1961,6 +2152,12 @@ public class AdminTopicImpl extends TopicImpl {
     throw new UnknownServerException("server#" + serverId + " is unknow.");
   }
  
+  private String createMessageId() {
+    if (msgCounter == Long.MAX_VALUE) msgCounter = 0;
+    msgCounter++;
+    return "ID:" + destId.toString() + ":" + msgCounter;
+  }
+
   /** 
    * Actually sends an <code>AdminReply</code> object to an identified
    * destination.
@@ -1969,21 +2166,22 @@ public class AdminTopicImpl extends TopicImpl {
    * @param msgId  Identifier of the original request.
    * @param reply  The <code>AdminReply</code> instance to send.
    */
-  private void distributeReply(AgentId to, String msgId, AdminReply reply)
-  {
+  private void distributeReply(AgentId to, String msgId, AdminReply reply) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG,
+        "AdminTopicImpl.distributeReply(" + 
+        to + ',' + msgId + ',' + reply + ')');
+                            
     if (to == null)
       return;
-
+    
     Message message = new Message();
-
-    if (msgCounter == Long.MAX_VALUE) msgCounter = 0;
-    msgCounter++;
-
-    message.setIdentifier("ID:" + destId.toString() + ":" + msgCounter);
+    message.setIdentifier(createMessageId());
     message.setCorrelationId(msgId);
     message.setTimestamp(System.currentTimeMillis());
-    message.setDestination(destId.toString(), false);
-
+    message.setDestination(destId.toString(), 
+                           Topic.TOPIC_TYPE);
     try {
       message.setObject(reply);
 
@@ -1992,8 +2190,10 @@ public class AdminTopicImpl extends TopicImpl {
 
       ClientMessages clientMessages = new ClientMessages(-1, -1, messages);
       Channel.sendTo(to, clientMessages);
+    } catch (Exception exc) {
+      MomTracing.dbgDestination.log(
+        BasicLevel.ERROR, "", exc);
     }
-    catch (Exception exc) {}
   }
 
 
@@ -2027,6 +2227,52 @@ public class AdminTopicImpl extends TopicImpl {
       this.msgId = msgId;
       this.replyTo = replyTo;
       this.request = request;
+    }
+  }
+
+  static class DestinationDesc 
+      implements java.io.Serializable {
+    private AgentId id;
+    private String name;
+    private String className;
+    private String type;
+
+    public DestinationDesc(AgentId id,
+                           String name,
+                           String className,
+                           String type) {
+      this.id = id;
+      this.name = name;
+      this.className = className.intern();
+      this.type = type.intern();
+    }
+
+    public final AgentId getId() {
+      return id;
+    }
+    
+    public final String getName() {
+      return name;
+    }
+
+    public final String getClassName() {
+      return className;
+    }
+
+    public final String getType() {
+      return type;
+    }
+
+    public boolean isAssignableTo(String assignedType) {
+      return type.startsWith(assignedType);
+    }
+
+    public String toString() {
+      return '(' + super.toString() +
+        ",id=" + id +
+        ",name=" + name + 
+        ",className=" + className + 
+        ",type=" + type + ')';
     }
   }
 }

@@ -36,6 +36,11 @@ import fr.dyade.aaa.agent.AgentServer;
  * @see DeadMQueueImpl
  */
 public class DeadMQueue extends Queue {
+
+  public static String getDestinationType() {
+    return "queue.dmq";
+  }
+
   /**
    * Empty constructor for newInstance(). 
    */ 

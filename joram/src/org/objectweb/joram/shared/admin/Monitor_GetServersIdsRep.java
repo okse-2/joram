@@ -32,23 +32,34 @@ import java.util.Vector;
 public class Monitor_GetServersIdsRep extends Monitor_Reply
 {
   /** Servers identifiers. */
-  private Vector ids;
+  private int[] ids;
 
+  private String[] names;
+
+  private String[] hostNames;
 
   /**
    * Constructs a <code>Monitor_GetServersRep</code> instance.
-   *
-   * @param ids  Vector of servers' identifiers.
    */
-  public Monitor_GetServersIdsRep(Vector ids)
-  {
+  public Monitor_GetServersIdsRep(
+    int[] ids,
+    String[] names,
+    String[] hostNames) {
     this.ids = ids;
+    this.names = names;
+    this.hostNames = hostNames;
   }
 
-
   /** Returns the servers' identifiers. */
-  public Vector getIds()
-  {
+  public final int[] getIds() {
     return ids;
+  }
+
+  public final String[] getNames() {
+    return names;
+  }
+
+  public final String[] getHostNames() {
+    return hostNames;
   }
 }

@@ -79,4 +79,9 @@ public class GetAdminTopicReply extends AbstractJmsReply
     req.setId((String) h.get("id"));
     return req;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",id=" + id + ')';
+  }
 }

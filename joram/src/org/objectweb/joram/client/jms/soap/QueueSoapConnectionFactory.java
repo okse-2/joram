@@ -89,53 +89,6 @@ public class QueueSoapConnectionFactory
   }
 
   /**
-   * Method inherited from the <code>SoapConnectionFactory</code> class;
-   * overrides this <code>ConnectionFactory</code> method for constructing
-   * the appropriate reference.
-   */
-  public Reference getReference() throws NamingException
-  {
-    Reference ref =
-      new Reference(this.getClass().getName(),
-                    "org.objectweb.joram.client.jms.admin.ObjectFactory",
-                    null);
-    ref.add(new StringRefAddr("adminObj.id", id));
-    ref.add(new StringRefAddr("cFactory.host", params.getHost()));
-    ref.add(new StringRefAddr("cFactory.port",
-                              (new Integer(params.getPort())).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.cnxT",
-                        (new Integer(params.connectingTimer)).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.txT",
-                        (new Integer(params.txPendingTimer)).toString()));
-    ref.add(new StringRefAddr("cFactory.soapCnxT",
-                              (new Integer(params.cnxPendingTimer))
-                                .toString()));
-    return ref;
-  }
-
-  /**
-   * Decodes a <code>QueueSoapConnectionFactory</code> which travelled through
-   * the SOAP protocol.
-   */
-  public Object decode(java.util.Hashtable h)
-  {
-    String host = (String) h.get("host");
-    int port = ((Integer) h.get("port")).intValue();
-    int timer = ((Integer) h.get("cnxPendingTimer")).intValue() / 1000;
-
-    QueueSoapConnectionFactory ret =
-      new QueueSoapConnectionFactory(host, port, timer);
-    FactoryParameters params = ret.getParameters();
-    params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
-    params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
-
-    return ret;
-  }
-
-
-  /**
    * Admin method creating a <code>javax.jms.QueueConnectionFactory</code>
    * instance for creating SOAP connections with a given server.
    *

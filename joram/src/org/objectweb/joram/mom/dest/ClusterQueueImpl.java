@@ -175,7 +175,7 @@ public class ClusterQueueImpl extends QueueImpl {
   protected Object doList(ListClusterQueue req) {
     Vector vect = new Vector();
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); )
-      vect.add(e.nextElement());
+      vect.add(e.nextElement().toString());
     return vect;
   }
  
@@ -555,8 +555,8 @@ public class ClusterQueueImpl extends QueueImpl {
                                       " ClusterQueueImpl.doReact LBMessageHope : nbMsgSend = " + 
                                       cm.getMessages().size());
 
-      for (Enumeration enum = cm.getMessages().elements(); enum.hasMoreElements(); ) {
-        Message msg = (Message) enum.nextElement();
+      for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+        Message msg = (Message) e.nextElement();
         messageSendToCluster(msg.getIdentifier());
         deletePersistenceMessage(msg);
       }

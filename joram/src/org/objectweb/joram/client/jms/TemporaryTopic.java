@@ -39,8 +39,17 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
 {
+  private final static String TMP_TOPIC_TYPE = "topic.tmp";
+
+  public static boolean isTemporaryTopic(String type) {
+    return Destination.isAssignableTo(type, TMP_TOPIC_TYPE);
+  }
+
   /** The connection the topic belongs to, <code>null</code> if not known. */
   private Connection cnx;
+
+  // Used by jndi2 SoapObjectHelper
+  public TemporaryTopic() {}
 
   /** 
    * Constructs a temporary topic.
@@ -49,17 +58,10 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
    * @param cnx  The connection the queue belongs to, <code>null</code> if
    *          not known. 
    */
-  public TemporaryTopic(String agentId, Connection cnx)
-  {
-    super(agentId);
+  public TemporaryTopic(String agentId, Connection cnx) {
+    super(agentId, TMP_TOPIC_TYPE);
     this.cnx = cnx;
   }
-
-  /** 
-   * Constructs an empty temporary topic.
-   */
-  public TemporaryTopic()
-  {}
 
   /** Returns a String image of the topic. */
   public String toString()
@@ -100,14 +102,5 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
   Connection getCnx()
   {
     return cnx;
-  }
-
-
-  /**
-   * Decodes a <code>TemporaryTopic</code> which traveled through the
-   * SOAP protocol.
-   */  
-  public Object decode(Hashtable h) {
-    return new TemporaryTopic((String) h.get("agentId"), null);
   }
 }

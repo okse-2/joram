@@ -26,6 +26,7 @@ import org.objectweb.joram.client.jms.admin.*;
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.shared.admin.*;
+import org.objectweb.joram.client.jms.Queue;
 
 import java.util.Properties;
 import java.util.Hashtable;
@@ -58,11 +59,11 @@ public class ClusterAdminAdd
     AdminModule admin = new AdminModule();
     admin.connect(host,port,"root", "root", 60);
 
-    Queue queue = new Queue(
-      Destination.doCreate(id,
-                           null,
-                           "org.objectweb.joram.mom.dest.ClusterQueue",
-                           prop));
+    Queue queue = Queue.create(
+      id,
+      null,
+      "org.objectweb.joram.mom.dest.ClusterQueue",
+      prop);
     
     System.out.println("queue = " + queue);
 

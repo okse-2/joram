@@ -34,12 +34,55 @@ public interface EngineMBean {
   public int getNbMaxAgents();
 
   /**
+   * Returns the number of agents actually loaded in memory.
+   *
+   * @return	the maximum number of agents actually loaded in memory
+   */
+  public int getNbAgents();
+
+  /**
    * Tests if the engine is alive.
    *
    * @return	true if this <code>MessageConsumer</code> is alive; false
    * 		otherwise.
    */
   public boolean isRunning();
+
+  /**
+   * Returns the number of agent's reaction since last boot.
+   *
+   * @return	the number of agent's reaction since last boot
+   */
+  public long getNbReactions();
+
+  /**
+   * Gets the number of messages posted to this engine since creation.
+   *
+   *  return	the number of messages.
+   */
+  public int getNbMessages();
+
+  /**
+   * Gets the number of waiting messages in this engine.
+   *
+   *  return	the number of waiting messages.
+   */
+  public int getNbWaitingMessages();
+
+  /**
+   * Returns the number of fixed agents.
+   *
+   * @return	the number of fixed agents
+   */
+  public int getNbFixedAgents();
+
+  /**
+   * Sets the maximum number of agents that can be loaded simultaneously
+   * in memory.
+   *
+   * @param NbMaxAgents	the maximum number of agents
+   */
+  public void setNbMaxAgents(int NbMaxAgents);
 
   public String dumpAgent(String id) throws Exception;
 

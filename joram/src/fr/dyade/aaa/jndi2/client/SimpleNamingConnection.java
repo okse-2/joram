@@ -39,13 +39,9 @@ public class SimpleNamingConnection
 
   private int port;
 
-  private Socket socket;
-
-  private SerialOutputStream sender;
-
-  private ObjectInputStream receiver;
-
   private Hashtable env;
+
+  private IOControl ioCtrl;
 
   public SimpleNamingConnection(String hostName, 
                                 int port,
@@ -58,9 +54,6 @@ public class SimpleNamingConnection
                        env + ')');
     this.hostName = hostName;
     this.port = port;
-    socket = null;
-    sender = null;
-    receiver = null;
     this.env = env;
   }
 
@@ -85,8 +78,8 @@ public class SimpleNamingConnection
                        "NamingConnection.invoke(" + request + ')');
     open();
     try {
-      sender.writeObject(request);
-      return (JndiReply)receiver.readObject();
+      ioCtrl.writeObject(request);
+      return (JndiReply)ioCtrl.readObject();
     } catch (IOException ioe) {
       if (Trace.logger.isLoggable(BasicLevel.ERROR))
         Trace.logger.log(BasicLevel.ERROR, "NamingConnection.receive()", ioe);
@@ -100,7 +93,7 @@ public class SimpleNamingConnection
       ne.setRootCause(cnfe);
       throw ne;
     } finally {
-      close();
+      ioCtrl.close();
     }
   }
 
@@ -109,35 +102,11 @@ public class SimpleNamingConnection
       Trace.logger.log(BasicLevel.DEBUG, 
                        "SimpleNamingConnection.open()");
     try {
-      socket = new Socket(hostName, port);
-      socket.setTcpNoDelay(true);
-      socket.setSoTimeout(0);
-      socket.setSoLinger(true, 1000);
-      sender = new SerialOutputStream(socket.getOutputStream());
-      receiver = new ObjectInputStream(socket.getInputStream());
+      Socket socket = new Socket(hostName, port);
+      ioCtrl = new IOControl(socket);
     } catch (IOException exc) {
       if (Trace.logger.isLoggable(BasicLevel.ERROR))
         Trace.logger.log(BasicLevel.ERROR, "NamingConnection.open()", exc);
-      NamingException exc2 = new NamingException(exc.getMessage());
-      exc2.setRootCause(exc);
-      throw exc2;
-    }
-  }
-
-  private void close() throws NamingException {
-    try {
-      if (sender != null)
-        sender.close();
-      if (receiver != null)
-        receiver.close();
-      if (socket != null)
-        socket.close();
-      socket = null;
-      sender = null;
-      receiver = null;
-    } catch (IOException exc) {
-      if (Trace.logger.isLoggable(BasicLevel.ERROR))
-        Trace.logger.log(BasicLevel.ERROR, "NamingConnection.close()", exc);
       NamingException exc2 = new NamingException(exc.getMessage());
       exc2.setRootCause(exc);
       throw exc2;

@@ -39,6 +39,16 @@ import org.objectweb.util.monolog.api.Logger;
  * or agent notifications.
  */
 public class JndiServer {
+
+  public static final String SO_TIMEOUT_PROP = 
+      "fr.dyade.aaa.jndi2.server.soTimeout";
+
+  public static final int DEFAULT_SO_TIMEOUT = 10000;
+
+  public static final String POOL_SIZE_PROP = 
+      "fr.dyade.aaa.jndi2.server.poolSize";
+
+  public static final int DEFAULT_POOL_SIZE = 3;
   
   private static TcpServer tcpServer;
 
@@ -52,9 +62,16 @@ public class JndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
+    int poolSize = Integer.getInteger(
+      POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+
+    int timeout = Integer.getInteger(
+      SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+
     tcpServer = new TcpServer(
       serverSocket,
-      3,
+      poolSize, 
+      timeout,
       getDefault());
     tcpServer.start();
 

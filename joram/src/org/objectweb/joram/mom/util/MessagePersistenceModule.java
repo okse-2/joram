@@ -156,7 +156,7 @@ public class MessagePersistenceModule implements java.io.Serializable
         && idsToBeDeleted.isEmpty())
       return;
 
-    Enumeration enum;
+    Enumeration e;
     String id;
     String name;
     Hashtable ids;
@@ -166,8 +166,8 @@ public class MessagePersistenceModule implements java.io.Serializable
     Transaction tx = AgentServer.getTransaction();
 
     // Deletion: browsing the identifiers of the messages to delete.
-    for (enum = idsToBeDeleted.keys(); enum.hasMoreElements();) {
-      id = (String) enum.nextElement();
+    for (e = idsToBeDeleted.keys(); e.hasMoreElements();) {
+      id = (String) e.nextElement();
       name = (String) idsTable.remove(id);
 
       // No vector name: message was persisted individually.
@@ -202,8 +202,8 @@ public class MessagePersistenceModule implements java.io.Serializable
     }
 
     // Update: deleting the previous message's state.
-    for (enum = toBeUpdated.keys(); enum.hasMoreElements();) {
-      id = (String) enum.nextElement();
+    for (e = toBeUpdated.keys(); e.hasMoreElements();) {
+      id = (String) e.nextElement();
       name = (String) idsTable.get(id);
 
       // No vector name: message was persisted individually.
@@ -241,8 +241,8 @@ public class MessagePersistenceModule implements java.io.Serializable
     }
 
     // Adding the messages to be saved to the vector.
-    for (enum = toBeSaved.keys(); enum.hasMoreElements();) {
-      id = (String) enum.nextElement();
+    for (e = toBeSaved.keys(); e.hasMoreElements();) {
+      id = (String) e.nextElement();
       msgs.add(toBeSaved.get(id));
       msgIds.put(id, id);
     }
@@ -272,8 +272,8 @@ public class MessagePersistenceModule implements java.io.Serializable
         name = "msgs" + agentId + "-" + counter++;
         vectorsTable.put(name, msgIds);
 
-        for (enum = msgIds.keys(); enum.hasMoreElements();)
-          idsTable.put(enum.nextElement(), name);
+        for (e = msgIds.keys(); e.hasMoreElements();)
+          idsTable.put(e.nextElement(), name);
   
         tx.save(msgs, name);
 
@@ -319,7 +319,7 @@ public class MessagePersistenceModule implements java.io.Serializable
   /** Loads all persisted objects. */
   public Vector loadAll()
   {
-    Enumeration enum;
+    Enumeration e;
     Vector messages = new Vector();
     Vector persistedVec;
     Message msg;
@@ -328,8 +328,8 @@ public class MessagePersistenceModule implements java.io.Serializable
     // Getting the identifiers of the messages persisted in vectors, and to
     // be kept.
     Hashtable idsToPersist = new Hashtable();
-    for (enum = vectorsTable.keys(); enum.hasMoreElements();)
-      idsToPersist.putAll((Hashtable) vectorsTable.remove(enum.nextElement()));
+    for (e = vectorsTable.keys(); e.hasMoreElements();)
+      idsToPersist.putAll((Hashtable) vectorsTable.remove(e.nextElement()));
      
     // Retrieving the names of the persistence objects previously saved. 
     Transaction tx = AgentServer.getTransaction();
@@ -366,8 +366,8 @@ public class MessagePersistenceModule implements java.io.Serializable
       try {
         persistedVec = (Vector) tx.load(vectorNames[i]);
         // Browsing the messages to check if they are still to be persisted.
-        for (enum = persistedVec.elements(); enum.hasMoreElements();) {
-          msg = (Message) enum.nextElement();
+        for (e = persistedVec.elements(); e.hasMoreElements();) {
+          msg = (Message) e.nextElement();
           msgId = msg.getIdentifier();
           if (idsToPersist.contains(msgId))
             messages.add(msg);

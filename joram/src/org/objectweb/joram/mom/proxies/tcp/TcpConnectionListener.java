@@ -47,6 +47,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class TcpConnectionListener 
     extends Daemon {
 
+  
+
   /**
    * The server socket listening to connections
    * from the JMS clients.
@@ -62,6 +64,8 @@ public class TcpConnectionListener
    */
   private TcpProxyService proxyService;
 
+  private int timeout;
+
   /**
    * Creates a new connection listener
    *
@@ -71,10 +75,12 @@ public class TcpConnectionListener
    */
   public TcpConnectionListener(
     ServerSocket serverSocket,
-    TcpProxyService proxyService) {
+    TcpProxyService proxyService,
+    int timeout) {
     super("TcpConnectionListener");
     this.serverSocket = serverSocket;
     this.proxyService = proxyService;
+    this.timeout = timeout;
   }
 
   public void run() {
@@ -133,7 +139,7 @@ public class TcpConnectionListener
       // Fix bug when the client doesn't
       // use the right protocol (e.g. Telnet)
       // and blocks this listener.
-      sock.setSoTimeout(10000);
+      sock.setSoTimeout(timeout);
       
       dis = new DataInputStream(
         sock.getInputStream());
@@ -211,6 +217,12 @@ public class TcpConnectionListener
         dos.flush();
         ioctrl = new IOControl(
           sock, gcn.getInputCounter());
+
+        TcpConnection tcpConnection = 
+          proxyService.getConnection(proxyId, key);
+        if (tcpConnection != null) {
+          tcpConnection.close();
+        }
       }
 
       // Reset the timeout in order

@@ -65,35 +65,29 @@ public class CreateUserDialog extends JDialog {
    * of the screen.  Otherwise, the argument should be the
    * component on top of which the dialog should appear.
    */
-  public static CreateUserDialog showDialog() throws Exception {
+  public static CreateUserDialog showDialog() {
   	return showDialog("", false);
   }
 
-  public static CreateUserDialog showDialog(String name, boolean passwdOnly) throws Exception {
-    if (dialog != null) {
-      dialog.nameField.setText(name);
-      dialog.passwdField.setText("");
-      dialog.passwd2Field.setText("");
-
-      if (passwdOnly) {
-		dialog.setTitle("Change Password");
-        dialog.nameField.setEditable(false);
-        dialog.submitButton.setText("Apply");
-      }
-      else {
-        dialog.setTitle("Create User");
-        dialog.nameField.setEditable(true);
-        dialog.submitButton.setText("Create");
-      }
-
-      dialog.setActionCancelled(false);
-      dialog.setLocationRelativeTo(dialog.parent);
-      dialog.setVisible(true);
+  public static CreateUserDialog showDialog(String name, boolean passwdOnly) {
+    dialog.nameField.setText(name);
+    dialog.passwdField.setText("");
+    dialog.passwd2Field.setText("");
+    
+    if (passwdOnly) {
+      dialog.setTitle("Change Password");
+      dialog.nameField.setEditable(false);
+      dialog.submitButton.setText("Apply");
     }
     else {
-      throw new Exception("CreateUserDialog not initialized");
+      dialog.setTitle("Create User");
+      dialog.nameField.setEditable(true);
+      dialog.submitButton.setText("Create");
     }
     
+    dialog.setActionCancelled(false);
+    dialog.setLocationRelativeTo(dialog.parent);
+    dialog.setVisible(true);
     return dialog;
   }
 

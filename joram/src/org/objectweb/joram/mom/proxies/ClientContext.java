@@ -94,8 +94,12 @@ class ClientContext implements java.io.Serializable
   }
 
   /** Sets the activation status of the context. */
-  void setActivated(boolean started)
-  {
+  void setActivated(boolean started) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientContext[" + proxyId + ',' + id + 
+        "].setActivated(" + started + ')');
     this.started = started;
   }
 

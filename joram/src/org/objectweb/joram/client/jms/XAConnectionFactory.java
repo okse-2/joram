@@ -49,7 +49,6 @@ public abstract class XAConnectionFactory
    * @param port  Server's listening port.
    */
   public XAConnectionFactory(String host, int port) {
-    super(host + ":" + port);
     params = new FactoryParameters(host, port);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -108,7 +107,7 @@ public abstract class XAConnectionFactory
    * through the SOAP protocol.
    */
   public Hashtable code() {
-    Hashtable h = super.code();
+    Hashtable h = new Hashtable();
     h.put("host",params.getHost());
     h.put("port",new Integer(params.getPort()));
     h.put("connectingTimer",new Integer(params.connectingTimer));
@@ -123,7 +122,10 @@ public abstract class XAConnectionFactory
    * Actual implementation of the method is located in the 
    * tcp and soap sub classes.
    */ 
-  public Object decode(Hashtable h) {
-    return null;
+  public void decode(Hashtable h) {
+    params = new FactoryParameters((String)h.get("host"),
+                                   ((Integer)h.get("port")).intValue());
+    params.connectingTimer = ((Integer)h.get("connectingTimer")).intValue();
+    params.cnxPendingTimer = ((Integer)h.get("cnxPendingTimer")).intValue();
   }
 }

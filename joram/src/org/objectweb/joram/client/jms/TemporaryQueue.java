@@ -37,10 +37,19 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.TemporaryQueue</code> interface.
  */
-public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
-{
+public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
+
+  private final static String TMP_QUEUE_TYPE = "queue.tmp";
+
+  public static boolean isTemporaryQueue(String type) {
+    return Destination.isAssignableTo(type, TMP_QUEUE_TYPE);
+  }
+
   /** The connection the queue belongs to, <code>null</code> if not known. */
   private Connection cnx;
+
+  // Used by jndi2 SoapObjectHelper
+  public TemporaryQueue() {}
 
   /** 
    * Constructs a temporary queue.
@@ -49,17 +58,10 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
    * @param cnx  The connection the queue belongs to, <code>null</code> if
    *          not known.
    */
-  public TemporaryQueue(String agentId, Connection cnx)
-  {
-    super(agentId);
+  public TemporaryQueue(String agentId, Connection cnx) {
+    super(agentId, TMP_QUEUE_TYPE);
     this.cnx = cnx;
   }
-
-  /** 
-   * Constructs an empty temporary queue.
-   */
-  public TemporaryQueue()
-  {}
 
   /** Returns a String image of the queue. */
   public String toString()
@@ -100,14 +102,5 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
   public Connection getCnx()
   {
     return cnx;
-  }
-
- 
-  /**
-   * Decodes a <code>TemporaryQueue</code> which traveled through the
-   * SOAP protocol.
-   */  
-  public Object decode(Hashtable h) {
-    return new TemporaryQueue((String) h.get("agentId"), null);
   }
 }

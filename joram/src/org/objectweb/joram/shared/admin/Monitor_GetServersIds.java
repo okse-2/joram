@@ -32,21 +32,37 @@ public class Monitor_GetServersIds extends Monitor_Request
   /** Identifier of the target server. */
   private int serverId;
 
+  private String domainName;
 
   /**
    * Constructs a <code>Monitor_GetServersIds</code> instance.
    *
    * @param serverId  Identifier of the target server.
    */
-  public Monitor_GetServersIds(int serverId)
-  {
-    this.serverId = serverId;
+  public Monitor_GetServersIds(int serverId) {
+    this(serverId, null);
   }
 
+  /**
+   * Constructs a <code>Monitor_GetServersIds</code> instance.
+   *
+   * @param serverId  Identifier of the target server.
+   * @param domainName Name of the domain that contains
+   *                   the servers.
+   */
+  public Monitor_GetServersIds(int serverId,
+                               String domainName)
+  {
+    this.serverId = serverId;
+    this.domainName = domainName;
+  }
 
   /** Returns the identifier of the target server. */
-  public int getServerId()
-  {
+  public final int getServerId() {
     return serverId;
+  }
+
+  public final String getDomainName() {
+    return domainName;
   }
 }

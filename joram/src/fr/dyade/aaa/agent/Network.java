@@ -47,6 +47,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   long WDActivationPeriod = 1000L;
+
+  /**
+   * Gets the WDActivationPeriod value.
+   *
+   * @return the WDActivationPeriod value
+   */
+  public long getWDActivationPeriod() {
+    return WDActivationPeriod;
+  }
+
+  /**
+   * Sets the WDActivationPeriod value.
+   *
+   * @param WDActivationPeriod	the WDActivationPeriod value
+   */
+  public void setWDActivationPeriod(long WDActivationPeriod) {
+    this.WDActivationPeriod = WDActivationPeriod;
+  }
+
   /**
    *  Number of try at stage 1, default value is 30.
    *  This value can be adjusted for all network components by setting
@@ -58,6 +77,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int  WDNbRetryLevel1 = 30;
+
+  /**
+   * Gets the WDNbRetryLevel1 value.
+   *
+   * @return the WDNbRetryLevel1 value
+   */
+  public int getWDNbRetryLevel1() {
+    return WDNbRetryLevel1;
+  }
+
+  /**
+   * Sets the WDNbRetryLevel1 value.
+   *
+   * @param WDNbRetryLevel1	the WDNbRetryLevel1 value
+   */
+  public void setWDNbRetryLevel1(int WDNbRetryLevel1) {
+    this.WDNbRetryLevel1 = WDNbRetryLevel1;
+  }
+
   /**
    *  Period of time in ms between two connection try at stage 1, default
    * value is WDActivationPeriod divided by 2.
@@ -70,6 +108,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   long WDRetryPeriod1 = WDActivationPeriod/2;
+
+  /**
+   * Gets the WDRetryPeriod1 value.
+   *
+   * @return the WDRetryPeriod1 value
+   */
+  public long getWDRetryPeriod1() {
+    return WDRetryPeriod1;
+  }
+
+  /**
+   * Sets the WDRetryPeriod1 value.
+   *
+   * @param WDRetryPeriod1	the WDRetryPeriod1 value
+   */
+  public void setWDRetryPeriod1(long WDRetryPeriod1) {
+    this.WDRetryPeriod1 = WDRetryPeriod1;
+  }
+
   /**
    *  Number of try at stage 2, default value is 55.
    *  This value can be adjusted for all network components by setting
@@ -81,6 +138,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int  WDNbRetryLevel2 = 55;
+
+  /**
+   * Gets the WDNbRetryLevel2 value.
+   *
+   * @return the WDNbRetryLevel2 value
+   */
+  public int getWDNbRetryLevel2() {
+    return WDNbRetryLevel2;
+  }
+
+  /**
+   * Sets the WDNbRetryLevel2 value.
+   *
+   * @param WDNbRetryLevel2	the WDNbRetryLevel2 value
+   */
+  public void setWDNbRetryLevel2(int WDNbRetryLevel2) {
+    this.WDNbRetryLevel2 = WDNbRetryLevel2;
+  }
+
   /**
    *  Period of time in ms between two connection try at stage 2, default
    * value is 5000L (5 seconds).
@@ -93,6 +169,25 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   long WDRetryPeriod2 = 5000L;
+
+  /**
+   * Gets the WDRetryPeriod2 value.
+   *
+   * @return the WDRetryPeriod2 value
+   */
+  public long getWDRetryPeriod2() {
+    return WDRetryPeriod2;
+  }
+
+  /**
+   * Sets the WDRetryPeriod2 value.
+   *
+   * @param WDRetryPeriod2	the WDRetryPeriod2 value
+   */
+  public void setWDRetryPeriod2(long WDRetryPeriod2) {
+    this.WDRetryPeriod2 = WDRetryPeriod2;
+  }
+
   /**
    *  Period of time in ms between two connection try at stage 3, default
    * value is 60000L (1 minute).
@@ -105,6 +200,24 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   long WDRetryPeriod3 = 60000L;
+
+  /**
+   * Gets the WDRetryPeriod3 value.
+   *
+   * @return the WDRetryPeriod3 value
+   */
+  public long getWDRetryPeriod3() {
+    return WDRetryPeriod3;
+  }
+
+  /**
+   * Sets the WDRetryPeriod3 value.
+   *
+   * @param WDRetryPeriod3	the WDRetryPeriod3 value
+   */
+  public void setWDRetryPeriod3(long WDRetryPeriod3) {
+    this.WDRetryPeriod3 = WDRetryPeriod3;
+  }
 
   protected Logger logmon = null;
 
@@ -166,10 +279,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("(").append(super.toString());
     strbuf.append(",name=").append(getName());
-    strbuf.append(",qout=").append(qout.size());
-    for (int i=0; i<servers.length; i++) {
-      strbuf.append(",(").append(servers[i]).append(',');
-      strbuf.append(stamp[i]).append(')');
+    if (qout != null) strbuf.append(",qout=").append(qout.size());
+    if (servers != null) {
+      for (int i=0; i<servers.length; i++) {
+        strbuf.append(",(").append(servers[i]).append(',');
+        strbuf.append(stamp[i]).append(')');
+      }
     }
     strbuf.append(")");
 
@@ -546,7 +661,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     if (boot != bootTS[fromIdx]) {
       if (logmon.isLoggable(BasicLevel.WARN))
         logmon.log(BasicLevel.WARN,
-                   getName() + ", reset stamp #" + source + " - " + bootTS[fromIdx]);
+                   getName() + ", reset stamp #" + source + ", "
+                   + bootTS[fromIdx] + " -> " + boot);
 
       bootTS[fromIdx] = boot;
       AgentServer.transaction.save(bootTS, bootTSFN);

@@ -48,10 +48,11 @@ class MessageConsumerListener implements ReplyListener {
   private static class Status {
     public static final int INIT = 0;
     public static final int RUN = 1;
-    public static final int CLOSE = 2;
+    public static final int ON_MSG = 2;
+    public static final int CLOSE = 3;
 
     private static final String[] names = {
-      "INIT", "RUN", "CLOSE"};
+      "INIT", "RUN", "ON_MSG", "CLOSE"};
 
     public static String toString(int status) {
       return names[status];
@@ -79,16 +80,28 @@ class MessageConsumerListener implements ReplyListener {
                           Session session) {
     this.consumer = consumer;
     this.session = session;
-    status = Status.INIT;
+    requestId = -1;
+    setStatus(Status.INIT);
+  }
+
+  private void setStatus(int status) {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.setStatus(" +
+        Status.toString(status) + ')');
+    this.status = status;
   }
 
   /**
    * Called by Session.
    */
   synchronized void start() throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.start()");
     if (status == Status.INIT) {
       subscribe();
-      status = Status.RUN;
+      setStatus(Status.RUN);
     } else {
       // Should not happen
       throw new IllegalStateException("Status error");
@@ -108,25 +121,38 @@ class MessageConsumerListener implements ReplyListener {
   /**
    * Called by Session.
    */
-  synchronized void close() throws JMSException {
-    if (status == Status.RUN) {
-      session.getRequestMultiplexer().abortRequest(requestId);
-      
-      ConsumerUnsetListRequest unsetLR = 
-        new ConsumerUnsetListRequest(
-          consumer.queueMode);
-      unsetLR.setTarget(consumer.targetName);
-      if (consumer.queueMode) {
-        unsetLR.setCancelledRequestId(requestId);
+  void close() throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.close()");
+
+    synchronized (this) {
+      while (status == Status.ON_MSG) {
+        try {
+          // Wait for the message listener to return from 
+          // onMessage()
+          wait();
+        } catch (InterruptedException exc) {}
       }
-
-      session.syncRequest(unsetLR);
-
-      status = Status.CLOSE;
-    } else {
-      // Should not happen
-      throw new IllegalStateException("Status error");
+      
+      if (status == Status.INIT ||
+          status == Status.CLOSE) return;
+      
+      session.getRequestMultiplexer().abortRequest(requestId);
+      setStatus(Status.CLOSE);
     }
+    
+    // Out of the synchronized block because it could 
+    // lead to a dead lock between with 
+    // the connection driver thread calling replyReceived.
+    ConsumerUnsetListRequest unsetLR = 
+      new ConsumerUnsetListRequest(
+        consumer.queueMode);
+    unsetLR.setTarget(consumer.targetName);
+    if (consumer.queueMode) {
+      unsetLR.setCancelledRequestId(requestId);
+    }
+    session.syncRequest(unsetLR);
   }
   
   /**
@@ -134,9 +160,15 @@ class MessageConsumerListener implements ReplyListener {
    */
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
-    if (status == Status.RUN) {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
+        reply + ')');
+    if (status == Status.CLOSE) {
+      throw new AbortedRequestException();
+    } else {
       try {
-        session.pushMessages(consumer, (ConsumerMessages)reply);
+        session.pushMessages(this, (ConsumerMessages)reply);
       } catch (StoppedQueueException exc) {
         throw new AbortedRequestException();
       }
@@ -152,13 +184,57 @@ class MessageConsumerListener implements ReplyListener {
       } else {
         return false;
       }
-    } else {
-      // It is closed
-      throw new AbortedRequestException();
     }
   }
   
   public void replyAborted(int requestId) {
     // Nothing to do.
+  }
+
+  public synchronized boolean isClosed() {
+    return (status == Status.CLOSE);
+  }
+
+  public final MessageConsumer getMessageConsumer() {
+    return consumer;
+  }
+
+  /**
+   * Called by Session.
+   */
+  public void onMessage(Message msg) throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + 
+        msg + ')');
+
+    synchronized (this) {
+      if (status == Status.RUN) {
+        setStatus(Status.ON_MSG);
+      } else {
+        throw new IllegalStateException("Status error");
+      }
+    }
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, " -> consumer.onMessage(" + 
+        msg + ')');
+
+    try {
+      consumer.onMessage(msg);
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> consumer.onMessage(" + 
+          msg + ") returned");
+    } finally {
+      synchronized (this) {
+        setStatus(Status.RUN);
+        
+        // Notify threads trying to close the listener.
+        notifyAll();
+      }
+    }
   }
 }

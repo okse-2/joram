@@ -64,7 +64,8 @@ public class TcpConnection
     tcpClient = new ReliableTcpClient(
       params, 
       name,
-      password);
+      password,
+      params.cnxPendingTimer > 0);
     tcpClient.addServerAddress(
       params.getHost(),
       params.getPort());

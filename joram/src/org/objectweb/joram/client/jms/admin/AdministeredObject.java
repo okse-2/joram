@@ -42,37 +42,6 @@ public abstract class AdministeredObject implements java.io.Serializable,
                                                     javax.naming.Referenceable,
                                                     SoapObjectItf
 {
-  /**
-   * Class table holding the <code>AdministeredObject</code> instances.
-   * <p>
-   * <b>Key:</b> object's identifier<br>
-   * <b>Object:</b> object's instance
-   */
-  protected static Hashtable instancesTable = new Hashtable();
-
-  /** Identifier of the object. */
-  protected String id;
-
-
-  /**
-   * Constructs an administered object.
-   *
-   * @param id  Identifier of the object.
-   */ 
-  protected AdministeredObject(String id)
-  {
-    this.id = this.getClass().getName() + ":" + id;
-
-    // Registering this instance in the table:
-    instancesTable.put(this.id, this);
-  }
-
-  /**
-   * Constructs an empty administered object.
-   */ 
-  protected AdministeredObject()
-  {}
-
 
   /** Sets the naming reference of an administered object. */
   public Reference getReference() throws NamingException
@@ -81,26 +50,6 @@ public abstract class AdministeredObject implements java.io.Serializable,
       new Reference(this.getClass().getName(),
                     "org.objectweb.joram.client.jms.admin.ObjectFactory",
                     null);
-    ref.add(new StringRefAddr("adminObj.id", id));
     return ref;
-  }
-  
-  /** Retrieves an instance from the table. */
-  public static Object getInstance(String name)
-  {
-    if (name == null)
-      return null;
-    return instancesTable.get(name);
-  }
-
-
-  /**
-   * Codes an <code>AdministeredObject</code> as a Hashtable for travelling 
-   * through the SOAP protocol.
-   */
-  public Hashtable code() {
-    Hashtable h = new Hashtable();
-    h.put("className", this.getClass().getName());
-    return h;
   }
 }

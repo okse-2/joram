@@ -159,19 +159,11 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void setJMSDestination(javax.jms.Destination dest) throws JMSException
-  {
-    if (dest == null)
-      momMsg.setDestination(null, true);
-    else
-      momMsg.setDestination(
-        ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
-        ((org.objectweb.joram.client.jms.Destination) dest).isQueue());
-
-    if (dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)
-      momMsg.setOptionalHeader("JMSTempDestination", new Boolean(true));
-    else
-      momMsg.setOptionalHeader("JMSTempDestination", new Boolean(false));
+  public void setJMSDestination(javax.jms.Destination dest) 
+    throws JMSException {
+    momMsg.setDestination(
+      ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
+      ((org.objectweb.joram.client.jms.Destination) dest).getType());
   }
 
   /**
@@ -201,17 +193,9 @@ public class Message implements javax.jms.Message {
    */
   public void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException
   {
-    if (replyTo == null)
-      momMsg.setReplyTo(null, true);
-    else
-      momMsg.setReplyTo(
-        ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
-        ((org.objectweb.joram.client.jms.Destination) replyTo).isQueue());
-
-    if (replyTo instanceof TemporaryQueue || replyTo instanceof TemporaryTopic)
-      momMsg.setOptionalHeader("JMSTempReplyTo", new Boolean(true));
-    else
-      momMsg.setOptionalHeader("JMSTempReplyTo", new Boolean(false));
+    momMsg.setReplyTo(
+      ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
+      ((org.objectweb.joram.client.jms.Destination) replyTo).getType());
   }
   
   /**
@@ -306,33 +290,18 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public javax.jms.Destination getJMSDestination() throws JMSException
-  {
+  public javax.jms.Destination getJMSDestination() 
+    throws JMSException {
     String id = momMsg.getDestinationId();
-    boolean queue = momMsg.toQueue();
-    Object temporaryValue = null;
-    boolean temporary = false;
-
-    try {
-      temporaryValue = momMsg.getOptionalHeader("JMSTempDestination");
-      temporary = ConversionHelper.toBoolean(temporaryValue);
-    }
-    // If the value can't be retrieved, it might be because the sender is
-    // not a JMS client and did not know about temporary destinations...
-    catch (Exception exc) {}
-
-    if (queue) {
-      if (temporary)
-        return new TemporaryQueue(id, null);
-      else
-        return new Queue(id);
-    }
-    else {
-      if (temporary)
-        return new TemporaryTopic(id, null);
-      else
-        return new Topic(id);
-    }
+    String type = momMsg.toType();
+    if (id != null) {
+      // The destination name is unknown
+      try {
+        return Destination.newInstance(id, null, type);
+      } catch (Exception exc) {
+        throw new JMSException(exc.getMessage());
+      }
+    } else return null;
   }
 
   /**
@@ -360,36 +329,18 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public javax.jms.Destination getJMSReplyTo() throws JMSException
-  {
+  public javax.jms.Destination getJMSReplyTo() 
+    throws JMSException {
     String id = momMsg.getReplyToId();
-    boolean queue = momMsg.replyToQueue();
-    Object temporaryValue = null;
-    boolean temporary = false;
-
-    if (id == null)
-      return null;
-
-    try {
-      temporaryValue = momMsg.getOptionalHeader("JMSTempReplyTo");
-      temporary = ConversionHelper.toBoolean(temporaryValue);
-    }
-    // If the value can't be retrieved, it might be because the sender is not
-    // a JMS client...
-    catch (Exception exc) {}
-  
-    if (queue) {
-      if (temporary)
-        return new TemporaryQueue(id, null);
-      else
-        return new Queue(id);
-    }
-    else {
-      if (temporary)
-        return new TemporaryTopic(id, null);
-      else
-        return new Topic(id);
-    } 
+    String type = momMsg.replyToType();
+    if (id != null) {
+      // The destination name is unknown
+      try {
+        return Destination.newInstance(id, null, type);
+      } catch (Exception exc) {
+        throw new JMSException(exc.getMessage());
+      }
+    } else return null;
   }
 
   /**
@@ -795,7 +746,7 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  If an error occurs while building the message.
    */
-  static Message
+  public static Message
          wrapMomMessage(Session sess, org.objectweb.joram.shared.messages.Message momMsg)
          throws JMSException
   {

@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package cluster.queue;
@@ -26,6 +27,7 @@ import org.objectweb.joram.client.jms.admin.*;
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.shared.admin.*;
+import org.objectweb.joram.client.jms.Queue;
 
 import java.util.Properties;
 import java.util.Hashtable;
@@ -56,14 +58,9 @@ public class ClusterAdmin {
 
     String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
 
-    String qid0 = Destination.doCreate(0, null, ClusterQueueCN, prop);
-    Queue queue0 = new Queue(qid0);
-
-    String qid1 = Destination.doCreate(1, null, ClusterQueueCN, prop);
-    Queue queue1 = new Queue(qid1);
-
-    String qid2 = Destination.doCreate(2, null, ClusterQueueCN, prop);
-    Queue queue2 = new Queue(qid2);
+    Queue queue0 = Queue.create(0, null, ClusterQueueCN, prop);
+    Queue queue1 = Queue.create(1, null, ClusterQueueCN, prop);
+    Queue queue2 = Queue.create(2, null, ClusterQueueCN, prop);
     
     System.out.println("queue0 = " + queue0);
     System.out.println("queue1 = " + queue1);
@@ -82,6 +79,9 @@ public class ClusterAdmin {
 
     AdminHelper.setQueueCluster(queue0,queue1);
     AdminHelper.setQueueCluster(queue0,queue2);
+    
+    queue0.addClusteredQueue(queue1);
+    queue0.addClusteredQueue(queue2);
     
     Hashtable h = new Hashtable();
     h.put("0",queue0);

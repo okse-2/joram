@@ -29,7 +29,9 @@ import java.util.Hashtable;
 import java.net.ConnectException;
 
 import javax.naming.*;
+import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.shared.admin.*;
 
 /**
@@ -43,6 +45,8 @@ public class User extends AdministeredObject
   /** Identifier of the user's proxy agent. */
   String proxyId;
 
+  // Used by jndi2 SoapObjectHelper
+  public User() {}
 
   /**
    * Constructs an <code>User</code> instance.
@@ -50,9 +54,7 @@ public class User extends AdministeredObject
    * @param name  The name of the user.
    * @param proxyId  Identifier of the user's proxy agent.
    */
-  public User(String name, String proxyId)
-  {
-    super(proxyId);
+  public User(String name, String proxyId) {
     this.name = name;
     this.proxyId = proxyId;
   }
@@ -123,7 +125,7 @@ public class User extends AdministeredObject
   public static User create(String name, String password)
          throws ConnectException, AdminException
   {
-    return create(name, password, AdminModule.getLocalServer());
+    return create(name, password, AdminModule.getLocalServerId());
   }
   
   /**
@@ -228,6 +230,101 @@ public class User extends AdministeredObject
       return reply.getThreshold().intValue();
   }
 
+  /**
+   * Returns the subscriptions owned by a user.
+   *
+   * @param serverId the identifier of the server where the user has been
+   *        created.
+   *
+   * @param userName name of the user.
+   *
+   * @exception AdminException If an error is raised by the 
+   *                           administration operation.
+   *
+   * @exception ConnectException  If the admin connection is not established.
+   */
+  public Subscription[] getSubscriptions() 
+    throws AdminException, ConnectException {
+    GetSubscriptionsRep reply = 
+      (GetSubscriptionsRep)AdminModule.doRequest(
+        new GetSubscriptions(proxyId));
+    String[] subNames = reply.getSubNames();
+    String[] topicIds = reply.getTopicIds();
+    int[] messageCounts = reply.getMessageCounts();
+    boolean[] durable = reply.getDurable();
+    Subscription[] res = new Subscription[subNames.length];
+    for (int i = 0; i < res.length; i++) {
+      res[i] = new Subscription(subNames[i],
+                                topicIds[i],
+                                messageCounts[i],
+                                durable[i]);
+    }
+    return res;
+  }
+
+  /**
+   * Returns a subscription.
+   *
+   * @param serverId the identifier of the server where the user 
+   * owner of the subscription has been created.
+   *
+   * @param userName name of the user that owns the subscription.
+   *
+   * @param subName the name of the subscription.
+   *
+   * @exception AdminException If an error is raised by the 
+   *                           administration operation.
+   *
+   * @exception ConnectException  If the admin connection is not established.
+   */
+  public Subscription getSubscription(String subName) 
+    throws AdminException, ConnectException {
+    GetSubscriptionRep reply = 
+      (GetSubscriptionRep)AdminModule.doRequest(
+        new GetSubscription(proxyId, subName));
+    return new Subscription(
+      subName,
+      reply.getTopicId(),
+      reply.getMessageCount(),
+      reply.getDurable());
+  }
+
+  public String[] getMessageIds(String subName) 
+    throws AdminException, ConnectException {
+    GetSubscriptionMessageIdsRep reply = 
+      (GetSubscriptionMessageIdsRep)AdminModule.doRequest(
+        new GetSubscriptionMessageIds(proxyId, subName));
+    return reply.getMessageIds();
+  }
+
+  public Message readMessage(
+    String subName,
+    String msgId) throws AdminException, ConnectException, JMSException {
+    GetSubscriptionMessageRep reply = 
+      (GetSubscriptionMessageRep)AdminModule.doRequest(
+        new GetSubscriptionMessage(proxyId,
+                                   subName,
+                                   msgId));
+    return Message.wrapMomMessage(null, reply.getMessage());
+  }
+
+  public void deleteMessage(
+    String subName, 
+    String msgId) 
+    throws AdminException, ConnectException {
+    AdminModule.doRequest(
+      new DeleteSubscriptionMessage(proxyId,
+                                    subName,
+                                    msgId));
+  }
+
+  public void clearSubscription(String subName)
+    throws AdminException, ConnectException {
+    AdminModule.doRequest(
+      new ClearSubscription(proxyId,
+                            subName));
+  }
+
    
   /** Returns the identifier of the user's proxy. */
   public String getProxyId()
@@ -249,7 +346,7 @@ public class User extends AdministeredObject
    * through the SOAP protocol.
    */
   public Hashtable code() {
-    Hashtable h = super.code();
+    Hashtable h = new Hashtable();
     h.put("name",name);
     h.put("proxyId",proxyId);
     return h;
@@ -258,7 +355,8 @@ public class User extends AdministeredObject
   /**
    * Decodes an <code>User</code> which travelled through the SOAP protocol.
    */
-  public Object decode(Hashtable h) {
-    return new User((String) h.get("name"), (String) h.get("proxyId"));
+  public void decode(Hashtable h) {
+    name = (String) h.get("name");
+    proxyId = (String) h.get("proxyId");
   }
 }

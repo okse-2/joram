@@ -42,6 +42,13 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  * @see QueueImpl
  */
 public class Queue extends Destination implements BagSerializer {
+  
+  public static final String QUEUE_TYPE = "queue";
+
+  public static String getDestinationType() {
+    return QUEUE_TYPE;
+  }
+
   /**
    * Empty constructor for newInstance(). 
    */ 

@@ -29,6 +29,11 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.agent.management.MXWrapper;
+
+import org.objectweb.joram.mom.MomTracing;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>Destination</code> agent is an agent hosting a MOM destination,
@@ -110,6 +115,25 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
+    MXWrapper.registerMBean(destImpl, "Joram", getMBeanName());
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize(boolean lastTime) {
+    try {
+      MXWrapper.unregisterMBean("Joram", getMBeanName());
+    } catch (Exception exc) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+    }
+    super.agentFinalize(lastTime);
+  }
+
+  private String getMBeanName() {
+    return new StringBuffer()
+      .append("type=Destination")
+      .append(",name=").append((name==nullName)?getId().toString():name)
+      .toString();
   }
 
   /**

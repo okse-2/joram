@@ -32,21 +32,44 @@ public class CreateDestinationReply extends AdminReply
   /** Identifier of the created destination. */
   private String id;
 
+  private String name;
+
+  private String type;
+
   /**
    * Constructs a <code>CreateDestinationReply</code> instance.
    *
    * @param id  The id of the created destination.
    * @param info  Related information.
    */
-  public CreateDestinationReply(String id, String info)
-  {
+  public CreateDestinationReply(
+    String id, 
+    String name,
+    String type,
+    String info) {
     super(true, info);
     this.id = id;
+    this.name = name;
+    this.type = type;
   }
 
   /** Returns the id of the created queue. */
-  public String getDestId()
-  {
+  public final String getId() {
     return id;
+  }
+
+  public final String getName() {
+    return name;
+  }
+
+  public final String getType() {
+    return type;
+  }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",id=" + id + 
+      ",name=" + name + 
+      ",type=" + type + ')';
   }
 }

@@ -190,10 +190,19 @@ public final class AgentServer {
   }
 
   static void addConsumer(String domain,
-                          MessageConsumer consumer) throws Exception {
+                          MessageConsumer cons) throws Exception {
     if (consumers.containsKey(domain))
       throw new Exception("Consumer for domain " + domain + " already exist");
-    consumers.put(domain, consumer);
+
+    consumers.put(domain, cons);
+
+    try {
+      MXWrapper.registerMBean(cons,
+                              "AgentServer",
+                              "server=" + getName() + ",cons=" + cons.getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+    }
   }
 
   static Enumeration getConsumers() {
@@ -207,9 +216,14 @@ public final class AgentServer {
   }
 
   static void removeConsumer(String domain) {
-    MessageConsumer mc = (MessageConsumer) consumers.remove(domain);
-    if (mc != null) {
-      mc.stop();
+    MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
+    if (cons != null) cons.stop();
+
+    try {
+      MXWrapper.unregisterMBean("AgentServer",
+                                "server=" + getName() + ",cons=" + cons.getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
   }
 
@@ -356,7 +370,7 @@ public final class AgentServer {
     servers.remove(new Short(sid));
   }
 
-  public static Enumeration elementsServerDesc() throws Exception {
+  public static Enumeration elementsServerDesc() {
     return servers.elements();
   }
 
@@ -546,17 +560,17 @@ public final class AgentServer {
 
     // Creates the local MessageConsumer: the Engine.
     engine = Engine.newInstance();
-    consumers.put("local", engine);
+    addConsumer("local", engine);
 
     // if JGroups
     if (clusterId > NULL_ID) {
       jgroups = new JGroups();
-      if (engine instanceof HATransactionEngine) {
-        jgroups.setEngine((HATransactionEngine) engine);
-        ((HATransactionEngine) engine).setJGroups(jgroups);
+      if (engine instanceof HAEngine) {
+        jgroups.setEngine((HAEngine) engine);
+        ((HAEngine) engine).setJGroups(jgroups);
       } else
         logmon.log(BasicLevel.ERROR, getName() + ", createConsumers(" + root + ")\n" +
-                   "engine [" + engine + "] is not a HATransactionEngine");
+                   "engine [" + engine + "] is not a HAEngine");
     }
 
     // Search alls directly accessible domains.
@@ -577,7 +591,7 @@ public final class AgentServer {
           jgroups.setNetWork((SimpleNetwork) consumer);
         }
 //         domain.consumer = consumer;
-        consumers.put(network.domain, consumer);
+        addConsumer(network.domain, consumer);
       } catch (ClassNotFoundException exc) {
         throw exc;
       } catch (InstantiationException exc) {
@@ -756,6 +770,12 @@ public final class AgentServer {
    * persistent storage.
    */
   private static void reset() {
+    try {
+      MXWrapper.unregisterMBean("AgentServer", "server=" + getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+    }
+    
     transaction = null;
     a3config = null;
   }
@@ -1067,6 +1087,16 @@ public final class AgentServer {
         throw new Exception("Bad initialization, status: " + status.value);
       status.value = Status.INITIALIZED;
     }
+
+    try {
+      SCServerMBean bean = new SCServer();
+      MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
+    } catch (Exception exc) {
+      if (logmon == null)
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+      logmon.log(BasicLevel.ERROR,
+                 getName() + " jmx failed", exc);
+    }
   }
 
   static String startConsumers() throws Exception {
@@ -1080,13 +1110,6 @@ public final class AgentServer {
           try {
             if (! (cons instanceof Engine)) {
               cons.start();
-              try {
-                MXWrapper.registerMBean(cons,
-                                        "AgentServer",
-                                        "server=" + getName() + ",cons=" + cons.getName());
-              } catch (Exception exc) {
-                logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
-              }
             }
           } catch (IOException exc) {
             if (errBuf == null) errBuf = new StringBuffer();
@@ -1145,13 +1168,6 @@ public final class AgentServer {
           try {
             if ((jgroups == null) || (cons instanceof Engine)) {
               cons.start();
-              try {
-                MXWrapper.registerMBean(cons,
-                                        "AgentServer",
-                                        "server=" + getName() + ",cons=" + cons.getName());
-              } catch (Exception exc) {
-                logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
-              }
             }
           } catch (IOException exc) {
             if (errBuf == null) errBuf = new StringBuffer();
@@ -1275,7 +1291,9 @@ public final class AgentServer {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        getName() + ", stop " + cons.getName());
+
           cons.stop();
+
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        getName() + ", " + cons.getName() + " stopped");
@@ -1353,16 +1371,6 @@ public final class AgentServer {
       logmon.log(BasicLevel.ERROR,
                  getName() + " initialisation failed", exc);
       System.exit(1);
-    }
-
-    try {
-      SCServerMBean bean = new SCServer();
-      MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
-    } catch (Exception exc) {
-      if (logmon == null)
-        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
-      logmon.log(BasicLevel.ERROR,
-                 getName() + " jmx failed", exc);
     }
 
     try {

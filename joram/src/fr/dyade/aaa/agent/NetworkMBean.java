@@ -39,4 +39,96 @@ public interface NetworkMBean {
 
   /** Forces the engine to stop executing */
   public void stop();
+
+  /**
+   * Returns a string representation of this consumer.
+   *
+   * @return	A string representation of this consumer. 
+   */
+  public String toString();
+
+  /**
+   * Gets the WDActivationPeriod value.
+   *
+   * @return the WDActivationPeriod value
+   */
+  public long getWDActivationPeriod();
+
+  /**
+   * Sets the WDActivationPeriod value.
+   *
+   * @param WDActivationPeriod	the WDActivationPeriod value
+   */
+  public void setWDActivationPeriod(long WDActivationPeriod);
+
+  /**
+   * Gets the WDNbRetryLevel1 value.
+   *
+   * @return the WDNbRetryLevel1 value
+   */
+  public int getWDNbRetryLevel1();
+
+  /**
+   * Sets the WDNbRetryLevel1 value.
+   *
+   * @param WDNbRetryLevel1	the WDNbRetryLevel1 value
+   */
+  public void setWDNbRetryLevel1(int WDNbRetryLevel1);
+
+  /**
+   * Gets the WDRetryPeriod1 value.
+   *
+   * @return the WDRetryPeriod1 value
+   */
+  public long getWDRetryPeriod1();
+
+  /**
+   * Sets the WDRetryPeriod1 value.
+   *
+   * @param WDRetryPeriod1	the WDRetryPeriod1 value
+   */
+  public void setWDRetryPeriod1(long WDRetryPeriod1);
+
+  /**
+   * Gets the WDNbRetryLevel2 value.
+   *
+   * @return the WDNbRetryLevel2 value
+   */
+  public int getWDNbRetryLevel2();
+
+  /**
+   * Sets the WDNbRetryLevel2 value.
+   *
+   * @param WDNbRetryLevel2	the WDNbRetryLevel2 value
+   */
+  public void setWDNbRetryLevel2(int WDNbRetryLevel2);
+
+  /**
+   * Gets the WDRetryPeriod2 value.
+   *
+   * @return the WDRetryPeriod2 value
+   */
+  public long getWDRetryPeriod2();
+
+  /**
+   * Sets the WDRetryPeriod2 value.
+   *
+   * @param WDRetryPeriod2	the WDRetryPeriod2 value
+   */
+  public void setWDRetryPeriod2(long WDRetryPeriod2);
+
+  /**
+   * Gets the WDRetryPeriod3 value.
+   *
+   * @return the WDRetryPeriod3 value
+   */
+  public long getWDRetryPeriod3();
+
+  /**
+   * Sets the WDRetryPeriod3 value.
+   *
+   * @param WDRetryPeriod3	the WDRetryPeriod3 value
+   */
+  public void setWDRetryPeriod3(long WDRetryPeriod3);
+
 }

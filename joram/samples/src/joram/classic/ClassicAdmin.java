@@ -41,8 +41,8 @@ public class ClassicAdmin
 
     AdminModule.connect("root", "root", 60);
 
-    Queue queue = (Queue) Queue.create();
-    Topic topic = (Topic) Topic.create();
+    Queue queue = (Queue) Queue.create("queue");
+    Topic topic = (Topic) Topic.create("topic");
     
     User user = User.create("anonymous", "anonymous");
 

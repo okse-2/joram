@@ -212,7 +212,6 @@ public class Session implements javax.jms.Session {
    */
   private Requestor requestor;
 
-
   /**
    * The requestor used by the session 
    * to make 'receive'
@@ -325,6 +324,10 @@ public class Session implements javax.jms.Session {
     this.status = status;
   }
 
+  boolean isStarted() {
+    return (status == Status.START);
+  }
+
   /**
    * Sets the session mode.
    */
@@ -338,7 +341,7 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Sets the request status. It is synchronized.
+   * Sets the request status.
    */
   private void setRequestStatus(int requestStatus) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -422,7 +425,7 @@ public class Session implements javax.jms.Session {
    * set transacted.
    * see connector ManagedConnectionImpl (Connector).
    */
-  public void setTransacted(boolean t) {
+  public synchronized void setTransacted(boolean t) {
     if (status != Status.CLOSE) {
       transacted = t;
     }
@@ -668,6 +671,12 @@ public class Session implements javax.jms.Session {
                               String selector,
                               boolean noLocal) 
     throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "Session.createDurableSubscriber(" + 
+        topic + ',' + name + ',' + 
+        selector + ',' + noLocal + ')');
     checkClosed();
     checkThreadOfControl();
     TopicSubscriber ts = new TopicSubscriber(
@@ -687,6 +696,11 @@ public class Session implements javax.jms.Session {
       createDurableSubscriber(javax.jms.Topic topic, 
                               String name)
     throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "Session.createDurableSubscriber(" + 
+        topic + ',' + name + ')');
     checkClosed();
     checkThreadOfControl();
     TopicSubscriber ts = new TopicSubscriber(
@@ -1035,7 +1049,7 @@ public class Session implements javax.jms.Session {
       // it could be used by a concurrent receive
       // as it is not synchronized (see receive()).
       receiveRequestor.close();
-
+      
       // Denying the non acknowledged messages:
       if (transacted) {
         rollback();
@@ -1311,28 +1325,22 @@ public class Session implements javax.jms.Session {
         targetName + ',' + 
         selector + ',' + 
         queueMode + ')');
-
     preReceive(mc);
     try {
       ConsumerMessages reply = null;
-      try {
-        reply =
-          (ConsumerMessages)receiveRequestor.request(
-            new ConsumerReceiveRequest(
-              targetName, 
-              selector, 
-              requestTimeToLive,
-              queueMode),
-            waitTimeOut);
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
-            BasicLevel.DEBUG, 
-            " -> reply = " + reply);
-      } catch (JMSException exc) {
-        // The requestor may have been closed
-        return null;
-      }
-
+      reply =
+        (ConsumerMessages)receiveRequestor.request(
+          new ConsumerReceiveRequest(
+            targetName, 
+            selector, 
+            requestTimeToLive,
+            queueMode),
+          waitTimeOut);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, 
+          " -> reply = " + reply);
+        
       synchronized (this) {
         // The session may have been 
         // closed in between.
@@ -1342,7 +1350,7 @@ public class Session implements javax.jms.Session {
           }
           return null;
         }
-
+        
         if (reply != null) {
           Vector msgs = reply.getMessages();
           if (msgs != null && ! msgs.isEmpty()) {
@@ -1356,7 +1364,7 @@ public class Session implements javax.jms.Session {
                 new ConsumerAckRequest(
                   targetName,
                   msgId,
-                queueMode));
+                  queueMode));
             } else {
               prepareAck(targetName, 
                          msgId, 
@@ -1367,7 +1375,7 @@ public class Session implements javax.jms.Session {
             return null;
           }
         } else {
-          return null;
+            return null;
         }
       }
     } finally {
@@ -1426,6 +1434,7 @@ public class Session implements javax.jms.Session {
     pendingMessageConsumer = null;
     setRequestStatus(RequestStatus.NONE);
     setSessionMode(SessionMode.NONE);
+    notifyAll();
   }
   
   /**
@@ -1440,12 +1449,22 @@ public class Session implements javax.jms.Session {
    * Called by MessageConsumer.
    */
   synchronized void closeConsumer(MessageConsumer mc) {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "Session.closeConsumer(" + mc + ')');
     consumers.removeElement(mc);
 
     if (pendingMessageConsumer == mc) {
       if (requestStatus == RequestStatus.RUN) {
         receiveRequestor.abortRequest();
-        setRequestStatus(RequestStatus.DONE);
+
+        // Wait for the end of the request
+        try {
+          while (requestStatus != RequestStatus.NONE) {
+            wait();
+          }
+        } catch (InterruptedException exc) {}
       }
     }
   }
@@ -1550,16 +1569,16 @@ public class Session implements javax.jms.Session {
    *
    * @exception 
    */
-  void pushMessages(MessageConsumer consumer, 
+  void pushMessages(MessageConsumerListener consumerListener, 
                     ConsumerMessages messages) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "Session.pushMessages(" + 
-        consumer + ',' + messages + ')');
+        consumerListener + ',' + messages + ')');
     repliesIn.push(
       new MessageListenerContext(
-        consumer, messages));
+        consumerListener, messages));
   }
 
   /**
@@ -1625,7 +1644,7 @@ public class Session implements javax.jms.Session {
     for (int i = 0; i < msgs.size(); i++) {
       onMessage(
         (org.objectweb.joram.shared.messages.Message)msgs.elementAt(i),
-        ctx.consumer);
+        ctx.consumerListener);
     }
   }
 
@@ -1662,25 +1681,27 @@ public class Session implements javax.jms.Session {
    */
   void onMessage(
     org.objectweb.joram.shared.messages.Message momMsg,
-    MessageConsumer consumer) throws JMSException {
+    MessageConsumerListener consumerListener) throws JMSException {
+    MessageConsumer consumer = consumerListener.getMessageConsumer();
+    
     Message msg = prepareMessage(
       momMsg, 
       consumer.targetName,
       consumer.queueMode);
-
+    
     if (msg == null) return;
-
+    
     try {
-      consumer.onMessage(msg);
+      consumerListener.onMessage(msg);
     } catch (JMSException exc) {
-      if (autoAck) {
+      if (autoAck || consumerListener.isClosed()) {
         denyMessage(consumer.targetName, 
                     momMsg.getIdentifier(), 
                     consumer.queueMode);
       }
       return;
     }
-
+    
     if (recover) {
       // The session has been recovered by the
       // listener thread.
@@ -1880,12 +1901,13 @@ public class Session implements javax.jms.Session {
    * a set of messages to consume.
    */
   private static class MessageListenerContext {
-    MessageConsumer consumer;
+    MessageConsumerListener consumerListener;
     ConsumerMessages messages;
 
-    MessageListenerContext(MessageConsumer consumer, 
-                           ConsumerMessages messages) {
-      this.consumer = consumer;
+    MessageListenerContext(
+      MessageConsumerListener consumerListener, 
+      ConsumerMessages messages) {
+      this.consumerListener = consumerListener;
       this.messages = messages;
     }
   }

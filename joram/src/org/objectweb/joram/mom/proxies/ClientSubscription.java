@@ -212,6 +212,15 @@ class ClientSubscription implements java.io.Serializable {
     return active;
   }
 
+  int getMessageCount() {
+    return messageIds.size();
+  }
+
+  String[] getMessageIds() {
+    String[] res = new String[messageIds.size()];
+    messageIds.copyInto(res);
+    return res;
+  }
   
   /**
    * Re-initializes the client subscription.
@@ -237,9 +246,8 @@ class ClientSubscription implements java.io.Serializable {
     // Browsing the persisted messages.
     Message message;
     String msgId;
-    for (Enumeration enum = persistedMessages.elements();
-         enum.hasMoreElements();) {
-      message = (Message) enum.nextElement();
+    for (Enumeration e = persistedMessages.elements(); e.hasMoreElements();) {
+      message = (Message) e.nextElement();
       msgId = message.getIdentifier();
 
       if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
@@ -308,8 +316,11 @@ class ClientSubscription implements java.io.Serializable {
   }
 
   /** De-activates the subscription, denies the non acknowledgded messages. */  
-  void deactivate()
-  {
+  void deactivate() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ClientSubscription.deactivate()");
+
     unsetListener();
     unsetReceiver();
     active = false;
@@ -398,8 +409,8 @@ class ClientSubscription implements java.io.Serializable {
     // Browsing the messages one by one.
     Message message;
     String msgId;
-    for (Enumeration enum = newMessages.elements(); enum.hasMoreElements();) {
-      message = (Message) enum.nextElement();
+    for (Enumeration e = newMessages.elements(); e.hasMoreElements();) {
+      message = (Message) e.nextElement();
       msgId = message.getIdentifier();
 
       // Keeping the message if filtering is successful.
@@ -770,8 +781,8 @@ class ClientSubscription implements java.io.Serializable {
    */
   void delete()
   {
-    for (Enumeration enum = deliveredIds.keys(); enum.hasMoreElements();)
-      messageIds.add(enum.nextElement());
+    for (Enumeration e = deliveredIds.keys(); e.hasMoreElements();)
+      messageIds.add(e.nextElement());
 
     String id;
     Message msg;
@@ -817,5 +828,65 @@ class ClientSubscription implements java.io.Serializable {
       Channel.sendTo(dmqId, messages);
     else if (DeadMQueueImpl.getId() != null)
       Channel.sendTo(DeadMQueueImpl.getId(), messages);
+  }
+
+  Message getMessage(String msgId) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientSubscription.getMessage(" + msgId + ')');
+    int index = messageIds.indexOf(msgId);
+    if (index < 0) {
+      // The message has been delivered
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, " -> message not found");
+      return null;
+    } else {
+      return (Message) messagesTable.get(msgId);
+    }
+  }
+
+  void deleteMessage(String msgId) {
+    messageIds.remove(msgId);
+    Message msg = removeMessage(msgId);
+    if (msg != null) {
+      ClientMessages deadMessages = new ClientMessages();
+      deadMessages.addMessage(msg);
+      sendToDMQ(deadMessages);
+    }
+  }
+
+  void clear() {
+    ClientMessages deadMessages = null;
+    for (int i = 0; i < messageIds.size(); i++) {
+      String msgId = (String)messageIds.elementAt(i);
+      Message msg = removeMessage(msgId);
+      if (msg != null) {
+        if (deadMessages == null) {
+          deadMessages = new ClientMessages();
+        }
+        deadMessages.addMessage(msg);
+      }
+    }
+    if (deadMessages != null) {
+      sendToDMQ(deadMessages);
+    }
+    messageIds.clear();
+  }
+
+  Message removeMessage(String msgId) {
+    Message msg = (Message) messagesTable.get(msgId);
+    if (msg != null) {
+      msg.acksCounter--;
+      if (msg.acksCounter == 0)
+        messagesTable.remove(msgId);
+      if (durable) {
+        msg.durableAcksCounter--;
+        if (msg.durableAcksCounter == 0)
+          persistenceModule.delete(msg);
+      }
+    }
+    return msg;
   }
 }

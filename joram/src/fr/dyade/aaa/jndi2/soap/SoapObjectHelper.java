@@ -61,20 +61,19 @@ public class SoapObjectHelper
     try {
       String className = (String) codedObject.get("className");
       Class clazz = Class.forName(className);
-      Class [] classParam = { new Hashtable().getClass() };
-      Method m = clazz.getMethod("decode",classParam);
-      object = m.invoke(clazz.newInstance(),new Object[]{codedObject});
-      
+      object = clazz.newInstance();
     } catch (Throwable exc) {
       throw new NamingException("could not decode Hashtable [" + codedObject
                                 + "] into an object: " + exc);
     }
 
-    if (object instanceof SoapObjectItf)
+    if (object instanceof SoapObjectItf) {
+      ((SoapObjectItf)object).decode(codedObject);
       return object;
-    
-    throw new NamingException("hashtable [" + codedObject
-                              + "] decoded into an unexpected object ["
-                              + object + "]");
+    } else {
+      throw new NamingException("hashtable [" + codedObject
+                                + "] decoded into an unexpected object ["
+                                + object + "]");
+    }
   }
 }

@@ -106,24 +106,37 @@ public class MessageConverterModule
       // Setting the DeliveryMode field.
       msg.setPersistent(jmsMessage.getJMSDeliveryMode() ==
                         javax.jms.DeliveryMode.PERSISTENT);
+
+      // DF: comment this code because it is not 
+      // compatible with typed destinations
       // Setting the DestinationID field.
-      javax.jms.Destination dest = jmsMessage.getJMSDestination();
-      if (dest instanceof javax.jms.Queue)
-        msg.setDestination(((javax.jms.Queue) dest).getQueueName(), true);
-      else if (dest instanceof javax.jms.Topic)
-        msg.setDestination(((javax.jms.Topic) dest).getTopicName(), false);
+      // javax.jms.Destination dest = jmsMessage.getJMSDestination();
+//       if (dest instanceof javax.jms.Queue)
+//         msg.setDestination(((javax.jms.Queue) dest).getQueueName(), true);
+//       else if (dest instanceof javax.jms.Topic)
+//         msg.setDestination(((javax.jms.Topic) dest).getTopicName(), false);
+
+
+
       // Setting the Expiration field.
       msg.setExpiration(jmsMessage.getJMSExpiration());
       // Setting the MessageID field.
       msg.setIdentifier(jmsMessage.getJMSMessageID());
       // Setting the Priority field.
       msg.setPriority(jmsMessage.getJMSPriority());
+
+      // DF: comment this code because it is not 
+      // compatible with typed destinations
+      //
       // Setting the ReplyTo field.
-      dest = jmsMessage.getJMSReplyTo();
-      if (dest != null && dest instanceof javax.jms.Queue)
-        msg.setReplyTo(((javax.jms.Queue) dest).getQueueName(), true);
-      else if (dest != null && dest instanceof javax.jms.Topic)
-        msg.setReplyTo(((javax.jms.Topic) dest).getTopicName(), false);
+      // dest = jmsMessage.getJMSReplyTo();
+//       if (dest != null && dest instanceof javax.jms.Queue)
+//         msg.setReplyTo(((javax.jms.Queue) dest).getQueueName(), true);
+//       else if (dest != null && dest instanceof javax.jms.Topic)
+//         msg.setReplyTo(((javax.jms.Topic) dest).getTopicName(), false);
+
+
+
       // Setting the Timestamp field.
       msg.setTimestamp(jmsMessage.getJMSTimestamp());
       // Setting the Type field.
@@ -224,14 +237,21 @@ public class MessageConverterModule
       jmsMessage.setJMSExpiration(momMessage.getExpiration());
       // Setting the Priority field.
       jmsMessage.setJMSPriority(momMessage.getPriority());
+
+
+      // DF: comment this code because it is not 
+      // compatible with typed destinations
       // Setting the ReplyTo field.
-      String destId = momMessage.getReplyToId();
-      if (destId != null) {
-        if (momMessage.replyToQueue())
-          jmsMessage.setJMSReplyTo(jmsSession.createQueue(destId));
-        else
-          jmsMessage.setJMSReplyTo(jmsSession.createTopic(destId));
-      }
+      // String destId = momMessage.getReplyToId();
+//       if (destId != null) {
+//         if (momMessage.replyToQueue())
+//           jmsMessage.setJMSReplyTo(jmsSession.createQueue(destId));
+//         else
+//           jmsMessage.setJMSReplyTo(jmsSession.createTopic(destId));
+//       }
+
+
+
       // Setting the Timestamp field.
       jmsMessage.setJMSTimestamp(momMessage.getTimestamp());
       // Setting the Type field.

@@ -24,13 +24,14 @@
 package org.objectweb.joram.shared.admin;
 
 public class RemoveServerRequest extends AdminRequest {
-  private String serverName;
 
-  public RemoveServerRequest(String serverName) {
-    this.serverName = serverName;
+  private int serverId;
+
+  public RemoveServerRequest(int serverId) {
+    this.serverId = serverId;
   }
 
-  public final String getServerName() {
-    return serverName;
+  public final int getServerId() {
+    return serverId;
   }
 }

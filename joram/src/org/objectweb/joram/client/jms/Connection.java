@@ -165,6 +165,10 @@ public class Connection implements javax.jms.Connection {
     this.status = status;
   }
 
+  boolean isStarted() {
+    return (status == Status.START);
+  }
+
   /** String image of the connection. */
   public String toString() {
     return "Cnx:" + proxyId + "-" + key;
@@ -396,6 +400,10 @@ public class Connection implements javax.jms.Connection {
 
       // Sending a synchronous "stop" request to the server:
       requestor.request(new CnxStopRequest());
+
+      // Set the status as STOP as the following operations
+      // (Session.stop) can't fail.
+      setStatus(Status.STOP);
     }
 
     // At this point, the server won't deliver messages anymore,
@@ -408,10 +416,6 @@ public class Connection implements javax.jms.Connection {
     for (int i = 0; i < sessions.size(); i++) {
       Session session = (Session) sessions.get(i);
       session.stop();
-    }
-    
-    synchronized (this) {
-      setStatus(Status.STOP);
     }
   }
 

@@ -63,9 +63,9 @@ public class ClusterAdmin
     top1.setFreeWriting();
     top2.setFreeWriting();
 
-    AdminHelper.setClusterLink(top0, top1);
-    AdminHelper.setClusterLink(top0, top2);
-
+    top0.addClusteredTopic(top1);
+    top0.addClusteredTopic(top2);
+    
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf0", cf0);
     jndiCtx.bind("cf1", cf1);
@@ -74,7 +74,7 @@ public class ClusterAdmin
     jndiCtx.bind("top1", top1);
     jndiCtx.bind("top2", top2);
     jndiCtx.close();
-
+    
     AdminModule.disconnect();
     System.out.println("Admin closed.");
   }

@@ -92,7 +92,7 @@ public class NamingContextFactory implements InitialContextFactory {
       // The URL format is scn://host:port
       String url = (String) env.get(SCN_PROVIDER_URL);
       if (url == null) url = (String) env.get(Context.PROVIDER_URL);
-      if (url != null) {
+      if (url != null && !url.equals("")) {
         StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
         if (! tokenizer.hasMoreElements()) 
           throw new NamingException("URL not valid:" + url);
