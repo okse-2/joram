@@ -15,10 +15,49 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
       <s2 name="Modifications">
+      <p>NONE SO FAR...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_4_1">
+      <p>This version is a maintenance version of the 3.4.0 release. It has
+      been tagged for allowing the integration of an up-to-date Joram into
+      JOnAS.</p>
+      <s2 name="Modifications">
       <ul>
       <li><code>NGNetwork</code> class removed from
       <code>fr.dyade.aaa.agent</code> package for allowing compilation
       with jdk1.3.</li>
+      <li>Bug corrected in the <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>
+      class and concerning XA rollbacks.</li>
+      </ul>
+      </s2>
+    </s1>
+    <s1 name="joram3_4_0"> 
+      <s2 name="Support of SOAP as a client/server communication protocol">
+      <p>This version is only available in CVS with tag joram3_4_0. So far, 
+      Joram provided a TCP link between its clients and servers. Now,
+      it also provides a SOAP link, based on HTTP and XML.</p>
+     
+      <p>For more info on SOAP, check
+      <a href="http://www.w3.org/TR/SOAP">W3C's SOAP</a> site.
+      </p>
+
+      <p>The support of the SOAP protocol led to re-architecturing 
+      the server side proxies (fr.dyade.aaa.mom.proxies) and client side
+      connection classes (fr.dyade.aaa.joram.Connection,
+      fr.dyade.aaa.joram.Driver, fr.dyade.aaa.joram.tcp,
+      fr.dyade.aaa.joram.soap).</p>
+
+      <p><a href="../doc/index.html">Documentation</a> is available, samples
+      have been added for testing. Testing requires the use of a servlet
+      container such as Apache's <a href="http://jakarta.apache.org/tomcat/">
+      Tomcat</a>.</p>
+      </s2>
+    </s1>
+
+    <s1 name="joram3_3_1"> 
+      <s2 name="Maintenance release of joram3_3_0">
+      <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
       </ul>
       </s2>
     </s1>
