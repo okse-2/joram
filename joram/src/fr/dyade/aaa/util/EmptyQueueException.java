@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -16,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 
 
@@ -25,8 +29,6 @@ package fr.dyade.aaa.util;
  * Thrown by methods in the <code>Queue</code> class to indicate 
  * that the queue is empty. 
  *
- * @author  Andr* Freyssinet
- * @version 1.0, 10/22/97
  * @see     fr.dyade.aaa.util.Queue
  */
 public class EmptyQueueException extends RuntimeException {

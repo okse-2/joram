@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 
 
@@ -27,12 +28,9 @@ package com.scalagent.kjoram.util;
  * Thrown by methods in the <code>Queue</code> class to indicate 
  * that the queue is empty. 
  *
- * @author  Andr* Freyssinet
- * @version 1.0, 10/22/97
  * @see     fr.dyade.aaa.util.Queue
  */
 public class EmptyQueueException extends RuntimeException {
-
 
   /**
    * Constructs a new <code>EmptyQueueException</code> with no detail message.

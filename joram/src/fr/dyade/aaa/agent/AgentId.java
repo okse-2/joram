@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -146,8 +149,6 @@ final class AgentIdStamp implements Serializable {
  * two agents may share a common stamp, as long as their from or to fields
  * differ. The to field identifies the agent server hosting the agent, so it
  * is used by the channel to forward notifications to the agent.<p> 
- *
- * @author  André Freyssinet
  *
  * @see AgentIdStamp
  */

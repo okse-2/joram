@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -16,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 
 
@@ -24,9 +28,6 @@ package fr.dyade.aaa.agent;
 /**
  * Thrown by Agent in the <code>react</code> method to indicate 
  * that the notification is unknown. 
- *
- * @author  Andr* Freyssinet
- * @version 1.3, 01/08/97
  */
 public class UnknownNotificationException extends Exception {
 
