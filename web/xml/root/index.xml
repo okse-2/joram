@@ -16,11 +16,11 @@
 
       <subtitle>Linux Expo / Linux World Paris 2002</subtitle>
 
-      <p>ObjectWeb will be present at the Linux Expo in Paris on
+      <p><em>ObjectWeb</em> will be present at the Linux Expo in Paris on
       January 30th and 31st and February 1st, 2002. Gerard Vandome
       (President of the ObjectWeb executive committee) will present
-      the JOnAS and ObjectWeb experience about using Open Source for
-      critical enterprise applications (see C2: Enterprise Computing
+      the JOnAS and ObjectWeb experience about using <em>Open Source for
+      critical enterprise applications</em> (see C2: Enterprise Computing
 	on <a
 	  href="http://www.linuxexpoparis.com/FR/home/index.php?site=conferences_programme">Linux Expo program</a> in french).
  </p>
@@ -29,7 +29,7 @@
       
       <p>Documentation is now made in <a
       href="http://www.docbook.org">DocBook</a>. You can now download
-	all <a href="doc/index.html">Joram documentation</a> in PostScript or PDF (it is still
+	all <a href="doc/index.html">JORAM documentation</a> in PostScript or PDF (it is still
       available online in HTML).</p>
     </s1>
 
