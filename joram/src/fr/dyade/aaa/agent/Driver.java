@@ -103,13 +103,19 @@ class ThreadFinalizer implements Runnable {
  */
 public abstract class Driver {
 
-public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $"; 
 
 
   /** separate thread running the driver */
   protected Thread thread;
   /** identifier local to the driver creator */
   protected int id;
+  /**
+   * Boolean variable used to stop the driver properly. If this variable is
+   * true then it indicates that the driver is stopping.
+   */ 
+    volatile boolean isRunning = false;
+    volatile boolean canStop = false;
 
   /**
    * Constructor.
@@ -119,6 +125,7 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.3 2000-10-05 15
   protected Driver(int id) {
     thread = null;
     this.id = id;
+    isRunning = true;
   }
 
   /**
@@ -126,6 +133,7 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.3 2000-10-05 15
    */
   protected Driver() {
     this(0);
+    isRunning =true;
   }
 
 
@@ -169,20 +177,26 @@ public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.3 2000-10-05 15
   }
 
   /**
-   * Stops the driver execution.
-   */
-  public synchronized void stop() {
-    if (thread == null) return;
-    thread.stop();
-    thread = null;
-  }
-
-  /**
    * Nullify thread variable. To be used by ThreadFinalizer.
    */
   synchronized void reset() {
     thread = null;
   }
+
+  /**
+   * Stops the driver execution.
+   */
+  public synchronized void stop() {
+    if (thread == null) return;
+    isRunning = false;
+    if (canStop) {
+	thread.interrupt();
+	close();
+    }
+    thread = null;
+  }
+
+  public abstract void close();
 
   /**
    * Sends a notification to an agent.

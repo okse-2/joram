@@ -50,7 +50,7 @@ import java.net.*;
  */
 public class TransientManager extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: TransientManager.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TransientManager.java,v 1.4 2000-10-20 13:56:14 tachkeni Exp $"; 
 
 
   static final int CONNECTOR_ID = -1;
@@ -346,9 +346,11 @@ class TransientConnector extends Driver {
     ServerSocket listen = new ServerSocket(port);
 
     main_loop:
-    while (true) {
+    while (isRunning) {
+      canStop = true;
       // waits for a transient server to connect
       Socket sock = listen.accept();
+      canStop = false;
 
       try {
 	if (Debug.drivers)
@@ -382,6 +384,7 @@ class TransientConnector extends Driver {
 			      manager.getDriverId(monitor, TransientManager.OUTPUT_ID),
 			      manager.getId());
 
+
 	if (Debug.drivers)
 	  Debug.trace("TransientConnector handle server " + config, false);
       } catch (Exception exc) {
@@ -390,4 +393,9 @@ class TransientConnector extends Driver {
       }
     }
   }
+
+  /**
+   * Close.
+   */
+    public void close() {}
 }

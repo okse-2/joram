@@ -33,8 +33,8 @@ import java.io.*;
  */
 class DriverIn extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
 
   /** id of agent to forward notifications to */
   protected AgentId proxy;
@@ -127,45 +127,48 @@ class DriverIn extends Driver {
     notify();
   }
 
-  public void run() {
-    Notification m;
+    public void run() {
+	Notification m;
     mainLoop:
-    while (true) {
-      m = null;
-      if (nbNotSent > maxNotSent) {
-	try {
-	  sendFlowControl();
-	} catch (IOException exc) {
-	  if (Debug.error)
-	    Debug.trace("in driver read sendFlowControl", exc);
-	  break mainLoop;
+	while (isRunning) {
+	    m = null;
+	    canStop = true;
+	    try {
+		if (nbNotSent > maxNotSent) {
+		    try {
+			sendFlowControl();
+		    } catch (IOException exc) {
+			if (Debug.error)
+			    Debug.trace("in driver read sendFlowControl", exc);
+			break mainLoop;
+		    }
+		    nbNotSent = 0;
+		}
+		m = in.readNotification();
+	    } catch (EOFException exc) {
+		// End of input flow.
+		break mainLoop;
+	    } catch (Exception exc) {
+		if (Debug.error)
+		    Debug.trace("error in " + in + ".readNotification", exc);
+		break mainLoop;
+	    }
+	    canStop = false;
+
+	    if (m != null) {
+		if (Debug.driversData)
+		    Debug.trace("in driver read " + m, false);
+		try {
+		    react(m);
+		    nbNotSent += 1;
+		} catch (IOException exc) {
+		    if (Debug.error)
+			Debug.trace("in driver read " + m, exc);
+		    break mainLoop;
+		}
+	    }
 	}
-	nbNotSent = 0;
-      }
-      try {
-	m = in.readNotification();
-      } catch (EOFException exc) {
-	// End of input flow.
-	break mainLoop;
-      } catch (Exception exc) {
-	if (Debug.error)
-	  Debug.trace("error in " + in + ".readNotification", exc);
-	break mainLoop;
-      }
-      if (m != null) {
-	if (Debug.driversData)
-	  Debug.trace("in driver read " + m, false);
-	try {
-	  react(m);
-	  nbNotSent += 1;
-	} catch (IOException exc) {
-	  if (Debug.error)
-	    Debug.trace("in driver read " + m, exc);
-	  break mainLoop;
-	}
-      }
     }
-  }
 
   /**
    * Reacts to a notification from the input stream.
@@ -193,4 +196,15 @@ class DriverIn extends Driver {
 	Debug.trace("error in reporting end of DriverIn", exc);
     }
   }
+
+  /**
+   * Close the OutputStream.
+   */
+    public void close() {
+    try {
+      in.close();
+    } catch (Exception exc) {}
+    in = null;
+  }
+
 }

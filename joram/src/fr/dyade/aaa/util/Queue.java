@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class Queue extends Vector {
 
-public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.3 2000-10-05 15:21:08 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.4 2000-10-20 13:56:22 tachkeni Exp $"; 
 
   /**
    * Pushes an item onto the bottom of this queue. 
@@ -75,11 +75,9 @@ public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.3 2000-10-05 15:
    * @return     the object at the top of this queue. 
    * @exception  EmptyQueueException  if this queue is empty.
    */
-  public synchronized Object get() {
+  public synchronized Object get() throws InterruptedException {
     while (size() == 0) {
-      try {
 	wait();
-      } catch (InterruptedException e) {}
     }
     return elementAt(0);
   }
