@@ -310,21 +310,7 @@ public abstract class XASession extends Session implements javax.jms.XASession
    *              transaction.
    * @exception JMSException  If the rollback fails because of Joram server.
    */
-  void rollTransactionBack(Xid xid) throws Exception
-  {
-    XAContext xaC = (XAContext) transactionsTable.get(xid);
-
-    if (xaC == null)
-      throw new XAException("Resource is not involved in specified"
-                            + " transaction.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": rolls transaction "
-                                 + xid.toString() + " back."); 
-
-    cnx.syncRequest(new XASessRollback(ident + " " + xid.toString())); 
-  }
+  abstract void rollbackTransaction(Xid xid) throws Exception;
 
   /**
    * Returns an array of the identifiers of the prepared transactions the
