@@ -29,8 +29,32 @@ import java.io.*;
 public class Notification implements Serializable, Cloneable {
   static final long serialVersionUID = 3007264908616389613L;
 
-  /** Context of the notification. */
+  /** True if the notification is persistent, false otherwise. */
   protected boolean persistent = true;
+
+  /**
+   * True if the notification is detachable, false otherwise. A detachable
+   * notification is saved in a different object that its containing
+   * message.
+   */
+  protected transient boolean detachable = false;
+
+  /**
+   * True if the notification is detached, false otherwise. A detached
+   * notification is not destroyed in the same way that its containing
+   * message.
+   */
+  protected transient boolean detached = false;
+
+  /**
+   * If the notification is stored independently that its containing message
+   * messageId contains the persistent name of this notification.
+   */
+  transient String messageId = null;
+
+  public String getMessageId() {
+    return messageId;
+  }
 
   /** Context of the notification. */
   private Object context;
@@ -60,7 +84,10 @@ public class Notification implements Serializable, Cloneable {
    */
   public synchronized Object clone() {
     try {
-      return super.clone();
+      Notification dup = (Notification) super.clone();
+      dup.detached = false;
+      dup.messageId = null;
+      return dup;
     } catch (CloneNotSupportedException e) { 
       // this shouldn't happen, since we are Cloneable
       throw new InternalError();
@@ -72,7 +99,10 @@ public class Notification implements Serializable, Cloneable {
 
     output.append("(");
     output.append(super.toString());
+    output.append(",messageId=").append(messageId);
     output.append(",persistent=").append(persistent);
+    output.append(",detachable=").append(detachable);
+    output.append(",detached=").append(detached);
     output.append(",context=").append(context);
     output.append(")");
 

@@ -482,7 +482,8 @@ final public class AgentAdmin extends Agent {
         // prepare serverDesc and add to startScript
         ServerDesc sd = new ServerDesc(id.shortValue(),
                                        cmd.name,
-                                       cmd.hostname);
+                                       cmd.hostname,
+                                       -1);
 //         sd.isTransient = false;
         sd.gateway = id.shortValue();
         startScript.serverDesc.put(id, sd);
@@ -515,7 +516,7 @@ final public class AgentAdmin extends Agent {
       throw new ServerCmdException(exc);
     }
   }
-   
+  
   /** 
    * create new service
    *
@@ -894,7 +895,10 @@ final public class AgentAdmin extends Agent {
           ServerDesc serverDesc = 
             AgentServer.getServerDesc(cmd.sid);
           if (cmd.domainName.equals(serverDesc.getDomainName())) {
-            serverDesc.port = a3cmlNetwork.port;
+            //serverDesc.setPort(a3cmlNetwork.port);
+            serverDesc.updateSockAddr(
+              serverDesc.getHostname(),
+              a3cmlNetwork.port);
           }
         } catch (UnknownServerException exc) {
           // Nothing to do
@@ -976,8 +980,6 @@ final public class AgentAdmin extends Agent {
 
         if (desc.gateway == desc.sid)
           ((Network) desc.domain).addServer(server.sid);
-      } else {
-        // TODO: Throw an UnknownServerType
       }
 
       if (logmon.isLoggable(BasicLevel.DEBUG))

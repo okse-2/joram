@@ -92,7 +92,7 @@ public class PoolNetwork extends StreamNetwork {
       nbMaxCnx = AgentServer.getInteger(getName() + ".nbMaxCnx").intValue();
     } catch (Exception exc) {
       try {
-	nbMaxCnx = AgentServer.getInteger("fr.dyade.aaa.agent.PoolCnxNetwork.nbMaxCnx").intValue();
+	nbMaxCnx = AgentServer.getInteger("PoolNetwork.nbMaxCnx").intValue();
       } catch (Exception exc2) {
 	nbMaxCnx = 5;
       }
@@ -244,10 +244,10 @@ public class PoolNetwork extends StreamNetwork {
     private ServerDesc server;
     /** The communication socket. */
     private Socket sock = null;
-    /** */
-    private ObjectInputStream ois = null;
-    /** */
-    private ObjectOutputStream oos = null;
+
+    MessageInputStream nis = null;
+    MessageOutputStream nos = null;
+
     /** */
     private MessageVector sendList;
 
@@ -300,13 +300,11 @@ public class PoolNetwork extends StreamNetwork {
       }
     }
 
-    void start(Socket sock,
-	       ObjectInputStream ois,
-	       ObjectOutputStream oos) {
+    void start(Socket sock, int boot) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", remotely started");
 
-      if (remoteStart(sock, ois, oos)) startEnd();
+      if (remoteStart(sock, boot)) startEnd();
     }
 
     /**
@@ -345,41 +343,30 @@ public class PoolNetwork extends StreamNetwork {
       }
 
       Socket sock = null;
-
-      ObjectInputStream ois = null;
-      ObjectOutputStream oos = null;
-
       try {
 	sock = createSocket(server);
 	setSocketOption(sock);
-	// Be careful: The OOS should be initialized first in order to
-	// send the header waited by OIS at the other end.
-	oos = new ObjectOutputStream(sock.getOutputStream());
-	ois = new ObjectInputStream(sock.getInputStream());
 
-	oos.writeObject(new Boot());
-	oos.flush();
-	oos.reset();
+	writeBoot(sock.getOutputStream());
+        int boot = readAck(sock.getInputStream());
 
-	StatusMessage statusMsg = (StatusMessage) ois.readObject();
+        AgentServer.transaction.begin();
+        testBootTS(sid, boot);
+        AgentServer.transaction.commit();
+        AgentServer.transaction.release();
 
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", receive: " + statusMsg);
-
-	// AF: Normally the remote server never reply with a Nack, it closes
-	// the connection directly, so we catch a ConnectException.
-	if (statusMsg.status == StatusMessage.NAckStatus)
-	  throw new ConnectException("Nack status received");
+        nis = new MessageInputStream(sock.getInputStream());
+        nos = new MessageOutputStream(sock.getOutputStream());
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
                      getName() + ", connection refused.", exc);
 	// TODO: Try it later, may be a a connection is in progress...
 	try {
-	  oos.close();
+	  sock.getOutputStream().close();
 	} catch (Exception exc2) {}
 	try {
-	  ois.close();
+	  sock.getInputStream().close();
 	} catch (Exception exc2) {}
 	try {
 	  sock.close();
@@ -387,6 +374,8 @@ public class PoolNetwork extends StreamNetwork {
 
 	// Reset the local attribute to allow future attempts.
         this.local = false;
+        nis = null;
+        nos = null;
 
 	return false;
       }
@@ -398,9 +387,6 @@ public class PoolNetwork extends StreamNetwork {
       // setup the connection (ACK reply).
       this.sock = sock;
       this.local = false;
-
-      this.ois = ois;
-      this.oos = oos;
 
       return true;
     }
@@ -418,33 +404,33 @@ public class PoolNetwork extends StreamNetwork {
      *
      * @return	true if the connection is established, false otherwise.
      */
-    synchronized boolean remoteStart(Socket sock,
-				     ObjectInputStream ois,
-				     ObjectOutputStream oos) {
+    synchronized boolean remoteStart(Socket sock, int boot) {
       try {
 	if ((this.sock != null) ||
 	    (this.local && server.sid > AgentServer.getServerId()))
-	  //  The connection is already established, or
-	  // a "local" connection is in progress from this server with a
-	  // greater priority.
-	  //  In all cases, stops this "remote" attempt.
-	  //  If the "local" attempt has a lower priority, it will fail
-	  // due to a remote reject.
+	  //  The connection is already established, or a "local" connection
+	  // is in progress from this server with a greater priority.
+	  //  In all cases, stops this "remote" attempt. If the "local"
+	  // attempt has a lower priority, it will fail due to a remote
+	  // reject.
 	  throw new ConnectException("Already connected");
 
 	// Accept this connection.
         if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                         getName() + ", send AckStatus");
+          logmon.log(BasicLevel.DEBUG, getName() + ", send AckStatus");
 
-	oos.writeObject(new StatusMessage(StatusMessage.AckStatus));
-	oos.flush();
-	oos.reset();
+        writeAck(sock.getOutputStream());
+
+        AgentServer.transaction.begin();
+        testBootTS(sid, boot);
+        AgentServer.transaction.commit();
+        AgentServer.transaction.release();
+
+        nis = new MessageInputStream(sock.getInputStream());
+        nos = new MessageOutputStream(sock.getOutputStream());
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.sock = sock;
-	this.ois = ois;
-	this.oos = oos;
 
 	return true;
       } catch (Exception exc) {
@@ -455,14 +441,16 @@ public class PoolNetwork extends StreamNetwork {
 
 	// Close the connection (# NACK).
 	try {
-	  oos.close();
+	  sock.getOutputStream().close();
 	} catch (Exception exc2) {}
 	try {
-	  ois.close();
+	  sock.getInputStream().close();
 	} catch (Exception exc2) {}
 	try {
 	  sock.close();
 	} catch (Exception exc2) {}
+        nis = null;
+        nos = null;
       }
       return false;
     }
@@ -475,7 +463,7 @@ public class PoolNetwork extends StreamNetwork {
     private void startEnd() {
       server.active = true;
       server.retry = 0;
-    
+
       synchronized(activeSessions) {
 	if (nbActiveCnx < nbMaxCnx) {
 	  // Insert the current session in the active pool.
@@ -555,17 +543,18 @@ public class PoolNetwork extends StreamNetwork {
         logmon.log(BasicLevel.DEBUG, getName() + ", closed.");
 
       try {
-	ois.close();
+	sock.getInputStream().close();
       } catch (Exception exc) {}
-      ois = null;
       try {
-	oos.close();
+	sock.getOutputStream().close();
       } catch (Exception exc) {}
-      oos = null;
       try {
 	sock.close();
       } catch (Exception exc) {}
       sock = null;
+
+      nis = null;
+      nos = null;
     }
 
     /**
@@ -577,12 +566,17 @@ public class PoolNetwork extends StreamNetwork {
      */
     final private void doAck(int ack) throws IOException {
       Message msg = null;
+
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", ack received #" + ack);
+
       try {
         //  Suppress the acknowledged notification from waiting list,
         // and deletes it.
         msg = sendList.removeMessage(ack);
         AgentServer.transaction.begin();
         msg.delete();
+        msg.free();
         AgentServer.transaction.commit();
         AgentServer.transaction.release();
 
@@ -635,7 +629,6 @@ public class PoolNetwork extends StreamNetwork {
       ack.source = AgentServer.getServerId();
       ack.dest = AgentServer.getServerDesc(server.sid).gateway;
       ack.stamp = stamp;
-      ack.boot = getBootTS();
 
       qout.push(ack);
     }
@@ -643,9 +636,7 @@ public class PoolNetwork extends StreamNetwork {
     final private synchronized void transmit(Message msg) {
       last = current++;
       try {
-        oos.writeObject(msg);
-        oos.flush();
-        oos.reset();
+        nos.writeMessage(msg);
       } catch (IOException exc) {
         logmon.log(BasicLevel.ERROR,
                    getName() + ", exception in sending message", exc);
@@ -656,7 +647,7 @@ public class PoolNetwork extends StreamNetwork {
     }
 
     public void run() {
-      Object obj;
+      Message msg;
 
       try {
 	while (running) {
@@ -666,7 +657,7 @@ public class PoolNetwork extends StreamNetwork {
             logmon.log(BasicLevel.DEBUG, getName() + ", waiting message");
 
 	  try {
-	    obj = ois.readObject();
+	    msg = nis.readMessage();
 	  } catch (ClassNotFoundException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
@@ -694,25 +685,18 @@ public class PoolNetwork extends StreamNetwork {
 
 	  canStop = false;
 
-          if (obj instanceof Message) {
-            Message msg = (Message) obj;
-            //  Keep message stamp in order to acknowledge it (be careful,
-            // the message get a new stamp to be delivered).
-            int stamp = msg.getStamp();
-            if (msg.not != null) {
-              deliver(msg);
-              ack(stamp);
-            } else {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           getName() +
-                           ", ack received #" + stamp);
-              doAck(stamp);
-            }
-	  } else {
-            if (logmon.isLoggable(BasicLevel.WARN))
-              logmon.log(BasicLevel.WARN, getName() + ", receives " + obj);
-	  }
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", receives: " + msg);
+
+          //  Keep message stamp in order to acknowledge it (be careful,
+          // the message get a new stamp to be delivered).
+          int stamp = msg.getStamp();
+          if (msg.not != null) {
+            deliver(msg);
+            ack(stamp);
+          } else {
+            doAck(stamp);
+          }
 	}
       } catch (EOFException exc) {
         if (running)
@@ -728,6 +712,165 @@ public class PoolNetwork extends StreamNetwork {
 	logmon.log(BasicLevel.DEBUG, getName() + ", ends");
 	running = false;
 	close();
+      }
+    }
+
+    /**
+     * Class used to read messages through a stream.
+     */
+    final class MessageInputStream extends ByteArrayInputStream {
+      private InputStream is = null;
+
+      MessageInputStream(InputStream is) {
+        super(new byte[256]);
+        this.is = is;
+      }
+
+      private void readFully(int length) throws IOException {
+        count = 0;
+        if (length > buf.length) buf = new byte[length];
+
+        int nb = -1;
+        do {
+          nb = is.read(buf, count, length-count);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", reads:" + nb);
+          if (nb < 0) throw new EOFException();
+          count += nb;
+        } while (count != length);
+        pos  = 0;
+      }
+
+      Message readMessage() throws Exception {
+        count = 0;
+        readFully(28);
+        // Reads boot timestamp of source server
+        int length = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
+          ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
+
+        Message msg = Message.alloc();
+        // Reads sender's AgentId
+        msg.from = new AgentId(
+          (short) (((buf[4] & 0xFF) <<  8) + (buf[5] & 0xFF)),
+          (short) (((buf[6] & 0xFF) <<  8) + (buf[7] & 0xFF)),
+          ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
+          ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0));
+        // Reads adressee's AgentId
+        msg.to = new AgentId(
+          (short) (((buf[12] & 0xFF) <<  8) + (buf[13] & 0xFF)),
+          (short) (((buf[14] & 0xFF) <<  8) + (buf[15] & 0xFF)),
+          ((buf[16] & 0xFF) << 24) + ((buf[17] & 0xFF) << 16) +
+          ((buf[18] & 0xFF) <<  8) + ((buf[19] & 0xFF) <<  0));
+        // Reads source server id of message
+        msg.source = (short) (((buf[20] & 0xFF) <<  8) +
+                              ((buf[21] & 0xFF) <<  0));
+        // Reads destination server id of message
+        msg.dest = (short) (((buf[22] & 0xFF) <<  8) +
+                            ((buf[23] & 0xFF) <<  0));
+        // Reads stamp of message
+        msg.stamp = ((buf[24] & 0xFF) << 24) +
+          ((buf[25] & 0xFF) << 16) +
+          ((buf[26] & 0xFF) <<  8) +
+          ((buf[27] & 0xFF) <<  0);
+
+        if (length > 28) {
+          readFully(length -28);
+
+          // Reads if notification is detachable
+          boolean detachable = (buf[28] == 1) ? true : false;
+          pos = 1;
+          // Reads notification object
+          ObjectInputStream ois = new ObjectInputStream(this);
+          msg.not = (Notification) ois.readObject();
+          msg.not.detachable = detachable;
+          msg.not.detached = false;
+        } else {
+          msg.not = null;
+        }
+
+        return msg;
+      }
+    }
+
+    /**
+     * Class used to send messages through a stream.
+     */
+    final class MessageOutputStream extends ByteArrayOutputStream {
+      private OutputStream os = null;
+      private ObjectOutputStream oos = null;
+
+      MessageOutputStream(OutputStream os) throws IOException {
+        super(256);
+
+        this.os = os;
+        oos = new ObjectOutputStream(this);
+
+        count = 0;
+        buf[29] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+        buf[30] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+        buf[31] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+        buf[32] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+      }
+
+      void writeMessage(Message msg) throws IOException {
+        logmon.log(BasicLevel.DEBUG, getName() + ", sends " + msg);
+
+        // Writes sender's AgentId
+        buf[4] = (byte) (msg.from.from >>>  8);
+        buf[5] = (byte) (msg.from.from >>>  0);
+        buf[6] = (byte) (msg.from.to >>>  8);
+        buf[7] = (byte) (msg.from.to >>>  0);
+        buf[8] = (byte) (msg.from.stamp >>>  24);
+        buf[9] = (byte) (msg.from.stamp >>>  16);
+        buf[10] = (byte) (msg.from.stamp >>>  8);
+        buf[11] = (byte) (msg.from.stamp >>>  0);
+        // Writes adressee's AgentId
+        buf[12]  = (byte) (msg.to.from >>>  8);
+        buf[13]  = (byte) (msg.to.from >>>  0);
+        buf[14] = (byte) (msg.to.to >>>  8);
+        buf[15] = (byte) (msg.to.to >>>  0);
+        buf[16] = (byte) (msg.to.stamp >>>  24);
+        buf[17] = (byte) (msg.to.stamp >>>  16);
+        buf[18] = (byte) (msg.to.stamp >>>  8);
+        buf[19] = (byte) (msg.to.stamp >>>  0);
+        // Writes source server id of message
+        buf[20]  = (byte) (msg.source >>>  8);
+        buf[21]  = (byte) (msg.source >>>  0);
+        // Writes destination server id of message
+        buf[22] = (byte) (msg.dest >>>  8);
+        buf[23] = (byte) (msg.dest >>>  0);
+        // Writes stamp of message
+        buf[24] = (byte) (msg.stamp >>>  24);
+        buf[25] = (byte) (msg.stamp >>>  16);
+        buf[26] = (byte) (msg.stamp >>>  8);
+        buf[27] = (byte) (msg.stamp >>>  0);
+        count = 28;
+
+        try {
+          if (msg.not != null) {
+            // Writes if notification is detachable
+            buf[28] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
+            // Be careful, the stream header is hard-written in buf[29..32]
+            count = 33;
+
+            oos.writeObject(msg.not);
+            oos.reset();
+            oos.flush();
+          }
+
+          // Writes length at beginning
+          buf[0] = (byte) (count >>>  24);
+          buf[1] = (byte) (count >>>  16);
+          buf[2] = (byte) (count >>>  8);
+          buf[3] = (byte) (count >>>  0);
+
+          logmon.log(BasicLevel.DEBUG, getName() + ", writes " + count);
+
+          os.write(buf, 0, count);;
+          os.flush();
+        } finally {
+          count = 0;
+        }
       }
     }
   }
@@ -760,12 +903,6 @@ public class PoolNetwork extends StreamNetwork {
     public void run() {
       /** Connected socket. */
       Socket sock = null;
-      /** Input stream from transient agent server. */
-      ObjectInputStream ois = null;
-      /** Output stream to transient agent server. */
-      ObjectOutputStream oos = null;
-
-      Object msg = null;
 
       try {
 	while (running) {
@@ -789,33 +926,13 @@ public class PoolNetwork extends StreamNetwork {
 	    canStop = false;
 
 	    setSocketOption(sock);
-	    // Be careful: The OOS should be initialized first in order to
-	    // send the header waited by OIS at the other end
-	    oos = new ObjectOutputStream(sock.getOutputStream());
-	    ois = new ObjectInputStream(sock.getInputStream());
 
-	    msg = ois.readObject();
-
-	    if (msg instanceof Boot) {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", connection setup from #" +
-                           ((Boot)msg).sid);
-	      getSession(((Boot)msg).sid).start(sock, ois, oos);
-	    } else {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", bad connection setup");
-	      try {
-		oos.close();
-	      } catch (Exception exc2) {}
-	      try {
-		ois.close();
-	      } catch (Exception exc2) {}
-	      try {
-		sock.close();
-	      } catch (Exception exc2) {}
-	    }
+            Boot boot = readBoot(sock.getInputStream());
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", connection setup from #" +
+                              boot.sid);
+            getSession(boot.sid).start(sock, boot.boot);
 	  } catch (Exception exc) {
 	    this.logmon.log(BasicLevel.ERROR,
                             this.getName() + ", bad connection setup", exc);
@@ -921,5 +1038,76 @@ public class PoolNetwork extends StreamNetwork {
         finish();
       }
     }
+  }
+
+
+  final void writeBoot(OutputStream out) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", writeBoot: " + getBootTS());
+
+    byte[] iobuf = new byte[6];
+    iobuf[0] = (byte) (AgentServer.getServerId() >>>  8);
+    iobuf[1] = (byte) (AgentServer.getServerId() >>>  0);
+    iobuf[2] = (byte) (getBootTS() >>>  24);
+    iobuf[3] = (byte) (getBootTS() >>>  16);
+    iobuf[4] = (byte) (getBootTS() >>>  8);
+    iobuf[5] = (byte) (getBootTS() >>>  0);
+    out.write(iobuf);
+    out.flush();
+  }
+  
+  final class Boot {
+    transient short sid;
+    transient int boot;
+  }
+
+  final void readFully(InputStream is, byte[] iobuf) throws IOException {
+    int n = 0;
+    do {
+      int count = is.read(iobuf, n, iobuf.length - n);
+      if (count < 0) throw new EOFException();
+      n += count;
+    } while (n < iobuf.length);
+  }
+
+  final Boot readBoot(InputStream in) throws IOException {
+    Boot boot = new Boot();
+
+    byte[] iobuf = new byte[6];
+    readFully(in, iobuf);
+    boot.sid = (short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF));
+    boot.boot = ((iobuf[2] & 0xFF) << 24) + ((iobuf[3] & 0xFF) << 16) +
+      ((iobuf[4] & 0xFF) <<  8) + ((iobuf[5] & 0xFF) <<  0);
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", readBoot from #" + boot.sid +
+                 " -> " + boot.boot);
+
+    return boot;
+  }
+  
+  final void writeAck(OutputStream out) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", writeAck: " + getBootTS());
+
+    byte[] iobuf = new byte[4];
+    iobuf[0] = (byte) (getBootTS() >>>  24);
+    iobuf[1] = (byte) (getBootTS() >>>  16);
+    iobuf[2] = (byte) (getBootTS() >>>  8);
+    iobuf[3] = (byte) (getBootTS() >>>  0);
+    out.write(iobuf);
+    out.flush();
+  }
+  
+  final int readAck(InputStream in)throws IOException {
+    byte[] iobuf = new byte[4];
+    readFully(in, iobuf);
+    int boot = ((iobuf[0] & 0xFF) << 24) + ((iobuf[1] & 0xFF) << 16) +
+      ((iobuf[2] & 0xFF) <<  8) + ((iobuf[3] & 0xFF) <<  0);
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", readAck:" + boot);
+
+    return boot;
   }
 }

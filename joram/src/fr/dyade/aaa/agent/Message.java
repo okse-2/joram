@@ -53,8 +53,6 @@ final class Message implements Serializable {
   transient short dest;
   /** The current stamp of the message */
   transient int stamp;
-  /** The boot timestamp of source server */
-  transient int boot;
 
   /** Get the unique server id. of the sender of this message */
   short getSource() {
@@ -94,22 +92,23 @@ final class Message implements Serializable {
     strbuf.append(",source=").append(source);
     strbuf.append(",dest=").append(dest);
     strbuf.append(",stamp=").append(stamp);
-    strbuf.append(",boot=").append(boot);
     strbuf.append(')');
     
     return strbuf;
   }
 
-  private byte iobuf[] = new byte [28];
+  private byte iobuf[] = new byte [25];
 
   /**
    *  The writeObject method is responsible for writing the state of the
    * object for its particular class so that the corresponding readObject
-   * method can restore it. 
+   * method can restore it.
+   *  Be careful this method should only be used for saving messages in
+   * persistent storage, sending messages will be done by another way.
    */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
-    // Sets sender's AgentId
+    // Writes sender's AgentId
     iobuf[0] = (byte) (from.from >>>  8);
     iobuf[1] = (byte) (from.from >>>  0);
     iobuf[2] = (byte) (from.to >>>  8);
@@ -118,7 +117,7 @@ final class Message implements Serializable {
     iobuf[5] = (byte) (from.stamp >>>  16);
     iobuf[6] = (byte) (from.stamp >>>  8);
     iobuf[7] = (byte) (from.stamp >>>  0);
-    // Sets adressee's AgentId
+    // Writes adressee's AgentId
     iobuf[8]  = (byte) (to.from >>>  8);
     iobuf[9]  = (byte) (to.from >>>  0);
     iobuf[10] = (byte) (to.to >>>  8);
@@ -127,59 +126,65 @@ final class Message implements Serializable {
     iobuf[13] = (byte) (to.stamp >>>  16);
     iobuf[14] = (byte) (to.stamp >>>  8);
     iobuf[15] = (byte) (to.stamp >>>  0);
-    // Sets source server id of message
+    // Writes source server id of message
     iobuf[16]  = (byte) (source >>>  8);
     iobuf[17]  = (byte) (source >>>  0);
-    // Sets destination server id of message
+    // Writes destination server id of message
     iobuf[18] = (byte) (dest >>>  8);
     iobuf[19] = (byte) (dest >>>  0);
-    // Sets stamp of message
+    // Writes stamp of message
     iobuf[20] = (byte) (stamp >>>  24);
     iobuf[21] = (byte) (stamp >>>  16);
     iobuf[22] = (byte) (stamp >>>  8);
     iobuf[23] = (byte) (stamp >>>  0);
-//     // Sets boot timestamp of source server
-    iobuf[24] = (byte) (boot >>>  24);
-    iobuf[25] = (byte) (boot >>>  16);
-    iobuf[26] = (byte) (boot >>>  8);
-    iobuf[27] = (byte) (boot >>>  0);
+    // Writes if notification is detachable
+    iobuf[24] = (not.detachable) ? ((byte) 1) : ((byte) 0);
     // Writes data on stream
-    out.write(iobuf, 0, 28);
-    // Writes notification object
-    out.writeObject(not);
+    out.write(iobuf, 0, 25);
+    
+    if (! not.detachable) {
+      // Writes notification object
+      out.writeObject(not);
+    }
   }
     
   /**
    *  The readObject method is responsible for reading from the stream and
    * restoring the classes fields.
+   *  Be careful this method should only be used for restoring messages from
+   * persistent storage, receiving messages will be done by another way.
    */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
-    iobuf = new byte[28];
+    iobuf = new byte[25];
 
-    in.readFully(iobuf, 0, 28);
-    // Gets sender's AgentId
+    in.readFully(iobuf, 0, 25);
+    // Reads sender's AgentId
     from = new AgentId((short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF)),
                        (short) (((iobuf[2] & 0xFF) <<  8) + (iobuf[3] & 0xFF)),
                        ((iobuf[4] & 0xFF) << 24) + ((iobuf[5] & 0xFF) << 16) +
                        ((iobuf[6] & 0xFF) <<  8) + ((iobuf[7] & 0xFF) <<  0));
-    // Gets adressee's AgentId
+    // Reads adressee's AgentId
     to = new AgentId((short) (((iobuf[8] & 0xFF) <<  8) + (iobuf[9] & 0xFF)),
                      (short) (((iobuf[10] & 0xFF) <<  8) + (iobuf[11] & 0xFF)),
                      ((iobuf[12] & 0xFF) << 24) + ((iobuf[13] & 0xFF) << 16) +
                      ((iobuf[14] & 0xFF) <<  8) + ((iobuf[15] & 0xFF) <<  0));
-    // Gets source server id of message
+    // Reads source server id of message
     source = (short) (((iobuf[16] & 0xFF) <<  8) + ((iobuf[17] & 0xFF) <<  0));
-    // Gets destination server id of message
+    // Reads destination server id of message
     dest = (short) (((iobuf[18] & 0xFF) <<  8) + ((iobuf[19] & 0xFF) <<  0));
-    // Gets stamp of message
+    // Reads stamp of message
     stamp = ((iobuf[20] & 0xFF) << 24) + ((iobuf[21] & 0xFF) << 16) +
       ((iobuf[22] & 0xFF) <<  8) + ((iobuf[23] & 0xFF) <<  0);
-    // Gets boot timestamp of source server
-    boot = ((iobuf[24] & 0xFF) << 24) + ((iobuf[25] & 0xFF) << 16) +
-      ((iobuf[26] & 0xFF) <<  8) + ((iobuf[27] & 0xFF) <<  0);
-    // Reads notification object
-    not = (Notification) in.readObject();
+    // Reads if notification is detachable
+    boolean detachable = (iobuf[24] == 1) ? true : false;
+
+    if (! detachable) {
+      // Reads notification object
+      not = (Notification) in.readObject();
+      not.detachable = false;
+      not.detached = false;
+    }
   }
 
   transient private String stringId = null;
@@ -207,6 +212,10 @@ final class Message implements Serializable {
   void save() throws IOException {
     if (isPersistent()) {
       AgentServer.transaction.save(this, toStringId());
+      if (not.detachable) {
+        not.messageId = StringId.toStringId('N', '_', dest, stamp, -1);
+        AgentServer.transaction.save(not, not.messageId);
+      }
     }
   }
 
@@ -220,7 +229,15 @@ final class Message implements Serializable {
    */
   static Message
   load(String name) throws IOException, ClassNotFoundException {
-    return (Message) AgentServer.transaction.load(name);
+    Message msg = (Message) AgentServer.transaction.load(name);
+    if (msg.not == null) {
+      String messageId = StringId.toStringId('N', '_', msg.dest, msg.stamp, -1);
+      msg.not = (Notification) AgentServer.transaction.load(messageId);
+      msg.not.messageId = messageId;
+      msg.not.detachable = true;
+      msg.not.detached = false;
+    }
+    return msg;
   }
 
   /**
@@ -229,22 +246,18 @@ final class Message implements Serializable {
   void delete()  throws IOException {
     if (isPersistent()) {
       AgentServer.transaction.delete(toStringId());
+      if (not.detachable && ! not.detached) {
+        // The Notification is not stored with message, and it is not detached
+        // so it may be deleted individually.
+        AgentServer.transaction.delete(not.getMessageId());
+      }
     }
   }
 
-  private Message() {}
-
   /**
    * Construct a new message.
-   * @param from	id of source Agent.
-   * @param to    	id of destination Agent.
-   * @param not    	Notification to be signaled.
    */
-  private Message(AgentId from, AgentId to, Notification not) {
-    this.from = from;
-    this.to = to;
-    if (not != null) this.not = (Notification) not.clone();
-  }
+  private Message() {}
 
   private static Pool pool = null;
 
@@ -253,6 +266,9 @@ final class Message implements Serializable {
     pool = new Pool("Message", size);
   }
 
+  /**
+   * Allocates a message from the pool.
+   */
   static Message alloc() {
     Message msg = null;
     
@@ -264,12 +280,22 @@ final class Message implements Serializable {
     return msg;
   }
 
+  /**
+   * Allocates a message from the pool.
+   *
+   * @param from	id of source Agent.
+   * @param to    	id of destination Agent.
+   * @param not    	Notification to be signaled.
+   */
   static Message alloc(AgentId from, AgentId to, Notification not) {
     Message msg = alloc();
     msg.set(from, to, not);
     return msg;
   }
 
+  /**
+   * Frees the message to the pool.
+   */
   void free() {
     not = null;	/* to let gc do its work */
     stringId = null;
@@ -279,6 +305,10 @@ final class Message implements Serializable {
   private void set(AgentId from, AgentId to, Notification not) {
     this.from = (AgentId) from;
     this.to = (AgentId) to;
-    if (not != null) this.not = (Notification) not.clone();
+    if (not != null) {
+      this.not = (Notification) not.clone();
+      this.not.detached = not.detached;
+      this.not.messageId = not.messageId;
+    }
   }
 }
