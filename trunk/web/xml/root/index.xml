@@ -14,6 +14,18 @@
 
     <s1 name="Recent news">
 
+      <subtitle>8 February 2002: mirror site in the United States</subtitle>
+
+      <p>A <connect
+      href="http://objectweb.cs.rice.edu/index.xml">mirror
+      site</connect> of the ObjectWeb website has been installed at
+      the <a href="http://www.cs.rice.edu/">Department of Computer
+      Science</a> at <a href="http://www.rice.edu/">RICE
+      University</a> (see <connect href="../mirrors.xml">mirror
+      sites</connect> page).</p>
+
+      <hr/>
+
       <subtitle>ObjectWeb Consortium launch!</subtitle>
 
       <p>The <em>ObjectWeb Consortium</em> has been officially created on 30
@@ -40,21 +52,6 @@
       href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">JORAM CVS
       repository</a>. Documentation will follow soon...</p>
       
-      <hr/>
-      
-      <subtitle>Linux Expo / Linux World Paris 2002</subtitle>
-
-      <p><em>ObjectWeb</em> will be present at the Linux Expo in Paris on
-      January 30th and 31st and February 1st, 2002. Gerard Vandome (President of
-      the ObjectWeb executive committee) will present the JOnAS and ObjectWeb
-      experience about using <em>Open Source for critical enterprise
-      applications</em> (see C2: Enterprise Computing on <a
-      href="http://www.linuxexpoparis.com/FR/home/index.php?site=conferences_programme">Linux
-      Expo program</a> in french).</p>
-
-      <p>The slides (<a href="doc/external/JOnASLinuxExpo02.pdf">pdf</a>) of the
-      presentation are now available.</p>
-
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
