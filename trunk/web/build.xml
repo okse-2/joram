@@ -24,17 +24,17 @@
     </tstamp>
 
     <!-- deal with dtds, stylesheets and project files (menus) dependencies -->
+<!--
     <mkdir dir="${html.dest}"/>
     <dependset>
        <srcfileset dir="${dtd.dir}" includes="*.dtd"/>
        <srcfileset dir="${stylesheets.dir}" includes="*.xsl"/>
        <srcfileset dir="${xml.dir}/project" includes="*.xml"/>
-      <!-- does not work if the ${html.dest} directory is missing -->
       <targetfileset dir="${html.dest}" 
 		     includes="**/*.html"
 		     excludes="${release-files}"/>
     </dependset> 
-
+-->
     <!-- static html files -->
     <copy todir="${html.dest}">
       <fileset dir="${html.src}">
