@@ -273,9 +273,8 @@ public class HttpNetwork extends FIFONetwork {
     String line = null;
 
     line = readLine(is);
-    if (line.startsWith("GET ")) {
-    } else if (line.startsWith("PUT ")) {
-    } else {
+    if ((line == null) ||
+        (! (line.startsWith("GET ") || line.startsWith("PUT ")))) {
       throw new Exception("Bad request: " + line);
     }
 
@@ -363,9 +362,9 @@ public class HttpNetwork extends FIFONetwork {
     String line = null;
 
     line = readLine(is);
-    if (line.equals("HTTP/1.1 200 OK")) {
-    } else if (line.equals("HTTP/1.1 204 No Content")) {
-    } else {
+    if ((line == null) ||
+        ((! line.equals("HTTP/1.1 200 OK")) &&
+         (! line.equals("HTTP/1.1 204 No Content")))) {
       throw new Exception("Bad reply: " + line);
     }
 
@@ -524,16 +523,14 @@ public class HttpNetwork extends FIFONetwork {
               // Get next message to send if any
               msgout = qout.get(0);
             } while (running && ((msgout != null) || (msgin != null)));
+          } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", close connection");
-          } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN,
-                       this.getName() + ", ", exc);
+                         this.getName() + ", connection closed", exc);
           } finally {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", connection closed");
+                         this.getName() + ", connection ends");
             try {
               os.close();
             } catch (Exception exc) {}
@@ -656,7 +653,8 @@ public class HttpNetwork extends FIFONetwork {
 
             } while (running);
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN, ", connection closed", exc);
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, ", connection closed", exc);
           } finally {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG, ", connection ends");
