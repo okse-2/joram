@@ -17,11 +17,11 @@
     </menu>
 
     <menu name="Resources">
-        <a href="../faq">FAQ</a>
-        <a href="../wws">Mailing Lists</a>
+        <a href="http://www.objectweb.org/faq">FAQ</a>
+        <a href="http://www.objectweb.org/wws">Mailing Lists</a>
         <connect href="../resources/search.xml">Search</connect>
         <connect href="../resources/cvs.xml">CVS Repositories</connect>
-        <connect href="../resources/bugs.xml">Bug Database</connect>
+<!--        <connect href="../resources/bugs.xml">Bug database</connect> -->
     </menu>
 
     <menu name="Misc">
