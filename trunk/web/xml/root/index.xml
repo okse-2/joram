@@ -57,8 +57,6 @@
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
-      <!--s2 name="As a standalone software, JORAM has been downloaded more
-               than 14,000 times"-->
       <subtitle>As a standalone software, JORAM has been downloaded more
                 than 14,000 times</subtitle>
 
@@ -67,7 +65,7 @@
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
                width="287" border="0" hspace="2"/></td>
 	  <td valign="middle"><p>Current packaged release: 3.6.0</p>
-	                      <p>Latest CVS tag: joram3_6_0</p></td>
+	                      <p>Latest CVS tag: joram3_6_1</p></td>
 	</tr>
       </table>
       
