@@ -28,8 +28,8 @@
     other JMS test suites existed but since they came from company
     selling JMS solutions I was quite doubtful about it. Working for
       <ulink url="http://www.objectweb.org"> ObjectWeb</ulink> which
-    is consortiun aiming at creating Open Source middleware 
-      software, it was my interest to make an
+    is a consortium aiming at creating Open Source middleware 
+      softwares, it was my interest to make an
     <emphasis>unbiased</emphasis> test suite that 
     could help us to improve our code quality.</para>
     <para>I don't deny that, at the beginning, JORAM results were not
