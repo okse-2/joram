@@ -32,6 +32,7 @@ import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 import java.io.*;
 import java.net.*;
 
+import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -83,12 +84,13 @@ class Driver extends fr.dyade.aaa.util.Daemon
         // Catching an IOException:
         catch (IOException ioE) {
           if (! cnx.closing) {
-            JMSException jE = new JMSException("The connection is broken,"
-                                               + " the driver stops.");
-            jE.setLinkedException(ioE);
+            IllegalStateException isE =
+              new IllegalStateException("The connection is broken,"
+                                        + " the driver stops.");
+            isE.setLinkedException(ioE);
   
             // Passing the asynchronous exception to the connection:
-            cnx.onException(jE);
+            cnx.onException(isE);
 
             // Interrupting the synchronous requesters:
             java.util.Enumeration enum = cnx.requestsTable.keys();
