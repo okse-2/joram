@@ -33,9 +33,39 @@ import javax.jms.*;
  * Test the message selector features of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorTest.java,v 1.6 2002-05-15 13:50:35 jmesnil Exp $
+ * @version $Id: SelectorTest.java,v 1.7 2002-06-27 08:34:01 jmesnil Exp $
  */
 public class SelectorTest extends PTPTestCase {
+
+    /**
+     * Test that an empty string as a message selector indicates that there
+     * is no message selector for the message consumer.
+     */
+    public void testEmptyStringAsSelector() {
+        try {
+            receiverConnection.stop();
+            receiver = receiverSession.createReceiver(receiverQueue, "");
+            receiverConnection.start();
+
+            TextMessage message = senderSession.createTextMessage();
+            message.setText("testEmptyStringAsSelector");
+            sender.send(message);
+
+            TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
+            assertTrue("No message was received", msg != null);
+            assertEquals("testEmptyStringAsSelector", msg.getText());
+        } catch (JMSException e) {
+            fail(e);
+        }
+    }       
+
+    /**
+     * Tats that String literals are well handled by the message selector.
+     * <br />
+     * <ul>
+     *   <li><code>"string = 'literal''s;"</code> is <code>true</code> for "literal's" and <code>false</code> for "literal"</li>
+     * </ul>
+     */
 
     public void testStringLiterals() {
         try {

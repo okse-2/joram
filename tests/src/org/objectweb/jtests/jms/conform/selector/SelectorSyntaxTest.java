@@ -35,7 +35,7 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.7 2002-06-03 12:28:02 jmesnil Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.8 2002-06-27 08:34:21 jmesnil Exp $
  */
 public class SelectorSyntaxTest extends PTPTestCase {
 
@@ -91,6 +91,17 @@ public class SelectorSyntaxTest extends PTPTestCase {
         }
 
     }   
+
+    /**
+     * Test that message selector can be an empty string.
+     */
+    public void testEmptyStringAsSelector() {
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "");
+        } catch (JMSException e) {
+            fail(e);
+        }
+    }
 
     /**
      * Test that identifiers can't be <code>NULL</code>.
