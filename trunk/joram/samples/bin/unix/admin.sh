@@ -7,8 +7,9 @@ echo "== Launching the graphical administration tool =="
 JORAM_LIBS=$JORAM_HOME/lib
 CONFIG_ENV=$JORAM_HOME/samples/config
 
-CLASSPATH=$JORAM_LIBS/joramgui.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram.jar
+CLASSPATH=$JORAM_LIBS/joram-gui.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-client.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jms.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jndi.jar
