@@ -31,35 +31,6 @@
 	problem you may encounter with the new distribution and documentation.<br />
 	We sincerely hope you will enjoy this new version.   
       </p>
-      
-      <hr />
-      
-      <subtitle>February, 8th 2002: mirror site in the United States</subtitle>
-
-      <p>A <connect
-      href="http://objectweb.cs.rice.edu/index.xml">mirror
-      site</connect> of the ObjectWeb website has been installed at
-      the <a href="http://www.cs.rice.edu/">Department of Computer
-      Science</a> at <a href="http://www.rice.edu/">RICE
-      University</a> (see <connect href="../mirrors.xml">mirror
-      sites</connect> page).</p>
-
-      <hr/>
-
-      <subtitle>ObjectWeb Consortium launched!</subtitle>
-
-      <p>The <em>ObjectWeb Consortium</em> has been officially created on 5
-      February 2002. ObjectWeb is now organised as an international open
-      consortium hosted by <a href="http://www.inria.fr/">INRIA</a> (<connect
-      href="../doc/index.xml#annoucement">more informations</connect>).</p>
-
-      <hr/>
-
-      <subtitle>January, 16th 2002: Documentation update</subtitle>
-
-      <p>The <a
-      href="http://www.objectweb.org/joram/current/doc/install/index.html">Installation
-      guide</a> has been updated to take into account Ant support.</p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
