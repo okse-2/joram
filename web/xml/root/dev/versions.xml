@@ -14,7 +14,13 @@
     <s1 name="CVS base, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: May 7, 2004)">
+      <s2 name="Modifications (latest: May 11, 2004)">
+      <ul>
+        <li>Admin file searched in the class loader if path not set,
+        in <code>org.objectweb.joram.client.connector.JoramAdapter</code>.
+        </li>
+      </ul>
+      <s2 name="Corrected bugs (latest: May 11, 2004)">
       <ul>
         <li>Dependency of a client class to a server class
         (<code>org.objectweb.joram.shared.client.QBrowseReply</code>). Updated
