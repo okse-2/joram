@@ -11,7 +11,29 @@
   </properties>
 
   <body>
-	   <s1 name="JORAM_4_1_1 (October 13, 2004)">
+		<s1 name="JORAM_4_1_2 (November 9, 2004)">
+		<p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_2.  
+		This release contains some minor features and bug fixes (see below the history file).</p>
+		<p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
+		<s2 name="Performance enhancements">
+		 <ul>
+        <li>Changes in TCP connection to improve performances.</li>
+		 </ul>
+		</s2>
+		<s2 name="Bug fixes">
+		 <ul>
+        <li>Corrects mistakes in <code>ra.xml</code> and <code>ra-remote.xml</code> files.
+					<ul>
+						<li>Removes empty (and useless) &lt;icon&gt; &lt;/icon&gt; tags.</li>
+						<li>Remove spaces and eof lines in the &lt;xxx-class&gt; tags and &lt;xxx-interface&gt; tags.</li>
+					</ul>
+				<li>Fix bug (NullPointerException) in  OutboundConnectionFactory.java, cxManager can be null.
+				<li>Throws a <code>StateException in setCtx(int key) if key &lt;0</code> (ProxyImpl.java).</li>
+		 </ul>
+		</s2>
+		</s1>
+		
+	  <s1 name="JORAM_4_1_1 (October 13, 2004)">
 		<p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_1.  
 		This release contains some minor features and bug fixes (see below the history file).</p>
 		<p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
