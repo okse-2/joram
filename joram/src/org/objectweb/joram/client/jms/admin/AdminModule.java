@@ -227,11 +227,16 @@ public class AdminModule
   {
     try {
       doRequest(new StopServerRequest(serverId));
+
+      if (serverId == localServer)
+        cnx = null;
     }
     // ConnectException is intercepted if stopped server is local server.
     catch (ConnectException exc) {
       if (serverId != localServer)
         throw exc;
+
+      cnx = null;
     }
   }
 
