@@ -26,7 +26,8 @@
 			 <li>Deployment in collocated mode : a JORAM server is started and stopped at RA deployment and undeployment.
 			 </li>
 			 </ul>
-			 </li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
+			 </li>
+			 <li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
 			  exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
 				as will be the next High-Availability Joram server to be released in the next version. </li>
 			 </ul>
