@@ -51,6 +51,14 @@ public interface Admin {
         throws NamingException;
     
     /** 
+     * Creates a <code>ConnectionFactory</code> and makes it available 
+     *from JNDI with name <code>name</code>.
+     *
+     * @param name JNDI name of the <code>ConnectionFactory</code>
+     */
+    public void createConnectionFactory(String name);
+
+    /** 
      * Creates a <code>QueueConnectionFactory</code> and makes it available 
      *from JNDI with name <code>name</code>.
      *
@@ -97,16 +105,23 @@ public interface Admin {
     public void deleteTopic(String name);
 
     /** 
+     * Removes the <code>ConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
+     *
+     * @param name JNDI name of the <code>ConnectionFactory</code>
+     */
+    public void deleteConnectionFactory (String name);
+
+    /** 
      * Removes the <code>QueueConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
      *
-     * @param name JNDI name of the <code>Queue</code>
+     * @param name JNDI name of the <code>QueueConnectionFactory</code>
      */
     public void deleteQueueConnectionFactory (String name);
 
     /** 
      * Removes the <code>TopicConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
      *
-     * @param name JNDI name of the <code>Queue</code>
+     * @param name JNDI name of the <code>TopicConnectionFactory</code>
      */    
     public void deleteTopicConnectionFactory (String name);
 }
