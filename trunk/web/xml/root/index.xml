@@ -27,8 +27,8 @@
 			 </li>
 			 </ul>
 			 </li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
-			  exchanging messages depending on their load. This new feature is sponsored by France Telecom R&D,
-				as will be the next High-Avaibility Joram server to be released in the next version. </li>
+			  exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
+				as will be the next High-Availability Joram server to be released in the next version. </li>
 			 </ul>
 			 <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
 			 concerning JMS in this TCK.</p>
