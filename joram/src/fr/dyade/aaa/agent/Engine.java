@@ -46,11 +46,11 @@ import fr.dyade.aaa.util.*;
  *   // by the channel.
  *   agent.react(msg.from, msg.not);
  *   // save changes, then commit.
- *   <BEGIN TRANSACTION>
+ *   &lt;BEGIN TRANSACTION&gt;
  *   qin.pop();
  *   channel.dispatch();
  *   agent.save();
- *   <COMMIT TRANSACTION>
+ *   &lt;COMMIT TRANSACTION&gt;
  * }
  * </pre></blockquote>
  * <p>
@@ -82,8 +82,8 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.10 2002-04-04 13:15:00 joram Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
