@@ -28,6 +28,7 @@ import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 import javax.jms.Session;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundTopicSession</code> instance wraps a JMS TopicSession
@@ -39,18 +40,38 @@ public class OutboundTopicSession extends OutboundSession
   /**
    * Constructs an <code>OutboundTopicSession</code> instance.
    */
-  OutboundTopicSession(Session sess, OutboundConnection cnx)
-  {
+  OutboundTopicSession(Session sess, OutboundConnection cnx) {
     super(sess, cnx);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "OutboundTopicSession(" + sess +
+                                    ", " + cnx + ")");
   }
 
+  /**
+   * Constructs an <code>OutboundTopicSession</code> instance.
+   */
+  OutboundTopicSession(Session sess, 
+                       OutboundConnection cnx, 
+                       boolean transacted) {
+    super(sess, cnx, transacted);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "OutboundTopicSession(" + sess +
+                                    ", " + cnx + ")");
+  }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.TopicPublisher createPublisher(Topic topic)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createPublisher(" + topic + ")");
+
     checkValidity();
     return new OutboundPublisher(sess.createProducer(topic), this);
   }
@@ -61,8 +82,13 @@ public class OutboundTopicSession extends OutboundSession
   public TopicSubscriber createSubscriber(Topic topic,
                                           String selector,
                                           boolean noLocal)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createSubscriber(" + topic + 
+                                    ", " + selector + 
+                                    ", " + noLocal + ")");
+
     checkValidity();
     MessageConsumer cons = sess.createConsumer(topic, selector, noLocal);
     return new OutboundSubscriber(topic, noLocal, cons, this);
@@ -72,8 +98,12 @@ public class OutboundTopicSession extends OutboundSession
    * Delegates the call to the wrapped JMS session.
    */
   public TopicSubscriber createSubscriber(Topic topic, String selector)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createSubscriber(" + topic + 
+                                    ", " + selector + ")");
+
     checkValidity();
     MessageConsumer cons = sess.createConsumer(topic, selector);
     return new OutboundSubscriber(topic, false, cons, this);
@@ -82,8 +112,12 @@ public class OutboundTopicSession extends OutboundSession
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public TopicSubscriber createSubscriber(Topic topic) throws JMSException
-  {
+  public TopicSubscriber createSubscriber(Topic topic) 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createSubscriber(" + topic + ")");
+
     checkValidity();
     return new OutboundSubscriber(topic,
                                   false,
