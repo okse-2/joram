@@ -70,7 +70,7 @@ public class NamingContextFactory implements InitialContextFactory {
       String host = null;
       String portStr = null;
 
-      // URL should be as: joram://host:port, or as: host:port      
+      // URL should be as: scn://host:port   
       String url = null;
       if (env != null) {
         url = (String) env.get(Context.PROVIDER_URL);
