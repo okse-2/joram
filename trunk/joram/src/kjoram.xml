@@ -41,7 +41,7 @@
     <delete dir="${obj.dir}"/>
     <delete dir="${doc.dir}"/>
     <!-- Deletes generated jar file -->
-    <delete file="${lib.dir}/kjoram.jar" />
+    <delete file="${lib.dir}/joram-kclient.jar" />
   </target>
 
   <!-- Prepares compilation phase -->
@@ -77,7 +77,7 @@
   <!-- JARS BUILDING -->
   <target name="ship.kjoram" depends="init,compile"
       description="--> Builds kJoram client jar.">
-    <jar jarfile="${lib.dir}/kjoram.jar">
+    <jar jarfile="${lib.dir}/joram-kclient.jar">
       <fileset dir="${obj.dir}">
         <include name="com/**/*.class"/>
       </fileset>
@@ -91,7 +91,7 @@
   <target name="release.jar" depends="clean,ship.kjoram" if="version">
     <copy todir="../kjoram-${version}" includeEmptyDirs="no">
       <fileset dir="..">
-	<include name="lib/kjoram.jar" />
+	<include name="lib/joram-kclient.jar" />
 	<include name="lib/kxml.jar" />
 	<include name="lib/midpapi.jar" />
 	<include name="licenses/LGPL_HEADER.TXT" />
