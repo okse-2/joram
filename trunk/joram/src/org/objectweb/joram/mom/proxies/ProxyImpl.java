@@ -1916,7 +1916,7 @@ public class ProxyImpl implements java.io.Serializable {
  * The <code>Xid</code> internal class is a utility class representing
  * a global transaction identifier.
  */
-class Xid
+class Xid implements java.io.Serializable
 {
   byte[] bq;
   int fi;
