@@ -14,7 +14,7 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs">
+      <s2 name="Corrected bugs (latest: August 13, 2003)">
       <ul>
         <li>Blocking <code>AdminItf.stopServer</code> method. The processing of
         this method disapeared from the administration topic server side since
