@@ -14,7 +14,7 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: February 16, 2004)"> 
+      <s2 name="Corrected bugs (latest: February 18, 2004)"> 
       <ul>
         <li>Improper connection close, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00067.html">
