@@ -146,9 +146,11 @@ public class ManagedTopicConnectionFactoryImpl
       password = this.password;
     }
     else {
-      if (! (cxRequest instanceof ConnectionRequest))
+      if (! (cxRequest instanceof ConnectionRequest)) {
+        out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
+      }
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
@@ -184,12 +186,15 @@ public class ManagedTopicConnectionFactoryImpl
       }
     }
     catch (IllegalStateException exc) {
+      out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
     }
     catch (JMSSecurityException exc) {
+      out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
     }
     catch (JMSException exc) {
+      out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
 
@@ -227,9 +232,11 @@ public class ManagedTopicConnectionFactoryImpl
     if (cxRequest == null)
       userName = this.userName;
     else {
-      if (! (cxRequest instanceof ConnectionRequest))
+      if (! (cxRequest instanceof ConnectionRequest)) {
+        out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
+      }
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
 

@@ -42,6 +42,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,24 +81,6 @@ import javax.transaction.xa.XAResource;
 public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                      java.io.Serializable
 {
-  /**
-   * Path to the directory containing JORAM's configuration files
-   * (<code>a3servers.xml</code> and <code>a3debug.cfg</code>).
-   */
-  private String platformConfigDir;
-  /** <code>true</code> if the underlying JORAM platform is persistent. */
-  private boolean persistentPlatform = false;
-  /** Identifier of the underlying JORAM server. */
-  private short serverId = 0;
-  /** Name of the underlying JORAM server. */
-  private String serverName = "s0";
-
-  /**
-   * Path to the file containing a description of the administered objects to
-   * create and bind.
-   */
-  private String adminFile = "joram-admin.properties";
-
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
 
@@ -125,6 +108,25 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   String hostName = "localhost";
   /** Port number of the underlying JORAM server. */
   int serverPort = 16010;
+
+  /**
+   * Path to the directory containing JORAM's configuration files
+   * (<code>a3servers.xml</code>, <code>a3debug.cfg</code>
+   * and admin file), needed when starting the collocated JORAM server.
+   */
+  private String platformConfigDir;
+  /** <code>true</code> if the JORAM server to start is persistent. */
+  private boolean persistentPlatform = false;
+  /**
+   * Path to the file containing a description of the administered objects to
+   * create and bind.
+   */
+  private String adminFile = "joram-admin.properties";
+
+  /** Identifier of the JORAM server to start. */
+  private short serverId = 0;
+  /** Name of the JORAM server to start. */
+  private String serverName = "s0";
 
 
   /**
@@ -188,7 +190,19 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     // Administering as specified in the properties file.
     try {
-      FileReader file = new FileReader(adminFile);
+      FileReader file;
+
+      if (platformConfigDir != null) {
+        try {
+          file = new FileReader(new File(platformConfigDir, adminFile));
+        }
+        catch (Exception exc) {
+          file = new FileReader(adminFile);
+        }
+      }
+      else
+        file = new FileReader(adminFile);
+
       BufferedReader reader = new BufferedReader(file);
 
       debugINFO("  - Reading the provided admin file...");
@@ -484,8 +498,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
 
   /**
-   * Creates a queue destination on the underlying JORAM server, binds the
-   * corresponding <code>Queue</code> instance.
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
    *
    * @exception AdminException   If the creation fails.
    * @exception NamingException  If the binding fails.
@@ -499,7 +513,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       queue.setFreeWriting();
       debugINFO("  - Queue [" + name + "] has been created.");
       Context ctx = new InitialContext();
-      ctx.bind(name, queue);
+      ctx.rebind(name, queue);
       return queue;
     }
     catch (ConnectException exc) {
@@ -509,8 +523,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   }
 
   /**
-   * Creates a topic destination on the underlying JORAM server, binds the
-   * corresponding <code>Topic</code> instance.
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
    *
    * @exception AdminException   If the creation fails.
    * @exception NamingException  If the binding fails.
@@ -524,7 +538,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       topic.setFreeWriting();
       debugINFO("  - Topic [" + name + "] has been created.");
       Context ctx = new InitialContext();
-      ctx.bind(name, topic);
+      ctx.rebind(name, topic);
       return topic;
     }
     catch (ConnectException exc) {
@@ -534,7 +548,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   }
 
   /**
-   * Creates a user on the underlying JORAM server.
+   * Creates or retrieves a user on the underlying JORAM server.
    *
    * @exception AdminException   If the creation fails.
    */
@@ -567,7 +581,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
-      ctx.bind(name, factory);
+      ctx.rebind(name, factory);
       debugINFO("  - ConnectionFactory [" + name
                 + "] has been created and bound.");
     }
@@ -593,7 +607,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
-      ctx.bind(name, factory);
+      ctx.rebind(name, factory);
       debugINFO("  - QueueConnectionFactory [" + name
                 + "] has been created and bound.");
     }
@@ -619,7 +633,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       Context ctx = new InitialContext();
-      ctx.bind(name, factory);
+      ctx.rebind(name, factory);
       debugINFO("  - TopicConnectionFactory [" + name
                 + "] has been created and bound.");
     }
