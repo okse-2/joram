@@ -1,0 +1,225 @@
+######################
+HOW TO RUN THE SAMPLES
+######################
+
+Type:
+ $ ant -projecthelp
+to have a list of the available ant targets for the samples.
+
+0. COMPILING THE SAMPLES
+Type:
+ $ ant
+(the corresponding target is compile).
+
+1. RUNNING THE CLASSIC SAMPLES
+The classic samples aim at illustrating very basic JMS operations under
+a simple and centralized architecture.
+
+a. Starting a server in centralized architecture:
+Type:
+ $ ant single_server
+
+b. Setting up the configuration:
+Type:
+ $ ant classic_admin
+
+c. Running the classic sender client:
+Type:
+ $ ant sender
+
+d. Running the classic receiver client:
+Type:
+ $ ant receiver
+
+e. etc...
+
+
+2. RUNNING THE CHAT SAMPLE
+The chat sample also runs under a simple and centralized architecture.
+
+a. Starting a server in centralized architecture:
+Type:
+ $ ant single_server
+
+b. Setting up the configuration:
+Type:
+ $ ant chat_admin
+
+c. Running the first chat client:
+Type:
+ $ ant chat1
+
+d. Running the second chat client:
+Type:
+ $ ant chat2
+
+
+3. RUNNING THE DOTCOM DEMO
+The dotcom demo simulates what could be a commercial transaction on the
+web, involving a client and various servers (shop, bank, ...). It also uses
+a centralized server.
+
+a. Starting a server in centralized architecture:
+Type:
+ $ ant single_server
+
+b. Setting up the configuration:
+Type:
+ $ ant dotcom_admin
+
+c. Running the servers:
+Type:
+ $ ant webServers
+
+d. Running the client server:
+Type:
+ $ ant webClient
+
+
+4. RUNNING THE CLUSTER DEMO
+The cluster demo aims at illustrating the use of Joram's Topic Cluster. It
+is based on a 3 servers distributed architecture. These servers may either
+be runned on a single host, or better, on remote hosts. For this, please
+modify the distributed_a3servers.xml and distributed_jndi.properties files.
+
+a. Starting server0:
+Type:
+ $ ant server0
+
+b. Starting server1:
+Type:
+ $ ant server1
+
+c. Starting server2:
+Type:
+ $ ant server2
+
+d. Running the admin:
+Type:
+ $ ant cluster_admin
+
+e. Running the subscriber on server1:
+Type:
+ $ ant subscriber10
+
+f. Running the first subscriber on server2:
+Type:
+ $ ant subscriber20
+
+g. Running the second subscriber on server2:
+Type:
+ $ ant subscriber21
+
+h. Running the publisher:
+Type:
+ $ ant cluster_pub
+
+
+5. RUNNING THE ARCHI DEMO
+The archi demo aims at illustrating the use of Joram in a distributed
+environment. It is based on a 3 servers distributed architecture. These servers
+may either be runned on a single host, or better, on remote hosts. For this,
+please modify the distributed_a3servers.xml and distributed_jndi.properties
+files.
+
+a. Starting server0:
+Type:
+ $ ant server0
+
+b. Starting server1:
+Type:
+ $ ant server1
+
+c. Starting server2:
+Type:
+ $ ant server2
+
+d. Running the admin:
+Type:
+ $ ant archi_admin
+
+e. Running the receiver on server2:
+Type:
+ $ ant archi_receiver
+
+f. Running the subscriber on server2:
+Type:
+ $ ant archi_sub
+
+g. Running the sender on server0:
+Type:
+ $ ant archi_sender
+
+h. Running the publisher on server0:
+Type:
+ $ ant archi_pub
+
+
+6. RUNNING THE TOPIC TREE DEMO
+The topic tree demo aims at illustrating the use of Joram's hierarchical
+topic. It is based on a centralized architecture. A consumer subscribes
+to the various nodes of the topic, a producer publishes messages on those
+nodes.
+
+a. Starting the server:
+Type:
+ $ ant single_server
+
+b. Running the admin:
+Type:
+ $ ant tree_admin
+
+c. Running the consumer:
+Type:
+ $ ant tree_consumer
+
+d. Running the producer:
+Type:
+ $ ant tree_producer
+
+
+7. RUNNING THE DEAD MESSAGE QUEUE DEMO
+The dead message queue demo aims at illustrating the functionning of Joram's
+dead message queue feature. It is based on a centralized architecture. A 
+client performs various operations which finally fail and result in messages
+being logged into the DMQ. A watcher consumes the message from the DMQ.
+
+a. Starting the server:
+Type:
+ $ ant single_server
+
+b. Running the admin:
+Type:
+ $ ant dmq_admin
+
+c. Running the DMQ watcher:
+Type:
+ $ ant dmq_watcher
+
+d. Running the failing client:
+Type:
+ $ ant dmq_client
+
+
+8. RUNNING THE SOAP SAMPLE
+The SOAP sample is a simple message producer and consumer pair communicating
+through HTTP/SOAP connections instead of TCP connections. It requires a
+configured (check installation document) Tomcat servlet container.
+
+a. Starting a Tomcat instance:
+Under tomcat/bin type the "startup" command.
+
+b. Starting the server 0:
+ $ ant soap_server
+
+c. Launching server 1, embedded in Tomcat's JVM:
+ $ ant soap_start
+
+d. Running the admin:
+ $ ant soap_admin
+
+e. Running the consumer:
+ $ ant soap_consumer
+
+f. Running the producer:
+ $ ant soap_producer
