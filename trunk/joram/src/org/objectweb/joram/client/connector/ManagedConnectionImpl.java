@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -183,7 +183,7 @@ public class ManagedConnectionImpl
 
     OutboundConnection newConn = (OutboundConnection) connection;
     newConn.managedCx = this;
-    newConn.xac = cnx;
+    newConn.xac = (org.objectweb.joram.client.jms.XAConnection) cnx;
   }
 
   /** Adds a connection event listener. */
@@ -317,8 +317,10 @@ public class ManagedConnectionImpl
   public synchronized void cleanup() throws ResourceException
   {
     OutboundConnection handle;
-    while (! handles.isEmpty())
+    while (! handles.isEmpty()) {
       handle = (OutboundConnection) handles.remove(0);
+      handle.cleanup();
+    }
   }
 
   /**
