@@ -52,6 +52,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class QueueImpl extends DestinationImpl implements QueueImplMBean
 {
+  /** Counter of messages arrivals. */
+  private long arrivalsCounter = 0;
+
   /** Table keeping the messages' consumers identifiers. */
   private Hashtable consumers;
   /** Table keeping the messages' consumers contexts. */
@@ -73,6 +76,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
   /** The persistence module used for managing the messages' persistence. */
   protected PersistenceModule persistenceModule;
 
+  /** <code>true</code> if the queue is currently receiving messages. */
+  private transient boolean receiving = false;
   /** Vector holding the messages before delivery. */
   protected transient Vector messages;
   /** Table holding the delivered messages before acknowledgement. */
@@ -91,7 +96,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
     consumers = new Hashtable();
     contexts = new Hashtable();
     requests = new Vector();
-    persistenceModule = new PersistenceModule(destId);
+    persistenceModule = new PersistenceModule(destId); 
   }
 
 
@@ -454,10 +459,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
                                       + msgId + " denied.");
     }
+
     // Sending the dead messages to the DMQ, if needed:
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
-
+    
     // Lauching a delivery sequence:
     deliverMessages(0);
   }
@@ -535,13 +541,25 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
    */
   protected void doProcess(ClientMessages not)
   {
+    receiving = true;
+
+    Message msg;
     // Storing each received message:
     for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();)
-      storeMessage((Message) msgs.nextElement());
+         msgs.hasMoreElements();) {
+
+      if (arrivalsCounter == Long.MAX_VALUE)
+        arrivalsCounter = 0;
+
+      msg = (Message) msgs.nextElement();
+      msg.order = arrivalsCounter++;
+      storeMessage(msg);
+    }
 
     // Lauching a delivery sequence:
     deliverMessages(0);
+
+    receiving = false;
   }
 
   /**
@@ -665,23 +683,54 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
     else if (samePriorities && priority != message.getPriority())
       samePriorities = false;
 
-    // Constant priorities: adding the message at the end of the vector.
-    if (samePriorities)
-      messages.add(message);
+    // Constant priorities: no need to insert the message according to
+    // its priority.
+    if (samePriorities) {
+      // Message being received: adding it at the end of the queue.
+      if (receiving)
+        messages.add(message);
+      // Denying or recovery: adding the message according to its original
+      // arrival order.
+      else {
+        long currentO;
+        int i = 0;
+        for (Enumeration enum = messages.elements();
+             enum.hasMoreElements();) {
+          currentO = ((Message) enum.nextElement()).order;
+
+          if (currentO > message.order)
+            break;
+
+          i++;
+        }
+        messages.insertElementAt(message, i);
+      }
+    }
     // Non constant priorities: inserting the message according to its 
     // priority.
     else {
+      Message currentMsg;
       int currentP;
-      int k = 0;
+      long currentO;
+      int i = 0;
       for (Enumeration enum = messages.elements(); enum.hasMoreElements();) {
-        currentP = ((Message) enum.nextElement()).getPriority();
+        currentMsg = (Message) enum.nextElement();
+        currentP = currentMsg.getPriority();
+        currentO = currentMsg.order;
 
-        if (currentP < message.getPriority())
+        // Message denied or recovered, priorities are equal: inserting the
+        // message according to its original arrival order.
+        if (! receiving && currentP == message.getPriority()) {
+          if (currentO > message.order)
+            break;
+        }
+        // Current priority lower than the message to store: inserting it.
+        else if (currentP < message.getPriority())
           break;
 
-        k++;
+        i++;
       }
-      messages.insertElementAt(message, k);
+      messages.insertElementAt(message, i);
     }
 
     // Persisting the message.
@@ -1018,6 +1067,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
   {
     in.defaultReadObject();
 
+    receiving = false;
     messages = new Vector();
     deliveredMsgs = new Hashtable();
 
