@@ -16,7 +16,6 @@
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="../lib"/>
     <property name="build.dir" location="../build"/>
-    <property name="ship.dir" location="../ship"/>
     <property name="doc.dir" location="../javadoc"/>
 
     <!-- Base classpath needed for execution -->
@@ -48,7 +47,6 @@
       description="--> Clean all generated files">
     <delete dir="${obj.dir}"/>
     <delete dir="${build.dir}"/>
-    <delete dir="${ship.dir}"/>
     <delete dir="${doc.dir}"/>
   </target>
 
@@ -121,35 +119,8 @@
   <!-- Specific Joram shipment -->
   <target name="ship.joram" depends="build.joram"
       description="--> Create a shipment of JORAM">
-    <mkdir dir="${ship.dir}"/>
-    <!-- lib directory -->
-    <mkdir dir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/mom.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/log4j.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/owlogapi.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/owlogwrpl4j.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
-    <!-- run directory -->
-    <mkdir dir="${ship.dir}/run"/>
-    <copy file="${src.dir}/fr/dyade/aaa/agent/a3config.dtd"
-          todir="${ship.dir}/run"/>
-    <chmod dir="${ship.dir}/run" perm="755"/>
-    <!-- licences directory -->
-    <mkdir dir="${ship.dir}/licences"/>
-    <copy todir="${ship.dir}/licences" flatten="yes">
-      <fileset dir="${src.dir}">
-        <include name="licenses/XERCES_LICENSE.TXT"/>
-        <include name="licenses/JAKARTA-REGEXP_LICENSE.TXT"/>
-        <include name="licenses/JORAM_LICENSE.TXT"/>
-        <include name="licenses/Opl_1_0.TXT"/>
-        <include name="licenses/EXHIBIT_A.TXT"/>
-      </fileset>
-    </copy>
+    <copy file="${build.dir}/joram.jar" todir="${lib.dir}"/>
+    <copy file="${build.dir}/mom.jar" todir="${lib.dir}"/>
   </target>
  
   <target name="javadoc" depends="prepare"
