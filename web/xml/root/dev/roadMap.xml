@@ -19,7 +19,6 @@
     <ul>
       <li>A universal bridge to foreign JMS providers</li>
       <li>Clustering features for Load Balancing and Fail Over</li>
-      <li>A new JNDI server distributed and replicated implementation</li>
       <li>A new branch for the Joram and MOM sources: 
       <code>org.objectweb.joram</code></li>
     </ul>
@@ -31,6 +30,7 @@
       JCA compliant platform</li>
       <li>Clustering features providing High Availability</li>
       <li>Optimised connections for collocated clients and servers</li>
+      <li>A new JNDI server distributed and replicated implementation</li>
     </ul>
 
   </s1>
