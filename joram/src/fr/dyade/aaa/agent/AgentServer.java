@@ -134,8 +134,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.10 2002-05-27 15:17:12 jmesnil Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   public final static short NULL_ID = -1;
 

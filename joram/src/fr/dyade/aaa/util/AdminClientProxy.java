@@ -38,7 +38,6 @@ public class AdminClientProxy {
 
   public void connect (String hostName, int port) throws Exception {
     socket = new Socket (hostName, port);
-    socket.setTcpNoDelay(true);
     dos = new DataOutputStream (socket.getOutputStream());
     dis = new DataInputStream (socket.getInputStream());
   }

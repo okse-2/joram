@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.8 2002-04-18 13:43:06 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.7 2002-03-26 16:08:39 joram Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -464,19 +464,9 @@ class PoolCnxNetwork extends StreamNetwork {
         logmon.log(BasicLevel.DEBUG,
                          getName() + ", connection started");
 
-      //  Try to send all waiting messages. As this.sock is no longer null
-      // so we can do a copy a waiting messages. New messages will be send
-      // directly in send method.
-      //  Be careful, in a very limit case a message can be sent 2 times:
-      // added in sendList after sock setting and before array copy, il will
-      // be transmit in send method and below. However there is no problem,
-      // the copy will be discarded on remote node and 2 ack messages will
-      // be received on local node.
-      Object[] waiting = sendList.toArray();
-      logmon.log(BasicLevel.DEBUG,
-		 getName() + ", send " + waiting.length + " waiting messages");
-      for (int i=0; i<waiting.length; i++) {
-	transmit(waiting[i]);
+      // Try to send all waiting messages.
+      for (int i=0; i<sendList.size(); i++) {
+	transmit((Serializable) sendList.elementAt(i));
       }
     }
 
@@ -533,6 +523,7 @@ class PoolCnxNetwork extends StreamNetwork {
       if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", send message #" + msg.update.stamp);
+
       sendList.addElement(msg);
       if (sock == null) {
 	// If there is no connection between local and destination server,
@@ -541,7 +532,7 @@ class PoolCnxNetwork extends StreamNetwork {
       } else {
 	transmit(msg);
       }
-   }
+    }
 
     // Should be synchronized !!
     final private void ack(int stamp) throws IOException {
@@ -553,7 +544,7 @@ class PoolCnxNetwork extends StreamNetwork {
       transmit(Ack);
     }
 
-    synchronized void transmit(Object msg) {
+    synchronized void transmit(Serializable msg) {
       last = current++;
       try {
         oos.writeObject(msg);
@@ -614,9 +605,6 @@ class PoolCnxNetwork extends StreamNetwork {
               logmon.log(BasicLevel.DEBUG,
                          getName() + ", ack received #" + ack.stamp);
 
-	    logmon.log(BasicLevel.DEBUG,
-		  getName() + ", sendList.size=" + sendList.size());
-
 	    for (int i=0; i<sendList.size(); i++) {
 	      Message tmpMsg = (Message) sendList.elementAt(i);
 	      if (tmpMsg.update.stamp == ack.stamp) {
@@ -631,6 +619,7 @@ class PoolCnxNetwork extends StreamNetwork {
                 if (logmon.isLoggable(BasicLevel.DEBUG))
                   logmon.log(BasicLevel.DEBUG,
                              getName() + ", ack ok #" + ack.stamp);
+
 		break;
 	      }
 	    }

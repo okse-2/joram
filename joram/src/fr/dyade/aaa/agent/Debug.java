@@ -59,91 +59,7 @@ import org.objectweb.util.monolog.api.LoggerFactory;
  * <p>
  * Currently only boolean variables may be dynamically set this way.
  */
-public final class Debug {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.10 2002-05-27 15:17:12 jmesnil Exp $";
-
-  /** directory holding the debug files */
-  public static File directory = null;
-
-  static LoggerFactory factory = null;
-
-  /** Property name for A3 debug configuration directory */
-  public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_DIR";
-  /** Default directory for A3 debug configuration file */
-  public final static String DEFAULT_DEBUG_DIR = ".";
-  /** Property name for A3 debug configuration filename */
-  public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_FILE";
-  /** Default filename for A3 debug configuration */
-  public final static String DEFAULT_DEBUG_FILE = "a3debug.cfg";
-  /** Property name for A3 debug produced files */ 
-  public final static String AUDIT_DIR_PROPERTY = "fr.dyade.aaa.agent.A3AUDIT_DIR";
-  /** Default directory for A3 debug produced files */
-  public final static String DEFAULT_AUDIT_DIR = ".";
-
-  /**
-   * Initializes the package.
-   * Creates and/or opens the debug trace file, sets the debug variables
-   * from the debug property file.
-   *
-   * @param serverId	this server id
-   */
-  public static void init(short serverId) {
-    boolean basic = false;
-
-    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY,
-                                         DEFAULT_DEBUG_DIR);
-    String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
-                                              DEFAULT_DEBUG_FILE);
-
-    File debugFile = new File(debugDir, debugFileName);
-    // Instanciate the MonologLoggerFactory
-    factory = (LoggerFactory) new MonologLoggerFactory();
-
-    if ((debugFile == null) ||
-        (!debugFile.exists()) ||
-        (!debugFile.isFile()) ||
-        (debugFile.length() == 0)) {
-      try {
-        ((MonologLoggerFactory) factory).configure(null);
-        basic = true;
-      } catch (Exception e) {
-        System.out.println("Unable to configure monolog wrapper");
-        System.exit(1);
-      }
-    } else {
-      try {
-        Properties prop = new Properties();
-        prop.put("log4jConfiguration", "property");
-        prop.put("log4jConfigurationFile", debugDir + "/" +  debugFileName);
-        ((MonologLoggerFactory) factory).configure(prop);
-      } catch (Exception exc) {
-        try {
-          ((MonologLoggerFactory)factory).configure(null);
-          basic = true;
-        } catch (Exception e) {
-          System.out.println("Unable to configure monolog wrapper");
-          System.exit(1);
-        }
-      }
-    }
-    
-    Category root = Category.getRoot();
-    if (basic) {
-      root.setPriority(org.apache.log4j.Priority.ERROR);
-    } else if (serverId >= 0) {
-      try {
-        String auditDir = System.getProperty(AUDIT_DIR_PROPERTY,
-                                             DEFAULT_AUDIT_DIR);
-        // Try to create local appender if defined...
-        FileAppender local = (FileAppender) root.getAppender("local");
-        File auditFile = new File(auditDir, "server#" + serverId + ".audit");
-        local.setFile(auditFile.getCanonicalPath());
-      } catch (Exception exc) { }
-    }
-
-  }
-
+public final class Debug extends fr.dyade.aaa.util.Debug {
     // sets dynamic debug variables for other packages
 //     final String dynvarMarker = "Debug.var.";
 //     int markerLength = dynvarMarker.length();
@@ -196,22 +112,12 @@ public final class Debug {
 //       }
 //     }
 
-  static final boolean debug = true;
-
   public static final String A3Debug = "fr.dyade.aaa.agent";
   public static final String A3Agent = A3Debug + ".Agent";
   public static final String A3Engine = A3Debug + ".Engine";
   public static final String A3Network = A3Debug + ".Network";
   public static final String A3Service = A3Debug + ".Service";
-  public static final String A3Daemon = A3Debug + ".Daemon";
   public static final String A3Proxy = A3Agent + ".ProxyAgent";
-
-  public static Logger getLogger(String topic) {
-    if (factory == null)
-      init((short) -1);
-
-    return factory.getLogger(topic);
-  }
 
 //   static void dump(byte[] buf, int size) {
 //     int idx = 0;

@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.Arrays;
 
 abstract class CausalNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: CausalNetwork.java,v 1.2 2002-05-27 15:17:12 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.1 $ */
+  public static final String RCS_VERSION="@(#)$Id: CausalNetwork.java,v 1.1 2002-03-26 16:08:39 joram Exp $";
 
   /** The matrix clock associated to this network component. */
   MatrixClock mclock;
