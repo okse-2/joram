@@ -64,7 +64,7 @@
       description="--> Compile JORAM">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
-           debug="true"
+           debug="on"
            deprecation="${deprecation}"
            optimize="false"
            nowarn="${nowarn}"
