@@ -38,6 +38,12 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
 {
   /** The wrapped object. */
   private Serializable object = null;
+  /**
+   * The object still coded as a bytes array (decoding will occur during
+   * the <code>getObject()</code> call.
+   */
+  private byte[] codedObject = null;
+
   /** <code>true</code> if the message body is read-only. */
   private boolean RObody = false;
 
@@ -56,23 +62,11 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
    *
    * @param sess  The consuming session.
    * @param momMsg  The MOM message to wrap.
-   *
-   * @exception MessageFormatException  In case of a problem when getting the
-   *              MOM message data.
    */
   ObjectMessage(Session sess, fr.dyade.aaa.mom.messages.Message momMsg)
-  throws MessageFormatException
   {
     super(sess, momMsg);
-    try {
-      object = (Serializable) momMsg.getObject();
-    }
-    catch (Exception exc) {
-      MessageFormatException jE =
-        new MessageFormatException("Error while getting the body.");
-      jE.setLinkedException(exc);
-      throw jE;
-    }
+    codedObject = momMsg.getBytes();
     RObody = true;
   }
 
@@ -106,11 +100,25 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   /**
    * API method.
    * 
-   * @exception JMSException  Actually never thrown.
+   * @exception MessageFormatException  In case of a problem when getting the
+   *              body.
    */
   public Serializable getObject() throws MessageFormatException
   {
-    return object;
+    if (codedObject == null)
+      return null;
+
+    try {
+      ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
+      ObjectInputStream ois = new ObjectInputStream(bais);
+      return (Serializable) ois.readObject();
+    }
+    catch (Exception exc) {
+      MessageFormatException jE =
+        new MessageFormatException("Error while deserializing the wrapped " 
+                                   + "object: " + exc);
+      throw jE;
+    }
   }
 
   /**
