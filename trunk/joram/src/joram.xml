@@ -177,6 +177,8 @@
     <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jndi.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
@@ -231,7 +233,6 @@
         <include name="jakarta-regexp-1.2.jar"/>
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
-        <include name="xerces.jar"/>
       </fileset>
     </jar>
     <delete file="${build.dir}/META-INF/ra.xml"/>
