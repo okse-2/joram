@@ -27,8 +27,6 @@ package fr.dyade.aaa.util;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Debug;
-
 /**
  * The Daemon class represents a basic active component in a server. It
  * provides usefull code to start and safely stop inner Thread.
@@ -59,8 +57,8 @@ import fr.dyade.aaa.agent.Debug;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.5 2002-03-26 16:10:07 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.5.2.1 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.5.2.1 2002-06-06 09:30:39 jmesnil Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -86,7 +84,7 @@ public abstract class Daemon implements Runnable {
    */
   protected volatile boolean canStop;
   /** The active component of this daemon. */ 
-  private Thread thread = null;
+  protected Thread thread = null;
   /** The <code>daemon</code>'s name. */ 
   private String name;
   /** The <code>daemon</code>'s nature. */
@@ -129,7 +127,7 @@ public abstract class Daemon implements Runnable {
     this.name = name;
 
     // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getLogger(Debug.A3Daemon + '.' + name);
+    logmon = Debug.getLogger(getClass().getName() + '.' + name);
     logmon.log(BasicLevel.DEBUG, getName() + ", created.");
 
     running = false;
