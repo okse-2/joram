@@ -35,7 +35,7 @@ package fr.dyade.aaa.mom.selectors;
  * on 26/07/01 09:01 from the specification file
  * <tt>file:/C:/WORK/JORAM/SELEC/JMS/selec.flex</tt>
  */
-class Lexer implements Scanner {
+public class Lexer implements Scanner {
 
   /** This character denotes the end of file */
   final public static int YYEOF = -1;
