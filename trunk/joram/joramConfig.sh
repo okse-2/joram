@@ -9,32 +9,30 @@
 
 
 #
-# OS definition
-#
-# <--------------------------------- TO BE UPDATED 
-
-# UNIX OS:
-export PATH_SEP=:
-# WINDOWS OS:
-#export PATH_SEP=;
-
-# ----------------------------------------------->
-
-
-#
 # directories definitions
 #
-# <--------------------------------- TO BE UPDATED 
 
 # root directory holds the src, classes (if you have 
 # downloaded JORAM sources) and lib directories.
 # In a windows environment, the drive letter is given 
-# using the //d notation, not the d: notation.
+# using the //d notation, not the d: or //D notations.
 # The value of this variable must be the output of the 
 # pwd command executed in that directory. It is case 
 # sensitive.
 
-export ROOTDIR=/home/joram1_1_0
+# <--------------------------------- TO BE UPDATED 
+# UNIX OS:
+#export ROOTDIR=/home/joram1_1_0
+# WINDOWS OS:
+# Please respect the syntax "//drive/..."
+export ROOTDIR=//d/joram1_1_0
+
+# where java finds the language classes.
+# UNIX OS:
+#export JDKHOME=/usr/local/jdk1.2.2
+# WINDOWS OS:
+# Please respect the syntax "drive:/..."
+export JDKHOME=c:/jdk1.2.2
 
 # ----------------------------------------------->
 
@@ -56,18 +54,12 @@ export GENERAL_MK=${SRCDIR}/makefiles/general.mk
 #
 # Java definitions
 #
-# <--------------------------------- TO BE UPDATED 
-# where java finds the language classes.
-
-export JDKHOME=/usr/local/jdk1.2.2
 export JAVA=${JDKHOME}/bin/java
 export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
-export JAVAC=jikes
-# export JAVAC="${JDKHOME}/bin/javac \
-#     -bootclasspath \"${ROOTDIR}/lib/OB.jar;${JAVAPATH}\""
-
-# ----------------------------------------------->
-
+# jikes users: uncomment next line, comment 
+# the line after...
+#export JAVAC="c:/jikes/jikes -nowarn"
+export JAVAC="${JDKHOME}/bin/javac -nowarn"
 
 #
 # build specific definitions
@@ -78,18 +70,46 @@ export GDT_FMT=XML
 #
 # CLASSPATH setting
 #
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${JAVAPATH}"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}."
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOTDIR}"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${OBJDIR}"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3util.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3agent.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3ip.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3mom.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3ns.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/a3jndi.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/joram.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/xerces.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/jta-spec1_0_1.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/jms.jar"
-export CLASSPATH="${CLASSPATH}${PATH_SEP}${LIBDIR}/jndi.jar"
+if [ ${OSTYPE} == "cygwin32" ] 
+then
+    export PATH_SEP=";"
+    rm -f in_tmp
+    echo ${ROOTDIR} > in_tmp
+    echo ${ROOTDIR} |grep "^//\([a-z]\)/joram" >/dev/null
+    if [ $? -ne 0 ]
+    then
+	export ROOT=`sed 's$^/joram$c:/joram$' in_tmp`
+    else
+	export ROOT=`sed 's$^//\([a-z]\)/joram$\1:/joram$' in_tmp`
+    fi
+    rm -f in_tmp
+else
+    export PATH_SEP=:
+    export ROOT=${ROOTDIR}
+fi
+
+if [ -z "${ROOT}" ]
+then
+    echo "Problem while configuring your CLASSPATH"
+    exit 1
+fi
+
+if echo ${CLASSPATH} | grep ${ROOT}/lib/a3agent.jar >/dev/null
+then	:
+else
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${JAVAPATH}"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}."
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/classes"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3util.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3agent.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3ip.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3mom.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3ns.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/a3jndi.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/joram.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/xerces.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jta-spec1_0_1.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jms.jar"
+    export CLASSPATH="${CLASSPATH}${PATH_SEP}${ROOT}/lib/jndi.jar"
+fi
