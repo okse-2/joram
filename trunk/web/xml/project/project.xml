@@ -39,6 +39,7 @@
       <legend>Misc</legend>
       <menuitem><a href="mailto:joram-team@objectweb.org">Contacts</a></menuitem>
       <menuitem><connect href="team.xml">Team</connect></menuitem>
+      <menuitem><connect href="../mirrors.xml">Mirror sites</connect></menuitem> 
     </menu>
   </body>
 </project>
