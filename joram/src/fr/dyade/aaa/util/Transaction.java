@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +23,6 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  static final String separator = "_";
-
   void init(String path) throws IOException;
 
   void begin() throws IOException;
@@ -33,11 +31,15 @@ public interface Transaction {
   String[] getList(String prefix);
 
   void save(Serializable obj, String name) throws IOException;
+  void saveByteArray(byte[] buf, String name) throws IOException;
   Object load(String name) throws IOException, ClassNotFoundException;
+  byte[] loadByteArray(String name) throws IOException, ClassNotFoundException;
   void delete(String name);
 
   void save(Serializable obj, String dirName, String name) throws IOException;
+  void saveByteArray(byte[] buf, String dirName, String name) throws IOException;
   Object load(String dirName, String name) throws IOException, ClassNotFoundException;
+  byte[] loadByteArray(String dirName, String name) throws IOException;
   void delete(String dirName, String name);
 
   void commit() throws IOException;

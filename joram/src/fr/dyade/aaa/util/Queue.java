@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -34,22 +35,17 @@ import java.util.*;
  * method. To be able to use the queue again, it must be re-started through
  * the <code>start()</code> method.
  */
-public class Queue extends Vector
-{
-  public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.14 2003-09-11 09:54:24 fmaistre Exp $"; 
-
+public class Queue extends Vector {
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.
    */
   private boolean stopping;
 
-
   /**
    * Constructs a <code>Queue</code> instance.
    */
-  public Queue()
-  {
+  public Queue() {
     super();
     start();
   }
@@ -61,8 +57,7 @@ public class Queue extends Vector
    * @param item  The item to be pushed at the end of this queue.
    * @exception  StoppedQueueException  If the queue is stopping or stopped.
    */
-  public synchronized void push(Object item)
-  {
+  public synchronized void push(Object item) {
     if (stopping)
       throw new StoppedQueueException();
 
@@ -77,8 +72,7 @@ public class Queue extends Vector
    * @return  The object at the top of this queue.
    * @exception  EmptyQueueException  If the queue is empty.
    */
-  public synchronized Object pop()
-  {
+  public synchronized Object pop() {
     Object obj;
     
     if (size() == 0)
@@ -100,8 +94,7 @@ public class Queue extends Vector
    *
    * @return  The object at the top of this queue. 
    */
-  public synchronized Object get() throws InterruptedException
-  {
+  public synchronized Object get() throws InterruptedException {
     while (size() == 0)
       wait();
 
@@ -110,8 +103,7 @@ public class Queue extends Vector
 
 
   /** Authorizes the use of the queue by producers. */
-  public void start()
-  {
+  public void start() {
     stopping = false;
   }
 
@@ -120,11 +112,8 @@ public class Queue extends Vector
    * Stops the queue by returning when it is empty and prohibiting any
    * further producers call to the <code>push</code> method.
    */
-  public synchronized void stop() throws InterruptedException
-  {
+  public synchronized void stop() throws InterruptedException {
     stopping = true;
-
-    if (size() != 0)
-      wait();
+    if (size() != 0) wait();
   }
 }

@@ -32,8 +32,8 @@ import fr.dyade.aaa.agent.AgentServer;
  * agent server id.
  */
 public class A3Log4jDailyRollingFileAppender extends DailyRollingFileAppender {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: A3Log4jDailyRollingFileAppender.java,v 1.5 2003-09-11 09:54:24 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jDailyRollingFileAppender.java,v 1.6 2004-02-13 08:14:50 fmaistre Exp $";
 
   /**
    * The default constructor does not do anything. 

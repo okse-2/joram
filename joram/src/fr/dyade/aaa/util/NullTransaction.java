@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,8 +23,6 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public class NullTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.14 2003-09-11 09:54:24 fmaistre Exp $"; 
-
   public NullTransaction() {}
 
   public void init(String path) throws IOException {
@@ -40,16 +39,28 @@ public class NullTransaction implements Transaction {
   }
 
   public void save(Serializable obj, String name) throws IOException {}
+  
+  public void saveByteArray(byte[] buf, String name) throws IOException {}
 
   public Object load(String name) throws IOException, ClassNotFoundException {
+    return null;
+  }
+  
+  public byte[] loadByteArray(String name) throws IOException, ClassNotFoundException {
     return null;
   }
 
   public void delete(String name) {}
 
   public void save(Serializable obj, String dirName, String name) throws IOException {}
+  
+  public void saveByteArray(byte[] buf, String dirName, String name) throws IOException {}
 
   public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+    return null;
+  }
+  
+  public byte[] loadByteArray(String dirName, String name) throws IOException {
     return null;
   }
 

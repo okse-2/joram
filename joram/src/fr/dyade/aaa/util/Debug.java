@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.10 2003-09-11 15:15:39 fmaistre Exp $";
+  /** flag used to remove huge logging */
+  public final static boolean debug = true;
 
   /** */
   public final static String DEBUG_CONFIGURE_PROPERTY = "fr.dyade.aaa.DEBUG_CONFIGURE";
@@ -66,7 +66,6 @@ public class Debug {
       initialize();
     } catch(Exception exc){
       System.err.println("Monolog configuration file not found, use defaults");
-      //exc.printStackTrace();
       try {
         ((Configurable) factory).configure(null);
         Logger[] loggers = factory.getLoggers();

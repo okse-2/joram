@@ -35,7 +35,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class BindObject extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: BindObject.java,v 1.11 2003-09-11 09:54:12 fmaistre Exp $";
+public static final String RCS_VERSION="@(#)$Id: BindObject.java,v 1.12 2004-02-13 08:14:35 fmaistre Exp $";
 
   /** object associated with name */
   private Object obj;
