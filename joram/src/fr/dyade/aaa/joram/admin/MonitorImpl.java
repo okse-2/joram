@@ -138,23 +138,26 @@ public class MonitorImpl implements MonitorItf
     Monitor_GetDestinationsRep reply =
       (Monitor_GetDestinationsRep) doRequest(request);
 
+    Vector dests;
     Vector list = new Vector();
-    Hashtable dests = reply.getDestinations();
-    String id;
-    String type;
-    javax.jms.Destination dest;
-    for (Enumeration ids = dests.keys(); ids.hasMoreElements();) {
-      id = (String) ids.nextElement();
-      type = (String) dests.get(id);
-      
-      if (type.equals("Queue"))
-        dest = new fr.dyade.aaa.joram.Queue(id);
-      else if (type.equals("DeadMQueue"))
-        dest = new DeadMQueue(id);
-      else
-        dest = new fr.dyade.aaa.joram.Topic(id);
-     
-      list.add(dest);
+
+    // Adding the queues, if any:
+    dests = reply.getQueues();
+    if (dests != null) {
+      for (int i = 0; i < dests.size(); i++)
+        list.add(new fr.dyade.aaa.joram.Queue((String) dests.get(i)));
+    }
+    // Adding the dead messages queues, if any:
+    dests = reply.getDeadMQueues();
+    if (dests != null) {
+      for (int i = 0; i < dests.size(); i++)
+        list.add(new DeadMQueue((String) dests.get(i)));
+    }
+    // Adding the topics, if any:
+    dests = reply.getTopics();
+    if (dests != null) {
+      for (int i = 0; i < dests.size(); i++)
+        list.add(new fr.dyade.aaa.joram.Topic((String) dests.get(i)));
     }
     return list;
   }
