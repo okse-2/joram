@@ -26,7 +26,7 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
 
   static final String separator = "_";
 
