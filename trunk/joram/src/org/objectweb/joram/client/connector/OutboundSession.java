@@ -74,23 +74,23 @@ public class OutboundSession implements javax.jms.Session
 
   /**
    * Forbidden call on a component's outbound session, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public void setMessageListener(javax.jms.MessageListener messageListener)
               throws JMSException
   {
     checkValidity();
-    throw new JMSException("Forbidden call on a component's session.");
+    throw new IllegalStateException("Forbidden call on a component's session.");
   }
 
   /**
    * Forbidden call on a component's outbound session, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public javax.jms.MessageListener getMessageListener() throws JMSException
   {
     checkValidity();
-    throw new JMSException("Forbidden call on a component's session.");
+    throw new IllegalStateException("Forbidden call on a component's session.");
   }
 
   /**
@@ -307,22 +307,22 @@ public class OutboundSession implements javax.jms.Session
 
   /**
    * Forbidden call on a component's outbound session, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public void commit() throws JMSException
   {
     checkValidity();
-    throw new JMSException("Forbidden call on a component's session.");
+    throw new IllegalStateException("Forbidden call on a component's session.");
   }
 
   /**
    * Forbidden call on a component's outbound session, throws a 
-   * <code>JMSException</code> instance.
+   * <code>IllegalStateException</code> instance.
    */
   public void rollback() throws JMSException
   {
     checkValidity();
-    throw new JMSException("Forbidden call on a component's session.");
+    throw new IllegalStateException("Forbidden call on a component's session.");
   }
 
   /** 
