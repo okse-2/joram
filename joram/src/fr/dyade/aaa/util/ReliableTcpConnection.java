@@ -71,7 +71,7 @@ public class ReliableTcpConnection {
       DEFAULT_WINDOW_SIZE).intValue();
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(
-        BasicLevel.INFO, 
+        BasicLevel.DEBUG, 
         "ReliableTcpConnection.windowSize=" + 
         windowSize);
     inputCounter = -1;
