@@ -47,13 +47,15 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
   /** The stream for reading the written data. */
   private DataInputStream inputStream = null;
 
-  /** Local bytes array. */
-  private byte[] bytes = null;
-
   /** <code>true</code> if the message body is read-only. */
   private boolean RObody = false;
   /** <code>true</code> if the message body is write-only. */
   private boolean WObody = true;
+
+  /** Local bytes array. */
+  private byte[] bytes = null;
+  /** <code>true</code> if the message has been sent since its last modif. */
+  private boolean prepared = false;
 
 
   /**
@@ -121,6 +123,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       bytes = null;
       RObody = false;
       WObody = true;
+      prepared = false;
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while closing the stream"
@@ -176,6 +179,13 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     if (RObody)
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
+
+    if (prepared) {
+      prepared = false;
+      outputBuffer = new ByteArrayOutputStream();
+      outputStream = new DataOutputStream(outputBuffer);
+    }
+
     try {
       outputStream.write(value, offset, length);
     }
@@ -278,6 +288,12 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
 
     if (value == null)
       throw new NullPointerException("Forbidden null value.");
+
+    if (prepared) {
+      prepared = false;
+      outputBuffer = new ByteArrayOutputStream();
+      outputStream = new DataOutputStream(outputBuffer);
+    }
 
     try {
       if (value instanceof Boolean)
@@ -695,6 +711,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     if (WObody) {
       outputStream.flush();
       bytes = outputBuffer.toByteArray();
+      prepared = true;
     }
 
     momMsg.clearBody();
