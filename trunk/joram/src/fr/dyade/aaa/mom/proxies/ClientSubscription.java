@@ -383,9 +383,13 @@ class ClientSubscription implements java.io.Serializable
                   || (msgId.indexOf(proxyId.toString()) == -1
                       || msgId.indexOf("c" + contextId + "m") == -1)))) {
 
-        message.acksCounter++;
-        if (message.acksCounter == 1)
+        if (messagesTable.containsKey(msgId))
+          message = (Message) messagesTable.get(msgId);
+        else
           messagesTable.put(msgId, message);
+
+        message.acksCounter++;
+
         if (durable) {
           message.durableAcksCounter++;
           if (message.durableAcksCounter == 1)
