@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot
- * Contributor(s): 
+ * Contributor(s):
  */
 package fr.dyade.aaa.jndi2.scn;
 
@@ -30,6 +30,7 @@ import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.OperationNotSupportedException;
+import javax.naming.spi.InitialContextFactory;
 import javax.naming.spi.ResolveResult;
 
 import fr.dyade.aaa.jndi2.client.NamingContextFactory;
@@ -51,14 +52,11 @@ public class scnURLContext implements Context {
     logger = fr.dyade.aaa.util.Debug.getLogger("fr.dyade.aaa.jndi2.scn");    
   }
 
-  static public final String hostName = "scn.naming.factory.host";
-  static public final String port     = "scn.naming.factory.port";
-  
   static private final String URL_PREFIX = "scn:comp/";
   static private final String ENV_PREFIX = "env";
     
-  private Hashtable myEnv = null;
-  static NamingContextFactory namingFactory = new NamingContextFactory();
+  private Hashtable myEnv;
+  private InitialContextFactory namingFactory;
     
   /**
    * Constructor
@@ -69,9 +67,22 @@ public class scnURLContext implements Context {
                  "scnURLContext.<init>(" + env + ')');
     if (env != null) {
       // clone env to be able to change it.
-      myEnv = (Hashtable) (env.clone());
-      myEnv.put("java.naming.factory.host", myEnv.get(hostName));
-      myEnv.put("java.naming.factory.port", myEnv.get(port));      
+      myEnv = (Hashtable)env.clone();
+
+      String factoryClassName = (String)myEnv.get("scn.naming.factory.class");
+      if (factoryClassName == null) {
+        namingFactory = new NamingContextFactory();
+      } else {
+        try {
+          Class factoryClass = Class.forName(factoryClassName);
+          namingFactory = 
+            (InitialContextFactory)factoryClass.newInstance();
+        } catch (Exception exc) {
+          NamingException ne = new NamingException();
+          ne.setRootCause(exc);
+          throw ne;
+        }
+      }
     }
   }
   

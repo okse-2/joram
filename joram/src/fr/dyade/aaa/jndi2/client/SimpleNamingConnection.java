@@ -45,16 +45,23 @@ public class SimpleNamingConnection
 
   private ObjectInputStream receiver;
 
-  public SimpleNamingConnection(String hostName, int port) {
+  private Hashtable env;
+
+  public SimpleNamingConnection(String hostName, 
+                                int port,
+                                Hashtable env) {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
                        "SimpleNamingConnection.<init>(" + 
-                       hostName + ',' + port + ')');
+                       hostName + ',' + 
+                       port + ',' + 
+                       env + ')');
     this.hostName = hostName;
     this.port = port;
-    this.socket = null;
-    this.sender = null;
-    this.receiver = null;
+    socket = null;
+    sender = null;
+    receiver = null;
+    this.env = env;
   }
 
   public final String getHostName() {
@@ -138,20 +145,17 @@ public class SimpleNamingConnection
   }
 
   public Hashtable getEnvironment() {
-    Hashtable env = new Hashtable();
-    env.put("java.naming.provider.host", hostName);
-    env.put("java.naming.provider.port", "" + port);
     return env;
   }
 
   public NamingConnection cloneConnection() {
-    return new SimpleNamingConnection(hostName, port);
+    return new SimpleNamingConnection(hostName, port, env);
   }
 
   public String toString() {
     return '(' + super.toString() +
       ",hostname=" + hostName +
-      ",port=" + port + ')';
+      ",port=" + port + 
+      ",env=" + env + ')';
   }
-
 }
