@@ -11,6 +11,34 @@
   </properties>
 
   <body>
+	   <s1 name="JORAM_4_1_1 (October 13, 2004)">
+		<p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_1.  
+		This release contains some minor features and bug fixes (see below the history file).</p>
+		<p> It is also available for <a href="../download/index/html">download</a> and the documentation has been slightly updated.</p>
+		<s2 name="New features and updates">
+		 <ul>
+        <li>Allows to fix inFlow value through <code>ConnectionManager.inFlow</code> property.</li>
+				<li>Allows change of default identity through JoramDfltLogin and JoramDfltPassword properties.</li>
+				<li> Major changes in the network architecture:
+					<ul>
+						<li>Reconnection after persistancy failure,</li>
+						<li>Deletion of old unused components: <code>clock</code>, <code>update</code>, etc.</li>
+						<li>Adds <code>PoolNetwork</code> component (beta).</li>
+						<li>Allows connection of reset(or non persistent) servers.</li>
+					</ul>
+				</li>
+				<li>Allows swap out of messages in message consumer (MessageVector impl.)</li>
+		 </ul>
+		</s2>
+		<s2 name="Bug fixes">
+		 <ul>
+        <li>Bug fixes in RA descriptors.</li>
+				<li>Uses of JAXP classes and interfaces (xerces no more needed).</li>
+				<li>Bug fixes in TCP client/server connection.</li>
+				<li>Minor fixes in the ship and release processes.</li>
+		 </ul>
+		</s2>
+		</s1>
 		<s1 name="JORAM 4.1 (September 14, 2004)">
 		<p>This version, integrated in JOnAS, succesfully passed the JMS test Suite of J2EE 1.4 TCK. </p>
 		<s2 name="Modifications">
