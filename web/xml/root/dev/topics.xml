@@ -54,6 +54,10 @@
         looks like when based on JMX:
         <a href="../download/adminJMX.zip">try it !</a></li>
       </ul>
+      <ul>
+        <li>A first sketch of the administration interface is also available
+        <a href="../download/AdminItf.Java">there</a> .</li>
+      </ul>
       </s2>
 
       <s2 name="Feeding back, or getting involved">
