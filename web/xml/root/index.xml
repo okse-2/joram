@@ -79,11 +79,13 @@
 	</tr>
       </table>
       
-      <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of
-      <em>JMS</em> (Java Message Service API released by Sun Microsystem,
-      Inc.). It provides access to a MOM (Message Oriented Middleware), built on
-      top of the <em>Scalagent</em> agents based distributed platform. JORAM is
-      a <em>free</em>, <em>open source</em> initiative.</p>
+      <p><strong>JORAM</strong> incorporates a 100% pure Java
+      implementation of <em>JMS</em> (Java Message Service API
+      released by Sun Microsystem, Inc.). It provides access to a MOM
+      (Message Oriented Middleware), built on top of the <a
+      href="http://www.scalagent.com/">Scalagent</a> agents based
+      distributed platform. JORAM is a <em>free</em>, <em>open
+      source</em> initiative.</p>
 
       <s2 name="Specification">
 
