@@ -14,7 +14,13 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: September 12, 2003)">
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_6_2 (September 22, 2003)">
+      <p>This release is integrated into JOnAS 3.3.</p>
+      <s2 name="Modifications">
       <ul>
         <li>Modification of <code>AgentServer</code> and
         <code>NameService</code> initialization allowing to stop a server
@@ -26,10 +32,18 @@
         <code>fr.dyade.aaa.util</code>.</li>
       </ul>
       </s2>
+      <s2 name="Corrected bugs">
+      <ul>
+        <li>Invalid creation of a <code>s$i</code> persistence root when
+        running JORAM in transient mode; impacted classes are
+        <code>fr.dyade.aaa.agent.AgentServer</code>,
+        <code>fr.dyade.aaa.util.ATransaction</code> and
+        <code>fr.dyade.aaa.util.NullTransaction</code>.</li>
+      </ul>
+      </s2>
     </s1>
     <s1 name="joram3_6_1 (September 11, 2003)">
-      <p>This release introduces MBean classes for standard JMX management.
-      It is also integrated into JOnAS 3.3.</p>
+      <p>This release introduces MBean classes for standard JMX management.</p>
       <s2 name="Modifications"> 
       <ul>
         <li>JMX MBeans introduced for the management of the JORAM destinations
