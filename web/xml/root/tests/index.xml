@@ -16,6 +16,7 @@
         passes the Test Suite</subtitle>
       <p>A new admin class has been provided by Andreas Mueller. It
          is available in CVS and in the package distribution.</p>
+      <hr />
       <subtitle>18th June 2002: Branch of the Test Suite to add JMS
         1.1 support</subtitle>
       <p>The CVS repository of the Test Suite has been branched to
