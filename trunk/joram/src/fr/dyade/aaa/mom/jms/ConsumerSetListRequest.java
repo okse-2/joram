@@ -25,29 +25,42 @@
 package fr.dyade.aaa.mom.jms;
 
 /**
- * A <code>TSessUnsubRequest</code> is sent by a closing temporary
- * <code>TopicSubscriber</code>, or by a <code>TopicSession</code>
- * unsubscribing a durable subscriber.
+ * A <code>ConsumerSetListRequest</code> is sent by a
+ * <code>MessageConsumer</code> on which a message listener is set.
  */
-public class TSessUnsubRequest extends AbstractJmsRequest
+public class ConsumerSetListRequest extends AbstractJmsRequest
 {
-  /** The name of the subscription to delete. */
-  private String subName;
+  /** Selector for filtering messages on a queue. */
+  private String selector;
+  /** <code>true</code> if the request is destinated to a queue. */
+  private boolean queueMode;
 
   /**
-   * Constructs a <code>TSessUnsubRequest</code>.
+   * Constructs an <code>ConsumerSetListRequest</code>.
    *
-   * @param subName  The name of the subscription to delete.
+   * @param targetName  Name of the target queue or subscription.
+   * @param selector  Selector for filtering messages.
+   * @param queueMode  <code>true</code> if this request is destinated to a
+   *          queue.
    */
-  public TSessUnsubRequest(String subName)
+  public ConsumerSetListRequest(String targetName, String selector, 
+                                boolean queueMode)
   {
-    super(null);
-    this.subName = subName;
+    super(targetName);
+    this.selector = selector;
+    this.queueMode = queueMode;
   }
 
-  /** Returns the name of the subscription to delete. */
-  public String getSubName()
+
+  /** Returns the selector for filtering messages. */
+  public String getSelector()
   {
-    return subName;
+    return selector;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
   }
 }

@@ -25,16 +25,16 @@
 package fr.dyade.aaa.mom.jms;
 
 /**
- * The <code>AbstractJmsRequest</code> class is used by Joram for sending
- * requests to MOM JMS proxies.
+ * The <code>AbstractJmsRequest</code> class is used by Joram clients for
+ * sending requests to their MOM JMS proxies.
  */
 public abstract class AbstractJmsRequest implements java.io.Serializable
 {
   /**
-   * Identifier of the MOM agent the request is destinated to, null if it is
-   * the proxy.
+   * The request target is either a destination agent name, or a subscription 
+   * name.
    */
-  private String to;
+  private String target;
   /** Identifier of the request. */
   private String requestId;
 
@@ -42,12 +42,12 @@ public abstract class AbstractJmsRequest implements java.io.Serializable
   /**
    * Constructs an <code>AbstractJmsRequest</code>.
    *
-   * @param to  String identifier of the MOM agent the request is destinated
-   *          to, null if it is the client proxy.
+   * @param target  String identifier of the request target, either a queue
+   *          name, or a subscription name.
    */
-  public AbstractJmsRequest(String to)
+  public AbstractJmsRequest(String target)
   {
-    this.to = to;
+    this.target = target;
   }
 
   /** Sets the request identifier. */
@@ -56,13 +56,10 @@ public abstract class AbstractJmsRequest implements java.io.Serializable
     this.requestId = requestId;
   }
 
-  /**
-   * Returns the String identifier of the MOM agent this request is destinated
-   * to.
-   */
-  public String getTo()
+  /** Returns the String identifier of this request target.  */
+  public String getTarget()
   {
-    return to;
+    return target;
   }
 
   /** Returns this request identifier. */

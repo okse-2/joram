@@ -27,38 +27,40 @@ package fr.dyade.aaa.mom.jms;
 import java.util.Vector;
 
 /**
- * A <code>TSessAckRequest</code> instance is used by a
- * <code>TopicSession</code> for acknowledging the messages it consumed.
+ * A <code>ConsumerAckRequest</code> instance is used by a
+ * <code>MessageConsumer</code> for acknowledging a received message.
  */
-public class TSessAckRequest extends AbstractJmsRequest
+public class ConsumerAckRequest extends AbstractJmsRequest
 {
-  /** Name of the subscription where acknowledging the messages. */
-  private String subName;
-  /** Vector of message identifiers. */
-  private Vector ids;
+  /** Message identifier. */
+  private String id;
+  /** <code>true</code> if the request is destinated to a queue. */
+  private boolean queueMode;
 
   /**
-   * Constructs a <code>TSessAckRequest</code> instance.
+   * Constructs a <code>ConsumerAckRequest</code> instance.
    *
-   * @param subName  Name of the subscription where acknowledging the messages.
-   * @param ids  Vector of acknowledged message identifiers.
+   * @param targetName  Name of the target queue or subscription.
+   * @param id  The message identifier.
+   * @param queueMode  <code>true</code> if this request is destinated to
+   *          a queue.
    */
-  public TSessAckRequest(String subName, Vector ids)
+  public ConsumerAckRequest(String targetName, String id, boolean queueMode)
   {
-    super(null);
-    this.subName = subName;
-    this.ids = ids;
+    super(targetName);
+    this.id = id;
+    this.queueMode = queueMode;
   }
 
-  /** Returns the name of the subscription where acknowledging the messages. */
-  public String getSubName()
+  /** Returns the acknowledged message identifier. */
+  public String getId()
   {
-    return subName;
+    return id;
   }
 
-  /** Returns the vector of acknowledged messages identifiers. */
-  public Vector getIds()
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
   {
-    return ids;
+    return queueMode;
   }
 }

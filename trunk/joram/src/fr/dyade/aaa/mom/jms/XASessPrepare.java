@@ -27,29 +27,50 @@ package fr.dyade.aaa.mom.jms;
 import java.util.Vector;
 
 /**
- * A <code>QRecDenyRequest</code> instance is used by a
- * <code>QueueReceiver</code> for denying a message.
+ * An <code>XASessPrepare</code> instance is used by an <code>XASession</code>
+ * for sending messages and acknowledgements to the proxy.
  */
-public class QRecDenyRequest extends AbstractJmsRequest
+public class XASessPrepare extends AbstractJmsRequest
 {
-  /** Message identifier. */
+  /** Identifier of the resource and the preparing transaction. */
   private String id;
+  /** Vector of <code>ProducerMessages</code> instances. */
+  private Vector sendings;
+  /** Vector of <code>SessAckRequest</code> instances. */
+  private Vector acks;
+  
 
   /**
-   * Constructs a <code>QRecDenyRequest</code> instance.
+   * Constructs an <code>XASessPrepare</code> instance.
    *
-   * @param queueName  Name of the queue where denying the message.
-   * @param id  The message identifier.
+   * @param id  Identifier of the resource and the preparing transaction.
+   * @param sendings  Vector of <code>ProducerMessages</code> instances.
+   * @param acks  Vector of <code>SessAckRequest</code> instances.
    */
-  public QRecDenyRequest(String queueName, String id)
+  public XASessPrepare(String id, Vector sendings, Vector acks)
   {
-    super(queueName);
+    super(null);
     this.id = id;
+    this.sendings = sendings;
+    this.acks = acks;
   }
 
-  /** Returns the denied message identifier. */
+
+  /** Returns the identifier of the resource and the commiting transaction. */
   public String getId()
   {
     return id;
+  }
+
+  /** Returns the vector of <code>ProducerMessages</code> instances. */
+  public Vector getSendings()
+  {
+    return sendings;
+  }
+
+  /** Returns the vector of <code>SessAckRequest</code> instances. */
+  public Vector getAcks()
+  {
+    return acks;
   }
 }

@@ -25,41 +25,53 @@
 package fr.dyade.aaa.mom.jms;
 
 /**
- * A <code>TSubReceiveRequest</code> is sent by a <code>TopicSubscriber</code>
- * requesting to receive a message.
+ * A <code>ConsumerReceiveRequest</code> is sent by a
+ * <code>MessageConsumer</code> when requesting a message.
  */
-public class TSubReceiveRequest extends AbstractJmsRequest
+public class ConsumerReceiveRequest extends AbstractJmsRequest
 {
-  /** The name of the subscription on which requesting the message. */
-  private String subName;
+  /** The selector for filtering messages on a queue. */
+  private String selector;
   /** The time to live value of the request (negative for infinite). */
   private long timeToLive;
+  /** <code>true</code> if the request is destinated to a queue. */
+  private boolean queueMode;
 
 
   /**
-   * Constructs a <code>TSubReceiveRequest</code>.
+   * Constructs a <code>ConsumerReceiveRequest</code>.
    *
-   * @param subName  The name of the subscription on which requesting the
-   *          message.
+   * @param targetName  Name of the target queue or subscription.
+   * @param selector  The selector for filtering messages, if any.
    * @param timeToLive  Time to live value in milliseconds, negative for
    *          infinite.
+   * @param queueMode  <code>true</code> if this request is destinated to a
+   *          queue.
    */
-  public TSubReceiveRequest(String subName, long timeToLive)
+  public ConsumerReceiveRequest(String targetName, String selector,
+                                long timeToLive, boolean queueMode)
   {
-    super(null);
-    this.subName = subName;
+    super(targetName);
+    this.selector = selector;
     this.timeToLive = timeToLive;
+    this.queueMode = queueMode;
   }
 
-  /** Returns the name of the subscription on which requesting the message. */
-  public String getSubName()
+  /** Returns the selector for filtering the messages. */
+  public String getSelector()
   {
-    return subName;
+    return selector;
   }
 
   /** Returns the time to live value in milliseconds. */
   public long getTimeToLive()
   {
     return timeToLive;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
   }
 }
