@@ -35,12 +35,11 @@
        and will soon be able to propose a first version of his work.</p>
     </s1>
 
-    <s1 name="kJoram">
-    <p>Nicolas Tachker (ScalAgent) is developing a light Joram client portable
-       on the J2ME environment (kJoram). This client will connect to the Joram
-       platform through Enhydra's <em>kSoap</em> protocol. The SOAP proxy
-       introduced by the joram 3.4 release is the kSoap entry point for the
-       Joram platform.</p>
+    <s1 name="C or C++ client sample">
+    <p>The SOAP proxy introduced by version 3.4 allows non Java clients to 
+       connect to the MOM. A sample illustrating this ability of JORAM to
+       authorize connections between heterogenous worlds would be great!
+       <em>Contributions would be highly appreciated!</em></p>
     </s1>
 
     <s1 name="Performances and Persistence">

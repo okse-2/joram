@@ -14,6 +14,25 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
+      <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
+      JORAM platform to <em>heterogenous</em> client applications. Where
+      JORAM 3.4, with the support of SOAP as client communication protocol,
+      opened the platform to non-Java applications, the 3.6 release, with
+      its new kJORAM libraries, allows J2ME applications to use JORAM messaging
+      functionnalities. A J2ME application is a lightweight Java application
+      deployed and running on a mobile device such as a PDA or a smart
+      phone.</p>
+      <p>New packages are provided in the download area:</p>
+      <ul>
+        <li><code>kjoram-3.6.0-src.tgz</code>, providing the kJORAM sources and
+            sample;</li>
+        <li><code>kjoram-3.6.0.tgz</code> providing the kJORAM libraries and
+            sample.</li>
+      </ul>
+      <p>kJORAM is also available by checking out the <em>joram</em> CVS
+      module.</p>
+
       <subtitle>June 24th, 2003: JORAM 3.5 is available.</subtitle>
       <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
       as packaged. This version is based on the 3.4 release and includes

@@ -23,26 +23,6 @@
 
     </s1>
 
-    <s1 name="Other Licenses">
-   
-      <p>The JORAM distribution includes libraries of <em>external
-      softwares</em>.</p>
-
-      <p>The <a href="http://jakarta.apache.org/regexp/">Regexp</a> regular
-      expression parser, the <a href="http://ws.apache.org/soap/">SOAP</a>
-      implementation, and the <a href="http://xml.apache.org/">Xerces</a>
-      XML parser are Apache's projects covered by the
-      <a href="http://xml.apache.org/dist/LICENSE.txt">Apache license</a>.
-      </p>
-
-      <p>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
-      JavaCup</a> Java parser generator is covered by the
-      <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">
-      CUP Parser Generator Copyright Notice, License, and Disclaimer</a>.
-      </p>
-   
-    </s1>
-    
   </body>
   
 </document>

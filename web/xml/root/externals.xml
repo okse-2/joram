@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>External softwares</title>
+    <filename>externals.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+
+    
+    <s1 name="External softwares">
+   
+      <p>JORAM uses the following external softwares:</p>
+
+      <ul>
+        <li><a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
+        JavaCup</a> is a Java parser generator used in JORAM message
+        selection feature. It is covered by the
+        <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">
+        CUP Parser Generator Copyright Notice, License, and Disclaimer</a>.
+        </li>
+      </ul>
+
+      <ul>
+        <li><a href="http://kxml.enhydra.org">kXML</a> is an XML parser
+        for J2ME used by kJORAM for communicating with a JORAM platform. It
+        is covered by the <a href="http://kxml.enhydra.org/software/license">
+        Enhydra Public License</a>.</li>
+      </ul>
+
+      <ul>
+        <li><a href="http://jakarta.apache.org/regexp/">Regexp</a> is
+        a regular expression parser used in JORAM message selection feature. 
+        It is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
+        Apache license</a>.</li>
+      </ul>
+
+      <ul>
+        <li><a href="http://ws.apache.org/soap/">SOAP</a> is an
+        implementation of the SOAP protocol used by JORAM's SOAP proxy.
+        It is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
+        Apache license</a>.</li>
+      </ul>
+
+      <ul>
+        <li><a href="http://xml.apache.org/">Xerces</a> is an XML
+        parser used for JORAM platform configuration. It is
+        is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
+        Apache license</a>.</li>
+      </ul>
+      
+    </s1>
+    
+  </body>
+  
+</document>
+
