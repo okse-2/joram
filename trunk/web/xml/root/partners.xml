@@ -15,20 +15,20 @@
     <s1 name="Partners">
 
       <table>	
-	<tr>
-	  <td rowspan="1" colspan="1" valign="middle" align="center">
+        <tr>
+          <td align="center" valign="middle">
             <a href="http://www.dyade.fr/">
-              <img src="images/partners/dyade.gif" alt="Dyade logo" width="270" border="0" height="65" align="middle"/>
+              <img src="images/partners/dyade.gif" alt="Dyade logo" width="270" border="0" height="65"/>
             </a>
           </td>
 
-	  <td rowspan="1" colspan="1" valign="top" align="left"> <p>The
-	  G.I.E. ("Groupement d'Int&eacute;r&ecirc;t &Eacute;conomique") <a
-	  href="http://www.dyade.fr/">Dyade</a> is a BULL/INRIA Advanced
-	  Research Joint Venture. Its goals are the conception and development
-	  of new technological components for future information systems.</p>
-	  </td>
-	</tr>
+          <td>
+            <p>The G.I.E. ("Groupement d'Int&#233;r&#234;t &#201;conomique") <a
+            href="http://www.dyade.fr/">Dyade</a> is a BULL/INRIA Advanced
+            Research Joint Venture. Its goals are the conception and development
+            of new technological components for future information systems.</p>
+          </td>
+        </tr>
 	<tr>
 	  <td rowspan="1" colspan="1" valign="middle" align="center"><a
 	  href="http://www.inria.fr/"><img src="images/partners/inria.gif"
