@@ -26,10 +26,12 @@
       <code>fr.dyade.aaa.joram.admin</code>.</li>
       <li>New administration method for stopping a server (
       <code>AdminItf.stopServer(int serverId)</code>). This method allows to
-      stop a given server from a connected administrator. Impacted packages are
-      <code>fr.dyade.aaa.mom.admin</code>, 
-      <code>fr.dyade.aaa.mom.dest</code> and
-      <code>fr.dyade.aaa.joram.admin</code>.</li>
+      stop a given server from a connected administrator. Impacted classes are
+      <code>fr.dyade.aaa.agent.ProxyAgent</code>, 
+      <code>fr.dyade.aaa.mom.admin.StopServerRequest</code>, 
+      <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>,
+      <code>fr.dyade.aaa.joram.admin.AdminItf</code> and
+      <code>fr.dyade.aaa.joram.admin.AdminImpl</code>.</li>
       <li>Modification of the administration methods: they are now all
       synchronous, for improving the return of errors to the administrator.
       Impacted packages are: <code>fr.dyade.aaa.joram.admin</code>,
