@@ -287,6 +287,7 @@ public abstract class Connection implements javax.jms.Connection
     Session session;
     for (int i = 0; i < sessions.size(); i++) {
       session = (Session) sessions.get(i);
+      session.repliesIn.start();
       session.start();
     }
     // Sending a start request to the server:
@@ -793,7 +794,8 @@ public abstract class Connection implements javax.jms.Connection
       isE.setLinkedException(iE);
 
       // Removes the potentially stored requester:
-      requestsTable.remove(request.getRequestId());
+      if (request.getRequestId() != null)
+        requestsTable.remove(request.getRequestId());
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
@@ -817,6 +819,9 @@ public abstract class Connection implements javax.jms.Connection
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply: "
                                    + correlationId);
+
+    if (correlationId == null)
+      return;
 
     // Getting the object related to the replied request:
     Object obj = requestsTable.get(correlationId);
@@ -851,9 +856,9 @@ public abstract class Connection implements javax.jms.Connection
           QueueMessage qM = (QueueMessage) reply;
 
           if (qM.getMessage() != null) {
-            syncRequest(
-              new QRecDenyRequest(qM.getMessage().getDestination().getName(),
-                                  qM.getMessage().getIdentifier()));
+            asyncRequest(
+               new QRecDenyRequest(qM.getMessage().getDestination().getName(),
+                                   qM.getMessage().getIdentifier()));
           }
         }
         else if (reply instanceof SubMessages) {
