@@ -15,7 +15,8 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications">
-      <p>None, so far...</p>
+      <p>February 13: THE CVS TREE IS CURRENTLY UNDER HEAVY MODIFICATIONS; THE
+      CODE BASE WILL BE UNSTABLE UNTIL SUBMISSION IS OVER.</p>
       </s2>
     </s1>
     <s1 name="joram3_7_1 (February 3, 2004)">
