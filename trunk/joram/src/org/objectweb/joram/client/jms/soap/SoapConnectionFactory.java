@@ -115,6 +115,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
     FactoryParameters params = ret.getParameters();
     params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
     params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
+    params.cnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
 
     return ret;
   }
