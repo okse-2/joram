@@ -16,9 +16,11 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: August 13, 2003)">
       <ul>
-        <li>Blocking <code>AdminItf.stopServer</code> method. The processing of
-        this method disapeared from the administration topic server side since
-        release 3.5, probably due to an invalid CVS merge. The code is back
+        <li>Blocking <code>AdminItf.stopServer</code> method (as noticed
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-08/msg00021.html">
+        here</a>). The processing of this method disapeared from the
+        administration topic server side since release 3.5, probably due to an
+        invalid CVS merge. The code is back
         now in class <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.</li>
       </ul>
       </s2>

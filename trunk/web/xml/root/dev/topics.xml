@@ -31,8 +31,8 @@
       <li>retrieve the dead message queue related settings for a given server,
           destination or user.</li>
     </ul>
-    <p>Alexander Fedorowicz is developing a <em>graphical</em> interface
-       and will soon be able to propose a first version of his work.</p>
+    <p>Alexander Fedorowicz is developing a <strong>graphical</strong>
+    interface and will soon be able to propose a first version of his work.</p>
     </s1>
 
     <s1 name="C or C++ client sample">
