@@ -917,17 +917,17 @@ public class ProxyImpl implements java.io.Serializable {
    * Method implementing the JMS proxy reaction to a
    * <code>ConsumerUnsubRequest</code> requesting to remove a subscription.
    *
-   * @exception RequestException  If the subscription does not exist.
+   * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerUnsubRequest req) throws RequestException
+  private void doReact(ConsumerUnsubRequest req) throws DestinationException
   {
     // Getting the subscription.
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
-      throw new RequestException("Can't unsubscribe non existing"
-                                 + " subscription: " + subName);
+	throw new DestinationException("Can't unsubscribe non existing"
+				       + " subscription: " + subName);
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,

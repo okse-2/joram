@@ -326,13 +326,12 @@ public class OutboundSession implements javax.jms.Session
   }
 
   /** 
-   * Forbidden call on a component's outbound session, throws a 
-   * <code>JMSException</code> instance.
+   * Delegates the call to the wrapped JMS session.
    */
   public void recover() throws JMSException
   {
     checkValidity();
-    throw new JMSException("Forbidden call on a component's session.");
+    sess.recover();
   }
 
 

@@ -894,7 +894,6 @@ public class Message implements Cloneable, Serializable
   {
     s.defaultWriteObject();
     bodyRO = true;
-    propertiesRO = true;
   }
 
   /**
@@ -907,6 +906,7 @@ public class Message implements Cloneable, Serializable
     s.defaultReadObject();
     acksCounter = 0;
     durableAcksCounter = 0;
+    propertiesRO = true;
   }
 
   public String toString() {
