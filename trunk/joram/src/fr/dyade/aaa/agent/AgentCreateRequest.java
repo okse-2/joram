@@ -28,8 +28,8 @@ import java.io.*;
  * @version 1.0, 12/10/97
  */
 public class AgentCreateRequest extends Notification {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.14 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
 
 
   static final long serialVersionUID = -873215263839213534L;

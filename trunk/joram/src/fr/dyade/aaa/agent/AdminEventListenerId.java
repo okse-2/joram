@@ -32,7 +32,7 @@ import fr.dyade.aaa.agent.*;
  * @version	v1.0
  */
 public class AdminEventListenerId implements Serializable{
-public static final String RCS_VERSION="@(#)$Id: AdminEventListenerId.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $";
+public static final String RCS_VERSION="@(#)$Id: AdminEventListenerId.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $";
     
     /* attributes of the type */
     public final static short NULL_LISTENER = 0;

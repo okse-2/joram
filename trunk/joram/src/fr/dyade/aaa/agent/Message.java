@@ -32,7 +32,7 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $"; 
 
   static final long serialVersionUID =  -2179939607085028300L;
 

@@ -120,6 +120,16 @@ public class A3CMLServer implements Serializable {
                                       "\" on server#" + sid);
   }
 
+  public A3CMLNetwork getNetwork(String domainName) {
+    for (int i = networks.size() -1; i >=0; i--) {
+      A3CMLNetwork nw = (A3CMLNetwork) networks.elementAt(i);
+      if (nw.domain.equals(domainName)) {
+        return nw;
+      }
+    }
+    return null;
+  }
+
   public String toString() {
     StringBuffer strBuf = new StringBuffer();
     strBuf.append("(");

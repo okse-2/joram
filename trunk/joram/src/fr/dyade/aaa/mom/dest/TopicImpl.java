@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -31,7 +32,9 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.mom.MomTracing;
+import fr.dyade.aaa.mom.admin.*;
 import fr.dyade.aaa.mom.comm.*;
+import fr.dyade.aaa.mom.comm.AdminReply;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
 import fr.dyade.aaa.mom.selectors.*;
@@ -56,7 +59,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
-public class TopicImpl extends DestinationImpl
+public class TopicImpl extends DestinationImpl implements TopicImplMBean
 {
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
@@ -796,5 +799,200 @@ public class TopicImpl extends DestinationImpl
       if (! deliverables.isEmpty())
         Channel.sendTo(subscriber, new TopicMsgsReply(deliverables));
     }
+  }
+
+
+  /**
+   * MBean method: returns <code>true</code> if the destination is freely
+   * readable.
+   */
+  public boolean isFreelyReadable()
+  {
+    return freeReading;
+  }
+
+  /**
+   * MBean method: returns <code>true</code> if the destination is freely
+   * writeable.
+   */
+  public boolean isFreelyWriteable()
+  {
+    return freeWriting;
+  }
+
+  /**
+   * MBean method: returns the identifiers of the readers on the destination.
+   */
+  public String getReaders()
+  {
+    Object key;
+    int right;
+    Vector readers = new Vector();
+    for (Enumeration enum = clients.keys(); enum.hasMoreElements();) {
+      key = enum.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+      if (right == READ || right == READWRITE)
+        readers.add(key.toString());
+    }
+    return readers.toString();
+  }
+
+  /**
+   * MBean method: returns the identifiers of the writers on the destination.
+   */
+  public String getWriters()
+  {
+    Object key;
+    int right;
+    Vector writers = new Vector();
+    for (Enumeration enum = clients.keys(); enum.hasMoreElements();) {
+      key = enum.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+      if (right == WRITE || right == READWRITE)
+        writers.add(key.toString());
+    }
+    return writers.toString();
+  }
+
+  /** MBean interface implementation: deletes the destination. */
+  public void delete()
+  {
+    DeleteDestination request = new DeleteDestination(destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }
+
+  /**
+   * MBean interface implementation: removes a given writer.
+   *
+   * @param writerId  Identifier of the writer.
+   *
+   * @exception Exception  If the identifier is invalid or if the specified
+   *              writer is not a registered writer.
+   */
+  public void removeWriter(String writerId) throws Exception
+  {
+    try {
+      if (writerId != null && ! isWriter(AgentId.fromString(writerId)))
+        throw new Exception("Unknown writer identifier.");
+    }
+    catch (IllegalArgumentException exc) {
+      throw new Exception("Invalid identifier.");
+    }
+
+    UnsetWriter request = new UnsetWriter(writerId, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }
+        
+
+  /**
+   * MBean interface implementation: removes a given reader.
+   *
+   * @param readerId  Identifier of the reader.
+   *
+   * @exception Exception  If the identifier is invalid or if the specified
+   *              reader is not a registered reader.
+   */
+  public void removeReader(String readerId) throws Exception
+  {
+    try {
+      if (readerId != null && ! isReader(AgentId.fromString(readerId)))
+        throw new Exception("Unknown reader identifier.");
+    }
+    catch (IllegalArgumentException exc) {
+      throw new Exception("Invalid identifier.");
+    }
+
+    UnsetReader request = new UnsetReader(readerId, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }
+
+  /**
+   * MBean interface implementation: adds a given writer on the destination.
+   *
+   * @param writerId  Identifier of the writer.
+   *
+   * @exception Exception  If the identifier is invalid.
+   */
+  public void addWriter(String writerId) throws Exception
+  {
+    try {
+      AgentId.fromString(writerId);
+    }
+    catch (IllegalArgumentException exc) {
+      throw new Exception("Invalid identifier.");
+    }
+    SetWriter request = new SetWriter(writerId, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }
+
+  /**
+   * MBean interface implementation: adds a given reader on the destination.
+   *
+   * @param readerId  Identifier of the reader.
+   *
+   * @exception Exception  If the identifier is invalid.
+   */
+  public void addReader(String readerId) throws Exception
+  {
+    try {
+      AgentId.fromString(readerId);
+    }
+    catch (IllegalArgumentException exc) {
+      throw new Exception("Invalid identifier.");
+    }
+    SetReader request = new SetReader(readerId, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }
+ 
+  /**
+   * MBean interface implementation: removes free writing access on
+   * the destination.
+   */
+  public void removeFreeWriting()
+  {
+    UnsetWriter request = new UnsetWriter(null, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }  
+
+  /**
+   * MBean interface implementation: removes free reading access on
+   * the destination.
+   */
+  public void removeFreeReading()
+  {
+    UnsetReader request = new UnsetReader(null, destId.toString());
+    Channel.sendTo(adminId, new MBeanNotification(request));
+  }  
+
+  /**
+   * MBean interface implementation: provides free writing access on
+   * the destination.
+   */
+  public void provideFreeWriting()
+  {
+    try {
+      addWriter(null);
+    }
+    catch (Exception exc) {}
+  }
+
+  /**
+   * MBean interface implementation: provides free reading access on
+   * the destination.
+   */
+  public void provideFreeReading()
+  {
+    try {
+      addReader(null);
+    }
+    catch (Exception exc) {}
+  }
+
+  /**
+   * MBean interface implementation; returns the number of subscribers.
+   */
+  public int getNumberOfSubscribers()
+  {
+    return subscribers.size();
   }
 }

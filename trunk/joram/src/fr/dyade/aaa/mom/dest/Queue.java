@@ -19,12 +19,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package fr.dyade.aaa.mom.dest;
 
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.management.MXWrapper;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
@@ -36,7 +39,7 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  *
  * @see QueueImpl
  */
-public class Queue extends Agent
+public class Queue extends Agent implements AdminDestinationItf
 {
   /**
    * Reference to the <code>QueueImpl</code> instance providing this
@@ -53,7 +56,7 @@ public class Queue extends Agent
    */ 
   public Queue(AgentId adminId)
   {
-    queueImpl = new QueueImpl(getId(), adminId);
+    init(adminId);
   }
 
   /**
@@ -62,6 +65,44 @@ public class Queue extends Agent
   protected Queue()
   {}
 
+  /**
+   * Initializes the queue.
+   *
+   * @param adminId  Identifier of the queue administrator.
+   */
+  public void init(AgentId adminId) {
+    queueImpl = new QueueImpl(getId(), adminId);
+  }
+
+  /**
+   * Sets properties for the queue.
+   * <p>
+   * Empty method as no properties may be set for the queue.
+   */
+  public void setProperties(Properties prop) {}
+
+  /** (Re)initializes the agent when (re)loading. */
+  public void initialize(boolean firstTime) throws Exception
+  {
+    super.initialize(firstTime);
+    MXWrapper.registerMBean(queueImpl,
+                            "JORAM destinations",
+                            getId().toString(),
+                            "Queue",
+                            null);
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize()
+  {
+    try {
+      MXWrapper.unregisterMBean("JORAM destinations",
+                                getId().toString(),
+                                "Queue",
+                                null);
+    }
+    catch (Exception exc) {}
+  }
 
   /**
    * Reactions to notifications are implemented in the

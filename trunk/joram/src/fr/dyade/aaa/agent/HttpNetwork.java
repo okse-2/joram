@@ -413,7 +413,7 @@ public class HttpNetwork extends Network {
     if (line.startsWith("GET ")) {
     } else if (line.startsWith("PUT ")) {
     } else {
-      throw new Exception();
+      throw new Exception("Bad request: " + line);
     }
 
     // Skip all header lines, get length
@@ -440,8 +440,7 @@ public class HttpNetwork extends Network {
       } while ((nb != -1) && (offset != length));
       
       if (offset != buf.length) {
-//       if (is.read(buf) != buf.length) {
-	throw new Exception();
+	throw new Exception("Bad request length: " + offset);
       } else {
 	ByteArrayInputStream bis = new ByteArrayInputStream(buf);
 	ObjectInputStream ois = new ObjectInputStream(bis);	  
@@ -504,7 +503,7 @@ public class HttpNetwork extends Network {
     if (line.equals("HTTP/1.1 200 OK")) {
     } else if (line.equals("HTTP/1.1 204 No Content")) {
     } else {
-      throw new Exception();
+      throw new Exception("Bad reply: " + line);
     }
 
     // Skip all header lines, get length
@@ -531,7 +530,7 @@ public class HttpNetwork extends Network {
       } while ((nb != -1) && (offset != length));
 
       if (offset != buf.length) {
-	throw new Exception();
+	throw new Exception("Bad reply length: " + offset);
       } else {
 	ByteArrayInputStream bis = new ByteArrayInputStream(buf);
 	ObjectInputStream ois = new ObjectInputStream(bis);	  
@@ -647,11 +646,16 @@ public class HttpNetwork extends Network {
               // Get next message to send if any
               msgout = qout.get(0);
             } while (running && ((msgout != null) || (msgin != null)));
-            logmon.log(BasicLevel.DEBUG, ", close connection");
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         this.getName() + ", close connection");
           } catch (Exception exc) {
             logmon.log(BasicLevel.WARN,
                        this.getName() + ", ", exc);
           } finally {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         this.getName() + ", connection closed");
             try {
               os.close();
             } catch (Exception exc) {}

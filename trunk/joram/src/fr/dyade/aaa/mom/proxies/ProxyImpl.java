@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -30,6 +31,8 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.mom.MomTracing;
+import fr.dyade.aaa.mom.admin.DeleteUser;
+import fr.dyade.aaa.mom.admin.UpdateUser;
 import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.dest.*;
 import fr.dyade.aaa.mom.excepts.*;
@@ -48,7 +51,7 @@ import java.util.Vector;
  * basically forwarding client requests to MOM destinations and MOM
  * destinations replies to clients.
  */ 
-public class ProxyImpl implements java.io.Serializable
+public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
 {
   /** <code>true</code> if this proxy is an administrator's proxy. */
   private boolean admin = false;
@@ -1779,5 +1782,58 @@ public class ProxyImpl implements java.io.Serializable
                                                      builtSelector));
    
     return true;
+  }
+
+  /** MBean interface implementation: returns the user name. */
+  public String getUserName()
+  {
+    return AdminTopicImpl.ref.getName(proxyAgent.getAgentId());
+  }
+
+  /** MBean interface implementation: returns the user password. */
+  public String getUserPassword()
+  {
+    return AdminTopicImpl.ref.getPassword(proxyAgent.getAgentId());
+  }
+
+  /** MBean interface implementation: deletes the proxy. */
+  public void delete()
+  {
+    DeleteUser request = new DeleteUser(getUserName(),
+                                        proxyAgent.getAgentId().toString());
+    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
+  }
+
+  /**
+   * Changes the user name.
+   *
+   * @param name  New name.
+   *
+   * @exception Exception  If the new name is already taken.
+   */
+  public void updateUserName(String name) throws Exception
+  {
+    if (AdminTopicImpl.ref.isTaken(name))
+      throw new Exception("Name already taken.");
+
+    UpdateUser request = new UpdateUser(getUserName(),
+                                        proxyAgent.getAgentId().toString(),
+                                        name,
+                                        getUserPassword());
+    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
+  }
+
+  /**
+   * Changes the user password.
+   *
+   * @param pass  New password.
+   */
+  public void updateUserPassword(String pass)
+  {
+    UpdateUser request = new UpdateUser(getUserName(),
+                                        proxyAgent.getAgentId().toString(),
+                                        getUserName(),
+                                        pass);
+    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
   }
 } 

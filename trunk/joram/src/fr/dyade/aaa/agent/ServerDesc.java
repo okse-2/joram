@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -32,17 +32,12 @@ import fr.dyade.aaa.util.Strings;
  * it's very important to make all modifiers package.
  */
 public final class ServerDesc implements Serializable {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $";
-
   /**  Server unique identifier. */
   short sid;
   /** Server name. */
   String name;
   /** Host name. */
   String hostname;
-//   /** Is the server transient? */
-//   boolean isTransient;
   /** Host address, use getAddr() method instead. */
   private transient InetAddress addr = null;
   /**
@@ -58,7 +53,6 @@ public final class ServerDesc implements Serializable {
    * Domain description of this server.
    */
   transient MessageConsumer domain = null;
-
   /**
    * The communication port. This variable is set only if the server is
    * directly accessible from this node, in this case it corresponds to the
@@ -117,15 +111,6 @@ public final class ServerDesc implements Serializable {
     this.hostname = hostname;
   }
 
-//   /**
-//    * Is the server transient?
-//    *
-//    * @return true if the server is transient, false otherwise.
-//    */
-//   public boolean isTransient() {
-//     return isTransient;
-//   }
-
   /**
    * Returns an IP address for its server.
    * 
@@ -164,7 +149,7 @@ public final class ServerDesc implements Serializable {
   }
 
   public String getDomainName() {
-    return domain.getName();
+    return domain.getDomainName();
   }
 
 

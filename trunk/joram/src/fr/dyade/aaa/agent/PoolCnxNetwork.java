@@ -35,8 +35,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 public class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.13 2003-09-11 09:53:25 fmaistre Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 

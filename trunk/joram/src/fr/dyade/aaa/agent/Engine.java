@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -80,10 +80,7 @@ import fr.dyade.aaa.util.*;
  * stops the agent server.
  * </ul>
  */
-abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.15 2003-06-23 13:37:51 fmaistre Exp $";
-
+abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   /**
    * Queue of messages to be delivered to local agents.
    */ 
@@ -164,6 +161,15 @@ abstract class Engine implements Runnable, MessageConsumer {
    */
   public final String getName() {
     return name;
+  }
+
+  /**
+   * Returns the corresponding domain's name.
+   *
+   * @return this domain's name.
+   */
+  public final String getDomainName() {
+    return "engine";
   }
 
   /**
@@ -308,15 +314,18 @@ abstract class Engine implements Runnable, MessageConsumer {
     return list;
   }
 
-  String dumpAgent(AgentId id)
+  public String dumpAgent(String id) throws Exception {
+    return dumpAgent(AgentId.fromString(id));
+  }
+
+  public String dumpAgent(AgentId id)
     throws IOException, ClassNotFoundException, Exception {
     Agent ag = (Agent) agents.get(id);
     if (ag == null) {
       ag = (Agent) AgentServer.transaction.load(id.toString());
-      if (ag == null) return "Agent" + id + " unknown";
-      return "Agent" + id + " on disk = " + ag;
+      if (ag == null) return id.toString() + " unknown";
     }
-    return "Agent" + id + " in memory = " + ag;
+    return ag.toString();
   } 
 
   /**

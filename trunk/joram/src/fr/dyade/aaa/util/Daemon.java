@@ -53,8 +53,8 @@ import org.objectweb.util.monolog.api.Logger;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.11 2003-06-23 13:45:20 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.12 2003-09-11 09:54:24 fmaistre Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -107,11 +107,12 @@ public abstract class Daemon implements Runnable {
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
 
-    strbuf.append(getName())
-      .append(" [").append(running).append("/")
-      .append(canStop).append("]");
-
-    if (thread != null) strbuf.append(" -> ").append(thread.isAlive());
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",name=").append(getName());
+    strbuf.append(",running=").append(running);
+    strbuf.append(",canStop=").append(canStop);
+    strbuf.append(",thread=").append(thread);
+    strbuf.append(')');
 
     return strbuf.toString();
   }

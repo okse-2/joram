@@ -27,7 +27,7 @@ package com.scalagent.kjoram.util;
  */
 public class StoppedQueueException extends RuntimeException
 {
-  public static final String RCS_VERSION="@(#)$Id: StoppedQueueException.java,v 1.1 2003-08-07 12:25:02 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: StoppedQueueException.java,v 1.2 2003-09-11 09:51:04 fmaistre Exp $"; 
 
   /**
    * Constructs a new <code>StoppedQueueException</code> with

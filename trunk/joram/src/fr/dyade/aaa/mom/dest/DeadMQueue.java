@@ -19,11 +19,14 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package fr.dyade.aaa.mom.dest;
 
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 
 /**
@@ -36,6 +39,11 @@ import fr.dyade.aaa.agent.AgentId;
 public class DeadMQueue extends Queue
 {
   /**
+   * Empty constructor for newInstance(). 
+   */ 
+  public DeadMQueue() {}
+
+  /**
    * Constructs a <code>DeadMQueue</code> agent. 
    *
    * @param adminId  Identifier of the agent which will be the administrator
@@ -43,6 +51,15 @@ public class DeadMQueue extends Queue
    */ 
   public DeadMQueue(AgentId adminId)
   {
+    init(adminId);
+  }
+
+  /**
+   * Initializes the dead message queue.
+   *
+   * @param adminId  Identifier of the queue administrator.
+   */
+  public void init(AgentId adminId) {
     queueImpl = new DeadMQueueImpl(getId(), adminId);
   }
 }

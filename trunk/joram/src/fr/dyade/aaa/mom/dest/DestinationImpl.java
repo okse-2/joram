@@ -47,20 +47,21 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public abstract class DestinationImpl implements java.io.Serializable
 {
-  /** Identifier of the destination's administrator. */
-  private AgentId adminId;
-  /** <code>true</code> if the READ access is granted to everybody. */
-  private boolean freeReading = false;
-  /** <code>true</code> if the WRITE access is granted to everybody. */
-  private boolean freeWriting = false;
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
    */
   private boolean deletable = false;
 
+  /** Identifier of the destination's administrator. */
+  protected AgentId adminId;
   /** Identifier of the agent hosting the destination. */
   protected AgentId destId;
+
+  /** <code>true</code> if the READ access is granted to everybody. */
+  protected boolean freeReading = false;
+  /** <code>true</code> if the WRITE access is granted to everybody. */
+  protected boolean freeWriting = false;
   /** Table of the destination readers and writers. */
   protected Hashtable clients;
   /**

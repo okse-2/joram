@@ -37,8 +37,8 @@ import fr.dyade.aaa.util.*;
  * localizing the target agent.
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
 
   static Channel channel = null;
 
@@ -270,8 +270,8 @@ abstract public class Channel {
 }
 
 final class TransactionChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
 
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
@@ -357,8 +357,8 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.15 2003-09-11 09:53:25 fmaistre Exp $";
 
   /**
    * Constructs a new <code>TransientChannel</code> object. this method

@@ -88,7 +88,11 @@ public class A3CML {
                                  String xmlFileName) throws Exception {
     File xmlFile = new File(cfgDir, xmlFileName);
     PrintWriter out = new PrintWriter(new FileWriter(xmlFile));
-
+    toXML(config, out);
+  }
+    
+  public static final void toXML(A3CMLConfig config,
+                                 PrintWriter out) throws Exception {
     out.write("<?xml version=\"1.0\"?>\n");
     out.write("<!DOCTYPE config SYSTEM \"a3config.dtd\">\n");
     out.write("\n<" + ELT_CONFIG + ">\n\n");
@@ -387,7 +391,7 @@ public class A3CML {
    * @exception Exception
    *	unspecialized exception when reading and parsing the configuration file
    */
-  static A3CMLConfig getConfig(Reader reader) 
+  public static A3CMLConfig getConfig(Reader reader) 
     throws Exception {
     if (logmon == null)
       logmon =  Debug.getLogger("fr.dyade.aaa.agent.Admin");

@@ -25,6 +25,7 @@ package fr.dyade.aaa.joram.admin;
 
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 
 /**
@@ -169,6 +170,40 @@ public interface AdminItf
    * @exception AdminException  If the request fails.
    */
   public DeadMQueue createDeadMQueue() throws ConnectException, AdminException;
+
+  /**
+   * Creates and deploys a destination on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the destination.
+   * @param className Name of class to be instanciated.
+   * @param prop      Destination object properties.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String createDestination(int serverId,
+                                  String className,
+                                  Properties prop)
+    throws ConnectException, AdminException;
+  
+  /**
+   * Creates and deploys a destination on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the destination.
+   * @param className Name of class to be instanciated.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String createDestination(int serverId,
+                                  String className)
+    throws ConnectException, AdminException;
 
   /**
    * Removes a given destination from the platform.

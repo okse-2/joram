@@ -29,8 +29,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.*;
 
 public class SCAdminHelper {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: SCAdminHelper.java,v 1.1 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: SCAdminHelper.java,v 1.2 2003-09-11 09:53:25 fmaistre Exp $"; 
 
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
   protected Hashtable ASP = null;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,18 +24,23 @@ import java.io.IOException;
 /**
  * The parent interface for all messages consumers.
  * 
- * @author	Freyssinet Andre
  * @see		Engine, Network.
  */
 public interface MessageConsumer {
-  public static final String RCS_VERSION="@(#)$Id: MessageConsumer.java,v 1.10 2003-06-23 13:37:51 fmaistre Exp $";
-
   /**
    * Returns this <code>MessageConsumer</code>'s name.
    *
    * @return this <code>MessageConsumer</code>'s name.
    */
   String getName();
+
+  /**
+   * Returns the corresponding domain's name.
+   *
+   * @return this domain's name.
+   */
+  String getDomainName();
+
   /**
    * Insert a message in the <code>MessageQueue</code>.
    * This method is used during initialisation to restore the component

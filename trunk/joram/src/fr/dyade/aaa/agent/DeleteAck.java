@@ -23,7 +23,7 @@ package fr.dyade.aaa.agent;
  * DeleteAck - Acknowledge for deleting an agent
  */
 public class DeleteAck extends Notification { 
-  public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $"; 
 
   public AgentId agent = null;
 

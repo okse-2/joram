@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,17 +28,14 @@ import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.agent.*;
 
 /**
- * A <code>ServletAgent</code> proxy provides a general agent framework for
+ * A <code>ServerAgent</code> proxy provides a general agent framework for
  * services built using the request-response paradigm. Their primary use is
  * to provide web-based access to agent oriented application using HTML web
  * pages.<p>
- * The <code>ServletAgent</code> proxy needs at least an argument: the TCP
+ * The <code>ServerAgent</code> proxy needs at least an argument: the TCP
  * port number.<p>
  */
 public abstract class ServerAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerAgent.java,v 1.4 2003-06-23 13:38:18 fmaistre Exp $"; 
-  
   /**
    * This boolean is used to prevent error messages due to stopping the
    * multiples monitors.
@@ -258,6 +255,7 @@ public abstract class ServerAgent extends Agent {
             else
               this.logmon.log(BasicLevel.ERROR,
                               this.getName() + ", error during accept", exc);
+            continue;
 	  }
 
 	  if (! running) break;

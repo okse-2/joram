@@ -19,11 +19,12 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package fr.dyade.aaa.mom.dest;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
@@ -49,6 +50,7 @@ import fr.dyade.aaa.ns.SimpleReport;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -57,7 +59,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>AdminTopicImpl</code> class implements the admin topic behaviour,
  * basically processing administration requests.
  */
-public class AdminTopicImpl extends TopicImpl
+public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
 {
   /** Reference of the server's local AdminTopicImpl instance. */
   public static AdminTopicImpl ref;
@@ -157,7 +159,6 @@ public class AdminTopicImpl extends TopicImpl
                                              false));
   }
 
-
   /**
    * Method used by <code>fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory</code>
    * and <code>fr.dyade.aaa.mom.proxies.soap.SoapProxy</code> proxies to check
@@ -194,11 +195,42 @@ public class AdminTopicImpl extends TopicImpl
       throw new Exception("User [" + name + "] does not exist");
   }
 
+  /** Method used by proxies for retrieving their name. */
+  public String getName(AgentId proxyId)
+  {
+    String name;
+    for (Enumeration enum = proxiesTable.keys(); enum.hasMoreElements();) {
+      name = (String) enum.nextElement();
+      if (proxyId.equals(proxiesTable.get(name)))
+        return name;
+    }
+    return null;
+  }
+
+  /** Method used by proxies for retrieving their password. */
+  public String getPassword(AgentId proxyId)
+  {
+    String name;
+    for (Enumeration enum = proxiesTable.keys(); enum.hasMoreElements();) {
+      name = (String) enum.nextElement();
+      if (proxyId.equals(proxiesTable.get(name)))
+        return (String) usersTable.get(name);;
+    }
+    return null;
+  }
+
+  /** Method used by proxies for checking if a given name is already used. */
+  public boolean isTaken(String name)
+  {
+    return usersTable.containsKey(name);
+  }
+  
   /** Method returning the id of the admin topic. */ 
   public AgentId getId()
   {
     return destId;
   }
+  
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -218,6 +250,8 @@ public class AdminTopicImpl extends TopicImpl
       doReact(from, (AdminNotification) not);
     else if (not instanceof SimpleReport)
       doReact(from, (SimpleReport) not);
+    else if (not instanceof MBeanNotification)
+      doReact(from, (MBeanNotification) not);
     else if (not instanceof fr.dyade.aaa.mom.comm.AdminReply)
       doReact(from, (fr.dyade.aaa.mom.comm.AdminReply) not);
     else
@@ -271,6 +305,36 @@ public class AdminTopicImpl extends TopicImpl
       friends = new Vector();
       friends.add(adminTopic0Id);
     }
+  }
+  
+  /**
+   * Reacts to an <code>MBeanNotification</code> by passing the wrapped
+   * administration request to the appropriate method.
+   */
+  protected void doReact(AgentId from, MBeanNotification not)
+  {
+    try {
+      if (not.request instanceof CreateDestinationRequest)
+        doProcess((CreateDestinationRequest) not.request, null, null);
+      else if (not.request instanceof CreateUserRequest)
+        doProcess((CreateUserRequest) not.request, null, null);
+      else if (not.request instanceof DeleteDestination)
+        doProcess((DeleteDestination) not.request, null, null);
+      else if (not.request instanceof UpdateUser)
+        doProcess((UpdateUser) not.request, null, null);
+      else if (not.request instanceof DeleteUser)
+        doProcess((DeleteUser) not.request, null, null);
+      else if (not.request instanceof SetReader)
+        doProcess((SetReader) not.request, null, null);
+      else if (not.request instanceof SetWriter)
+        doProcess((SetWriter) not.request, null, null);
+      else if (not.request instanceof UnsetReader)
+        doProcess((UnsetReader) not.request, null, null);
+      else if (not.request instanceof UnsetWriter)
+        doProcess((UnsetWriter) not.request, null, null);
+    }
+    catch (UnknownServerException exc) {}
+    catch (RequestException exc) {}
   }
 
   /**
@@ -641,10 +705,8 @@ public class AdminTopicImpl extends TopicImpl
 
         if (request instanceof StopServerRequest)
           doProcess((StopServerRequest) request, replyTo, msgId);
-        else if (request instanceof CreateQueueRequest)
-          doProcess((CreateQueueRequest) request, replyTo, msgId);
-        else if (request instanceof CreateTopicRequest)
-          doProcess((CreateTopicRequest) request, replyTo, msgId);
+        else if (request instanceof CreateDestinationRequest)
+          doProcess((CreateDestinationRequest) request, replyTo, msgId);
         else if (request instanceof DeleteDestination)
           doProcess((DeleteDestination) request, replyTo, msgId);
         else if (request instanceof SetCluster)
@@ -758,6 +820,7 @@ public class AdminTopicImpl extends TopicImpl
     }
   }
 
+
   /**
    * Processes a <code>StopServerRequest</code> instance requesting to stop
    * a given server.
@@ -781,97 +844,65 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /**
-   * Processes a <code>CreateQueueRequest</code> instance requesting the
-   * creation of a <code>Queue</code> or a <code>DeadMQueue</code>
-   * destination.
+   * Processes a <code>CreateDestinationRequest</code> instance
+   * requesting the creation of a destination.
    *
    * @exception UnknownServerException  If the target server does not exist.
-   * @exception RequestException  If the queue deployement fails.
+   * @exception RequestException  If the destination deployement fails.
    */
-  private void doProcess(CreateQueueRequest request,
+  private void doProcess(CreateDestinationRequest request,
                          AgentId replyTo,
                          String msgId)
-               throws UnknownServerException, RequestException
-  {
+    throws UnknownServerException, RequestException {
+
     // If this server is not the target server, doing nothing:
     if (! checkServerId(request.getServerId()))
       return;
-      
-    Queue queue = null;
-    String dest;
-    if (request instanceof CreateDMQRequest) {
-      queue = new DeadMQueue(destId);
-      dest = "DMQ";
-    }
-    else {
-      queue = new Queue(destId);
-      dest = "queue";
-    }
 
+    Agent dest = null;
+    String clazz = request.getClassName();
+    Properties properties = request.getProperties();
+
+    // Instanciating the destination class.
     try {
-      queue.deploy();
-      AgentId qId = queue.getId();
-
-      if (dest.equals("queue"))
-        queues.add(qId);
+      if ((clazz != null) && (clazz.length() > 0)) {
+        dest = (Agent) Class.forName(clazz).newInstance();
+        if (properties != null)
+          ((AdminDestinationItf) dest).setProperties(properties);
+        ((AdminDestinationItf) dest).init(destId);
+      } else throw new Exception("Invalid empty class name.");
+    } catch (Exception exc) {
+      if (exc instanceof ClassCastException)
+        throw new RequestException("Class [" + clazz + "] is not a Destination class.");
       else
-        deadMQueues.add(qId);
-
-      String info = "Request [" + request.getClass().getName()
-                    + "], processed by AdminTopic on server [" + serverId
-                    + "], successful [true]: " + dest + " ["
-                    + qId.toString() + "] has been created and deployed";
-
-      distributeReply(replyTo,
-                      msgId,
-                      new CreateDestinationReply(qId.toString(), info));
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+        throw new RequestException("Could not instanciate Destination class [" + clazz + "]: " + exc);
     }
-    catch (Exception exc) {
-      throw new RequestException("Queue not deployed: " + exc);
-    }
-  }
-  
-  /**
-   * Processes a <code>CreateTopicRequest</code> instance requesting the
-   * creation of a <code>Topic</code> destination.
-   *
-   * @exception UnknownServerException  If the target server does not exist.
-   * @exception RequestException  If the topic deployement failed.
-   */
-  private void doProcess(CreateTopicRequest request,
-                         AgentId replyTo,
-                         String msgId)
-               throws UnknownServerException, RequestException
-  {
-    // If this server is not the target server, doing nothing:
-    if (! checkServerId(request.getServerId()))
-      return;
-
-    Topic topic = new Topic(destId);
 
     try {
-      topic.deploy();
-      AgentId tId = topic.getId();
+      dest.deploy();
+      AgentId destId = dest.getId();
 
-      topics.add(tId);
-  
+      if (dest instanceof DeadMQueue)
+        deadMQueues.add(destId);
+      else if (dest instanceof Topic)
+        topics.add(destId);
+      else if (dest instanceof Queue)
+        queues.add(destId);
+
       String info = "Request [" + request.getClass().getName()
                     + "], processed by AdminTopic on server [" + serverId
-                    + "], successful [true]: topic ["
-                    + tId.toString() + "] has been created and deployed";
+                    + "], successful [true]: " + clazz + " ["
+                    + destId.toString() + "] has been created and deployed";
 
       distributeReply(replyTo,
                       msgId,
-                      new CreateDestinationReply(tId.toString(), info));
+                      new CreateDestinationReply(destId.toString(), info));
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     }
     catch (Exception exc) {
-      throw new RequestException("Topic not deployed: " + exc);
+      throw new RequestException("Error while deploying Destination [" + clazz + "]: " + exc);
     }
   }
 
@@ -1876,6 +1907,80 @@ public class AdminTopicImpl extends TopicImpl
       Channel.sendTo(to, clientMessages);
     }
     catch (Exception exc) {}
+  }
+
+
+  /**
+   * MBean interface implementation; returns the administered queues
+   * identifiers.
+   */
+  public String getAdministeredQueuesIds()
+  {
+    Vector result = new Vector();
+    for (int i = 0; i < queues.size(); i++)
+      result.add(queues.get(i).toString());
+
+    return result.toString();
+  }
+
+  /**
+   * MBean interface implementation; returns the administered topics
+   * identifiers.
+   */
+  public String getAdministeredTopicsIds()
+  {
+    Vector result = new Vector();
+    for (int i = 0; i < topics.size(); i++)
+      result.add(topics.get(i).toString());
+
+    return result.toString();
+  }
+
+  /**
+   * Returns the names and proxies identifiers of the administered JMS users.
+   */
+  public String getAdministeredJmsUsers()
+  {
+    return proxiesTable.toString();
+  }
+
+  /**
+   * MBean interface implementation: creates a local JMS proxy.
+   *
+   * @param name  User name.
+   * @param pass  User password.
+   *
+   * @exception Exception  If the user identification is already taken.
+   */
+  public void createLocalJmsUser(String name, String pass)
+              throws Exception
+  {
+    if (soapTable.containsKey(name))
+      throw new Exception("User [" + name + "] is a SOAP user.");
+
+    if (proxiesTable.containsKey(name))
+      throw new Exception("User [" + name + "] has already been defined.");
+
+    CreateUserRequest request = new CreateUserRequest(name, pass, serverId);
+    Channel.sendTo(destId, new MBeanNotification(request));
+  }
+
+  /** MBean interface implementation: creates a local topic. */
+  public void createLocalTopic()
+  {
+    CreateDestinationRequest request = 
+      new CreateDestinationRequest(serverId,
+                                   "fr.dyade.aaa.mom.dest.Topic");
+    Channel.sendTo(destId, new MBeanNotification(request));
+  }
+  
+  /** MBean interface implementation: creates a local queue. */
+  public void createLocalQueue()
+  {
+    CreateDestinationRequest request = 
+      new CreateDestinationRequest(serverId,
+                                   "fr.dyade.aaa.mom.dest.Queue");
+    Channel.sendTo(destId, new MBeanNotification(request));
   }
 
 

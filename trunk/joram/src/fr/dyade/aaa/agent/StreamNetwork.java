@@ -27,8 +27,8 @@ import java.net.*;
  * class for stream sockets.
  */
 public abstract class StreamNetwork extends CausalNetwork {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.13 2003-09-11 09:53:25 fmaistre Exp $";
 
   /** Creates a new Network component */
   public StreamNetwork() {

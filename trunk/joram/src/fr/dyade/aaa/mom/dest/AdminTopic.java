@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
  */
 package fr.dyade.aaa.mom.dest;
 
-import java.io.IOException;
+import fr.dyade.aaa.agent.management.MXWrapper;
 
 
 /**
@@ -47,9 +47,10 @@ public class AdminTopic extends Topic
   /**
    * Initializes the <code>AdminTopic</code> service.
    *
-   * @exception IOException  If the topic deployment fails.
+   * @exception java.io.IOException  If the deployment of the topic fails.
    */
-  public static void init(String args, boolean firstTime) throws IOException
+  public static void init(String args, boolean firstTime)
+                     throws java.io.IOException
   {
     if (! firstTime)
       return;
@@ -65,4 +66,31 @@ public class AdminTopic extends Topic
    */ 
   public static void stopService()
   {}
+
+  /** (Re)initializes the agent when (re)loading. */
+  public void initialize(boolean firstTime) throws Exception
+  {
+    super.initialize(firstTime);
+    MXWrapper.unregisterMBean("JORAM destinations",
+                              getId().toString(),
+                              "Topic",
+                              null);
+    MXWrapper.registerMBean(topicImpl,
+                            "JORAM server",
+                            getId().toString(),
+                            "AdminTopic",
+                            null);
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize()
+  {
+    try {
+      MXWrapper.unregisterMBean("JORAM server",
+                                getId().toString(),
+                                "AdminTopic",
+                                null);
+    }
+    catch (Exception exc) {}
+  }
 }

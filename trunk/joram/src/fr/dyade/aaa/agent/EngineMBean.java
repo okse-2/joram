@@ -1,7 +1,5 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,25 +15,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
- *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
  */
-package fr.dyade.aaa.mom.admin;
+package fr.dyade.aaa.agent;
 
-/**
- * A <code>CreateDMQRequest</code> instance requests the creation of a dead
- * message queue on a given server.
- */
-public class CreateDMQRequest extends CreateQueueRequest
-{
+public interface EngineMBean {
   /**
-   * Constructs a <code>CreateDMQRequest</code> instance.
+   * Returns this <code>Engine</code>'s name.
    *
-   * @param serverId  The id of the server where deploying the dmq.
+   * @return this <code>Engine</code>'s name.
    */
-  public CreateDMQRequest(int serverId)
-  {
-    super(serverId);
-  }
+  public String getName();
+
+  /**
+   * Tests if the engine is alive.
+   *
+   * @return	true if this <code>MessageConsumer</code> is alive; false
+   * 		otherwise.
+   */
+  public boolean isRunning();
+
+  public String dumpAgent(String id) throws Exception;
+
+  /** Causes this engine to begin execution */
+  public void start() throws Exception;
+
+  /** Forces the engine to stop executing */
+  public void stop();
 }

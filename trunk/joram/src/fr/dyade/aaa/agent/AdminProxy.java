@@ -30,6 +30,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.agent.conf.A3CML;
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
 
 /**
  * A <code>AdminProxy</code> service provides an interface to access
@@ -41,8 +43,8 @@ import fr.dyade.aaa.util.Daemon;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.7 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.8 2003-09-11 09:53:25 fmaistre Exp $"; 
 
   static AdminProxy proxy = null;
 
@@ -161,6 +163,7 @@ public class AdminProxy {
   public static final String STOP_SERVER = "halt";
   public static final String CRASH_SERVER = "crash";
   public static final String PING = "ping";
+  public static final String CONFIG = "config";
 
   // Environment control
   static final String SET_VARIABLE = "set";
@@ -547,6 +550,20 @@ public class AdminProxy {
 	} else if (cmd.equals(NONE)) {
 	} else if (cmd.equals(PING)) {
           writer.println(AgentServer.getServerId());
+        } else if (cmd.equals(CONFIG)) {
+          try {
+            A3CMLConfig a3CMLConfig = AgentServer.getConfig();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintWriter out = new PrintWriter(baos);
+            A3CML.toXML(a3CMLConfig, out);
+            baos.flush();
+            baos.close();
+            byte[] bytes = baos.toByteArray();
+            writer.println(new String(bytes));
+          } catch (Exception exc) {
+            writer.println("Can't load configuration: " + exc.getMessage());
+            if (debug) exc.printStackTrace(writer);
+          }
         } else if (cmd.equals(UPDATE_TRACES)){
           PrintStream oldErr = System.err;
           try{
@@ -584,7 +601,9 @@ public class AdminProxy {
 	    "\t" + ADD_SERVICE + " classname arguments" +
 	    "\n\t\tRegisters and starts the specified Service.\n" +
 	    "\t" + REMOVE_SERVICE + " classname" +
-	    "\n\t\tStops then unregister the specified Service.\n");
+	    "\n\t\tStops then unregister the specified Service.\n" + 
+            "\t" + CONFIG + 
+            "\n\t\tReturns the configuration of the server in XML format.\n");
 	} else {
 	  writer.println("unknown command:" + cmd);
 	}

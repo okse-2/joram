@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -44,9 +44,6 @@ import fr.dyade.aaa.util.Daemon;
  * output flow.
  */
 public class HttpDebug {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.9 2003-06-23 13:37:51 fmaistre Exp $"; 
-
   static HttpDebug httpd = null;
 
   static int port = 8090;
@@ -79,10 +76,10 @@ public class HttpDebug {
 
     if (httpd == null)
       httpd = new HttpDebug(port);
-    start();
+    startService();
   }
 
-  public static void start() {
+  public static void startService() {
     for (int i=0; i<httpd.monitors.length; i++) {
       httpd.monitors[i].start();
     }
