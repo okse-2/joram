@@ -56,8 +56,8 @@ public final class Debug implements java.io.Serializable  {
 		connectReceive = Boolean.getBoolean("Debug.connectReceive");
 		connectTopicRec = Boolean.getBoolean("Debug.connectTopicRec");
 		admin = Boolean.getBoolean("Debug.admin");
-		admin = Boolean.getBoolean("Debug.topic");
-		admin = Boolean.getBoolean("Debug.queue");
+		topic = Boolean.getBoolean("Debug.topic");
+		queue = Boolean.getBoolean("Debug.queue");
 	}
 		
 }
