@@ -83,6 +83,8 @@ public class JmsClientProxy extends ConnectionFactory
     scheduler = Scheduler.getDefault();
 
     connections = new Vector();
+    subsTable = new Hashtable();
+    messagesTable = new Hashtable();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
@@ -122,7 +124,7 @@ public class JmsClientProxy extends ConnectionFactory
         // Denying the non acknowledged messages:
         cnx.deny();
 
-        // Removing or desactivating the subscriptions:
+        // Removing or desactivating the subscriptions, if any:
         String subName;
         ClientSubscription sub;
         while (! cnx.activeSubs.isEmpty()) {
@@ -147,11 +149,6 @@ public class JmsClientProxy extends ConnectionFactory
               MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary"
                                       + " subscription " + name + " deleted.");
           }
-        }
-
-        if (subsTable != null && subsTable.isEmpty()) {
-          subsTable = null;
-          messagesTable = null;
         }
 
         // Deleting the temporary destinations:
@@ -677,11 +674,6 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void doReact(ConsumerSubRequest req) throws RequestException
   {
-    if (subsTable == null) {
-      subsTable = new Hashtable();
-      messagesTable = new Hashtable();
-    }
-
     // Checking the name of the subscription:
     String subName = req.getSubName();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
@@ -847,10 +839,6 @@ public class JmsClientProxy extends ConnectionFactory
     // Getting the subscription:
     String subName = req.getTarget();
 
-    if (subsTable == null)
-      throw new RequestException("Can't unsubscribe non existing"
-                                 + " subscription: " + subName);
-
     ClientSubscription sub = (ClientSubscription) subsTable.remove(subName);
 
     if (sub == null)
@@ -867,11 +855,6 @@ public class JmsClientProxy extends ConnectionFactory
     // Removing the subscription:
     cnx.activeSubs.remove(subName);
     sub.delete();
-
-    if (subsTable.isEmpty()) {
-      subsTable = null;
-      messagesTable = null;
-    }
 
     // Acknowledging the request:
     sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
@@ -1645,23 +1628,21 @@ public class JmsClientProxy extends ConnectionFactory
         }
 
         // Removing all proxy's subscriptions:
-        if (subsTable != null) {
-          Enumeration subNames = subsTable.keys();
-          String subName;
-          ClientSubscription sub;
-          Vector tIds = new Vector();
-          while (subNames.hasMoreElements()) {
-            subName = (String) subNames.nextElement();
-            sub = (ClientSubscription) subsTable.remove(subName);
-            if (! tIds.contains(sub.topicId)) {
-              tIds.add(sub.topicId);
-              sendTo(sub.topicId, new UnsubscribeRequest(null, null));
-            }
+        Enumeration subNames = subsTable.keys();
+        String subName;
+        ClientSubscription sub;
+        Vector tIds = new Vector();
+        while (subNames.hasMoreElements()) {
+          subName = (String) subNames.nextElement();
+          sub = (ClientSubscription) subsTable.remove(subName);
+          if (! tIds.contains(sub.topicId)) {
+            tIds.add(sub.topicId);
+            sendTo(sub.topicId, new UnsubscribeRequest(null, null));
           }
-          tIds.removeAllElements();
-          tIds = null;
-          messagesTable.clear();
         }
+        tIds.removeAllElements();
+        tIds = null;
+        messagesTable.clear();
       }
       catch (ProxyException pE) {}
     }
