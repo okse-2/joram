@@ -19,7 +19,7 @@
  * USA
  * 
  * Initial developer(s): Jeff Mesnil (jmesnil@inrialpes.fr)
- * Contributor(s): ______________________________________.
+ * Contributor(s): Andreas Mueller <am@iit.de>.                 
  */
 
 package org.objectweb.jtests.jms.conform.connection;
@@ -34,7 +34,7 @@ import junit.framework.*;
  * See JMS specifications, §4.3.5 Closing a Connection
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: ConnectionTest.java,v 1.2 2002-04-08 13:46:57 joram Exp $
+ * @version $Id: ConnectionTest.java,v 1.3 2002-04-08 14:49:07 joram Exp $
  */
 public class ConnectionTest extends PTPTestCase {
   

@@ -19,7 +19,7 @@
  * USA
  * 
  * Initial developer(s): Jeff Mesnil (jmesnil@inrialpes.fr)
- * Contributor(s): ______________________________________.
+ * Contributor(s): Andreas Mueller <am@iit.de>.
  */
 
 package org.objectweb.jtests.jms.conform.session;
@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TopicSessionTest.java,v 1.5 2002-04-08 10:34:16 joram Exp $
+ * @version $Id: TopicSessionTest.java,v 1.6 2002-04-08 14:48:10 joram Exp $
  */
 public class TopicSessionTest extends PubSubTestCase {
 
