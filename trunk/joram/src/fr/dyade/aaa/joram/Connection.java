@@ -172,6 +172,20 @@ public class Connection implements javax.jms.Connection
     return "Cnx:" + proxyId + "-" + key;
   }
 
+  /**
+   * Specializes this Object method; returns <code>true</code> if the
+   * parameter is a <code>Connection</code> instance sharing the same
+   * proxy identifier and connection key.
+   */
+  public boolean equals(Object obj)
+  {
+    if (! (obj instanceof Connection))
+      return false;
+
+    Connection cnx = (Connection) obj;
+
+    return toString().equals(cnx.toString());
+  }
 
   /**
    * API method.
