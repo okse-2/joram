@@ -14,8 +14,13 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far.</p>
+      <s2 name="Modifications (latest: April 2003, 23rd)">
+      <ul>
+      <li>JNDI bug corrected: serializable objects may be bound in a server
+      without the need for the server to "know" the objects' classes. The
+      following packages should be updated: <code>fr.dyade.aaa.agent</code>,
+      <code>fr.dyade.aaa.ip</code>, <code>fr.dyade.aaa.jndi2</code>.</li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram3_4_1">
