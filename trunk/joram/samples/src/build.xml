@@ -130,6 +130,22 @@
     </java>
   </target>
 
+  <!-- Runs the classic consumer client -->
+  <target name="consumer" depends="init"
+    description="--> Start a Consumer client">
+    <java classname="classic.Consumer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic producer client -->
+  <target name="producer" depends="init"
+    description="--> Start a Producer client">
+    <java classname="classic.Producer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
   <!-- Runs the classic browser client -->
   <target name="browser" depends="init"
     description="--> Start a Browser client">
