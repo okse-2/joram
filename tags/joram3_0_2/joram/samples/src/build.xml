@@ -1,0 +1,322 @@
+<project default="compile" basedir=".">
+
+  <!-- Initializes the environment paths and properties -->
+  <target name="init">
+    <!-- Initialize the directory structure properties -->
+    <property name="src.dir" location="."/>
+    <property name="obj.dir" location="../classes"/>
+    <property name="lib.dir" location="../../lib"/>
+    <property name="run.dir" location="../run"/>
+    <property name="conf.dir" location="../../config"/>
+    <!-- Project classpath needed for execution -->
+    <path id="project.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <pathelement path="${obj.dir}"/>
+    </path>
+    <property name="project.class.path" refid="project.class.path"/>
+  </target>
+
+  <!-- Clean samples - delete generated files -->
+  <target name="clean" depends="init"
+          description="--> delete generated files">
+    <delete dir="${obj.dir}"/>
+  </target>
+
+  <!-- Prepares the compilation phase -->
+  <target name="prepare" depends="init">
+    <delete quiet="true" dir="${obj.dir}"/>
+    <delete quiet="true" dir="${run.dir}"/>
+    <mkdir dir="${obj.dir}"/>
+  </target>
+
+  <!-- Compiles -->
+  <target name="compile" depends="prepare"
+    description="--> Compile all samples">
+    <javac srcdir="${src.dir}"
+           destdir="${obj.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}"
+           nowarn="${nowarn}"
+           verbose="${verbose}">
+      <classpath refid="project.class.path"/>
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+
+
+  <!-- Initializes the centralized configuration -->
+  <target name="simple_init" depends="init">
+    <delete dir="${run.dir}"/>
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          todir="${obj.dir}"/>
+    <copy file="${conf.dir}/centralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the distributed configuration -->
+  <target name="distributed_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${obj.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/distributed_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Starts a server -->
+  <target name="server" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg value="-DTransaction=${transaction}"/>
+      <arg line="${sid} ./s${sid}"/>
+    </java>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="single_server" depends="simple_init"
+          description="--> Start a single server in non-persistent mode">
+    <antcall target="server">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+
+  <!-- Setup the classic configuration -->
+  <target name="classic_admin" depends="init"
+          description="--> Setup a classic administration (for a centralized architecture)">
+    <java classname="classic.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="sender" depends="init"
+    description="--> Start a Sender client">
+    <java classname="classic.Sender" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic receiver client -->
+  <target name="receiver" depends="init"
+    description="--> Start a Receiver client">
+    <java classname="classic.Receiver" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic subscriber client -->
+  <target name="subscriber" depends="init"
+    description="--> Start a Subscriber client">
+    <java classname="classic.Subscriber" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic publisher client -->
+  <target name="publisher" depends="init"
+    description="--> Start a Publisher client">
+    <java classname="classic.Publisher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic browser client -->
+  <target name="browser" depends="init"
+    description="--> Start a Browser client">
+    <java classname="classic.Browser" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+  <!-- Setup the chat administration -->
+  <target name="chat_admin" depends="init"
+          description="--> Setup chat administration">
+    <java classname="chat.ChatAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a chat client -->
+  <target name="chat1" depends="init"
+    description="--> Run chat client as user1">
+    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+      <arg line="user1"/>
+    </java>
+  </target>
+
+  <!-- Runs an other chat client -->
+  <target name="chat2" depends="init"
+    description="--> Run chat client as user2">
+    <java classname="chat.SimpleChat" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+      <arg line="user2"/>
+    </java>
+  </target>
+
+  
+  <!-- Setup the dotcom administration -->
+  <target name="dotcom_admin" depends="init"
+          description="--> Setup dotcom administration">
+      <java classname="dotcom.DotcomAdmin"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+  </target>
+
+  <!-- Runs the dotcom servers -->
+  <target name="webServers" depends="init"
+    description="--> Run all dotcom servers">
+    <parallel>
+      <java classname="dotcom.BillingServer" failonerror="no" fork="yes">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.InventoryServer" failonerror="no" fork="yes">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.CustomerServer" failonerror="no" fork="yes">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.ControlServer" failonerror="no" fork="yes">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.DeliveryServer" failonerror="no" fork="yes">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </parallel>
+  </target>
+
+  <!-- Runs the dotcom client -->
+  <target name="webClient" depends="init"
+    description="--> Run dotcom client">
+    <java classname="dotcom.WebServer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+  <!-- Setup a distributed architecture -->
+  <target name="server0" depends="distributed_init"
+          description="--> Start a server for a distributed architecture (w/ id 0)">
+    <antcall target="server">
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="server1" depends="distributed_init"
+          description="--> Start a server for a distributed architecture (w/ id 1)">
+    <antcall target="server">
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+  <target name="server2" depends="distributed_init"
+          description="--> Start a server for a distributed architecture (w/ id 2)">
+    <antcall target="server">
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
+      <param name="sid" value="2"/>
+    </antcall>
+  </target>
+
+  <!-- Runs the archi administration -->
+  <target name="archi_admin" depends="init"
+    description="--> Run the distributed architecture administration">
+    <java classname="archi.ArchiAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi sender client -->
+  <target name="archi_sender" depends="init"
+    description="--> Run the distributed architecture Sender client">
+    <java classname="archi.Sender" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi receiver client -->
+  <target name="archi_receiver" depends="init"
+    description="--> Run the distributed architecture Receiver client">
+    <java classname="archi.Receiver" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi durable subscriber client -->
+  <target name="archi_sub" depends="init"
+    description="--> Run the distributed architecture Subscriber client">
+    <java classname="archi.DSubscriber" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi publisher client -->
+  <target name="archi_pub" depends="init"
+    description="--> Run the distributed architecture Publisher client">
+    <java classname="archi.Publisher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  
+  <!-- Runs the cluster administration -->
+  <target name="cluster_admin" depends="init"
+    description="--> Run the cluster administration">
+    <java classname="cluster.ClusterAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a cluster subscriber -->
+  <target name="subscriber10" depends="init">
+    <java classname="cluster.Subscriber10" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a cluster subscriber -->
+  <target name="subscriber20" depends="init">
+    <java classname="cluster.Subscriber20" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a cluster subscriber -->
+  <target name="subscriber21" depends="init">
+    <java classname="cluster.Subscriber21" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the cluster publisher -->
+  <target name="cluster_pub" depends="init">
+    <java classname="cluster.Publisher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+</project>
