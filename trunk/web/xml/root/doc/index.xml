@@ -44,6 +44,10 @@
         <li>Administering the <a href="../current/doc/joram3_0_ADMIN.pdf">
         3.0 release</a>.</li>
       </ul>
+      <ul>
+        <li><a href="../current/doc/joram3_3_ADV_CFG.pdf">Advanced</a>
+        configuration tips for the 3.3 and later releases.</li>
+      </ul>
     </s1>
 
     <s1 name="Running JORAM samples">
