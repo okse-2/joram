@@ -30,7 +30,7 @@
       expression parser, the <a href="http://ws.apache.org/soap/">SOAP</a>
       implementation, and the <a href="http://xml.apache.org/">Xerces</a>
       XML parser are Apache's projects covered by the
-      <a href="licenses/APACHE_LICENSE.TXT">Apache license</a>.
+      <a href="http://xml.apache.org/dist/LICENSE.txt">Apache license</a>.
       </p>
 
       <p>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
