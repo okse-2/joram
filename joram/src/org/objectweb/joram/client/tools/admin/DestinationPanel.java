@@ -33,7 +33,7 @@ import javax.swing.*;
 import java.util.*;
 import javax.jms.*;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
 
 
 /**

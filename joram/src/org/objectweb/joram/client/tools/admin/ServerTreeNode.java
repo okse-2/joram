@@ -25,7 +25,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
 
 
 class ServerTreeNode extends DefaultMutableTreeNode

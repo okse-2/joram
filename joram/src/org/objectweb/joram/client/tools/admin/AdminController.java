@@ -27,12 +27,12 @@ import javax.naming.*;
 import javax.swing.tree.*;
 import javax.jms.*;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.tcp.*;
+
 
 public class AdminController
 {
-  private final AdminItf admin;
-  private final MonitorItf monitor;
   private boolean adminConnected = false;
   private String adminConnectionStr = "Not connected";
 
@@ -64,9 +64,6 @@ public class AdminController
 
   public AdminController()
   {
-    admin = new AdminImpl();
-    monitor = new MonitorImpl();
-    
     adminRoot = new DefaultMutableTreeNode(STR_ADMIN_DISCONNECTED);
     adminTreeModel = new DefaultTreeModel(adminRoot, true);
 
@@ -144,8 +141,7 @@ public class AdminController
   	}
   	catch (Exception exc) {}
 
-  	admin.connect(host, port, user, passwd, 30);
-  	monitor.connect(host, port, user, passwd, 30);
+  	AdminModule.connect(host, port, user, passwd, 30);
   	adminConnected = true;
   	adminConnectionStr = "//" + host + ":" + port;
 
@@ -164,7 +160,7 @@ public class AdminController
 
 		List servers = null;
 		try {
-			servers = monitor.getServersIds();
+			servers = AdminModule.getServersIds();
 		}
 		catch (Exception exc) {
 			System.err.println("Failed to get server list: " + exc);
@@ -175,8 +171,8 @@ public class AdminController
 			int server = ((Short) it.next()).intValue();		
 
       try {
-        destList = monitor.getDestinations(server);
-        userList = monitor.getUsers(server);
+        destList = AdminModule.getDestinations(server);
+        userList = AdminModule.getUsers(server);
       }
       catch (AdminException exc) {
         System.err.println("Failed to get user and destination lists for server #" +
@@ -206,8 +202,7 @@ public class AdminController
   public void disconnectAdmin() throws Exception
   {
   	if (adminConnected) {
-      admin.disconnect();
-      monitor.disconnect();
+      AdminModule.disconnect();
   	}
 
     adminRoot.setUserObject(STR_ADMIN_DISCONNECTED);
@@ -221,7 +216,7 @@ public class AdminController
 
 	public void stopServer(ServerTreeNode stn) throws Exception
 	{
-		admin.stopServer(stn.getServerId());
+		AdminModule.stopServer(stn.getServerId());
 		adminTreeModel.removeNodeFromParent(stn);
 	}
 
@@ -238,17 +233,17 @@ public class AdminController
   	Object factory = null;
 
   	if ("CF".equals(type))
-  	  factory = admin.createConnectionFactory(host, port);
+  	  factory = TcpConnectionFactory.create(host, port);
   	if ("QCF".equals(type))
-  	  factory = admin.createQueueConnectionFactory(host, port);
+  	  factory = QueueTcpConnectionFactory.create(host, port);
   	if ("TCF".equals(type))
-  	  factory = admin.createTopicConnectionFactory(host, port);
+  	  factory = TopicTcpConnectionFactory.create(host, port);
   	if ("XCF".equals(type))
-  	  factory = admin.createXAConnectionFactory(host, port);
+  	  factory = XATcpConnectionFactory.create(host, port);
   	if ("XQCF".equals(type))
-  	  factory = admin.createXAQueueConnectionFactory(host, port);
+  	  factory = XAQueueTcpConnectionFactory.create(host, port);
   	if ("XTCF".equals(type))
-  	  factory = admin.createXATopicConnectionFactory(host, port);
+  	  factory = XATopicTcpConnectionFactory.create(host, port);
 
     ctx.bind(name, factory);
 
@@ -268,11 +263,11 @@ public class AdminController
   	Destination dest = null;
 
   	if ("Q".equals(type))
-  	  dest = admin.createQueue(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.Queue.create(serverNode.getServerId());
   	if ("T".equals(type))
-  	  dest = admin.createTopic(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.Topic.create(serverNode.getServerId());
   	if ("DMQ".equals(type))
-  	  dest = admin.createDeadMQueue(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.admin.DeadMQueue.create(serverNode.getServerId());
 
     ctx.bind(name, dest);
 
@@ -291,8 +286,9 @@ public class AdminController
 
     try
     {
-      Destination dest = (Destination) obj;
-      admin.deleteDestination(dest);
+      org.objectweb.joram.client.jms.Destination dest = 
+        (org.objectweb.joram.client.jms.Destination) obj;
+      dest.delete();
 
       DestinationTreeNode dtn = findDestinationNode(adminRoot, dest);
       if (dtn != null)
@@ -307,7 +303,7 @@ public class AdminController
 
   public void createUser(ServerTreeNode serverNode, String name, String passwd) throws Exception
   {
-    User user = admin.createUser(name, passwd, serverNode.getServerId());
+    User user = User.create(name, passwd, serverNode.getServerId());
     UserTreeNode userNode = new UserTreeNode(this, user);
     adminTreeModel.insertNodeInto(userNode, serverNode.getUserRoot(),
                                   serverNode.getUserRoot().getChildCount());
@@ -315,182 +311,181 @@ public class AdminController
 
   public void updateUser(UserTreeNode userNode, String name, String passwd) throws Exception
   {
-    admin.updateUser(userNode.getUser(), name, passwd);
+    userNode.getUser().update(name, passwd);
     adminTreeModel.nodeChanged(userNode);
   }
 
   public void deleteUser(UserTreeNode node) throws Exception
   {
-    User user = node.getUser();
-    admin.deleteUser(user);
+    node.getUser().delete();
 
     adminTreeModel.removeNodeFromParent(node);
   }
 
   public int getPendingMessages(Queue q) throws Exception
   {
-  	return monitor.getPendingMessages(q);
+    return ((org.objectweb.joram.client.jms.Queue) q).getPendingMessages();
   }
 
   public int getPendingRequests(Queue q) throws Exception
   {
-    return monitor.getPendingRequests(q);
+    return ((org.objectweb.joram.client.jms.Queue) q).getPendingRequests();
   }
 
   public int getSubscriptions(Topic t) throws Exception
   {
-    return monitor.getSubscriptions(t);
+    return ((org.objectweb.joram.client.jms.Topic) t).getSubscriptions();
   }
 
   public int getDefaultThreshold(int serverId) throws Exception
   {
-    return monitor.getDefaultThreshold(serverId);
+    return AdminModule.getDefaultThreshold(serverId);
   }
 
   public void setDefaultThreshold(int serverId, int threshold) throws Exception
   {
-    admin.setDefaultThreshold(serverId, threshold);
+    AdminModule.setDefaultThreshold(serverId, threshold);
   }
 
   public DeadMQueue getDefaultDMQ(int serverId) throws Exception
   {
-    return monitor.getDefaultDMQ(serverId);
+    return AdminModule.getDefaultDMQ(serverId);
   }
 
   public void setDefaultDMQ(int serverId, DeadMQueue dmq) throws Exception
   {
-    admin.setDefaultDMQ(serverId, dmq);
+    AdminModule.setDefaultDMQ(serverId, dmq);
   }
 
   public void unsetDefaultThreshold(int serverId) throws Exception
   {
-    admin.unsetDefaultThreshold(serverId);
+    AdminModule.setDefaultThreshold(serverId, -1);
   }
 
   public void unsetDefaultDMQ(int serverId) throws Exception
   {
-    admin.unsetDefaultDMQ(serverId);
+    AdminModule.setDefaultDMQ(serverId, null);
   }
 
   public int getUserThreshold(User user) throws Exception
   {
-    return monitor.getThreshold(user);
+    return user.getThreshold();
   }
 
   public void setUserThreshold(User user, int threshold) throws Exception
   {
-    admin.setUserThreshold(user, threshold);
+    user.setThreshold(threshold);
   }
 
   public DeadMQueue getUserDMQ(User user) throws Exception
   {
-    return monitor.getDMQ(user);
+    return user.getDMQ();
   }
 
   public void setUserDMQ(User user, DeadMQueue dmq) throws Exception
   {
-    admin.setUserDMQ(user, dmq);
+    user.setDMQ(dmq);
   }
 
   public void unsetUserThreshold(User user) throws Exception
   {
-    admin.unsetUserThreshold(user);
+    user.setThreshold(-1);
   }
 
   public void unsetUserDMQ(User user) throws Exception
   {
-    admin.unsetUserDMQ(user);
+    user.setDMQ(null);
   }
 
   public int getQueueThreshold(Queue queue) throws Exception
   {
-    return monitor.getThreshold(queue);
+    return ((org.objectweb.joram.client.jms.Queue) queue).getThreshold();
   }
 
   public void setQueueThreshold(Queue queue, int threshold) throws Exception
   {
-    admin.setQueueThreshold(queue, threshold);
+    ((org.objectweb.joram.client.jms.Queue) queue).setThreshold(threshold);
   }
 
   public DeadMQueue getDestinationDMQ(Destination dest) throws Exception
   {
-    return monitor.getDMQ(dest);
+    return ((org.objectweb.joram.client.jms.Destination) dest).getDMQ();
   }
 
   public void setDestinationDMQ(Destination dest, DeadMQueue dmq) throws Exception
   {
-    admin.setDestinationDMQ(dest, dmq);
+    ((org.objectweb.joram.client.jms.Destination) dest).setDMQ(dmq);
   }
 
   public void unsetQueueThreshold(Queue queue) throws Exception
   {
-    admin.unsetQueueThreshold(queue);
+    ((org.objectweb.joram.client.jms.Queue) queue).setThreshold(-1);
   }
 
   public void unsetDestinationDMQ(Destination dest) throws Exception
   {
-    admin.unsetDestinationDMQ(dest);
+    ((org.objectweb.joram.client.jms.Destination) dest).setDMQ(null);
   }
 
   public boolean isFreelyReadable(Destination dest) throws Exception
   {
-    return monitor.freelyReadable(dest);
+    return ((org.objectweb.joram.client.jms.Destination) dest).isFreelyReadable();
   }
 
   public boolean isFreelyWritable(Destination dest) throws Exception
   {
-    return monitor.freelyWriteable(dest);
+    return ((org.objectweb.joram.client.jms.Destination) dest).isFreelyWriteable();
   }
 
   public void setFreeReading(Destination dest) throws Exception
   {
-    admin.setFreeReading(dest);
+    ((org.objectweb.joram.client.jms.Destination) dest).setFreeReading();
   }
 
   public void setFreeWriting(Destination dest) throws Exception
   {
-    admin.setFreeWriting(dest);
+    ((org.objectweb.joram.client.jms.Destination) dest).setFreeWriting();
   }
 
   public void unsetFreeReading(Destination dest) throws Exception
   {
-    admin.unsetFreeReading(dest);
+    ((org.objectweb.joram.client.jms.Destination) dest).unsetFreeReading();
   }
 
   public void unsetFreeWriting(Destination dest) throws Exception
   {
-    admin.unsetFreeWriting(dest);
+    ((org.objectweb.joram.client.jms.Destination) dest).unsetFreeWriting();
   }
 
-	public List getAuthorizedReaders(Destination dest) throws Exception
-	{
-		return monitor.getReaders(dest);
-	}
+  public List getAuthorizedReaders(Destination dest) throws Exception
+  {
+    return ((org.objectweb.joram.client.jms.Destination) dest).getReaders();
+  }
 
-	public List getAuthorizedWriters(Destination dest) throws Exception
-	{
-		return monitor.getWriters(dest);
-	}
+  public List getAuthorizedWriters(Destination dest) throws Exception
+  {
+    return ((org.objectweb.joram.client.jms.Destination) dest).getWriters();
+  }
 
-	public void setReader(User user, Destination dest) throws Exception
-	{
-		admin.setReader(user, dest);
-	}
+  public void setReader(User user, Destination dest) throws Exception
+  {
+    ((org.objectweb.joram.client.jms.Destination) dest).setReader(user);
+  }
 
-	public void setWriter(User user, Destination dest) throws Exception
-	{
-		admin.setWriter(user, dest);
-	}
+  public void setWriter(User user, Destination dest) throws Exception
+  {
+    ((org.objectweb.joram.client.jms.Destination) dest).setWriter(user);
+  }
 
-	public void unsetReader(User user, Destination dest) throws Exception
-	{
-		admin.unsetReader(user, dest);
-	}
+  public void unsetReader(User user, Destination dest) throws Exception
+  {
+    ((org.objectweb.joram.client.jms.Destination) dest).unsetReader(user);
+  }
 
-	public void unsetWriter(User user, Destination dest) throws Exception
-	{
-		admin.unsetWriter(user, dest);
-	}
+  public void unsetWriter(User user, Destination dest) throws Exception
+  {
+    ((org.objectweb.joram.client.jms.Destination) dest).unsetWriter(user);
+  }
 
   public String getAdminConnectionStatus() { return adminConnectionStr; }
 
