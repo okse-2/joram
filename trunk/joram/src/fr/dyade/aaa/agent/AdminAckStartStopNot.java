@@ -32,8 +32,6 @@ import fr.dyade.aaa.admin.cmd.ExceptionCmd;
  * @see AdminStartStopNot
  */
 public class AdminAckStartStopNot extends Notification {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminAckStartStopNot.java,v 1.5 2004-03-16 10:03:45 fmaistre Exp $";
 
   /** exception catch in start/stop */
   public ExceptionCmd exc = null;

@@ -24,8 +24,6 @@ import java.io.*;
 import java.util.*;
 
 public class StopServiceCmd implements StopAdminCmd, Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: StopServiceCmd.java,v 1.5 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   public String className = null;
   public String args = null;

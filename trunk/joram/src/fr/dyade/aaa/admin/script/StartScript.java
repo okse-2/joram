@@ -39,8 +39,6 @@ import fr.dyade.aaa.agent.conf.*;
  * @see ServerDesc
  */
 public class StartScript implements Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: StartScript.java,v 1.5 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /** vector of StartAdminCmd */
   private Vector commands = null;

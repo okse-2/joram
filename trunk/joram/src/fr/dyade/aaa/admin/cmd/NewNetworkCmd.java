@@ -24,8 +24,6 @@ import java.io.*;
 import java.util.*;
 
 public class NewNetworkCmd extends NetworkCmd implements Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: NewNetworkCmd.java,v 1.5 2004-03-16 10:03:45 fmaistre Exp $"; 
   
   public int port;
 

@@ -28,8 +28,6 @@ import org.objectweb.util.monolog.api.Logger;
  * Input driver.
  */
 class DriverIn extends Driver {
-  /** RCS version number of this file: $Revision: 1.19 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.19 2004-03-16 10:03:45 fmaistre Exp $";
 
   /** Proxy this <code>DriverIn<code> belongs to. */
   private ProxyAgent proxy;
