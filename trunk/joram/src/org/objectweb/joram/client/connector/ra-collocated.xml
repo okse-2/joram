@@ -50,6 +50,7 @@
       <config-property>
          <config-property-name>PersistentPlatform</config-property-name>
          <config-property-type>java.lang.Boolean</config-property-type>
+         <config-property-value>false</config-property-value>
       </config-property>
       <config-property>
          <config-property-name>ServerId</config-property-name>
