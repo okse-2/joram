@@ -28,8 +28,7 @@
         <include name="jndi.jar"/>
         <include name="jta.jar"/>
         <include name="log4j.jar"/>
-        <include name="owlogapi.jar"/>
-        <include name="owlogwrpl4j.jar"/>
+	<include name="ow_util_log_wrp_log4j.jar" />
         <include name="xerces.jar"/>
       </fileset>
     </path>
@@ -134,8 +133,7 @@
     <fileset dir="${lib.dir}">
       <include name="jms.jar"/>
       <include name="log4j.jar"/>
-      <include name="owlogapi.jar"/>
-      <include name="owlogwrpl4j.jar"/>
+      <include name="ow_util_log_wrp_log4j.jar" />
       <include name="xerces.jar"/>
       <include name="jndi.jar"/>
     </fileset>
