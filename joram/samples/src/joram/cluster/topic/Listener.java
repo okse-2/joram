@@ -21,37 +21,23 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package cluster;
+package cluster.topic;
 
 import javax.jms.*;
-import javax.naming.*;
 
-public class Subscriber20
+
+public class Listener implements MessageListener
 {
-  static Context ictx = null; 
-
-  public static void main(String[] args) throws Exception
+  public void onMessage(Message msg)
   {
-    System.out.println();
-    System.out.println("Subscribes and listens to topic on server2...");
-
-    ictx = new InitialContext();
-    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf2");
-    Topic dest = (Topic) ictx.lookup("top2");
-    ictx.close();
-
-    Connection cnx = cnxF.createConnection("subscriber20", "subscriber20");
-    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer sub = sess.createConsumer(dest);
-
-    sub.setMessageListener(new Listener());
-
-    cnx.start();
-
-    System.in.read();
-    cnx.close();
-
-    System.out.println();
-    System.out.println("Subscriber closed.");
+    try {
+      if (msg instanceof TextMessage)
+        System.out.println(((TextMessage) msg).getText());
+      else if (msg instanceof ObjectMessage)
+        System.out.println(((ObjectMessage) msg).getObject());
+    }
+    catch (JMSException jE) {
+      System.err.println("Exception in listener: " + jE);
+    }
   }
 }

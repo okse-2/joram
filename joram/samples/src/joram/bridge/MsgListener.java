@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,26 +17,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s):
  */
-package cluster;
+package bridge;
 
 import javax.jms.*;
 
-
-public class Listener implements MessageListener
+/**
+ * Implements the <code>javax.jms.MessageListener</code> interface.
+ */
+public class MsgListener implements MessageListener
 {
   public void onMessage(Message msg)
   {
     try {
       if (msg instanceof TextMessage)
         System.out.println(((TextMessage) msg).getText());
-      else if (msg instanceof ObjectMessage)
-        System.out.println(((ObjectMessage) msg).getObject());
     }
-    catch (JMSException jE) {
-      System.err.println("Exception in listener: " + jE);
+    catch (JMSException exc) {
+      System.err.println("Exception in listener: " + exc);
     }
   }
 }

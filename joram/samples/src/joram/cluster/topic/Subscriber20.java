@@ -21,12 +21,12 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package cluster;
+package cluster.topic;
 
 import javax.jms.*;
 import javax.naming.*;
 
-public class Subscriber21
+public class Subscriber20
 {
   static Context ictx = null; 
 
@@ -40,7 +40,7 @@ public class Subscriber21
     Topic dest = (Topic) ictx.lookup("top2");
     ictx.close();
 
-    Connection cnx = cnxF.createConnection("subscriber21", "subscriber21");
+    Connection cnx = cnxF.createConnection("subscriber20", "subscriber20");
     Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageConsumer sub = sess.createConsumer(dest);
 

@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,13 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package classic;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 
 /**
@@ -36,25 +39,24 @@ public class ClassicAdmin
     System.out.println();
     System.out.println("Classic administration...");
 
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 
-    javax.jms.Queue queue = admin.createQueue(0);
-    javax.jms.Topic topic = admin.createTopic(0);
+    Queue queue = (Queue) Queue.create(0);
+    Topic topic = (Topic) Topic.create(0);
 
     javax.jms.ConnectionFactory cf =
-      admin.createConnectionFactory("localhost", 16010);
+      TcpConnectionFactory.create("localhost", 16010);
     javax.jms.QueueConnectionFactory qcf =
-      admin.createQueueConnectionFactory("localhost", 16010);
+      QueueTcpConnectionFactory.create("localhost", 16010);
     javax.jms.TopicConnectionFactory tcf =
-      admin.createTopicConnectionFactory("localhost", 16010);
+      TopicTcpConnectionFactory.create("localhost", 16010);
+    
+    User user = User.create("anonymous", "anonymous", 0);
 
-    User user = admin.createUser("anonymous", "anonymous", 0);
-
-    admin.setFreeReading(queue);
-    admin.setFreeReading(topic);
-    admin.setFreeWriting(queue);
-    admin.setFreeWriting(topic);
+    queue.setFreeReading();
+    topic.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeWriting();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
@@ -64,7 +66,7 @@ public class ClassicAdmin
     jndiCtx.bind("topic", topic);
     jndiCtx.close();
 
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admin closed.");
   }
 }

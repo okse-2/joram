@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -23,7 +24,9 @@
  */
 package deadMQueue;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Administers an agent server for the deadMQueue samples.
@@ -35,36 +38,35 @@ public class DMQAdmin
     System.out.println();
     System.out.println("DMQ administration...");
 
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 
-    javax.jms.Queue queue = admin.createQueue(0);
-    javax.jms.Topic topic = admin.createTopic(0);
+    Queue queue = (Queue) Queue.create(0);
+    Topic topic = (Topic) Topic.create(0);
 
-    DeadMQueue userDmq = admin.createDeadMQueue(0);
-    DeadMQueue destDmq = admin.createDeadMQueue(0);
+    DeadMQueue userDmq = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue destDmq = (DeadMQueue) DeadMQueue.create(0);
 
-    User ano = admin.createUser("anonymous", "anonymous", 0);
-    User dmq = admin.createUser("dmq", "dmq", 0);
+    User ano = User.create("anonymous", "anonymous", 0);
+    User dmq = User.create("dmq", "dmq", 0);
 
     javax.jms.ConnectionFactory cnxFact =
-      admin.createConnectionFactory("localhost", 16010);
+      TcpConnectionFactory.create("localhost", 16010);
 
-    admin.setUserDMQ(ano, userDmq);
-    admin.setDestinationDMQ(queue, destDmq);
-    admin.setDestinationDMQ(topic, destDmq);
+    ano.setDMQ(userDmq);
+    queue.setDMQ(destDmq);
+    topic.setDMQ(destDmq);
 
-    admin.setUserThreshold(ano, 2);
-    admin.setQueueThreshold(queue, 2);
+    ano.setThreshold(2);
+    queue.setThreshold(2);
 
-    admin.setFreeReading(queue);
-    admin.setFreeWriting(queue);
-    admin.setFreeReading(topic);
-    admin.setFreeWriting(topic);
-    admin.setReader(dmq, userDmq);
-    admin.setWriter(dmq, userDmq);
-    admin.setReader(dmq, destDmq);
-    admin.setWriter(dmq, destDmq);
+    queue.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeReading();
+    topic.setFreeWriting();
+    userDmq.setReader(dmq);
+    userDmq.setWriter(dmq);
+    destDmq.setReader(dmq);
+    destDmq.setWriter(dmq);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("queue", queue);
@@ -74,7 +76,7 @@ public class DMQAdmin
     jndiCtx.bind("cnxFact", cnxFact);
     jndiCtx.close();
 
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admin closed.");
   }
 }
