@@ -49,6 +49,7 @@ public final class Debug extends fr.dyade.aaa.util.Debug {
   public static final String A3Network = A3Debug + ".Network";
   public static final String A3Service = A3Debug + ".Service";
   public static final String A3Proxy = A3Agent + ".ProxyAgent";
+  public static final String JGroups = A3Debug + ".JGroups";
 
     // sets dynamic debug variables for other packages
 //     final String dynvarMarker = "Debug.var.";

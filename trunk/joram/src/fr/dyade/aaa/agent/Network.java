@@ -124,7 +124,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    */
   private int[] stamp;
   /** Buffer used to optimise transactions*/
-  private byte[] stampBuf = null;
+  private byte[] stampbuf = null;
   /** */
   private int[] bootTS = null;
   /** Filename for boot time stamp storage */
@@ -208,10 +208,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     sid = AgentServer.getServerId();
     idxLS = index(sid);
     // Loads the logical clock.
-    stampBuf = AgentServer.transaction.loadByteArray(name);
-    if (stampBuf ==  null) {
+    stampbuf = AgentServer.transaction.loadByteArray(name);
+    if (stampbuf ==  null) {
       // Creates the new stamp array and the boot time stamp,
-      stampBuf = new byte[4*servers.length];
+      stampbuf = new byte[4*servers.length];
       stamp = new int[servers.length];
       bootTS = new int[servers.length];
       // Then initializes them
@@ -227,17 +227,17 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       // Save the servers configuration and the logical time stamp.
       AgentServer.transaction.save(servers, serversFN);
       AgentServer.transaction.save(bootTS, bootTSFN);
-      AgentServer.transaction.saveByteArray(stampBuf, name);
+      AgentServer.transaction.saveByteArray(stampbuf, name);
     } else {
       // Loads the domain configurations
       short[] s = (short[]) AgentServer.transaction.load(serversFN);
       bootTS = (int[]) AgentServer.transaction.load(bootTSFN);
       stamp = new int[s.length];
-      for (int i=0; i<servers.length; i++) {
-        stamp[i] = ((stampBuf[(i*4)+0] & 0xFF) << 24) +
-          ((stampBuf[(i*4)+1] & 0xFF) << 16) +
-          ((stampBuf[(i*4)+2] & 0xFF) <<  8) +
-          (stampBuf[(i*4)+3] & 0xFF);
+      for (int i=0; i<stamp.length; i++) {
+        stamp[i] = ((stampbuf[(i*4)+0] & 0xFF) << 24) +
+          ((stampbuf[(i*4)+1] & 0xFF) << 16) +
+          ((stampbuf[(i*4)+2] & 0xFF) <<  8) +
+          (stampbuf[(i*4)+3] & 0xFF);
       }
       // Joins with the new domain configuration:
       if ((servers != null) && !Arrays.equals(servers, s)) {
@@ -329,6 +329,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // First we have to verify that id is not already in servers
     int idx = index(id);
     if (idx >= 0) return;
+
     idx = -idx -1;
     // Allocates new array for stamp and server
     int[] newStamp = new int[servers.length+1];
@@ -345,9 +346,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       j++;
     }
     if (idx > 0)
-      System.arraycopy(stampBuf, 0, newStampBuf, 0, idx*4);
+      System.arraycopy(stampbuf, 0, newStampBuf, 0, idx*4);
     if (idx < servers.length)
-      System.arraycopy(stampBuf, idx*4,
+      System.arraycopy(stampbuf, idx*4,
                        newStampBuf, (idx+1)*4, (servers.length-idx)*4);
 
     newServers[idx] = id;
@@ -359,15 +360,16 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     newStampBuf[idx+3] = 0; 	// useless
 
     stamp = newStamp;
-    stampBuf = newStampBuf;
+    stampbuf = newStampBuf;
     servers = newServers;
+    bootTS = newBootTS;
     // be careful, set again the index of local server.
     idxLS = index(sid);
 
     // Save the servers configuration and the logical time stamp.
     AgentServer.transaction.save(servers, serversFN);
     AgentServer.transaction.save(bootTS, bootTSFN);
-    AgentServer.transaction.saveByteArray(stampBuf, name);
+    AgentServer.transaction.saveByteArray(stampbuf, name);
   }
 
   /**
@@ -397,21 +399,22 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       j++;
     }
     if (idx > 0)
-      System.arraycopy(stampBuf, 0, newStampBuf, 0, idx*4);
+      System.arraycopy(stampbuf, 0, newStampBuf, 0, idx*4);
     if (idx < (servers.length-1))
-      System.arraycopy(stampBuf, (idx+1)*4,
+      System.arraycopy(stampbuf, (idx+1)*4,
                        newStampBuf, idx*4, (servers.length-idx-1)*4);
 
     stamp = newStamp;
-    stampBuf = newStampBuf;
+    stampbuf = newStampBuf;
     servers = newServers;
+    bootTS = newBootTS;
     // be careful, set again the index of local server.
     idxLS = index(sid);
 
     // Save the servers configuration and the logical time stamp.
     AgentServer.transaction.save(servers, serversFN);
     AgentServer.transaction.save(bootTS, bootTSFN);
-    AgentServer.transaction.saveByteArray(stampBuf, name);
+    AgentServer.transaction.saveByteArray(stampbuf, name);
   }
 
   /**
@@ -429,7 +432,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Save the servers configuration and the logical time stamp.
     AgentServer.transaction.save(servers, serversFN);
     AgentServer.transaction.save(bootTS, bootTSFN);
-    AgentServer.transaction.saveByteArray(stampBuf, name);
+    AgentServer.transaction.saveByteArray(stampbuf, name);
   }
 
   /**
@@ -445,7 +448,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     msg.source = AgentServer.getServerId();
     msg.dest = to;
     msg.stamp = getSendUpdate(to);
-    msg.boot = getBootTS();
 
     // Saves the message.
     msg.save();
@@ -462,6 +464,30 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   protected final int index(short id) {
     int idx = Arrays.binarySearch(servers, id);
     return idx;
+  }
+
+  protected final byte[] getStamp() {
+    return stampbuf;
+  }
+
+  protected final void setStamp(byte[] stampbuf) {
+    this.stampbuf = stampbuf;
+    stamp = new int[servers.length];
+    for (int i=0; i<stamp.length; i++) {
+      stamp[i] = ((stampbuf[(i*4)+0] & 0xFF) << 24) +
+        ((stampbuf[(i*4)+1] & 0xFF) << 16) +
+        ((stampbuf[(i*4)+2] & 0xFF) <<  8) +
+        (stampbuf[(i*4)+3] & 0xFF);
+    }    
+  }
+
+  private void updateStamp(int idx, int update) throws IOException {
+    stamp[idx] = update;
+    stampbuf[(idx*4)+0] = (byte)((update >>> 24) & 0xFF);
+    stampbuf[(idx*4)+1] = (byte)((update >>> 16) & 0xFF);
+    stampbuf[(idx*4)+2] = (byte)((update >>>  8) & 0xFF);
+    stampbuf[(idx*4)+3] = (byte)(update & 0xFF);
+    AgentServer.transaction.saveByteArray(stampbuf, name);
   }
 
   /** The message can be delivered. */
@@ -487,21 +513,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @return		<code>DELIVER</code>, <code>ALREADY_DELIVERED</code>,
    * 			or <code>WAIT_TO_DELIVER</code> code.
    */
-  synchronized int testRecvUpdate(short source, int update, int boot) throws IOException {
+  synchronized int testRecvUpdate(short source, int update) throws IOException {
     int fromIdx = index(source);
 
-    if (boot != bootTS[fromIdx]) {
-      bootTS[fromIdx] = boot;
-      stamp[fromIdx] = -1;
-      AgentServer.transaction.save(bootTS, bootTSFN);
-    }
     if (update > stamp[fromIdx]) {
-      stamp[fromIdx] = update;
-      stampBuf[(fromIdx*4)+0] = (byte)((stamp[fromIdx] >>> 24) & 0xFF);
-      stampBuf[(fromIdx*4)+1] = (byte)((stamp[fromIdx] >>> 16) & 0xFF);
-      stampBuf[(fromIdx*4)+2] = (byte)((stamp[fromIdx] >>>  8) & 0xFF);
-      stampBuf[(fromIdx*4)+3] = (byte)(stamp[fromIdx] & 0xFF);
-      AgentServer.transaction.saveByteArray(stampBuf, name);
+      updateStamp(fromIdx, update);
       return DELIVER;
     }
     return ALREADY_DELIVERED;
@@ -515,17 +531,27 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @return	The message matrix clock (list of update).
    */
   synchronized int getSendUpdate(short to) throws IOException {
-    int update =  ++stamp[idxLS];
-    stampBuf[(idxLS*4)+0] = (byte)((stamp[idxLS] >>> 24) & 0xFF);
-    stampBuf[(idxLS*4)+1] = (byte)((stamp[idxLS] >>> 16) & 0xFF);
-    stampBuf[(idxLS*4)+2] = (byte)((stamp[idxLS] >>>  8) & 0xFF);
-    stampBuf[(idxLS*4)+3] = (byte)(stamp[idxLS] & 0xFF);
-    AgentServer.transaction.saveByteArray(stampBuf, name);
+    int update =  stamp[idxLS] +1;
+    updateStamp(idxLS, update);
     return update;
   }
 
   final int getBootTS() {
     return bootTS[idxLS];
+  }
+
+  final void testBootTS(short source, int boot) throws IOException {
+    int fromIdx = index(source);
+
+    if (boot != bootTS[fromIdx]) {
+      if (logmon.isLoggable(BasicLevel.WARN))
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", reset stamp #" + source + " - " + bootTS[fromIdx]);
+
+      bootTS[fromIdx] = boot;
+      AgentServer.transaction.save(bootTS, bootTSFN);
+      updateStamp(fromIdx, -1);
+    }
   }
 
   /**
@@ -566,7 +592,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
     // Test if the message can be delivered then deliver it
     // else put it in the waiting list
-    int todo = testRecvUpdate(source, msg.getStamp(), msg.boot);
+    int todo = testRecvUpdate(source, msg.getStamp());
 
     if (todo == DELIVER) {
       // Deliver the message then try to deliver alls waiting message.
@@ -592,6 +618,22 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
+   * Deletes the component, removes all persistent datas. The component
+   * may have been previously stopped, and removed from MessageConsumer
+   * list.
+   * This operation use Transaction calls, you may use commit to validate it.
+   *
+   * @see fr.dyade.aaa.util.Transaction 
+   */
+  public void delete() throws IllegalStateException {
+    if (isRunning()) throw new IllegalStateException();
+
+    AgentServer.transaction.delete(serversFN);
+    AgentServer.transaction.delete(bootTSFN);
+    AgentServer.transaction.delete(name);
+  }
+
+  /**
    * Validates all messages pushed in queue during transaction session.
    */
   public void validate() {
@@ -600,13 +642,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   public MessageQueue getQueue() {
     return qout;
-  }
-
-  /**
-   * This operation always throws an IllegalStateException.
-   */
-  public void delete() throws IllegalStateException {
-    throw new IllegalStateException();
   }
 
   /**

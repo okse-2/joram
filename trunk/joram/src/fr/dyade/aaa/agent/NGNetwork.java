@@ -625,6 +625,7 @@ public class NGNetwork extends StreamNetwork {
         msg = sendlist.removeMessage(ack);
         AgentServer.transaction.begin();
         msg.delete();
+        msg.free();
         AgentServer.transaction.commit();
         AgentServer.transaction.release();
 

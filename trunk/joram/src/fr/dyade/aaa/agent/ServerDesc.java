@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -25,8 +26,11 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.net.*;
+import java.util.Vector;
+import java.util.Enumeration;
 
 import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.util.SocketAddress;
 
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
@@ -39,22 +43,23 @@ public final class ServerDesc implements Serializable {
   short sid;
   /** Server name. */
   String name;
-  /** Host name. */
-  String hostname;
   /**
-   * The communication port. This variable is set only if the server is
-   * directly accessible from this node, in this case it corresponds to the
-   * communication port of the server in the adjoining domain.
+   * The IP address of the server.
+   * It contains hostname and port ({@link fr.dyade.aaa.util.SocketAddress
+   * <code>SocketAddress</code>}) of remote server. The communication port
+   * is set only if the server is directly accessible from this node; in
+   * this case it corresponds to the communication port of the server in the
+   * adjoining domain.
+   * The descriptor of an HA server contains one <code>SocketAddress</code>
+   * for each of its constituent.
    */
-  int port = -1;
-  /** Host address, use getAddr() method instead. */
-  private transient InetAddress addr = null;
+  private Vector sockAddrs = null;
   /**
    * Description of services running on this server.
    */
   transient ServiceDesc[] services = null;
   /**
-   * Server Id. of a gateway server for this server if it is not in a
+   * Server Id. of a gateway server for this server if it is not in an
    * adjoining domain.
    */
   short gateway = -1;
@@ -72,15 +77,19 @@ public final class ServerDesc implements Serializable {
     
   /**
    * Constructs a new node for a persistent agent server.
-   * @param	name		server name
-   * @param	hostname	host name
+   * @param	sid		the server unique id
+   * @param	name		the server name
+   * @param	hostname	the server hostname
+   * @param	port		the server port
    */
   public ServerDesc(short sid,
 		    String name,
-		    String hostname) {
+		    String hostname,
+                    int port) {
     this.sid = sid;
     this.name = name;
-    this.hostname = hostname;
+    sockAddrs = new Vector();
+    sockAddrs.addElement(new SocketAddress(hostname,port));
   }
 
   /**
@@ -102,16 +111,21 @@ public final class ServerDesc implements Serializable {
   }
 
   /**
-   * Gets host name for this server.
+   * Gets hostname for this server.
    *
-   * @return the host name.
+   * @return the hostname.
    */
   public String getHostname() {
-    return hostname;
+    return  ((SocketAddress) sockAddrs.firstElement()).getHostname();
   }
 
-  void setHostname(String hostname) {
-    this.hostname = hostname;
+  /**
+   * Gets port for this server.
+   *
+   * @return the port.
+   */
+  public int getPort() {
+    return ((SocketAddress) sockAddrs.firstElement()).getPort();
   }
 
   /**
@@ -120,14 +134,7 @@ public final class ServerDesc implements Serializable {
    * @return	an IP address for this server.
    */
   public InetAddress getAddr() {
-    if (addr == null) {
-      try {
-	addr = InetAddress.getByName(hostname);
-      } catch (UnknownHostException exc) {
-	addr = null;
-      }
-    }
-    return addr;
+    return ((SocketAddress) sockAddrs.firstElement()).getAddress();
   }
 
   /**
@@ -137,22 +144,36 @@ public final class ServerDesc implements Serializable {
    * @return	an IP address for this server.
    */
   public InetAddress resetAddr() {
-    try {
-      addr = InetAddress.getByName(hostname);
-    } catch (UnknownHostException exc) {
-      addr = null;
-    }
-    return addr;
+    ((SocketAddress) sockAddrs.firstElement()).resetAddr();
+    return getAddr();
   }
 
-  public int getPort() {
-    return port;
+  void addSockAddr(String hostname, int port) {
+    sockAddrs.addElement(new SocketAddress(hostname, port));
   }
 
-  void setPort(int port) {
-    this.port = port;
+  void updateSockAddr(String hostname, int port) {
+    sockAddrs.remove(0);
+    sockAddrs.insertElementAt(new SocketAddress(hostname,port), 0);
   }
 
+  /**
+   * In case of an HA server, selects the IP address as this of the master
+   * component of the HA configuration.
+   */
+  void moveToFirst(SocketAddress addr) {
+    sockAddrs.insertElementAt(addr, 0);
+    sockAddrs.remove(addr);
+  }
+
+  /**
+   * In case of an HA server, gets the IP address of all the components
+   * of the HA configuration.
+   */
+  Enumeration getSockAddrs() {
+    return sockAddrs.elements();
+  }
+  
   /**
    * Gets the description of services running on this server.
    *
@@ -185,14 +206,12 @@ public final class ServerDesc implements Serializable {
     strBuf.append("(").append(super.toString());
     strBuf.append(",sid=").append(sid);
     strBuf.append(",name=").append(name);
-    strBuf.append(",hostname=").append(hostname);
-    strBuf.append(",addr=").append(addr);
     strBuf.append(",services=");
     Strings.toString(strBuf, services);
     strBuf.append(",active=").append(active);
     strBuf.append(",last=").append(last);
     strBuf.append(",gateway=").append(gateway);
-    strBuf.append(",port=").append(port);
+    strBuf.append(",sockAddrs=").append(sockAddrs);
     strBuf.append(",domain=").append(domain);
     strBuf.append(")");
     return strBuf.toString();

@@ -90,7 +90,7 @@ class EngineThread extends Thread {
  * stops the agent server.
  * </ul>
  */
-abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
+class Engine implements Runnable, MessageConsumer, EngineMBean {
   /**
    * Queue of messages to be delivered to local agents.
    */ 
@@ -110,6 +110,15 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * each reaction)
    */
   protected volatile boolean canStop;
+
+  /** Logical timestamp information for messages in "local" domain. */
+  private int stamp;
+
+  /** Buffer used to optimise */
+  private byte[] stampBuf = null;
+
+  /** True if the timestamp is modified since last save. */
+  private boolean modified = false;
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -198,7 +207,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @return		the corresponding <code>engine</code>'s instance.
    */
   static Engine newInstance() throws Exception {
-    String cname = "fr.dyade.aaa.agent.TransactionEngine";
+    String cname = "fr.dyade.aaa.agent.Engine";
     cname = AgentServer.getProperty("Engine", cname);
 
     Class eclass = Class.forName(cname);
@@ -270,7 +279,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * Initializes a new <code>Engine</code> object (can only be used by
    * subclasses).
    */
-  protected Engine() {
+  protected Engine() throws Exception {
     name = "Engine#" + AgentServer.getServerId();
 
     // Get the logging monitor from current server MonologLoggerFactory
@@ -288,7 +297,12 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
  
     isRunning = false;
     canStop = false;
-    thread = null;   
+    thread = null;
+
+    needToBeCommited = false;
+
+    restore();
+    if (modified) save();
   }
 
   void init() throws Exception {
@@ -523,7 +537,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @param	id		The agent identification.
    * @return			The corresponding agent.
    *
-   * cnot.deploy@exception IOException
+   * @exception IOException
    *	when accessing the stored image
    * @exception ClassNotFoundException
    *	if the stored image class may not be found
@@ -550,7 +564,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                    exc);
         throw new Exception(getName() + "Can't initialize Agent" + ag.id);
       }
-
       if (ag.logmon == null)
         ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
                                     ".#" + AgentServer.getServerId());
@@ -561,7 +574,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
     } else {
       throw new UnknownAgentException();
     }
-
     ag.last = now;
     return ag;
   }
@@ -659,10 +671,70 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
+   * Saves logical clock information to persistent storage.
+   */
+  public void save() throws IOException {
+    if (modified) {
+      stampBuf[0] = (byte)((stamp >>> 24) & 0xFF);
+      stampBuf[1] = (byte)((stamp >>> 16) & 0xFF);
+      stampBuf[2] = (byte)((stamp >>>  8) & 0xFF);
+      stampBuf[3] = (byte)(stamp & 0xFF);
+      AgentServer.transaction.saveByteArray(stampBuf, getName());
+      modified = false;
+    }
+  }
+
+  /**
+   * Restores logical clock information from persistent storage.
+   */
+  public void restore() throws Exception {
+    stampBuf = AgentServer.transaction.loadByteArray(getName());
+    if (stampBuf == null) {
+      stamp = 0;
+      stampBuf = new byte[4];
+      modified = true;
+    } else {
+      stamp = ((stampBuf[0] & 0xFF) << 24) +
+        ((stampBuf[1] & 0xFF) << 16) +
+        ((stampBuf[2] & 0xFF) <<  8) +
+        (stampBuf[3] & 0xFF);
+      modified = false;
+    }
+  }
+
+  /**
    * This operation always throws an IllegalStateException.
    */
   public void delete() throws IllegalStateException {
     throw new IllegalStateException();
+  }
+
+  protected final int getStamp() {
+    return stamp;
+  }
+
+  protected final void setStamp(int stamp) {
+    modified = true;
+    this.stamp = stamp;
+  }
+
+  protected final void stamp(Message msg) {
+    modified = true;
+    msg.source = AgentServer.getServerId();
+    msg.dest = AgentServer.getServerId();
+    msg.stamp = ++stamp;
+  }
+
+  /**
+   *  Adds a message in "ready to deliver" list. This method allocates a
+   * new time stamp to the message ; be Careful, changing the stamp imply
+   * the filename change too.
+   */
+  public void post(Message msg) throws Exception {
+    stamp(msg);
+    msg.save();
+
+    qin.push(msg);
   }
 
   protected boolean needToBeCommited = false;
@@ -766,14 +838,72 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
-   * Commit the agent reaction in case of rigth termination.
+   * Commit the agent reaction in case of rigth termination:<ul>
+   * <li>suppress the processed notification from message queue,
+   * then deletes it ;
+   * <li>push all new notifications in qin and qout, and saves them ;
+   * <li>saves the agent state ;
+   * <li>then commit the transaction to validate all changes.
+   * </ul>
    */
-  abstract void commit() throws Exception;
+  void commit() throws Exception {
+    AgentServer.transaction.begin();
+    // Suppress the processed notification from message queue ..
+    qin.pop();
+    // .. then deletes it ..
+    msg.delete();
+    // .. and frees it.
+    msg.free();
+    // Post all notifications temporary keeped in mq in the rigth consumers,
+    // then saves changes.
+    dispatch();
+    // Saves the agent state then commit the transaction.
+    if (agent != null) agent.save();
+    AgentServer.transaction.commit();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
+    AgentServer.transaction.release();
+  }
 
   /**
-   * Abort the agent reaction in case of error during execution.
+   * Abort the agent reaction in case of error during execution. In case
+   * of unrecoverable error during the reaction we have to rollback:<ul>
+   * <li>reload the previous state of agent ;
+   * <li>remove the failed notification ;
+   * <li>clean the Channel queue of all pushed notifications ;
+   * <li>send an error notification to the sender ;
+   * <li>then commit the transaction to validate all changes.
+   * </ul>
    */
-  abstract void abort(Exception exc) throws Exception;
+  void abort(Exception exc) throws Exception {
+    AgentServer.transaction.begin();
+    // Reload the state of agent.
+    try {
+      agent = reload(msg.to);
+    } catch (Exception exc2) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", can't reload Agent" + msg.to, exc2);
+      throw new Exception("Can't reload Agent" + msg.to);
+    }
+
+    // Remove the failed notification ..
+    qin.pop();
+    // .. then deletes it ..
+    msg.delete();
+    // .. and frees it.
+    msg.free();
+    // Clean the Channel queue of all pushed notifications.
+    clean();
+    // Send an error notification to client agent.
+    push(AgentId.localId,
+         msg.from,
+         new ExceptionNotification(msg.to, msg.not, exc));
+    dispatch();
+    AgentServer.transaction.commit();
+    // The transaction has commited, then validate all messages.
+    Channel.validate();
+    AgentServer.transaction.release();
+  }
 
   /**
    * Returns a string representation of this engine. 
@@ -782,20 +912,12 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append(getName());
-    if (! isRunning) {
-      strbuf.append(" is stopped.");
-    } else if (agent == null) {
-      strbuf.append(" is waiting new message.");
-    } else {
-      strbuf.append(" is running, qin[").append(qin.size()).append("].\n");
-      strbuf.append("Agent [");
-      strbuf.append(agent);
-      strbuf.append("]\nNotification [");
-      strbuf.append(msg.not);
-      strbuf.append("]\nFrom Agent");
-      strbuf.append(msg.from);
-    }
+
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",name=").append(getName());
+    strbuf.append(",running=").append(isRunning());
+    strbuf.append(",agent=").append(agent).append(')');
+
     return strbuf.toString();
   }
 }
