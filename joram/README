@@ -2,16 +2,16 @@
 # JORAM Installation #
 ######################
 
-You must have a proper Ant environment to compile JORAM
-(see <http://jakarta.apache.org/ant/manual/install.html>).
+A proper Ant environment is needed to compile JORAM:
+see <http://jakarta.apache.org/ant/manual/install.html>.
 
 In the src/ directory, type:
  $ ant -projecthelp
-to have a list of available Ant targets for JORAM
+to have a list of the available Ant targets for JORAM.
 
  $ ant
-will create a new shipment of JORAM with all the needed libraries to use it
-in ship/lib/ (default target is ship.joram)
+will create a new shipment of JORAM with all the needed libraries
+in ship/lib/ (the corresponding target is ship.joram)
 
  $ ant javadoc
 to generate Javadoc
