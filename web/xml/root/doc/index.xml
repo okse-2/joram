@@ -12,7 +12,7 @@
 
   <body>
 
-    <s1 name="JORAM documentation">
+    <s1 name="JORAM manuals">
       <p>If available, the documents related to a given release are
       identified by the same tag. Example, "Installing the 3.6 release" is
       what should be read for installing JORAM 3.6.</p>
@@ -82,7 +82,7 @@
       </ul>
     </s1>
 
-    <s1 name="External documentation">
+    <s1 name="Other documentation">
       <subtitle>JORAM show</subtitle>
       <p>The latest JORAM slides show, presented at the Objectweb conference
       in Paris (20-21 November 2003), is available <a href="http://www.objectweb.org/phorum/download.php/36,68/031120-Joram-OWConf.pdf">here</a>.</p>
