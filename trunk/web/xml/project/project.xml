@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<!DOCTYPE project SYSTEM '../../../common/dtd/project.dtd'>
+<!DOCTYPE project SYSTEM '../../common/dtd/project.dtd'>
 
 <project>
   <title>JORAM</title>
