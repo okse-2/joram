@@ -12,7 +12,7 @@
 
   <body>
 
-    <s1 name="JORAM documentation">
+    <s1 name="Lastest release documentation">
   
       <p>The following documentation is available for JORAM:</p>
       
@@ -24,6 +24,17 @@
       </ol>
 
     </s1>
+
+    <s1 name="Other documentation">
+  
+      <subtitle>General documentation</subtitle>
+
+      <ul>
+	<li>JORAM brochure (<a href="../../doc/JORAM.pdf">pdf</a>).</li>
+      </ul>
+
+    </s1>
+
   </body>
 
 </document>
