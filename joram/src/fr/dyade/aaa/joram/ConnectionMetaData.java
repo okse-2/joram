@@ -38,8 +38,8 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData
   private static String jmsProviderName = "Joram";
   private static String jmsVersion = "1.1";
   private static int providerMajorVersion = 3;
-  private static int providerMinorVersion = 5;
-  private static String providerVersion = "3.5";
+  private static int providerMinorVersion = 6;
+  private static String providerVersion = "3.6";
   private static Vector jmsxProperties = new Vector();
 
   static

@@ -56,13 +56,22 @@ class DriverConnect extends Driver {
       } while (isRunning && multipleCnx);
     }
     catch (java.net.SocketException exc) {
-      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
+      if (! proxy.finalizing) {
+        logmon.log(BasicLevel.WARN,
+                   "connection closed in createDrivers()",
+                   exc);
+      }
     }
     catch (java.io.EOFException exc) {
-      logmon.log(BasicLevel.WARN, "connection closed in createDrivers()", exc);
+      if (! proxy.finalizing) {
+        logmon.log(BasicLevel.WARN,
+                   "connection closed in createDrivers()",
+                   exc);
+      }
     }
     catch (Exception exc) { 
-      logmon.log(BasicLevel.ERROR, "error in createDrivers()", exc);
+      if (! proxy.finalizing)
+        logmon.log(BasicLevel.ERROR, "error in createDrivers()", exc);
     }
   }
   

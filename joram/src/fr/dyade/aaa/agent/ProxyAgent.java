@@ -30,8 +30,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.16 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.16 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.17 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.17 2003-09-10 13:12:13 fmaistre Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -67,6 +67,9 @@ public abstract class ProxyAgent extends Agent {
    * connection.
    */
   private int driversKey = 1;
+
+  /** <code>true</code> if the proxy is being finalized. */
+  boolean finalizing = false;
 
   /**
    * Returns default log topic for proxies. Its method  overriddes
@@ -518,34 +521,27 @@ public abstract class ProxyAgent extends Agent {
       logmon.log(BasicLevel.DEBUG,
                  toString() + " agentFinalize -> " + drvCnx);
 
-    try {
-      if (multiConn) {
-        closeAllConnections();
-      } else {
-        try {
-          ois.close();
-        } catch (Exception exc) {
-        }
-        try {
-          oos.close();
-        } catch (Exception exc) {
-        }
-      }
+    finalizing = true;
 
+    if (multiConn)
+      closeAllConnections();
+    else {
       try {
-        disconnect();
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN, "error in agentFinalize", exc);
-      }
-
-      stop();
-
-      qout = null;
-      ois = null;
-      oos = null;
-    } catch (Throwable exc) {
-      if (logmon.isLoggable(BasicLevel.ERROR))
-      logmon.log(BasicLevel.ERROR, "error in finalize", exc);
+        ois.close();
+      } catch (Exception exc) {}
+      try {
+        oos.close();
+      } catch (Exception exc) {}
     }
+
+    try {
+      disconnect();
+    } catch (Exception exc) {}
+
+    stop();
+
+    qout = null;
+    ois = null;
+    oos = null;
   }
 }

@@ -35,8 +35,8 @@ public class ConnectionMetaData
   private static String jmsProviderName = "Joram";
   private static String jmsVersion = "1.1";
   private static int providerMajorVersion = 3;
-  private static int providerMinorVersion = 4;
-  private static String providerVersion = "3.4";
+  private static int providerMinorVersion = 6;
+  private static String providerVersion = "3.6";
   private static Vector jmsxProperties = new Vector();
 
   static

@@ -30,11 +30,11 @@ import fr.dyade.aaa.util.*;
  * Output driver.
  */
 class DriverOut extends Driver {
-  /** RCS version number of this file: $Revision: 1.16 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.16 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.17 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.17 2003-09-10 13:12:13 fmaistre Exp $";
 
-  /** id of associated proxy agent */
-  protected AgentId proxy;
+  /** Reference to the proxy agent */
+  protected ProxyAgent proxy;
   /** queue of <code>Notification</code> objects to be sent */
   protected Queue mq;
   /** stream to write notifications to */
@@ -47,7 +47,7 @@ class DriverOut extends Driver {
    * Constructor.
    *
    * @param id		identifier local to the driver creator
-   * @param proxy	id of associated proxy agent
+   * @param proxy	associated proxy agent
    * @param mq		queue of <code>Notification</code> objects to be sent
    * @param out		stream to write notifications to
    */
@@ -56,7 +56,7 @@ class DriverOut extends Driver {
             Queue mq,
             NotificationOutputStream out) {
     super(id);
-    this.proxy = proxy.getId();
+    this.proxy = proxy;
     this.mq = mq;
     this.out = out;
     this.name = proxy.getName() + ".DriverOut#" + id;
@@ -99,8 +99,10 @@ class DriverOut extends Driver {
         canStop = false;
         out.writeNotification(m);
       } catch (IOException exc) {
-        logmon.log(BasicLevel.WARN,
-                   getName() + ", write failed" + m, exc);
+        if (! proxy.finalizing) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", write failed" + m, exc);
+        }
         break mainLoop;
       } catch (InterruptedException exc) {
         break mainLoop;
@@ -139,13 +141,13 @@ class DriverOut extends Driver {
     try {
       // Single connection context.
       if (key == 0)
-        sendTo(proxy, new DriverDone(id));
+        sendTo(proxy.getId(), new DriverDone(id));
 
       // In a multi-connections context, flagging the DriverDone
       // notification with the key so that it is known which 
       // DriverOut to close.
       else
-        sendTo(proxy, new DriverDone(id, key));
+        sendTo(proxy.getId(), new DriverDone(id, key));
 
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR,
