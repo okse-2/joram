@@ -1,4 +1,22 @@
+###############################################################################
+# 2004/11/05 | Joram 4.1.2 release.
+###############################################################################
 +==============================================================================
+| 2004/11/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| fix bug (NullPointerException) in 
+| OutboundConnectionFactory.java, cxManager can be null.
+| ProxyImpl.java in setCtx(int key) if key <0 throw a StateException.
++==============================================================================
+| 2004/10/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+| Corrects mistakes in ra.xml and ra-remote.xml files.
+|       - Removes empty (and useless) <icon></icon> tags.
+|       - Remove spaces and eof lines in the <xxx-class> tags and
+|       <xxx-interface> tags.
+###############################################################################
+# 2004/10/13 | Joram 4.1.1 release.
+###############################################################################
 | 2004/10/11 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
 | Allows to fix inFlow value through ConnectionManager.inFlow property.
@@ -32,8 +50,6 @@
 | 2004/09/15 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
 | Minor fixes in ship and releases processus.
-+==============================================================================
-| 2004/09/13 | Andre Freyssinet - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
-| Joram 4.1.0 release.
-+==============================================================================
+###############################################################################
+# 2004/09/13 | Joram 4.1.0 release.
+###############################################################################
