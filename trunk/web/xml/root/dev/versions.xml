@@ -14,17 +14,22 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram4_0_1 (March 23, 2004)">
+      <p>This maintenance version is integrated within JOnAS 4.0</p>
       <s2 name="Modifications (latest: March 16, 2004)">
       <ul>
+        <li>New logging configuration, based on JavaLog rather than on
+        log4j. Updated file is <code>samples/config/a3debug.cfg</code>.</li>
         <li>New JORAM shipping; generated jars now are:</li>
         <ul>
           <li><code>joram-client.jar</code>: client library</li>
           <li><code>joram-mom.jar</code>: server library</li>
           <li><code>joram-shared.jar</code>: client/server shared library</li>
         </ul>
-        <li>Submission of the new
-        <code>org/objectweb/joram/connector</code> package holding the classes
-        implementing the JCA 1.5 resource adapter for JORAM.</li>
       </ul>
       </s2>
       <s2 name="Corrected bugs (latest: March 11, 2004)"> 
