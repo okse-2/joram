@@ -15,7 +15,15 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications">
-      <p>None, so far...</p>
+      <ul>
+        <li>New <code>build.xml</code> file for simplier building and
+        cleaning targets.</li>
+        <ul>
+          <li>Shipping JORAM: <em>ant ship.joram</em></li>
+          <li>Shipping kJORAM: <em>ant ship.kjoram</em></li>
+          <li>Cleaning the distribution: <em>ant clean</em></li>
+        </ul>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram3_6_2 (September 22, 2003)">
