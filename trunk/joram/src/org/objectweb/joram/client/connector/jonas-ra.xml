@@ -60,6 +60,10 @@
       <jonas-config-property-name>Password</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
   </jonas-connection-definition>
   <jonas-connection-definition>
     <description>org.objectweb.joram.client.connector.ManagedTopicConnectionFactoryImpl</description>
@@ -72,6 +76,10 @@
       <jonas-config-property-name>Password</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
   </jonas-connection-definition>
   <jonas-connection-definition>
     <description>org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl</description>
@@ -82,6 +90,10 @@
     </jonas-config-property>
     <jonas-config-property>
       <jonas-config-property-name>Password</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
       <jonas-config-property-value></jonas-config-property-value>
     </jonas-config-property>
   </jonas-connection-definition>

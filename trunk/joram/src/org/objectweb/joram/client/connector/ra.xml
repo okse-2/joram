@@ -93,6 +93,11 @@
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
             </config-property>
+            <config-property>
+              <config-property-name>Collocated</config-property-name>
+              <config-property-type>java.lang.Boolean</config-property-type>
+              <config-property-value>false</config-property-value>
+            </config-property>
             <connectionfactory-interface>
                javax.jms.QueueConnectionFactory
             </connectionfactory-interface>
@@ -118,6 +123,11 @@
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
             </config-property>
+            <config-property>
+              <config-property-name>Collocated</config-property-name>
+              <config-property-type>java.lang.Boolean</config-property-type>
+              <config-property-value>false</config-property-value>
+            </config-property>
             <connectionfactory-interface>
                javax.jms.TopicConnectionFactory
             </connectionfactory-interface>
@@ -142,6 +152,11 @@
               <config-property-name>Password</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
+            </config-property>
+            <config-property>
+              <config-property-name>Collocated</config-property-name>
+              <config-property-type>java.lang.Boolean</config-property-type>
+              <config-property-value>false</config-property-value>
             </config-property>
             <connectionfactory-interface>
                javax.jms.ConnectionFactory
