@@ -96,7 +96,7 @@
 	  
           <tr> 
             <td colspan="2">
-	      <textarea rows="30" cols="90">
+	      <textarea name="licence" rows="30" cols="90">
 JORAM LICENSE
 
 1. Definitions
