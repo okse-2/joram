@@ -21,9 +21,9 @@
 
     <menu>
       <legend>Developers' Corner</legend>
-      <menuitem><a href="dev/corner.html">How to contribute</a></menuitem>
+      <menuitem><a href="dev/corner.html">Welcome</a></menuitem>
       <menuitem><connect href="dev/roadMap.xml">Road map</connect></menuitem>
-      <menuitem><connect href="dev/versions.xml">Releases info</connect></menuitem>
+      <menuitem><connect href="dev/versions.xml">Code updates</connect></menuitem>
       <menuitem><a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
       <menuitem><a href="http://forge.objectweb.org/projects/joram">ObjectWeb Forge site</a></menuitem>
     </menu>
