@@ -13,6 +13,13 @@
   <body>
 
     <s1 name="Latest News">
+      <subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
+      <p>Following the JORAM community constant increase, a JORAM users' day is
+      organized in Paris on the 17th of June. Its goal is to allow JORAM
+      developers and users to meet and exchange their views about the usage 
+      and evolutions of the JORAM platform.</p>
+      <p>The complete announcement is available
+      <a href="current/doc/JORAM-Day.pdf">here</a>.</p>
       <subtitle>February 13, 2004: JORAM 4.0 is released and provides major
       new features!</subtitle>
       <p>JORAM 4.0 is the first release of a new JORAM generation with even
@@ -88,7 +95,7 @@
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
       <subtitle>As a standalone software, JORAM has been downloaded more
-                than 17,000 times</subtitle>
+                than 19,000 times</subtitle>
 
       <table border="0">
 	<tr>
