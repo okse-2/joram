@@ -14,9 +14,15 @@
     <ant dir="." antfile="kjoram.xml" target="ship.kjoram"/>
   </target>
 
-  <!-- JORAM and kJORAM cleaning target -->
+  <!-- JORAM graphical admin tool shipment target -->
+  <target name="ship.gui"
+          description="builds and ships Joram graphical administration tool">
+    <ant dir="." antfile="joram.xml" target="ship.gui"/>
+  </target>
+
+  <!-- Global cleaning target -->
   <target name="clean"
-          description="cleans Joram and kJoram shipments">
+          description="cleans the generated shipments">
     <ant dir="." antfile="joram.xml" target="clean"/>
     <ant dir="." antfile="kjoram.xml" target="clean"/>
   </target>
