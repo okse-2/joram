@@ -14,8 +14,15 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: January 26, 2004)">
+      <s2 name="Modifications (latest: January 27, 2004)">
       <ul>
+        <li><code>ObjectMessage</code> optimization. The wrapped object in
+        an <code>ObjectMessage</code> instance is not automatically 
+        deserialized when reaching the consumer's connection, but only when
+        calling the <code>getObject</code> method. This for improving the
+        behaviour of JORAM within application servers.
+        The updated classes are <code>fr.dyade.aaa.mom.messages.Message</code>
+        and <code>fr.dyade.aaa.joram.ObjectMessage</code>.</li>
         <li>New flow control mechanism. In order not to overload a JORAM server
         with incoming messages, it is possible to set a maximum authorized
         flow (in messages / second). This setting is done in the configuration
