@@ -11,6 +11,71 @@
   </properties>
 
   <body>
+    <s1 name="JORAM 4.2 (March 31, 2005)">
+      <p>The Joram 4.2 final release is available in the CVS repository with the tag JORAM_4_2. 
+         It provides a lot of fixes and improvements.</p>
+      <p> The documentation has been updated and is available for <a href="../download/index.html">download</a>.</p>
+
+      <s2 name="New Features and Improvments ">
+	<ul>
+	  <li>Upgraded JMX management features : Servers list and status in SCServer, Right management in Joram's 
+              destinations.</li>
+	  <li>Upgraded JDK 1.5 support</li>
+	  <li>JAMT : support for dynamic configuration of the JORAM platform</li>
+	  <li>Administration module: new operations to read/delete messages from subscriptions and queues.</li>
+	  <li>Network communications: Many improvments and bug-fixes in NGNetwork.</li>
+	  <li>Joram RA: Add util to configure the joram adapter resource. create new jar joram-config.jar 
+              and joram-raconfig.jar. modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
+              update jonas-ra.xml.</li>
+       </ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>JAMT : Closing the "abort dialog" aborts the running operation. Null pointer in popup listener</li>
+	  <li>Joram client : Deadlock between message listener and concurrent close.Methods getMetaData from 
+              Connection and receiveNoWait from MessageConsumer throw an IllegalStateException if a connection failure
+               occured (e.g. TCP failure).</li>
+	  <li>Packaging : Adds jmxri.jar in classpath for samples/bin scripts.</li>
+	  <li>Network Communication: Fix in HttpNetwork allowing the usage of a (non HTTP 1.1) proxy.</li>
+	  <li>TCK Compatibility for Jonas : regression in TCK, null testing.
+          </li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM 4.2 RC2 (March 11, 2005)">
+      <p>The Joram 4.2 release candidate 2 is available in the CVS repository with the tag JORAM_4_2_RC2. 
+         It provides a lot of fixes and improvements.</p>
+
+      <s2 name="New Features and Improvments ">
+	<ul>
+	  <li>Upgraded JMX management features : Servers list and status in SCServer, Right management in Joram's 
+              destinations.</li>
+	  <li>Upgraded JDK 1.5 support</li>
+	  <li>JAMT : support for dynamic configuration of the JORAM platform</li>
+	  <li>Administration module: new operations to read/delete messages from subscriptions and queues.</li>
+	  <li>Network communications: Many improvments and bug-fixes in NGNetwork.</li>
+	  <li>Joram RA: Add util to configure the joram adapter resource. create new jar joram-config.jar 
+              and joram-raconfig.jar. modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
+              update jonas-ra.xml.</li>
+       </ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>JNDI connection closure.</li>
+	  <li>Joram client: fix automatic reconnection policy.</li>
+	  <li>Selectors : Encoded string literals as UNICODE. Add joramSelector directory in 
+              org/objectweb/joram/shared/selector read joramselector.doc (HowTo generate the joram selector)</li>
+	  <li>Network Communication: call server.moveToFirst(SocketAddress) until find the good socket 
+              (just for cluster use).</li>
+	  <li>High Availability :  Test cluster.properties.size() in the cluster configuration phase, in 
+              AgentServer.java. Replace serverCluster by server in a3config.dtd and  update sample a3config.dtd
+              no longer initialize 'Bag' agent in setState (HATransactionEngine).
+          </li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM 4.2 RC1 (January 10, 2005)">
       <p>The Joram 4.2 release candidate 1 is available in the CVS repository with the tag JORAM_4_2_RC1. 
          It provides  new features as high-avaibility, dynamic configuration, and a lot of fixes

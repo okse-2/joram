@@ -37,8 +37,6 @@
           <li>the Apache's implementation of
           <a href="http://ws.apache.org/soap/">SOAP</a>, used by JORAM
           SOAP proxy.</li>
-          <li>the <a href="http://xml.apache.org/">Xerces</a> XML
-          parser, used for JORAM platform configuration.</li>
         </ul>
       </ul>
       <ul>
