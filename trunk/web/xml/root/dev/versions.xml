@@ -14,7 +14,7 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
-      <s2 name="Modifications (latest: April 2003, 23rd)">
+      <s2 name="Modifications (latest: April 2003, 28th)">
       <ul>
       <li>Bug in serial sending of a message with a transacted session:
       clearing an already sent (but not commited) message's properties,
