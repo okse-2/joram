@@ -670,7 +670,10 @@ public class Session implements javax.jms.Session {
     throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    return new TopicSubscriber(this, (Topic) topic, name, selector, noLocal);
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, name, selector, noLocal);
+    addConsumer(ts);
+    return ts;
   }
 
   /**
@@ -686,7 +689,10 @@ public class Session implements javax.jms.Session {
     throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    return new TopicSubscriber(this, (Topic) topic, name, null, false);
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, name, null, false);
+    addConsumer(ts);
+    return ts;
   }
 
   /**
