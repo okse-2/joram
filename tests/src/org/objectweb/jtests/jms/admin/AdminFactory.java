@@ -48,7 +48,6 @@ public class AdminFactory {
     
     public static Admin getAdmin() {
 	String adminClassName = getAdminClassName();
-	System.out.println("JMS Provider: "+ adminClassName);
 	Admin admin = null;
 	if (adminClassName == null) {
 	    System.err.println ("Property "+ PROP_NAME +" has not been found in the file "+ PROP_FILE_NAME +".");
@@ -67,6 +66,7 @@ public class AdminFactory {
 	    e.printStackTrace();
 	    System.exit(1);
 	}
+    System.out.println("JMS Provider: "+ admin.getName());
 	return admin;
     }
 }
