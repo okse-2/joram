@@ -700,7 +700,7 @@ public class ProxyImpl implements java.io.Serializable
 
     TopicSubscription tSub;
     ClientSubscription cSub;
-   
+
     // true if a SubscribeRequest has been sent to the topic. 
     boolean sent = false;
 
@@ -1437,26 +1437,26 @@ public class ProxyImpl implements java.io.Serializable
 
     // The exception comes from a topic refusing the access: deleting the subs.
     if (exc instanceof AccessException) {
-      Vector subNames = (Vector) topicsTable.remove(from);
-      if (subNames != null) {
+      TopicSubscription tSub = (TopicSubscription) topicsTable.remove(from);
+      if (tSub != null) {
         String name;
         ClientSubscription sub;
-        for (Enumeration enum = subNames.elements(); enum.hasMoreElements();) { 
+        for (Enumeration enum = tSub.getNames(); enum.hasMoreElements();) { 
           name = (String) enum.nextElement();
-          sub = (ClientSubscription) subsTable.remove(name);
+          sub = (ClientSubscription) subsTable.remove(name); 
           sub.delete();
 
           try {
             setCtx(sub.getContextId());
             activeCtx.removeSubName(name);
-            doReply(new MomExceptionReply(sub.getSubRequestId(), exc));
+            doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
           }
           catch (ProxyException pExc) {}
         }
         return;
       }
     }
-    // The sender is not a topic; forwarding the exception to the client.
+    // Forwarding the exception to the client.
     try {
       setCtx(rep.getClientContext());
       doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
@@ -1734,8 +1734,12 @@ public class ProxyImpl implements java.io.Serializable
     }
 
     // Removing all proxy's subscriptions:
-    for (Enumeration topics = topicsTable.keys(); topics.hasMoreElements();)
-      updateSubscriptionToTopic((AgentId) topics.nextElement(), -1, -1);
+    AgentId destId;
+    for (Enumeration topics = topicsTable.keys(); topics.hasMoreElements();) {
+      destId = (AgentId) topics.nextElement();
+      topicsTable.remove(destId);
+      updateSubscriptionToTopic(destId, -1, -1);
+    }
   }
 
   
