@@ -41,14 +41,48 @@ public class LocalServer implements LocalServerMBean
 {
   /** The wrapped adapter instance. */
   private JoramAdapter adapter;
-
+  
+  private String objectName;
+  private boolean eventProvider = false;
+  private boolean stateManageable = false;
+  private boolean statisticsProvider = false;
 
   /** Constructs a <code>LocalServer</code> instance. */
-  public LocalServer(JoramAdapter adapter)
-  {
+  public LocalServer(JoramAdapter adapter) {
     this.adapter = adapter;
   }
 
+  public void setObjectName(String objectName) {
+    this.objectName = objectName;
+  }
+
+  public void setStateManageable(boolean stateManageable) {
+    this.stateManageable = stateManageable;
+  }
+
+  public void setStatisticsProvider(boolean statisticsProvider) {
+    this.statisticsProvider = statisticsProvider;
+  }
+
+  public void setEventProvider(boolean eventProvider) {
+    this.eventProvider = eventProvider;
+  }
+
+  public String getobjectName() {
+    return objectName;
+  }
+
+  public boolean iseventProvider() {
+    return eventProvider;
+  }
+
+  public boolean isstateManageable() {
+    return stateManageable;
+  }
+
+  public boolean isstatisticsProvider() {
+    return statisticsProvider;
+  }
 
   public String getPlatformConfiguration()
   {
@@ -71,7 +105,7 @@ public class LocalServer implements LocalServerMBean
 
   public String getRelease()
   {
-    return "4.0.5";
+    return "4.1.0";
   }
 
   public String getRunningMode()
