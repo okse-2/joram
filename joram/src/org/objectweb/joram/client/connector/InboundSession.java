@@ -112,7 +112,7 @@ class InboundSession implements javax.jms.ServerSession,
   public void start() throws JMSException
   {
     try {
-      JoramAdapter.debugDEBUG("ServerSession submits Work instance.");
+      AdapterTracing.debugDEBUG("ServerSession submits Work instance.");
       workManager.scheduleWork(this);
     }
     catch (Exception exc) {
@@ -128,7 +128,7 @@ class InboundSession implements javax.jms.ServerSession,
   /** Runs the wrapped session for processing the messages. */
   public void run()
   {
-    JoramAdapter.debugDEBUG("ServerSession runs wrapped Session.");
+    AdapterTracing.debugDEBUG("ServerSession runs wrapped Session.");
     session.run();
     consumer.releaseSession(this);
   }
@@ -137,7 +137,7 @@ class InboundSession implements javax.jms.ServerSession,
   public void onMessage(javax.jms.Message message)
   {
     try {
-      JoramAdapter.debugDEBUG("ServerSession passes message to listener.");
+      AdapterTracing.debugDEBUG("ServerSession passes message to listener.");
       MessageEndpoint endpoint = endpointFactory.createEndpoint(xaResource);
       ((javax.jms.MessageListener) endpoint).onMessage(message);
       endpoint.release();
