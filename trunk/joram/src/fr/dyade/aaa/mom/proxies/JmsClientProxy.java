@@ -878,7 +878,7 @@ public class JmsClientProxy extends ConnectionFactory
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
-      throw new RequestException("Can't unsubscribe non existing"
+      throw new RequestException("Can't request a message from the unknown"
                                  + " subscription: " + subName);
 
     String reqId = req.getRequestId();
@@ -2050,7 +2050,7 @@ public class JmsClientProxy extends ConnectionFactory
           id = (String) ids.get(i);
           if (! deliveredIds.contains(id)) {
             message = (Message) messagesTable.get(id);
-            // If the message hasn't alreay been removed:
+            // If the message hasn't already been removed:
             if (message != null) {
               // If the current message is valid, comparing its priority with
               // the hightest encountered so far, and if superior, keeping it:
@@ -2079,17 +2079,18 @@ public class JmsClientProxy extends ConnectionFactory
         }
         // Putting the kept message in the vector:
         if (keptMsg != null) {
-          if (deniedIds.contains(id)) {
+          if (deniedIds.contains(keptMsg.getIdentifier())) {
             keptMsg.denied = true;
-            deniedIds.remove(id);
+            deniedIds.remove(keptMsg.getIdentifier());
           }
           else
             keptMsg.denied = false;
           messages.add(keptMsg);
-          deliveredIds.add(id);
+          deliveredIds.add(keptMsg.getIdentifier());
 
           if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message " + id
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Message "
+                                    + keptMsg.getIdentifier()
                                     + " added for delivery in sub " + name);
         }
       }
