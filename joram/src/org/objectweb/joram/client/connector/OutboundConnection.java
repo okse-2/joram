@@ -37,7 +37,7 @@ public class OutboundConnection implements javax.jms.Connection
   /** The managed connection this "handle" belongs to. */
   ManagedConnectionImpl managedCx;
   /** The physical connection this "handle" handles. */
-  org.objectweb.joram.client.jms.XAConnection xac;
+  XAConnection xac;
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
 
@@ -51,7 +51,7 @@ public class OutboundConnection implements javax.jms.Connection
   OutboundConnection(ManagedConnectionImpl managedCx, XAConnection xac)
   {
     this.managedCx = managedCx;
-    this.xac = (org.objectweb.joram.client.jms.XAConnection) xac;
+    this.xac = xac;
   }
 
   /**
@@ -223,19 +223,21 @@ public class OutboundConnection implements javax.jms.Connection
   public void cleanup() {
     // Closing the sessions:
     Session session;
-    while (xac.sessions != null && 
-           ! xac.sessions.isEmpty()) {
-      session = (Session) xac.sessions.elementAt(0);
+    org.objectweb.joram.client.jms.Connection cnx = 
+      (org.objectweb.joram.client.jms.XAConnection) xac;
+    while (cnx.sessions != null && 
+           ! cnx.sessions.isEmpty()) {
+      session = (Session) cnx.sessions.elementAt(0);
       try {
         session.close();
       }
       // Catching a JMSException if the connection is broken:
       catch (JMSException jE) {}
     } 
-    if (xac.requestsTable != null)
-      xac.requestsTable.clear();
-    if (xac.repliesTable != null)
-      xac.repliesTable.clear();
+    if (cnx.requestsTable != null)
+      cnx.requestsTable.clear();
+    if (cnx.repliesTable != null)
+      cnx.repliesTable.clear();
   }
 
   public String toString()
