@@ -88,8 +88,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    *          messages produced by its connection.
    *
    * @exception InvalidSelectorException  If the selector syntax is invalid.
-   * @exception IllegalStateException  If the connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
+   * @exception IllegalStateException  If the connection is broken, or if the
+   *                                   subscription is durable and already
+   *                                   activated.
+   * @exception JMSException           Generic exception.
    */
   MessageConsumer(Session sess, Destination dest, String selector,
                   String subName, boolean noLocal) throws JMSException
@@ -133,6 +135,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                                   selector,
                                                   noLocal,
                                                   durableSubscriber));
+
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
@@ -160,8 +163,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * @param selector  Selector for filtering messages.
    *
    * @exception InvalidSelectorException  If the selector syntax is invalid.
-   * @exception IllegalStateException  If the connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
+   * @exception IllegalStateException  If the connection is broken, or if the
+   *                                   subscription is durable and already
+   *                                   activated.
+   * @exception JMSException           Generic exception.
    */
   MessageConsumer(Session sess, Destination dest,
                   String selector) throws JMSException
@@ -190,7 +195,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
-   * @exception IllegalStateException  If the consumer is closed.
    */
   public void setMessageListener(javax.jms.MessageListener messageListener)
               throws JMSException
