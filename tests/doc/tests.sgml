@@ -58,7 +58,7 @@
     <sect2>
       <title>CVS repository</title>
       <para>The test suite is available only by CVS. To setup the CVS
-	software, see <ulink url="http://www/cvshome.org">CVS
+	software, see <ulink url="http://www.cvshome.org">CVS
       website</ulink></para> 
       <para>To access the CVS repository in anonymous mode, simply use the
       following commands (if you are using a GUI CVS client, configure
