@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -50,7 +50,8 @@ public class A3CMLDomain {
     this.name = name;
     if ((network == null) || network.equals(""))
       this.network = "fr.dyade.aaa.agent.SingleCnxNetwork";
-    this.network = network;
+    else
+      this.network = network;
   }
   
   void addServer(A3CMLPServer server) {
