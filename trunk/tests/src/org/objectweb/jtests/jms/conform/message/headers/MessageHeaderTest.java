@@ -25,6 +25,7 @@
 package org.objectweb.jtests.jms.conform.message.headers;
 
 import org.objectweb.jtests.jms.framework.PTPTestCase;
+import org.objectweb.jtests.jms.framework.TestConfig;
 import javax.jms.*;
 import junit.framework.*;
 import javax.naming.* ;
@@ -33,7 +34,7 @@ import javax.naming.* ;
  * Test the headers of a message
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageHeaderTest.java,v 1.6 2002-04-08 14:48:32 joram Exp $
+ * @version $Id: MessageHeaderTest.java,v 1.7 2002-04-23 08:36:18 jmesnil Exp $
  */
 public class MessageHeaderTest extends PTPTestCase {
 
@@ -51,7 +52,7 @@ public class MessageHeaderTest extends PTPTestCase {
 			 "method sending the message.\n",
 			 9, message.getJMSPriority());
       
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	}  catch (JMSException e) {
 	    fail(e);
 	} 
@@ -73,7 +74,7 @@ public class MessageHeaderTest extends PTPTestCase {
 			 "method sending the message.\n",
 			 Message.DEFAULT_PRIORITY, message.getJMSPriority());
       
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	}  catch (JMSException e) {
 	    fail(e);
 	} 
@@ -88,7 +89,7 @@ public class MessageHeaderTest extends PTPTestCase {
 	    Message message= senderSession.createMessage();
 	    sender.send(message);
 
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	    assertEquals("§3.4.9 When a message is received its JMSExpiration header field contains this same " +
 			 "value [i.e. set on return of the send method].\n",
 			 message.getJMSExpiration(), msg.getJMSExpiration());
@@ -110,7 +111,7 @@ public class MessageHeaderTest extends PTPTestCase {
 	    assertTrue("§3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
 		       message.getJMSMessageID().startsWith("ID:"));      
       
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	    assertTrue("§3.4.3 All JMSMessageID values must start with the prefix 'ID:'.\n",
 		       msg.getJMSMessageID().startsWith("ID:"));      
 	} catch (JMSException e) {
@@ -129,7 +130,7 @@ public class MessageHeaderTest extends PTPTestCase {
 	    sender.send(message);
 	    assertTrue("§3.4.3 When a message is sent this value is ignored.\n",
 		       message.getJMSMessageID() != "ID:foo");
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	} catch (JMSException e) {
 	    fail(e);
 	} 
@@ -154,7 +155,7 @@ public class MessageHeaderTest extends PTPTestCase {
 			 "by the sending method (persistent by default).\n",
 			 Message.DEFAULT_DELIVERY_MODE, message.getJMSDeliveryMode());
 
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	} catch (JMSException e) {
 	    fail(e);
 	} 
@@ -183,7 +184,7 @@ public class MessageHeaderTest extends PTPTestCase {
 			 "by the sending method.\n",
 			 senderQueue, message.getJMSDestination());
 
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	    assertEquals("§3.4.1 When a message is received, its destination value must be equivalent  " +
 			 " to the value assigned when it was sent.\n",
 			 ((Queue)message.getJMSDestination()).getQueueName(), 
@@ -208,7 +209,7 @@ public class MessageHeaderTest extends PTPTestCase {
 	    message.setJMSReplyTo(senderQueue);
 	    sender.send(message);
 
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	    Destination dest = msg.getJMSReplyTo();
 	    assertTrue("JMS ReplyTo header field should be a Queue", 
 		       dest instanceof Queue);
@@ -232,7 +233,7 @@ public class MessageHeaderTest extends PTPTestCase {
 	    message.setJMSReplyTo(tempQueue);
 	    sender.send(message);
 	    
-	    Message msg = receiver.receive();
+	    Message msg = receiver.receive(TestConfig.TIMEOUT);
 	    Destination dest = msg.getJMSReplyTo();
 	    assertTrue("JMS ReplyTo header field should be a TemporaryQueue", 
 		       dest instanceof TemporaryQueue);

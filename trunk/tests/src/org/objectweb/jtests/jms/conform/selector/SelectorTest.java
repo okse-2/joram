@@ -33,7 +33,7 @@ import javax.jms.*;
  * Test the message selector features of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorTest.java,v 1.2 2002-03-19 15:01:40 joram Exp $
+ * @version $Id: SelectorTest.java,v 1.3 2002-04-23 08:36:43 jmesnil Exp $
  */
 public class SelectorTest extends PTPTestCase {
 
@@ -64,7 +64,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testSelectorExampleFromSpecs:2");
       sender.send(message);
 
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertEquals("testSelectorExampleFromSpecs:2", msg.getText());
     } catch (JMSException e) {
       fail(e);
@@ -94,7 +94,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testGreaterThan:2");
       sender.send(message);
       
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertEquals("testGreaterThan:2", msg.getText());
     } catch (JMSException e) {
       fail(e);
@@ -124,7 +124,7 @@ public class SelectorTest extends PTPTestCase {
        message.setText("testEquals:2");
        sender.send(message);
        
-       TextMessage msg = (TextMessage)receiver.receive();
+       TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
        assertEquals("testEquals:2", msg.getText());
      } catch (JMSException e) {
        fail(e);
@@ -152,7 +152,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testBetween:2");
       sender.send(message);
 
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertTrue("Message not received",
 		 msg != null);
       assertTrue("Message of another test: "+ msg.getText(),
@@ -185,7 +185,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testIn:2");
       sender.send(message);
   
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertTrue("Message not received",
 		 msg != null);
       assertTrue("Message of another test: "+ msg.getText(),
@@ -218,7 +218,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testLikeEscape:2");
       sender.send(message);
 
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertTrue("Message not received",
 		 msg != null);
       assertTrue("Message of another test: "+ msg.getText(),
@@ -251,7 +251,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testLike_2:2");
       sender.send(message);
 
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertTrue("Message not received",
 		 msg != null);
       assertTrue("Message of another test: "+ msg.getText(),
@@ -284,7 +284,7 @@ public class SelectorTest extends PTPTestCase {
       message.setText("testLike_1:2");
       sender.send(message);
 
-      TextMessage msg = (TextMessage)receiver.receive();
+      TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       assertTrue("Message not received", msg != null);
       assertTrue("Message of another test: "+ msg.getText(),
 		 msg.getText().startsWith("testLike_1"));
@@ -317,7 +317,7 @@ public class SelectorTest extends PTPTestCase {
        message.setText("testNull:2");
        sender.send(message);
        
-       TextMessage msg = (TextMessage)receiver.receive();
+       TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
        assertTrue(msg != null);
        assertEquals("testNull:2", msg.getText());
      } catch (JMSException e) {

@@ -35,7 +35,7 @@ import javax.jms.*;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SessionTest.java,v 1.1 2002-03-19 15:19:06 joram Exp $
+ * @version $Id: SessionTest.java,v 1.2 2002-04-23 08:36:54 jmesnil Exp $
  */
 public class SessionTest extends PTPTestCase {
         
@@ -113,7 +113,7 @@ public class SessionTest extends PTPTestCase {
       // commit the transaction -> the sent message should be received
       senderSession.commit();
       
-      m = (TextMessage) receiver.receiveNoWait();
+      m = (TextMessage) receiver.receive(TestConfig.TIMEOUT);
       assertTrue(m != null);
       assertEquals("testCommitTransactedSession", m.getText());
     } catch (Exception e) {
@@ -188,7 +188,7 @@ public class SessionTest extends PTPTestCase {
       Message message = senderSession.createMessage();
       sender.send(message);
 
-      Message m = receiver.receive();
+      Message m = receiver.receive(TestConfig.TIMEOUT);
       receiverSession.close();
       m.acknowledge();
       fail("§4.4.1 Invoking the acknowledge method of a received message from a closed "+
@@ -213,7 +213,7 @@ public class SessionTest extends PTPTestCase {
       message.setText("testUseMessage");
       sender.send(message);
       
-      TextMessage m = (TextMessage)receiver.receive();
+      TextMessage m = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
       receiverSession.close();
       assertEquals("testUseMessage", m.getText());
     } catch (Exception e) {

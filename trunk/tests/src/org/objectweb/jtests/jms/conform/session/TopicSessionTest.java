@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TopicSessionTest.java,v 1.8 2002-04-16 10:01:10 joram Exp $
+ * @version $Id: TopicSessionTest.java,v 1.9 2002-04-23 08:36:59 jmesnil Exp $
  */
 public class TopicSessionTest extends PubSubTestCase {
 
@@ -73,7 +73,7 @@ public class TopicSessionTest extends PubSubTestCase {
 	    publisherSession.commit();
       
 	    // we receive it
-	    Message msg1 = subscriber.receive();
+	    Message msg1 = subscriber.receive(TestConfig.TIMEOUT);
 	    assertTrue("no message received", msg1 != null);
 	    assertTrue(msg1 instanceof TextMessage);
 	    assertEquals("testRollbackReceivedMessage", ((TextMessage)msg1).getText());
@@ -82,7 +82,7 @@ public class TopicSessionTest extends PubSubTestCase {
 	    subscriberSession.rollback();
       
 	    // we expect to receive a second time the message
-	    Message msg2 = subscriber.receive();
+	    Message msg2 = subscriber.receive(TestConfig.TIMEOUT);
 	    assertTrue("no message received after rollbacking subscriber session.", msg2 != null);
 	    assertTrue(msg2 instanceof TextMessage);
 	    assertEquals("testRollbackReceivedMessage", ((TextMessage)msg2).getText());
@@ -117,7 +117,7 @@ public class TopicSessionTest extends PubSubTestCase {
 	    subscriber = subscriberSession.createDurableSubscriber(subscriberTopic, "testTopic");
 	    subscriberConnection.start();
 
-	    TextMessage m = (TextMessage)subscriber.receive();
+	    TextMessage m = (TextMessage)subscriber.receive(TestConfig.TIMEOUT);
 	    assertTrue(m != null);
 	    assertEquals("test", m.getText());
 	} catch (JMSException e) {

@@ -35,7 +35,7 @@ import javax.jms.*;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: QueueSessionTest.java,v 1.1 2002-03-19 15:19:06 joram Exp $
+ * @version $Id: QueueSessionTest.java,v 1.2 2002-04-23 08:36:49 jmesnil Exp $
  */
 public class QueueSessionTest extends PTPTestCase {
 
@@ -71,7 +71,7 @@ public class QueueSessionTest extends PTPTestCase {
 	    senderSession.commit();
 
 	    // we receive a message...
-	    Message m = receiver.receiveNoWait();
+	    Message m = receiver.receive(TestConfig.TIMEOUT);
 	    assertTrue(m != null);
 	    assertTrue(m instanceof TextMessage);
 	    TextMessage msg = (TextMessage)m;
@@ -84,7 +84,7 @@ public class QueueSessionTest extends PTPTestCase {
 	    receiverSession.rollback();
 
 	    // we receive again a message
-	    m = receiver.receiveNoWait();
+	    m = receiver.receive(TestConfig.TIMEOUT);
 	    assertTrue(m != null);
 	    assertTrue(m instanceof TextMessage);
 	    msg = (TextMessage)m;

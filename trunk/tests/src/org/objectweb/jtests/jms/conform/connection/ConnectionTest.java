@@ -24,7 +24,8 @@
 
 package org.objectweb.jtests.jms.conform.connection;
 
-import org.objectweb.jtests.jms.framework.*;
+import org.objectweb.jtests.jms.framework.PTPTestCase;
+import org.objectweb.jtests.jms.framework.TestConfig;
 import javax.jms.*;
 import junit.framework.*;
 
@@ -34,7 +35,7 @@ import junit.framework.*;
  * See JMS specifications, §4.3.5 Closing a Connection
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: ConnectionTest.java,v 1.3 2002-04-08 14:49:07 joram Exp $
+ * @version $Id: ConnectionTest.java,v 1.4 2002-04-23 08:36:06 jmesnil Exp $
  */
 public class ConnectionTest extends PTPTestCase {
   
@@ -52,7 +53,7 @@ public class ConnectionTest extends PTPTestCase {
 	    Message message = senderSession.createMessage();
 	    sender.send(message);
 
-	    Message m = receiver.receive();
+	    Message m = receiver.receive(TestConfig.TIMEOUT);
 	    receiverConnection.close();
 	    m.acknowledge();
 	    fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
@@ -95,7 +96,7 @@ public class ConnectionTest extends PTPTestCase {
 	    Message message = senderSession.createTextMessage();
 	    sender.send(message);
       
-	    Message m = receiver.receive();
+	    Message m = receiver.receive(TestConfig.TIMEOUT);
 	} catch (JMSException e) {
 	    fail(e);
 	}
