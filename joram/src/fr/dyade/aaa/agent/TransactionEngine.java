@@ -89,13 +89,11 @@ final class TransactionEngine extends Engine {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if (msg.isPersistent()) {
-      modified = true;
-      msg.setUpdate(Update.alloc(AgentServer.getServerId(),
-                                 AgentServer.getServerId(),
-                                 ++stamp));
-      msg.save();
-    }
+    modified = true;
+    msg.setUpdate(Update.alloc(AgentServer.getServerId(),
+                               AgentServer.getServerId(),
+                               ++stamp));
+    msg.save();
     qin.push(msg);
   }
 
