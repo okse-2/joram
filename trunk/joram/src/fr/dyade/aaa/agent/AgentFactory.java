@@ -36,8 +36,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.10 2002-04-18 13:40:53 jmesnil Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -129,8 +129,8 @@ final class AgentVector extends AgentObject {
  * @author  Andre Freyssinet
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.10 2002-04-18 13:40:53 jmesnil Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -254,8 +254,11 @@ final class AgentFactory extends Agent {
           logmon.log(BasicLevel.DEBUG,
                      "AgentFactory" + id +
                      ", create Agent" + ag.id + " [" + ag.name + "]");
-	if (cnot.reply != null)
-	  sendTo(cnot.reply, new AgentCreateReply(ag.getId()));
+	if (cnot.reply != null) {
+          AgentCreateReply reply = new AgentCreateReply(ag.getId());
+          reply.setContext(cnot.getContext());
+	  sendTo(cnot.reply, reply);          
+        }
       } catch (Exception exc) {
  	//  If there is an explicit reply request send it the
 	// ExceptionNotification to the requester else to the
@@ -264,12 +267,13 @@ final class AgentFactory extends Agent {
         logmon.log(BasicLevel.ERROR,
                    "AgentFactory" + id + ", can't create Agent" + cnot.deploy,
                    exc);
+        ExceptionNotification excNot = 
+          new ExceptionNotification(getId(), cnot, exc);
+        excNot.setContext(cnot.getContext());
 	if (cnot.reply != null) {
-	  sendTo(cnot.reply,
-		 new ExceptionNotification(getId(), cnot, exc));
+	  sendTo(cnot.reply, excNot);
 	} else {
-	  sendTo(from,
-		 new ExceptionNotification(getId(), cnot, exc));
+	  sendTo(from, excNot);
 	}
       }
     } else if (not instanceof AgentDeleteRequest) {
