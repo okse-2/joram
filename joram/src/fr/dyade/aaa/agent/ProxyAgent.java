@@ -30,8 +30,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.21 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.21 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;

@@ -29,7 +29,6 @@ package fr.dyade.aaa.agent;
  */
 public class UnknownAgentException extends Exception {
 
-public static final String RCS_VERSION="@(#)$Id: UnknownAgentException.java,v 1.17 2004-03-16 10:03:45 fmaistre Exp $"; 
 
   /**
    *  Constructs a new <code>UnknownAgentException</code> with no

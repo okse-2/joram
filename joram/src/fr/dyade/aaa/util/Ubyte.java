@@ -30,7 +30,6 @@ package fr.dyade.aaa.util;
  */
 public class Ubyte {
 
-public static final String RCS_VERSION="@(#)$Id: Ubyte.java,v 1.11 2004-03-16 10:03:45 fmaistre Exp $"; 
 
 
   /**

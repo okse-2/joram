@@ -25,8 +25,6 @@ package fr.dyade.aaa.agent;
  * connection set.
  */
 public class DriverMonitor {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverMonitor.java,v 1.12 2004-03-16 10:03:45 fmaistre Exp $";
 
   /** The DriverIn of this connection set. */
   DriverIn drvIn;

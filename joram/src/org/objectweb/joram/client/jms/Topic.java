@@ -274,7 +274,9 @@ public class Topic extends Destination implements javax.jms.Topic
   }
 
   /**
-   * Monitoring method returning the number of subscriptions on this topic.
+   * Monitoring method returning the number of users that subscribes on
+   * this topic.
+   * If a client has many subscriptions it is only counted once.
    * <p>
    * The request fails if the topic is deleted server side.
    *
