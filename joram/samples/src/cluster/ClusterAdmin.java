@@ -38,9 +38,9 @@ public class ClusterAdmin
     System.out.println();
     System.out.println("Cluster administration...");
 
-    Admin admin0 = new Admin("pukapuka", 16010, "root", "root", 60);
-    Admin admin1 = new Admin("pukapuka", 16011, "root", "root", 60);
-    Admin admin2 = new Admin("pukapuka", 16012, "root", "root", 60);
+    Admin admin0 = new Admin("localhost", 16010, "root", "root", 60);
+    Admin admin1 = new Admin("localhost", 16011, "root", "root", 60);
+    Admin admin2 = new Admin("localhost", 16012, "root", "root", 60);
 
     admin0.addAdminId("admin", "pass");
     admin1.addAdminId("admin", "pass");
@@ -50,9 +50,9 @@ public class ClusterAdmin
     admin1.close();
     admin2.close();
 
-    admin0 = new Admin("pukapuka", 16010, "admin", "pass", 60);
-    admin1 = new Admin("pukapuka", 16011, "admin", "pass", 60);
-    admin2 = new Admin("pukapuka", 16012, "admin", "pass", 60);
+    admin0 = new Admin("localhost", 16010, "admin", "pass", 60);
+    admin1 = new Admin("localhost", 16011, "admin", "pass", 60);
+    admin2 = new Admin("localhost", 16012, "admin", "pass", 60);
 
     admin0.delAdminId("root");
     admin1.delAdminId("root");
