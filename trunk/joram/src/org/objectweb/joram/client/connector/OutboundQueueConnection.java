@@ -18,13 +18,14 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundQueueConnection</code> instance is a handler for a
@@ -46,6 +47,10 @@ public class OutboundQueueConnection
                           XAQueueConnection xac)
   {
     super(managedCx, xac);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "OutboundQueueConnection(" + managedCx + 
+                                    ", " + xac + ")");
   }
 
  
@@ -58,16 +63,23 @@ public class OutboundQueueConnection
    */
   public QueueSession
          createQueueSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createQueueSession(" + transacted +
+                                    ", " + acknowledgeMode +  ")");
+
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createQueueSession sess = " +  managedCx.session);
     Session sess = managedCx.session;
     if (sess == null)
-      sess = xac.createSession(transacted, acknowledgeMode);
+      sess = xac.createSession(false, acknowledgeMode);
 
-    return new OutboundQueueSession(sess, this);
+    return new OutboundQueueSession(sess, this, transacted);
   }
 
   /**
