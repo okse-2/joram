@@ -62,10 +62,7 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
   /** Administrator's initial password. */
   private String initialAdminPass;
 
-  /**
-   * Flow control duration (in ms) between two message sendings
-   * (-1 for no flow control).
-   */
+  // FLOW CONTROL OBJECTS AND PARAMETERS //
   private static Object lock = new Object();
   private static int inFlow = -1;
   private static long flowControl = 0;
@@ -338,7 +335,6 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
           end = System.currentTimeMillis();
           flowControl += (10000L - (end - start)) / (inFlow *10);
           if (flowControl < 0) flowControl = 0L;
-          System.out.println(flowControl);
           start = end;
           nbmsg = 0;
         }
