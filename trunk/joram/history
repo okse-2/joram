@@ -1,6 +1,14 @@
 +==============================================================================
 | 2004/10/01 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
+| Allows change of default identity through JoramDfltLogin and
+| JoramDfltPassword properties.
+| Changes network architecture:
+|	- reconnection after persistancy failure,
+|	- suppression of unused components: clock, update, etc.
++==============================================================================
+| 2004/10/01 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
 | Majors changes in network architecture:
 |       - Removes old unused components.
 |       - Adds PoolNetwork component (beta).
