@@ -58,7 +58,8 @@
     <s1 name="joram3_3_1"> 
       <s2 name="Maintenance release of joram3_3_0">
       <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
-      </ul>
+      is similar to the joram3_3_0 version except that it corrects a few bugs.
+      </p>
       </s2>
       <s2 name="Corrected bugs">
       <ul>
