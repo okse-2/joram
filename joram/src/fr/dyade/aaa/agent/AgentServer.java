@@ -249,8 +249,6 @@ public final class AgentServer {
   private static String name = null;
 
   public final static String getName() {
-    if (name == null)
-      name = new StringBuffer("AgentServer#").append(getServerId()).toString();
     return name;
   }
 
@@ -806,6 +804,10 @@ public final class AgentServer {
     return 2;
   }
 
+  /**
+   *  Cleans an AgentServer configuration in order to restart it from
+   * persistent storage.
+   */
   private static void reset() {
     transaction = null;
     a3config = null;
@@ -829,25 +831,28 @@ public final class AgentServer {
   public static void init(short sid,
                           String path,
                           LoggerFactory loggerFactory) throws Exception {
-    synchronized(status) {
-      if ((status.value != Status.INSTALLED) &&
-          (status.value != Status.STOPPED))
-        throw new Exception("cannot initialize, bad status: " + status.value);
-      status.value = Status.INITIALIZING;
-    }
-
-    serverId = sid; 
+    name = new StringBuffer("AgentServer#").append(sid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
-    logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
-                              ".#" + AgentServer.getServerId());
+    logmon = Debug.getLogger(Debug.A3Debug + '.' + getName());
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", init()", new Exception());
     else
       logmon.log(BasicLevel.WARN, getName() + ", init()");
 
-    reset();
+    synchronized(status) {
+      if (status.value == Status.STOPPED) {
+        logmon.log(BasicLevel.DEBUG, getName() + ", reset configuration");
+        reset();
+        status.value = Status.INSTALLED;
+      }
+      if (status.value != Status.INSTALLED)
+        throw new Exception("cannot initialize, bad status: " + status.value);
+      status.value = Status.INITIALIZING;
+    }
+
+    serverId = sid; 
 
     tgroup = new ThreadGroup(getName()) {
       public void uncaughtException(Thread t, Throwable e) {
