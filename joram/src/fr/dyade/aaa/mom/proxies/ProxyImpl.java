@@ -66,7 +66,12 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
    * Flow control duration (in ms) between two message sendings
    * (-1 for no flow control).
    */
-  private int flowControl = -1;
+  private static Object lock = new Object();
+  private static int inFlow = -1;
+  private static long flowControl = 0;
+  private static long start = 0L;
+  private static long end = 0L;
+  private static int nbmsg = 0;
 
   /**
    * Identifier of this proxy dead message queue, <code>null</code> for DMQ
@@ -129,9 +134,7 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
     contexts = new Hashtable();
     subsTable = new Hashtable();
 
-    int inFlow = fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory.inFlow;
-    if (inFlow != -1)
-      flowControl = 1000 / inFlow;
+    inFlow = fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory.inFlow;
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
@@ -327,13 +330,26 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
     proxyAgent.sendNot(AgentId.fromString(req.getTarget()), not);
     doReply(key, new ServerReply(req));
 
-    if (flowControl == -1)
-      Thread.yield();
-    else {
-      try {
-        Thread.sleep(flowControl);
+    if (inFlow != -1) {
+      synchronized (lock) {
+        if (start == 0L) start = System.currentTimeMillis();
+        nbmsg += 1;
+        if (nbmsg == (inFlow *10)) {
+          end = System.currentTimeMillis();
+          flowControl += (10000L - (end - start)) / (inFlow *10);
+          if (flowControl < 0) flowControl = 0L;
+          System.out.println(flowControl);
+          start = end;
+          nbmsg = 0;
+        }
       }
-      catch (Exception exc) {}
+      if (flowControl > 0) {
+        try {
+          Thread.sleep(flowControl);
+        } catch (InterruptedException exc) {}
+      } else {
+        Thread.yield();
+      }
     }
   }
 
