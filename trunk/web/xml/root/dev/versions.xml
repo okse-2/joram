@@ -15,16 +15,20 @@
     <s1 name="Information on the current version">
       <s2 name="Bugs">
       <ul>
-      <li>MessageProducers synchronized with the destinations, found by
-          <a href="http://www.objectweb.org/wws/arc/joram/2002-06/msg00024.html">
-          Jan Kester</a>.
-          This incorrect behaviour is encountered in distributed
-          configurations, when a producer client is connected to a server and
-          produces a message destinated to a destination located on an other
-          server. If this latest server is down, the producer will block
-          because of a synchronous call to the destination to check the access
-          permission of the producer. The fix involves dead message queues and
-          is not available yet.</li>
+      <li>Timeout in MessageConsumer.receive not compliant, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-09/msg00003.html">
+          Gerald Schröder</a>.
+          A MessageConsumer.receive(0) behaves as a receiveNoWait() instead
+          of behaving as a receive() (by waiting indefinitely for a message).
+          The fix has been submitted in the CVS distribution, in the
+          fr.dyade.aaa.joram package.</li>
+      <li>Incorrect BytesMessage and StreamMessage implementations, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00021.html">
+          Mark Trumpler</a>.
+          BytesMessage and StreamMessage were wrongly behaving in the case of
+          multiple sendings, modified or not. Also, their readBytes(...)
+          methods were wrong. The fix has been submitted in the CVS
+          distribution, in the fr.dyade.aaa.joram package.</li>
       <li>Messages never delivered in the case of an incorrect listener
           removal, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00012.html">
@@ -35,13 +39,16 @@
           server side until it is started again. If the connection is never
           started, and also never closed, the messages are kept there for ever,
           and thus never delivered. The fix hasn't been submitted yet.</li>
-      <li>Incorrect BytesMessage and StreamMessage implementations, found by
-          <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00021.html">
-          Mark Trumpler</a>.
-          BytesMessage and StreamMessage were wrongly behaving in the case of
-          multiple sendings, modified or not. Also, their readBytes(...)
-          methods were wrong. The fix has been submitted in the CVS
-          distribution, in the fr.dyade.aaa.joram package.</li>
+      <li>MessageProducers synchronized with the destinations, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-06/msg00024.html">
+          Jan Kester</a>.
+          This incorrect behaviour is encountered in distributed
+          configurations, when a producer client is connected to a server and
+          produces a message destinated to a destination located on an other
+          server. If this latest server is down, the producer will block
+          because of a synchronous call to the destination to check the access
+          permission of the producer. The fix involves dead message queues and
+          is not available yet.</li>
       </ul>
       </s2>
     </s1>
