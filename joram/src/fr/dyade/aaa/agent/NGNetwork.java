@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.Daemon;
  * <code>NGNetwork</code> is a new implementation of <code>Network</code>
  * class using nio package.
  */
-public class NGNetwork extends FIFONetwork {
+public class NGNetwork extends StreamNetwork {
   final class MessageVector {
     /**
      * The array buffer into which the components of the vector are
