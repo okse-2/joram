@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -89,7 +89,7 @@ public class XASession extends Session implements javax.jms.XASession
    *
    * @exception JMSException  Actually never thrown.
    */
-  XASession(Connection cnx, Session sess, XAResourceMngr rm)
+  public XASession(Connection cnx, Session sess, XAResourceMngr rm)
     throws JMSException
   {
     super(cnx, true, 0);
