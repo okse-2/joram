@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -26,6 +26,7 @@ import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Topic;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundSubscriber</code> instance wraps a JMS PubSub consumer
@@ -46,24 +47,34 @@ public class OutboundSubscriber extends OutboundConsumer
   OutboundSubscriber(Topic topic, 
                      boolean noLocal,
                      MessageConsumer consumer,
-                     OutboundSession session)
-  {
+                     OutboundSession session) {
     super(consumer, session);
     this.topic = topic;
     this.noLocal = noLocal;
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundSubscriber(" + topic +
+                                    ", " + noLocal +
+                                    ", " + consumer +
+                                    ", " + session + ")");
   }
 
 
   /** Returns the consumer's topic. */
-  public Topic getTopic() throws JMSException
-  {
+  public Topic getTopic() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getTopic()");
+    
     checkValidity();
     return topic;
   }
 
   /** Returns the noLocal parameter. */
-  public boolean getNoLocal() throws JMSException
-  {
+  public boolean getNoLocal() throws JMSException {
+   if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getNoLocal()");
+
     checkValidity();
     return noLocal;
   }

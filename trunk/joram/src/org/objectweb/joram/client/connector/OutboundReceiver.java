@@ -30,6 +30,7 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.client.jms.TemporaryQueue;
 import javax.jms.Connection;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundReceiver</code> instance wraps a JMS PTP consumer
@@ -52,6 +53,12 @@ public class OutboundReceiver extends OutboundConsumer
     super(consumer, session);
     this.queue = queue;
     
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundReceiver(" + queue + 
+                                    ", " + consumer + 
+                                    ", " + session + ")");
+    
     if (queue instanceof TemporaryQueue) {
       Connection tempQCnx = ((TemporaryQueue) queue).getCnx();
 
@@ -63,8 +70,10 @@ public class OutboundReceiver extends OutboundConsumer
 
 
   /** Returns the consumer's queue. */
-  public Queue getQueue() throws JMSException
-  {
+  public Queue getQueue() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getQueue() = " + queue);
+
     checkValidity();
     return queue;
   }

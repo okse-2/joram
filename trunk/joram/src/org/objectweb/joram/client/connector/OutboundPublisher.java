@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -26,6 +27,7 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Topic;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundPublisher</code> instance wraps a JMS producer
@@ -40,9 +42,13 @@ public class OutboundPublisher extends OutboundProducer
    * @param producer  The JMS producer to wrap.
    * @param session   The OutboundSession the publisher belongs to.
    */
-  OutboundPublisher(MessageProducer producer, OutboundSession session)
-  {
+  OutboundPublisher(MessageProducer producer, OutboundSession session) {
     super(producer, session);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "OutboundPublisher(" + producer + 
+                                    ", " + session + ")");
   }
 
  
@@ -58,15 +64,24 @@ public class OutboundPublisher extends OutboundProducer
                       int deliveryMode, 
                       int priority,
                       long timeToLive)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " publish(" + message +
+                                    ", " + deliveryMode +
+                                    ", " + priority +
+                                    ", " + timeToLive + ")");
+
     checkValidity();
     producer.send(message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
-  public void publish(Message message) throws JMSException
-  {
+  public void publish(Message message) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " publish(" + message + ")");
+
     checkValidity();
     producer.send(message);
   }
@@ -77,15 +92,26 @@ public class OutboundPublisher extends OutboundProducer
                       int deliveryMode, 
                       int priority,
                       long timeToLive)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " publish(" + topic +
+                                    ", " + message +
+                                    ", " + deliveryMode +
+                                    ", " + priority +
+                                    ", " + timeToLive + ")");
+
     checkValidity();
     producer.send(topic, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
-  public void publish(Topic topic, Message message) throws JMSException
-  {
+  public void publish(Topic topic, Message message) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " publish(" + topic +
+                                    ", " + message + ")");
+
     checkValidity();
     producer.send(topic, message);
   }

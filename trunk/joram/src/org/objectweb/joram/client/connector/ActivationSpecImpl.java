@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -27,6 +27,7 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>ActivationSpecImpl</code> instance holds configuration information
@@ -112,6 +113,9 @@ public class ActivationSpecImpl
   /** Sets the resource adapter central authority. */
   public void setResourceAdapter(ResourceAdapter ra) throws ResourceException
   {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " setResourceAdapter(" + ra + ")");
+
     if (this.ra != null)
       throw new IllegalStateException("Can not change resource adapter"
                                       + " association.");
@@ -127,6 +131,9 @@ public class ActivationSpecImpl
   /** Returns the resource adapter central authority instance. */
   public ResourceAdapter getResourceAdapter()
   {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getResourceAdapter = " + ra);
+
     return ra;
   }
 

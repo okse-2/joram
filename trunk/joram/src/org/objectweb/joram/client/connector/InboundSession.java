@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -31,6 +31,7 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>InboundSession</code> instance is responsible for processing
@@ -73,8 +74,14 @@ class InboundSession implements javax.jms.ServerSession,
                  WorkManager workManager,
                  MessageEndpointFactory endpointFactory,
                  XAConnection cnx,
-                 boolean transacted)
-  {
+                 boolean transacted) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundSession(" + consumer +
+                                    "," + workManager +
+                                    "," + endpointFactory +
+                                    "," + cnx +
+                                    "," + transacted + ")");
+    
     this.consumer = consumer;
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
@@ -83,10 +90,16 @@ class InboundSession implements javax.jms.ServerSession,
       if (transacted) {
         session = cnx.createXASession();
         xaResource = ((XASession) session).getXAResource();
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                        "InboundSession xaResource = " + xaResource);
       }
       else
         session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      "InboundSession session = " + session);
       session.setMessageListener(this);
     }
     catch (JMSException exc) {}
@@ -134,8 +147,11 @@ class InboundSession implements javax.jms.ServerSession,
   }
 
   /** Forwards a processed message to an endpoint. */
-  public void onMessage(javax.jms.Message message)
-  {
+  public void onMessage(javax.jms.Message message) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " onMessage(" + message + ")");
+
     try {
       AdapterTracing.debugDEBUG("ServerSession passes message to listener.");
       MessageEndpoint endpoint = endpointFactory.createEndpoint(xaResource);

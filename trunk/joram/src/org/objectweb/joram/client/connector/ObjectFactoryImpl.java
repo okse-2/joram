@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): 
+ * Contributor(s):  Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -26,6 +26,7 @@ import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.Reference;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * This class is a factory for building non managed outbound connection 
@@ -45,8 +46,15 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context ctx,
-                                  java.util.Hashtable env) throws Exception
-  {
+                                  java.util.Hashtable env)
+    throws Exception {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getObjectInstance(" + obj + 
+                                    ", " + name +
+                                    ", " + ctx +
+                                    ", " + env + ")");
+
     Reference ref = (Reference) obj;
 
     String hostName = (String) ref.get("hostName").getContent();

@@ -26,6 +26,7 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundConsumer</code> instance wraps a JMS consumer
@@ -48,8 +49,14 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    * @param consumer  JMS consumer to wrap.
    * @param session   The OutboundSession this consumer belongs to.
    */
-  OutboundConsumer(MessageConsumer consumer, OutboundSession session)
-  {
+  OutboundConsumer(MessageConsumer consumer, 
+                   OutboundSession session) {
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundConsumer(" + consumer + 
+                                    ", " + session + ")");
+    
     this.consumer = consumer;
     this.session = session;
   }
@@ -79,8 +86,11 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   /**
    * Delegates the call to the wrapped JMS consumer.
    */
-  public String getMessageSelector() throws JMSException
-  {
+  public String getMessageSelector() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " getMessageSelector()");
+    
     checkValidity();
     return consumer.getMessageSelector();
   }
@@ -88,8 +98,11 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   /** 
    * Delegates the call to the wrapped JMS consumer.
    */
-  public javax.jms.Message receive(long timeOut) throws JMSException
-  {
+  public javax.jms.Message receive(long timeOut) throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receive(" + timeOut + ")");
+
     checkValidity();
     return consumer.receive(timeOut);
   }
@@ -97,8 +110,11 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   /** 
    * Delegates the call to the wrapped JMS consumer.
    */
-  public javax.jms.Message receive() throws JMSException
-  {
+  public javax.jms.Message receive() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receive()");
+
     checkValidity();
     return consumer.receive();
   }
@@ -106,8 +122,11 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   /** 
    * Delegates the call to the wrapped JMS consumer.
    */
-  public javax.jms.Message receiveNoWait() throws JMSException
-  {
+  public javax.jms.Message receiveNoWait() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " receiveNoWait()");
+
     checkValidity();
     if (!session.isStarted())
       return null;
@@ -117,8 +136,11 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   /**
    * Delegates the call to the wrapped JMS consumer.
    */
-  public void close() throws JMSException
-  {
+  public void close() throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " close()");
+
     valid = false;
     consumer.close();
   }

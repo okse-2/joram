@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -28,6 +28,7 @@ import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundQueueConnectionFactory</code> instance is used for
@@ -49,6 +50,11 @@ public class OutboundQueueConnectionFactory
                                  ConnectionManager cxManager)
   {
     super(mcf, cxManager);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundQueueConnectionFactory(" + mcf + 
+                                    ", " + cxManager + ")");
   }
 
 
@@ -61,8 +67,11 @@ public class OutboundQueueConnectionFactory
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.QueueConnection createQueueConnection() throws JMSException
-  {
+  public javax.jms.QueueConnection createQueueConnection() 
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createQueueConnection()");
+
     return createQueueConnection(mcf.userName, mcf.password);
   }
 
@@ -76,24 +85,30 @@ public class OutboundQueueConnectionFactory
    * @exception JMSException           Generic exception.
    */
   public javax.jms.QueueConnection
-         createQueueConnection(String userName, String password)
-         throws JMSException
-  {
+      createQueueConnection(String userName, String password)
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createQueueConnection(" + userName + 
+                                    ", " + password + ")");
+
     try {
       QueueConnectionRequest cxRequest =
         new QueueConnectionRequest(userName, password);
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
+
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createQueueConnection connection = " + o);
+
       return (javax.jms.QueueConnection) o;
-    }
-    catch (javax.resource.spi.SecurityException exc) {
+    } catch (javax.resource.spi.SecurityException exc) {
       throw new JMSSecurityException("Invalid user identification: " + exc);
-    }
-    catch (javax.resource.spi.CommException exc) {
+    } catch (javax.resource.spi.CommException exc) {
       throw new IllegalStateException("Could not connect to the JORAM server: "
                                       + exc);
-    }
-    catch (javax.resource.ResourceException exc) {
+    } catch (javax.resource.ResourceException exc) {
       throw new JMSException("Could not create connection: " + exc);
     }
   }

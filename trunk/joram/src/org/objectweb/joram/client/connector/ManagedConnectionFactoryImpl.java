@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>ManagedConnectionFactoryImpl</code> instance manages
@@ -96,8 +97,10 @@ public class ManagedConnectionFactoryImpl
    * @exception ResourceException  Never thrown.
    */
   public Object createConnectionFactory(ConnectionManager cxManager)
-                throws ResourceException
-  {
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory(" + cxManager + ")");
+
     return new OutboundConnectionFactory(this, cxManager);
   }
 
@@ -107,8 +110,10 @@ public class ManagedConnectionFactoryImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory() throws ResourceException
-  {
+  public Object createConnectionFactory() throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
+
     OutboundConnectionFactory factory = 
       new OutboundConnectionFactory(this, null);
 
@@ -142,10 +147,14 @@ public class ManagedConnectionFactoryImpl
    *                                   reason.
    */ 
   public ManagedConnection
-         createManagedConnection(Subject subject,
-                                 ConnectionRequestInfo cxRequest)
-         throws ResourceException
-  {
+      createManagedConnection(Subject subject,
+                              ConnectionRequestInfo cxRequest)
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createManagedConnection(" + subject +
+                                    ", " + cxRequest + ")");
+
     String userName;
     String password;
 
@@ -182,16 +191,17 @@ public class ManagedConnectionFactoryImpl
 
     try {
       cnx = factory.createXAConnection(userName, password);
-    }
-    catch (IllegalStateException exc) {
+
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " createManagedConnection cnx = " + cnx);
+    } catch (IllegalStateException exc) {
       out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
-    }
-    catch (JMSSecurityException exc) {
+    } catch (JMSSecurityException exc) {
       out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
-    }
-    catch (JMSException exc) {
+    } catch (JMSException exc) {
       out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
@@ -203,6 +213,9 @@ public class ManagedConnectionFactoryImpl
                                                             userName);
     managedCx.setLogWriter(out);
 
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createManagedConnection managedCx = " + managedCx);
     return managedCx;
   }
 
@@ -218,11 +231,15 @@ public class ManagedConnectionFactoryImpl
    *                               invalid.
    */
   public ManagedConnection
-         matchManagedConnections(Set connectionSet,
-                                 Subject subject,
-                                 ConnectionRequestInfo cxRequest)
-         throws ResourceException
-  {
+      matchManagedConnections(Set connectionSet,
+                              Subject subject,
+                              ConnectionRequestInfo cxRequest)
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " matchManagedConnections(" + connectionSet +
+                                    ", " + subject + ", " + cxRequest + ")");
+
     String userName;
 
     // No user identification provided, using the default one.
@@ -252,6 +269,9 @@ public class ManagedConnectionFactoryImpl
     }
 
     if (matching) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                      this + " matchManagedConnections managedCx = " + managedCx);
       managedCx.setLogWriter(out);
       return managedCx;
     }
@@ -297,14 +317,22 @@ public class ManagedConnectionFactoryImpl
 
     ManagedConnectionFactoryImpl other = (ManagedConnectionFactoryImpl) o;
   
-    return hostName.equals(other.hostName)
-           && serverPort == other.serverPort
-           && userName.equals(other.userName);
+    boolean res =
+      hostName.equals(other.hostName)
+      && serverPort == other.serverPort
+      && userName.equals(other.userName);
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " equals " + res);
+    return res;
   }
 
   /** Returns the resource adapter central authority instance. */
-  public ResourceAdapter getResourceAdapter()
-  {
+  public ResourceAdapter getResourceAdapter() {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " getResourceAdapter() = " + ra);
     return ra;
   }
 
@@ -313,8 +341,12 @@ public class ManagedConnectionFactoryImpl
    *
    * @exception ResourceException  If the adapter could not be set.
    */
-  public void setResourceAdapter(ResourceAdapter ra) throws ResourceException
-  {
+  public void setResourceAdapter(ResourceAdapter ra) 
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setResourceAdapter(" + ra + ")");
+
     if (this.ra != null) {
       out.print("ResourceAdapter instance already associated.");
       throw new javax.resource.spi.IllegalStateException("ResourceAdapter "
@@ -340,8 +372,12 @@ public class ManagedConnectionFactoryImpl
   /**
    * From a set of managed connections, returns the set of invalid ones.
    */
-  public Set getInvalidConnections(Set connectionSet) throws ResourceException
-  {
+  public Set getInvalidConnections(Set connectionSet) 
+    throws ResourceException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " getInvalidConnections(" + connectionSet + ")");
+
     Iterator it = connectionSet.iterator();
     ManagedConnectionImpl managedCx;
 
