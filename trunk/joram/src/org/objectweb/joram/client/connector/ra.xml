@@ -39,11 +39,6 @@
          org.objectweb.joram.client.connector.JoramAdapter
       </resourceadapter-class>
       <config-property>
-         <config-property-name>DebugMode</config-property-name>
-         <config-property-type>java.lang.Boolean</config-property-type>
-         <config-property-value>false</config-property-value>
-      </config-property>
-      <config-property>
          <config-property-name>PlatformConfigDir</config-property-name>
          <config-property-type>java.lang.String</config-property-type>
       </config-property>

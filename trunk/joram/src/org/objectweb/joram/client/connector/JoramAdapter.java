@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.connector;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
@@ -36,6 +37,9 @@ import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -76,8 +80,6 @@ import javax.transaction.xa.XAResource;
 public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                      java.io.Serializable
 {
-  /** <code>true</code> for activating the debug mode. */
-  private boolean debugMode = false;
   /**
    * Path to the directory containing the underlying JORAM platform
    * <code>a3servers.xml</code> configuration file, needed in the
@@ -353,6 +355,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                   + "context: " + exc);
     }
 
+    int maxWorks = 0;
+    try {
+      maxWorks = Integer.parseInt(specImpl.getMaxNumberOfWorks());
+    }
+    catch (Exception exc) {
+      throw new ResourceException("Invalid max number of works instances "
+                                  + "number: " + exc);
+    }
+
     String destType = specImpl.getDestinationType();
     String destName = specImpl.getDestination();
 
@@ -374,6 +385,13 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       createUser(userName, password);
 
       XAConnectionFactory connectionFactory = null;
+
+      if (collocated)
+        connectionFactory = XALocalConnectionFactory.create();
+      else
+        connectionFactory =
+          XATcpConnectionFactory.create(hostName, serverPort);
+
       XAConnection cnx =
         connectionFactory.createXAConnection(userName, password);
 
@@ -386,7 +404,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                             specImpl.getMessageSelector(),
                             durable,
                             specImpl.getSubscriptionName(),
-                            transacted);
+                            transacted,
+                            maxWorks);
 
       consumers.put(specImpl, consumer);
     }
@@ -638,8 +657,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   /** Debugging method. */
   private void debug(String message)
   {
-    if (debugMode)
-      System.out.println(message);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, message);
   }
 
   /** Deserializing method. */
@@ -654,11 +673,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   // ------------------------------------------
   // --- JavaBean setter and getter methods ---
   // ------------------------------------------
-  public void setDebugMode(java.lang.Boolean debugMode)
-  {
-    this.debugMode = debugMode.booleanValue();
-  }
-
   public void setPlatformConfigDir(java.lang.String platformConfigDir)
   {
     this.platformConfigDir = platformConfigDir;
@@ -698,12 +712,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   {
     this.serverPort = serverPort.intValue();
   }
-
-  public java.lang.Boolean getDebugMode()
-  {
-    return new Boolean(debugMode);
-  }
-
+  
   public java.lang.String getPlatformConfigDir()
   {
     return platformConfigDir;
@@ -742,5 +751,20 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   public java.lang.Integer getServerPort()
   {
     return new Integer(serverPort);
+  }
+}
+
+/**
+ * Utility class for logging.
+ */
+class AdapterTracing
+{
+  public static Logger dbgAdapter = null;
+  private static boolean initialized = false;
+
+  static
+  {
+    dbgAdapter =
+      Debug.getLogger("org.objectweb.joram.client.connector.Adapter");
   }
 }

@@ -41,6 +41,9 @@ class InboundSession implements javax.jms.ServerSession,
                                 javax.resource.spi.work.Work,
                                 javax.jms.MessageListener
 {
+  /** <code>InboundConsumer</code> instance this session belongs to. */
+  private InboundConsumer consumer;
+
   /** Application server's <code>WorkManager</code> instance. */
   private WorkManager workManager;
   /** Application's endpoints factory. */
@@ -58,6 +61,7 @@ class InboundSession implements javax.jms.ServerSession,
   /**
    * Constructs an <code>InboundSession</code> instance.
    *
+   * @param consumer         InboundConsumer creating this session.
    * @param workManager      Application server's <code>WorkManager</code>
    *                         instance.
    * @param endpointFactory  Application's endpoints factory.
@@ -65,11 +69,13 @@ class InboundSession implements javax.jms.ServerSession,
    * @param transacted       <code>true</code> if deliveries occur within a 
    *                         XA transaction.
    */
-  InboundSession(WorkManager workManager,
+  InboundSession(InboundConsumer consumer,
+                 WorkManager workManager,
                  MessageEndpointFactory endpointFactory,
                  XAConnection cnx,
                  boolean transacted)
   {
+    this.consumer = consumer;
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
 
@@ -122,6 +128,7 @@ class InboundSession implements javax.jms.ServerSession,
   public void run()
   {
     session.run();
+    consumer.releaseSession(this);
   }
 
   /** Forwards a processed message to an endpoint. */

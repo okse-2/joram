@@ -30,6 +30,8 @@ import javax.resource.spi.SecurityException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 
+import java.util.Vector;
+
 
 /**
  * An <code>InboundConsumer</code> instance is responsible for consuming
@@ -51,8 +53,16 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   /** <code>true</code> if message consumption occurs in a transaction. */
   private boolean transacted;
 
+  /** Maximum number of Work instances to be submitted (0 for infinite). */
+  private int maxWorks;
+
   /** Wrapped <code>ConnectionConsumer</code> instance. */
   private ConnectionConsumer cnxConsumer;
+  /** Number of created server sessions. */
+  private int serverSessions = 0;
+
+  /** Pool of server sessions. */
+  private Vector pool;
 
 
   /**
@@ -68,6 +78,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    * @param subName          Durable subscription name.
    * @param transacted       <code>true</code> if deliveries will occur in a
    *                         XA transaction.
+   * @param maxWorks         Max number of Work instances to be submitted.
    *
    * @exception NotSupportedException  If the activation parameters are
    *                                   invalid.
@@ -84,12 +95,20 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                   String selector,
                   boolean durable,
                   String subName,
-                  boolean transacted) throws ResourceException
+                  boolean transacted,
+                  int maxWorks) throws ResourceException
   {
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
     this.cnx = cnx;
     this.transacted = transacted;
+
+    if (maxWorks < 0)
+      this.maxWorks = 0;
+    else {
+      this.maxWorks = maxWorks;
+      pool = new Vector(maxWorks);
+    }
 
     try {
       if (durable) {
@@ -137,9 +156,48 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    */
   public ServerSession getServerSession() throws JMSException
   {
-    return new InboundSession(workManager, endpointFactory, cnx, transacted);
+    // No limit to work 
+    if (maxWorks <= 0)
+      return new InboundSession(this,
+                                workManager,
+                                endpointFactory,
+                                cnx,
+                                transacted);
+
+    try {
+      synchronized (pool) {
+        if (pool.isEmpty() && (serverSessions < maxWorks)) {
+          serverSessions++;
+          return new InboundSession(this,
+                                    workManager,
+                                    endpointFactory,
+                                    cnx,
+                                    transacted);
+        }
+        else if (pool.isEmpty())
+          pool.wait();
+
+        return (ServerSession) pool.remove(0);
+      }
+    }
+    catch (Exception exc) {
+      throw new JMSException("Error while getting server session from pool: "
+                             + exc);
+    }
   }
 
+
+  /** Releases an <code>InboundSession</code> instance. */
+  void releaseSession(InboundSession session)
+  {
+    try {
+      synchronized (pool) {
+        pool.add(session);
+        pool.notify();
+      }
+    }
+    catch (Exception exc) {}
+  }
 
   /** Closes the consumer. */
   void close()
