@@ -21,7 +21,7 @@
 	  download</a></em>.<br />
       </p><p>
 	This version corrects all bugs discovered by JORAM community
-	since the release of JORAM 3.0.0 which were already available
+	since the release of JORAM 3.0.0. These corrections were already available
 	in CVS repository.
       </p>
 
@@ -66,6 +66,7 @@
 	  <li><em>Point-to-Point</em> (PTP) messaging model</li>
 	  <li><em>Publish / Subscribe</em> (Pub/Sub) messaging model</li>
 	  <li>Message selection</li>
+	  <li>Plus a timer for pending transacted sessions</li>
 	  <li>Plus a distributed Topic destination</li>
 	  <li>Plus a "light" <em>JNDI 1.1.2</em> implementation</li>
 	</ul>
