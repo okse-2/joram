@@ -20,6 +20,12 @@
     <ant dir="." antfile="joram.xml" target="ship.gui"/>
   </target>
 
+  <!-- JORAM graphical admin tool shipment target -->
+  <target name="javadoc"
+          description="generates the Joram javadoc">
+    <ant dir="." antfile="joram.xml" target="javadoc"/>
+  </target>
+
   <!-- Global cleaning target -->
   <target name="clean"
           description="cleans the generated shipments">
