@@ -28,7 +28,7 @@
           version. Those changes partially concern communication protocols and thus prevent backward compatibility with previous
           Joram versions. </li>
       </ul>
-      <p>This version has been sponsored by France Telecom R&D</p>
+      <p>This version has been sponsored by France Telecom R&amp;D</p>
 
       <subtitle>January 7, 2005: JORAM 4.1.5 maintenance release is available</subtitle>
       <p>Joram 4.1.5 is a maintenance release with bug fixes and configuration improvments.</p>
@@ -59,7 +59,7 @@
 	  </ul>
 	</li>
 	<li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
-	exchanging messages depending on their load. This new feature is sponsored by France Telecom R&D,
+	exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
 	as will be the future High-Availability Joram server to be released in the next version. </li>
       </ul>
       <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
