@@ -51,6 +51,8 @@ public interface ConnectionItf
   public void send(com.scalagent.kjoram.jms.AbstractJmsRequest request)
               throws com.scalagent.kjoram.excepts.IllegalStateException;
 
+  public String getUserName();
+
   /** Closes the connection. */
   public void close();
 }

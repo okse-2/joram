@@ -49,6 +49,8 @@ public class SoapConnection implements com.scalagent.kjoram.ConnectionItf {
   /** */
   private HttpConnection httpConnect = null;
 
+  private String name = null;
+
   /**
    * Creates a <code>SoapConnection</code> instance.
    *
@@ -62,8 +64,12 @@ public class SoapConnection implements com.scalagent.kjoram.ConnectionItf {
   public SoapConnection(FactoryParameters factParams, String name,
                         String password) throws JMSException {
     connect(factParams, name, password);
+    this.name = name;
   }
 
+  public String getUserName() {
+    return name;
+  }
 
   /**
    * Creates a driver for the connection.
@@ -86,7 +92,7 @@ public class SoapConnection implements com.scalagent.kjoram.ConnectionItf {
     try {
       if (httpConnect == null)
         httpConnect = new HttpConnection(serviceUrl);
-      httpConnect.call(request,cnxId);
+      httpConnect.call(request,name,cnxId);
     } catch (Exception exc) {
       httpConnect = null;
       throw new IllegalStateException("The SOAP call failed: "
