@@ -34,41 +34,43 @@ public class TypeLoader {
   public static Class loadType(String typeName,
                                ClassLoader classLoader) {
     try {
-      if (classLoader == null) {
-        return Class.forName(typeName);
-      } else {
-        return classLoader.loadClass(typeName);
-      }
-    } catch (Exception exc) {
-      // This may be either:
-      // - a primitive type
-      // - an array type if no instance of this 
-      //   array of this type has been created yet.
-      // - an unknown type
-      if (typeName.equals("int")) {
-        return Integer.class;
-      } else if (typeName.equals("long")) {
-        return Long.class;
-      } else if (typeName.equals("boolean")) {
-        return Boolean.class;
-      } else if (typeName.equals("short")) {
-        return Short.class;
-      } else if (typeName.equals("double")) {
-        return Double.class;
-      } else if (typeName.equals("float")) {
-        return Float.class;
-      } else if (typeName.length() > 4 &&
-                 typeName.charAt(0) == '[' &&
-                 typeName.charAt(1) == 'L' &&
-                 typeName.charAt(typeName.length() - 1) == ';') {
-        String eltClassName = typeName.substring(
-          2, typeName.length() - 1);
-        Class eltClass = loadType(eltClassName, classLoader);
-        if (eltClass == null) return null;
-        // Have to create an instance to get the type (class)
-        Object arrayInstance = Array.newInstance(eltClass, 0);
-        return arrayInstance.getClass();
-      } else return null;
+      return Class.forName(typeName);
+    } catch (ClassNotFoundException exc) {
+      try {
+        if (classLoader != null) {
+          return classLoader.loadClass(typeName);
+        }
+      } catch (ClassNotFoundException exc2) {}
     }
+    
+    // This may be either:
+    // - a primitive type
+    // - an array type if no instance of this 
+    //   array of this type has been created yet.
+    // - an unknown type
+    if (typeName.equals("int")) {
+      return Integer.class;
+    } else if (typeName.equals("long")) {
+      return Long.class;
+    } else if (typeName.equals("boolean")) {
+      return Boolean.class;
+    } else if (typeName.equals("short")) {
+      return Short.class;
+    } else if (typeName.equals("double")) {
+      return Double.class;
+    } else if (typeName.equals("float")) {
+      return Float.class;
+    } else if (typeName.length() > 4 &&
+               typeName.charAt(0) == '[' &&
+               typeName.charAt(1) == 'L' &&
+               typeName.charAt(typeName.length() - 1) == ';') {
+      String eltClassName = typeName.substring(
+        2, typeName.length() - 1);
+      Class eltClass = loadType(eltClassName, classLoader);
+      if (eltClass == null) return null;
+      // Have to create an instance to get the type (class)
+      Object arrayInstance = Array.newInstance(eltClass, 0);
+      return arrayInstance.getClass();
+    } else return null;
   }
 }
