@@ -21,11 +21,10 @@
     </menu>
 
     <menu>
-      <legend>Developers' Corner</legend>
-      <menuitem><a href="dev/versions.html">Releases Info</a></menuitem>
-      <menuitem><a href="dev/topics.html">Hot Topics</a></menuitem>
-      <menuitem><a href="dev/contrib.html">Getting Involved</a></menuitem>
-      <menuitem><a href="http://debian-sf.objectweb.org/cvs/?group_id=4">CVS Repository</a></menuitem>
+      <connect href="dev/corner.xml">Developers' corner</connect>
+      <menuitem><connect href="dev/versions.xml">Releases info</connect></menuitem>
+      <menuitem><connect href="dev/topics.xml">Hot topics</connect></menuitem>
+      <menuitem><a href="http://debian-sf.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
     </menu>
     
     <menu>

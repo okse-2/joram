@@ -34,8 +34,9 @@
       </p>
 
       <p>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
-      JavaCup</a> Java parser generator is covered by
-      <a href="licenses/CUP_LICENSE.TXT">this license</a>.
+      JavaCup</a> Java parser generator is covered by the
+      <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">
+      CUP Parser Generator Copyright Notice, License, and Disclaimer</a>.
       </p>
    
     </s1>
