@@ -1,21 +1,13 @@
-<project default="ship.joram" basedir=".">
-  <!-- Generic build file used by core developper -->
+<?xml version="1.0" standalone="yes"?>
 
+<project default="ship.joram" basedir=".">
   <!-- Initializes properties -->
   <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
     <!-- Initialize the environment properties, use ${env.name} -->
     <property environment="env"/>
   
-    <!-- Detect cygwin unix emulation on windows-->
-    <condition property="cygwin32">
-      <equals arg1="${env.OSTYPE}" arg2="cygwin32"/>
-    </condition >
-
-    <!-- Detect NT familly OS -->
-    <condition property="nt">
-      <os family="windows"/>
-    </condition >
-
     <!-- Get the user defined properties from file -->
     <property file="build.properties"/>
 
@@ -26,68 +18,16 @@
     <property name="build.dir" location="../build"/>
     <property name="ship.dir" location="../ship"/>
     <property name="doc.dir" location="../apidoc"/>
-  </target>
-
-
-  <!-- Verify dependancies between properties -->
-  <target name="verify" depends="init">
-    <condition property="services">
-      <or>
-        <equals arg1="${netwall}" arg2="true"/>
-        <equals arg1="${paf}" arg2="true"/>
-        <equals arg1="${tools}" arg2="true"/>
-        <equals arg1="${control}" arg2="true"/>
-        <equals arg1="${umts}" arg2="true"/>
-      </or>
-    </condition >
-    <condition property="model">
-      <or>
-        <equals arg1="${netwall}" arg2="true"/>
-        <equals arg1="${paf}" arg2="true"/>
-        <equals arg1="${control}" arg2="true"/>
-        <equals arg1="${tools}" arg2="true"/>
-        <equals arg1="${services}" arg2="true"/>        
-        <equals arg1="${umts}" arg2="true"/>
-      </or>
-    </condition >
-  </target>
-
-  <!-- Initialize patternset and path, defines fileset to compile -->
-  <target name="init.src">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    
-    <!-- Base AgentServer sources set -->
-    <patternset id="base">
-      <include name="fr/dyade/aaa/util/*.java"/>
-      <include name="fr/dyade/aaa/agent/*.java"/>
-      <exclude name="fr/dyade/aaa/agent/SSLNetwork.java" unless="security"/>
-      <include name="fr/dyade/aaa/ip/*.java"/>
-    </patternset>
-
-    <!-- Classic AgentServer extensions sources set -->
-    <patternset id="extension">
-      <include name="fr/dyade/aaa/task/*.java"/>
-      <include name="fr/dyade/aaa/ns/*.java"/>
-      <include name="fr/dyade/aaa/jndi/*.java"/>
-      <include name="fr/dyade/aaa/scbean/*.java"/>
-    </patternset>
-
-    <!-- Joram specific sources set -->
-    <patternset id="joram">
-      <include name="fr/dyade/aaa/mom/*.java" if="jms"/>
-      <include name="fr/dyade/aaa/mom/selectors/*.java" if="jms"/>
-      <include name="fr/dyade/aaa/joram/*.java" if="jms"/>
-    </patternset>
 
     <!-- Base classpath needed for execution -->
     <path id="base.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
         <include name="jakarta-regexp-1.2.jar"/>
-        <include name="jms.jar" if="jms"/>
+        <include name="JCup.jar"/>
+        <include name="jms.jar"/>
         <include name="jndi.jar"/>
-        <include name="jta-spec1_0_1.jar"/>
+        <include name="jta.jar"/>
         <include name="log4j.jar"/>
         <include name="owlogapi.jar"/>
         <include name="owlogwrpl4j.jar"/>
@@ -104,7 +44,8 @@
   </target>
 
   <!-- Clean all generated files -->
-  <target name="clean" depends="init">
+  <target name="clean" depends="init"
+      description="--> Clean all generated files">
     <delete dir="${obj.dir}"/>
     <delete dir="${build.dir}"/>
     <delete dir="${ship.dir}"/>
@@ -113,14 +54,15 @@
   </target>
 
   <!-- Prepare compilation phase -->
-  <target name="prepare" depends="verify,init.src">
+  <target name="prepare" depends="init">
     <!-- Create the directory structure -->
     <mkdir dir="${obj.dir}"/>
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${doc.dir}"/>
   </target>
 
-  <target name="compile" depends="prepare">
+  <target name="compile" depends="prepare"
+      description="--> Compile JORAM">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
            debug="true"
@@ -131,41 +73,20 @@
 
       <classpath refid="project.class.path"/>
 
-      <patternset refid="base"/>
-      <patternset refid="extension"/>
-      <patternset refid="joram"/>
-      <include name="fr/dyade/aaa/proxy/*.java"/>
-    </javac>
-  </target>
+      <include name="**/*.java"/>
 
-  <target name="javadoc" depends="prepare">
-    <javadoc sourcepath="${src.dir}"
-             destdir="${doc.dir}"
-             access="${doc.access}"
-             version="${doc.version}"
-             author="${doc.author}"
-             windowtitle="${doc.name} API"
-             doctitle="${doc.name}"
-             bottom="Copyright &#xA9; 2001 Scalagent - All rights reserved">
-      <package name="fr.dyade.aaa.util"/>
-      <package name="fr.dyade.aaa.agent"/>
-      <package name="fr.dyade.aaa.ip"/>
-<!--      <package name="fr.dyade.aaa.scbean"/>
-      <package name="fr.dyade.aaa.task"/>
-      <package name="fr.dyade.aaa.ns"/>-->
-      <package name="fr.dyade.aaa.jndi"/>
-<!--      <package name="fr.dyade.aaa.proxy.jndi"/>-->
-      <package name="fr.dyade.aaa.joram"/>
-      <package name="fr.dyade.aaa.mom"/>
-    </javadoc>
+      <!-- Excludes tests and CVS directories -->
+      <exclude name="fr/dyade/aaa/**/CVS/**/*.java"/>
+    </javac>
   </target>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      - Joram specific build target
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <target name="build.joram" depends="init.joram,compile">
-    <!-- Build specific jar file -->
-    <jar jarfile="${build.dir}/joram.jar">
+  <target name="build.joram" depends="init,compile"
+      description="--> Build JORAM jar files">
+    <!-- Build mom jar file -->
+    <jar jarfile="${build.dir}/mom.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
@@ -175,86 +96,44 @@
         <include name="fr/dyade/aaa/ns/*.class"/>
         <include name="fr/dyade/aaa/jndi/*.class"/>
         <include name="fr/dyade/aaa/mom/*.class"/>
+        <include name="fr/dyade/aaa/mom/comm/*.class"/>
+        <include name="fr/dyade/aaa/mom/dest/*.class"/>
+        <include name="fr/dyade/aaa/mom/excepts/*.class"/>
+        <include name="fr/dyade/aaa/mom/jms/*.class"/>
+        <include name="fr/dyade/aaa/mom/messages/*.class"/>
+        <include name="fr/dyade/aaa/mom/proxies/*.class"/>
+        <include name="fr/dyade/aaa/mom/selectors/*.class"/>
+        <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram.jar">
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/mom/excepts/*.class"/>
+        <include name="fr/dyade/aaa/mom/jms/*.class"/>
+        <include name="fr/dyade/aaa/mom/messages/*.class"/>
         <include name="fr/dyade/aaa/mom/selectors/*.class"/>
         <include name="fr/dyade/aaa/joram/*.class"/>
+        <include name="fr/dyade/aaa/joram/admin/*.class"/>
         <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
       </fileset>
     </jar>
   </target>
 
   <!-- Specific Joram shipment -->
-  <target name="ship.joram" depends="clean,build.joram">
+  <target name="ship.joram" depends="build.joram"
+      description="--> Create a shipment of JORAM">
     <mkdir dir="${ship.dir}"/>
     <!-- lib directory -->
     <mkdir dir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/mom.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jta-spec1_0_1.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/log4j.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/owlogapi.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/owlogwrpl4j.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
-    <!-- run directory -->
-    <mkdir dir="${ship.dir}/dtd"/>
-    <copy file="${src.dir}/fr/dyade/aaa/agent/a3config.dtd"
-          todir="${ship.dir}/dtd"/>
-    <chmod dir="${ship.dir}/dtd" perm="755"/>
-    <!-- licences directory -->
-    <mkdir dir="${ship.dir}/licences"/>
-    <copy todir="${ship.dir}/licences" flatten="yes">
-      <fileset dir="${src.dir}">
-        <include name="licenses/XERCES_LICENSE.TXT"/>
-        <include name="licenses/JAKARTA-REGEXP_LICENSE.TXT"/>
-        <include name="licenses/JORAM_LICENSE.TXT"/>
-        <include name="licenses/Opl_1_0.TXT"/>
-        <include name="licenses/EXHIBIT_A.TXT"/>
-      </fileset>
-    </copy>
-
-  </target>
-
-  <target name="init.joram" depends="init">
-     <!-- Overload jms property -->
-    <property name="jms" value="true"/>
-  </target>
-
-  <target name="javacc.ar" depends="prepare">
-    <mkdir dir="${obj.dir}/fr/dyade/aaa/ar/"/>
-    <javacc target="${src.dir}/fr/dyade/aaa/ar/CorrelParser.jj"
-            outputdirectory="${obj.dir}/fr/dyade/aaa/ar/"
-            javacchome="${lib.dir}"/>
-  </target>
-
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     - Specific A3 build target.
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <target name="build.a3" depends="init.a3,compile">
-    <!-- Build agent server jar file -->
-    <jar jarfile="${build.dir}/a3server.jar">
-      <fileset dir="${obj.dir}">
-        <include name="fr/dyade/aaa/util/*.class"/>
-        <include name="fr/dyade/aaa/agent/*.class"/>
-        <include name="fr/dyade/aaa/ip/*.class"/>
-        <include name="fr/dyade/aaa/scbean/*.class"/>
-        <include name="fr/dyade/aaa/task/*.class"/>
-        <include name="fr/dyade/aaa/ns/*.class"/>
-        <include name="fr/dyade/aaa/jndi/*.class"/>
-        <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
-      </fileset>
-    </jar>
-  </target>
-
-  <!-- Specific A3 shipment -->
-  <target name="ship.a3" depends="clean,build.a3">
-    <mkdir dir="${ship.dir}"/>
-    <!-- lib directory -->
-    <mkdir dir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/a3server.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/log4j.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/owlogapi.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/owlogwrpl4j.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
     <!-- run directory -->
     <mkdir dir="${ship.dir}/run"/>
@@ -266,43 +145,54 @@
     <copy todir="${ship.dir}/licences" flatten="yes">
       <fileset dir="${src.dir}">
         <include name="licenses/XERCES_LICENSE.TXT"/>
+        <include name="licenses/JAKARTA-REGEXP_LICENSE.TXT"/>
+        <include name="licenses/JORAM_LICENSE.TXT"/>
         <include name="licenses/Opl_1_0.TXT"/>
         <include name="licenses/EXHIBIT_A.TXT"/>
       </fileset>
     </copy>
   </target>
-
-  <target name="init.a3" depends="init">
+ 
+  <target name="javadoc" depends="prepare"
+      description="--> Generate Javadoc">
+  <!-- Path needed to create the javadoc  -->
+  <path id="doc.class.path">
+    <fileset dir="${lib.dir}">
+      <include name="jms.jar"/>
+      <include name="log4j.jar"/>
+      <include name="owlogapi.jar"/>
+      <include name="owlogwrpl4j.jar"/>
+      <include name="xerces.jar"/>
+      <include name="jndi.jar"/>
+    </fileset>
+  </path>
+  
+  <javadoc sourcepath="${src.dir}"
+    destdir="${doc.dir}"
+    classpathref="doc.class.path"
+    overview="overview.html"
+    access="${doc.access}"
+    version="${doc.version}"
+    author="${doc.author}"
+    windowtitle="${doc.name} API"
+             doctitle="${doc.name}"
+    bottom="Copyright &#xA9; 2001 Scalagent - All rights reserved">
+    <package name="fr.dyade.aaa.util"/>
+    <package name="fr.dyade.aaa.agent"/>
+    <package name="fr.dyade.aaa.ip"/>
+    <package name="fr.dyade.aaa.task"/>
+    <package name="fr.dyade.aaa.ns"/>
+    <package name="fr.dyade.aaa.jndi"/> 
+    <package name="fr.dyade.aaa.mom"/>
+    <package name="fr.dyade.aaa.mom.comm"/>
+    <package name="fr.dyade.aaa.mom.dest"/>
+    <package name="fr.dyade.aaa.mom.excepts"/>
+    <package name="fr.dyade.aaa.mom.jms"/>
+    <package name="fr.dyade.aaa.mom.messages"/>
+    <package name="fr.dyade.aaa.mom.proxies"/>
+    <package name="fr.dyade.aaa.mom.selectors"/>
+    <package name="fr.dyade.aaa.joram"/>
+    <package name="fr.dyade.aaa.joram.admin"/>
+  </javadoc>
   </target>
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     - Generic build target (all targets).
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <target name="build.all" depends="init.all,javacc.ar,compile">
-  </target>
-
-  <target name="init.all" depends="init">
-     <!-- Overload user-defined properties -->
-    <property name="jms" value="true"/>
-  </target>
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     - User defined build target (see build.properties).
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <target name="build" depends="compile">
-    <!-- Build agent server jar file -->
-    <jar jarfile="${build.dir}/a3server.jar">
-      <fileset dir="${obj.dir}">
-        <include name="fr/dyade/aaa/util/*.class"/>
-        <include name="fr/dyade/aaa/agent/*.class"/>
-        <include name="fr/dyade/aaa/ip/*.class"/>
-        <include name="fr/dyade/aaa/scbean/*.class"/>
-        <include name="fr/dyade/aaa/task/*.class"/>
-        <include name="fr/dyade/aaa/ns/*.class"/>
-        <include name="fr/dyade/aaa/jndi/*.class"/>
-        <exclude name="fr/dyade/aaa/**/tests/**/*.class"/>
-      </fileset>
-    </jar>
-  </target>
-
 </project>
