@@ -36,7 +36,7 @@ package fr.dyade.aaa.mom;
 public class NotifMessageFromQueue extends NotificationMOMRequest
 { 
   /** Message wrapped. */ 
-  Message msg ;
+  public Message msg ;
 
   String selector;
 
