@@ -14,8 +14,13 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: December 9, 2003)">
+      <s2 name="Corrected bugs (latest: December 18, 2003)">
       <ul>
+        <li>Automatic deny request sent to already deleted temporary queue, 
+        found by Gerald Schröder. This bug had no influence on a server's
+        operations, however it generated the logging of ERROR messages. It
+        is corrected, the class to update is
+        <code>fr.dyade.aaa.mom.proxies.ClientContext</code>.</li>
         <li><code>NullPointerException</code> thrown by a single user's proxy
         which subscribed to various leafs of a same topic hierarchy, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00019.html">
