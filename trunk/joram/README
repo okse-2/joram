@@ -1,0 +1,19 @@
+This package contains:
+classes/
+lib/
+src/
+jndi.properties
+joramConfig.sh
+
+The following libraries must be added in lib/:
+jms.jar, jndi.jar, jta-spec1_0_1.jar
+
+Edit and execute joramConfig.sh:
+ - source joramConfig.sh
+
+
+Testing JORAM:
+src/fr/dyade/aaa/joram/tests
+src/fr/dyade/aaa/joram/demo/commerce
+
+See the READMEs...
