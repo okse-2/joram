@@ -14,10 +14,15 @@
     <s1 name="CVS base, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: May 11, 2004)">
+      <s2 name="Modifications (latest: May 17, 2004)">
       <ul>
+        <li>Config file extension changed to <code>.cfg</code>; slight change
+        in the tracing module; better handling of a stopping adapter, by
+        unregistering all mbeans. Updated package is
+        <code>org.objectweb.joram.client.connector</code>.
+        </li>
         <li>Many improvements in the <code>org.objectweb.joram.client.connector</code>
-        package for better handling the state managment of the wrappping Outbound
+        package for better handling the state management of the wrapping Outbound
         objects.</li>
         <li><em>NbMaxAgents</em> variable set when launching a non
         persistent server through the adapter, so that no agents swapping
