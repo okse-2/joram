@@ -18,13 +18,17 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.TemporaryQueue;
+import javax.jms.Connection;
 
 
 /**
@@ -44,9 +48,17 @@ public class OutboundReceiver extends OutboundConsumer
   OutboundReceiver(Queue queue,
                    MessageConsumer consumer,
                    OutboundSession session)
-  {
+    throws JMSException {
     super(consumer, session);
     this.queue = queue;
+    
+    if (queue instanceof TemporaryQueue) {
+      Connection tempQCnx = ((TemporaryQueue) queue).getCnx();
+
+      if (tempQCnx == null || !session.cnx.cnxEquals(tempQCnx))
+        throw new JMSSecurityException("Forbidden consumer on this "
+                                       + "temporary destination.");
+    }
   }
 
 
