@@ -130,4 +130,10 @@ public class OutboundQueueSession extends OutboundSession
     throws JMSException {
     throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }    
+
+  public String toString() {
+    if (sess != null)
+      return sess.toString();
+    return null;
+  }
 }
