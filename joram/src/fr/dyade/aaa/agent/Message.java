@@ -73,8 +73,16 @@ final class Message implements Serializable {
    * @return	A string representation of this object. 
    */
   public String toString() {
-    StringBuffer strbuf = new StringBuffer();
+    return appendToString(new StringBuffer()).toString();
+  }
 
+  /**
+   *  Adds a string representation for this object in the
+   * StringBuffer parameter.
+   *
+   * @return	A string representation of this object. 
+   */
+  public StringBuffer appendToString(StringBuffer strbuf) {
     strbuf.append('(').append(super.toString());
     strbuf.append(",from=").append(from);
     strbuf.append(",to=").append(to);
@@ -82,15 +90,12 @@ final class Message implements Serializable {
     strbuf.append(",update=");
     Update current = update;
     while (current != null) {
-      strbuf.append(current).append(',');
-//       strbuf.append(current.l).append(',')
-// 	.append(current.c).append(',')
-// 	.append(current.stamp).append(':');
+      current.appendToString(strbuf).append(',');
       current = current.next;
     }
     strbuf.append(')');
     
-    return strbuf.toString();
+    return strbuf;
   }
 
   /**
@@ -152,8 +157,8 @@ final class Message implements Serializable {
 
   transient private String stringId = null;
 
-  private final String toStringId() {
-    if (stringId == null) {
+  final String toStringId() {
+    if ((stringId == null) && (update != null)) {
       char[] buf = (char[]) (perThreadBuffer.get());
       int idx = getChars(update.stamp, buf, BUFLEN);
       buf[--idx] = '_';
@@ -226,10 +231,19 @@ final class Message implements Serializable {
   }
 
   /**
+   * Tests if the associated notification is persistent or not.
+   *
+   * @return true if the associated notification is persistent.
+   */
+  boolean isPersistent() {
+    return ((not != null) && not.persistent);
+  }
+
+  /**
    *  Saves the object state on persistent storage.
    */
   void save() throws IOException {
-    if ((not != null) && not.persistent) {
+    if (isPersistent()) {
       AgentServer.transaction.save(this, toStringId());
     }
   }
@@ -251,7 +265,7 @@ final class Message implements Serializable {
    * Deletes the current object in persistent storage.
    */
   void delete()  throws IOException {
-    if ((not != null) && not.persistent) {
+    if (isPersistent()) {
       AgentServer.transaction.delete(toStringId());
     }
   }
