@@ -69,11 +69,11 @@
 	
 	<p>JORAM also implements the <em>ASF</em> interfaces and methods for performing JMS
 	  operations through an application server, and is integrated
-	  to <a href="http://www.objectweb.org/jonas">JOnAS</a> EJB
+	  to <a href="http://www.objectweb.org/jonas/">JOnAS</a> EJB
 	  platform.</p>
       </s2>
       
-      <s2 name="Downloading JORAM">
+<!--      <s2 name="Downloading JORAM">
 
 	<p>JORAM <em>source</em> code and <em>binary</em> version are
 	available. JORAM also provides basic test files and demos.</p>
@@ -121,7 +121,7 @@
 	Contact <a
 	href="mailto:joram-team@objectweb.org">us</a>.</p>
 
-      </s2>
+      </s2>  -->
     </s1>
     
   </body>
