@@ -14,7 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: May 2003, 20th)">
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_4_2 (May 2003, 28th)">
+      <p>Compared with the 3_4_1 release, this version introduces monitoring 
+      methods and corrects bugs as described below.</p>
+      <s2 name="Modifications">
       <ul>
       <li>Introduction of a monitoring interface and reference implementation.
       A first set of methods allow to list the destinations, users of a given
@@ -51,7 +58,7 @@
       <code>fr.dyade.aaa.jndi2.client</code> package.</li>
       </ul>
       </s2>
-      <s2 name="Corrected Bugs (latest: May 2003, 14th)">
+      <s2 name="Corrected Bugs">
       <ul>
       <li>Bug concerning expiring messages in queues, found by Lorenzo
       Scantamburlo: already delivered messages, but not yet acknowledged,
