@@ -31,11 +31,13 @@
       </ol>
     </s1>
 
-    <s1 name="Test suite documentation">
-      <p>To use JMS test suite, have a look at the <a
-	  href="../current/doc/tests/index.html">test suite
-	  documentation</a> (<a
+    <s1 name="Test suite documentation" anchor="test_doc">
+      <p>To use the test suite, have a look at its <a
+	  href="../current/doc/tests/index.html">documentation</a> (<a
 	  href="../current/doc/tests.pdf">PDF</a>).
+      </p>
+      <p>You can also browse the test suite <a
+          href="../current/javadoc/tests/index.html">Javadoc</a>.
       </p>
     </s1>
 
