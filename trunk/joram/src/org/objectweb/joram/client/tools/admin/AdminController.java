@@ -82,31 +82,33 @@ public class AdminController
 
   public void connectJndi(String host, int port, String ctxName) throws NamingException
   {
-  	namedCtx = ctxName;
-  	
-  	Hashtable env = new Hashtable();
-  	env.put(PROP_JNDI_FACTORY,
-  	  System.getProperty(PROP_JNDI_FACTORY) != null ? System.getProperty(PROP_JNDI_FACTORY) : DEFAULT_JNDI_FACTORY);
-  	env.put(PROP_JNDI_HOST, host);
-  	env.put(PROP_JNDI_PORT, Integer.toString(port));
-  	
-  	ctx = new InitialContext(env);
+    namedCtx = ctxName;
+    
+    Hashtable env = new Hashtable();
+    env.put(PROP_JNDI_FACTORY,
+            System.getProperty(PROP_JNDI_FACTORY) != null ? System.getProperty(PROP_JNDI_FACTORY) : DEFAULT_JNDI_FACTORY);
+    env.put(PROP_JNDI_HOST, host);
+    env.put(PROP_JNDI_PORT, Integer.toString(port));
+    
+    ctx = new InitialContext(env);
     jndiConnected = true;
-
+    if (ctxName != null) {
+      ctx = (Context)ctx.lookup(ctxName);
+    }
     jndiRoot.setUserObject((ctxName == null || ctxName.length() == 0) ? "Root Context" : ctxName);
     jndiTreeModel.nodeChanged(jndiRoot);
-  	refreshJndiData();
+    refreshJndiData();
   }
 
   public void refreshJndiData() throws NamingException
   {
     cleanupJndiTree();
  
-  	for (NamingEnumeration e = ctx.list(namedCtx); e.hasMore();) {
-  	  NameClassPair pair = (NameClassPair) e.next();
+    for (NamingEnumeration e = ctx.list(""); e.hasMore();) {
+      NameClassPair pair = (NameClassPair) e.next();
       JndiTreeNode node = new JndiTreeNode(this, ctx, pair.getName());
-  	  insertJndiNode(node);
-  	}
+      insertJndiNode(node);
+    }
   }
 
   public void disconnectJndi() throws NamingException

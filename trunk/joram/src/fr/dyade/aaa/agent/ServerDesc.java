@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -38,6 +41,12 @@ public final class ServerDesc implements Serializable {
   String name;
   /** Host name. */
   String hostname;
+  /**
+   * The communication port. This variable is set only if the server is
+   * directly accessible from this node, in this case it corresponds to the
+   * communication port of the server in the adjoining domain.
+   */
+  int port = -1;
   /** Host address, use getAddr() method instead. */
   private transient InetAddress addr = null;
   /**
@@ -53,12 +62,6 @@ public final class ServerDesc implements Serializable {
    * Domain description of this server.
    */
   transient MessageConsumer domain = null;
-  /**
-   * The communication port. This variable is set only if the server is
-   * directly accessible from this node, in this case it corresponds to the
-   * communication port of the server in the adjoining domain.
-   */
-  int port = -1;
 
   /** True if there is no waiting messages for this server. */
   transient volatile boolean active = true;

@@ -2,6 +2,7 @@
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -108,5 +109,64 @@ public class AdminHelper
          throws ConnectException, AdminException 
   {
     AdminModule.doRequest(new UnsetFather(topic.getName()));
+  }
+
+
+  /**
+   * Adds a queue to a cluster.
+   * <p>
+   * The request fails if one or both of the queues are deleted, or
+   * can't belong to a cluster.
+   *
+   * @param clusterQueue  Queue part of the cluster, or chosen as the 
+   *          initiator of the cluster.
+   * @param joiningQueue  Queue joining the cluster.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static void setQueueCluster(Queue clusterQueue, Queue joiningQueue)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(
+      new AddQueueCluster(clusterQueue.getName(), joiningQueue.getName()));
+  }
+
+  public static void setQueueCluster(Destination clusterQueue,
+                                     Queue joiningQueue)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(
+      new AddQueueCluster(clusterQueue.getName(), joiningQueue.getName()));
+  }
+
+  /**
+   * Removes a queue from the cluster Queue it is part of.
+   * <p>
+   * The request fails if the queue does not exist or is not part of any 
+   * cluster.
+   *
+   * @param clusterQueue  the cluster Queue.
+   * @param leaveQueue    Queue leaving the cluster Queue it is part of.
+   * 
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static void leaveQueueCluster(Queue clusterQueue, Queue leaveQueue)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(
+      new RemoveQueueCluster(clusterQueue.getName(), leaveQueue.getName()));
+  }
+
+  /**
+   * List a cluster queue.
+   *
+   * @param clusterQueue  the cluster Queue.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static AdminReply listQueueCluster(Queue clusterQueue)
+    throws ConnectException, AdminException {
+    return AdminModule.doRequest(
+      new ListClusterQueue(clusterQueue.getName()));
   }
 } 

@@ -230,28 +230,6 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage());
         }
-      } else if (name.equals(A3CML.ELT_TRANSIENT)) {
-        try {
-          short sid, gateway;
-          try {
-            sid = Short.parseShort(atts.getValue(A3CML.ATT_ID));
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for server id: " +
-                                atts.getValue(A3CML.ATT_ID));
-          }
-          try {
-            gateway = Short.parseShort(atts.getValue(A3CML.ATT_SERVER));
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for gateway server id: " +
-                                atts.getValue(A3CML.ATT_SERVER));
-          }
-          server = new A3CMLTServer(sid,
-                                    atts.getValue(A3CML.ATT_NAME),
-                                    atts.getValue(A3CML.ATT_HOSTNAME),
-                                    gateway);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage());
-        }
       } else if (name.equals(A3CML.ELT_NETWORK)) {
         try {
           int port;
@@ -310,8 +288,7 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
         if (name.equals(A3CML.ELT_DOMAIN)) {
           a3cmlConfig.addDomain(domain);
           domain = null;
-        } else if (name.equals(A3CML.ELT_SERVER) ||
-                   name.equals(A3CML.ELT_TRANSIENT)) {
+        } else if (name.equals(A3CML.ELT_SERVER)) {
           a3cmlConfig.addServer(server);
           server = null;
         } else if (name.equals(A3CML.ELT_NETWORK)) {

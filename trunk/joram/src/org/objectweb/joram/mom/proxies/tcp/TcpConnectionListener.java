@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package org.objectweb.joram.mom.proxies.tcp;
@@ -31,6 +32,8 @@ import java.util.*;
 
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.mom.dest.AdminTopicImpl;
+import org.objectweb.joram.mom.notifications.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -78,6 +81,15 @@ public class TcpConnectionListener
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpConnectionListener.run()");
+
+    // Wait for the admin topic deployment.
+    // (a synchronization would be much better)
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException exc) {
+      // continue
+    }
+
     loop:
     while (running) {
       canStop = true;
@@ -129,56 +141,91 @@ public class TcpConnectionListener
         sock.getOutputStream());
       
       String userName = dis.readUTF();
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+	MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, 
+          " -> read userName = " + userName);
+      String userPassword = dis.readUTF();
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+	MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, 
+          " -> read userPassword = " + userPassword);
       int key = dis.readInt();
-      
-      UserConnection userConnection;
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+	MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, 
+          " -> read key = " + key);
+      int heartBeat = 0;
       if (key == -1) {
-        String userPassword = dis.readUTF();
-        int timeout = dis.readInt();
-        try {
-          ReliableTcpConnection reliableTcp =
-            new ReliableTcpConnection();        
-          userConnection = 
-            ConnectionManager.openConnection(
-              userName, 
-              userPassword, 
-              timeout,
-              reliableTcp);
-          dos.writeInt(0);
-          dos.writeInt(userConnection.getKey());
-        } catch (Exception exc) {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
-          dos.writeInt(1);
-          dos.writeUTF(exc.getMessage());
-          return;
-        }
-      } else {
-        userConnection = ConnectionManager.getConnection(
-          userName, key);      
-        if (userConnection == null) {
-          dos.writeInt(1);
-          dos.writeUTF("Connection closed");
-          return;
-        } else {
-          dos.writeInt(0);
-        }
+	heartBeat = dis.readInt();
+	if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+	MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, 
+          " -> read heartBeat = " + heartBeat);
+      }
+
+      GetProxyIdNot gpin = new GetProxyIdNot(
+        userName, userPassword);
+      AgentId proxyId;
+      try {
+        gpin.invoke(new AgentId(AgentServer.getServerId(),
+                                AgentServer.getServerId(),
+                                AgentId.JoramAdminStamp));
+        proxyId = gpin.getProxyId();
+      } catch (Exception exc) {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+	  MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+        dos.writeInt(1);
+	dos.writeUTF(exc.toString());
+	return;
       }
       
-      ReliableTcpConnection reliableTcp =
-        (ReliableTcpConnection)userConnection.getContext();
-      
+      IOControl ioctrl;
+      AckedQueue replyQueue;
+      if (key == -1) {
+        OpenConnectionNot ocn = new OpenConnectionNot(
+          true, heartBeat);	
+        ocn.invoke(proxyId);
+	dos.writeInt(0);
+	dos.writeInt(ocn.getKey());
+	dos.flush();
+	key = ocn.getKey();
+	replyQueue = (AckedQueue)ocn.getReplyQueue();
+	ioctrl = new IOControl(sock);
+      } else {
+	GetConnectionNot gcn = new GetConnectionNot(key);
+        try {
+          gcn.invoke(proxyId);          
+        } catch (Exception exc) {
+	  if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG, "", exc);
+	  dos.writeInt(1);
+          dos.writeUTF(exc.getMessage());
+	  dos.flush();
+          return;
+        }
+        replyQueue = gcn.getQueue();
+        heartBeat = gcn.getHeartBeat();
+        dos.writeInt(0);
+        dos.flush();
+        ioctrl = new IOControl(
+          sock, gcn.getInputCounter());
+      }
+
       // Reset the timeout in order
       // to enable the server to indefinitely
       // wait for requests.
       sock.setSoTimeout(0);
       
-      reliableTcp.init(sock);
-      
       TcpConnection tcpConnection = 
-        new TcpConnection(
-          userConnection,
-          proxyService);
+	new TcpConnection(
+	  ioctrl, 
+	  proxyId,
+	  replyQueue,
+	  key,          
+	  proxyService,
+          heartBeat == 0);
       tcpConnection.start();
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -201,5 +248,3 @@ public class TcpConnectionListener
     serverSocket = null;
   }
 }
-
-

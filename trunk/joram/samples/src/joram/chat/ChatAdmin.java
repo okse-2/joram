@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,8 @@
  * USA.
  *
  * Initial developer(s): Jose Carlos Waeny
- * Contributor(s): Frederic Maistre (INRIA), Nicolas Tachker (ScalAgent)
+ * Contributor(s): Frederic Maistre (INRIA)
+ *                 ScalAgent Distributed Technologies
  */
 package chat;
 

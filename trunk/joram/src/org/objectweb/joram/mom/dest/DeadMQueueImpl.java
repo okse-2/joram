@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -38,19 +38,16 @@ import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * The <code>DeadMQueueImpl</code> class implements the MOM dead message queue
  * behaviour, basically storing dead messages and delivering them upon clients
  * requests.
  */
-public class DeadMQueueImpl extends QueueImpl
-{
+public class DeadMQueueImpl extends QueueImpl {
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId id = null;
   /** Static value holding the default threshold for a server. */
   static Integer threshold = null;
-
 
   /**
    * Constructs a <code>DeadMQueueImpl</code> instance.
@@ -58,27 +55,23 @@ public class DeadMQueueImpl extends QueueImpl
    * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    */
-  public DeadMQueueImpl(AgentId destId, AgentId adminId)
-  {
+  public DeadMQueueImpl(AgentId destId, AgentId adminId) {
     super(destId, adminId);
   }
 
 
-  public String toString()
-  {
+  public String toString() {
     return "DeadMQueueImpl:" + destId.toString();
   }
 
 
   /** Static method returning the default DMQ identifier. */
-  public static AgentId getId()
-  {
+  public static AgentId getId() {
     return id;
   }
   
   /** Static method returning the default threshold. */
-  public static Integer getThreshold()
-  {
+  public static Integer getThreshold() {
     return threshold;
   }
 
@@ -89,8 +82,7 @@ public class DeadMQueueImpl extends QueueImpl
    * @exception AccessException  Not thrown.
    */
   protected void doReact(AgentId from, SetDMQRequest req)
-                 throws AccessException
-  {
+                 throws AccessException {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
       MomTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + req);
@@ -104,8 +96,7 @@ public class DeadMQueueImpl extends QueueImpl
    * @exception AccessException  Never thrown.
    */
   protected void doReact(AgentId from, ClientMessages not)
-                 throws AccessException
-  {
+                 throws AccessException {
     // Getting and persisting the messages:
     Message msg;
     for (Enumeration msgs = not.getMessages().elements();
@@ -125,8 +116,7 @@ public class DeadMQueueImpl extends QueueImpl
    * @exception AccessException  Not thrown.
    */
   protected void doReact(AgentId from, SetThreshRequest req)
-                 throws AccessException
-  {
+                 throws AccessException {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
       MomTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + req);
@@ -140,8 +130,7 @@ public class DeadMQueueImpl extends QueueImpl
    * @exception AccessException  If the requester is not a reader.
    */
   protected void doReact(AgentId from, BrowseRequest not)
-                 throws AccessException
-  {
+                 throws AccessException {
     // If client is not a reader, throwing an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
@@ -169,24 +158,21 @@ public class DeadMQueueImpl extends QueueImpl
    * <code>AcknowledgeRequest</code> requests are actually not processed
    * in dead message queues.
    */
-  protected void doReact(AgentId from, AcknowledgeRequest not)
-  {}
+  protected void doReact(AgentId from, AcknowledgeRequest not) {}
  
   /**
    * Overrides this <code>QueueImpl</code> method;
    * <code>DenyRequest</code> requests are actually not processed
    * in dead message queues.
    */
-  protected void doReact(AgentId from, DenyRequest not)
-  {}
+  protected void doReact(AgentId from, DenyRequest not) {}
 
   /**
    * Overrides this <code>QueueImpl</code> method; if the sent notification
    * was a <code>QueueMsgReply</code> instance, putting the sent message back
    * in queue.
    */
-  protected void doProcess(UnknownAgent uA)
-  {
+  protected void doProcess(UnknownAgent uA) {
     AgentId client = uA.agent;
     Notification not = uA.not;
 
@@ -212,8 +198,7 @@ public class DeadMQueueImpl extends QueueImpl
    * not checked and message fields are not updated; also, no sending to
    * any DMQ.
    */ 
-  protected void deliverMessages(int index)
-  {
+  protected void deliverMessages(int index) {
     ReceiveRequest notRec = null;
     boolean replied;
     int j = 0;
@@ -265,6 +250,5 @@ public class DeadMQueueImpl extends QueueImpl
    * Overwrites this <code>DestinationImpl</code> method so that no messages
    * may be sent by the DMQ to itself.
    */
-  protected void sendToDMQ(Vector deadMessages, AgentId dmqId)
-  {}
+  protected void sendToDMQ(Vector deadMessages, AgentId dmqId) {}
 }

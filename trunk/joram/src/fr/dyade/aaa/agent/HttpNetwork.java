@@ -15,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -194,77 +197,6 @@ public class HttpNetwork extends FIFONetwork {
     return strbuf.toString();
   }
 
-  /**
-   * Numbers of attempt to bind the server's socket before aborting.
-   */
-  final static int CnxRetry = 3;
-
-  /**
-   *  This method creates and returns a socket connected to a ServerSocket at
-   * the specified network address and port. It may be overloaded in subclass,
-   * in order to create particular subclasses of sockets.
-   * <p>
-   *  Due to polymorphism of both factories and sockets, different kinds of
-   * sockets can be used by the same application code. The sockets returned
-   * to the application can be subclasses of <a href="java.net.Socket">
-   * Socket</a>, so that they can directly expose new APIs for features such
-   * as compression, security, or firewall tunneling.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
-   */
-  Socket createSocket(InetAddress host, int port) throws IOException {
-    if (host == null)
-      throw new UnknownHostException();
-    return new Socket(host, port);
-  }
-
-  /**
-   *  This method creates and returns a server socket which uses all network
-   * interfaces on the host, and is bound to the specified port. It may be
-   * overloaded in subclass, in order to create particular subclasses of
-   * server sockets.
-   *
-   * @param port	the port to listen to.
-   * @return		a server socket bound to the specified port.
-   *
-   * @exception IOException	for networking errors
-   */
-  ServerSocket createServerSocket() throws IOException {
-    for (int i=0; ; i++) {
-      try {
-        return new ServerSocket(port);
-      } catch (BindException exc) {
-        if (i > CnxRetry) throw exc;
-        try {
-          Thread.sleep(i * 200);
-        } catch (InterruptedException e) {}
-      }
-    }
-  }
-
-  /**
-   *  Configures this socket using the socket options established for this
-   * factory. It may be overloaded in subclass, in order to handle particular
-   * subclasses of sockets
-   *
-   * @param Socket	the socket.
-   *
-   * @exception IOException	for networking errors
-   */ 
-  static void setSocketOption(Socket sock) throws SocketException {
-    // Don't use TCP data coalescing - ie Nagle's algorithm
-    sock.setTcpNoDelay(true);
-    // Read operation will block indefinitely until requested data arrives
-    sock.setSoTimeout(0);
-    // Set Linger-on-Close timeout.
-    sock.setSoLinger(true, 60);
-  }
-
   byte[] buf = new byte[120];
 
   protected String readLine(InputStream is) throws IOException {
@@ -291,7 +223,7 @@ public class HttpNetwork extends FIFONetwork {
     if (msg != null) {
       strbuf.append("PUT ");
       if (proxy != null) {
-        strbuf.append("http://").append(server.getHostname()).append(':').append(server.port);
+        strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
       }
       strbuf.append("/msg#").append(msg.getStamp()).append(" HTTP/1.1");
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -302,7 +234,7 @@ public class HttpNetwork extends FIFONetwork {
     } else {
       strbuf.append("GET ");
       if (proxy != null) {
-        strbuf.append("http://").append(server.getHostname()).append(':').append(server.port);
+        strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
         strbuf.append("/msg HTTP/1.1");
       }
     }
@@ -529,7 +461,7 @@ public class HttpNetwork extends FIFONetwork {
             while (true) {
               if (proxy == null) {
                 try {
-                  socket = createSocket(server.getAddr(), server.port);
+                  socket = createSocket(server);
                   break;
                 } catch (IOException exc) {
                   logmon.log(BasicLevel.WARN,

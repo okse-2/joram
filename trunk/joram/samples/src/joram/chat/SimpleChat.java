@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Jose Carlos Waeny
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package chat;
 
@@ -53,7 +53,7 @@ public class SimpleChat implements javax.jms.MessageListener{
         InitialContext jndi = null;
         
         try {
-            jndi = getHome.context(); //new InitialContext();
+            jndi = new InitialContext();
         } catch( Exception e) {
             System.out.println( e.toString() );
             System.exit(2);

@@ -85,4 +85,12 @@ public class DenyRequest extends AbstractRequest
     }
     return msgIds.elements();
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",msgId=" + msgId +
+      ",msgIds=" + msgIds + ')';
+  }
 } 
+
+

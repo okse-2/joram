@@ -58,7 +58,7 @@ public class SCAdminHelper {
    */
   public String startAgentServer(short sid,
                                  String[] jvmarg) throws Exception {
-    return startAgentServer(sid, null, jvmarg);
+    return startAgentServer(sid, null, jvmarg, null);
   }
 
   /**
@@ -73,7 +73,15 @@ public class SCAdminHelper {
                                  File dir,
                                  String[] jvmarg) throws Exception {
     return startAgentServer(sid, dir, jvmarg, 
-                            "fr.dyade.aaa.agent.AgentServer");
+                            "fr.dyade.aaa.agent.AgentServer", null);
+  }
+
+  public String startAgentServer(short sid,
+                                 File dir,
+                                 String[] jvmarg,
+				 String[] servarg) throws Exception {
+    return startAgentServer(sid, dir, jvmarg, 
+                            "fr.dyade.aaa.agent.AgentServer", servarg);
   }
 
   /**
@@ -84,11 +92,13 @@ public class SCAdminHelper {
    *	current working directory if <code>null</code>
    * @param jvmarg	arguments to pass to the created java program
    * @param className   the name of the main class
+   * @param servarg	additional arguments to pass to the created java program
    */
   public String startAgentServer(short sid,
                                  File dir,
                                  String[] jvmarg,
-                                 String className) throws Exception {
+                                 String className,
+				 String[] servarg) throws Exception {
     logmon.log(BasicLevel.DEBUG,
                "SCAdmin: start AgentServer#" + sid);
 
@@ -122,6 +132,10 @@ public class SCAdminHelper {
     argv.addElement(className);
     argv.addElement(Short.toString(sid));
     argv.addElement("s" + sid);
+    if (servarg != null) {
+      for (int i=0; i<servarg.length; i++)
+        argv.addElement(servarg[i]);
+    }
 
     String[] command = new String[argv.size()];
     argv.copyInto(command);

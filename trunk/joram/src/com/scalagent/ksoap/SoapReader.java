@@ -72,7 +72,7 @@ public class SoapReader {
       }
 
       StartTag start = (StartTag) parser.peek();
-
+     
       Object o = read(null, 
                       -1,
                       start.getNamespace(), 
@@ -91,7 +91,7 @@ public class SoapReader {
     }
     if (KSoapTracing.dbgReader)
       KSoapTracing.log(KSoapTracing.DEBUG,
-                       "SoapReader.read() : sO=" + sO);//NTA tmp
+                       "SoapReader.read() : sO=" + sO);
     return sO;
   }
 

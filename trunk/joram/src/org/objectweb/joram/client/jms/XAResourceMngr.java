@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -41,12 +42,10 @@ import org.objectweb.joram.shared.client.XACnxRollback;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * Utility class used by XA connections for managing XA resources.
  */
-public class XAResourceMngr
-{
+public class XAResourceMngr {
   /** Transaction active. */
   public static final int STARTED = 0;
   /** Transaction suspended. */

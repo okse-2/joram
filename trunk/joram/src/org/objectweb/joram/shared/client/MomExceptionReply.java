@@ -86,4 +86,9 @@ public class MomExceptionReply extends AbstractJmsReply
       ((Integer) h.get("correlationId")).intValue(),
       new MomException((String) h.get("momExcept")));
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",momExcept=" + momExcept + ')';
+  }
 }

@@ -219,46 +219,6 @@ public class A3CMLConfig implements Serializable {
   }
 
   /**
-   * Tests if the specified agent server is transient.
-   *
-   * @param id		agent server id
-   * @return		true if the server is transient; false otherwise; 
-   * @exception UnknownServerException
-   *			The specified server does not exist.
-   */
-  public final boolean isTransient(short sid) throws UnknownServerException {
-    A3CMLServer server = getServer(sid);
-
-    if (server instanceof A3CMLPServer) {
-      return false;
-    } else if (server instanceof A3CMLTServer) {
-      return true;
-    } else {
-      throw new UnknownServerException("Unknown type for server id. # " + sid);
-    }
-  }
-
-  /**
-   * Tests if the specified agent server is transient.
-   *
-   * @param name 	agent server name
-   * @return	 	true if the server is transient; false otherwise; 
-   * @exception  UnknownServerException
-   *			The specified server does not exist.
-   */
-  public final boolean isTransient(String name) throws UnknownServerException {
-    A3CMLServer server = getServer(name);
-
-    if (server instanceof A3CMLPServer) {
-      return false;
-    } else if (server instanceof A3CMLTServer) {
-      return true;
-    } else {
-      throw new UnknownServerException("Unknown type for server " + name);
-    }
-  }
-
-  /**
    * add property
    *
    * @param prop A3CMLProperty
@@ -367,39 +327,6 @@ public class A3CMLConfig implements Serializable {
   /* -+-+-+-                                                -+-+-+- */
 
   /**
-   *  Adapts the current configuration to the specified transient server.
-   */
-   public void configure(A3CMLTServer root) throws Exception {
-    short rootid = root.sid;
-
-    // Temporary fix, reset visited and gateway fields
-    reset();
-
-    // Gets the descriptor of gateway server.
-    A3CMLPServer gateway = (A3CMLPServer) getServer(root.gateway);
-
-    logmon.log(BasicLevel.DEBUG,
-               "configure - gateway=" + gateway);
-
-    // Search the listen port of proxy
-    for (Enumeration n = gateway.networks.elements(); n.hasMoreElements();) {
-      A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
-
-      logmon.log(BasicLevel.DEBUG,
-                 "configure - explore(" + network + ")");
-      if (network.domain.equals("transient"))
-        gateway.port = network.port;
-    }
-
-    logmon.log(BasicLevel.DEBUG,
-               "configure - gateway.port=" + gateway.port);
-
-    if (gateway.port == -1)
-      throw new Exception("There is no transient network on server #" +
-			  root.gateway + ", bad configuration.");
-  }
-
-  /**
    *  Adapts the current configuration to the specified persistent server.
    */
   public void configure(A3CMLPServer root) throws Exception {
@@ -411,24 +338,9 @@ public class A3CMLConfig implements Serializable {
     
     // TODO: Adds the local domain
 //  Domain domain = new Domain("local"
-    // Search alls directly accessible domains (except transient).
+    // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
-      if (network.domain.equals("transient")) {
-        // Adds the transient domain.
-        // AF: Normally, the domain should be added during creation phase (from
-        // XML file or from AgentAdmin), but as all transient domain are named
-        // "transient" and at this moment we don't known the root server we 
-        // can't do this, so we have a "patch" here.
-        // TODO: creates server.transient domain then handle them...
-        if (! containsDomain("transient")) {
-          A3CMLDomain domain = new A3CMLDomain(network.domain,
-                                               "fr.dyade.aaa.agent.TransientNetworkProxy");
-          addDomain(domain);
-        }
-        // Transient network is handled later
-        continue;
-      }
 
       A3CMLDomain domain = (A3CMLDomain) domains.get(network.domain);
       domain.gateway = rootid;
@@ -476,13 +388,6 @@ public class A3CMLConfig implements Serializable {
              n.hasMoreElements();) {
           A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
 
-          if (network.domain.equals("transient")) {
-            // A transient server is never a router so it is not
-            // necessary to explore these servers
-
-            continue;
-          }
-
           A3CMLDomain d2 = (A3CMLDomain) domains.get(network.domain);
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -524,28 +429,6 @@ public class A3CMLConfig implements Serializable {
       if (server instanceof A3CMLPServer) {
         if (! server.visited)
           throw new Exception(server + " inaccessible");
-      } else if (server instanceof A3CMLTServer) {
-        A3CMLServer router = getServer(server.gateway);
-        if (! router.visited)
-          throw new Exception(server + "/" + router + " inaccessible");
-        if (! (router instanceof A3CMLPServer))
-          throw new Exception("transient " + router +
-                              " can't route transient " + server);
-        A3CMLNetwork network = null;
-        for (Enumeration n = ((A3CMLPServer) router).networks.elements();
-             n.hasMoreElements();) {
-          network = (A3CMLNetwork)  n.nextElement();
-          if (network.domain.equals("transient")) break;
-        }
-        if (network == null)
-          throw new Exception("server " + router +
-                              " can't route transient " + server);
-        // Adds transient servers to the domain list
-        if (router.sid == rootid) {
-          getDomain(network.domain).addServer(server);
-        }
-        // set visited value for transient servers 
-        server.visited = true;
       }
     }
   }
@@ -577,20 +460,6 @@ public class A3CMLConfig implements Serializable {
     for (int i = 0; i < dom.servers.size(); i++) {
       A3CMLPServer server = (A3CMLPServer) dom.servers.elementAt(i);
       domainConf.servers.put(new Short(server.sid),server);
-    }
-
-    // add transient server in domainConf.
-    for (Enumeration s1 = domainConf.servers.elements(); s1.hasMoreElements(); ) {
-      A3CMLServer server = (A3CMLServer) s1.nextElement();
-      for (Enumeration s2 = servers.elements(); s2.hasMoreElements(); ) {
-        A3CMLServer serv = (A3CMLServer) s2.nextElement();
-        if (serv instanceof A3CMLTServer) {
-          if (server.sid == ((A3CMLTServer) serv).gateway) {
-            domainConf.servers.put(new Short(serv.sid),
-                                   ((A3CMLTServer) serv).duplicate());
-          }
-        }
-      }
     }
 
     // add global properties in domainConf.
@@ -667,20 +536,6 @@ public class A3CMLConfig implements Serializable {
             j++;
         }
         domainConf.servers.put(new Short(server.sid),server);
-      }
-      
-      // add transient server in domainConf.
-      for (Enumeration s1 = domainConf.servers.elements(); s1.hasMoreElements(); ) {
-        A3CMLServer server = (A3CMLServer) s1.nextElement();
-        for (Enumeration s2 = servers.elements(); s2.hasMoreElements(); ) {
-          A3CMLServer serv = (A3CMLServer) s2.nextElement();
-          if (serv instanceof A3CMLTServer) {
-            if (server.sid == serv.gateway) {
-              domainConf.servers.put(new Short(serv.sid),
-                                     ((A3CMLTServer) serv).duplicate());
-            }
-          }
-        }
       }
     }
       
@@ -908,40 +763,6 @@ public class A3CMLConfig implements Serializable {
   /* -+-+-+- the corresponding TcpServer services.          -+-+-+- */
   /* -+-+-+- This code below is needed for historic reason. -+-+-+- */
   /* -+-+-+-                                                -+-+-+- */
-
-  /**
-   * Get the argument strings for a particular service running on a server
-   * (identified by its id.) and on associated transient servers.
-   *
-   * @param id		agent server id
-   * @param classname	the service class name
-   * @return		the arguments as declared in configuration file
-   * @exception	UnknownServerException
-   *	The specified server does not exist.
-   * @exception UnknownServiceException
-   *	The specified service is not declared on this server. 
-   */
-  public final String getServiceArgsFamily(short sid,
-                                           String classname) 
-    throws UnknownServerException, UnknownServiceException {
-    try {
-      String args = getServiceArgs(sid, classname);
-      return args;
-    } catch (UnknownServiceException exc) {}
-    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = (A3CMLServer) s.nextElement();
-
-      if ((server instanceof A3CMLTServer) &&
-	  (((A3CMLTServer) server).gateway == sid)) {
-	try {
-	  String args = getServiceArgs(server.sid, classname);
-	  return args;
-	} catch (Exception exc) {}
-      }
-    }
-    throw new UnknownServiceException("Unknown service \"" + classname +
-                                      "\" on family server#" + sid);
-  }
 
   /**
    * Gets the argument strings for a particular service running on a server

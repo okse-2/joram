@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -50,8 +51,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * This topic is in fact a bridge linking JORAM and a foreign JMS server,
  * and which is accessible through the Pub/Sub communication mode.
  */
-public class BridgeTopicImpl extends TopicImpl
-{
+public class BridgeTopicImpl extends TopicImpl {
   /** The JMS module for accessing the foreign JMS destination. */
   private BridgeUnifiedModule jmsModule;
 
@@ -65,9 +65,6 @@ public class BridgeTopicImpl extends TopicImpl
    * <b>Value:</b> message
    */
   private Hashtable outTable;
-
-  
-
 
   /**
    * Constructs a <code>BridgeTopicImpl</code> instance.

@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,8 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
+ *                 Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -42,8 +43,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * consuming messages, the actual sendings and acknowledgement being managed
  * by this XA wrapper.
  */
-public class XASession extends Session implements javax.jms.XASession
-{
+public class XASession extends Session implements javax.jms.XASession {
   /** The XA resource representing the session to the transaction manager. */
   private javax.transaction.xa.XAResource xaResource;
   

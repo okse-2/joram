@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -25,14 +28,14 @@ import org.objectweb.util.monolog.api.Logger;
  *  <code>FIFONetwork</code> is a base implementation for network components
  * with a simple FIFO message ordering.
  */
-public abstract class FIFONetwork extends Network {
+public abstract class FIFONetwork extends StreamNetwork {
   /**
    * Creates a new network component. This simple constructor is required
    * by subclasses.
    */
   public FIFONetwork() {}
 
-  public LogicalClock createsLogicalClock(String name, short[] servers) {
+  LogicalClock createsLogicalClock(String name, short[] servers) {
     return new SimpleClock(name, servers);
   }
 
@@ -68,13 +71,16 @@ public abstract class FIFONetwork extends Network {
     AgentServer.getServerDesc(from).active = true;
     AgentServer.getServerDesc(from).retry = 0;
 
+    // Start atransaction in order to ensure atomicity of clock updates
+    // and queue changes.
+    AgentServer.transaction.begin();
+
     // Test if the message can be delivered then deliver it
     // else put it in the waiting list
     int todo = clock.testRecvUpdate(msg.getUpdate());
 
     if (todo == LogicalClock.DELIVER) {
       // Deliver the message then try to deliver alls waiting message.
-      AgentServer.transaction.begin();
       // Allocate a local time to the message to order it in
       // local queue, and save it.
       Channel.post(msg);
@@ -113,7 +119,6 @@ public abstract class FIFONetwork extends Network {
       Channel.validate();
       AgentServer.transaction.release();
     } else if (todo == LogicalClock.WAIT_TO_DELIVER) {
-      AgentServer.transaction.begin();
       // Insert in a waiting list.
       msg.save();
       waiting.addElement(msg);
@@ -126,6 +131,8 @@ public abstract class FIFONetwork extends Network {
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).
+      AgentServer.transaction.commit();
+      AgentServer.transaction.release();
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -24,7 +27,6 @@ import fr.dyade.aaa.agent.conf.*;
 public interface SCServerMBean {
   public short getServerId();
   public String getName();
-  public boolean isTransient();
 
   public void start();
   public void stop();

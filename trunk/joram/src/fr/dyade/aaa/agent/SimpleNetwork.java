@@ -15,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -28,8 +31,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 /**
- *  <code>SingleCnxNetwork</code> is a simple implementation of
- * <code>StreamNetwork</code> class with a single connection at
+ *  <code>SimpleCnxNetwork</code> is a simple implementation of
+ * <code>FifoNetwork</code> class with a single connection at
  * a time.
  */
 public class SimpleNetwork extends FIFONetwork {
@@ -44,115 +47,6 @@ public class SimpleNetwork extends FIFONetwork {
   public SimpleNetwork() {
     super();
   }
-
-  // -----+----- -----+----- -----+----- -----+----- -----+----- -----+----- 
-  // start of code from StreamNetwork class.
-
-  /**
-   * Numbers of attempt to bind the server's socket before aborting.
-   */
-  final static int CnxRetry = 10;
-
-  /**
-   *  This method creates and returns a socket connected to a ServerSocket at
-   * the specified network address and port. It may be overloaded in subclass,
-   * in order to create particular subclasses of sockets.
-   * <p>
-   *  Due to polymorphism of both factories and sockets, different kinds of
-   * sockets can be used by the same application code. The sockets returned
-   * to the application can be subclasses of <a href="java.net.Socket">
-   * Socket</a>, so that they can directly expose new APIs for features such
-   * as compression, security, or firewall tunneling.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
-   */
-  Socket createSocket(InetAddress host, int port) throws IOException {
-    if (host == null)
-      throw new UnknownHostException();
-    return new Socket(host, port);
-  }
-
-  /**
-   *  This method creates and returns a server socket which uses all network
-   * interfaces on the host, and is bound to the specified port. It may be
-   * overloaded in subclass, in order to create particular subclasses of
-   * server sockets.
-   *
-   * @param port	the port to listen to.
-   * @return		a server socket bound to the specified port.
-   *
-   * @exception IOException	for networking errors
-   */
-  ServerSocket createServerSocket() throws IOException {
-    for (int i=0; ; i++) {
-      try {
-        return new ServerSocket(port);
-      } catch (BindException exc) {
-        if (i > CnxRetry) throw exc;
-        try {
-          Thread.sleep(i * 250);
-        } catch (InterruptedException e) {}
-      }
-    }
-  }
-
-  /**
-   *  Configures this socket using the socket options established for this
-   * factory. It may be overloaded in subclass, in order to handle particular
-   * subclasses of sockets
-   *
-   * @param Socket	the socket.
-   *
-   * @exception IOException	for networking errors
-   */ 
-  static void setSocketOption(Socket sock) throws SocketException {
-    // Don't use TCP data coalescing - ie Nagle's algorithm
-    sock.setTcpNoDelay(true);
-    // Read operation will block indefinitely until requested data arrives
-    sock.setSoTimeout(0);
-    // Set Linger-on-Close timeout.
-    sock.setSoLinger(true, 60);
-  }
-
-  /**
-   *  Returns an <code>ObjectInputStream</code> for this socket. This
-   * method may be overloaded in subclass, transforming the data along
-   * the way or providing additional functionality (ie cyphering).
-   *
-   * @param sock	the socket.
-   * @return		an input stream for reading object from this socket.
-   *
-   * @exception	IOException	if an I/O error occurs when creating the
-   *				input stream.
-   */
-  static ObjectInputStream
-      getInputStream(Socket sock) throws IOException {
-    return new ObjectInputStream(sock.getInputStream());
-  }
-
-  /**
-   *  Returns an <code>ObjectOutputStream</code> for this socket. This
-   * method may be overloaded in subclass, transforming the data along
-   * the way or providing additional functionality (ie cyphering).
-   *
-   * @param sock	the socket.
-   * @return		an output stream for writing object to this socket.
-   *
-   * @exception	IOException	if an I/O error occurs when creating the
-   *				output stream.
-   */
-  static ObjectOutputStream
-      getOutputStream(Socket sock) throws IOException {
-    return new ObjectOutputStream(sock.getOutputStream());
-  }
-
-  // End of code from StreamNetwork class.
-  // -----+----- -----+----- -----+----- -----+----- -----+----- -----+----- 
 
   /** Input component */
   NetServerIn netServerIn = null;
@@ -240,12 +134,15 @@ public class SimpleNetwork extends FIFONetwork {
   }
 
   final class NetServerOut extends Daemon {
+    NetOutputStream nos = null;
+
     NetServerOut(String name, Logger logmon) {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
       this.setThreadGroup(AgentServer.getThreadGroup());
     }
+
     protected void close() {}
 
     protected void shutdown() {}
@@ -255,12 +152,18 @@ public class SimpleNetwork extends FIFONetwork {
       Message msg = null;
       short msgto;
       ServerDesc server = null;
-      Socket socket = null;
-      ObjectOutputStream oos = null;
       InputStream is = null;
 
-
       try {
+        try {
+          nos = new NetOutputStream();
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", cannot start.");
+          return;
+        }
+
+        loop:
 	while (running) {
           canStop = true;
           try {
@@ -276,10 +179,10 @@ public class SimpleNetwork extends FIFONetwork {
           }
           canStop = false;
           if (! running) break;
-          if (msg == null) continue;
 
           msgto = msg.getToId();
 
+          Socket socket = null;
           try {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
@@ -298,11 +201,7 @@ public class SimpleNetwork extends FIFONetwork {
 	  
               // Open the connection.
               try {
-                if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
-                socket = createSocket(server.getAddr(), server.port);
-                if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+                socket = createSocket(server);
               } catch (IOException exc) {
                 this.logmon.log(BasicLevel.WARN,
                                 this.getName() + ", connection refused", exc);
@@ -315,40 +214,34 @@ public class SimpleNetwork extends FIFONetwork {
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.WARN,
                               this.getName() + ", move msg in watchdog list", exc);
-              //  There is a connection problem, put the message in a
-              // waiting list.
-              sendList.addElement(msg);
+              if (msg.isPersistent()) {
+                //  There is a connection problem, put the message in a
+                // waiting list.
+                // Be careful, if the message is not persistent, a new sending
+                // may cause a duplication
+                sendList.addElement(msg);
+              }
               qout.pop();
               continue;
             }
 
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", write message");
-            
             try {
               // Send the message,
-              oos = getOutputStream(socket);
-              oos.writeObject(msg);
-
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait ack");
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", write message");
+              nos.writeObject(socket, msg);
+
               // and wait the acknowledge.
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", wait ack");
               is = socket.getInputStream();
               if ((ret = is.read()) == -1)
                 throw new ConnectException("Connection broken");
-
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", receive ack");
-	
-              try {
-                oos.close();
-              } catch (IOException exc) {}
-              try {
-                is.close();
-              } catch (IOException exc) {}
-              try {
-                socket.close();
-              } catch (IOException exc) {}
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", receive ack");
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.WARN,
                               this.getName() + ", move msg in watchdog list", exc);
@@ -361,6 +254,16 @@ public class SimpleNetwork extends FIFONetwork {
               }
               qout.pop();
               continue;
+            } finally {
+              try {
+                socket.getOutputStream().close();
+              } catch (IOException exc) {}
+              try {
+                is.close();
+              } catch (IOException exc) {}
+              try {
+                socket.close();
+              } catch (IOException exc) {}
             }
 	  } catch (UnknownServerException exc) {
             this.logmon.log(BasicLevel.ERROR,
@@ -381,17 +284,10 @@ public class SimpleNetwork extends FIFONetwork {
 	  } catch (Exception exc) {
 	    this.logmon.log(BasicLevel.FATAL,
                        this.getName() + ", unrecoverable exception", exc);
-	    //  There is an unrecoverable exception during the transaction
-	    // we must exit from server.
-            // Creates a thread to execute AgentServer.stop in order to
-            // avoid deadlock.
-            Thread t = new Thread() {
-                public void run() {
-                  AgentServer.stop();
-                }
-              };
-            t.setDaemon(true);
-            t.start();
+            //  There is an unrecoverable exception during the transaction
+            // we must exit from server.
+            AgentServer.stop(false);
+            break loop;
 	  }
 	}
       } finally {
@@ -450,7 +346,7 @@ public class SimpleNetwork extends FIFONetwork {
 
 	    // Read the message,
 	    os = socket.getOutputStream();
-	    ois = getInputStream(socket);
+	    ois = new ObjectInputStream(socket.getInputStream());
 
 	    Object obj = ois.readObject(); 
 
@@ -470,8 +366,8 @@ public class SimpleNetwork extends FIFONetwork {
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", send ack");
 
 	    // then send the acknowledge.
-	    os.write((byte) 0);
-	    os.flush();	// nop !
+	    os.write(0);
+            socket.shutdownOutput();
 	  } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR, ", closed", exc);
 	  } finally {
@@ -495,10 +391,10 @@ public class SimpleNetwork extends FIFONetwork {
     }
   }
 
-
   final class WatchDog extends Daemon {
     /** Use to synchronize thread */
     private Object lock;
+    NetOutputStream nos = null;
 
     WatchDog(String name, Logger logmon) {
       super(name + ".WatchDog");
@@ -548,8 +444,18 @@ public class SimpleNetwork extends FIFONetwork {
       Message msg = null;
       short msgto;
       ServerDesc server = null;
+      InputStream is = null;
       
       try {
+        try {
+          nos = new NetOutputStream();
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", cannot start.");
+          return;
+        }
+
+        loop:
         synchronized (lock) {
 	  while (running) {
 	    try {
@@ -594,15 +500,10 @@ public class SimpleNetwork extends FIFONetwork {
 		  // Open the connection.
 		  Socket socket = null;
                   try {
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", try to connect");
-                    socket = createSocket(server.getAddr(), server.port);
+                    socket = createSocket(server);
+                    // The connection is ok, reset active and retry flags.
                     server.active = true;
                     server.retry = 0;
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", connected");
                   } catch (IOException exc) {
                     this.logmon.log(BasicLevel.WARN,
                                     this.getName() + ", connection refused",
@@ -611,36 +512,34 @@ public class SimpleNetwork extends FIFONetwork {
 		  }
 		  setSocketOption(socket);
 
-		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG,
-                                    this.getName() + ", write message");
-
-		  // Send the message,
-		  ObjectOutputStream oos = getOutputStream(socket);
-		  oos.writeObject(msg);
-
-		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG,
-                                    this.getName() + ", wait ack");
-
-		  // and wait the acknowledge.
-		  InputStream is = socket.getInputStream();
-		  if ((ret = is.read()) == -1)
-		    throw new ConnectException("Connection broken");
-
-		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG,
-                               this.getName() + ", receive ack");
-	    
-		  try {
-		    oos.close();
-		  } catch (IOException exc) {}
-		  try {
-		    is.close();
-		  } catch (IOException exc) {}
-		  try {
-		    socket.close();
-		  } catch (IOException exc) {}
+                  try {
+                    // Send the message,
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", write message");
+                    nos.writeObject(socket, msg);
+                  
+                    // and wait the acknowledge.
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", wait ack");
+                    is = socket.getInputStream();
+                    if ((ret = is.read()) == -1)
+                      throw new ConnectException("Connection broken");
+                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                      this.logmon.log(BasicLevel.DEBUG,
+                                      this.getName() + ", receive ack");
+                  } finally {
+                    try {
+                      socket.getOutputStream().close();
+                    } catch (IOException exc) {}
+                    try {
+                      is.close();
+                    } catch (IOException exc) {}
+                    try {
+                      socket.close();
+                    } catch (IOException exc) {}
+                  }
 
                   try {
                     AgentServer.transaction.begin();
@@ -655,15 +554,8 @@ public class SimpleNetwork extends FIFONetwork {
                                     exc);
                     //  There is an unrecoverable exception during the
                     // transaction we must exit from server.
-                    // Creates a thread to execute AgentServer.stop in order to
-                    // avoid deadlock.
-                    Thread t = new Thread() {
-                        public void run() {
-                          AgentServer.stop();
-                        }
-                      };
-                    t.setDaemon(true);
-                    t.start();
+                    AgentServer.stop(false);
+                    break loop;
                   }
                 }
               } catch (SocketException exc) {
@@ -695,15 +587,8 @@ public class SimpleNetwork extends FIFONetwork {
                                   exc2);
                   //  There is an unrecoverable exception during the
                   // transaction we must exit from server.
-                  // Creates a thread to execute AgentServer.stop in order to
-                  // avoid deadlock.
-                  Thread t = new Thread() {
-                      public void run() {
-                        AgentServer.stop();
-                      }
-                    };
-                  t.setDaemon(true);
-                  t.start();
+                  AgentServer.stop(false);
+                  break loop;
                 }
               } catch (Exception exc) {
                 this.logmon.log(BasicLevel.ERROR,

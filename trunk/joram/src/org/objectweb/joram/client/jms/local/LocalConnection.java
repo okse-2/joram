@@ -24,9 +24,13 @@ package org.objectweb.joram.client.jms.local;
 
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.client.jms.Driver;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.mom.notifications.*;
+
+import fr.dyade.aaa.agent.*;
 
 import fr.dyade.aaa.util.Queue;
 
@@ -35,39 +39,61 @@ import javax.jms.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class LocalConnection 
-    implements org.objectweb.joram.client.jms.ConnectionItf {  
+    implements org.objectweb.joram.client.jms.ConnectionItf {
 
-  private UserConnection userConnection;
+  private AgentId proxyId;    
+
+  private int key;
+
+  private Queue replyQueue;
 
   public LocalConnection(
     String userName, String password) throws JMSException {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
-        "LocalConnection.<init>(" + userName + ')');
+        "LocalConnection.<init>(" + userName + ',' + password + ')');
+
+    GetProxyIdNot gpin = new GetProxyIdNot(
+      userName, password);
     try {
-      userConnection = ConnectionManager.openConnection(
-        userName, password, 0, null);
+      gpin.invoke(new AgentId(AgentServer.getServerId(),
+                              AgentServer.getServerId(),
+                              AgentId.JoramAdminStamp));
+      proxyId = gpin.getProxyId();
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       throw new JMSException(exc.getMessage());
     }
+
+    OpenConnectionNot ocn = new OpenConnectionNot(false, 0);
+    try {
+      ocn.invoke(proxyId);
+      replyQueue = (Queue)ocn.getReplyQueue();
+      key = ocn.getKey();
+    } catch (Exception exc) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      JMSException jmse = new JMSException(
+        exc.getMessage());
+      jmse.setLinkedException(exc);
+      throw jmse;
+    }
   }
 
-  public void send(AbstractJmsRequest request) throws javax.jms.IllegalStateException {
+  public void send(AbstractJmsRequest request) 
+    throws javax.jms.IllegalStateException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "LocalConnection.send(" + request + ')');
-    try {
-      userConnection.send(request);
-    } catch (Exception exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, "", exc);
-      throw new javax.jms.IllegalStateException(
-        exc.getMessage());
+
+    Channel.sendTo(proxyId, 
+      new RequestNot(key, request));
+
+    if (request instanceof ProducerMessages) {
+      FlowControl.flowControl();
     }
   }
 
@@ -80,14 +106,13 @@ public class LocalConnection
 
   AbstractJmsReply getReply() 
     throws InterruptedException {
-    return userConnection.receive();
+    AbstractJmsReply reply = 
+      (AbstractJmsReply)replyQueue.get();
+    replyQueue.pop();
+    return reply;
   }
 
   public void close() {
     // Nothing to do
-  }
-
-  public boolean syncClosure() {
-    return false;
   }
 }

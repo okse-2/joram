@@ -51,7 +51,6 @@ public class Queue extends Destination implements javax.jms.Queue
   public Queue(String agentId)
   {
     super(agentId);
-    isQueue = true;
   }
 
   /** 
@@ -63,7 +62,6 @@ public class Queue extends Destination implements javax.jms.Queue
   public Queue(String agentId, String name)
   {
     super(agentId, name);
-    isQueue = true;
   }
 
   /** 

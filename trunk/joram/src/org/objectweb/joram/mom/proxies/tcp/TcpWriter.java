@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
@@ -42,22 +42,14 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class TcpWriter extends Daemon {
   
   /**
-   * The connection with the user's proxy.
-   */
-  private UserConnection userConnection;
-  
-  /**
    * The TCP connection that started
    * this writer.
    */
   private TcpConnection tcpConnection;
 
-  private ReliableTcpConnection reliableTcp;
+  private IOControl ioctrl;
 
-  /**
-   * The output stream where to write
-   */
-  private ObjectOutputStream out;
+  private AckedQueue replyQueue;
 
   /**
    * Creates a new writer.
@@ -67,15 +59,15 @@ public class TcpWriter extends Daemon {
    * with the user's proxy
    * @param tcpConnection the TCP connection
    */
-  public TcpWriter(UserConnection userConnection,
+  public TcpWriter(IOControl ioctrl,
+		   AckedQueue replyQueue,
                    TcpConnection tcpConnection) 
     throws IOException {
     super("tcpWriter");
-    this.userConnection = userConnection;
+    this.ioctrl = ioctrl;
+    this.replyQueue = replyQueue;
     this.tcpConnection = tcpConnection;
-    reliableTcp = 
-      (ReliableTcpConnection)userConnection.
-      getContext();
+    replyQueue.reset();
   }
 
   public void run() {
@@ -85,15 +77,28 @@ public class TcpWriter extends Daemon {
         "TcpWriter.run()");
     try {
       while (running) {
-        AbstractJmsReply reply =  
-          userConnection.receive();
-        reliableTcp.send((AbstractJmsReply) reply);
+        ProxyMessage msg =  
+          (ProxyMessage)replyQueue.get();
+        if (msg.getObject() instanceof Exception) {
+          // Exception indicating that the connection
+          // has been closed by the heart beat task.
+          // (see UserAgent)
+          new Thread(new Runnable() {
+              public void run() {            
+                tcpConnection.close();
+              }
+            }).start();
+        } else {
+          ioctrl.send(msg);
+          // No queue.pop() !
+          // Done by the proxy (UserAgent)
+        }
       }
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(
           BasicLevel.DEBUG, "", exc);
-    }    
+    }
   }
 
   protected void shutdown() {
@@ -104,9 +109,9 @@ public class TcpWriter extends Daemon {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
-        "TcpWriter.close()");
-    if (reliableTcp != null)
-      reliableTcp.close();
-    reliableTcp = null;
+        "TcpWriter.close()", new Exception());
+    if (ioctrl != null)
+      ioctrl.close();
+    ioctrl = null;
   }
 }

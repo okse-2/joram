@@ -67,10 +67,9 @@ public class NamingContextFactory implements InitialContextFactory {
     Hashtable env) 
     throws NamingException {    
     try {
-      String host = null;
-      String portStr = null;
+      NamingConnection namingConnection;
 
-      // URL should be as: scn://host:port   
+      // URL should be as: scn://host:port
       String url = null;
       if (env != null) {
         url = (String) env.get(Context.PROVIDER_URL);
@@ -79,35 +78,37 @@ public class NamingContextFactory implements InitialContextFactory {
         url = System.getProperty(Context.PROVIDER_URL, null);
     
       if (url != null) {
-        if (url.startsWith("scn")) {
-          int indexOfHost = url.indexOf("//") == -1 ? 0 : url.indexOf("//") + 2; 
-          int indexOfPort = url.indexOf(":", indexOfHost) + 1;
-        
-          host = url.substring(indexOfHost, indexOfPort - 1);
-          portStr = url.substring(indexOfPort);
+        StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
+        if (! tokenizer.hasMoreElements()) 
+          throw new NamingException("URL not valid:" + url);
+        String protocol = tokenizer.nextToken();        
+        if (protocol.equals("scn")) {
+          String host = tokenizer.nextToken();
+          String portStr = tokenizer.nextToken();
+          int port = Integer.parseInt(portStr);
+          namingConnection = new SimpleNamingConnection(host, port);
+        } else {
+          throw new NamingException("Unknown protocol:" + protocol);
         }
+      } else {    
+        String host = null;
+        if (env != null) {
+          host = (String) env.get(HOST_PROPERTY);
+        }
+        if (host == null) {
+          host = System.getProperty(HOST_PROPERTY, "localhost");
+        }
+        String portStr = null;
+        if (env != null) {
+          portStr = (String) env.get(PORT_PROPERTY);
+        }
+        if (portStr == null) {
+          portStr = System.getProperty(PORT_PROPERTY, "16400");
+        }
+        int port = Integer.parseInt(portStr);
+        namingConnection = new SimpleNamingConnection(host, port);
       }
-    
-      if (host == null && env != null)
-        host = (String) env.get(HOST_PROPERTY);
-      if (host == null)
-        host = System.getProperty(HOST_PROPERTY, null);
-      if (host == null) {
-        //default host
-        host = "localhost";
-      }
-    
-      if (portStr == null && env != null)
-        portStr = (String) env.get(PORT_PROPERTY);
-      if (portStr == null)
-        portStr = System.getProperty(PORT_PROPERTY, null);
-      if (portStr == null) {
-        //default port
-        portStr = "16400";
-      }
-      int port = Integer.parseInt(portStr);
-
-      return new NamingConnection(host, port);
+      return namingConnection;
     } catch (ClassCastException e) {
       NamingException nx = 
         new NamingException(

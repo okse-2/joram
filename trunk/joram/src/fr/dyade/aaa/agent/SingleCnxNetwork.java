@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -34,7 +37,7 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class with a single connection at
  * a time.
  */
-public class SingleCnxNetwork extends StreamNetwork {
+public class SingleCnxNetwork extends CausalNetwork {
   /** FIFO list of all messages to be sent by the watch-dog thead */
   Vector sendList;
 
@@ -159,7 +162,6 @@ public class SingleCnxNetwork extends StreamNetwork {
 	    }
 	    canStop = false;
             if (! running) break;
-            if (msg == null) continue;
 
 	    msgto = msg.getToId();
 
@@ -180,11 +182,7 @@ public class SingleCnxNetwork extends StreamNetwork {
 	    // Open the connection.
 	    Socket socket = null;
             try {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
-              socket = createSocket(server.getAddr(), server.port);
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+              socket = createSocket(server);
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.WARN,
                               this.getName() + ", connection refused", exc);
@@ -198,7 +196,7 @@ public class SingleCnxNetwork extends StreamNetwork {
 	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", write message");
 	    // Send the message,
-	    ObjectOutputStream oos = getOutputStream(socket);
+	    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 	    oos.writeObject(msg);
 
 	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -249,15 +247,7 @@ public class SingleCnxNetwork extends StreamNetwork {
                        this.getName() + ", unrecoverable exception", exc);
 	    //  There is an unrecoverable exception during the transaction
 	    // we must exit from server.
-            // Creates a thread to execute AgentServer.stop in order to
-            // avoid deadlock.
-            Thread t = new Thread() {
-                public void run() {
-                  AgentServer.stop();
-                }
-              };
-            t.setDaemon(true);
-            t.start();
+            AgentServer.stop(false);
 	  }
 	}
       } finally {
@@ -320,7 +310,7 @@ public class SingleCnxNetwork extends StreamNetwork {
 
 	    // Read the message,
 	    os = socket.getOutputStream();
-	    ois = getInputStream(socket);
+	    ois = new ObjectInputStream(socket.getInputStream());
 	    Object obj = ois.readObject();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -472,15 +462,10 @@ public class SingleCnxNetwork extends StreamNetwork {
 		  // Open the connection.
 		  Socket socket = null;
                   try {
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", try to connect");
-                    socket = createSocket(server.getAddr(), server.port);
+                    socket = createSocket(server);
+                    // The connection is ok, reset active and retry flags.
                     server.active = true;
                     server.retry = 0;
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", connected");
                   } catch (IOException exc) {
                     this.logmon.log(BasicLevel.WARN,
                                     this.getName() + ", connection refused",
@@ -494,7 +479,7 @@ public class SingleCnxNetwork extends StreamNetwork {
                                     this.getName() + ", write message");
 
 		  // Send the message,
-		  ObjectOutputStream oos = getOutputStream(socket);
+		  ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 		  oos.writeObject(msg);
 
 		  if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -533,15 +518,7 @@ public class SingleCnxNetwork extends StreamNetwork {
                                     exc);
                     //  There is an unrecoverable exception during the
                     // transaction we must exit from server.
-                    // Creates a thread to execute AgentServer.stop in order to
-                    // avoid deadlock.
-                    Thread t = new Thread() {
-                        public void run() {
-                          AgentServer.stop();
-                        }
-                      };
-                    t.setDaemon(true);
-                    t.start();
+                    AgentServer.stop(false);
                   }
                 }
               } catch (SocketException exc) {
@@ -573,15 +550,7 @@ public class SingleCnxNetwork extends StreamNetwork {
                                   exc2);
                   //  There is an unrecoverable exception during the
                   // transaction we must exit from server.
-                  // Creates a thread to execute AgentServer.stop in order to
-                  // avoid deadlock.
-                  Thread t = new Thread() {
-                      public void run() {
-                        AgentServer.stop();
-                      }
-                    };
-                  t.setDaemon(true);
-                  t.start();
+                  AgentServer.stop(false);
                 }
               } catch (Exception exc) {
                 this.logmon.log(BasicLevel.ERROR,

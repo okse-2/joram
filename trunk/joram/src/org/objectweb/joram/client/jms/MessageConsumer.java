@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -39,8 +39,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.MessageConsumer</code> interface.
  */
-public class MessageConsumer implements javax.jms.MessageConsumer
-{
+public class MessageConsumer implements javax.jms.MessageConsumer {
   /** The selector for filtering messages. */
   private String selector;
   /** The message listener, if any. */
@@ -94,8 +93,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * @exception JMSException           Generic exception.
    */
   MessageConsumer(Session sess, Destination dest, String selector,
-                  String subName, boolean noLocal) throws JMSException
-  {
+                  String subName, boolean noLocal) throws JMSException {
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
 
@@ -135,7 +133,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                                   selector,
                                                   noLocal,
                                                   durableSubscriber));
-
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
@@ -281,8 +278,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    *
    * @exception IllegalStateException  If the consumer is closed.
    */
-  public javax.jms.MessageListener getMessageListener() throws JMSException
-  {
+  public javax.jms.MessageListener getMessageListener() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed consumer.");
 
@@ -294,8 +290,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    *
    * @exception IllegalStateException  If the consumer is closed.
    */
-  public String getMessageSelector() throws JMSException
-  {
+  public String getMessageSelector() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed consumer.");
 
@@ -361,7 +356,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
                                    + " reply.");
-
+  
       Vector msgs = reply.getMessages();
       if (msgs != null && ! msgs.isEmpty()) {
         org.objectweb.joram.shared.messages.Message msg =

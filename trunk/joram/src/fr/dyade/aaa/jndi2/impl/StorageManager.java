@@ -202,4 +202,15 @@ public class StorageManager {
     return (NamingContextId)nameToIdIndex.get(name);
   }
 
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    out.writeLong(contextCounter);
+    out.writeObject(nameToIdIndex);
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    contextCounter = in.readLong();
+    nameToIdIndex = (Hashtable)in.readObject();
+  }
 }

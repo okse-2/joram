@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -165,8 +168,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    */
   public Network() {
     network = this;
-    qout = new MessageQueue();
-    waiting = new Vector();
   }
 
   /**
@@ -202,9 +203,30 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     waiting.addElement(msg);
   }
 
-  abstract public LogicalClock
-      createsLogicalClock(String name,
-                          short[] servers);
+  /**
+   *  Creates a new <code>LogicalClock</code> for this Network component.
+   * This method should be defined in subclass depending of implementation
+   * message ordering (FIFO, causal, etc.).
+   */
+  abstract LogicalClock createsLogicalClock(String name, short[] servers);
+
+  /**
+   *  Sets the <code>LogicalClock</code> for this Network component.
+   * This method is normally used to initialize the clock of a new slave
+   * server in HA mode.
+   */
+  final void setLogicalClock(LogicalClock clock) {
+    this.clock = clock;
+  }
+
+  /**
+   *  Gets the <code>LogicalClock</code> of this Network component.
+   * This method is normally used to capture the current clock of the
+   * master server in HA mode, then initialize a new slave.
+   */
+  final LogicalClock getLogicalClock() {
+    return clock;
+  }
 
   /**
    * Saves logical clock information to persistent storage.
@@ -236,6 +258,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    */
   public void init(String name, int port, short[] servers) throws Exception {
     this.name = AgentServer.getName() + '.' + name;
+
+    qout = new MessageQueue(this.name,
+                            AgentServer.getTransaction().isPersistent());
+    waiting = new Vector();
+
     this.domain = name;
     this.port = port;
 

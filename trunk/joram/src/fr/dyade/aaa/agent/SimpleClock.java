@@ -233,4 +233,24 @@ final class SimpleClock extends LogicalClock {
     modified = true;
     return update;
   }
+
+  /**
+   * Returns a string representation of this <code>SimpleClock</code> object
+   * in the form of a set of entries, enclosed in braces and separated by the
+   * String ", " (characters comma and space).
+   *
+   * @return String representation of this <code>SimpleClock</code> object.
+   */
+  public String toString() {
+    StringBuffer strBuf = new StringBuffer();
+
+    strBuf.append('(').append(super.toString()).append(',');
+    for (int i=0; i<servers.length; i++) {
+      strBuf.append('(').append(servers[i]).append(',');
+      strBuf.append(stamp[0][i]).append(',').append(stamp[1][i]).append(')');
+    }
+    strBuf.append(')');
+
+    return strBuf.toString();
+  }   
 }

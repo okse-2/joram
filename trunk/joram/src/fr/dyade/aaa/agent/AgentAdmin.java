@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2002 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +16,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -365,8 +368,6 @@ final public class AgentAdmin extends Agent {
       AdminCmd cmd = (AdminCmd) e.nextElement();
       if (cmd instanceof NewDomainCmd) {
         doReact((NewDomainCmd) cmd);
-      } else if (cmd instanceof NewTransientCmd) {
-        doReact((NewTransientCmd) cmd);
       } else if (cmd instanceof NewServerCmd) {
         doReact((NewServerCmd) cmd);
       } else if (cmd instanceof NewServiceCmd) {
@@ -387,8 +388,6 @@ final public class AgentAdmin extends Agent {
         doReact((RemoveNetworkCmd) cmd);
       }  else if (cmd instanceof RemoveServerCmd) {
         doReact((RemoveServerCmd) cmd);
-      }  else if (cmd instanceof RemoveTransientCmd) {
-        doReact((RemoveTransientCmd) cmd);
       }  else if (cmd instanceof RemoveServiceCmd) {
         doReact((RemoveServiceCmd) cmd);
       }  else if (cmd instanceof UnsetServerPropertyCmd) {
@@ -407,8 +406,6 @@ final public class AgentAdmin extends Agent {
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
     if (root instanceof A3CMLPServer) {
       a3cmlConfig.configure((A3CMLPServer) root);
-    } else if (root instanceof A3CMLTServer) {
-      a3cmlConfig.configure((A3CMLTServer) root);
     } else {
       throw new Exception("Unknown agent server type: #" +
                           AgentServer.getServerId());
@@ -518,72 +515,7 @@ final public class AgentAdmin extends Agent {
       throw new ServerCmdException(exc);
     }
   }
-  
-  /** 
-   * create new transient
-   *
-   * @param cmd NewTransientCmd
-   *
-   * @exception ServerCmdException
-   */
-  private void doReact(NewTransientCmd cmd) throws ServerCmdException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "AgentAdmin.doReact(" + cmd + ")");
-
-    try {
-      if (!a3cmlConfig.containsServer(cmd.name)) {
-        // set id for new server
-        Short id = null;
-        if (cmd.sid == null) {
-          id = getSid();
-          if (id == null) 
-            throw new ServerCmdException(
-              "AgentAdmin : NewTransientCmd(" + cmd + 
-              ")not authorized on " + 
-              AgentServer.getServerId());
-        } else
-          id = cmd.sid;
-        
-        short gateway = a3cmlConfig.getServerIdByName(cmd.gateway);
-        a3cmlConfig.addServer(
-          new A3CMLTServer(id.shortValue(),
-                           cmd.name,
-                           cmd.hostname,
-                           gateway));
-        rollback.add(new RemoveTransientCmd(cmd.name,
-                                            cmd.hostname,
-                                            Short.toString(gateway)));
-        
-        // prepare serverDesc and add to startScript
-        // DF: the domainName is resolved during the start stage.
-        ServerDesc sd = new ServerDesc(id.shortValue(),
-                                       cmd.name,
-                                       cmd.hostname);
-//         sd.isTransient = true;
-        sd.gateway = gateway;
-        startScript.serverDesc.put(id,sd);
-        startScript.add(new StartServerCmd(id.shortValue(),cmd.name));
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, 
-                     "AgentAdmin startScript.serverDesc.put(" + id + "," + sd + ")");
-      } else {
-        if (silence) {
-          startScript.add(new StartServerCmd(
-            a3cmlConfig.getServerIdByName(cmd.name),
-            cmd.name));
-          return;
-        }
-        throw new ServerCmdException("Server transient " + cmd.name + " already exist id=" + id);
-      }
-    } catch (Exception exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "AgentAdmin.doReact(NewTransientCmd)",exc);
-      throw new ServerCmdException(exc);
-    }
-  }
-  
+   
   /** 
    * create new service
    *
@@ -961,8 +893,7 @@ final public class AgentAdmin extends Agent {
         try {
           ServerDesc serverDesc = 
             AgentServer.getServerDesc(cmd.sid);
-          if (cmd.domainName.equals(
-            serverDesc.getDomainName())) {
+          if (cmd.domainName.equals(serverDesc.getDomainName())) {
             serverDesc.port = a3cmlNetwork.port;
           }
         } catch (UnknownServerException exc) {
@@ -1032,29 +963,21 @@ final public class AgentAdmin extends Agent {
 //                      "AgentAdmin.StartServerCmd : NAT desc = " + desc);
 //       }
 
-      if (current instanceof A3CMLTServer) {
-        // current server is transient
-        ServerDesc sdAssocitePer = AgentServer.getServerDesc(((A3CMLTServer) current).gateway);
-        desc.gateway = sdAssocitePer.gateway;
-        desc.domain = sdAssocitePer.domain;
-        if (desc.domain != null)
-          ((Network) desc.domain).addServer(server.sid);
-      } else if (current instanceof A3CMLPServer) {
+      if (current instanceof A3CMLPServer) {
         // current server is persistent
         if (server instanceof A3CMLPServer) {
  //       if(!setGatewayAndDomain((A3CMLPServer) server,
 //                                (A3CMLPServer) current))
 //          throw new ServerCmdException(server + " is inaccessible from " + current);
           AgentServer.initServerDesc(desc, (A3CMLPServer) server);
-        } else if (server instanceof A3CMLTServer) {
-//        setGatewayAndDomain((A3CMLTServer) server);
-          AgentServer.initServerDesc(desc, (A3CMLTServer) server);
         } else {
           // TODO: Throw an UnknownServerType
         }
 
         if (desc.gateway == desc.sid)
           ((Network) desc.domain).addServer(server.sid);
+      } else {
+        // TODO: Throw an UnknownServerType
       }
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1251,47 +1174,13 @@ final public class AgentAdmin extends Agent {
     A3CMLServer svr = null;
     try {
       svr = (A3CMLServer) a3cmlConfig.getServer(cmd.name);
-    } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {return;}
-
-    if (svr == null) return;
-    Vector toRemove = new Vector();
-    try {
-      for (Enumeration s = a3cmlConfig.servers.elements(); s.hasMoreElements(); ) {
-        A3CMLServer server = (A3CMLServer)s.nextElement();
-        if (server instanceof A3CMLTServer) {
-          if(((A3CMLTServer) server).gateway == svr.sid)
-            toRemove.addElement(new RemoveTransientCmd(server.name,
-                                                       server.hostname,
-                                                       "" + svr.sid));
-        }
-      }
-      for (int i = 0; i < toRemove.size(); i++)
-        doReact((RemoveTransientCmd) toRemove.elementAt(i));
-      
-      removeServer(svr.sid);
-    } catch (Exception exc) {
-      if (logmon.isLoggable(BasicLevel.ERROR))
-        logmon.log(BasicLevel.ERROR, "", exc);
-      throw new ServerCmdException(exc);
+    } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
+      return;
     }
-  }
+    if (svr == null) return;
 
-  /** 
-   * remove transient
-   *
-   * @param cmd RemoveTransientCmd
-   *
-   * @exception ServerCmdException
-   */
-  private void doReact(RemoveTransientCmd cmd) throws ServerCmdException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "AgentAdmin.doReact(" + cmd + ")");
-    
     try {
-      A3CMLServer server = (A3CMLServer) a3cmlConfig.getServer(cmd.name);
-      if (server == null) return;
-      removeTransient(server.sid);
+      removeServer(svr.sid);
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
         logmon.log(BasicLevel.ERROR, "", exc);
@@ -1514,36 +1403,6 @@ final public class AgentAdmin extends Agent {
     }
   }
 
-  private void removeTransient(short sid) throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "AgentAdmin.removeTransient(" + sid + ")");
-
-    try {
-      ServerDesc servDesc = AgentServer.getServerDesc(sid);
-      if (servDesc.domain instanceof Network)
-        ((Network) servDesc.domain).delServer(sid);
-      
-      // remove server in serverDesc
-      AgentServer.removeServerDesc(sid);
-      for (Enumeration e = AgentServer.elementsServerDesc(); e.hasMoreElements(); ) {
-        ServerDesc sd = (ServerDesc)e.nextElement();
-        if (sd.gateway == sid) {
-        sd.gateway = -1;
-        sd.domain = null;
-        }
-      }
-    } catch (Exception exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "AgentAdmin.removeTransient remove server #" + 
-                   sid,exc);
-    }
-
-    // remove server in a3cmlConfig
-    a3cmlConfig.removeServer(sid);
-  }
-
   private void removeService(short sid, String className) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
@@ -1647,19 +1506,5 @@ final public class AgentAdmin extends Agent {
 //     }
 
 //     return false;
-//   }
-
-//   private void setGatewayAndDomain(A3CMLTServer newServer) throws Exception {
-//     if (logmon.isLoggable(BasicLevel.DEBUG))
-//       logmon.log(BasicLevel.DEBUG,
-//                  "AgentAdmin.setGatewayAndDomain(" + newServer + ")");
-
-//     ServerDesc newServDesc = AgentServer.getServerDesc(newServer.sid);
-//     logmon.log(BasicLevel.DEBUG,
-//                "AgentAdmin.setGatewayAndDomain:" + newServDesc);
-//     ServerDesc pServDesc = AgentServer.getServerDesc(newServer.gateway);
-//     newServDesc.gateway = pServDesc.gateway;
-//     newServDesc.domain = pServDesc.domain;
-//     logmon.log(BasicLevel.DEBUG, "AgentAdmin.setGatewayAndDomain:" + newServDesc);
 //   }
 }

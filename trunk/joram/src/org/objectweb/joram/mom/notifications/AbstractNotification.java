@@ -61,4 +61,9 @@ public abstract class AbstractNotification
   {
     return clientContext;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ", clientContext=" + clientContext + ')';
+  }
 }

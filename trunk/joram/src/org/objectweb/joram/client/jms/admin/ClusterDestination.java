@@ -2,6 +2,7 @@
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -84,8 +85,6 @@ public abstract class ClusterDestination extends Destination {
                     "org.objectweb.joram.client.jms.admin.ObjectFactory",
                     null);
     ref.add(new StringRefAddr("adminObj.id", id));
-    ref.add(new StringRefAddr("cluster.isQueue",
-                              Boolean.toString(isQueue())));
     int i = 0;
     for (Enumeration e = cluster.keys(); e.hasMoreElements(); ) {
       String key = (String) e.nextElement();

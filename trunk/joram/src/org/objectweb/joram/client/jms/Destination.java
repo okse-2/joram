@@ -46,17 +46,13 @@ import javax.naming.*;
  * JORAM specific administration and monitoring methods.
  */
 public abstract class Destination
-                      extends AdministeredObject
-                      implements javax.jms.Destination
+  extends AdministeredObject
+  implements javax.jms.Destination
 {
   /** Identifier of the agent destination. */
   protected String agentId;
   /** Name given by the administrator. */
   protected String adminName;
-
-  /** <code>true</code> if destination is a queue. */
-  protected boolean isQueue = false;
-
 
   /**
    * Constructs a destination.
@@ -123,7 +119,7 @@ public abstract class Destination
    * Returns <code>true</code> if the destination is a queue.
    */
   public boolean isQueue() {
-    return isQueue;
+    return (this instanceof Queue);
   }
 
   /**

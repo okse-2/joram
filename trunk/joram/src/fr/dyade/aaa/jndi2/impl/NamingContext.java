@@ -31,7 +31,7 @@ import javax.naming.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-public class NamingContext implements Serializable {
+public class NamingContext implements Serializable, Cloneable {
 
   private NamingContextId id;
 
@@ -133,6 +133,18 @@ public class NamingContext implements Serializable {
       return ref.getClassName();
     } else {
       return obj.getClass().getName();
+    }
+  }
+
+  public Object clone() {
+    try {
+      NamingContext clone = 
+        (NamingContext)super.clone();
+      clone.records = (Vector)records.clone();
+      // other attributes are cloned
+      return clone;
+    } catch (CloneNotSupportedException exc) {
+      return null;
     }
   }
 

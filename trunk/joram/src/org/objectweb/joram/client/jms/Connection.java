@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): David Feliot (ScalAgent DT)
- *                 Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -37,12 +36,10 @@ import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
  */
-public class Connection implements javax.jms.Connection
-{
+public class Connection implements javax.jms.Connection {
   /** Timer provided by the <code>Connection</code> class */
   private fr.dyade.aaa.util.Timer sessionsTimer;
 
@@ -704,6 +701,12 @@ public class Connection implements javax.jms.Connection
    */
   void distribute(AbstractJmsReply reply)
   {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG,
+        "Connection[" + proxyId + ':' + key + 
+        "].distribute(" + reply + ')');
+
     // Getting the correlation identifier:
     int correlationId = reply.getCorrelationId();
 
@@ -754,13 +757,20 @@ public class Connection implements javax.jms.Connection
       }
     }
     // Finally, if the requester disappeared, denying the delivery:
-    else if (reply instanceof ConsumerMessages)
+    else if (reply instanceof ConsumerMessages) {
       denyDelivery((ConsumerMessages) reply);
+    }
   }
 
   /** Actually denies a non deliverable delivery. */
   private void denyDelivery(ConsumerMessages delivery)
   {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG,
+        "Connection[" + proxyId + ':' + key + 
+        "].denyDelivery(" + delivery + ')');
+
     Vector msgs = delivery.getMessages();
     org.objectweb.joram.shared.messages.Message msg;
     Vector ids = new Vector();
@@ -780,7 +790,10 @@ public class Connection implements javax.jms.Connection
                                        delivery.getQueueMode(), true));
     }
     // If sthg goes wrong while denying, nothing more can be done!
-    catch (JMSException jE) {}
+    catch (JMSException jE) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", jE);
+    }
   }
 
   /**

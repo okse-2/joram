@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -31,21 +31,17 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 
-
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
  * behaviour is provided by a <code>QueueImpl</code> instance.
  *
  * @see QueueImpl
  */
-public class Queue extends Agent implements AdminDestinationItf
-{
+public class Queue extends Destination {
   /**
-   * Reference to the <code>QueueImpl</code> instance providing this
-   * agent with its queue behaviour.
-   */
-  protected QueueImpl queueImpl;
-
+   * Empty constructor for newInstance(). 
+   */ 
+  protected Queue() {}
 
   /**
    * Constructs a <code>Queue</code> agent. 
@@ -53,58 +49,23 @@ public class Queue extends Agent implements AdminDestinationItf
    * @param adminId  Identifier of the agent which will be the administrator
    *          of the queue.
    */ 
-  public Queue(AgentId adminId)
-  {
-    init(adminId);
+  public Queue(AgentId adminId) {
+    super(adminId);
   }
 
   /**
    * Constructor with parameter for fixing the queue or not.
    */ 
-  protected Queue(boolean fixed)
-  {
+  protected Queue(boolean fixed) {
     super(fixed);
   }
 
   /**
-   * Empty constructor for subclass. 
-   */ 
-  protected Queue()
-  {}
-
-  /**
-   * Initializes the queue.
+   * Creates the <tt>QueueImpl</tt>.
    *
    * @param adminId  Identifier of the queue administrator.
    */
-  public void init(AgentId adminId) {
-    queueImpl = new QueueImpl(getId(), adminId);
-  }
-
-  /**
-   * Sets properties for the queue.
-   * <p>
-   * Empty method as no properties may be set for the queue.
-   */
-  public void setProperties(Properties prop) {}
-
-
-  /**
-   * Reactions to notifications are implemented in the
-   * <code>QueueImpl</code> class.
-   */ 
-  public void react(AgentId from, Notification not) throws Exception
-  {
-    try {
-      queueImpl.react(from, not);
-
-      // A DeleteNot notification is finally processed at the Agent level
-      // when its processing went successful in the DestinationImpl instance.
-      if (not instanceof DeleteNot && queueImpl.canBeDeleted())
-        super.react(from, not);
-    }
-    catch (UnknownNotificationException exc) {
-      super.react(from, not);
-    }
+  public DestinationImpl createsImpl(AgentId adminId) {
+    return new QueueImpl(getId(), adminId);
   }
 }

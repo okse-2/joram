@@ -228,6 +228,10 @@ public final class AgentId implements Serializable {
   public static int SCAdminProxyStamp = 9;
   /** Reserved stamp for JORAM administration topic <code>AgentId</code>. */
   public static int JoramAdminStamp = 10;
+  /** Reserved stamp for JORAM administration proxy <code>AgentId</code>. */
+  public static int JoramAdminPxStamp = 11;
+  /** Reserved stamp for JMS topic <code>AgentId</code> in charge ofsending control events. */
+  public static int ControlTopicStamp = 12;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 SCALAGENT 
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
-
 package fr.dyade.aaa.admin.script;
 
 import java.lang.*;
@@ -27,18 +28,15 @@ import fr.dyade.aaa.admin.cmd.*;
 import fr.dyade.aaa.agent.conf.*;
 
 /**
- * Script contain an AdminCmd vector.
- * It use to create/remove domain, network, 
- * server persistent and server transient,
- * and set/unset property and jvm argument
- * in A3CMLConfig (configuration).
+ * Script contains an AdminCmd vector. Each commands permits to
+ * create/remove domain, network, server and set/unset property or
+ * jvm argument in A3CMLConfig (configuration).
  *
  * @see AgentAdmin
  * @see AdminCmd
  * @see A3CMLConfig
  */
 public class Script implements Serializable, Cloneable {
-
   /** AdminCmd Vector */
   private Vector commands = null;
   /** create new configuration */

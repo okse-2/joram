@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Andre Freyssinet (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Alexander Fedorowicz
  */
 package fr.dyade.aaa.util;
@@ -115,6 +115,10 @@ public class ATransaction implements Transaction, Runnable {
   static final boolean debug = false;
 
   public ATransaction() {}
+
+  public boolean isPersistent() {
+    return true;
+  }
 
   public final void init(String path) throws IOException {
     phase = INIT;
