@@ -298,14 +298,11 @@
     <copy file="${lib.dir}/owlogwrpl4j.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/bsf.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/xalan.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/junit.jar" todir="${ship.dir}/lib"/>
     <!-- run directory -->
-    <mkdir dir="${ship.dir}/run"/>
+    <mkdir dir="${ship.dir}/dtd"/>
     <copy file="${src.dir}/fr/dyade/aaa/agent/a3config.dtd"
-          todir="${ship.dir}/run"/>
-    <chmod dir="${ship.dir}/run" perm="755"/>
+          todir="${ship.dir}/dtd"/>
+    <chmod dir="${ship.dir}/dtd" perm="755"/>
     <!-- licences directory -->
     <mkdir dir="${ship.dir}/licences"/>
     <copy todir="${ship.dir}/licences" flatten="yes">
