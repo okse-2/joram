@@ -55,9 +55,10 @@
       top of the <em>Scalagent</em> agents based distributed platform. JORAM is
       a <em>free</em>, <em>open source</em> initiative.</p>
 
+<!-- 
       <p>JORAM is provided by <img src="images/scalagent.jpg" align="middle"
       alt="Scalagent logo" width="295" height="101" border="0"/></p>
-  
+  -->
       <s2 name="Specification">
 
 	<p>JORAM provides full support to <em>JMS 1.0.2b</em>.</p>
