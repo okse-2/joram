@@ -14,8 +14,15 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: February 18, 2004)"> 
+      <s2 name="Corrected bugs (latest: February 19, 2004)"> 
       <ul>
+        <li>Blocking connection request, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00090.html">
+        Piero de Salvia</a>. In case a user does not exist, trying to
+        open a connection for this user would block instead of throwing a 
+        security exception. The bug is corrected, the updated class is
+        <code>org.objectweb.joram.mom.proxies.OpenConnectionNot</code>.
+        </li>
         <li>Improper connection close, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00067.html">
         Christian Neudorfer</a>. Due to a static timer, it was not possible
