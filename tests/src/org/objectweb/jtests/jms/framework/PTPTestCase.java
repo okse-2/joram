@@ -41,7 +41,7 @@ import javax.jms.*;
  * <code>JMSTestCase</code>.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: PTPTestCase.java,v 1.2 2002-04-02 12:15:26 joram Exp $
+ * @version $Id: PTPTestCase.java,v 1.3 2002-06-20 11:06:50 jmesnil Exp $
  */
 public class PTPTestCase extends JMSTestCase {
 
@@ -148,7 +148,7 @@ public class PTPTestCase extends JMSTestCase {
 
 	    admin.deleteQueueConnectionFactory(QCF_NAME);
 	    admin.deleteQueue(QUEUE_NAME);
-
+            
 	    ctx.close();
 	} catch (Exception e) {
 	    //XXX
