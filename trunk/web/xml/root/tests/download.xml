@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="test@objectweb.org">test</author>
+    <title>Test Suite Download</title>
+    <filename>download.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Test Suite Download">
+      <p>You can get the Test Suite either as a package or through
+      CVS.
+      </p>
+      <s2 name="Package">
+	<p>The Test Suite is available as a <a
+	    href="../download/tests.tgz">package</a> (Gzipped Tar file).
+	</p>
+      </s2>
+      <s2 name="CVS Repository">
+	<p>The Test Suite is also available through CVS. To setup the
+	  CVS software, see <a href="http://www/cvshome.org">CVS website</a>
+	</p>
+	<p>To access the CVS repository in anonymous mode, simply use
+	  the following commands (if you are using a GUI CVS client,
+	  configure it appropriately):
+	</p>
+	<source>
+cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM login
+password:
+cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM co tests</source>
+	<p>When prompted for a password, simply press the
+	  <code>Enter</code> key.
+	</p>
+	<p>This will create a replica of the test suite source tree in
+	  your account on your machine, with all files needed by the
+	  module. You can then compile and play with it.
+	</p>
+	<p>Please note that the test suite is in the same CVS
+	  repository than JORAM <strong>but</strong> in a different
+	  module, you can checkout the Test Suite without getting
+	  JORAM code.
+	</p>
+	<p>The Test Suite CVS repository can only be accessed in
+	  <em>read mode in the pserver mode</em>. Therefore, the only
+	  possible CVS commands are <code>checkout, update, status</code> or
+	  <code>diff</code>. When running the <code>cvs update</code>
+	  command, make sure that you are in the correct directory.  
+	</p>
+      </s2>
+    </s1>
+  </body>
+</document>
+
