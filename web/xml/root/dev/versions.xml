@@ -22,6 +22,18 @@
           of behaving as a receive() (by waiting indefinitely for a message).
           The fix has been submitted in the CVS distribution, in the
           fr.dyade.aaa.joram package.</li>
+      <li>Listener not active if set after its connection was started, found by
+          Gerald Schröder.
+          When setting a listener on a consumer belonging to a connection already
+          started, the session thread for distributing the asynchronous deliveries
+          was actually never started. The fix has been submitted in the CVS
+          distribution, in the fr.dyade.aaa.joram package.</li>
+      <li>Connection not properly closed when failing, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-08/msg00036.html">
+          Roy</a>.
+          In the case of a connection failure, the related Connection object and
+          its resources are not properly closed. The fix hasn't been submitted
+          yet.</li>
       <li>Incorrect BytesMessage and StreamMessage implementations, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00021.html">
           Mark Trumpler</a>.
