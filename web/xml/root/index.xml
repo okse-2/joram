@@ -18,7 +18,9 @@
       joram2_2</subtitle>
       <p>This version adds support for <a
 	  href="http://jakarta.apache.org/ant">Ant</a> build
-      system. Package and documentation will follow soon...</p>
+	system. Package and documentation will follow soon...<br/>
+	Have a look <a
+	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">JORAM CVS repository</a></p>
       
       <subtitle>Linux Expo / Linux World Paris 2002</subtitle>
 
