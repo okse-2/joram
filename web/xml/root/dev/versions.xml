@@ -19,7 +19,8 @@
         <li><code>ObjectMessage</code> optimization [2]. When a 
         <code>getObject()</code> call fails, an other trial is performed
         using the context class loader. This again, for improving JORAM's
-        behaviour within an application server.</li>
+        behaviour within an application server. Impacted class is
+        <code>fr.dyade.aaa.joram.ObjectMessage</code>.</li>
         <li><code>ObjectMessage</code> optimization [1]. The wrapped object in
         an <code>ObjectMessage</code> instance is not automatically 
         deserialized when reaching the consumer's connection, but only when
