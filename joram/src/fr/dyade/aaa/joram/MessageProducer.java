@@ -110,15 +110,16 @@ public class MessageProducer implements javax.jms.MessageProducer
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid delivery mode.
    */
-  public void setDeliveryMode(int deliveryMode) throws JMSException
-  {
-    if (closed)
+ public void setDeliveryMode(int deliveryMode) throws JMSException
+ {
+    if (closed) {
       throw new IllegalStateException("Forbidden call on a closed producer.");
+      }
 
     if (deliveryMode != javax.jms.DeliveryMode.PERSISTENT
-        || deliveryMode != javax.jms.DeliveryMode.NON_PERSISTENT)
-      throw new JMSException("Can't set invalid delivery mode.");
-
+        && deliveryMode != javax.jms.DeliveryMode.NON_PERSISTENT) {
+        throw new JMSException("Can't set invalid delivery mode.");
+    }
     this.deliveryMode = deliveryMode;
   }
 
