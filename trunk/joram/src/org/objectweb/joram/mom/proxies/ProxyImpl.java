@@ -53,7 +53,7 @@ import java.util.Vector;
  * basically forwarding client requests to MOM destinations and MOM
  * destinations replies to clients.
  */ 
-public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
+public class ProxyImpl implements java.io.Serializable {
   /**  Flow control. */
   private static Object lock = new Object();
   private static int inFlow = ConnectionManager.inFlow;
@@ -1905,59 +1905,6 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable {
                                                      builtSelector));
    
     return true;
-  }
-
-  /** MBean interface implementation: returns the user name. */
-  public String getUserName()
-  {
-    return AdminTopicImpl.ref.getName(proxyAgent.getAgentId());
-  }
-
-  /** MBean interface implementation: returns the user password. */
-  public String getUserPassword()
-  {
-    return AdminTopicImpl.ref.getPassword(proxyAgent.getAgentId());
-  }
-
-  /** MBean interface implementation: deletes the proxy. */
-  public void delete()
-  {
-    DeleteUser request = new DeleteUser(getUserName(),
-                                        proxyAgent.getAgentId().toString());
-    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
-  }
-
-  /**
-   * Changes the user name.
-   *
-   * @param name  New name.
-   *
-   * @exception Exception  If the new name is already taken.
-   */
-  public void updateUserName(String name) throws Exception
-  {
-    if (AdminTopicImpl.ref.isTaken(name))
-      throw new Exception("Name already taken.");
-
-    UpdateUser request = new UpdateUser(getUserName(),
-                                        proxyAgent.getAgentId().toString(),
-                                        name,
-                                        getUserPassword());
-    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
-  }
-
-  /**
-   * Changes the user password.
-   *
-   * @param pass  New password.
-   */
-  public void updateUserPassword(String pass)
-  {
-    UpdateUser request = new UpdateUser(getUserName(),
-                                        proxyAgent.getAgentId().toString(),
-                                        getUserName(),
-                                        pass);
-    proxyAgent.sendNot(AdminTopicImpl.ref.getId(), new ProxyMBeanNot(request));
   }
 
   public AgentId getId() {

@@ -27,7 +27,6 @@ import java.util.Properties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.management.MXWrapper;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
@@ -96,29 +95,6 @@ public class Topic extends Agent implements AdminDestinationItf
    */
   public void setProperties(Properties prop) {}
 
-  
-  /** (Re)initializes the agent when (re)loading. */
-  public void agentInitialize(boolean firstTime) throws Exception
-  {
-    super.agentInitialize(firstTime);
-    MXWrapper.registerMBean(topicImpl,
-                            "JORAM destinations",
-                            getId().toString(),
-                            "Topic",
-                            null);
-  }
-
-  /** Finalizes the agent before it is garbaged. */
-  public void agentFinalize(boolean lastTime)
-  {
-    try {
-      MXWrapper.unregisterMBean("JORAM destinations",
-                                getId().toString(),
-                                "Topic",
-                                null);
-    }
-    catch (Exception exc) {}
-  }
   
   /**
    * Reactions to notifications are implemented in the

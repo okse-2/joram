@@ -24,7 +24,6 @@
 package org.objectweb.joram.mom.dest;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.management.MXWrapper;
 
 
 /**
@@ -74,31 +73,4 @@ public class AdminTopic extends Topic
    */
   public static void stopService()
   {}
-
-  /** (Re)initializes the agent when (re)loading. */
-  public void agentInitialize(boolean firstTime) throws Exception
-  {
-    super.agentInitialize(firstTime);
-    MXWrapper.unregisterMBean("JORAM destinations",
-                              getId().toString(),
-                              "Topic",
-                              null);
-    MXWrapper.registerMBean(topicImpl,
-                            "JORAM server",
-                            getId().toString(),
-                            "AdminTopic",
-                            null);
-  }
-
-  /** Finalizes the agent before it is garbaged. */
-  public void agentFinalize(boolean lastTime)
-  {
-    try {
-      MXWrapper.unregisterMBean("JORAM server",
-                                getId().toString(),
-                                "AdminTopic",
-                                null);
-    }
-    catch (Exception exc) {}
-  }
 }
