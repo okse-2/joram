@@ -231,24 +231,33 @@ public class XASession extends Session implements javax.jms.XASession
    * API method inherited from session, but intercepted here for
    * forbidding its use in the XA context (as defined by the API).
    *
-   * @exception TransactionInProgressException  Systematically thrown.
+   * @exception IllegalStateException  Systematically thrown.
    */
   public void commit() throws JMSException
   {
-    throw new TransactionInProgressException("Forbidden call on an XA"
-                                             + " session.");
+    throw new IllegalStateException("Forbidden call on an XA session.");
   }
 
   /**
    * API method inherited from session, but intercepted here for
    * forbidding its use in the XA context (as defined by the API).
    *
-   * @exception TransactionInProgressException  Systematically thrown.
+   * @exception IllegalStateException  Systematically thrown.
    */
   public void rollback() throws JMSException
   {
-    throw new TransactionInProgressException("Forbidden call on an XA"
-                                             + " session.");
+    throw new IllegalStateException("Forbidden call on an XA session.");
+  }
+
+  /**
+   * API method inherited from session, but intercepted here for
+   * forbidding its use in the XA context (as defined by the API).
+   *
+   * @exception IllegalStateException  Systematically thrown.
+   */
+  public void recover() throws JMSException
+  {
+    throw new IllegalStateException("Forbidden call on an XA session.");
   }
 
   /**
