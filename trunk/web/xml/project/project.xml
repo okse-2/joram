@@ -4,10 +4,14 @@
 
 <project>
 
-    <title>JORAM</title>
-    
-    <body>
+  <title>JORAM</title>
 
+  <description>JORAM (Java Open Reliable Asynchronous Messaging) is an open source implementation of the JMS (Java Message Service) API.</description>
+
+  <keywords>JORAM,Java,Open,Reliable,Asynchronous,Messaging,JMS,Java,Message,Service,message,oriented,middleware,MOM,agent,Agents,Anytime,Anywhere,AAA,platform,ScalAgent,open,source,free,software,LGPL</keywords>
+
+  <body>
+    
     <menu name="JORAM">
       <connect href="index.xml">Home page</connect>
       <connect href="download/index.xml">Download</connect>
@@ -29,5 +33,5 @@
       <connect href="team.xml">Team</connect>
     </menu>
 
-    </body>
+  </body>
 </project>
