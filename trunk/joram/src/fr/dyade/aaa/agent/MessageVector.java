@@ -416,7 +416,7 @@ final class MessageVector implements MessageQueue {
 
       Message msg;
       try {
-        msg = (Message) AgentServer.getTransaction().load(name);
+        msg = Message.load(name);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, logmsg + "reload from disk " + msg);
