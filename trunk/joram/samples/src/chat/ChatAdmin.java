@@ -50,20 +50,12 @@ public class ChatAdmin
     // Connecting to JORAM server:
     Admin admin = new Admin("root", "root", 60);
 
-    // Updating the administrator's identity and disconnecting:
-    admin.addAdminId("admin", "pass");
-    admin.close();
-
-    // Connecting with the new identity and removing the default one:
-    admin = new fr.dyade.aaa.joram.admin.Admin("admin", "pass", 60);
-    admin.delAdminId("root");
-    
     // Creating the JMS administered objects:        
-    TopicConnectionFactory connFactory = admin.createTopicConnectionFactory();
+    ConnectionFactory connFactory = admin.createConnectionFactory();
     Topic topicChat = admin.createTopic("topic");
 
-    // Creating a user (anonymous):
-    User user = admin.createUser("anonymous", "anonymous");
+    // Creating an access for user anonymous:
+    User ano = admin.createUser("anonymous", "anonymous");
 
     // Setting free access to the topic:
     admin.setFreeReading("topic");

@@ -33,13 +33,31 @@ import javax.jms.*;
  */
 public class MsgListener implements MessageListener
 {
+  String ident = null;
+
+  public MsgListener()
+  {}
+
+  public MsgListener(String ident)
+  {
+    this.ident = ident;
+  }
+
   public void onMessage(Message msg)
   {
     try {
-      if (msg instanceof TextMessage)
-        System.out.println(((TextMessage) msg).getText());
-      else if (msg instanceof ObjectMessage)
-        System.out.println(((ObjectMessage) msg).getObject());
+      if (msg instanceof TextMessage) {
+        if (ident == null) 
+          System.out.println(((TextMessage) msg).getText());
+        else
+          System.out.println(ident + ": " + ((TextMessage) msg).getText());
+      }
+      else if (msg instanceof ObjectMessage) {
+        if (ident == null) 
+          System.out.println(((ObjectMessage) msg).getObject());
+        else
+          System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
+      }
     }
     catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);

@@ -42,30 +42,14 @@ public class ClusterAdmin
     Admin admin1 = new Admin("localhost", 16011, "root", "root", 60);
     Admin admin2 = new Admin("localhost", 16012, "root", "root", 60);
 
-    admin0.addAdminId("admin", "pass");
-    admin1.addAdminId("admin", "pass");
-    admin2.addAdminId("admin", "pass");
-
-    admin0.close();
-    admin1.close();
-    admin2.close();
-
-    admin0 = new Admin("localhost", 16010, "admin", "pass", 60);
-    admin1 = new Admin("localhost", 16011, "admin", "pass", 60);
-    admin2 = new Admin("localhost", 16012, "admin", "pass", 60);
-
-    admin0.delAdminId("root");
-    admin1.delAdminId("root");
-    admin2.delAdminId("root");
-
     User publisher00 = admin0.createUser("publisher00", "publisher00");
     User subscriber10 = admin1.createUser("subscriber10", "subscriber10");
     User subscriber20 = admin2.createUser("subscriber20", "subscriber20"); 
     User subscriber21 = admin2.createUser("subscriber21", "subscriber21");
 
-    TopicConnectionFactory tcf0 = admin0.createTopicConnectionFactory();
-    TopicConnectionFactory tcf1 = admin1.createTopicConnectionFactory();
-    TopicConnectionFactory tcf2 = admin2.createTopicConnectionFactory();
+    ConnectionFactory cf0 = admin0.createConnectionFactory();
+    ConnectionFactory cf1 = admin1.createConnectionFactory();
+    ConnectionFactory cf2 = admin2.createConnectionFactory();
 
     Topic t0 = admin0.createTopic("topic0");
     Topic t1 = admin1.createTopic("topic1");
@@ -88,9 +72,9 @@ public class ClusterAdmin
     admin2.createCluster(cluster);
 
     ictx = new InitialContext();
-    ictx.rebind("tcf0", tcf0);
-    ictx.rebind("tcf1", tcf1);
-    ictx.rebind("tcf2", tcf2);
+    ictx.rebind("cf0", cf0);
+    ictx.rebind("cf1", cf1);
+    ictx.rebind("cf2", cf2);
     ictx.rebind("top0", t0);
     ictx.rebind("top1", t1);
     ictx.rebind("top2", t2);

@@ -30,40 +30,39 @@ import javax.jms.*;
 import javax.naming.*;
 
 /**
- * Browses the queue.
+ * Consumes messages from the queue and from the topic.
  */
-public class Browser
+public class Consumer
 {
   static Context ictx = null; 
 
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Browses the queue: ");
+    System.out.println("Listens to the queue and to the topic...");
 
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
-    QueueConnectionFactory qcf = (QueueConnectionFactory) ictx.lookup("qcf");
+    Topic topic = (Topic) ictx.lookup("topic");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
-    QueueConnection qc = qcf.createQueueConnection();
-    QueueSession qs = qc.createQueueSession(true, 0);
-    QueueBrowser browser = qs.createBrowser(queue);
+    Connection cnx = cf.createConnection();
+    Session sess = cnx.createSession(true, 0);
+    MessageConsumer recv = sess.createConsumer(queue);
+    MessageConsumer subs = sess.createConsumer(topic);
 
-    java.util.Enumeration messages = browser.getEnumeration();
+    recv.setMessageListener(new MsgListener("Queue listener"));
+    subs.setMessageListener(new MsgListener("Topic listener"));
 
-    Message msg;
+    cnx.start();
 
-    while (messages.hasMoreElements()) {
-      msg = (Message) messages.nextElement();
+    System.in.read();
+    sess.commit();
 
-      if (msg instanceof TextMessage)
-        System.out.println(((TextMessage) msg).getText());
-    }
+    cnx.close();
 
     System.out.println();
-    System.out.println("Queue browsed.");
-
-    qc.close();
+    System.out.println("Consumer closed.");
   }
 }

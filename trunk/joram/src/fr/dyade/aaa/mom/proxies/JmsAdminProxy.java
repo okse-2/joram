@@ -85,6 +85,15 @@ public class JmsAdminProxy extends ConnectionFactory
     // Create default administrator:
     usersTable.put("root", new UserContext("root", true));
 
+    /*try {
+      JmsClientProxy defaultUserProxy = new JmsClientProxy(this.getId());
+      defaultUserProxy.deploy();
+      UserContext uc = new UserContext("anonymous", false);
+      usersTable.put("anonymous", uc);
+      uc.proxyId = defaultUserProxy.getId();
+    }
+    catch (IOException iE) {}*/
+
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
   }

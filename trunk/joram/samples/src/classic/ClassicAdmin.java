@@ -41,19 +41,15 @@ public class ClassicAdmin
     System.out.println();
     System.out.println("Classic administration phase... ");
 
-    Admin admin = new Admin("root", "root", 120);
-    admin.addAdminId("adminName", "adminPass");
-    admin.close();
-
-    admin = new Admin("adminName", "adminPass", 120);
-    admin.delAdminId("root");
+    Admin admin = new Admin("root", "root", 60);
 
     Queue queue = admin.createQueue("queue");
     Topic topic = admin.createTopic("topic");
+    ConnectionFactory cf = admin.createConnectionFactory();
     QueueConnectionFactory qcf = admin.createQueueConnectionFactory();
     TopicConnectionFactory tcf = admin.createTopicConnectionFactory();
 
-    User defUser = admin.createUser("anonymous", "anonymous");
+    User user = admin.createUser("anonymous", "anonymous");
 
     admin.setFreeReading("queue");
     admin.setFreeReading("topic");
@@ -66,6 +62,7 @@ public class ClassicAdmin
     ictx = new InitialContext();
     ictx.rebind("queue", queue);
     ictx.rebind("topic", topic);
+    ictx.rebind("cf", cf);
     ictx.rebind("qcf", qcf);
     ictx.rebind("tcf", tcf);
     ictx.close();

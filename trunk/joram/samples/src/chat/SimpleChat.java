@@ -41,13 +41,13 @@ import java.util.Properties;
  */
 public class SimpleChat implements javax.jms.MessageListener{
     
-    private TopicConnectionFactory conFactory;
-    private TopicSession           pubSession;
-    private TopicSession           subSession;
-    private TopicPublisher         publisher;
-    private TopicSubscriber        subscriber;
-    private TopicConnection        connection;
-    private String                 userName;
+    private ConnectionFactory conFactory;
+    private Session           pubSession;
+    private Session           subSession;
+    private MessageProducer   publisher;
+    private MessageConsumer   subscriber;
+    private Connection        connection;
+    private String            userName;
     
     /* Constructor. Establish JMS publisher and subscriber */
     public SimpleChat(String topicName, String username) throws Exception {
@@ -62,21 +62,21 @@ public class SimpleChat implements javax.jms.MessageListener{
         }
         
         // Look up a JMS connection factory
-        conFactory = (TopicConnectionFactory)jndi.lookup("factoryChat");
+        conFactory = (ConnectionFactory)jndi.lookup("factoryChat");
         
         // Create a JMS connection
-        connection = conFactory.createTopicConnection();
+        connection = conFactory.createConnection();
         
         // Create two JMS session objects
-        pubSession = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-        subSession = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+        pubSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        subSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         
         // Look up a JMS topic
         Topic chatTopic = (Topic)jndi.lookup(topicName);
         
         // Create a JMS publisher and subscriber
-        publisher = pubSession.createPublisher(chatTopic);
-        subscriber = subSession.createSubscriber(chatTopic);
+        publisher = pubSession.createProducer(chatTopic);
+        subscriber = subSession.createConsumer(chatTopic);
         
         // Set a JMS message listener
         subscriber.setMessageListener(this);
@@ -103,7 +103,7 @@ public class SimpleChat implements javax.jms.MessageListener{
         TextMessage message = pubSession.createTextMessage( );
         message.setText(text);
         message.setStringProperty("User", userName);
-        publisher.publish(message);
+        publisher.send(message);
     }
     
     /* Close the JMS connection */
