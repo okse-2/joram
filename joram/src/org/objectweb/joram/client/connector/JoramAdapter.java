@@ -181,7 +181,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       if (platformConfigDir != null) {
         System.setProperty("fr.dyade.aaa.agent.A3CONF_DIR", platformConfigDir);
-        System.setProperty("fr.dyade.aaa.agent.DEBUG_DIR", platformConfigDir);
+        System.setProperty("fr.dyade.aaa.DEBUG_DIR", platformConfigDir);
       }
 
       try {
@@ -199,22 +199,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     // Administering as specified in the properties file.
     try {
-      FileReader file;
+      File file = new File(platformConfigDir, adminFile);
+      FileReader fileReader = new FileReader(file);
+      BufferedReader reader = new BufferedReader(fileReader);
 
-      if (platformConfigDir != null) {
-        try {
-          file = new FileReader(new File(platformConfigDir, adminFile));
-        }
-        catch (Exception exc) {
-          file = new FileReader(adminFile);
-        }
-      }
-      else
-        file = new FileReader(adminFile);
-
-      BufferedReader reader = new BufferedReader(file);
-
-      debugINFO("  - Reading the provided admin file...");
+      debugINFO("  - Reading the provided admin file: " + file);
 
       boolean end = false;
       String line;
