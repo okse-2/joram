@@ -26,22 +26,87 @@ package org.objectweb.jtests.jms.admin;
 
 import javax.naming.*;
 
+/**
+ * Simple Administration interface.
+ * <br />
+ * JMS Provider has to implement this 
+ * simple interface to be able to use the test suite.
+ */
 public interface Admin {
-  
-  public String getName();
+    
+    /**
+     * Returns the name of the JMS Provider.
+     *
+     * @return name of the JMS Provider
+     */
+    public String getName();
 
-  public InitialContext createInitialContext() 
-    throws NamingException;
-  
-  public void createQueueConnectionFactory(String name);
-  public void createTopicConnectionFactory(String name);
+    /** 
+     * Returns an <code>InitialContext</code> with correct properties from
+     * the JMS Provider.
+     *
+     * @return an <code>InitialContext</code> with correct properties from the JMS Provider.
+     */
+    public InitialContext createInitialContext() 
+        throws NamingException;
+    
+    /** 
+     * Creates a <code>QueueConnectionFactory</code> and makes it available 
+     *from JNDI with name <code>name</code>.
+     *
+     * @param name JNDI name of the <code>QueueConnectionFactory</code>
+     */
+    public void createQueueConnectionFactory(String name);
+
+    /** 
+     * Creates a <code>TopicConnectionFactory</code> and makes it available 
+     *from JNDI with name <code>name</code>.
+     *
+     * @param name JNDI name of the <code>TopicConnectionFactory</code>
+     */
+    public void createTopicConnectionFactory(String name);
  
-  public void createQueue(String name);
-  public void createTopic(String name);
+    /** 
+     * Creates a <code>Queue</code> and makes it available 
+     *from JNDI with name <code>name</code>.
+     *
+     * @param name JNDI name of the <code>Queue</code>
+     */
+    public void createQueue(String name);
 
-  public void deleteQueue(String name);
-  public void deleteTopic(String name);
+    /** 
+     * Creates a <code>Topic</code> and makes it available 
+     *from JNDI with name <code>name</code>.
+     *
+     * @param name JNDI name of the <code>Topic</code>
+     */
+    public void createTopic(String name);
+    
+    /** 
+     * Removes the <code>Queue</code> of name <code>name</code> from JNDI and deletes it
+     *
+     * @param name JNDI name of the <code>Queue</code>
+     */
+    public void deleteQueue(String name);
+    
+    /** 
+     * Removes the <code>Topic</code> of name <code>name</code> from JNDI and deletes it
+     *
+     * @param name JNDI name of the <code>Topic</code>
+     */
+    public void deleteTopic(String name);
 
-  public void deleteQueueConnectionFactory (String name);
-  public void deleteTopicConnectionFactory (String name);
+    /** 
+     * Removes the <code>QueueConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
+     *
+     * @param name JNDI name of the <code>Queue</code>
+     */
+    public void deleteQueueConnectionFactory (String name);
+
+    /** 
+     * Removes the <code>TopicConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
+     *
+     * @param name JNDI name of the <code>Queue</code>
+     */    
+    public void deleteTopicConnectionFactory (String name);
 }
