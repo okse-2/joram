@@ -1190,8 +1190,8 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XASessRollback</code> request rolling the operations performed
-   * in a given transaction back.
+   * <code>XASessRollback</code> request rolling back the operations performed
+   * in a given transaction.
    * <p>
    * This method actually processes the objects sent at the prepare phase,
    * and acknowledges the request.
@@ -1201,6 +1201,49 @@ public class JmsClientProxy extends ConnectionFactory
     String id = req.getId();
 
     if (cnx.transactionsTable == null) {
+
+      if (req instanceof XAQSessRollback) {
+        XAQSessRollback qReq = (XAQSessRollback) req;
+
+        String destName;
+        AgentId qId;
+        Vector ids;
+        while (qReq.hasMoreDests()) {
+          destName = qReq.nextDest();
+          qId = AgentId.fromString(destName);
+          ids = qReq.getIds(destName);
+          cnx.ackedIds(qId, ids);
+          sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+        }
+      }
+      else {
+        XATSessRollback tReq = (XATSessRollback) req;
+
+        String subName;
+        ClientSubscription sub;
+        SubMessages sM;
+        while (tReq.hasMoreSubs()) {
+          subName = tReq.nextSub();
+          sub = (ClientSubscription) subsTable.get(subName);
+
+          if (sub != null) {
+            sub.deny(tReq.getIds(subName));
+
+            try {
+              setCnx(sub.connectionKey);
+   
+              // Launching a delivery sequence:
+              if (cnx.started) {
+                sM = sub.deliver();
+                if (sM != null)
+                  doReply(sM);
+              } 
+            }
+            catch (ProxyException pE) {}
+          }
+        }
+      }
+
       sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
       return;
     }
@@ -1783,7 +1826,7 @@ public class JmsClientProxy extends ConnectionFactory
      * to be commited.
      * <p>
      * <b>Key:</b> transaction identifier<br>
-     * <b>Object:</b> <code>XAQSessPrepare</code> object
+     * <b>Object:</b> <code>XA&lt;Q/T&gt;SessPrepare</code> object
      */
     private Hashtable transactionsTable;
     /**
