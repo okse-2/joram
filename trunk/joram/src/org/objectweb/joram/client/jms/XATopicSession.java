@@ -25,12 +25,8 @@ package org.objectweb.joram.client.jms;
 
 import org.objectweb.joram.shared.client.*;
 
-import java.util.*;
-
 import javax.jms.JMSException;
-import javax.transaction.xa.*;
-
-import org.objectweb.util.monolog.api.BasicLevel;
+import javax.jms.TopicSubscriber;
 
 /**
  * Implements the <code>javax.jms.XATopicSession</code> interface.
@@ -61,6 +57,26 @@ public class XATopicSession extends XASession
   /** API method. */ 
   public javax.jms.TopicSession getTopicSession() throws JMSException
   {
-    return (TopicSession) sess;
+    return (javax.jms.TopicSession) sess;
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public TopicSubscriber createSubscriber(javax.jms.Topic topic,
+                                          String selector,
+                                          boolean noLocal)
+         throws JMSException
+  {
+    return ((TopicSession) sess).createSubscriber(topic, selector, noLocal);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public TopicSubscriber createSubscriber(javax.jms.Topic topic)
+         throws JMSException
+  {
+    return ((TopicSession) sess).createSubscriber(topic);
   }
 }

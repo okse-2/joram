@@ -92,7 +92,7 @@ public abstract class Destination
     if (! (obj instanceof Destination))
       return false;
 
-    return (agentId.equals(((Destination) obj).getName()));
+    return (getName().equals(((Destination) obj).getName()));
   }
 
   /**
@@ -108,7 +108,7 @@ public abstract class Destination
    */
   public Hashtable code() {
     Hashtable h = super.code();
-    h.put("agentId",agentId);
+    h.put("agentId",getName());
     return h;
   }
 
@@ -116,7 +116,7 @@ public abstract class Destination
   public Reference getReference() throws NamingException
   {
     Reference ref = super.getReference();
-    ref.add(new StringRefAddr("dest.name", agentId));
+    ref.add(new StringRefAddr("dest.name", getName()));
     return ref;
   }
 
@@ -161,7 +161,7 @@ public abstract class Destination
   public void delete()
          throws ConnectException, AdminException, javax.jms.JMSException
   {
-    AdminModule.doRequest(new DeleteDestination(agentId));
+    AdminModule.doRequest(new DeleteDestination(getName()));
   }
 
   /**
@@ -174,7 +174,7 @@ public abstract class Destination
    */
   public void setFreeReading() throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new SetReader(null, agentId));
+    AdminModule.doRequest(new SetReader(null, getName()));
   }
 
   /**
@@ -187,7 +187,7 @@ public abstract class Destination
    */
   public void setFreeWriting() throws ConnectException, AdminException 
   {
-    AdminModule.doRequest(new SetWriter(null, agentId));
+    AdminModule.doRequest(new SetWriter(null, getName()));
   }
 
   /**
@@ -200,7 +200,7 @@ public abstract class Destination
    */
   public void unsetFreeReading() throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new UnsetReader(null, agentId));
+    AdminModule.doRequest(new UnsetReader(null, getName()));
   }
 
   /**
@@ -213,7 +213,7 @@ public abstract class Destination
    */
   public void unsetFreeWriting() throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new UnsetWriter(null, agentId));
+    AdminModule.doRequest(new UnsetWriter(null, getName()));
   }
 
   /**
@@ -228,7 +228,7 @@ public abstract class Destination
    */
   public void setReader(User user) throws ConnectException, AdminException 
   {
-    AdminModule.doRequest(new SetReader(user.getProxyId(), agentId));
+    AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
   }
 
   /**
@@ -243,7 +243,7 @@ public abstract class Destination
    */
   public void setWriter(User user) throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new SetWriter(user.getProxyId(), agentId));
+    AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
   }
 
   /**
@@ -258,7 +258,7 @@ public abstract class Destination
    */
   public void unsetReader(User user) throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new UnsetReader(user.getProxyId(), agentId));
+    AdminModule.doRequest(new UnsetReader(user.getProxyId(), getName()));
   }
 
   /**
@@ -273,7 +273,7 @@ public abstract class Destination
    */
   public void unsetWriter(User user) throws ConnectException, AdminException
   {
-    AdminModule.doRequest(new UnsetWriter(user.getProxyId(), agentId));
+    AdminModule.doRequest(new UnsetWriter(user.getProxyId(), getName()));
   }
 
 
@@ -294,9 +294,9 @@ public abstract class Destination
   public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException
   {
     if (dmq == null)
-      AdminModule.doRequest(new UnsetDestinationDMQ(agentId));
+      AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
     else
-      AdminModule.doRequest(new SetDestinationDMQ(agentId, dmq.getName()));
+      AdminModule.doRequest(new SetDestinationDMQ(getName(), dmq.getName()));
   }
 
   /**
@@ -311,7 +311,7 @@ public abstract class Destination
    */
   public List getReaders() throws ConnectException, AdminException
   {
-    Monitor_GetReaders request = new Monitor_GetReaders(agentId);
+    Monitor_GetReaders request = new Monitor_GetReaders(getName());
     Monitor_GetUsersRep reply =
       (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
@@ -337,7 +337,7 @@ public abstract class Destination
    */
   public List getWriters() throws ConnectException, AdminException
   {
-    Monitor_GetWriters request = new Monitor_GetWriters(agentId);
+    Monitor_GetWriters request = new Monitor_GetWriters(getName());
     Monitor_GetUsersRep reply =
       (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
@@ -362,7 +362,7 @@ public abstract class Destination
    */
   public boolean isFreelyReadable() throws ConnectException, AdminException
   {
-    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(agentId);
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
     Monitor_GetFreeAccessRep reply;
     reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
@@ -380,7 +380,7 @@ public abstract class Destination
    */
   public boolean isFreelyWriteable() throws ConnectException, AdminException
   {
-    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(agentId);
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
     Monitor_GetFreeAccessRep reply;
     reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
@@ -398,7 +398,7 @@ public abstract class Destination
    */
   public DeadMQueue getDMQ() throws ConnectException, AdminException
   {
-    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(agentId);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
     Monitor_GetDMQSettingsRep reply;
     reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
     
