@@ -296,6 +296,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed consumer.");
 
+    // Server side, infinite time to live is specified by a negative value.
+    if (timeOut == 0)
+      timeOut = -1;
+
     if (messageListener != null) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
         JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as a"
