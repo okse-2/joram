@@ -136,7 +136,7 @@
   <!-- Runs the classic subscriber client -->
   <target name="subscriber" depends="init"
     description="--> Starts a Subscriber client">
-    <java classname="classic.Subscriber" failonerror="no" fork="yes">
+    <java classname="classic.Subscriber" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -152,7 +152,7 @@
   <!-- Runs the classic consumer client -->
   <target name="consumer" depends="init"
     description="--> Starts a Consumer client">
-    <java classname="classic.Consumer" failonerror="no" fork="yes">
+    <java classname="classic.Consumer" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -294,7 +294,7 @@
   <!-- Runs the archi durable subscriber client -->
   <target name="archi_sub" depends="init"
     description="--> Runs the distributed architecture Subscriber client">
-    <java classname="archi.DSubscriber" failonerror="no" fork="yes">
+    <java classname="archi.DSubscriber" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -318,21 +318,21 @@
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber10" depends="init">
-    <java classname="cluster.topic.Subscriber10" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber10" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber20" depends="init">
-    <java classname="cluster.topic.Subscriber20" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber20" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
   <!-- Runs a cluster subscriber -->
   <target name="subscriber21" depends="init">
-    <java classname="cluster.topic.Subscriber21" failonerror="no" fork="yes">
+    <java classname="cluster.topic.Subscriber21" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -355,7 +355,7 @@
   <!-- Runs the tree consumer client -->
   <target name="tree_consumer" depends="init"
     description="--> Starts a tree Consumer client">
-    <java classname="topicTree.Consumer" failonerror="no" fork="yes">
+    <java classname="topicTree.Consumer" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -379,7 +379,7 @@
   <!-- Runs the dead message queue watcher client -->
   <target name="dmq_watcher" depends="init"
     description="--> Starts a dead message queue watcher client">
-    <java classname="deadMQueue.DMQWatcher" failonerror="no" fork="yes">
+    <java classname="deadMQueue.DMQWatcher" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -433,7 +433,7 @@
   <!-- Runs the soap consumer -->
   <target name="soap_consumer" depends="init"
     description="--> Starts the SOAP consumer">
-    <java classname="soap.SoapConsumer" failonerror="no" fork="yes">
+    <java classname="soap.SoapConsumer" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -473,7 +473,7 @@
   <!-- Runs the perfs tests subscriber -->
   <target name="perfs_sub" depends="init"
     description="--> Starts the PERFS subscriber">
-    <java classname="perfs.PerfsSubscriber" failonerror="no" fork="yes">
+    <java classname="perfs.PerfsSubscriber" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -497,7 +497,7 @@
   <!-- Runs the bridge consumer -->
   <target name="bridge_consumer" depends="init"
     description="--> Runs the BRIDGE sample consumer">
-    <java classname="bridge.BridgeConsumer" failonerror="no" fork="yes">
+    <java classname="bridge.BridgeConsumer" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
