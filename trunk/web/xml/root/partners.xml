@@ -37,12 +37,12 @@
 
 	  <td rowspan="1" colspan="1" valign="middle" align="left"><a
 	  href="http://www.inria.fr/">INRIA</a> is the French National
-	  Institutefor Research in Computer Science and Control. It is
+	  Institute for Research in Computer Science and Control. It is
 	  a scientific and technological institute operating under the
 	  dual authority of the Ministry of Research and the Ministry
 	  of Industry. INRIA is contributing to the <a
-	  href="http://jonas.objectweb.org/">JOnAS</a> transaction
-	  service and to <connect
+	  href="http://jonas.objectweb.org/">JOnAS</a> application
+          server and to <connect
 	  href="index.xml">JORAM</connect>.</td>
 	</tr>
 
