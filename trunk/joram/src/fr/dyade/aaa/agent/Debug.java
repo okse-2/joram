@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2004 ScalAgent Distibuted Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -19,13 +19,6 @@
  * USA.
  */
 package fr.dyade.aaa.agent;
-
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import org.apache.log4j.Category;
-import org.apache.log4j.FileAppender;
 
 /**
  * This class controls the debug traces printed to the audit file.
@@ -56,25 +49,6 @@ public final class Debug extends fr.dyade.aaa.util.Debug {
   public static final String A3Network = A3Debug + ".Network";
   public static final String A3Service = A3Debug + ".Service";
   public static final String A3Proxy = A3Agent + ".ProxyAgent";
-
-  /**
-   * Initializes the package.
-   *
-   * @param serverId	this server id
-   */
-//   static void init(short serverId) {
-//     if (factory == null) init();
-// 
-//     Category root = Category.getRoot();
-//     if (serverId >= 0) {
-//       try {
-//         // Try to create local appender if defined...
-//         FileAppender local = (FileAppender) root.getAppender("local");
-//         File auditFile = new File("server#" + serverId + ".audit");
-//         local.setFile(auditFile.getCanonicalPath());
-//       } catch (Exception exc) { }
-//     }
-//   }
 
     // sets dynamic debug variables for other packages
 //     final String dynvarMarker = "Debug.var.";
@@ -125,6 +99,4 @@ public final class Debug extends fr.dyade.aaa.util.Debug {
 //                      varClassName + "." + varName, exc);
 // 	  continue;
 // 	}
-//       }
-//     }
 }
