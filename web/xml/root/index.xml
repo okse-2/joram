@@ -14,9 +14,9 @@
 
     <s1 name="Recent news">
 
-      <subtitle>March, 11th 2002: JORAM 3.0 available</subtitle>
+      <subtitle>March, 11th 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
       
-      <p><em>JORAM 3.0 is now available for <a
+      <p><em>JORAM 3.0.0 is now available for <a
 	  href="http://www.objectweb.org/joram/download/">
 	  download</a></em>. <a href="http://www.objectweb.org/joram/doc/">Documentation</a> has also been
 	updated and new samples are provided.<br />
