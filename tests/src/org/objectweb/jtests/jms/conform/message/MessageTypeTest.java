@@ -48,8 +48,8 @@ import java.util.Enumeration;
  * For each of this type of message, we test that a message can be sent and received
  * with an empty body or not.
  * 
- * @author Jeff Mesnil (jmensil@inrialpes.fr)
- * @version $Id: MessageTypeTest.java,v 1.1 2002-03-15 12:20:57 joram Exp $
+ * @author Jeff Mesnil (jmesnil@inrialpes.fr)
+ * @version $Id: MessageTypeTest.java,v 1.2 2002-03-15 16:01:17 joram Exp $
  */
 public class MessageTypeTest extends GenericJMSTestCase {
 
