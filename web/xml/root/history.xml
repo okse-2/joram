@@ -13,7 +13,61 @@
   <body>
 
     <s1 name="JORAM History">
-
+			
+			<subtitle>October 20-21: JORAM Training Session, Grenoble, France</subtitle>
+			<p>A two-day training session on JORAM is scheduled and will be delivered in french language.
+			 The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+		  <p>This training session is targeted at architects and system designers that intend to integrate 
+			the JORAM component within a global distributed solution. It includes a significant part of 
+			experimentations and case studies based on real-world application scenarios.</p>
+			<p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
+			of the JORAM component. We offer to share our expertise through a training session that provides
+			 the key knowledge to use and deploy a JORAM system that fits your requirements.
+			This two-day session details the design principles of JORAM and describes the best practices 
+			to take advantage of its advanced properties in complex networked environments.</p>
+			<p>Detailed information about this training session is available online 
+			<a href="http://www.scalagent.com/pages/fr/datasheet/040820-JORAM-formation.pdf">(PDF, in french only)</a></p>
+      
+			<subtitle>July 1st, 2004: Report of the 1st JORAM Users' Day</subtitle>
+  	  <p>The first JORAM Users' Day has been held last June 17 th in Paris.
+			 This event was the first successful attempt within the ObjectWeb community 
+			 to have direct exchanges between users and designers/developers of an 
+			 ObjectWeb component.</p>
+			 <p>The Report as well as some of the presentations are available online at
+			  the ScalAgent Distributed Technologies web site : </p>
+			 <ul>
+			 <li>Report as <a href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</a>
+			  or <a href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</a></li>
+			 <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
+			 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</a>
+			 </li>
+       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
+			 Next Generation Open Source by J.P. Laisné (President of the 
+			 Objectweb consortium)(PDF in french)</a>
+			 </li>
+       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-EPFL-joram_day.pdf">
+			 JMSGroups: Towards JMS-Compliant Group Communication by A. Kupsys 
+			 (EPFL Switzerland) (PDF)</a>
+			 </li>
+			 </ul>
+			 <p>The discussion about JORAM is open especially for those who have not been
+			 able to join the Users' Day. Any contribution is welcome on the main
+			 JORAM mailing list.</p>
+			 
+			<subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
+      <p>ObjectWeb and the JORAM core development team are setting up
+      a JORAM Users' Day on June 17th in Paris (place to be defined later).</p>
+      <p>This day is intended to be the first attempt of direct exchanges
+      between members of the JORAM community. The meeting is an opportunity
+      to report on the credibility of the JORAM solution and to raise
+      questions and answers about the durability and evolution of this open
+      source product.</p>
+      <p>Details about the JORAM Users Day can be found
+      <a href="current/doc/JORAM-Day.pdf">here</a>.</p>
+      <p>A french version of this annoucement is also available at:
+      <a href="http://www.scalagent.com/pages/fr/products/joram-usergroup.htm">
+      http://www.scalagent.com/pages/fr/products/joram-usergroup.htm</a>.</p>
+			
       <subtitle>February 13, 2004: JORAM 4.0 is released and provides major
       new features!</subtitle>
       <p>JORAM 4.0 is the first release of a new JORAM generation with even
