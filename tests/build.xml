@@ -141,9 +141,9 @@
       author="true"
       version="true"
       use="false"
-      windowtitle="JMS Tests Documentation">	   
-      <doctitle><![CDATA[<h1>JMS Tests
-    Documentation</h1>]]></doctitle>
+      windowtitle="Test Suite Documentation">	   
+      <doctitle><![CDATA[<h1>Test Suite 
+        Documentation</h1>]]></doctitle>
       <group title="JMS Conformance Tests" packages="org.objectweb.jtests.jms.conform.*"/>
       <group title="JMS Administration" packages="org.objectweb.jtests.jms.admin"/>
       <group title="JMS JUnit Framework" packages="org.objectweb.jtests.jms.framework"/>
