@@ -31,11 +31,11 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 /**
- *  <code>SimpleCnxNetwork</code> is a simple implementation of
- * <code>FifoNetwork</code> class with a single connection at
+ *  <code>SimpleNetwork</code> is a simple implementation of
+ * <code>StreamNetwork</code> class with a single connection at
  * a time.
  */
-public class SimpleNetwork extends FIFONetwork {
+public class SimpleNetwork extends StreamNetwork {
   /** FIFO list of all messages to be sent by the watch-dog thead. */
   MessageVector sendList;
 
@@ -191,7 +191,7 @@ public class SimpleNetwork extends FIFONetwork {
           if (! running) break;
 
           if (msg != null) {
-            msgto = msg.getToId();
+            msgto = msg.getDest();
 
             Socket socket = null;
             try {
@@ -283,7 +283,7 @@ public class SimpleNetwork extends FIFONetwork {
 
       for (int i=0; i<sendList.size(); i++) {
         Message msg = (Message) sendList.getMessageAt(i);
-        short msgto = msg.getToId();
+        short msgto = msg.getDest();
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
@@ -375,7 +375,7 @@ public class SimpleNetwork extends FIFONetwork {
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", write message");
-        nos.writeObject(socket, msg);
+        nos.writeMessage(socket, msg);
         socket.shutdownOutput();
         // and wait the acknowledge.
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -452,21 +452,56 @@ public class SimpleNetwork extends FIFONetwork {
 
 	    // Read the message,
 	    os = socket.getOutputStream();
-	    ois = new ObjectInputStream(socket.getInputStream());
+            InputStream is = socket.getInputStream();
 
-	    Object obj = ois.readObject(); 
+    byte[] iobuf = new byte[28];
+    Message msg = Message.alloc();
+    int n = 0;
+    do {
+      int count = is.read(iobuf, n, 28 - n);
+      if (count < 0) throw new EOFException();
+      n += count;
+     } while (n < 28);
+
+    // Gets sender's AgentId
+    msg.from = new AgentId(
+      (short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF)),
+      (short) (((iobuf[2] & 0xFF) <<  8) + (iobuf[3] & 0xFF)),
+      ((iobuf[4] & 0xFF) << 24) + ((iobuf[5] & 0xFF) << 16) +
+      ((iobuf[6] & 0xFF) <<  8) + ((iobuf[7] & 0xFF) <<  0));
+    // Gets adressee's AgentId
+    msg.to = new AgentId(
+      (short) (((iobuf[8] & 0xFF) <<  8) + (iobuf[9] & 0xFF)),
+      (short) (((iobuf[10] & 0xFF) <<  8) + (iobuf[11] & 0xFF)),
+      ((iobuf[12] & 0xFF) << 24) + ((iobuf[13] & 0xFF) << 16) +
+      ((iobuf[14] & 0xFF) <<  8) + ((iobuf[15] & 0xFF) <<  0));
+    // Gets source server id of message
+    msg.source = (short) (((iobuf[16] & 0xFF) <<  8) +
+                          ((iobuf[17] & 0xFF) <<  0));
+    // Gets destination server id of message
+    msg.dest = (short) (((iobuf[18] & 0xFF) <<  8) +
+                        ((iobuf[19] & 0xFF) <<  0));
+    // Gets stamp of message
+    msg.stamp = ((iobuf[20] & 0xFF) << 24) + ((iobuf[21] & 0xFF) << 16) +
+      ((iobuf[22] & 0xFF) <<  8) + ((iobuf[23] & 0xFF) <<  0);
+    // Gets boot timestamp of source server
+    msg.boot = ((iobuf[24] & 0xFF) << 24) + ((iobuf[25] & 0xFF) << 16) +
+      ((iobuf[26] & 0xFF) <<  8) + ((iobuf[27] & 0xFF) <<  0);
+    // Reads notification object
+    ois = new ObjectInputStream(is);
+    msg.not = (Notification) ois.readObject();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", msg received");
 
-	    if (obj instanceof Message) {
-	      deliver((Message) obj);
-	    } else {
-              this.logmon.log(BasicLevel.ERROR,
-                              this.getName() + ", not a message");
-	      throw new IOException("Not a message");
-	    }
+// 	    if (obj instanceof Message) {
+	      deliver((Message) msg);
+// 	    } else {
+//               this.logmon.log(BasicLevel.ERROR,
+//                               this.getName() + ", not a message");
+// 	      throw new IOException("Not a message");
+// 	    }
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", send ack");

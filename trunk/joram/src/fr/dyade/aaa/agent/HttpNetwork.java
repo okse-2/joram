@@ -31,10 +31,10 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 /**
- * <code>HttpNetwork</code> is a simple implementation of <code>Network</code>
+ * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>
  * based on HTTP 1.1 protocol.
  */
-public class HttpNetwork extends FIFONetwork {
+public class HttpNetwork extends StreamNetwork {
   private InetAddress proxy = null;
   /**
    *  Hostname (or IP dotted address) of proxy host, if not defined there

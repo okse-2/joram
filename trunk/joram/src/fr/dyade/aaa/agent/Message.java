@@ -29,42 +29,46 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.*;
 
 /**
- * 
+ * The internal message structure.
+ * A message is divided in 2 parts:<ul>
+ * <li>An immutable part with source and destination agent unique id, and
+ * notification object.
+ * <li>A variable part containing information about message routing (next hop)
+ * and the current stamp of the message.
+ * </ul>
  */
 final class Message implements Serializable {
   static final long serialVersionUID =  -2179939607085028300L;
 
-  //  Declares all fields transient in order to avoid useless
-  // description of each during serialization.
   /** <code>AgentId</code> of sender. */
   transient AgentId from;
   /** <code>AgentId</code> of destination agent. */
   transient AgentId to;
   /** The notification. */
   transient Notification not;
-  /** The logical date of sending specified by the update of matrix clock. */
-  private transient Update update;
- 
-  short getFromId() {
-    return update.getFromId();
+
+  /** The unique id. of source server */
+  transient short source;
+  /** The unique id. of destination server*/
+  transient short dest;
+  /** The current stamp of the message */
+  transient int stamp;
+  /** The boot timestamp of source server */
+  transient int boot;
+
+  /** Get the unique server id. of the sender of this message */
+  short getSource() {
+    return source;
   }
  
-  short getToId() {
-    return update.getToId();
+  /** Get the unique server id. of the addressee of this message */
+  short getDest() {
+    return dest;
   }
 
+  /** Get the stamp of this message */
   int getStamp() {
-    return update.stamp;
-  }
-
-  void setUpdate(Update update) {
-    if (this.update != null) this.update.free();
-    this.update = update;
-    stringId = null;
-  }
-
-  Update getUpdate() {
-    return update;
+    return stamp;
   }
 
   /**
@@ -87,16 +91,16 @@ final class Message implements Serializable {
     strbuf.append(",from=").append(from);
     strbuf.append(",to=").append(to);
     strbuf.append(",not=").append(not);
-    strbuf.append(",update=");
-    Update current = update;
-    while (current != null) {
-      current.appendToString(strbuf).append(',');
-      current = current.next;
-    }
+    strbuf.append(",source=").append(source);
+    strbuf.append(",dest=").append(dest);
+    strbuf.append(",stamp=").append(stamp);
+    strbuf.append(",boot=").append(boot);
     strbuf.append(')');
     
     return strbuf;
   }
+
+  private byte iobuf[] = new byte [28];
 
   /**
    *  The writeObject method is responsible for writing the state of the
@@ -105,25 +109,44 @@ final class Message implements Serializable {
    */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
-    // Writes from AgentId
-    out.writeShort(from.from);
-    out.writeShort(from.to);
-    out.writeInt(from.stamp);
-    // Writes to AgentId
-    out.writeShort(to.from);
-    out.writeShort(to.to);
-    out.writeInt(to.stamp);
+    // Sets sender's AgentId
+    iobuf[0] = (byte) (from.from >>>  8);
+    iobuf[1] = (byte) (from.from >>>  0);
+    iobuf[2] = (byte) (from.to >>>  8);
+    iobuf[3] = (byte) (from.to >>>  0);
+    iobuf[4] = (byte) (from.stamp >>>  24);
+    iobuf[5] = (byte) (from.stamp >>>  16);
+    iobuf[6] = (byte) (from.stamp >>>  8);
+    iobuf[7] = (byte) (from.stamp >>>  0);
+    // Sets adressee's AgentId
+    iobuf[8]  = (byte) (to.from >>>  8);
+    iobuf[9]  = (byte) (to.from >>>  0);
+    iobuf[10] = (byte) (to.to >>>  8);
+    iobuf[11] = (byte) (to.to >>>  0);
+    iobuf[12] = (byte) (to.stamp >>>  24);
+    iobuf[13] = (byte) (to.stamp >>>  16);
+    iobuf[14] = (byte) (to.stamp >>>  8);
+    iobuf[15] = (byte) (to.stamp >>>  0);
+    // Sets source server id of message
+    iobuf[16]  = (byte) (source >>>  8);
+    iobuf[17]  = (byte) (source >>>  0);
+    // Sets destination server id of message
+    iobuf[18] = (byte) (dest >>>  8);
+    iobuf[19] = (byte) (dest >>>  0);
+    // Sets stamp of message
+    iobuf[20] = (byte) (stamp >>>  24);
+    iobuf[21] = (byte) (stamp >>>  16);
+    iobuf[22] = (byte) (stamp >>>  8);
+    iobuf[23] = (byte) (stamp >>>  0);
+//     // Sets boot timestamp of source server
+    iobuf[24] = (byte) (boot >>>  24);
+    iobuf[25] = (byte) (boot >>>  16);
+    iobuf[26] = (byte) (boot >>>  8);
+    iobuf[27] = (byte) (boot >>>  0);
+    // Writes data on stream
+    out.write(iobuf, 0, 28);
+    // Writes notification object
     out.writeObject(not);
-    // In order to optimize the serialization, we serialize each update...
-    Update next = update;
-    while (next != null) {
-      out.writeShort(next.l);
-      out.writeShort(next.c);
-      out.writeInt(next.stamp);
-      out.writeInt(next.bootTS);
-      next = next.next;
-    }
-    out.writeShort(-1);
   }
     
   /**
@@ -132,20 +155,31 @@ final class Message implements Serializable {
    */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
-    // Reads from AgentId
-    from = new AgentId(in.readShort(), in.readShort(), in.readInt());
-    // Reads to AgentId
-    to = new AgentId(in.readShort(), in.readShort(), in.readInt());
+    iobuf = new byte[28];
+
+    in.readFully(iobuf, 0, 28);
+    // Gets sender's AgentId
+    from = new AgentId((short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF)),
+                       (short) (((iobuf[2] & 0xFF) <<  8) + (iobuf[3] & 0xFF)),
+                       ((iobuf[4] & 0xFF) << 24) + ((iobuf[5] & 0xFF) << 16) +
+                       ((iobuf[6] & 0xFF) <<  8) + ((iobuf[7] & 0xFF) <<  0));
+    // Gets adressee's AgentId
+    to = new AgentId((short) (((iobuf[8] & 0xFF) <<  8) + (iobuf[9] & 0xFF)),
+                     (short) (((iobuf[10] & 0xFF) <<  8) + (iobuf[11] & 0xFF)),
+                     ((iobuf[12] & 0xFF) << 24) + ((iobuf[13] & 0xFF) << 16) +
+                     ((iobuf[14] & 0xFF) <<  8) + ((iobuf[15] & 0xFF) <<  0));
+    // Gets source server id of message
+    source = (short) (((iobuf[16] & 0xFF) <<  8) + ((iobuf[17] & 0xFF) <<  0));
+    // Gets destination server id of message
+    dest = (short) (((iobuf[18] & 0xFF) <<  8) + ((iobuf[19] & 0xFF) <<  0));
+    // Gets stamp of message
+    stamp = ((iobuf[20] & 0xFF) << 24) + ((iobuf[21] & 0xFF) << 16) +
+      ((iobuf[22] & 0xFF) <<  8) + ((iobuf[23] & 0xFF) <<  0);
+    // Gets boot timestamp of source server
+    boot = ((iobuf[24] & 0xFF) << 24) + ((iobuf[25] & 0xFF) << 16) +
+      ((iobuf[26] & 0xFF) <<  8) + ((iobuf[27] & 0xFF) <<  0);
+    // Reads notification object
     not = (Notification) in.readObject();
-    // Gets clock update
-    short l;
-    while ((l = in.readShort()) != -1) {
-      if (update == null)
-	update = Update.alloc(l, in.readShort(), in.readInt());
-      else
-	Update.alloc(l, in.readShort(), in.readInt(), update);
-      update.setBootTS(in.readInt());
-    }
   }
 
   private final static int BUFLEN = 20;
@@ -160,11 +194,11 @@ final class Message implements Serializable {
   transient private String stringId = null;
 
   final String toStringId() {
-    if ((stringId == null) && (update != null)) {
+    if (stringId == null) {
       char[] buf = (char[]) (perThreadBuffer.get());
-      int idx = getChars(update.stamp, buf, BUFLEN);
+      int idx = getChars(stamp, buf, BUFLEN);
       buf[--idx] = '_';
-      idx = getChars(update.c, buf, idx);
+      idx = getChars(dest, buf, idx);
       buf[--idx] = '@';
       stringId = new String(buf, idx, BUFLEN - idx);
     }
@@ -272,6 +306,8 @@ final class Message implements Serializable {
     }
   }
 
+  private Message() {}
+
   /**
    * Construct a new message.
    * @param from	id of source Agent.
@@ -291,22 +327,25 @@ final class Message implements Serializable {
     pool = new Pool("Message", size);
   }
 
-  static Message alloc(AgentId from, AgentId to, Notification not) {
+  static Message alloc() {
     Message msg = null;
     
     try {
       msg = (Message) pool.allocElement();
     } catch (Exception exc) {
-      return new Message(from, to, not);
+      return new Message();
     }
+    return msg;
+  }
+
+  static Message alloc(AgentId from, AgentId to, Notification not) {
+    Message msg = alloc();
     msg.set(from, to, not);
     return msg;
   }
 
   void free() {
     not = null;	/* to let gc do its work */
-    if (update != null) update.free();
-    update = null;
     pool.freeElement(this);
   }
   

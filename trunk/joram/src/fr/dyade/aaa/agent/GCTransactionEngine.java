@@ -91,10 +91,12 @@ final class GCTransactionEngine extends Engine {
    */
   public void post(Message msg) throws Exception {
     modified = true;
-    msg.setUpdate(Update.alloc(AgentServer.getServerId(),
-                               AgentServer.getServerId(),
-                               ++stamp));
+
+    msg.source = AgentServer.getServerId();
+    msg.dest = AgentServer.getServerId();
+    msg.stamp = ++stamp;
     msg.save();
+
     qin.push(msg);
   }
 

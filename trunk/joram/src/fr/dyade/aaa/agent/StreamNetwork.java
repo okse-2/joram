@@ -252,37 +252,69 @@ public abstract class StreamNetwork extends Network {
   /**
    * Class used to send messages through a TCP stream.
    */
-  static final class NetOutputStream {
-    private ByteArrayOutputStream baos = null;
+  final class NetOutputStream extends ByteArrayOutputStream {
     private ObjectOutputStream oos = null;
     private OutputStream os = null;
 
-    static private final byte[] streamHeader = {
-      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-    };
-
     NetOutputStream() throws IOException {
-      baos = new ByteArrayOutputStream(256);
-      oos = new ObjectOutputStream(baos);
-      baos.reset();
+      super(256);
+      oos = new ObjectOutputStream(this);
+      count = 0;
+      buf[28] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+      buf[29] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+      buf[30] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+      buf[31] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
     }
 
-    void writeObject(Socket sock, Object msg) throws IOException {
+    void writeMessage(Socket sock, Message msg) throws IOException {
       os = sock.getOutputStream();
 
+      // Sets sender's AgentId
+      buf[0] = (byte) (msg.from.from >>>  8);
+      buf[1] = (byte) (msg.from.from >>>  0);
+      buf[2] = (byte) (msg.from.to >>>  8);
+      buf[3] = (byte) (msg.from.to >>>  0);
+      buf[4] = (byte) (msg.from.stamp >>>  24);
+      buf[5] = (byte) (msg.from.stamp >>>  16);
+      buf[6] = (byte) (msg.from.stamp >>>  8);
+      buf[7] = (byte) (msg.from.stamp >>>  0);
+      // Sets adressee's AgentId
+      buf[8]  = (byte) (msg.to.from >>>  8);
+      buf[9]  = (byte) (msg.to.from >>>  0);
+      buf[10] = (byte) (msg.to.to >>>  8);
+      buf[11] = (byte) (msg.to.to >>>  0);
+      buf[12] = (byte) (msg.to.stamp >>>  24);
+      buf[13] = (byte) (msg.to.stamp >>>  16);
+      buf[14] = (byte) (msg.to.stamp >>>  8);
+      buf[15] = (byte) (msg.to.stamp >>>  0);
+      // Sets source server id of message
+      buf[16]  = (byte) (msg.source >>>  8);
+      buf[17]  = (byte) (msg.source >>>  0);
+      // Sets destination server id of message
+      buf[18] = (byte) (msg.dest >>>  8);
+      buf[19] = (byte) (msg.dest >>>  0);
+      // Sets stamp of message
+      buf[20] = (byte) (msg.stamp >>>  24);
+      buf[21] = (byte) (msg.stamp >>>  16);
+      buf[22] = (byte) (msg.stamp >>>  8);
+      buf[23] = (byte) (msg.stamp >>>  0);
+      // Sets boot timestamp of source server
+      buf[24] = (byte) (msg.boot >>>  24);
+      buf[25] = (byte) (msg.boot >>>  16);
+      buf[26] = (byte) (msg.boot >>>  8);
+      buf[27] = (byte) (msg.boot >>>  0);
+      // Be careful, the stream header is hard-written in buf[28..31]
+      count = 32;
+
       try {
-        baos.write(streamHeader, 0, 4);
-        oos.writeObject(msg);
+        oos.writeObject(msg.not);
         oos.reset();
         oos.flush();
 
-        baos.writeTo(os);
+        os.write(buf, 0, count);;
         os.flush();
       } finally {
-        baos.reset();
+        count = 0;
       }
     }
   }
