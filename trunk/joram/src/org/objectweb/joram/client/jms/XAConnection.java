@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -86,5 +86,13 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
     return new XASession(this, rm);
+  }
+
+  /**
+   * return XAResourceMngr of this connection.
+   * see connector
+   */
+  public XAResourceMngr getXAResourceMngr() {
+    return rm;
   }
 }
