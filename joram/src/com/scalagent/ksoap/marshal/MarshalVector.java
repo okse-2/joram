@@ -56,6 +56,12 @@ public class MarshalVector implements Marshal {
     sO.addProperty(new PropertyInfo("item",OBJECT_TYPE),null);
 
     StartTag start = (StartTag) xmlParser.peek();
+    String toParse = start.getAttribute(ClassMap.enc,"arrayType").getValue();
+    int cut = toParse.indexOf(":Map[");
+    toParse = toParse.substring(cut+5);
+    cut = toParse.indexOf("]");
+    toParse = toParse.substring(0,cut);
+    int size = Integer.parseInt(toParse);
 
     xmlParser.read();
     xmlParser.skip();
@@ -65,7 +71,7 @@ public class MarshalVector implements Marshal {
       Attribute attr = start.getAttribute(ClassMap.xsi,"type");
       if (attr != null) {
         String type = attr.getValue();
-        int cut = type.indexOf(':');
+        cut = type.indexOf(':');
         name = type.substring(cut + 1);
         String prefix = "";
         if (cut > 0) 
@@ -76,11 +82,16 @@ public class MarshalVector implements Marshal {
       Object value =
         reader.read(null,-1,namespace,name,OBJECT_TYPE);
       reader.parser.skip();
+
       if (value != null) {
         sO.setProperty(i++,value);
-        xmlParser.read();
-        xmlParser.skip();
-        break;
+        if (size == i) {
+          xmlParser.read();
+          xmlParser.skip();
+          break;
+        } else {
+          continue;
+        }
       }
       xmlParser.read();
       xmlParser.skip();

@@ -135,12 +135,13 @@ public class HttpTransport {
             KSoapTracing.log(KSoapTracing.DEBUG,
                              "HttpTransport.call() responce = " + responseEnvelope.getBody());
           break;
-        } catch (IOException e) {
+        } catch (Throwable e) {
           if (e instanceof InterruptedIOException) {
             //System.out.println("+++++++ EXCEPTION");
           } else {
             KSoapTracing.log(KSoapTracing.ERROR,e.toString());
-            throw e;
+            if (e instanceof IOException)
+              throw (IOException)e;
           }
         }
       }
