@@ -252,15 +252,14 @@ public class ManagedConnectionImpl
             break;
         }
 
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                        this + " getXAResource  outboundCnx = " + outboundCnx +
-                                        "\n  outboundCnx.sess = " + outboundCnx.sessions);
-
         if (outboundCnx == null)
           outboundCnx = (OutboundConnection) getConnection(null,null);
 
         if (outboundCnx != null) {
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                          this + " getXAResource  outboundCnx = " + outboundCnx +
+                                          "\n  outboundCnx.sess = " + outboundCnx.sessions);
 
           OutboundSession outboundSession = null;       
           if (outboundCnx.sessions.size() > 0) {
