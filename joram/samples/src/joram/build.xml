@@ -109,7 +109,6 @@
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="${sid} ./s${sid}"/>
     </java>
   </target>
