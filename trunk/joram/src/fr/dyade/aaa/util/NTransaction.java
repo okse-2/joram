@@ -46,8 +46,24 @@ public final class NTransaction implements Transaction {
   final static int Kb = 1024;
   final static int Mb = Kb * Kb;
 
-  final static int CLEANUP_THRESHOLD_OPERATION = 8192;
-  final static int CLEANUP_THRESHOLD_SIZE = 16 * Mb;
+  /**
+   *  Global in memory log initial capacity, by default 4096.
+   *  This value can be adjusted for a particular server by setting
+   * <code>NTLogMemoryCapacity</code> specific property.
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  static int LogMemoryCapacity = 4096;
+  /**
+   *  Size of disk log in Mb, by default 16Mb.
+   *  This value can be adjusted for a particular server by setting
+   * <code>NTLogFileSize</code> specific property.
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  static int LogFileSize = 16 * Mb;
 
   /** Log context associated with each Thread using NTransaction. */
   private class Context {
@@ -87,6 +103,11 @@ public final class NTransaction implements Transaction {
     logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, init()");
+
+    LogMemoryCapacity = Integer.getInteger("NTLogMemoryCapacity",
+                                           LogMemoryCapacity).intValue();
+    LogFileSize = Integer.getInteger("NTLogFileSize",
+                                     LogFileSize /Mb).intValue() *Mb;
 
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
@@ -429,7 +450,7 @@ public final class NTransaction implements Transaction {
 
       //  Search for old log file, then apply all committed operation,
       // finally cleans it.
-      log = new Hashtable(CLEANUP_THRESHOLD_OPERATION);
+      log = new Hashtable(LogMemoryCapacity);
 
       
       File logFilePN = new File(dir, "log");
@@ -493,7 +514,7 @@ public final class NTransaction implements Transaction {
         garbage();
       } else {
         logFile = new RandomAccessFile(logFilePN, "rwd");
-        logFile.setLength(CLEANUP_THRESHOLD_SIZE);
+        logFile.setLength(LogFileSize);
 
         current = 1;
         // Cleans log file
@@ -573,7 +594,7 @@ public final class NTransaction implements Transaction {
 
       ctxlog.clear();
 
-      if (current > CLEANUP_THRESHOLD_SIZE) garbage();
+      if (current > LogFileSize) garbage();
     }
 
     /**
