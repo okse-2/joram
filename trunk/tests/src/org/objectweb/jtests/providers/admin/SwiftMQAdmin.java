@@ -1,16 +1,11 @@
 package org.objectweb.jtests.providers.admin;
 
+import com.swiftmq.admin.cli.*;
 import org.objectweb.jtests.jms.admin.Admin;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.JMSException;
+import javax.jms.*;
+import javax.naming.*;
 import java.util.Properties;
-
-import com.swiftmq.admin.cli.CLI;
-import com.swiftmq.admin.cli.CLIException;
 
 public class SwiftMQAdmin implements Admin
 {
@@ -26,7 +21,7 @@ public class SwiftMQAdmin implements Admin
       props.setProperty("java.naming.factory.initial", "com.swiftmq.jndi.InitialContextFactoryImpl");
       props.setProperty("java.naming.provider.url", "smqp://localhost:4001/timeout=10000");
       ctx = new InitialContext(props);
-      QueueConnectionFactory qcf = (QueueConnectionFactory)ctx.lookup("plainsocket@router1");
+      QueueConnectionFactory qcf = (QueueConnectionFactory) ctx.lookup("plainsocket@router1");
       qc = qcf.createQueueConnection();
       cli = new CLI(qc);
       cli.waitForRouter("router1");
@@ -53,7 +48,7 @@ public class SwiftMQAdmin implements Admin
   }
 
   public InitialContext createInitialContext()
-      throws NamingException
+    throws NamingException
   {
     return ctx;
   }
@@ -63,7 +58,7 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("new "+name+" map-to plainsocket@router1");
+      cli.executeCommand("new " + name + " map-to plainsocket@router1");
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -76,7 +71,7 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("new "+name+" map-to plainsocket@router1");
+      cli.executeCommand("new " + name + " map-to plainsocket@router1");
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -84,14 +79,19 @@ public class SwiftMQAdmin implements Admin
     }
   }
 
+  public void createConnectionFactory(String name)
+  {
+    createQueueConnectionFactory(name);
+  }
+
   public void createQueue(String name)
   {
     try
     {
       cli.executeCommand("cc /sys$queuemanager/queues");
-      cli.executeCommand("new "+name);
+      cli.executeCommand("new " + name);
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("new "+name+" map-to "+name+"@router1");
+      cli.executeCommand("new " + name + " map-to " + name + "@router1");
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -104,11 +104,11 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$topicmanager/topics");
-      String [] s = cli.getContextEntities();
+      String[] s = cli.getContextEntities();
       boolean found = false;
       if (s != null)
       {
-        for (int i=0;i<s.length;i++)
+        for (int i = 0; i < s.length; i++)
         {
           if (s[i].equals(name))
           {
@@ -118,7 +118,7 @@ public class SwiftMQAdmin implements Admin
         }
       }
       if (!found)
-        cli.executeCommand("new "+name);
+        cli.executeCommand("new " + name);
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -131,9 +131,9 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$queuemanager/queues");
-      cli.executeCommand("delete "+name);
+      cli.executeCommand("delete " + name);
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("delete "+name);
+      cli.executeCommand("delete " + name);
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -151,7 +151,7 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("delete "+name);
+      cli.executeCommand("delete " + name);
     } catch (CLIException e)
     {
       e.printStackTrace();
@@ -164,11 +164,16 @@ public class SwiftMQAdmin implements Admin
     try
     {
       cli.executeCommand("cc /sys$jndi/aliases");
-      cli.executeCommand("delete "+name);
+      cli.executeCommand("delete " + name);
     } catch (CLIException e)
     {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public void deleteConnectionFactory(String name)
+  {
+    deleteQueueConnectionFactory(name);
   }
 }
