@@ -160,7 +160,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   {
     // No limit to work 
     if (maxWorks <= 0) {
-      JoramAdapter.debugDEBUG("ServerSessionPool provides new ServerSession.");
+      AdapterTracing.debugDEBUG("ServerSessionPool provides new ServerSession.");
       return new InboundSession(this,
                                 workManager,
                                 endpointFactory,
@@ -171,8 +171,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     try {
       synchronized (pool) {
         if (pool.isEmpty() && (serverSessions < maxWorks)) {
-          JoramAdapter.debugDEBUG("ServerSessionPool provides "
-                                  + "new ServerSession.");
+          AdapterTracing.debugDEBUG("ServerSessionPool provides "
+                                    + "new ServerSession.");
           serverSessions++;
           return new InboundSession(this,
                                     workManager,
@@ -181,8 +181,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                     transacted);
         }
         else if (pool.isEmpty()) {
-          JoramAdapter.debugDEBUG("ServerSessionPool waits for "
-                             + "a free ServerSession.");
+          AdapterTracing.debugDEBUG("ServerSessionPool waits for "
+                                    + "a free ServerSession.");
           pool.wait();
         }
 
@@ -199,7 +199,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   /** Releases an <code>InboundSession</code> instance. */
   void releaseSession(InboundSession session)
   {
-    JoramAdapter.debugDEBUG("ServerSessionPool releases a ServerSession.");
+    AdapterTracing.debugDEBUG("ServerSessionPool releases a ServerSession.");
     try {
       synchronized (pool) {
         pool.add(session);
