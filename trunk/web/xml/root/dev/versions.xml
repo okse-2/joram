@@ -14,8 +14,16 @@
     <s1 name="CVS base, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: April 6, 2004)">
+      <s2 name="Corrected bugs (latest: April 28, 2004)">
       <ul>
+        <li>Broken SOAP connections not detected, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-04/msg00143.html">
+        Christian Neudorfer</a>. The corrected classes are
+        <code>org.objectweb.joram.client.jms.soap.QueueSoapConnectionFactory</code>,
+        <code>org.objectweb.joram.client.jms.soap.SoapConnectionFactory</code>,
+        <code>org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory</code>,
+        and <code>org.objectweb.joram.client.jms.admin.ObjectFactory</code>.
+        </li>
         <li>Transacted sending not working from kJoram client, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00040.html">
         André Bottaro</a>. The bug is corrected, the packages to update are
