@@ -14,13 +14,7 @@
     <ant dir="." antfile="kjoram.xml" target="ship.kjoram"/>
   </target>
 
-  <!-- JORAM graphical admin tool shipment target -->
-  <target name="ship.gui"
-          description="builds and ships Joram graphical administration tool">
-    <ant dir="." antfile="joram.xml" target="ship.gui"/>
-  </target>
-
-  <!-- JORAM graphical admin tool shipment target -->
+  <!-- Javadoc target -->
   <target name="javadoc"
           description="generates the Joram javadoc">
     <ant dir="." antfile="joram.xml" target="javadoc"/>
