@@ -15,6 +15,7 @@
          <include name="*.jar"/>
       </fileset>
       <pathelement path="${obj.dir}"/>
+      <pathelement path="${conf.dir}"/>
     </path>
     <property name="project.class.path" refid="project.class.path"/>
   </target>
@@ -53,12 +54,6 @@
     <delete dir="${run.dir}"/>
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
-    <copy file="${conf.dir}/jndi.properties"
-          todir="${obj.dir}"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
@@ -68,12 +63,6 @@
   <target name="distributed_init" depends="init">
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
-    <copy file="${conf.dir}/jndi.properties"
-          tofile="${obj.dir}/jndi.properties"/>
     <copy file="${conf.dir}/distributed_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
