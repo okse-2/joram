@@ -1518,6 +1518,8 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
     for (i = 0; i < topics.size(); i ++)
       reply.addTopic(((AgentId) topics.get(i)).toString());
 
+    reply.setNames(destinationsTable);
+
     distributeReply(replyTo, msgId, reply);
   }
 
