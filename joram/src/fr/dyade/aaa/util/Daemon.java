@@ -59,8 +59,8 @@ import fr.dyade.aaa.agent.Debug;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.5 2002-03-26 16:10:07 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.6 2002-05-06 14:26:25 jmesnil Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -86,7 +86,7 @@ public abstract class Daemon implements Runnable {
    */
   protected volatile boolean canStop;
   /** The active component of this daemon. */ 
-  private Thread thread = null;
+  protected Thread thread = null;
   /** The <code>daemon</code>'s name. */ 
   private String name;
   /** The <code>daemon</code>'s nature. */
