@@ -1,23 +1,42 @@
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0"?>
 
-<project default="ship.joram" basedir=".">
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "file:./common.xml">
+]>
+
+<project default="ship" basedir=".">
+  <!-- Includes generic stuff -->
+  &common;
+
   <!-- Initializes properties -->
-  <target name="init">
-    <!-- Creates the time stamp -->
-    <tstamp/>
-    <!-- Initializes the environment properties, uses ${env.name} -->
-    <property environment="env"/>
-  
-    <!-- Gets the user defined properties from file -->
-    <property file="build.properties"/>
-
-    <!-- Initializes the directory structure properties -->
-    <property name="src.dir" location="."/>
-    <property name="obj.dir" location="../classes"/>
-    <property name="lib.dir" location="../lib"/>
-    <property name="doc.dir" location="../javadoc"/>
-    <property name="licenses.dir" location="../licenses"/>
+  <target name="init.joram" depends="init">
     <property name="releases.dir" location="../releases"/>
+    <property name="samples.dir" location="../samples"/>
+
+    <!-- Defines specific fileset to compile -->
+    <patternset id="specific.compile.sources" >
+      <!-- include name="com/scalagent/jmx/*.java"/ -->
+      <include name="fr/dyade/aaa/agent/conf/*.java"/>
+      <include name="fr/dyade/aaa/agent/management/*.java"/>
+      <include name="fr/dyade/aaa/agent/AgentServer.java"/>
+      <include name="fr/dyade/aaa/agent/Engine.java"/>
+      <include name="fr/dyade/aaa/agent/TransactionEngine.java"/>
+      <include name="fr/dyade/aaa/agent/GCTransactionEngine.java"/>
+      <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SCServer.java"/>
+      <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
+      <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
+      <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
+      <include name="fr/dyade/aaa/admin/**/*.java"/>
+      <include name="fr/dyade/aaa/jndi2/**/*.java"/>
+      <include name="fr/dyade/aaa/util/NullTransaction.java"/>
+      <include name="fr/dyade/aaa/util/ATransaction.java"/>
+      <include name="fr/dyade/aaa/util/AFastTransaction.java"/>
+      <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="org/objectweb/joram/**/*.java"/>
+      <!-- Exclude KXML Wrapper (requires kxml.jar) -->
+      <exclude name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+    </patternset>
 
     <!-- Base classpath needed for execution -->
     <path id="base.class.path">
@@ -32,7 +51,6 @@
         <include name="jmxtools.jar"/>
         <include name="jndi.jar"/>
         <include name="jta.jar"/>
-        <include name="log4j.jar"/>
         <include name="mail.jar"/>
 	<include name="ow_monolog.jar" />
         <include name="soap.jar"/>
@@ -46,62 +64,18 @@
       <pathelement path="${obj.dir}"/>
       <pathelement path="${additional.path}"/>
     </path>
+
+    <!-- Specific classpath needed for compilation -->
+    <path id="specific.class.path">
+      <path refid="project.class.path"/>
+    </path>
   </target>
 
-  <!-- Cleans all generated files -->
-  <target name="clean" depends="init"
-      description="--> Cleans all generated files">
-    <delete dir="${obj.dir}"/>
-    <delete dir="${doc.dir}"/>
-    <!-- Deletes generated jar files -->
-    <delete file="${lib.dir}/joram-client.jar" />
-    <delete file="${lib.dir}/joram-connector.jar" />
-    <delete file="${lib.dir}/joram-gui.jar" />
-    <delete file="${lib.dir}/joram-mom.jar" />
-    <delete file="${lib.dir}/joram-shared.jar" />
-    <!-- Deletes generated rar files -->
-    <delete file="${lib.dir}/joram_for_jonas_ra.rar" />
-    <delete file="${lib.dir}/joram.rar" />
-  </target>
-
-  <!-- Prepares compilation phase -->
-  <target name="prepare" depends="init">
-    <!-- Creates the directory structure -->
-    <mkdir dir="${obj.dir}"/>
-    <mkdir dir="${doc.dir}"/>
-  </target>
-
-  <!-- Compilation phase -->
-  <target name="compile" depends="prepare"
-      description="--> Compiles Joram sources.">
-    <javac srcdir="${src.dir}:${obj.dir}"
-           destdir="${obj.dir}"
-           debug="on"
-           deprecation="${deprecation}"
-           optimize="false"
-           nowarn="${nowarn}"
-           verbose="${verbose}">
-
-      <classpath refid="project.class.path"/>
-
-      <include name="fr/**/*.java"/>
-      <include name="org/**/*.java"/>
-
-      <!-- Requires kxml.jar -->
-      <exclude name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
-
-      <!-- Exclude CVS directories -->
-      <exclude name="fr/dyade/aaa/**/CVS/**/*.java"/>
-    </javac>
-  </target>
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     - Joram specific build target
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- JARS BUILDING -->
-  <target name="ship.joram" depends="init,compile"
+  <!-- Builds all needed jars -->
+  <target name="build.joram" depends="init.joram,compile"
       description="--> Builds Joram server and client jars.">
-    <jar jarfile="${lib.dir}/joram-shared.jar">
+    <mkdir dir="${build.dir}/META-INF"/>
+    <jar jarfile="${build.dir}/joram-shared.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectHelper.class"/>
@@ -114,7 +88,7 @@
         <include name="org/objectweb/joram/shared/selectors/*.class"/>
       </fileset>
     </jar>
-    <jar jarfile="${lib.dir}/joram-mom.jar">
+    <jar jarfile="${build.dir}/joram-mom.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/admin/*.class"/>
         <include name="fr/dyade/aaa/admin/cmd/*.class"/>
@@ -135,7 +109,7 @@
         <include name="org/objectweb/joram/mom/util/*.class"/>
       </fileset>
     </jar>
-    <jar jarfile="${lib.dir}/joram-client.jar">
+    <jar jarfile="${build.dir}/joram-client.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
         <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
@@ -147,12 +121,12 @@
         <include name="org/objectweb/joram/client/jms/tcp/*.class"/>
       </fileset>
     </jar>
-  </target>
-
-  <!-- Builds a JORAM admin GUI jar. -->
-  <target name="ship.gui" depends="init,compile"
-      description="--> Builds Joram admin GUI jar.">
-    <jar jarfile="${lib.dir}/joram-gui.jar">
+    <jar jarfile="${build.dir}/joram-connector.jar">
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/client/connector/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-gui.jar">
       <fileset dir="${obj.dir}">
         <include name="org/objectweb/joram/client/tools/admin/*.class"/>
       </fileset>
@@ -162,86 +136,115 @@
     </jar>
   </target>
 
-  <!-- Builds a JORAM connector jar. -->
-  <target name="ship.connector" depends="ship.joram"
-      description="--> Builds Joram connector jar.">
-    <jar jarfile="${lib.dir}/joram-connector.jar">
-      <fileset dir="${obj.dir}">
-        <include name="org/objectweb/joram/client/connector/*.class"/>
+  <!-- Ships a JORAM distribution -->
+  <target name="ship.joram" depends="ship"/>
+  <target name="ship" depends="build.joram"
+    description="--> Creates a Joram shipment.">
+    <mkdir dir="${ship.dir}"/>
+    <mkdir dir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jndi.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
+    <mkdir dir="${ship.dir}/licences"/>
+    <copy todir="${ship.dir}/licences" flatten="yes">
+      <fileset dir="${licenses.dir}">
+        <include name="APACHE_LICENSE.TXT"/>
+        <include name="CUP_LICENSE.TXT"/>
+        <include name="LGPL_HEADER.TXT"/>
       </fileset>
-    </jar>
+    </copy>
   </target>
 
-  <!-- Builds a JORAM adapter. -->
-  <target name="ship.adapter" depends="ship.connector"
-          description="--> Builds JORAM adapter.">
-    <mkdir dir="${lib.dir}/META-INF"/>
+  <!-- Ships a JORAM JCA 1.5 adapter -->
+  <target name="ship.adapter" depends="build.joram"
+          description="--> Ships a JORAM JCA adapter">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
-          todir="${lib.dir}/META-INF"/>
-    <jar jarfile="${lib.dir}/joram.rar">
-      <fileset dir="${lib.dir}">
-        <include name="jakarta-regexp-1.2.jar"/>
+          tofile="${build.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram.rar">
+      <fileset dir="${build.dir}">
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
         <include name="joram-mom.jar"/>
         <include name="joram-shared.jar"/>
+        <include name="META-INF/ra.xml"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="jakarta-regexp-1.2.jar"/>
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
         <include name="xerces.jar"/>
-        <include name="META-INF/ra.xml"/>
       </fileset>
     </jar>
-    <delete dir="${lib.dir}/META-INF"/>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
   </target>
 
-  <!-- Builds a JORAM adapter for non collocated use. -->
-  <target name="ship.remoteadapter" depends="ship.connector"
-          description="--> Builds JORAM adapter for non collocated use.">
-    <mkdir dir="${lib.dir}/META-INF"/>
+  <!-- Ships a JORAM JCA 1.5 adapter for non collocated use -->
+  <target name="ship.remoteadapter" depends="build.joram"
+          description="--> Ships a JORAM JCA adapter for non collocated use">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
-          tofile="${lib.dir}/META-INF/ra.xml"/>
-    <jar jarfile="${lib.dir}/joram.rar">
-      <fileset dir="${lib.dir}">
+          tofile="${build.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram.rar">
+      <fileset dir="${build.dir}">
         <include name="joram-shared.jar"/>
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
-        <include name="JCup.jar"/>
-        <include name="ow_monolog.jar"/>
         <include name="META-INF/ra.xml"/>
       </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+      </fileset>
     </jar>
-    <delete dir="${lib.dir}/META-INF"/>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
   </target>
 
-  <!-- Builds a JORAM adapter for JOnAS. -->
-  <target name="ship.jonasadapter" depends="ship.connector"
-          description="--> Builds JORAM adapter for JOnAS.">
-    <mkdir dir="${lib.dir}/META-INF"/>
+  <!-- Ships a JORAM JCA 1.5 adapter for JOnAS -->
+  <target name="ship.jonasadapter" depends="build.joram"
+          description="--> Ships a JORAM JCA adapter for JOnAS">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
-          tofile="${lib.dir}/META-INF/ra.xml"/>
+          tofile="${build.dir}/META-INF/ra.xml"/>
     <copy file="${src.dir}/org/objectweb/joram/client/connector/jonas-ra.xml"
-          todir="${lib.dir}/META-INF"/>
-    <jar jarfile="${lib.dir}/joram_for_jonas_ra.rar">
-      <fileset dir="${lib.dir}">
+          tofile="${build.dir}/META-INF/jonas-ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram_for_jonas_ra.rar">
+      <fileset dir="${build.dir}">
         <include name="META-INF/*.xml"/>
       </fileset>
     </jar>
-    <delete dir="${lib.dir}/META-INF"/>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
+    <delete file="${build.dir}/META-INF/jonas-ra.xml"/>
   </target>
 
   <!-- JAVADOC --> 
   <target name="javadoc" depends="prepare"
-      description="--> Generates the Javadoc.">
-    <javadoc packagenames="fr.dyade.aaa.*, org.objectweb.joram.*"
-      sourcepath="${src.dir}"
-      classpathref="project.class.path"
-      defaultexcludes="yes"
-      destdir="${doc.dir}"
-      author="true"
-      version="true"
-      use="false"
-      windowtitle="Joram Documentation">	   
-      <doctitle><![CDATA[<h1>Joram Documentation</h1>]]></doctitle>
+      description="--> Generates the JavaDoc.">
+    <javadoc sourcepath="${src.dir}"
+             destdir="${doc.dir}"
+             classpathref="project.class.path"
+             overview="overview.html"
+             access="private"
+             version="false"
+             author="false"
+             use="false"
+             windowtitle="Joram(TM) Platform Documentation"
+             doctitle="Joram(TM) Platform Documentation"
+             bottom="Copyright &#xA9; 2004 Scalagent - All rights reserved">
+      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <package name="fr.dyade.aaa.*"/>
+      <package name="org.objectweb.joram.*"/>
     </javadoc>
   </target>
 
@@ -249,7 +252,7 @@
   <target name="releases" depends="release.src, release.jar"
     if="version"/>
 
-  <target name="release.jar" depends="clean,ship.joram" if="version">
+  <target name="release.jar" depends="clean,ship" if="version">
     <copy todir="../joram-${version}" includeEmptyDirs="no">
       <fileset dir="..">
 	<exclude name="build.xml" />
@@ -303,5 +306,12 @@
     <delete dir="../joram-${version}-src" /> 
     <mkdir dir="${releases.dir}" />
     <move file="joram-${version}-src.tgz" todir="${releases.dir}" />
+  </target>
+
+  <target name="crlfbin" depends="init.joram">
+    <fixcrlf srcdir="${samples.dir}/bin" eol="crlf"
+             includes="*.bat"/>
+    <fixcrlf srcdir="${samples.dir}/bin" eol="lf"
+             includes="*.sh"/>
   </target>
 </project>
