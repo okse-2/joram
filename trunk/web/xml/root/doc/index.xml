@@ -25,57 +25,47 @@
     <s1 name="Installing JORAM">
       <ul>
         <li>Installing the <a href="../current/doc/joram3_4_INSTALL.pdf">
-        3.4 release</a>.</li>
+        3.4 (and later) releases</a>.</li>
         <li>Installing the <a href="../current/doc/joram3_0_INSTALL.pdf">
-        3.0 (and above) releases</a>.</li>
+        3.0 (and later, including 3.1, 3.2 and 3.3) releases</a>.</li>
       </ul>
     </s1>
 
     <s1 name="Administering JORAM">
       <ul>
+        <li>Administering the <a href="../current/doc/joram3_4_2_ADMIN.pdf">
+        3.4.2 (and later) releases</a>.</li>
         <li>Administering the <a href="../current/doc/joram3_4_ADMIN.pdf">
-        3.4 release</a>.</li>
+        3.4 releases</a>.</li>
         <li>Administering the <a href="../current/doc/joram3_3_ADMIN.pdf">
-        3.3 release</a>.</li>
-        <li>Administering the <a href="../current/doc/joram3_2_ADMIN.pdf">
-        3.2 release</a>.</li>
-        <li>Administering the <a href="../current/doc/joram3_1_ADMIN.pdf">
-        3.1 release</a>.</li>
-        <li>Administering the <a href="../current/doc/joram3_0_ADMIN.pdf">
-        3.0 release</a>.</li>
+        3.3 releases</a>.</li>
       </ul>
       <ul>
         <li><a href="../current/doc/joram3_3_ADV_CFG.pdf">Advanced</a>
         configuration tips for the 3.3 and later releases.</li>
-        <li>Update of the <a href="../current/doc/joram_ADMIN.pdf">
-        administration</a> guide for the latest synchronous admin procotol,
-        available through CVS, no tag.</li>
-        <li>New guide about <a href="../current/doc/joram_MONITOR.pdf">
-        monitoring</a> JORAM. Monitoring methods are available through CVS,
-        no tag.</li>
+        <li>New guide about <a href="../current/doc/joram3_4_2_MONITOR.pdf">
+        monitoring</a> JORAM. Monitoring methods are available since release
+        3.4.2.</li>
       </ul>
     </s1>
 
     <s1 name="Running JORAM Samples">
       <ul>
+        <li>Running the <a href="../current/doc/joram3_5_SAMPLES.pdf">
+        3.5 release samples</a>.</li>
         <li>Running the <a href="../current/doc/joram3_4_SAMPLES.pdf">
-        3.4 release samples</a>.</li>
+        3.4 releases samples</a>.</li>
         <li>Running the <a href="../current/doc/joram3_2_SAMPLES.pdf">
-        3.2 release (and above) samples</a>.</li>
-        <li>Running the <a href="../current/doc/joram3_1_SAMPLES.pdf">
-        3.1 release samples</a>.</li>
-        <li>Running the <a href="../current/doc/joram3_0_SAMPLES.pdf">
-        3.0 release samples</a>.</li>
+        3.2 (and later) releases samples</a>.</li>
       </ul>
     </s1>
 
     <s1 name="JORAM API Documentation">
       <ul>
         <li>Browsing the <a href="../current/javadoc/joram/index.html">
-        3.4 release javadoc</a>.</li>
+        3.5 release javadoc</a>.</li>
       </ul>
     </s1>
-
   </body>
 
 </document>

@@ -43,14 +43,14 @@
        Joram platform.</p>
     </s1>
 
-    <s1 name="Persistence">
-    <p>Frédéric Maistre (INRIA) is re-viewing the persistence implementation
-       in the Joram platform, mainly for improving the <em>performances</em>
-       of the persistent mode.</p>
-    <p>Gavin King is working to provide a new persistence mode using
-       <em>JDBC</em> and allowing to set a database as persistence support.</p>
+    <s1 name="Performances and Persistence">
+    <p>The 3.5 release opens the door to improving Joram's performances and
+    providing more flexibility to the persistence of messages.</p>
+    <p>Algorithms may still evolve to become more performant. New interfaces
+    and classes might be written for allowing the messages to be persisted on
+    any other support than the current file based one. <em>Contributions
+    are welcome!</em></p>
     </s1>
-
   </body>
 
 </document>

@@ -18,6 +18,16 @@
       <p>None, so far...</p>
       </s2>
     </s1>
+    <s1 name="joram3_5_0 (June 2003, 24th)"> 
+      <p>This version provides a totally refactored message persistence
+      management.</p>  
+      <s2 name="Modifications">
+      <p>Modifications mainly occured in the destinations' and proxy's 
+      algorithms. Check packages <code>fr.dyade.aaa.mom.dest</code> and
+      <code>fr.dyade.aaa.mom.proxies</code>. Check also the new class
+      <code>fr.dyade.aaa.mom.messages.PersistenceModule</code>.</p>
+      </s2>
+    </s1>
     <s1 name="joram3_4_3 (June 2003, 17th)">
       <p>This version provides a new Monolog initialization allowing a better
       integration of Joram within Jonas.</p>

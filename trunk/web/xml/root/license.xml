@@ -14,10 +14,12 @@
 
     <s1 name="JORAM License">
 
-      <p>JORAM is provided under the JORAM license which is a union of the <a
-      href="licenses/JORAM_LICENSE.TXT">JORAM Public License</a> and the <a
-      href="licenses/OPL_1_0.TXT">Open Public License</a> (OPL 1.0) stating the
-      general licensing policy of the software.</p>
+      <p>JORAM is a free software; you can redistribute it and/or modify
+      it under the terms of the
+      <a href="http://www.gnu.org/licenses/lgpl.html">GNU Lesser General
+      Public License (LGPL)</a> as published by the Free Software Foundation;
+      either version 2.1 of the license, or (at your option) any later version.
+      </p>
 
     </s1>
 
