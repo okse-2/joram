@@ -24,39 +24,20 @@
  */
 package fr.dyade.aaa.mom.jms;
 
-import fr.dyade.aaa.mom.messages.Message;
-
 /**
- * A <code>QueueMessage</code> is used by a JMS client proxy for
- * forwarding a queue <code>QueueMsgReply</code> holding a message, and
- * actually replying to a <code>QRecReceiveRequest</code>.
+ * A <code>ConsumerUnsubRequest</code> is sent by a closing temporary
+ * <code>MessageConsumer</code> on a topic, or by a <code>Session</code>
+ * unsubscribing a durable subscriber.
  */
-public class QueueMessage extends AbstractJmsReply
+public class ConsumerUnsubRequest extends AbstractJmsRequest
 {
-  /** The message carried by this reply. */
-  private Message message = null;
-
   /**
-   * Constructs a <code>QueueMessage</code> instance.
+   * Constructs a <code>ConsumerUnsubRequest</code>.
    *
-   * @param destReply  The <code>fr.dyade.aaa.mom.comm.QueueMsgReply</code>
-   *          actually forwarded.
+   * @param subName  The name of the subscription to delete.
    */
-  public QueueMessage(fr.dyade.aaa.mom.comm.QueueMsgReply destReply)
+  public ConsumerUnsubRequest(String subName)
   {
-    super(destReply.getCorrelationId());
-    this.message = destReply.getMessage();
-  }
-
-  /** Constructs an empty <code>QueueMessage</code> instance. */
-  public QueueMessage()
-  {
-    super(null);
-  }
-
-  /** Returns the message carried by this reply. */
-  public Message getMessage()
-  {
-    return message;
+    super(subName);
   }
 }

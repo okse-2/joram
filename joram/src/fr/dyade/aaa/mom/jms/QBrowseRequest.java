@@ -36,7 +36,7 @@ public class QBrowseRequest extends AbstractJmsRequest
   /**
    * Constructs a <code>QBrowseRequest</code> instance.
    *
-   * @param to   See superclass.
+   * @param to  Name of the queue to browse. 
    * @param selector  The selector for filtering messages, if any.
    */
   public QBrowseRequest(String to, String selector)

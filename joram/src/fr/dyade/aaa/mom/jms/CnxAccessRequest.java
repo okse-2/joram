@@ -36,7 +36,7 @@ public class CnxAccessRequest extends AbstractJmsRequest
   /**
    * Constructs a <code>CnxAccessRequest</code> instance.
    *
-   * @param to  See superclass.
+   * @param dest  The destination on which checking the access.
    * @param right  Requested right (1 for READ, 2 for WRITE).
    */
   public CnxAccessRequest(String dest, int right)

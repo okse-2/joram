@@ -25,10 +25,10 @@
 package fr.dyade.aaa.mom.jms;
 
 /**
- * A <code>TSessSubRequest</code> is sent by <code>TopicSession</code> when
- * creating a subscriber.
+ * A <code>ConsumerSubRequest</code> is sent by a constructing
+ * <code>MessageConsumer</code> destinated to consume messages on a topic.
  */
-public class TSessSubRequest extends AbstractJmsRequest
+public class ConsumerSubRequest extends AbstractJmsRequest
 {
   /** The subscription's name. */
   private String subName;
@@ -43,7 +43,7 @@ public class TSessSubRequest extends AbstractJmsRequest
   private boolean durable;
 
   /**
-   * Constructs a <code>TSessSubRequest</code>.
+   * Constructs a <code>ConsumerSubRequest</code>.
    *
    * @param topic  The topic identifier the client wishes to subscribe to.
    * @param subName  The subscription's name.
@@ -51,8 +51,8 @@ public class TSessSubRequest extends AbstractJmsRequest
    * @param noLocal  <code>true</code> for not consuming the local messages.
    * @param durable  <code>true</code> for a durable subscription.
    */
-  public TSessSubRequest(String topic, String subName, String selector,
-                         boolean noLocal, boolean durable)
+  public ConsumerSubRequest(String topic, String subName, String selector,
+                            boolean noLocal, boolean durable)
   {
     super(topic);
     this.subName = subName;

@@ -25,41 +25,18 @@
 package fr.dyade.aaa.mom.jms;
 
 /**
- * A <code>QRecReceiveRequest</code> is sent by a <code>QueueReceiver</code>
- * when requesting a message.
+ * A <code>ConsumerCloseSubRequest</code> is sent by a closing durable
+ * <code>TopicSubscriber</code>.
  */
-public class QRecReceiveRequest extends AbstractJmsRequest
+public class ConsumerCloseSubRequest extends AbstractJmsRequest
 {
-  /** The selector for filtering messages on a queue. */
-  private String selector;
-  /** The time to live value of the request (negative for infinite). */
-  private long timeToLive;
-
-
   /**
-   * Constructs a <code>QRReceiveRequest</code>.
+   * Constructs an <code>ConsumerCloseSubRequest</code>.
    *
-   * @param queue   See superclass.
-   * @param selector  The selector for filtering messages, if any.
-   * @param timeToLive  Time to live value in milliseconds, negative for
-   *          infinite.
+   * @param subName  The name of the closing durable subscription.
    */
-  public QRecReceiveRequest(String queue, String selector, long timeToLive)
+  public ConsumerCloseSubRequest(String subName)
   {
-    super(queue);
-    this.selector = selector;
-    this.timeToLive = timeToLive;
-  }
-
-  /** Returns the selector for filtering the messages. */
-  public String getSelector()
-  {
-    return selector;
-  }
-
-  /** Returns the time to live value in milliseconds. */
-  public long getTimeToLive()
-  {
-    return timeToLive;
+    super(subName);
   }
 }

@@ -30,7 +30,7 @@ import java.util.Vector;
 
 /**
  * A <code>ProducerMessages</code> instance is sent by a
- * <code>MessageProducer</code> when sending or publishing messages.
+ * <code>MessageProducer</code> when sending messages.
  */
 public class ProducerMessages extends AbstractJmsRequest
 {
@@ -40,7 +40,7 @@ public class ProducerMessages extends AbstractJmsRequest
   /**
    * Constructs a <code>ProducerMessages</code> instance.
    *
-   * @param dest See superclass.
+   * @param dest  Name of the destination the messages are sent to.
    */
   public ProducerMessages(String dest)
   {

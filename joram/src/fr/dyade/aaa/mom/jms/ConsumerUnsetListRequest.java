@@ -24,41 +24,20 @@
  */
 package fr.dyade.aaa.mom.jms;
 
-import java.util.Vector;
-
 /**
- * A <code>TSessDenyRequest</code> instance is used by a
- * <code>TopicSession</code> for denying the messages it consumed.
+ * A <code>ConsumerUnsetListRequest</code> is sent by a
+ * <code>MessageConsumer</code> which subscribed to a topic, and which
+ * listener is unset.
  */
-public class TSessDenyRequest extends AbstractJmsRequest
+public class ConsumerUnsetListRequest extends AbstractJmsRequest
 {
-  /** Name of the subscription where denying the messages. */
-  private String subName;
-  /** Vector of message identifiers. */
-  private Vector ids;
-
   /**
-   * Constructs a <code>TSessDenyRequest</code> instance.
+   * Constructs a <code>ConsumerUnsetListRequest</code>.
    *
-   * @param subName  Name of the subscription where denying the messages.
-   * @param ids  Vector of denied message identifiers.
+   * @param subName  The name of the subscription which listener is unset.
    */
-  public TSessDenyRequest(String subName, Vector ids)
+  public ConsumerUnsetListRequest(String subName)
   {
-    super(null);
-    this.subName = subName;
-    this.ids = ids;
-  }
-
-  /** Returns the name of the subscription where denying the messages. */
-  public String getSubName()
-  {
-    return subName;
-  }
-
-  /** Returns the vector of denied messages identifiers. */
-  public Vector getIds()
-  {
-    return ids;
+    super(subName);
   }
 }

@@ -24,29 +24,43 @@
  */
 package fr.dyade.aaa.mom.jms;
 
+import java.util.Vector;
+
 /**
- * A <code>TSubUnsetListRequest</code> is sent by a
- * <code>TopicSubscriber</code> which listener is unset.
+ * A <code>SessAckRequest</code> instance is used by a <code>Session</code>
+ * for acknowledging the messages it consumed.
  */
-public class TSubUnsetListRequest extends AbstractJmsRequest
+public class SessAckRequest extends AbstractJmsRequest
 {
-  /** The name of the subscription which listener is unset. */
-  private String subName;
+  /** Vector of message identifiers. */
+  private Vector ids;
+  /** <code>true</code> if the request is destinated to a queue. */
+  private boolean queueMode;
 
   /**
-   * Constructs an <code>TSubUnsetListRequest</code>.
+   * Constructs a <code>SessAckRequest</code> instance.
    *
-   * @param subName  The name of the subscription which listener is unset.
+   * @param targetName  Name of the target queue or subscription.
+   * @param ids  Vector of acknowledged message identifiers.
+   * @param queueMode  <code>true</code> if this request is destinated to a
+   *          queue.
    */
-  public TSubUnsetListRequest(String subName)
+  public SessAckRequest(String targetName, Vector ids, boolean queueMode)
   {
-    super(null);
-    this.subName = subName;
+    super(targetName);
+    this.ids = ids;
+    this.queueMode = queueMode;
   }
 
-  /** Returns the name of the subscription which listener is unset. */
-  public String getSubName()
+  /** Returns the vector of acknowledged messages identifiers. */
+  public Vector getIds()
   {
-    return subName;
+    return ids;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
   }
 }
