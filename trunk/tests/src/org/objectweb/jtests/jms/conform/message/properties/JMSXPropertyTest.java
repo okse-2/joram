@@ -36,7 +36,7 @@ import java.util.Enumeration;
  *  See JMS Specification, §3.5.9 JMS Defined Properties
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: JMSXPropertyTest.java,v 1.1 2002-06-27 09:36:58 jmesnil Exp $
+ * @version $Id: JMSXPropertyTest.java,v 1.2 2002-07-01 14:04:30 jmesnil Exp $
  */
 public class JMSXPropertyTest extends PTPTestCase {
   
@@ -78,19 +78,6 @@ public class JMSXPropertyTest extends PTPTestCase {
         assertEquals("testSupportsJMSXGroupID_1", msg.getText());
     } catch (JMSException e) {
       fail(e);
-    }
-  }
-
-  /**
-   * Test that the JMSX property <code>JMSXGroupID</code> has to 
-   * be a <code>String</code>.
-   */
-  public void testJMSXGroupID_2() {
-    try {
-        TextMessage message = senderSession.createTextMessage();
-        message.setIntProperty("JMSXGroupID", 2002);
-        fail("JMSXGroupID property has to be a String");
-    } catch (JMSException e) {
     }
   }
 
