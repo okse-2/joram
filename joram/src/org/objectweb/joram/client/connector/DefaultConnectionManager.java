@@ -73,54 +73,63 @@ public class DefaultConnectionManager
    */
   public Object allocateConnection(ManagedConnectionFactory mcf,
                                    ConnectionRequestInfo cxRequest)
-                throws ResourceException
-  {
+    throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " allocateConnection(" + mcf + "," + cxRequest + ")");
-
+    
     String userName;
     String password;
-
+    
     if (cxRequest == null) {
       userName = ((ManagedConnectionFactoryImpl) mcf).getUserName();
       password = ((ManagedConnectionFactoryImpl) mcf).getPassword();
-    }
-    else {
+    } else {
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
     }
-
+    
     String hostName = ((ManagedConnectionFactoryImpl) mcf).getHostName();
     int serverPort =
       ((ManagedConnectionFactoryImpl) mcf).getServerPort().intValue();
-
+    
     try {
       if (cxRequest instanceof QueueConnectionRequest) {
         QueueConnectionFactory factory =
           QueueTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createQueueConnection(userName, password);
-      }
-      else if (cxRequest instanceof TopicConnectionRequest) {
+      } else if (cxRequest instanceof TopicConnectionRequest) {
         TopicConnectionFactory factory =
           TopicTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createTopicConnection(userName, password);
-      }
-      else {
+      } else {
         ConnectionFactory factory =
           TcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createConnection(userName, password);
       }
-    }
-    catch (IllegalStateException exc) {
+    } catch (IllegalStateException exc) {
       throw new CommException("Could not access the JORAM server: " + exc);
-    }
-    catch (JMSSecurityException exc) {
+    } catch (JMSSecurityException exc) {
       throw new SecurityException("Invalid user identification: " + exc);
-    }
-    catch (JMSException exc) {
+    } catch (JMSException exc) {
       throw new ResourceException("Failed connecting process: " + exc);
     }
+  }
+
+  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , 
+                                    ManagedConnectionFactoryImpl mcf) {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setFactoryParameters(" + factory + "," + mcf + ")");   
+    factory.getParameters().connectingTimer = mcf.getConnectingTimer();
+    factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
+    factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
   }
 
   /**

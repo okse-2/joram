@@ -80,6 +80,25 @@ public class ManagedConnectionFactoryImpl
   /** Default user password. */
   String password = "anonymous";
 
+  /**
+   * Duration in seconds during which connecting is attempted (connecting
+   * might take time if the server is temporarily not reachable); the 0 value
+   * is set for connecting only once and aborting if connecting failed.
+   */
+  public int connectingTimer = 0;
+  /**
+   * Duration in seconds during which a JMS transacted (non XA) session might
+   * be pending; above that duration the session is rolled back and closed;
+   * the 0 value means "no timer".
+   */
+  public int txPendingTimer = 0;
+  /** 
+   * Period in milliseconds between two ping requests sent by the client
+   * connection to the server; if the server does not receive any ping
+   * request during more than 2 * cnxPendingTimer, the connection is
+   * considered as dead and processed as required.
+   */
+  public int cnxPendingTimer = 0;
 
   /** 
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
@@ -87,6 +106,34 @@ public class ManagedConnectionFactoryImpl
   public ManagedConnectionFactoryImpl()
   {}
 
+
+  public int getConnectingTimer() {
+    return connectingTimer;
+  }
+
+  public int getCnxPendingTimer() {
+    return cnxPendingTimer;
+  }
+
+  public int getTxPendingTimer() {
+    return txPendingTimer;
+  }
+
+  protected void setParameters(Object factory) {
+    if (factory instanceof org.objectweb.joram.client.jms.ConnectionFactory) {
+      org.objectweb.joram.client.jms.ConnectionFactory f = 
+        (org.objectweb.joram.client.jms.ConnectionFactory) factory;
+      f.getParameters().connectingTimer = connectingTimer;
+      f.getParameters().cnxPendingTimer = cnxPendingTimer;
+      f.getParameters().txPendingTimer = txPendingTimer;
+    } else if (factory instanceof org.objectweb.joram.client.jms.XAConnectionFactory) {
+      org.objectweb.joram.client.jms.XAConnectionFactory f = 
+        (org.objectweb.joram.client.jms.XAConnectionFactory) factory;
+      f.getParameters().connectingTimer = connectingTimer;
+      f.getParameters().cnxPendingTimer = cnxPendingTimer;
+      f.getParameters().txPendingTimer = txPendingTimer;
+    }
+  }
 
   /**
    * Method called by an application server (managed case) for creating an
@@ -189,6 +236,8 @@ public class ManagedConnectionFactoryImpl
     else
       factory = XATcpConnectionFactory.create(hostName, serverPort);
 
+    setParameters(factory);
+    
     try {
       cnx = factory.createXAConnection(userName, password);
 
@@ -367,6 +416,18 @@ public class ManagedConnectionFactoryImpl
     collocated = ((JoramAdapter) ra).collocated;
     hostName = ((JoramAdapter) ra).hostName;
     serverPort = ((JoramAdapter) ra).serverPort;
+    connectingTimer = ((JoramAdapter) ra).connectingTimer;
+    txPendingTimer = ((JoramAdapter) ra).txPendingTimer;
+    cnxPendingTimer = ((JoramAdapter) ra).cnxPendingTimer;
+
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " setResourceAdapter collocated = " + collocated +
+                                    ", hostName = " + hostName +
+                                    ", serverPort = " + serverPort + 
+                                    ", connectingTimer = " + connectingTimer + 
+                                    ", txPendingTimer = " + txPendingTimer + 
+                                    ", cnxPendingTimer = " + cnxPendingTimer);
   }
 
   /**
