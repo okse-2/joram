@@ -7,8 +7,7 @@
     <!-- Initialize the directory structure properties -->
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
-    <property name="ship.dir" location="../../ship"/>
-    <property name="lib.dir" location="${ship.dir}/lib"/>
+    <property name="lib.dir" location="../../lib"/>
     <property name="run.dir" location="../run"/>
     <property name="conf.dir" location="../../config"/>
     <!-- Project classpath needed for execution -->
