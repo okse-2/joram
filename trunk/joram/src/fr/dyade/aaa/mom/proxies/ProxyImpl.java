@@ -89,6 +89,8 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
   private Hashtable subsTable;
   /** The module used by the proxy's subscriptions for persisting messages. */
   private PersistenceModule msgsPersistenceModule;
+  /** Counter of message arrivals from topics. */
+  private long arrivalsCounter = 0;
 
   /** The reference of the agent hosting the proxy. */
   private transient ProxyAgentItf proxyAgent;
@@ -1396,6 +1398,16 @@ public class ProxyImpl implements ProxyImplMBean, java.io.Serializable
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
     if (tSub == null || tSub.isEmpty())
       return;
+
+    // Setting the arrival order of the messages.
+    for (Enumeration msgs = rep.getMessages().elements();
+         msgs.hasMoreElements();) {
+      
+      if (arrivalsCounter == Long.MAX_VALUE)
+        arrivalsCounter = 0;
+
+      ((Message) msgs.nextElement()).order = arrivalsCounter++;
+    }
 
     String subName;
     ClientSubscription sub;
