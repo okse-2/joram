@@ -78,7 +78,7 @@ public class OutboundQueueSession extends OutboundSession
   /** 
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.TopicSubscriber
       createDurableSubscriber(javax.jms.Topic topic, 
@@ -86,48 +86,48 @@ public class OutboundQueueSession extends OutboundSession
                               String selector,
                               boolean noLocal) 
     throws JMSException  {
-    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }
 
   /** 
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.TopicSubscriber
          createDurableSubscriber(javax.jms.Topic topic, 
                                  String name)
          throws JMSException {
-    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }
 
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.Topic createTopic(String topicName) 
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }
 
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.TemporaryTopic createTemporaryTopic() 
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }
 
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public void unsubscribe(String name) 
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a OutboundQueueSession.");
   }    
 }

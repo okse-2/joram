@@ -94,42 +94,42 @@ public class OutboundTopicSession extends OutboundSession
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.QueueBrowser
       createBrowser(javax.jms.Queue queue, 
                     String selector)
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a TopicSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a TopicSession.");
   }
   
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue)
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a TopicSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a TopicSession.");
   }
   
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.Queue createQueue(String queueName) 
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a TopicSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a TopicSession.");
   }
   
   /**
    * API method.
    *
-   * @exception IllegalStateException  Systematically.
+   * @exception javax.jms.IllegalStateException  Systematically.
    */
   public javax.jms.TemporaryQueue createTemporaryQueue() 
     throws JMSException {
-    throw new IllegalStateException("Forbidden call on a TopicSession.");
+    throw new javax.jms.IllegalStateException("Forbidden call on a TopicSession.");
   }
 }
