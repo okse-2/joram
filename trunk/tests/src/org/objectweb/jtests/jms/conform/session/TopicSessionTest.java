@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TopicSessionTest.java,v 1.7 2002-04-15 14:41:09 joram Exp $
+ * @version $Id: TopicSessionTest.java,v 1.8 2002-04-16 10:01:10 joram Exp $
  */
 public class TopicSessionTest extends PubSubTestCase {
 
@@ -82,10 +82,10 @@ public class TopicSessionTest extends PubSubTestCase {
 	    subscriberSession.rollback();
       
 	    // we expect to receive a second time the message
-	    Message msg2 = subscriber.receive);
+	    Message msg2 = subscriber.receive();
 	    assertTrue("no message received after rollbacking subscriber session.", msg2 != null);
 	    assertTrue(msg2 instanceof TextMessage);
-	    assertEquals("tesRollbackReceivedMessage", ((TextMessage)msg2).getText());
+	    assertEquals("testRollbackReceivedMessage", ((TextMessage)msg2).getText());
       
       
 	    // finally we commit the subscriberSession transaction
