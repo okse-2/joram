@@ -55,11 +55,8 @@
         <li><code>org/objectweb/joram</code>: sources of the MOM and JORAM
         client layers</li>
       </ul>
-      <p>The new packages are available in the 
-      <a href="download/index.html">download area</a>. The CVS tag is
+      <p>New packages have been released, the CVS tag is
       <strong>joram4_0_0</strong>.</p>
-      <p>The <a href="doc/index.html">documentation</a> has also largely been
-      updated.</p>
 
       <subtitle>November 7, 2003: the first major
       contribution from JORAM ever growing community</subtitle>
