@@ -217,6 +217,35 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
+    // Cleaning the possible expired messages.
+    int index = 0;
+    Message message;
+    ClientMessages deadMessages = null;
+    while (index < messages.size()) {
+      message = (Message) messages.get(index);
+
+      if (message.isValid())
+        index++;
+      else {
+        messages.remove(index);
+        persistenceModule.delete(message);
+        
+        message.expired = true;
+
+        if (deadMessages == null)
+          deadMessages = new ClientMessages();
+        deadMessages.addMessage(message);
+
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
+                                        + message.getIdentifier()
+                                        + " removed.");
+      }
+    }
+    // Sending the dead messages to the DMQ, if needed:
+    if (deadMessages != null)
+      sendToDMQ(deadMessages, null);
+
     Channel.sendTo(from, new Monit_GetNumberRep(not, messages.size()));
   }
 
