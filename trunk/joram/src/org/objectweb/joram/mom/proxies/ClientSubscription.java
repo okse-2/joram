@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -38,7 +38,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
@@ -164,12 +163,10 @@ class ClientSubscription implements java.io.Serializable {
                               this + ": created.");
   }
 
-
   public String toString()
   {
     return "ClientSubscription" + proxyId + name;
   }
-
 
   /** Returns the subscription's context identifier. */
   int getContextId()
@@ -212,7 +209,6 @@ class ClientSubscription implements java.io.Serializable {
   {
     return active;
   }
-
   
   /**
    * Re-initializes the client subscription.
@@ -308,7 +304,7 @@ class ClientSubscription implements java.io.Serializable {
                               this + ": reactivated.");
   }
 
-  /** De-activates the subscription, denies the non acknowledgded messages. */  
+  /** De-activates the subscription, denies the non acknowledgded messages. */
   void deactivate()
   {
     unsetListener();
@@ -385,14 +381,16 @@ class ClientSubscription implements java.io.Serializable {
   {
     this.threshold = threshold;
   }
-
   
   /**
    * Browses messages and keeps those which will have to be delivered
    * to the subscriber.
    */
-  void browseNewMessages(Vector newMessages)
-  {
+  void browseNewMessages(Vector newMessages) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".browseNewMessages(" + 
+                              newMessages + ')');
     // Browsing the messages one by one.
     Message message;
     String msgId;
@@ -433,8 +431,13 @@ class ClientSubscription implements java.io.Serializable {
   /**
    * Launches a delivery sequence, either for a listener, or for a receiver.
    */
-  ConsumerMessages deliver()
-  {
+  ConsumerMessages deliver() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + proxyId + ',' + 
+        topicId + ',' + name + "].deliver()");
+    
     // Returning null if no request exists:
     if (requestId == -1)
       return null;
@@ -534,22 +537,36 @@ class ClientSubscription implements java.io.Serializable {
       int highestP = -1;
       Message keptMsg = null;
       // Browsing the non delivered messages.
-      for (Enumeration ids = messageIds.elements(); ids.hasMoreElements();) {
-        id = (String) ids.nextElement();
+      int i = 0;
+      while (i < messageIds.size()) {
+        id = (String) messageIds.elementAt(i);
         message = (Message) messagesTable.get(id);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG, " -> message = " + message);
+        
         // Message still exists.
         if (message != null) {
           // Checking valid message.
           if (message.isValid()) {
+            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgProxy.log(
+                BasicLevel.DEBUG, " -> valid message");
             // Higher priority: keeping the message.
             if (message.getPriority() > highestP) {
               highestP = message.getPriority();
               keptMsg = message;
             }
+
+            // get next message
+            i++;
           }
           // Invalid message: removing and adding it to the vector of dead
           // messages.
           else {
+            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgProxy.log(
+                BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
             messagesTable.remove(id);
             // Deleting the message, if needed.
@@ -569,6 +586,9 @@ class ClientSubscription implements java.io.Serializable {
         }
         // Message has already been deleted.
         else {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG, " -> deleted message");
           messageIds.remove(id);
           deniedMsgs.remove(id);
         }
@@ -592,6 +612,8 @@ class ClientSubscription implements java.io.Serializable {
           MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
                                   this + ": message " + keptMsg.getIdentifier()
                                   + " added for delivery.");
+      } else {
+        i++;
       }
     }
    
@@ -631,6 +653,7 @@ class ClientSubscription implements java.io.Serializable {
       deniedMsgs.remove(id);
       msg = (Message) messagesTable.get(id);
 
+      // Message may be null if it is not valid anymore
       if (msg != null) {
         msg.acksCounter--;
         if (msg.acksCounter == 0)
@@ -648,8 +671,10 @@ class ClientSubscription implements java.io.Serializable {
   /**
    * Denies messages.
    */
-  void deny(Enumeration denies)
-  {
+  void deny(Enumeration denies) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                              this + ".deny(" + denies + ')');
     String id;
     Message msg;
     ClientMessages deadMessages = null;
@@ -658,6 +683,7 @@ class ClientSubscription implements java.io.Serializable {
     String currentId;
     long currentO;
 
+    denyLoop:
     while (denies.hasMoreElements()) {
       id = (String) denies.nextElement();
 
@@ -668,6 +694,9 @@ class ClientSubscription implements java.io.Serializable {
       deliveredIds.remove(id);
       msg = (Message) messagesTable.get(id);
       
+      // Message may be null if it is not valid anymore
+      if (msg == null) continue denyLoop;
+
       Integer value = (Integer) deniedMsgs.get(id);
       if (value != null)
         deliveryAttempts = value.intValue() + 1;
@@ -696,17 +725,30 @@ class ClientSubscription implements java.io.Serializable {
       // original delivery order, and adding a new entry for it in the
       // denied messages table.
       else {
-        i = 0;
-        for (Enumeration enum = messageIds.elements();
-             enum.hasMoreElements();) {
-          currentId = (String) enum.nextElement();
-          currentO = ((Message) messagesTable.get(currentId)).order;
-
-          if (currentO > msg.order)
-            break;
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                  " -> put back to the messages to deliver");
        
+        i = 0;
+        insertLoop:
+        while (i < messageIds.size()) {
+          currentId = (String) messageIds.elementAt(i);
+          Message currentMessage = (Message) messagesTable.get(currentId);
+
+          // Message may be null if it is not valid anymore
+          if (currentMessage != null) {
+            currentO = currentMessage.order;
+            if (currentO > msg.order) {
+              break insertLoop;
+            } else {
           i++;
         }
+          } else {
+            // Remove the invalid message
+            messageIds.removeElementAt(i);
+          }
+        }
+        
         messageIds.insertElementAt(id, i);
         deniedMsgs.put(id, new Integer(deliveryAttempts));
       }
