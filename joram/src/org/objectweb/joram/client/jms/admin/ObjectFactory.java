@@ -217,9 +217,11 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       String txTimer = (String) ref.get("cFactory.txT").getContent();
       String soapCnxTimeout =
         (String) ref.get("cFactory.soapCnxT").getContent();
+      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
-        new SoapConnectionFactory(host, (new Integer(port)).intValue(),
-                                  (new Integer(soapCnxTimeout)).intValue());
+        new SoapConnectionFactory(host,
+                                  (new Integer(port)).intValue(),
+                                  timer); 
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
@@ -232,10 +234,11 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       String txTimer = (String) ref.get("cFactory.txT").getContent();
       String soapCnxTimeout =
         (String) ref.get("cFactory.soapCnxT").getContent();
+      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
-        new QueueSoapConnectionFactory(host, (new Integer(port)).intValue(),
-                                       (new Integer(soapCnxTimeout))
-                                         .intValue());
+        new QueueSoapConnectionFactory(host,
+                                       (new Integer(port)).intValue(),
+                                       timer); 
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
@@ -248,10 +251,11 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       String txTimer = (String) ref.get("cFactory.txT").getContent();
       String soapCnxTimeout =
         (String) ref.get("cFactory.soapCnxT").getContent();
+      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
-        new TopicSoapConnectionFactory(host, (new Integer(port)).intValue(),
-                                       (new Integer(soapCnxTimeout))
-                                         .intValue());
+        new TopicSoapConnectionFactory(host,
+                                       (new Integer(port)).intValue(),
+                                       timer); 
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
