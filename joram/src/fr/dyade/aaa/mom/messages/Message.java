@@ -28,6 +28,7 @@ package fr.dyade.aaa.mom.messages;
 
 import java.io.*;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 /** 
  * The <code>Message</code> class actually provides the transport facility
@@ -342,35 +343,55 @@ public class Message implements Cloneable, Serializable
   {
     Object res = null;
 
-    if (name.equals("JMSMessageID"))
+    if (name.equals("JMSMessageID")) {
       res = id;
-    else if (name.equals("JMSPriority"))
+    } else if (name.equals("JMSPriority")) {
       res = new Integer(priority);
-    else if (name.equals("JMSTimestamp"))
+    } else if (name.equals("JMSTimestamp")) {
       res = new Long(timestamp);
-    else if (name.equals("JMSCorrelationID"))
+    } else if (name.equals("JMSCorrelationID")) {
       res = correlationId;
-    else if (name.equals("JMSDeliveryMode")) {
+    } else if (name.equals("JMSDeliveryMode")) {
       //XXX it would be better to check userIntHeader based on the constants
       //XXX of javax.jms.DeliveryMode instead of the hard-coded values.
       //XXX but without creating a dependency on javax.jms in mom package.
       if (userIntHeader == 1) { 
         // JMSDeliveryMode is set to NON_PERSISTENT
-        return "NON_PERSISTENT";
+        res = "NON_PERSISTENT";
       } else {
         // JMSDeliveryMode is set to PERSISTENT
-        return "PERSISTENT";
+        res = "PERSISTENT";
       }
-    } else if (name.equals("JMSType"))
+    } else if (name.equals("JMSType")) {
       res = userStringHeader;
-    else if (properties == null)
-      res = null;
-    else
-      res = properties.get(name);
+    } else {
+      // we've checked JMS header fields. now we have
+      // to check JMS properties 
+      if (properties == null) {
+          res = null;
+      } else {
+          res = properties.get(name);
+      }
+    }
+    
+    if (res instanceof String) {
+        // if the property is a String, we replace its simple quote <'> 
+        // by a double one <''> (see JMS 1.0.2b 3.8.1.1)
+        // ugly hack until we have the correct filter.cup file corrected by Andreas
+        StringTokenizer tokenizer= new StringTokenizer((String)res, "'");
+        StringBuffer buff = new StringBuffer();               
+        while (tokenizer.hasMoreTokens()) {
+            buff.append(tokenizer.nextToken());
+            buff.append("''");
+        }
+        String s = buff.toString();
+        res = s.substring(0, s.length() - 2);
+    }
 
-    if (res instanceof Number)
-      return new Double(((Number) res).doubleValue());
-
+    if (res instanceof Number) {
+        res = new Double(((Number) res).doubleValue());
+    }
+    
     return res;
   }
 
