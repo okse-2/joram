@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -1194,6 +1197,32 @@ public final class AgentServer {
 
     if (errBuf == null) return null;
     return errBuf.toString();
+  }
+
+  /**
+   *  Forces this AgentServer to stop executing. This method stops all
+   * consumers and services. Be careful, if you specify a synchronous
+   * process, this method wait for all server's thread to terminate; so
+   * if this method is called from a server's thread it should result a
+   * dead-lock.
+   *
+   * @param sync	If true the stop is precessed synchronous, otherwise
+   *			a thread is created and the method returns.
+   */
+  public static void stop(boolean sync) {
+    if (sync == true) {
+      stop();
+    } else {
+      // Creates a thread to execute AgentServer.stop in order to
+      // avoid deadlock.
+      Thread t = new Thread() {
+          public void run() {
+            stop();
+          }
+        };
+      t.setDaemon(true);
+      t.start();
+    }
   }
 
   /**
