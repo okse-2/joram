@@ -43,6 +43,7 @@ import java.net.UnknownHostException;
 
 import javax.jms.*;
 
+
 /**
  * This class is the reference implementation of the <code>AdminItf</code> 
  * interface.
@@ -58,8 +59,6 @@ public class AdminImpl implements AdminItf
   private TopicSession sess;
   /** The admin topic to send admin requests to. */
   private javax.jms.Topic topic;
-  /** The producer for sending requests to the admin topic. */
-  private MessageProducer producer;
   /** The requestor for sending the synchronous requests. */
   private TopicRequestor requestor;
 
@@ -78,7 +77,8 @@ public class AdminImpl implements AdminItf
 
 
   /**
-   * Opens a connection with the Joram server given a
+   * Opens a connection dedicated to administering with the Joram server
+   * which parameters are wrapped by a given
    * <code>TopicConnectionFactory</code>.
    *
    * @param cnxFact  The TopicConnectionFactory to use for connecting.
@@ -89,7 +89,7 @@ public class AdminImpl implements AdminItf
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(TopicConnectionFactory cnxFact, String name,
+  public void connect(javax.jms.TopicConnectionFactory cnxFact, String name,
                       String password)
               throws ConnectException, AdminException
   {
@@ -102,7 +102,6 @@ public class AdminImpl implements AdminItf
 
       topic = sess.createTopic("#AdminTopic");
       
-      producer = sess.createProducer(topic);
       requestor = new TopicRequestor(sess, topic);
 
       cnx.start();
@@ -213,11 +212,7 @@ public class AdminImpl implements AdminItf
                          throws ConnectException, AdminException
   {
     reply = doRequest(new CreateQueueRequest(serverId));
-
-    if (reply instanceof CreateDestinationReply)
-      return new Queue(((CreateDestinationReply) reply).getDestId());
-    else
-      throw new AdminException(reply.getInfo());
+    return new Queue(((CreateDestinationReply) reply).getDestId());
   }
 
   /**
@@ -250,11 +245,7 @@ public class AdminImpl implements AdminItf
                          throws ConnectException, AdminException
   {
     reply = doRequest(new CreateTopicRequest(serverId));
-
-    if (reply instanceof CreateDestinationReply)
-      return new Topic(((CreateDestinationReply) reply).getDestId());
-    else
-      throw new AdminException(reply.getInfo());
+    return new Topic(((CreateDestinationReply) reply).getDestId());
   }
 
   /**
@@ -268,7 +259,7 @@ public class AdminImpl implements AdminItf
    */
   public javax.jms.Topic createTopic() throws ConnectException, AdminException
   {
-    return  this.createTopic(localServer);
+    return this.createTopic(localServer);
   }
 
   /**
@@ -287,11 +278,7 @@ public class AdminImpl implements AdminItf
                     throws ConnectException, AdminException
   {
     reply = doRequest(new CreateDMQRequest(serverId));
-
-    if (reply instanceof CreateDestinationReply)
-      return new DeadMQueue(((CreateDestinationReply) reply).getDestId());
-    else
-      throw new AdminException(reply.getInfo());
+    return new DeadMQueue(((CreateDestinationReply) reply).getDestId());
   }
 
   /**
@@ -310,8 +297,6 @@ public class AdminImpl implements AdminItf
 
   /**
    * Removes a given destination from the platform.
-   * <p>
-   * The request is not effective if the destination has already been deleted.
    *
    * @param dest  The destination to remove.
    *
@@ -323,13 +308,13 @@ public class AdminImpl implements AdminItf
   public void deleteDestination(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new DeleteDestination(getDestinationName(dest)));
+    doRequest(new DeleteDestination(getDestinationName(dest)));
   }
 
   /**
    * Adds a topic to a cluster.
    * <p>
-   * The request fails one or both of the topics are deleted, or
+   * The request fails if one or both of the topics are deleted, or
    * can't belong to a cluster.
    *
    * @param clusterTopic  Topic part of the cluster, or chosen as the 
@@ -352,27 +337,27 @@ public class AdminImpl implements AdminItf
   /**
    * Removes a topic from the cluster it is part of.
    * <p>
-   * The request is not effective if the topic is deleted or not part
-   * of any cluster.
+   * The request fails if the topic does not exist or is not part of any 
+   * cluster.
    *
    * @param topic  Topic leaving the cluster it is part of.
    * 
    * @exception IllegalArgumentException  If the topic is not a valid 
    *              JORAM topic.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void leaveCluster(javax.jms.Topic topic)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetCluster(getDestinationName(topic)));
+    doRequest(new UnsetCluster(getDestinationName(topic)));
   }
 
   /**
    * Sets a given topic as the father of an other topic.
    * <p>
-   * The request fails if one or both of the topics are deleted,
-   * or can't belong to a hierarchy.
+   * The request fails if one of the topics does not exist or can't be part
+   * of a hierarchy.
    *
    * @param father  Father.
    * @param son  Son.
@@ -392,7 +377,7 @@ public class AdminImpl implements AdminItf
   /**
    * Unsets the father of a given topic.
    * <p>
-   * The request is not effective if the topic is deleted or not part of any
+   * The request fails if the topic does not exist or is not part of any
    * hierarchy.
    *
    * @param topic  Topic which father is unset.
@@ -400,12 +385,12 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the topic is not a valid 
    *              JORAM topic.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetFather(javax.jms.Topic topic)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetFather(getDestinationName(topic)));
+    doRequest(new UnsetFather(getDestinationName(topic)));
   }
 
   /**
@@ -428,11 +413,7 @@ public class AdminImpl implements AdminItf
               throws ConnectException, AdminException
   {
     reply = doRequest(new CreateUserRequest(name, password, serverId));
-
-    if (reply instanceof CreateUserReply)
-      return new User(name, ((CreateUserReply) reply).getProxId());
-    else
-      throw new AdminException(reply.getInfo());
+    return new User(name, ((CreateUserReply) reply).getProxId());
   }
 
   /**
@@ -478,8 +459,6 @@ public class AdminImpl implements AdminItf
 
   /**
    * Removes a given user.
-   * <p>
-   * The request is not effective if the user is already deleted.
    *
    * @param user  The user to remove.
    *
@@ -488,85 +467,85 @@ public class AdminImpl implements AdminItf
    */
   public void deleteUser(User user) throws ConnectException, AdminException
   {
-    doSend(new DeleteUser(user.name, user.proxyId));
+    doRequest(new DeleteUser(user.name, user.proxyId));
   }
 
   /**
    * Sets free reading access on a given destination.
    * <p>
-   * The request is not effective if the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    *
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setFreeReading(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new SetReader(null, getDestinationName(dest)));
+    doRequest(new SetReader(null, getDestinationName(dest)));
   }
 
   /**
    * Sets free writing access on a given destination.
    * <p>
-   * The request is not effective if the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    *
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setFreeWriting(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new SetWriter(null, getDestinationName(dest)));
+    doRequest(new SetWriter(null, getDestinationName(dest)));
   }
 
   /**
    * Unsets free reading access on a given destination.
    * <p>
-   * The request is not effective if the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    *
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetFreeReading(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetReader(null, getDestinationName(dest)));
+    doRequest(new UnsetReader(null, getDestinationName(dest)));
   }
 
   /**
    * Unsets free writing access on a given destination.
    * <p>
-   * The request is not effective if the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    *
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetFreeWriting(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetWriter(null, getDestinationName(dest)));
+    doRequest(new UnsetWriter(null, getDestinationName(dest)));
   }
 
   /**
    * Sets a given user as a reader on a given destination.
    * <p>
-   * The request is not effective if the user or the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param user  User to be set as a reader.
    * @param dest  Destination.
@@ -574,18 +553,18 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setReader(User user, javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new SetReader(user.proxyId, getDestinationName(dest)));
+    doRequest(new SetReader(user.proxyId, getDestinationName(dest)));
   }
 
   /**
    * Sets a given user as a writer on a given destination.
    * <p>
-   * The request is not effective if the user or the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param user  User to be set as a writer.
    * @param dest  Destination.
@@ -593,18 +572,18 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setWriter(User user, javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new SetWriter(user.proxyId, getDestinationName(dest)));
+    doRequest(new SetWriter(user.proxyId, getDestinationName(dest)));
   }
 
   /**
    * Unsets a given user as a reader on a given destination.
    * <p>
-   * The request is not effective if the user or the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param user  Reader to be unset.
    * @param dest  Destination.
@@ -612,18 +591,18 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetReader(User user, javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetReader(user.proxyId, getDestinationName(dest)));
+    doRequest(new UnsetReader(user.proxyId, getDestinationName(dest)));
   }
 
   /**
    * Unsets a given user as a writer on a given destination.
    * <p>
-   * The request is not effective if the user or the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param user  Writer to be unset.
    * @param dest  Destination.
@@ -631,19 +610,16 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetWriter(User user, javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetWriter(user.proxyId, getDestinationName(dest)));
+    doRequest(new UnsetWriter(user.proxyId, getDestinationName(dest)));
   }
 
   /**
    * Sets a given dead message queue as the default DMQ for a given server.
-   * <p>
-   * The request is not effective if the server is unknown in the platform,
-   * or if the dmq is deleted.
    *
    * @param serverId  The identifier of the server.
    * @param dmq  The dmq to be set as the default one.
@@ -654,13 +630,11 @@ public class AdminImpl implements AdminItf
   public void setDefaultDMQ(int serverId, DeadMQueue dmq)
               throws ConnectException, AdminException
   {
-    doSend(new SetDefaultDMQ(serverId, getDestinationName(dmq)));
+    doRequest(new SetDefaultDMQ(serverId, getDestinationName(dmq)));
   }
 
   /**
    * Sets a given dead message queue as the default DMQ for the local server.
-   * <p>
-   * The request is not effective if the dmq is deleted.
    *
    * @param dmq  The dmq to be set as the default one.
    *
@@ -676,7 +650,7 @@ public class AdminImpl implements AdminItf
   /**
    * Sets a given dead message queue as the DMQ for a given destination.
    * <p>
-   * The request is not effective if the destination or the DMQ is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    * @param dmq  The dead message queue to be set.
@@ -684,36 +658,34 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setDestinationDMQ(javax.jms.Destination dest, DeadMQueue dmq)
               throws ConnectException, AdminException
   {
-    doSend(new SetDestinationDMQ(getDestinationName(dest),
-                                 getDestinationName(dmq)));
+    doRequest(new SetDestinationDMQ(getDestinationName(dest),
+                                    getDestinationName(dmq)));
   }
 
   /**
    * Sets a given dead message queue as the DMQ for a given user.
    * <p>
-   * The request is not effective if the user or the DMQ is deleted.
+   * The request fails if the user is deleted.
    *
    * @param user  The user.
    * @param dmq  The dead message queue to be set.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setUserDMQ(User user, DeadMQueue dmq)
               throws ConnectException, AdminException
   {
-    doSend(new SetUserDMQ(user.proxyId, getDestinationName(dmq)));
+    doRequest(new SetUserDMQ(user.proxyId, getDestinationName(dmq)));
   } 
 
   /**
    * Unsets the default dead message queue of a given server.
-   * <p>
-   * The request is not effective if the server is unknown in the platform.
    *
    * @param serverId  The identifier of the server.
    *
@@ -723,7 +695,7 @@ public class AdminImpl implements AdminItf
   public void unsetDefaultDMQ(int serverId)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetDefaultDMQ(serverId));
+    doRequest(new UnsetDefaultDMQ(serverId));
   }
 
   /**
@@ -740,40 +712,38 @@ public class AdminImpl implements AdminItf
   /**
    * Unsets the dead message queue of a given destination.
    * <p>
-   * The request is not effective if the destination is deleted.
+   * The request fails if the destination is deleted.
    *
    * @param dest  The destination.
    *
    * @exception IllegalArgumentException  If the destination is not a valid 
    *              JORAM destination.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetDestinationDMQ(javax.jms.Destination dest)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetDestinationDMQ(getDestinationName(dest)));
+    doRequest(new UnsetDestinationDMQ(getDestinationName(dest)));
   }
 
   /**
    * Unsets the dead message queue of a given user.
    *  <p>
-   * The request is not effective if the user is deleted.
+   * The request fails if the user is deleted.
    *
    * @param user  The user.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetUserDMQ(User user) throws ConnectException, AdminException
   {
-    doSend(new UnsetUserDMQ(user.proxyId));
+    doRequest(new UnsetUserDMQ(user.proxyId));
   }
 
   /**
    * Sets a given value as the default threshold for a given server.
-   * <p>
-   * The request is not effective if the server is unknown in the platform.
    *
    * @param serverId  The identifier of the server.
    * @param threshold  The threshold value to be set.
@@ -784,7 +754,7 @@ public class AdminImpl implements AdminItf
   public void setDefaultThreshold(int serverId, int threshold)
               throws ConnectException, AdminException
   {
-    doSend(new SetDefaultThreshold(serverId, threshold));
+    doRequest(new SetDefaultThreshold(serverId, threshold));
   }
 
   /**
@@ -804,7 +774,7 @@ public class AdminImpl implements AdminItf
   /**
    * Sets a given value as the threshold for a given queue.
    * <p>
-   * The request is not effective if the queue is deleted.
+   * The request fails if the queue is deleted.
    *
    * @param queue  The queue.
    * @param threshold  The threshold value to be set.
@@ -812,35 +782,33 @@ public class AdminImpl implements AdminItf
    * @exception IllegalArgumentException  If the queue is not a valid 
    *              JORAM queue.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setQueueThreshold(javax.jms.Queue queue, int threshold)
               throws ConnectException, AdminException
   {
-    doSend(new SetQueueThreshold(getDestinationName(queue), threshold));
+    doRequest(new SetQueueThreshold(getDestinationName(queue), threshold));
   } 
 
   /**
    * Sets a given value as the threshold for a given user.
    * <p>
-   * The request is not effective if the user is deleted.
+   * The request fails if the user is deleted.
    *
    * @param userName  The user.
    * @param threshold  The threshold value to be set.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setUserThreshold(User user, int threshold)
               throws ConnectException, AdminException
   {
-    doSend(new SetUserThreshold(user.proxyId, threshold));
+    doRequest(new SetUserThreshold(user.proxyId, threshold));
   } 
 
   /**
    * Unsets the default threshold of a given server.
-   * <p>
-   * The request is not effective if the server is unknown in the platform.
    *
    * @param serverId  The identifier of the server.
    *
@@ -850,7 +818,7 @@ public class AdminImpl implements AdminItf
   public void unsetDefaultThreshold(int serverId)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetDefaultThreshold(serverId));
+    doRequest(new UnsetDefaultThreshold(serverId));
   }
 
   /**
@@ -867,35 +835,35 @@ public class AdminImpl implements AdminItf
   /**
    * Unsets the threshold of a given queue.
    * <p>
-   * The request is not effective if the queue is deleted.
+   * The request fails if the queue is deleted.
    *
    * @param queue  The queue.
    *
    * @exception IllegalArgumentException  If the queue is not a valid 
    *              JORAM queue.
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetQueueThreshold(javax.jms.Queue queue)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetQueueThreshold(getDestinationName(queue)));
+    doRequest(new UnsetQueueThreshold(getDestinationName(queue)));
   }
 
   /**
    * Unsets the threshold of a given user.
    * <p>
-   * The request is not effective if the user is deleted.
+   * The request fails if the user is deleted.
    *
    * @param userName  The user.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails..
    */
   public void unsetUserThreshold(User user)
               throws ConnectException, AdminException
   {
-    doSend(new UnsetUserThreshold(user.proxyId));
+    doRequest(new UnsetUserThreshold(user.proxyId));
   } 
 
   /**
@@ -1032,65 +1000,12 @@ public class AdminImpl implements AdminItf
 
 
   /**
-   * Method actually sending an <code>AdminRequest</code> instance to
-   * the platform and getting an <code>AdminReply</code> instance.
-   *
-   * @exception ConnectException  If the connection to the platform fails.
-   * @exception AdminException  If the platform's reply is invalid, or if
-   *              the request failed.
-   */  
-  AdminReply doRequest(AdminRequest request)
-                     throws AdminException, ConnectException
-  {
-    try {
-      requestMsg = sess.createObjectMessage(request);
-      replyMsg = (ObjectMessage) requestor.request(requestMsg);
-      reply = (AdminReply) replyMsg.getObject();
-
-      if (! reply.succeeded())
-        throw new AdminException(reply.getInfo());
-
-      return reply;
-    }
-    catch (JMSException exc) {
-      throw new ConnectException("Connection failed: " + exc.getMessage());
-    }
-    catch (ClassCastException exc) {
-      throw new AdminException("Invalid server reply: " + exc.getMessage());
-    }
-  }
-
-  /**
-   * Method actually sending an <code>AdminRequest</code> instance to
-   * the platform.
-   *
-   * @exception ConnectException  If the connection to the platform fails.
-   */  
-  void doSend(AdminRequest request) throws ConnectException
-  {
-    try {
-      requestMsg = sess.createObjectMessage(request);
-      producer.send(requestMsg);
-    }
-    catch (JMSException exc) {
-      throw new ConnectException("Connection failed: " + exc.getMessage());
-    }
-  }
-
-  /** Temporary method kept for maintaining the old Admin class. */
-  int getServerId()
-  {
-    return localServer;
-  }
-
- 
-  /**
    * Returns the name of a given JORAM destination.
    *
    * @exception IllegalArgumentException  If the destination is null or not
    *               a JORAM destination.
    */ 
-  private String getDestinationName(javax.jms.Destination dest)
+  String getDestinationName(javax.jms.Destination dest)
   {
     if (dest == null)
       throw new IllegalArgumentException("Invalid null destination");
@@ -1111,5 +1026,40 @@ public class AdminImpl implements AdminItf
     catch (JMSException exc) {
       return null;
     }
+  }
+
+  /**
+   * Method actually sending an <code>AdminRequest</code> instance to
+   * the platform and getting an <code>AdminReply</code> instance.
+   *
+   * @exception ConnectException  If the connection to the platform fails.
+   * @exception AdminException  If the platform's reply is invalid, or if
+   *              the request failed.
+   */  
+  AdminReply doRequest(AdminRequest request)
+  throws AdminException, ConnectException
+  {
+    try {
+      requestMsg = sess.createObjectMessage(request);
+      replyMsg = (ObjectMessage) requestor.request(requestMsg);
+      reply = (AdminReply) replyMsg.getObject();
+
+      if (! reply.succeeded())
+        throw new AdminException(reply.getInfo());
+
+      return reply;
+    }
+    catch (JMSException exc) {
+      throw new ConnectException("Connection failed: " + exc.getMessage());
+    }
+    catch (ClassCastException exc) {
+      throw new AdminException("Invalid server reply: " + exc.getMessage());
+    }
+  }
+  
+  /** Temporary method kept for maintaining the old Admin class. */
+  int getServerId()
+  {
+    return localServer;
   }
 } 

@@ -615,7 +615,7 @@ public class Admin
     String joiningId;
     for (int i = 1; i < cluster.topics.size(); i++) {
       joiningId = (String) cluster.topics.get(i);
-      adminImpl.doSend(new SetCluster(initId, joiningId));
+      adminImpl.doRequest(new SetCluster(initId, joiningId));
     }
     cluster.locked = true;
 
@@ -651,7 +651,7 @@ public class Admin
       String id;
       for (int i = 0; i < cluster.topics.size(); i++) {
         id = (String) cluster.topics.get(i);
-        adminImpl.doSend(new UnsetCluster(id));
+        adminImpl.doRequest(new UnsetCluster(id));
       }
       
       jndiCtx.unbind(mName);
