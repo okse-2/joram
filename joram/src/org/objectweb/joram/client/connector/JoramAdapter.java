@@ -624,7 +624,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                               + exc);
     }
 
-    return (XAResource[]) resources.toArray();
+    return (XAResource[]) resources.toArray(new XAResource[resources.size()]);
   }
 
 
