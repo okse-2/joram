@@ -380,6 +380,7 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   protected void prepare() throws Exception
   {
     momMsg.setMap(map);
+    super.prepare();
   }
 
   /** 

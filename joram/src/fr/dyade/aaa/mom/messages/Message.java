@@ -81,12 +81,12 @@ public class Message implements Cloneable, Serializable
    * <b>Object:</b> property (native objects)
    */
   public Hashtable properties = null;
-
   /**
    * <code>true</code> if the message has been denied at least once by a
    * consumer.
    */
   public boolean denied = false;
+
   /** The identifier of the consumer, used by queues. */
   public String consId = null;
   /**

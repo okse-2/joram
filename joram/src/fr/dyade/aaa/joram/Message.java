@@ -703,7 +703,10 @@ public class Message implements javax.jms.Message
    * @exception Exception  If an error occurs while serializing.
    */
   protected void prepare() throws Exception
-  {}
+  {
+    momMsg.consId = null;
+    momMsg.acksCounter = 0;
+  }
 
   /** 
    * Method actually deserializing the MOM body as the wrapped data.

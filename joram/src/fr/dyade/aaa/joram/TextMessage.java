@@ -97,6 +97,7 @@ public class TextMessage extends Message implements javax.jms.TextMessage
   protected void prepare() throws Exception
   {
     momMsg.setText(text);
+    super.prepare();
   }
 
   /** 
