@@ -20,7 +20,7 @@
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00102.html">
         Nigel Rantor</a>. The <code>fr.dyade.aaa.jndi2.distributed</code> 
         package was not included in the jar construction, preventing any
-        distributed JNDI conf to work. An update <code>joram.xml</code> build
+        distributed JNDI conf to work. An updated <code>joram.xml</code> build
         file has been submitted under <code>src/</code>.</li>
         <li>kJoram compiling issues, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00058.html">
