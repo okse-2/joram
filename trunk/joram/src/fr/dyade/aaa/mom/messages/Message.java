@@ -88,12 +88,12 @@ public class Message implements Cloneable, Serializable
   public boolean denied = false;
 
   /** The identifier of the consumer, used by queues. */
-  public String consId = null;
+  transient public String consId = null;
   /**
    * The number of acknowledgements a message still expects from its 
    * subscribers before having been fully consumed (field used by JMS proxies).
    */
-  public int acksCounter = 0;
+  transient public int acksCounter = 0;
 
 
 
