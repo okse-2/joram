@@ -23,7 +23,7 @@
  */
 package deadMQueue;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
 
 import javax.jms.*;
 import javax.naming.*;

@@ -178,6 +178,7 @@
   <target name="release.jar" depends="clean,ship.joram,ship.gui" if="version">
     <copy todir="../joram-${version}" includeEmptyDirs="no">
       <fileset dir="..">
+	<exclude name="build.xml" />
 	<exclude name="src/**" />
 	<exclude name="classes/**" />
 	<exclude name="lib/jmxri.jar" />
@@ -203,6 +204,8 @@
   <target name="release.src" depends="clean" if="version">
     <copy todir="../joram-${version}-src" includeEmptyDirs="no">
       <fileset dir="..">
+	<exclude name="build.xml" />
+	<exclude name="src/fr/dyade/aaa/ns/**" />
 	<exclude name="classes/**" />
         <exclude name="lib/jmxri.jar" />
 	<exclude name="lib/jmxtools.jar" />
