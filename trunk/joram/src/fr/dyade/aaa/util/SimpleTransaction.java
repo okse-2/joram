@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,9 +24,9 @@ import java.io.*;
 import java.util.*;
 
 public final class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.15 2003-09-12 08:05:50 afreyssin Exp $"; 
-
   private File dir = null;
+  static private final String LOCK = "lock";
+  private File lockFile = null;
 
   public SimpleTransaction() {}
 
@@ -40,6 +40,11 @@ public final class SimpleTransaction implements Transaction {
     // different one after restart (see AgentServer.init).
     DataOutputStream dos = null;
     try {
+      lockFile = new File(dir, LOCK);
+      if (! lockFile.createNewFile()) {
+        throw new IOException("Transaction already running.");
+      }
+      lockFile.deleteOnExit();
       File tfc = new File(dir, "TFC");
       if (! tfc.exists()) {
         dos = new DataOutputStream(new FileOutputStream(tfc));
@@ -102,6 +107,47 @@ public final class SimpleTransaction implements Transaction {
     }
   }
 
+  public void saveByteArray(byte[] buf, String name) throws IOException {
+    saveByteArray(buf, null, name);
+  }
+
+  public void saveByteArray(byte[] buf,
+                            String dirName, String name) throws IOException {
+    File temp, file;
+    if (dirName == null) {
+      temp = new File(dir, "temp_" + name);
+      file = new File(dir, name);
+    } else {
+      File parentDir = new File(dir, dirName);
+      if (!parentDir.exists()) {
+        parentDir.mkdirs();
+      }
+      temp = new File(parentDir, "temp_" + name);
+      file = new File(parentDir, name);
+    }
+
+    if (temp.exists() && (! temp.delete()))
+      throw new IOException("Can't delete log file: " + temp.getPath());
+
+    if (file.exists())
+      file.renameTo(temp);
+	
+    // Save the current state of the object.
+    FileOutputStream fos = null;
+    try {
+      fos = new FileOutputStream(file);
+      fos.write(buf);
+      fos.flush();
+      fos.getFD().sync();
+      fos.close();
+      fos = null;
+      temp.delete();
+      temp = null;
+    } finally {
+      if (fos != null) fos.close();
+    }
+  }
+
   public Object load(String name) throws IOException, ClassNotFoundException {
     return load(null, name);
   }
@@ -136,6 +182,47 @@ public final class SimpleTransaction implements Transaction {
 	  fis.close();
       }
       return obj;
+    }
+    return null;
+  }
+
+  public byte[] loadByteArray(String name) throws IOException {
+    return loadByteArray(null, name);
+  }
+
+  public byte[] loadByteArray(String dirName, String name) throws IOException {
+    byte[] buf;
+
+    File temp, file;
+    if (dirName == null) {
+      temp = new File(dir, "temp_" + name);
+      file = new File(dir, name);
+    } else {
+      File parentDir = new File(dir, dirName);
+      temp = new File(parentDir, "temp_" + name);
+      file = new File(parentDir, name);
+    }
+    if (temp.exists()) {
+      if (! file.delete())
+	throw new IOException("Can't delete corrupted file: " + file.getPath());
+      if (! temp.renameTo(file))
+	throw new IOException("Can't restore corrupted file: " + file.getPath());
+    }
+    if (file.canRead()) {
+      FileInputStream fis = null;
+      try {
+	fis = new FileInputStream(file);
+        buf = new byte[(int) file.length()];
+        for (int nb=0; nb<buf.length; ) {
+          int ret = fis.read(buf, nb, buf.length-nb);
+          if (ret == -1) throw new EOFException();
+          nb += ret;
+        }
+      } finally {
+	if (fis != null)
+	  fis.close();
+      }
+      return buf;
     }
     return null;
   }
@@ -187,5 +274,7 @@ public final class SimpleTransaction implements Transaction {
 
   public void release() throws IOException {}
 
-  public void stop() {}
+  public void stop() {
+    lockFile.delete();
+  }
 }

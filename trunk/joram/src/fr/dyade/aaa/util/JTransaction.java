@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -155,12 +155,19 @@ public class JTransaction implements Transaction {
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(obj);
     oos.flush();
-    byte[] bobj = bos.toByteArray();
+    saveByteArray(bos.toByteArray(), dirName, name);
+  }
 
+  public void saveByteArray(byte[] buf, String name) throws IOException {
+    saveByteArray(buf, null, name);
+  }
+
+  public void saveByteArray(byte[] buf,
+                            String dirName, String name) throws IOException {
     if (phase == RUN) {
       // We are during a transaction put the new state in the log.
       Object key = OperationKey.newKey(dirName, name);
-      log.put(key, new Operation(SAVE, dirName, name, bobj));
+      log.put(key, new Operation(SAVE, dirName, name, buf));
     } else {
       // Save the new state on the disk.
       File file;
@@ -174,7 +181,7 @@ public class JTransaction implements Transaction {
         file = new File(parentDir, name);
       }
       FileOutputStream fos = new FileOutputStream(file);
-      fos.write(bobj);
+      fos.write(buf);
       fos.close();
     }
   }
@@ -197,7 +204,7 @@ public class JTransaction implements Transaction {
 	  
 	  return ois.readObject();
 	} else if (op.type == DELETE) {
-	  // l'objet a *t* d*truit.
+	  // The object is no longer alive
 	  return null;
 	}
       }
@@ -224,6 +231,48 @@ public class JTransaction implements Transaction {
     }
 
     return obj;
+  }
+
+  public byte[] loadByteArray(String name) throws IOException {
+    return loadByteArray(null, name);
+  }
+
+  public byte[] loadByteArray(String dirName, String name) throws IOException {
+    if (phase == RUN) {
+      // first search in the log a new value for the object.
+      Object key = OperationKey.newKey(dirName, name);
+      Operation op = (Operation) log.get(key);
+      if (op != null) {
+	if (op.type == SAVE) {
+          return op.value;
+	} else if (op.type == DELETE) {
+	  // The object is no longer alive
+	  return null;
+	}
+      }
+    }
+
+    try {
+      File file;
+      if (dirName == null) {
+        file = new File(dir, name);
+      } else {
+        File parentDir = new File(dir, dirName);
+        file = new File(parentDir, name);
+      }
+      FileInputStream fis = new FileInputStream(file);
+      byte[] buf = new byte[(int) file.length()];
+      for (int nb=0; nb<buf.length; ) {
+        int ret = fis.read(buf, nb, buf.length-nb);
+        if (ret == -1) throw new EOFException();
+        nb += ret;
+      }
+      fis.close();
+
+      return buf;
+    } catch (FileNotFoundException exc) {
+      return null;
+    }
   }
 
   public void delete(String name) {
