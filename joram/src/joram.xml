@@ -28,6 +28,8 @@
         <include name="jakarta-regexp-1.2.jar"/>
         <include name="JCup.jar"/>
         <include name="jms.jar"/>
+        <include name="jmxri.jar"/>
+        <include name="jmxtools.jar"/>
         <include name="jndi.jar"/>
         <include name="jta.jar"/>
         <include name="log4j.jar"/>
@@ -80,6 +82,7 @@
       <classpath refid="project.class.path"/>
 
       <include name="fr/**/*.java"/>
+      <include name="com/scalagent/jmx/*.java"/>
  
       <!-- Requires jdk1.4 -->
       <exclude name="fr/dyade/aaa/agent/SSLNetwork.java"/>
