@@ -16,6 +16,9 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications (latest: May 11, 2004)">
       <ul>
+        <li>Many improvements in the <code>org.objectweb.joram.client.connector</code>
+        package for better handling the state managment of the wrappping Outbound
+        objects.</li>
         <li><em>NbMaxAgents</em> variable set when launching a non
         persistent server through the adapter, so that no agents swapping
         is performed (updated class:
