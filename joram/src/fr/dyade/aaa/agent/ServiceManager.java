@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * @author	Freyssinet Andre
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.3 2001-08-31 08:13:59 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.4 2001-09-11 10:58:51 tachkeni Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
@@ -174,7 +174,7 @@ public class ServiceManager implements Serializable {
       try {
 	if (desc.running) stop(desc);
       } catch (Throwable exc) {
-	if (Debug.error)
+	if (Debug.A3Server)
 	  Debug.trace("cannot stop service " + desc.getClassName(), exc);
       }
     }
