@@ -24,7 +24,7 @@ package org.objectweb.joram.client.tools.admin;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-import fr.dyade.aaa.joram.admin.User;
+import org.objectweb.joram.client.jms.admin.User;
 
 
 class UserTreeNode extends DefaultMutableTreeNode

@@ -32,7 +32,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 
-import fr.dyade.aaa.joram.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 
 
 /**
