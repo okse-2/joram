@@ -18,7 +18,8 @@
       <ul>
         <li>Incorrect target for launching JORAM as a SOAP service in the 
         samples <code>build.xml</code> file, found  by 
-        <a href="">Christian Neudorfer</a>. The target still refers to the
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00053.html">
+        Christian Neudorfer</a>. The target still refers to the
         old <code>fr.dyade.aaa.joram</code> package instead of refering to
         <code>org.objectweb.joram.client.jms</code>. An updated version
         has been submitted in CVS.</li>
