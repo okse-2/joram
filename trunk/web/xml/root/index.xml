@@ -24,6 +24,8 @@
       destinations, users, and also to bind them to JORAM's naming server.</p>
       <p>Many thanks to Alexander for providing this useful tool often
       requested on JORAM's mailing lists.</p>
+      <p><img src="images/joram-gui.jpg" alt="JORAM GUI screenshot" height="240"
+           width="450" border="0" hspace="2" align="middle"/></p>
       <p>The tool sources are available in CVS and in the sources package. It
       is provided as an independent library in the binary distribution. Check
       the <a href="download/index.html">download area</a>.
