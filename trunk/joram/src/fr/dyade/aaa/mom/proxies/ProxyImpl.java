@@ -337,6 +337,7 @@ public class ProxyImpl implements java.io.Serializable
    * <li><code>SyncReply</code> proxy synchronizing notifications,</li>
    * <li><code>SetDMQRequest</code> admin notifications,</li>
    * <li><code>SetThreshRequest</code> admin notifications,</li>
+   * <li><code>Monit_GetDMQSettings</code> monitoring notifications,</li>
    * <li><code>AbstractReply</code> destination replies,</li>
    * <li><code>AdminReply</code> administration replies,</li>
    * <li><code>fr.dyade.aaa.agent.UnknownAgent</code>,</li>
@@ -358,6 +359,8 @@ public class ProxyImpl implements java.io.Serializable
       doReact(from, (SetDMQRequest) not);
     else if (not instanceof SetThreshRequest)
       doReact(from, (SetThreshRequest) not);
+    else if (not instanceof Monit_GetDMQSettings)
+      doReact(from, (Monit_GetDMQSettings) not);
     // Notification sent by the proxy to itself for causal reasons:
     else if (not instanceof SyncReply)
       doReact((SyncReply) not);
@@ -738,6 +741,7 @@ public class ProxyImpl implements java.io.Serializable
     // Acknowledging the request:
     proxyAgent.sendNot(proxyAgent.getAgentId(),
                        new SyncReply(currKey, new ServerReply(req)));
+
   }
 
   /**
@@ -1237,6 +1241,18 @@ public class ProxyImpl implements java.io.Serializable
   }
 
   /**
+   * Method implementing the reaction to a <code>Monit_GetDMQSettings</code>
+   * instance requesting the DMQ settings of this proxy.
+   */
+  private void doReact(AgentId from, Monit_GetDMQSettings not)
+  {
+    String id = null;
+    if (dmqId != null)
+      id = dmqId.toString();
+    proxyAgent.sendNot(from, new Monit_GetDMQSettingsRep(not, id, threshold));
+  }
+
+  /**
    * Method implementing the JMS proxy reaction to a
    * <code>SyncReply</code> notification sent by itself, wrapping a reply
    * to be sent to a client.
@@ -1440,7 +1456,7 @@ public class ProxyImpl implements java.io.Serializable
         ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
         if (sub != null && from.equals(sub.topicId)) {
           subsTable.remove(subName);
-          cnx.activeSubs.remove(sub);
+          cnx.activeSubs.remove(subName);
           sub.delete();
         }
       }
@@ -1511,7 +1527,7 @@ public class ProxyImpl implements java.io.Serializable
         ClientSubscription sub = (ClientSubscription) subsTable.remove(name);
         try {
           setCnx(sub.connectionKey);
-          cnx.activeSubs.remove(sub);
+          cnx.activeSubs.remove(name);
         }
         catch (ProxyException exc) {}
         sub.delete();
