@@ -27,12 +27,13 @@ package org.objectweb.jtests.jms.conform.message.headers;
 import org.objectweb.jtests.jms.framework.PTPTestCase;
 import javax.jms.*;
 import junit.framework.*;
+import javax.naming.* ;
 
 /**
  * Test the headers of a message
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageHeaderTest.java,v 1.2 2002-03-25 16:18:28 joram Exp $
+ * @version $Id: MessageHeaderTest.java,v 1.3 2002-04-02 12:12:36 joram Exp $
  */
 public class MessageHeaderTest extends PTPTestCase {
 
@@ -167,12 +168,17 @@ public class MessageHeaderTest extends PTPTestCase {
      */
     public void testJMSDestination() {
 	try {
+	    admin.createQueue("anotherQueue");
+	    Context ctx = admin.createInitialContext();
+	    Queue anotherQueue = (Queue)ctx.lookup("anotherQueue");
+	    assertTrue(anotherQueue != senderQueue);
+
+	    // set the JMSDestination header field to the anotherQueue Destination
 	    Message message = senderSession.createMessage();
-	    // set the JMSDestination header field to the senderQueue Destination
-	    message.setJMSDestination(senderQueue);
+	    message.setJMSDestination(anotherQueue);
 	    sender.send(message);
 	    assertTrue("§3.4.1 When a message is sent this value is ignored.\n",
-		       message.getJMSDestination() != senderQueue);
+		       message.getJMSDestination() != anotherQueue);
 	    assertEquals("§3.4.1 After completion of the send it holds the destination object specified " +
 			 "by the sending method.\n",
 			 receiverQueue, message.getJMSDestination());
@@ -181,9 +187,13 @@ public class MessageHeaderTest extends PTPTestCase {
 	    assertEquals("§3.4.1 When a message is received, its destination value must be equivalent  " +
 			 " to the value assigned when it was sent.\n",
 			 message.getJMSDestination(), msg.getJMSDestination());
+
+	    admin.deleteQueue("anotherQueue");
 	} catch (JMSException e) {
 	    fail(e);
-	} 
+	} catch (NamingException e) {
+	    fail(e.getMessage());
+	}
     }
 
     /**
