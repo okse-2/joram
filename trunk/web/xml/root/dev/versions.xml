@@ -14,7 +14,7 @@
     <s1 name="joram CVS version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with small corrections and updates.</p>
-      <s2 name="Modifications (latest: May 2003, 7th)">
+      <s2 name="Modifications (latest: May 2003, 13th)">
       <ul>
       <li>Bug in bytes and stream messages: sequentially modifying and sending
       an instance of one of those messages resulted in always sending the same
