@@ -395,7 +395,7 @@
   <!-- Starts the server side soap service -->
   <target name="soap_start" depends="soap_init"
    description="--> Starts the server side soap service">
-    <java classname="fr.dyade.aaa.joram.soap.SoapServiceStarter"
+    <java classname="org.objectweb.joram.client.jms.soap.SoapServiceStarter"
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
