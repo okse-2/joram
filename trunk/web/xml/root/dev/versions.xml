@@ -14,8 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: February 19, 2004)"> 
+      <s2 name="Corrected bugs (latest: February 20, 2004)"> 
       <ul>
+        <li>Improper construction of the <code>mom.jar</code> library, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00102.html">
+        Nigel Rantor</a>. The <code>fr.dyade.aaa.jndi2.distributed</code> 
+        package was not included in the jar construction, preventing any
+        distributed JNDI conf to work. An update <code>joram.xml</code> build
+        file has been submitted under <code>src/</code>.</li>
         <li>kJoram compiling issues, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00058.html">
         Stanley</a>. Due to improper build setup and JORAM 4.0 new 
