@@ -16,6 +16,12 @@
       the latest tagged version with small corrections and updates.</p>
       <s2 name="Modifications (latest: April 2003, 23rd)">
       <ul>
+      <li>Bug in serial sending of a message with a transacted session:
+      clearing an already sent (but not commited) message's properties,
+      was actually clearing the properties (instead of clearing only the
+      properties for the sending to come). The impacted class is
+      <code>Message</code> in the <code>fr.dyade.aaa.mom.messages</code>
+      package.</li>
       <li>JNDI bug corrected: serializable objects may be bound in a server
       without the need for the server to "know" the objects' classes. The
       following packages should be updated: <code>fr.dyade.aaa.agent</code>,
