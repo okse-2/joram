@@ -39,9 +39,9 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   /** The array in which the written data is buffered. */
   private ByteArrayOutputStream outputBuffer = null;
   /** The stream in which body data is written. */
-  private ObjectOutputStream outputStream = null;
+  private DataOutputStream outputStream = null;
   /** The stream for reading the data. */
-  private ObjectInputStream inputStream = null;
+  private DataInputStream inputStream = null;
 
   /** <code>true</code> if the message body is read-only. */
   private boolean RObody = false; 
@@ -53,6 +53,22 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   /** <code>true</code> if the message has been sent since its last modif. */
   private boolean prepared = false;
 
+  private int available = 0;
+  private boolean firstTimeBytesRead = true;
+
+  private static final int SHORT = 1;
+  private static final int CHAR = 2;
+  private static final int INT = 3;
+  private static final int LONG = 4;
+  private static final int FLOAT = 5;
+  private static final int DOUBLE = 6;
+  private static final int BOOLEAN = 7;
+  private static final int STRING = 8;
+  private static final int BYTE = 9;
+  private static final int BYTES = 10;
+  private static final int NULL = 11;
+  
+
 
   /**
    * Instanciates a bright new <code>StreamMessage</code>.
@@ -60,20 +76,12 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception JMSException  In case of an error while creating the output
    *              stream.
    */
-  StreamMessage() throws JMSException
-  {
+  StreamMessage() throws JMSException {
     super();
     outputBuffer = new ByteArrayOutputStream();
-
-    try {
-      outputStream = new ObjectOutputStream(outputBuffer);
-    }
-    catch (IOException ioE) {
-      JMSException jE =
-        new JMSException("Error while creating the stream facility.");
-      jE.setLinkedException(ioE);
-      throw jE;
-    }
+    outputStream = new DataOutputStream(outputBuffer);
+    available = 0;
+    firstTimeBytesRead = true;
   }
 
   /**
@@ -87,13 +95,12 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    *              stream.
    */
   StreamMessage(Session sess, org.objectweb.joram.shared.messages.Message momMsg)
-  throws JMSException
-  {
+    throws JMSException {
     super(sess, momMsg);
     bytes = momMsg.getStream();
-
+    
     try {
-      inputStream = new ObjectInputStream(new ByteArrayInputStream(bytes));
+      inputStream = new DataInputStream(new ByteArrayInputStream(bytes));
     }
     catch (Exception exc) {
       JMSException jE =
@@ -103,6 +110,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
     }
     RObody = true;
     WObody = false;
+    available = 0;
+    firstTimeBytesRead = true;
   }
   
 
@@ -125,7 +134,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
         inputStream.close();
 
       outputBuffer = new ByteArrayOutputStream();
-      outputStream = new ObjectOutputStream(outputBuffer);
+      outputStream = new DataOutputStream(outputBuffer);
       bytes = null;
       RObody = false;
       WObody = true;
@@ -146,14 +155,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */
-  public void writeBoolean(boolean value) throws JMSException
-  {
+  public void writeBoolean(boolean value) 
+    throws JMSException {
     prepareWrite();
 
     try {
+      outputStream.writeByte(BOOLEAN);
       outputStream.writeBoolean(value);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -166,14 +175,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeByte(byte value) throws JMSException
-  {
+  public void writeByte(byte value) 
+    throws JMSException {
     prepareWrite();
 
     try {
-      outputStream.writeByte(value);
-    }
-    catch (IOException ioE) {
+      outputStream.writeByte(BYTE);
+      outputStream.writeByte((int) value);
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -186,18 +195,9 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */   
-  public void writeBytes(byte[] value) throws JMSException
-  {
-    prepareWrite();
-
-    try {
-      outputStream.write(value);
-    }
-    catch (IOException ioE) {
-      JMSException jE = new JMSException("Error while writing the value.");
-      jE.setLinkedException(ioE);
-      throw jE;
-    }
+  public void writeBytes(byte[] value) 
+    throws JMSException {
+    writeBytes(value, 0, value.length);
   }
 
   /** 
@@ -207,14 +207,18 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception JMSException  If the value could not be written on the stream.
    */   
   public void writeBytes(byte[] value, int offset, int length)
-              throws JMSException
-  {
+    throws JMSException {
     prepareWrite();
-
+    
     try {
+      outputStream.writeByte(BYTES);
+      if (value == null) {
+        outputStream.writeInt(-1);
+        return;
+      } else
+        outputStream.writeInt(length);
       outputStream.write(value, offset, length);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -227,14 +231,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeChar(char value) throws JMSException
-  {
+  public void writeChar(char value) 
+    throws JMSException {
     prepareWrite();
 
     try {
-      outputStream.writeChar(value);
-    }
-    catch (IOException ioE) {
+      outputStream.writeByte(CHAR);
+      outputStream.writeChar((int) value);
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -247,14 +251,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeDouble(double value) throws JMSException
-  {
+  public void writeDouble(double value) 
+    throws JMSException {
     prepareWrite();
 
     try {
+      outputStream.writeByte(DOUBLE);
       outputStream.writeDouble(value);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -267,14 +271,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */   
-  public void writeFloat(float value) throws JMSException
-  {
+  public void writeFloat(float value) 
+    throws JMSException {
     prepareWrite();
 
     try {
+      outputStream.writeByte(FLOAT);
       outputStream.writeFloat(value);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -287,14 +291,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */  
-  public void writeInt(int value) throws JMSException
-  {
+  public void writeInt(int value) 
+    throws JMSException {
     prepareWrite();
 
     try {
+      outputStream.writeByte(INT);
       outputStream.writeInt(value);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -307,14 +311,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeLong(long value) throws JMSException
-  {
+  public void writeLong(long value) 
+    throws JMSException {
     prepareWrite();
 
     try {
+      outputStream.writeByte(LONG);
       outputStream.writeLong(value);
-    }
-    catch (IOException ioE) {
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -327,14 +331,14 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */  
-  public void writeShort(short value) throws JMSException
-  {
+  public void writeShort(short value) 
+    throws JMSException {
     prepareWrite();
 
     try {
-      outputStream.writeShort(value);
-    }
-    catch (IOException ioE) {
+      outputStream.writeByte(SHORT);
+      outputStream.writeShort((int) value);
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -347,16 +351,18 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception JMSException  If the value could not be written on the stream.
    */   
-  public void writeString(String value) throws JMSException
-  {
+  public void writeString(String value) 
+    throws JMSException {
     prepareWrite();
-
-    if (value == null) return;
-
+    
     try {
-      outputStream.writeUTF(value);
-    }
-    catch (IOException ioE) {
+      if (value == null)
+        outputStream.writeByte(NULL);
+      else {
+        outputStream.writeByte(STRING);
+        outputStream.writeUTF(value);
+      }
+    } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
       throw jE;
@@ -370,23 +376,41 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageFormatException  If the value type is invalid.
    * @exception JMSException  If the value could not be written on the stream.
    */ 
-  public void writeObject(Object value) throws JMSException
-  {
+  public void writeObject(Object value) 
+    throws JMSException {
     prepareWrite();
 
-    if (! (value instanceof Boolean) && ! (value instanceof Character)
-        && ! (value instanceof Number) && ! (value instanceof String)
-        && ! (value instanceof byte[]))
+    if (value == null) {
+      try {
+        outputStream.writeByte(NULL);
+      } catch (IOException ioE) {
+        JMSException jE = new JMSException("Error while writing the value.");
+        jE.setLinkedException(ioE);
+        throw jE;
+      }
+    } else if (value instanceof Boolean) {
+      writeBoolean(((Boolean) value).booleanValue());
+    } else if (value instanceof Character) {
+      writeChar(((Character) value).charValue());
+    } else if (value instanceof Byte) {
+      writeByte(((Byte) value).byteValue());
+    } else if (value instanceof Short) { 
+      writeShort(((Short) value).shortValue());
+    } else if (value instanceof Integer) { 
+      writeInt(((Integer) value).intValue());
+    } else if (value instanceof Long) { 
+      writeLong(((Long) value).longValue());
+    } else if (value instanceof Float) { 
+      writeFloat(((Float) value).floatValue());
+    } else if (value instanceof Double) { 
+      writeDouble(((Double) value).doubleValue());
+    } else if (value instanceof String) {
+      writeString((String) value);
+    } else if (value instanceof byte[]) {
+      writeBytes((byte[]) value);
+    } else
       throw new MessageFormatException("Can't write non Java primitive type"
                                        + " as a bytes array.");
-    try {
-      outputStream.writeObject(value);
-    }
-    catch (IOException ioE) {
-      JMSException jE = new JMSException("Error while writing the value.");
-      jE.setLinkedException(ioE);
-      throw jE;
-    }
   }
   
   
@@ -396,18 +420,31 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public boolean readBoolean() throws JMSException
-  {
+  public boolean readBoolean() 
+    throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readBoolean();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == BOOLEAN)
+        return inputStream.readBoolean();
+      else if (type == STRING)
+        return Boolean.valueOf(inputStream.readUTF()).booleanValue();
+      else
+        throw new MessageFormatException("type read: " + type + " is not a boolean or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    }                                                             
   }
 
   /**
@@ -416,25 +453,36 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
-   *            MessageEOFException          Unexpected end of bytes array.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public byte readByte() throws JMSException
-  {
+  public byte readByte() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readByte();
-    }
-    catch (Exception e) {
-      JMSException je = null;
-      if (e instanceof EOFException ||
-          e instanceof IOException)
-        je = new MessageEOFException("Unexpected end of bytes array : " + e);
+      inputStream.mark(inputStream.available());
+      byte type = inputStream.readByte();
+      if (type == BYTE)
+        return inputStream.readByte();
+      else if (type == STRING)
+        return Byte.valueOf(inputStream.readUTF()).byteValue();
       else
-        je = new MessageFormatException("Can't read the expected type: " + e);
-      throw je;
-    }
+        throw new MessageFormatException("type read: " + type + " is not a byte or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } catch (NumberFormatException e3) {
+      try {
+        inputStream.reset();
+      } catch (Exception e) {}
+      throw e3;
+    }           
   }
  
   /**
@@ -443,18 +491,32 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public short readShort() throws JMSException
-  {
+  public short readShort() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readShort();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == SHORT)
+        return inputStream.readShort();
+      else if (type == BYTE)
+        return inputStream.readByte();
+      else if (type == STRING)
+        return Short.valueOf(inputStream.readUTF()).shortValue();
+      else
+        throw new MessageFormatException("type read: " + type + " is not a short, a byte or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -463,18 +525,32 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public char readChar() throws JMSException
-  {
+  public char readChar() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readChar();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == CHAR)
+        return inputStream.readChar();
+//        else if (type == STRING)
+//          return inputStream.readUTF().charAt(0);
+      else if (type == NULL)
+        throw new NullPointerException("null is not a char.");
+      else
+        throw new MessageFormatException("type read: " + type + " is not a char.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -483,18 +559,35 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public int readInt() throws JMSException
-  {
+  public int readInt() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readInt();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == INT)
+        return inputStream.readInt();
+      else if (type == SHORT)
+        return inputStream.readShort();
+      else if (type == BYTE)
+        return inputStream.readByte();
+      else if (type == STRING)
+        return Integer.valueOf(inputStream.readUTF()).intValue();
+      else
+        throw new MessageFormatException("type read: " + type + 
+                                         " is not a int, a short, a byte or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -503,18 +596,37 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public long readLong() throws JMSException
-  {
+  public long readLong() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readLong();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == LONG)
+        return inputStream.readLong();
+      else if (type == INT)
+        return inputStream.readInt();
+      else if (type == SHORT)
+        return inputStream.readShort();
+      else if (type == BYTE)
+        return inputStream.readByte();
+      else if (type == STRING)
+        return Long.valueOf(inputStream.readUTF()).longValue();
+      else
+        throw new MessageFormatException("type read: " + type + 
+                                         " is not a int, a short, a byte or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -523,18 +635,30 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public float readFloat() throws JMSException
-  {
+  public float readFloat() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readFloat();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == FLOAT)
+        return inputStream.readFloat();
+      else if (type == STRING)
+        return Float.valueOf(inputStream.readUTF()).floatValue();
+      else
+        throw new MessageFormatException("type read: " + type + " is not float or String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -543,6 +667,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
   public double readDouble() throws JMSException
   {
@@ -550,11 +676,24 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readDouble();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == DOUBLE)
+        return inputStream.readDouble();
+      else if (type == FLOAT)
+        return inputStream.readFloat();
+      else if (type == STRING)
+        return Double.valueOf(inputStream.readUTF()).doubleValue();
+      else
+        throw new MessageFormatException("type read: " + type + " is not a double, a float or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -563,9 +702,10 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public int readBytes(byte[] bytes) throws JMSException
-  {
+  public int readBytes(byte[] bytes) throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
@@ -573,23 +713,82 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return -1;
     if (bytes.length == 0)
       return 0;
-
-    int counter = 0;
+    
+    int ret = 0; 
     try {
-      for (int i = 0; i < bytes.length; i ++) {
-        bytes[i] = inputStream.readByte();
-        counter++;
+      byte type;
+      int counter = 0; 
+      if (firstTimeBytesRead) {
+        type = inputStream.readByte();
+
+        if (type == BYTES) {
+          available = inputStream.readInt();
+          
+          if (available == 0 || available == -1)
+            return available;
+          
+          int toread = 0;
+          if (bytes.length >= available)
+            toread = available;
+          else
+            toread = bytes.length;
+          for (int i = 0; i < toread; i ++) {
+            bytes[i] = inputStream.readByte();
+            counter++;
+          }
+          ret = counter;
+          available = toread - counter;
+          firstTimeBytesRead = false;
+          counter = 0;
+        } else
+          throw new MessageFormatException("type read: " + type + " is not a byte[].");
+      } else {
+        if (available > 0)
+          type = BYTES;
+        else {
+          inputStream.mark(inputStream.available());
+          type = inputStream.readByte();
+        }
+        
+        if (type == BYTES) {
+          if (available >= 0)
+            available = inputStream.readInt();
+
+          if (available == 0 || available == -1)
+            return available;
+
+          int toread = 0;          
+          if (bytes.length >= available)
+            toread = available;
+          else
+            toread = bytes.length;
+          for (int i = 0; i < toread; i ++) {
+            bytes[i] = inputStream.readByte();
+            counter++;
+          }
+          ret = counter;
+          available = toread - counter;
+          firstTimeBytesRead = false;
+          counter = 0;
+        } else {
+          inputStream.reset();
+          firstTimeBytesRead = true;
+          return -1;
+        }
       }
-    }
-    // End of array has been reached:
-    catch (EOFException eofE) {}
-    // An error has occured!
-    catch (IOException ioE) {
-      throw new MessageFormatException("Can't read the expected type: " + ioE);
-    }
-    if (counter == 0)
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
+
+    if (ret == 0)
       return -1;
-    return counter;
+    return ret;
   }
 
   /**
@@ -598,18 +797,47 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public String readString() throws JMSException
-  {
+  public String readString() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readUTF();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
-    }
+      byte type = inputStream.readByte();
+      if (type == STRING)
+        return inputStream.readUTF();
+      else if (type == INT)
+        return String.valueOf(inputStream.readInt());
+      else if (type == SHORT)
+        return String.valueOf(inputStream.readShort());
+      else if (type == BYTE)
+        return String.valueOf(inputStream.readByte());
+      else if (type == FLOAT)
+        return String.valueOf(inputStream.readFloat());
+      else if (type == LONG)
+        return String.valueOf(inputStream.readLong());
+      else if (type == DOUBLE)
+        return String.valueOf(inputStream.readDouble());
+      else if (type == BOOLEAN)
+        return String.valueOf(inputStream.readBoolean());
+      else if (type == CHAR)
+        return String.valueOf(inputStream.readChar());
+      else if (type == NULL)
+        return null;
+      else
+        throw new MessageFormatException("type read: " + type + 
+                                         " is not a int, a short, a byte,... or a String.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   /**
@@ -618,18 +846,51 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the body is
    *                                         not possible.
+   * @exception MessageEOFException          Unexpected end of bytes array.
+   * @exception JMSException                 internal error
    */
-  public Object readObject() throws JMSException
-  {
+  public Object readObject() throws JMSException {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
     try {
-      return inputStream.readObject();
-    }
-    catch (Exception e) {
-      throw new MessageFormatException("Can't read the body: " + e);
-    }
+      byte type = inputStream.readByte();
+
+      if (type == BOOLEAN) {
+        return new Boolean(inputStream.readBoolean());
+      } else if (type == CHAR) {
+        return new Character(inputStream.readChar());
+      } else if (type == BYTE) {
+        return new Byte(inputStream.readByte());
+      } else if (type == SHORT) { 
+        return new Short(inputStream.readShort());
+      } else if (type == INT) { 
+        return new Integer(inputStream.readInt());
+      } else if (type == LONG) { 
+        return new Long(inputStream.readLong());
+      } else if (type == FLOAT) { 
+        return new Float(inputStream.readFloat());
+      } else if (type == DOUBLE) { 
+        return new Double(inputStream.readDouble());
+      } else if (type == STRING) {
+        return inputStream.readUTF();
+      } else if (type == NULL) {
+        return null;
+      } else if (type == BYTES) {
+        byte[] b = new byte[inputStream.available()];
+        inputStream.read(b);
+        return b;
+      } else
+        throw new MessageFormatException("not a primitive object.");
+    } catch (EOFException e1) {
+      MessageEOFException exc = new MessageEOFException("end of message " + e1);
+      exc.setLinkedException(e1);
+      throw exc;
+    } catch (IOException e2) {
+      JMSException exc = new JMSException("IOException");
+      exc.setLinkedException(e2);
+      throw exc;
+    } 
   }
 
   
@@ -639,22 +900,23 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception JMSException  If an error occurs while closing the output
    *              stream.
    */
-  public void reset() throws JMSException
-  {
+  public void reset() throws JMSException {
     try {
       if (WObody) {
         outputStream.flush();
         bytes = outputBuffer.toByteArray();
-      }
-      else
+      } else
         inputStream.close();
       
-      inputStream = new ObjectInputStream(new ByteArrayInputStream(bytes));
+      inputStream = new DataInputStream(new ByteArrayInputStream(bytes));
+      
+      if (inputStream != null)
+        inputStream.reset();
 
       RObody = true;
       WObody = false;
-    }
-    catch (IOException iE) {
+      firstTimeBytesRead = true;
+    } catch (IOException iE) {
       JMSException jE =
         new JMSException("Error while manipulating the stream facilities.");
       jE.setLinkedException(iE);
@@ -697,14 +959,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
     if (prepared) {
       prepared = false;
       outputBuffer = new ByteArrayOutputStream();
-
-      try {
-        outputStream = new ObjectOutputStream(outputBuffer);
-      }
-      catch (IOException exc) {
-        throw new JMSException("Can prepare stream for writing operation: "
-                               + exc);
-      }
+      outputStream = new DataOutputStream(outputBuffer);
     }
   }
 }
