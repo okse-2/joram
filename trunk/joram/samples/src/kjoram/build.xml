@@ -10,7 +10,7 @@
     <path id="project.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
-         <include name="kjoram.jar"/>
+         <include name="joram-kclient.jar"/>
          <include name="kxml.jar"/>
          <include name="midpapi.jar"/>
       </fileset>
