@@ -21,41 +21,37 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package cluster;
+package cluster.topic;
 
 import javax.jms.*;
 import javax.naming.*;
 
-public class Publisher
+public class Subscriber21
 {
-  static Context ictx;
+  static Context ictx = null; 
 
-  public static void main(String[] arg) throws Exception
+  public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Publishes messages on topic on server0...");
+    System.out.println("Subscribes and listens to topic on server2...");
 
     ictx = new InitialContext();
-    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf0");
-    Topic dest = (Topic) ictx.lookup("top0");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf2");
+    Topic dest = (Topic) ictx.lookup("top2");
     ictx.close();
 
-    Connection cnx = cnxF.createConnection("publisher00", "publisher00");
-    Session sess = cnx.createSession(true, 0);
-    MessageProducer pub = sess.createProducer(dest);
+    Connection cnx = cnxF.createConnection("subscriber21", "subscriber21");
+    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer sub = sess.createConsumer(dest);
 
-    TextMessage msg = sess.createTextMessage();
+    sub.setMessageListener(new Listener());
 
-    int i;
-    for (i = 0; i < 10; i++) {
-      msg.setText("Msg " + i);
-      pub.send(msg);
-    }
+    cnx.start();
 
-    sess.commit();
-
-    System.out.println(i + " messages published.");
-
+    System.in.read();
     cnx.close();
+
+    System.out.println();
+    System.out.println("Subscriber closed.");
   }
 }

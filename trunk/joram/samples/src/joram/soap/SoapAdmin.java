@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,8 +24,9 @@
  */
 package soap;
 
-import fr.dyade.aaa.joram.admin.*;
-import fr.dyade.aaa.joram.soap.TopicSoapConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory;
 
 
 /**
@@ -37,26 +39,23 @@ public class SoapAdmin
     System.out.println();
     System.out.println("Soap administration...");
 
-    TopicSoapConnectionFactory cnxFact =
-      new TopicSoapConnectionFactory("localhost", 8080, 60);
-    cnxFact.getParameters().connectingTimer = 60;
+    TopicSoapConnectionFactory soapCf = (TopicSoapConnectionFactory)
+      TopicSoapConnectionFactory.create("localhost", 8080, 60);
+    soapCf.getParameters().connectingTimer = 60;
 
-    SoapExt_AdminItf admin = new SoapExt_AdminImpl();
-    admin.connect(cnxFact, "root", "root");
+    AdminModule.connect(soapCf, "root", "root");
 
-    javax.jms.ConnectionFactory soapCf = admin.createSoapConnectionFactory(1);
+    Queue queue = (Queue) Queue.create(0);
+    Topic topic = (Topic) Topic.create(0);
 
-    javax.jms.Queue queue = admin.createQueue(0);
-    javax.jms.Topic topic = admin.createTopic(0);
+    User soapUser = User.create("anonymous", "anonymous", 1);
 
-    User soapUser = admin.createSoapUser("anonymous", "anonymous", 1);
+    queue.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
-    admin.setFreeReading(queue);
-    admin.setFreeWriting(queue);
-    admin.setFreeReading(topic);
-    admin.setFreeWriting(topic);
-
-    admin.disconnect();
+    AdminModule.disconnect();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("soapCf", soapCf);

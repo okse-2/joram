@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,13 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package dotcom;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 
 /**
@@ -39,45 +42,44 @@ public class DotcomAdmin
     System.out.println("Dotcom administration...");
 
     // connecting to JORAM server
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 	    
     // setting users
-    User web = admin.createUser("web", "web", 0);
-    User billing = admin.createUser("billing", "billing", 0);
-    User inventory = admin.createUser("inventory", "inventory", 0);
-    User customer = admin.createUser("customer", "customer", 0);
-    User control = admin.createUser("control", "control", 0);
-    User delivery = admin.createUser("delivery", "delivery", 0);
+    User web = User.create("web", "web", 0);
+    User billing = User.create("billing", "billing", 0);
+    User inventory = User.create("inventory", "inventory", 0);
+    User customer = User.create("customer", "customer", 0);
+    User control = User.create("control", "control", 0);
+    User delivery = User.create("delivery", "delivery", 0);
 
     // Creating the administered objects:
     javax.jms.QueueConnectionFactory qcf =
-      admin.createQueueConnectionFactory("localhost", 16010);
+      QueueTcpConnectionFactory.create("localhost", 16010);
     javax.jms.TopicConnectionFactory tcf =
-      admin.createTopicConnectionFactory("localhost", 16010);
+      TopicTcpConnectionFactory.create("localhost", 16010);
 
-    javax.jms.Topic tOrders = admin.createTopic(0);
-    javax.jms.Queue qItems = admin.createQueue(0);
-    javax.jms.Queue qCheck = admin.createQueue(0);
-    javax.jms.Queue qChecked = admin.createQueue(0);
-    javax.jms.Queue qBills = admin.createQueue(0);
-    javax.jms.Queue qDelivery = admin.createQueue(0);
+    Topic tOrders = (Topic) Topic.create(0);
+    Queue qItems = (Queue) Queue.create(0);
+    Queue qCheck = (Queue) Queue.create(0);
+    Queue qChecked = (Queue) Queue.create(0);
+    Queue qBills = (Queue) Queue.create(0);
+    Queue qDelivery = (Queue) Queue.create(0);
 
     // Setting access permissions:
-    admin.setWriter(web, tOrders);
-    admin.setReader(billing, tOrders);
-    admin.setReader(inventory, tOrders);
-    admin.setReader(customer, tOrders);
-    admin.setWriter(billing, qCheck);
-    admin.setReader(control, qCheck);
-    admin.setWriter(control, qChecked);
-    admin.setReader(billing, qChecked);
-    admin.setWriter(billing, qBills);
-    admin.setReader(customer, qBills);
-    admin.setWriter(inventory, qItems);
-    admin.setReader(customer, qItems);
-    admin.setWriter(customer, qDelivery);
-    admin.setReader(delivery, qDelivery);
+    tOrders.setWriter(web);
+    tOrders.setReader(billing);
+    tOrders.setReader(inventory);
+    tOrders.setReader(customer);
+    qCheck.setWriter(billing);
+    qCheck.setReader(control);
+    qChecked.setWriter(control);
+    qChecked.setReader(billing);
+    qBills.setWriter(billing);
+    qBills.setReader(customer);
+    qItems.setWriter(inventory);
+    qItems.setReader(customer);
+    qDelivery.setWriter(customer);
+    qDelivery.setReader(delivery);
 
     // Binding objects in JNDI:
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -91,7 +93,7 @@ public class DotcomAdmin
     jndiCtx.bind("qDelivery", qDelivery);
     jndiCtx.close();
 
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admin closed.");
   }
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent DT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,56 +18,57 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
-package topicTree;
+package bridge;
 
 import org.objectweb.joram.client.jms.admin.*;
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.tcp.*;
 
+import java.util.Properties;
+
+
 /**
- * Administers an agent server for the topic tree samples.
+ * Administers an agent server for the bridge sample.
  */
-public class TreeAdmin
+public class BridgeAdmin
 {
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Tree administration...");
+    System.out.println("Bridge administration...");
 
     AdminModule.connect("root", "root", 60);
 
-    Topic news = (Topic) Topic.create(0);
-    Topic business = (Topic) Topic.create(0);
-    Topic sports = (Topic) Topic.create(0);
-    Topic tennis = (Topic) Topic.create(0);
+    // Setting the bridge properties
+    Properties prop = new Properties();
+    // Communication mode: PTP
+    prop.setProperty("jmsMode", "ptp");
+    // Foreign QueueConnectionFactory JNDI name: foreignCF
+    prop.setProperty("connectionFactoryName", "foreignCF");
+    // Foreign Queue JNDI name: foreignDest
+    prop.setProperty("destinationName", "foreignDest");
 
-    AdminHelper.setHierarchicalLink(news, business);
-    AdminHelper.setHierarchicalLink(news, sports);
-    AdminHelper.setHierarchicalLink(sports, tennis);
+    // Creating a Topic bridge on server 0:
+    Topic bridgeD = Topic.create(0,
+                                 "org.objectweb.joram.mom.dest.BridgeTopic",
+                                 prop);
+
+    bridgeD.setFreeReading();
+    bridgeD.setFreeWriting();
 
     javax.jms.ConnectionFactory cf =
-      TcpConnectionFactory.create("localhost", 16010);
+      QueueTcpConnectionFactory.create("localhost", 16010);
 
     User user = User.create("anonymous", "anonymous", 0);
 
-    news.setFreeReading();
-    news.setFreeWriting();
-    business.setFreeReading();
-    business.setFreeWriting();
-    sports.setFreeReading();
-    sports.setFreeWriting();
-    tennis.setFreeReading();
-    tennis.setFreeWriting();
-
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("news", news);
-    jndiCtx.bind("business", business);
-    jndiCtx.bind("sports", sports);
-    jndiCtx.bind("tennis", tennis);
+
+    jndiCtx.bind("bridgeD", bridgeD);
     jndiCtx.bind("cf", cf);
+    
     jndiCtx.close();
 
     AdminModule.disconnect();

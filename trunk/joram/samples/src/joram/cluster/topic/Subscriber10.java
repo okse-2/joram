@@ -21,39 +21,37 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package perfs;
+package cluster.topic;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import javax.jms.*;
+import javax.naming.*;
 
-/**
- */
-public class PerfsAdmin
+public class Subscriber10
 {
+  static Context ictx = null; 
+
   public static void main(String[] args) throws Exception
   {
-    AdminModule.connect("root", "root", 60);
+    System.out.println();
+    System.out.println("Subscribes and listens to topic on server1...");
 
-    Queue queue = (Queue) Queue.create(0);
-    Topic topic = (Topic) Topic.create(0);
+    ictx = new InitialContext();
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf1");
+    Topic dest = (Topic) ictx.lookup("top1");
+    ictx.close();
 
-    javax.jms.ConnectionFactory cf =
-      TcpConnectionFactory.create("localhost", 16010);
+    Connection cnx = cnxF.createConnection("subscriber10", "subscriber10");
+    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer sub = sess.createConsumer(dest);
 
-    User user = User.create("anonymous", "anonymous", 0);
+    sub.setMessageListener(new Listener());
 
-    queue.setFreeReading();
-    topic.setFreeReading();
-    queue.setFreeWriting();
-    topic.setFreeWriting();
+    cnx.start();
 
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("cf", cf);
-    jndiCtx.bind("queue", queue);
-    jndiCtx.bind("topic", topic);
-    jndiCtx.close();
+    System.in.read();
+    cnx.close();
 
-    AdminModule.disconnect();
+    System.out.println();
+    System.out.println("Subscriber closed.");
   }
 }

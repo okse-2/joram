@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,13 @@
  * USA.
  *
  * Initial developer(s): Jose Carlos Waeny
- * Contributor(s): Frederic Maistre (INRIA)
+ * Contributor(s): Frederic Maistre (INRIA), Nicolas Tachker (ScalAgent)
  */
 package chat;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Launching JORAM administration:
@@ -41,20 +44,20 @@ public class ChatAdmin
     System.out.println("Chat administration phase... ");
 
     // Connecting to JORAM server:
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 
     // Creating the JMS administered objects:        
     javax.jms.ConnectionFactory connFactory =
-      admin.createConnectionFactory("localhost", 16010);
-    javax.jms.Topic topic = admin.createTopic(0);
+      TcpConnectionFactory.create("localhost", 16010);
+
+    Topic topic = (Topic) Topic.create(0);
 
     // Creating an access for user anonymous:
-    User user = admin.createUser("anonymous", "anonymous", 0);
+    User user = User.create("anonymous", "anonymous", 0);
 
     // Setting free access to the topic:
-    admin.setFreeReading(topic);
-    admin.setFreeWriting(topic);
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
     // Binding objects in JNDI:
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -62,7 +65,7 @@ public class ChatAdmin
     jndiCtx.bind("topicChat", topic);
     jndiCtx.close();
     
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admin closed.");
   }
 }

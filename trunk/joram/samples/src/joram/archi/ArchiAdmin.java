@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,13 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package archi;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Administers two agent servers for the archi samples.
@@ -36,28 +39,27 @@ public class ArchiAdmin
     System.out.println("Archi administration...");
 
     // Connecting the administrator:
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 
     // Creating access for user anonymous on servers 0 and 2:
-    User user0 = admin.createUser("anonymous", "anonymous", 0);
-    User user2 = admin.createUser("anonymous", "anonymous", 2);
+    User user0 = User.create("anonymous", "anonymous", 0);
+    User user2 = User.create("anonymous", "anonymous", 2);
 
     // Creating the destinations on server 1:
-    javax.jms.Queue queue = admin.createQueue(1);
-    javax.jms.Topic topic = admin.createTopic(1);
+    Queue queue = (Queue) Queue.create(1);
+    Topic topic = (Topic) Topic.create(1);
 
     // Setting free access to the destinations:
-    admin.setFreeReading(queue);
-    admin.setFreeReading(topic);
-    admin.setFreeWriting(queue);
-    admin.setFreeWriting(topic);
+    queue.setFreeReading();
+    topic.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeWriting();
 
     // Creating the connection factories for connecting to the servers 0 and 2:
     javax.jms.ConnectionFactory cf0 =
-      admin.createConnectionFactory("localhost", 16010);
+      TcpConnectionFactory.create("localhost", 16010);
     javax.jms.ConnectionFactory cf2 =
-      admin.createConnectionFactory("localhost", 16012);
+      TcpConnectionFactory.create("localhost", 16012);
 
     // Binding the objects in JNDI:
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -67,7 +69,7 @@ public class ArchiAdmin
     jndiCtx.bind("cf2", cf2);
     jndiCtx.close();
 
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admin closed.");
   } 
 }

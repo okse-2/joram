@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,50 +20,51 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
-package cluster;
+package cluster.topic;
 
-import fr.dyade.aaa.joram.admin.*;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
- * Administers three agent servers for the cluster sample.
+ * Administers three agent servers for the cluster of topics sample.
  */
 public class ClusterAdmin
 {
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Cluster administration...");
+    System.out.println("Cluster of topics administration...");
 
-    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
 
-    User user00 = admin.createUser("publisher00", "publisher00", 0);
-    User user10 = admin.createUser("subscriber10", "subscriber10", 1);
-    User user20 = admin.createUser("subscriber20", "subscriber20", 2); 
-    User user21 = admin.createUser("subscriber21", "subscriber21", 2);
+    User user00 = User.create("publisher00", "publisher00", 0);
+    User user10 = User.create("subscriber10", "subscriber10", 1);
+    User user20 = User.create("subscriber20", "subscriber20", 2); 
+    User user21 = User.create("subscriber21", "subscriber21", 2);
 
     javax.jms.ConnectionFactory cf0 =
-      admin.createConnectionFactory("localhost", 16010);
+      TcpConnectionFactory.create("localhost", 16010);
     javax.jms.ConnectionFactory cf1 =
-      admin.createConnectionFactory("localhost", 16011);
+      TcpConnectionFactory.create("localhost", 16011);
     javax.jms.ConnectionFactory cf2 =
-      admin.createConnectionFactory("localhost", 16012);
+      TcpConnectionFactory.create("localhost", 16012);
 
-    javax.jms.Topic top0 = admin.createTopic(0);
-    javax.jms.Topic top1 = admin.createTopic(1);
-    javax.jms.Topic top2 = admin.createTopic(2);
+    Topic top0 = (Topic) Topic.create(0);
+    Topic top1 = (Topic) Topic.create(1);
+    Topic top2 = (Topic) Topic.create(2);
 
-    admin.setFreeReading(top0);
-    admin.setFreeReading(top1);
-    admin.setFreeReading(top2);
-    admin.setFreeWriting(top0);
-    admin.setFreeWriting(top1);
-    admin.setFreeWriting(top2);
+    top0.setFreeReading();
+    top1.setFreeReading();
+    top2.setFreeReading();
+    top0.setFreeWriting();
+    top1.setFreeWriting();
+    top2.setFreeWriting();
 
-    admin.setCluster(top0, top1);
-    admin.setCluster(top0, top2);
+    AdminHelper.setClusterLink(top0, top1);
+    AdminHelper.setClusterLink(top0, top2);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf0", cf0);
@@ -73,7 +75,7 @@ public class ClusterAdmin
     jndiCtx.bind("top2", top2);
     jndiCtx.close();
 
-    admin.disconnect();
-    System.out.println("Admins closed.");
+    AdminModule.disconnect();
+    System.out.println("Admin closed.");
   }
 }
