@@ -15,7 +15,22 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications">
-      <p>None, so far...</p>
+      <ul>
+      <li><code>setConfig(...)</code> method in
+        <code>fr.dyade.aaa.agent.AgentServer</code> has now a public access 
+        for configuration purposes; calling it after the server has been
+        started throws an exception.</li>
+      </ul>
+      </s2>
+      <s2 name="Corrected Bugs">
+      <ul>
+      <li><code>ClassCastException</code> occuring in
+        <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code> when subscribing to
+        a non-readable topic, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-06/msg00053.html">
+        Prashanth Kasturi</a>. The bug is corrected, the impacted class is
+        <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.</li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram3_5_0 (June 2003, 24th)"> 
