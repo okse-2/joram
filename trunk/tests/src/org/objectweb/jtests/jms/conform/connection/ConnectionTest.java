@@ -35,7 +35,7 @@ import junit.framework.*;
  * See JMS specifications, §4.3.5 Closing a Connection
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: ConnectionTest.java,v 1.4 2002-04-23 08:36:06 jmesnil Exp $
+ * @version $Id: ConnectionTest.java,v 1.5 2002-05-16 10:36:19 jmesnil Exp $
  */
 public class ConnectionTest extends PTPTestCase {
   
@@ -44,29 +44,29 @@ public class ConnectionTest extends PTPTestCase {
      * from a closed connection's session must throw an <code>IllegalStateException</code>.
      */
     public void testAcknowledge() {
-	try {
-	    receiverConnection.stop();
-	    receiverSession = receiverConnection.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
-	    receiver = receiverSession.createReceiver(receiverQueue);
-	    receiverConnection.start();
+        try {
+            receiverConnection.stop();
+            receiverSession = receiverConnection.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
+            receiver = receiverSession.createReceiver(receiverQueue);
+            receiverConnection.start();
 
-	    Message message = senderSession.createMessage();
-	    sender.send(message);
+            Message message = senderSession.createMessage();
+            sender.send(message);
 
-	    Message m = receiver.receive(TestConfig.TIMEOUT);
-	    receiverConnection.close();
-	    m.acknowledge();
-	    fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
-		 "connection's session must throw a [javax.jms.]IllegalStateException.\n");
-	} catch (javax.jms.IllegalStateException e) {
-	} catch (JMSException e) {
-	    fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
-		 "connection's session must throw a [javax.jms.]IllegalStateException, not a "+ e);
-	} catch (java.lang.IllegalStateException e) {
-	    fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
-		 "connection's session must throw an [javax.jms.]IllegalStateException "+
-		 "[not a java.lang.IllegalStateException]");
-	}
+            Message m = receiver.receive(TestConfig.TIMEOUT);
+            receiverConnection.close();
+            m.acknowledge();
+            fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
+                 "connection's session must throw a [javax.jms.]IllegalStateException.\n");
+        } catch (javax.jms.IllegalStateException e) {
+        } catch (JMSException e) {
+            fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
+                 "connection's session must throw a [javax.jms.]IllegalStateException, not a "+ e);
+        } catch (java.lang.IllegalStateException e) {
+            fail("§4.3.5 Invoking the acknowledge method of a received message from a closed "+
+                 "connection's session must throw an [javax.jms.]IllegalStateException "+
+                 "[not a java.lang.IllegalStateException]");
+        }
     }
     
     /**
@@ -74,16 +74,16 @@ public class ConnectionTest extends PTPTestCase {
      * throws a <code>javax.jms.IllegalStateException</code>.
      */
     public void testUseClosedConnection() {
-	try {
-	    senderConnection.close();
-	    senderConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-	    fail("Should raise a javax.jms.IllegalStateException");
-	} catch (javax.jms.IllegalStateException e) {
-	} catch (JMSException e) {
-	    fail("Should raise a javax.jms.IllegalStateException, not a "+ e);
-	} catch (java.lang.IllegalStateException e) {
-	    fail("Should raise a javax.jms.IllegalStateException, not a java.lang.IllegalStateException");
-	}
+        try {
+            senderConnection.close();
+            senderConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            fail("Should raise a javax.jms.IllegalStateException");
+        } catch (javax.jms.IllegalStateException e) {
+        } catch (JMSException e) {
+            fail("Should raise a javax.jms.IllegalStateException, not a "+ e);
+        } catch (java.lang.IllegalStateException e) {
+            fail("Should raise a javax.jms.IllegalStateException, not a java.lang.IllegalStateException");
+        }
     }
 
     /**
@@ -91,15 +91,15 @@ public class ConnectionTest extends PTPTestCase {
      * <code>Connection</code> is stopped.
      */
     public void testMessageSentWhenConnectionClosed() {
-	try {
-	    senderConnection.stop();
-	    Message message = senderSession.createTextMessage();
-	    sender.send(message);
+        try {
+            senderConnection.stop();
+            Message message = senderSession.createTextMessage();
+            sender.send(message);
       
-	    Message m = receiver.receive(TestConfig.TIMEOUT);
-	} catch (JMSException e) {
-	    fail(e);
-	}
+            Message m = receiver.receive(TestConfig.TIMEOUT);
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
   
 
@@ -107,86 +107,86 @@ public class ConnectionTest extends PTPTestCase {
      * Test that closing a closed connectiondoes not throw an exception.
      */
     public void testCloseClosedConnection() {
-	try {
-	    // senderConnection is already started
-	    // we close it once
-	    senderConnection.close();
-	    // we close it a second time
-	    senderConnection.close();
-	} catch (Exception e) {
-	    fail("§4.3.5 Closing a closed connection must not throw an exception.\n");
-	}
+        try {
+            // senderConnection is already started
+            // we close it once
+            senderConnection.close();
+            // we close it a second time
+            senderConnection.close();
+        } catch (Exception e) {
+            fail("§4.3.5 Closing a closed connection must not throw an exception.\n");
+        }
     }
   
     /**
      * Test that starting a started connection is ignored
      */
     public void testStartStartedConnection() {
-	try {
-	    // senderConnection is already started
-	    // start it again should be ignored
-	    senderConnection.start();
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            // senderConnection is already started
+            // start it again should be ignored
+            senderConnection.start();
+        } catch (JMSException e) {
+            fail(e);
+        }
     } 
 
     /**
      * Test that stopping a stopped connection is ignored
      */
     public void testStopStoppedConnection() {
-	try {
-	    // senderConnection is started
-	    // we stop it once
-	    senderConnection.stop();
-	    // stopping it a second time is ignored
-	    senderConnection.stop();
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            // senderConnection is started
+            // we stop it once
+            senderConnection.stop();
+            // stopping it a second time is ignored
+            senderConnection.stop();
+        } catch (JMSException e) {
+            fail(e);
+        }
     } 
 
     /**
      * Test that delivery of message is stopped if the message consumer connection is stopped
      */
     public void testStopConsumerConnection() {
-	try {
-	    receiverConnection.stop();
+        try {
+            receiverConnection.stop();
       
-	    receiver.setMessageListener(new MessageListener() {
-		    public void onMessage(Message m) {
-			try {
-			    fail("The message must not be received, the consumer connection is stopped");
-			    assertEquals("test", ((TextMessage)m).getText());
-			} catch (JMSException e) {
-			    fail(e);
-			} 
-		    }
-		});
+            receiver.setMessageListener(new MessageListener() {
+                    public void onMessage(Message m) {
+                        try {
+                            fail("The message must not be received, the consumer connection is stopped");
+                            assertEquals("test", ((TextMessage)m).getText());
+                        } catch (JMSException e) {
+                            fail(e);
+                        } 
+                    }
+                });
       
-	    TextMessage message = senderSession.createTextMessage();
-	    message.setText("test");
-	    sender.send(message);
-	    synchronized(this) {
-		try {
-		    wait(1000);
-		} catch (Exception e) {
-		    fail (e);
-		}
-	    }
-	} catch (JMSException e) {
-	    fail(e);
-	}
+            TextMessage message = senderSession.createTextMessage();
+            message.setText("test");
+            sender.send(message);
+            synchronized(this) {
+                try {
+                    wait(1000);
+                } catch (Exception e) {
+                    fail (e);
+                }
+            }
+        } catch (JMSException e) {
+            fail(e);
+        }
     } 
   
     /** 
      * Method to use this class in a Test suite
      */
     public static Test suite() {
-	return new TestSuite(ConnectionTest.class);
+        return new TestSuite(ConnectionTest.class);
     }
   
     public ConnectionTest(String name) {
-	super(name);
+        super(name);
     }
 }
