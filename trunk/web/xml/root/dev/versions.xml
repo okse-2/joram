@@ -14,8 +14,15 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far...</p>
+      <s2 name="Corrected bugs (latest: February 16, 2004)"> 
+      <ul>
+        <li>Incorrect target for launching JORAM as a SOAP service in the 
+        samples <code>build.xml</code> file, found  by 
+        <a href="">Christian Neudorfer</a>. The target still refers to the
+        old <code>fr.dyade.aaa.joram</code> package instead of refering to
+        <code>org.objectweb.joram.client.jms</code>. An updated version
+        has been submitted in CVS.</li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram4_0_0 (February 13, 2004)">
