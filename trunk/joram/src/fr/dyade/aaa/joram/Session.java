@@ -1010,7 +1010,7 @@ public class Session implements javax.jms.Session
   
       try { 
         cnx.asyncRequest(new SessDenyRequest(reply.comesFrom(), ids,
-                                             true, true));
+                                             reply.getQueueMode(), true));
       }
       catch (JMSException jE) {}
     }

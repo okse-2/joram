@@ -953,7 +953,8 @@ public class Connection implements javax.jms.Connection
     try {
       // Sending the denying as an asynchronous request, as no synchronous
       // behaviour is expected here:
-      asyncRequest(new SessDenyRequest(delivery.comesFrom(), ids, true, true));
+      asyncRequest(new SessDenyRequest(delivery.comesFrom(), ids, 
+                                       delivery.getQueueMode(), true));
     }
     // If sthg goes wrong while denying, nothing more can be done!
     catch (JMSException jE) {}
