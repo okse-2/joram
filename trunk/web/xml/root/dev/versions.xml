@@ -12,11 +12,11 @@
 
   <body>
 		<s1 name="JORAM_4_1_0 (September 9, 2004)">
-		<P>This maintenance version, integrated in JOnAS, succesfully passed the JMS test Suite of J2EE 1.4 TCK. </P>
+		<p>This maintenance version, integrated in JOnAS, succesfully passed the JMS test Suite of J2EE 1.4 TCK. </p>
 		<s2 name="Modifications">
 		<ul>
 		<li>Full featured JCA 1.5 RA</li>
-		<Li>Clustered Queues for load-balancing purposes, in addition to existing clustered Topics</Li>
+		<li>Clustered Queues for load-balancing purposes, in addition to existing clustered Topics</li>
 		</ul>
 		</s2>
 		</s1>
