@@ -16,3 +16,5 @@ fr.dyade.aaa.jndi and fr.dyade.aaa.joram, released September 11, 2000.
 The Initial Developer of the Original Code is Dyade. The Original Code and
 portions created by Dyade are Copyright Bull and Copyright INRIA.
 All Rights Reserved. 
+
+The present code contributor is xxx.
