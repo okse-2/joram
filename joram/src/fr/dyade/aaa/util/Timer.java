@@ -72,7 +72,7 @@ public class Timer
     long wakeupTime = System.currentTimeMillis() + delay;
     insertTask(task, wakeupTime);
 
-    if (daemon.started && wakeupTime < daemon.nextWakeup)
+    if (wakeupTime < daemon.nextWakeup)
       daemon.interrupt();
    
     if (! daemon.started)
