@@ -14,6 +14,7 @@
       <connect href="index.xml">JORAM</connect>
       <menuitem><connect href="download/index.xml">Download</connect></menuitem>
       <menuitem><connect href="doc/index.xml">Documentation</connect></menuitem>
+      <menuitem><connect href="partners.xml">Partners</connect></menuitem>
       <menuitem><connect href="license.xml">License</connect></menuitem>
       <menuitem><connect href="history.xml">History</connect></menuitem>
     </menu>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@objectweb.org">joram-team</author>
+    <title>Partners</title>
+    <filename>partners.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="Partners">
+
+      <table>
+        <tr>
+          <td align="center" valign="middle">
+            <a href="http://www.scalagent.com/">
+              <img src="images/scalagent.jpg" alt="ScalAgent logo" border="0" width="295" height="101"/>
+            </a>
+          </td>
+
+          <td align="center" valign="middle">
+            <p>More informations on the <a
+            href="http://www.scalagent.com/">ScalAgent</a>
+            website.</p>
+          </td>
+        </tr>
+      </table>
+
+    </s1>
+    
+  </body>
+
+</document>
