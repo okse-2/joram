@@ -29,6 +29,7 @@ import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
 
 import fr.dyade.aaa.util.*;
 
@@ -135,8 +136,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.14 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.14 2003-06-17 11:46:37 fmaistre Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -708,14 +709,39 @@ public final class AgentServer {
   init(String args[]) throws Exception {
     if (args.length < 2)
       throw new Exception("usage: java <main> sid storage");
+    short sId;
     try {
-      serverId = (short) Integer.parseInt(args[0]);
+      sId = (short) Integer.parseInt(args[0]);
     } catch (NumberFormatException exc) {
       throw new Exception("usage: java <main> sid storage");
     }
    
     String path = args[1];
+    init(sId, path, null);
+    return 2;
+  }
 
+ /**
+   * Initializes this agent server.
+   * <code>start</code> function is then called to start this agent server
+   * execution. Between the <code>init</code> and </code>start</code> calls,
+   * agents may be created and deployed, and notifications may be sent using
+   * the <code>Channel</code> <code>sendTo</code> function.
+   *
+   * @param serverid	the server id
+   * @param path        the persistency directory.
+   * @param loggerFactory the monolog LoggerFactory;
+   * 	
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  public static void
+  init(short sId, String path, LoggerFactory loggerFactory) throws Exception {
+    serverId = sId; 
+    if (loggerFactory != null) {
+        Debug.setLoggerFactory(loggerFactory);
+    }
     logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
 
@@ -919,8 +945,9 @@ public final class AgentServer {
     transaction.commit();
     transaction.release();
 
-    return 2;
   }
+
+
 
   /**
    *  Causes this AgentServer to begin its execution. This method starts all

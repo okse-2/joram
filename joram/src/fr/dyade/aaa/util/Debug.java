@@ -38,8 +38,8 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.6 2003-04-14 11:37:23 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.7 2003-06-17 11:46:50 fmaistre Exp $";
 
   /** */
   public final static String DEBUG_CONFIGURE_PROPERTY = "fr.dyade.aaa.DEBUG_CONFIGURE";
@@ -144,4 +144,13 @@ public class Debug {
     if (factory == null) init();
     return factory.getLogger(topic);
   }
+
+  /**
+   * Set the monolog Loggerfactory
+   * @param loggerFactory the monolog LoggerFactory
+   */
+    public static void setLoggerFactory(LoggerFactory loggerFactory) {
+        factory = loggerFactory;
+    }
+
 }
