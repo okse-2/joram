@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.connector;
 
 import javax.jms.*;
+import javax.jms.IllegalStateException;
 
 
 /**
@@ -37,7 +38,7 @@ public class OutboundConnection implements javax.jms.Connection
   ManagedConnectionImpl managedCx;
   /** The physical connection this "handle" handles. */
   XAConnection xac;
-  
+
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
 
@@ -54,23 +55,22 @@ public class OutboundConnection implements javax.jms.Connection
     this.xac = xac;
   }
 
- 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public void setClientID(String clientID) throws JMSException
   {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public void setExceptionListener(ExceptionListener listener)
               throws JMSException
@@ -78,8 +78,8 @@ public class OutboundConnection implements javax.jms.Connection
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
  
   /**
@@ -95,23 +95,24 @@ public class OutboundConnection implements javax.jms.Connection
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    if (managedCx.session == null)
-      managedCx.session = xac.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    Session sess = managedCx.session;
+    if (sess == null)
+      sess = xac.createSession(transacted, acknowledgeMode);
 
-    return new OutboundSession(managedCx.session, this);
+    return new OutboundSession(sess, this);
   }
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public String getClientID() throws JMSException
   {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
   
   /**
@@ -130,15 +131,15 @@ public class OutboundConnection implements javax.jms.Connection
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public ExceptionListener getExceptionListener() throws JMSException
   {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
   
   /**
@@ -157,20 +158,20 @@ public class OutboundConnection implements javax.jms.Connection
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public void stop() throws JMSException
   {
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public ConnectionConsumer
          createConnectionConsumer(Destination destination,
@@ -182,13 +183,13 @@ public class OutboundConnection implements javax.jms.Connection
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
    * Forbidden call on an application or component's outbound connection,
-   * throws a <code>JMSException</code> instance.
+   * throws a <code>IllegalStateException</code> instance.
    */
   public ConnectionConsumer
          createDurableConnectionConsumer(Topic topic,
@@ -201,8 +202,8 @@ public class OutboundConnection implements javax.jms.Connection
     if (! valid)
       throw new javax.jms.IllegalStateException("Invalid connection handle.");
 
-    throw new JMSException("Forbidden call on an application or component's "
-                           + "session.");
+    throw new IllegalStateException("Forbidden call on a component's "
+                                    + "connection.");
   }
 
   /**
@@ -215,5 +216,11 @@ public class OutboundConnection implements javax.jms.Connection
   {
     valid = false;
     managedCx.closeHandle(this);
+  }
+
+  
+  public String toString()
+  {
+    return "OutboundConnection[" + xac.toString() + "]";
   }
 }
