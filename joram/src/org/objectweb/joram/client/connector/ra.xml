@@ -102,11 +102,11 @@
                javax.jms.QueueConnectionFactory
             </connectionfactory-interface>
             <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.QueueConnectionFactoryImpl
+               org.objectweb.joram.client.connector.OutboundQueueConnectionFactory
             </connectionfactory-impl-class>
             <connection-interface>javax.jms.QueueConnection</connection-interface>
             <connection-impl-class>
-               org.objectweb.joram.client.connector.QueueConnectionImpl
+               org.objectweb.joram.client.connector.OutboundQueueConnection
             </connection-impl-class>
          </connection-definition>
          <connection-definition>
@@ -132,11 +132,11 @@
                javax.jms.TopicConnectionFactory
             </connectionfactory-interface>
             <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.TopicConnectionFactoryImpl
+               org.objectweb.joram.client.connector.OutboundTopicConnectionFactory
             </connectionfactory-impl-class>
             <connection-interface>javax.jms.TopicConnection</connection-interface>
             <connection-impl-class>
-               org.objectweb.joram.client.connector.TopicConnectionImpl
+               org.objectweb.joram.client.connector.OutboundTopicConnection
             </connection-impl-class>
          </connection-definition>
          <connection-definition>
@@ -162,11 +162,11 @@
                javax.jms.ConnectionFactory
             </connectionfactory-interface>
             <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.ConnectionFactoryImpl
+               org.objectweb.joram.client.connector.OutboundConnectionFactory
             </connectionfactory-impl-class>
             <connection-interface>javax.jms.Connection</connection-interface>
             <connection-impl-class>
-               org.objectweb.joram.client.connector.ConnectionImpl
+               org.objectweb.joram.client.connector.OutboundConnection
             </connection-impl-class>
          </connection-definition>
          <transaction-support>XATransaction</transaction-support>
