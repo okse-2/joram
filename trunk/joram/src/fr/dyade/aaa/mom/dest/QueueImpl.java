@@ -214,7 +214,10 @@ public class QueueImpl extends DestinationImpl
       // messages:
       else {
         messages.remove(i);
-        deliverables--;
+
+        // If message was not consumed, decreasing the deliverables counter:
+        if (message.consId == null)
+          deliverables--;
 
         if (deadM == null)
           deadM = new Vector();
@@ -589,7 +592,11 @@ public class QueueImpl extends DestinationImpl
           // dead messages:
           else {
             messages.remove(j);
-            deliverables--;
+             
+            // If message was not consumed, decreasing the
+            // deliverables counter:
+            if (msg.consId == null)
+              deliverables--;
   
             if (deadM == null)
               deadM = new Vector();
