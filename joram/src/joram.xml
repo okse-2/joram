@@ -26,7 +26,7 @@
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
       <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
-      <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+      <!-- include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/ -->
       <include name="fr/dyade/aaa/agent/management/*.java"/>
       <!-- include name="com/scalagent/jmx/*.java"/ -->
       <include name="fr/dyade/aaa/admin/**/*.java"/>
@@ -154,7 +154,7 @@
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/ -->
     <!-- copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/ -->
     <!-- copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/ -->
     <copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/>
