@@ -180,6 +180,15 @@ public class Session implements javax.jms.Session
   }
 
   /**
+   * set transacted.
+   * see connector ManagedConnectionImpl.
+   */
+  public void setTransacted(boolean t) {
+    if (!closed)
+      transacted = t;
+  }
+
+  /**
    * API method.
    *
    * @exception JMSException  Actually never thrown.
