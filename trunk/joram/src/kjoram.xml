@@ -15,7 +15,6 @@
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="../lib"/>
-    <property name="build.dir" location="../build"/>
     <property name="licenses.dir" location="../licenses"/>
     <property name="releases.dir" location="../releases"/>
 
@@ -40,7 +39,6 @@
   <target name="clean" depends="init"
       description="--> Cleans all generated files">
     <delete dir="${obj.dir}"/>
-    <delete dir="${build.dir}"/>
     <delete dir="${doc.dir}"/>
     <!-- Deletes generated jar file -->
     <delete file="${lib.dir}/kjoram.jar" />
@@ -50,7 +48,6 @@
   <target name="prepare" depends="init">
     <!-- Creates the directory structure -->
     <mkdir dir="${obj.dir}"/>
-    <mkdir dir="${build.dir}"/>
   </target>
 
   <!-- Compilation phase -->
@@ -68,6 +65,7 @@
       <classpath refid="project.class.path"/>
 
       <include name="com/**/*.java"/>
+      <exclude name="com/**/jmx/*.java"/>
  
     </javac>
   </target>
@@ -76,19 +74,13 @@
      - kJoram specific build target
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- JARS BUILDING -->
-  <target name="build.kjoram" depends="init,compile"
+  <target name="ship.kjoram" depends="init,compile"
       description="--> Builds kJoram client jar.">
-    <jar jarfile="${build.dir}/kjoram.jar">
+    <jar jarfile="${lib.dir}/kjoram.jar">
       <fileset dir="${obj.dir}">
         <include name="com/**/*.class"/>
       </fileset>
     </jar>
-  </target>
-
-  <!-- SHIPMENT -->
-  <target name="ship.kjoram" depends="build.kjoram"
-      description="--> Creates a kJoram shipment.">
-    <copy file="${build.dir}/kjoram.jar" todir="${lib.dir}"/>
   </target>
 
   <!-- RELEASES -->
