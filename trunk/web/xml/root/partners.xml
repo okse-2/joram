@@ -14,7 +14,22 @@
 
     <s1 name="Partners">
 
-      <table>
+      <table>	
+	<tr>
+	  <td rowspan="1" colspan="1" valign="middle" align="center"><a
+	  href="http://www.inria.fr/"><img src="images/partners/inria.gif"
+	  border="0" width="166" height="45" alt="INRIA logo" align="middle"
+	  /></a></td>
+
+	  <td rowspan="1" colspan="1" valign="middle" align="left"><a
+	  href="http://www.inria.fr/">INRIA</a> is the French National
+	  Institutefor Research in Computer Science and Control. It is a
+	  scientific and technological institute operating under the dual
+	  authority of the Ministry of Research and the Ministry of
+	  Industry. INRIA is contributing to the <connect
+	  href="../jonas/index.xml">JOnAS</connect> transaction service and to
+	  <connect href="index.xml">JORAM</connect>.</td>
+	</tr>
         <tr>
           <td align="center" valign="middle">
             <a href="http://www.scalagent.com/">
@@ -28,22 +43,6 @@
             website.</p>
           </td>
         </tr>
-	
-	<tr>
-	  <td rowspan="1" colspan="1" valign="middle"
-	      align="center"><a href="http://www.inria.fr/"><img
-	      src="images/partners/inria.gif" border="0" width="166"
-	      height="45" alt="INRIA logo" align="middle" /></a></td>
-
-	  <td rowspan="1" colspan="1" valign="middle" align="left"><a
-	      href="http://www.inria.fr/">INRIA</a> is the French
-	      National Institutefor Research in Computer Science and
-	      Control. It is a scientific and technological institute
-	      operating under the dual authority of the Ministry of
-	      Research and the Ministry of Industry. INRIA is
-	      contributing to the JOnAS transaction service and to
-	      JORAM.</td>
-	</tr>
       </table>
 
     </s1>
