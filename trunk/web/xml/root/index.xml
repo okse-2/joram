@@ -83,7 +83,7 @@
       implementation of <em>JMS</em> (Java Message Service API
       released by Sun Microsystem, Inc.). It provides access to a MOM
       (Message Oriented Middleware), built on top of the <a
-      href="http://www.scalagent.com/">Scalagent</a> agents based
+      href="http://www.scalagent.com/">ScalAgent</a> agents based
       distributed platform. JORAM is a <em>free</em>, <em>open
       source</em> initiative.</p>
 
