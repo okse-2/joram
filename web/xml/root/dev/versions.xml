@@ -14,8 +14,12 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: August 13, 2003)">
+      <s2 name="Corrected bugs (latest: September 10, 2003)">
       <ul>
+        <li>Invalid precedence on naming properties (as noticed
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00015.html">
+        here</a>). The correct order is now taken into account. Modifications
+        occured in the <code>fr.dyade.aaa.jndi2</code> package.</li>
         <li>Blocking <code>AdminItf.stopServer</code> method (as noticed
         <a href="http://www.objectweb.org/wws/arc/joram/2003-08/msg00021.html">
         here</a>). The processing of this method disapeared from the
