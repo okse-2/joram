@@ -93,8 +93,29 @@
       </s2>
     </s1>
 
-    <s1 name="What's up for the next version?">
-      
+    <s1 name="Informations on JORAM 3.3">
+
+      <s2 name="New administration protocol">
+      <ul>
+      <li>This version of JORAM includes a totally refactored administration
+      protocol. Administration is now based on JMS communication and is much
+      more flexible than the past implementation. The new administration
+      implementation comes with a new administration interface. Old
+      administration codes should go on working even if they now use
+      deprecated methods. 
+      </li>
+      </ul>
+      </s2>
+      <s2 name="Corrected bugs">
+      <ul>
+      <li>Timeout in MessageConsumer.receive not compliant, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-11/msg00018.html">
+          Gerald Schröder</a>.
+          A MessageConsumer.receive(timeOut) would not return if the connection
+          it belongs to was in stopped mode, even if the timer expired.
+      </li>
+      </ul>
+      </s2>
     </s1>
 
   </body>

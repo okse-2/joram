@@ -14,7 +14,25 @@
 
     <s1 name="Recent news">
 
-      <subtitle>21st october 2002: JORAM 3.2 provides new features!</subtitle>
+      <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
+      available in the CVS distribution.</subtitle>
+      <p>This new version provides a totally refactored <em>administration</em> 
+      protocol. Administration is now based on JMS communication and is much
+      more flexible than the past implementation. Hopefully it will make
+      contributing easier; JORAM's administration still misses graphical tools
+      and JMX support, and any contribution would be highly appreciated.
+      </p>
+      <p>This new administration implementation comes with a new administration
+      interface. Old administration codes should go on working even if they now
+      use deprecated methods. 
+      </p>
+      <p>Check the <a href="doc/index.html">available documentation</a> for
+      the new JORAM tutorial and the samples for new administration code
+      examples.
+      </p>
+      <hr />
+
+      <subtitle>October 21st, 2002: JORAM 3.2 provides new features!</subtitle>
       <p>The main added values of Joram 3.2.0 are the new implementations of
          <em>hierarchical topics</em> and <em>dead message queues</em>.
       </p>
@@ -37,7 +55,7 @@
       </p> 
       <hr />
 
-      <subtitle>18th June 2002: JMS Test Suite tests for JMS 1.1 support!
+      <subtitle>June 18th, 2002: JMS Test Suite tests for JMS 1.1 support!
                 </subtitle>
       <p>The <em>JMS Test Suite</em> has its own
          <a href="tests/index.html">page</a>.<br />
@@ -47,7 +65,7 @@
       
       <hr />
 
-     <subtitle>10th june 2002: JORAM now implements the new JMS 1.1
+     <subtitle>June 10th, 2002: JORAM now implements the new JMS 1.1
         specification!</subtitle>
       <p><em>Joram 3.1.0 fully implements JMS 1.1</em> providing unified
         messaging interfaces for the Point-to-Point and Pub/Sub
