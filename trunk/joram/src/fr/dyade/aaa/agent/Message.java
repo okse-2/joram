@@ -31,7 +31,7 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.10 2002-04-18 13:36:17 jmesnil Exp $"; 
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -157,9 +157,8 @@ class Message implements Serializable {
    * @param not    	Notification to be signaled.
    */
   public Message(AgentId from, AgentId to, Notification not) {
-    if (from != null)
-      this.from = (AgentId) from.clone();
-    this.to = (AgentId) to.clone();
+    this.from = from;
+    this.to = to;
     this.not = (Notification) not.clone();
     this.deadline = -1L;
   }
