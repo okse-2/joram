@@ -104,11 +104,11 @@ public class SocketAddress {
   public boolean equals(Object obj) {
     if (obj == null || !(obj instanceof SocketAddress))
       return false;
-    SocketAddress addr = (SocketAddress) obj;
+    SocketAddress sa = (SocketAddress) obj;
 
-    if ((hostname.equals(addr.hostname)) &&
-        (addr.equals(addr.addr)) &&
-        (port == addr.port))
+    if ((hostname.equals(sa.hostname)) &&
+        (addr.equals(sa.addr)) &&
+        (port == sa.port))
       return true;
     return false;
   }
