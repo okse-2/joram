@@ -23,4 +23,4 @@ cp %CONFIG_HOME%\tcp_jndi.properties %CONFIG_HOME%\jndi.properties
 mkdir %RUN_DIR%
 cd %RUN_DIR%
 
-%JAVA_HOME%\bin\java -DTransaction=fr.dyade.aaa.util.NullTransaction fr.dyade.aaa.agent.AgentServer 0 ./s0
+%JAVA_HOME%\bin\java -classpath %CLASSPATH% -DTransaction=fr.dyade.aaa.util.NullTransaction fr.dyade.aaa.agent.AgentServer 0 ./s0
