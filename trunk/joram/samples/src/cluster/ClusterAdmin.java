@@ -29,63 +29,55 @@ package cluster;
 
 import fr.dyade.aaa.joram.admin.*;
 
-import javax.jms.*;
-import javax.naming.*;
-
+/**
+ * Administers three agent servers for the cluster sample.
+ */
 public class ClusterAdmin
 {
-  static Context ictx;
-
   public static void main(String[] args) throws Exception
   {
     System.out.println();
     System.out.println("Cluster administration...");
 
-    Admin admin0 = new Admin("localhost", 16010, "root", "root", 60);
-    Admin admin1 = new Admin("localhost", 16011, "root", "root", 60);
-    Admin admin2 = new Admin("localhost", 16012, "root", "root", 60);
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
-    User publisher00 = admin0.createUser("publisher00", "publisher00");
-    User subscriber10 = admin1.createUser("subscriber10", "subscriber10");
-    User subscriber20 = admin2.createUser("subscriber20", "subscriber20"); 
-    User subscriber21 = admin2.createUser("subscriber21", "subscriber21");
+    User user00 = admin.createUser("publisher00", "publisher00", 0);
+    User user10 = admin.createUser("subscriber10", "subscriber10", 1);
+    User user20 = admin.createUser("subscriber20", "subscriber20", 2); 
+    User user21 = admin.createUser("subscriber21", "subscriber21", 2);
 
-    ConnectionFactory cf0 = admin0.createConnectionFactory();
-    ConnectionFactory cf1 = admin1.createConnectionFactory();
-    ConnectionFactory cf2 = admin2.createConnectionFactory();
+    javax.jms.ConnectionFactory cf0 =
+      admin.createConnectionFactory("localhost", 16010);
+    javax.jms.ConnectionFactory cf1 =
+      admin.createConnectionFactory("localhost", 16011);
+    javax.jms.ConnectionFactory cf2 =
+      admin.createConnectionFactory("localhost", 16012);
 
-    Topic t0 = admin0.createTopic("topic0");
-    Topic t1 = admin1.createTopic("topic1");
-    Topic t2 = admin2.createTopic("topic2");
+    javax.jms.Topic top0 = admin.createTopic(0);
+    javax.jms.Topic top1 = admin.createTopic(1);
+    javax.jms.Topic top2 = admin.createTopic(2);
 
-    admin0.setFreeReading("topic0");
-    admin1.setFreeReading("topic1");
-    admin2.setFreeReading("topic2");
-    admin0.setFreeWriting("topic0");
-    admin1.setFreeWriting("topic1");
-    admin2.setFreeWriting("topic2");
+    admin.setFreeReading(top0);
+    admin.setFreeReading(top1);
+    admin.setFreeReading(top2);
+    admin.setFreeWriting(top0);
+    admin.setFreeWriting(top1);
+    admin.setFreeWriting(top2);
 
-    Cluster cluster = new Cluster("cluster");
-    cluster.addTopic((fr.dyade.aaa.joram.Topic) t0);
-    cluster.addTopic((fr.dyade.aaa.joram.Topic) t1);
-    cluster.addTopic((fr.dyade.aaa.joram.Topic) t2);
+    admin.setCluster(top0, top1);
+    admin.setCluster(top0, top2);
 
-    admin0.createCluster(cluster);
-    admin1.createCluster(cluster);
-    admin2.createCluster(cluster);
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("cf0", cf0);
+    jndiCtx.bind("cf1", cf1);
+    jndiCtx.bind("cf2", cf2);
+    jndiCtx.bind("top0", top0);
+    jndiCtx.bind("top1", top1);
+    jndiCtx.bind("top2", top2);
+    jndiCtx.close();
 
-    ictx = new InitialContext();
-    ictx.rebind("cf0", cf0);
-    ictx.rebind("cf1", cf1);
-    ictx.rebind("cf2", cf2);
-    ictx.rebind("top0", t0);
-    ictx.rebind("top1", t1);
-    ictx.rebind("top2", t2);
-    ictx.close();
-
-    admin0.close();
-    admin1.close();
-    admin2.close();
+    admin.disconnect();
     System.out.println("Admins closed.");
   }
 }

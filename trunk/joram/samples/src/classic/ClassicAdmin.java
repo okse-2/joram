@@ -29,48 +29,46 @@ package classic;
 
 import fr.dyade.aaa.joram.admin.*;
 
-import javax.jms.*;
-import javax.naming.*;
 
 /**
  * Administers an agent server for the classic samples.
  */
 public class ClassicAdmin
 {
-  static Context ictx = null; 
-
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Classic administration phase... ");
+    System.out.println("Classic administration...");
 
-    Admin admin = new Admin("root", "root", 60);
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
-    Queue queue = admin.createQueue("queue");
-    Topic topic = admin.createTopic("topic");
-    ConnectionFactory cf = admin.createConnectionFactory();
-    QueueConnectionFactory qcf = admin.createQueueConnectionFactory();
-    TopicConnectionFactory tcf = admin.createTopicConnectionFactory();
+    javax.jms.Queue queue = admin.createQueue(0);
+    javax.jms.Topic topic = admin.createTopic(0);
 
-    User user = admin.createUser("anonymous", "anonymous");
+    javax.jms.ConnectionFactory cf =
+      admin.createConnectionFactory("localhost", 16010);
+    javax.jms.QueueConnectionFactory qcf =
+      admin.createQueueConnectionFactory("localhost", 16010);
+    javax.jms.TopicConnectionFactory tcf =
+      admin.createTopicConnectionFactory("localhost", 16010);
 
-    admin.setFreeReading("queue");
-    admin.setFreeReading("topic");
-    admin.setFreeWriting("queue");
-    admin.setFreeWriting("topic");
+    User user = admin.createUser("anonymous", "anonymous", 0);
 
-    admin.close();
+    admin.setFreeReading(queue);
+    admin.setFreeReading(topic);
+    admin.setFreeWriting(queue);
+    admin.setFreeWriting(topic);
 
-    System.out.println("Binding objects in JNDI... ");
-    ictx = new InitialContext();
-    ictx.rebind("queue", queue);
-    ictx.rebind("topic", topic);
-    ictx.rebind("cf", cf);
-    ictx.rebind("qcf", qcf);
-    ictx.rebind("tcf", tcf);
-    ictx.close();
-    System.out.println("Objects binded.");
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("cf", cf);
+    jndiCtx.bind("qcf", qcf);
+    jndiCtx.bind("tcf", tcf);
+    jndiCtx.bind("queue", queue);
+    jndiCtx.bind("topic", topic);
+    jndiCtx.close();
 
+    admin.disconnect();
     System.out.println("Admin closed.");
   }
 }

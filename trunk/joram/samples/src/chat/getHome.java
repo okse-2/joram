@@ -45,7 +45,7 @@ public class getHome {
         Properties props    = new Properties();
         Properties sysProps = System.getProperties();
         
-        props.setProperty("java.naming.factory.initial", "fr.dyade.aaa.jndi.NamingContextFactory");
+        props.setProperty("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
         props.setProperty("java.naming.provider.url", "joram://localhost:16400");
         
         sysProps.putAll(props);

@@ -23,14 +23,11 @@
  * All Rights Reserved.
  *
  * Initial developer(s): Jose Carlos Waeny
- * Contributor(s):
+ * Contributor(s): Frederic Maistre (INRIA)
  */
 package chat;
 
 import fr.dyade.aaa.joram.admin.*;
-
-import javax.jms.*;
-import javax.naming.*;
 
 /**
  * Launching JORAM administration:
@@ -42,37 +39,34 @@ import javax.naming.*;
  */
 public class ChatAdmin
 {
-  static Context ictx = null;
-    
   public static void main(String args[]) throws Exception
   {
     System.out.println();
     System.out.println("Chat administration phase... ");
 
-    // Getting InitialContext:
-    ictx = new InitialContext();
-            
     // Connecting to JORAM server:
-    Admin admin = new Admin("root", "root", 60);
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
     // Creating the JMS administered objects:        
-    ConnectionFactory connFactory = admin.createConnectionFactory();
-    Topic topicChat = admin.createTopic("topic");
+    javax.jms.ConnectionFactory connFactory =
+      admin.createConnectionFactory("localhost", 16010);
+    javax.jms.Topic topic = admin.createTopic(0);
 
     // Creating an access for user anonymous:
-    User ano = admin.createUser("anonymous", "anonymous");
+    User user = admin.createUser("anonymous", "anonymous", 0);
 
     // Setting free access to the topic:
-    admin.setFreeReading("topic");
-    admin.setFreeWriting("topic");
-            
-    // binding all in JNDI
-    ictx.rebind("factoryChat", connFactory);
-    ictx.rebind("topicChat", topicChat);
-            
-    ictx.close();
-    admin.close();
+    admin.setFreeReading(topic);
+    admin.setFreeWriting(topic);
 
+    // Binding objects in JNDI:
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("factoryChat", connFactory);
+    jndiCtx.bind("topicChat", topic);
+    jndiCtx.close();
+    
+    admin.disconnect();
     System.out.println("Admin closed.");
   }
 }
