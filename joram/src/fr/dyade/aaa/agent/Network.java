@@ -60,7 +60,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   int  WDNbRetryLevel1 = 30;
   /**
    *  Period of time in ms between two connection try at stage 1, default
-   * value is 1000L (1 second).
+   * value is WDActivationPeriod divided by 2.
    *  This value can be adjusted for all network components by setting
    * <code>WDRetryPeriod1</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDRetryPeriod1</code>
@@ -69,7 +69,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  long WDRetryPeriod1 = WDActivationPeriod;
+  long WDRetryPeriod1 = WDActivationPeriod/2;
   /**
    *  Number of try at stage 2, default value is 55.
    *  This value can be adjusted for all network components by setting
@@ -119,8 +119,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   protected String domain;
   /** The communication port. */
   protected int port;
-  /** The <code>MessageQueue</code> associated with this network component. */
-  protected MessageQueue qout;
+  /** The <code>MessageVector</code> associated with this network component. */
+  protected MessageVector qout;
   /** The logical clock associated to this network component. */
   protected LogicalClock clock;
   /**
@@ -259,7 +259,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   public void init(String name, int port, short[] servers) throws Exception {
     this.name = AgentServer.getName() + '.' + name;
 
-    qout = new MessageQueue(this.name,
+    qout = new MessageVector(this.name,
                             AgentServer.getTransaction().isPersistent());
     waiting = new Vector();
 
@@ -308,12 +308,31 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     clock.load();
   }
 
+  /**
+   * Adds the server sid in the network configuration.
+   *
+   * @param sid	the unique server id.
+   */
   public void addServer(short sid) throws Exception {
-    clock.addServer(name, sid);
+    clock.addServer(sid);
   }
 
+  /**
+   * Removes the server sid in the network configuration.
+   *
+   * @param sid	the unique server id.
+   */
   public void delServer(short sid) throws Exception {
-    clock.delServer(name, sid);
+    clock.delServer(sid);
+  }
+
+  /**
+   * Reset all information related to server sid in the network configuration.
+   *
+   * @param sid	the unique server id.
+   */
+  void resetServer(short sid) throws IOException {
+    clock.resetServer(sid);
   }
 
   /**
@@ -322,15 +341,13 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if (msg.isPersistent()) {
-      short to = AgentServer.getServerDesc(msg.to.to).gateway;
-      // Allocates a new timestamp. Be careful, if the message needs to be
-      // routed we have to use the next destination in timestamp generation.
-      msg.setUpdate(clock.getSendUpdate(to));
-      // Saves the message.
-      msg.save();
-      // Push it in "ready to deliver" queue.
-    }
+    short to = AgentServer.getServerDesc(msg.to.to).gateway;
+    // Allocates a new timestamp. Be careful, if the message needs to be
+    // routed we have to use the next destination in timestamp generation.
+    msg.setUpdate(clock.getSendUpdate(to));
+    // Saves the message.
+    msg.save();
+    // Push it in "ready to deliver" queue.
     qout.push(msg);
   }
 
@@ -351,11 +368,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   public MessageQueue getQueue() {
     return qout;
   }
-
-  /**
-   * Wakes up the watch-dog thread.
-   */
-  public abstract void wakeup();
 
   /**
    * Updates the network port.

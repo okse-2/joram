@@ -271,7 +271,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                getName() + " created [" + getClass().getName() + "].");
 
     NbMaxAgents = Integer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
-    qin = new MessageQueue(name, AgentServer.getTransaction().isPersistent());
+    qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
     if (! AgentServer.getTransaction().isPersistent()) {
       NbMaxAgents = Integer.MAX_VALUE;
     }

@@ -43,6 +43,8 @@ final class Update {
    * Matrix clock value.
    */
   transient int stamp;
+
+  transient int bootTS;
   /**
    * pointer on next element of update list.
    */
@@ -67,7 +69,8 @@ final class Update {
     strbuf.append('(').append(super.toString());
     strbuf.append(',').append(l).append(',')
 	.append(c).append(',')
-	.append(stamp).append(')');
+	.append(stamp).append(',')
+	.append(bootTS).append(')');
     return strbuf;
   }
 
@@ -100,6 +103,14 @@ final class Update {
    */
   public short getToId() {
     return c;
+  }
+
+  public int getBootTS() {
+    return bootTS;
+  }
+
+  public void setBootTS(int bootTS) {
+    this.bootTS = bootTS;
   }
 
   private static Pool pool = null;

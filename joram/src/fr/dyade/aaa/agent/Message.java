@@ -120,6 +120,7 @@ final class Message implements Serializable {
       out.writeShort(next.l);
       out.writeShort(next.c);
       out.writeInt(next.stamp);
+      out.writeInt(next.bootTS);
       next = next.next;
     }
     out.writeShort(-1);
@@ -143,6 +144,7 @@ final class Message implements Serializable {
 	update = Update.alloc(l, in.readShort(), in.readInt());
       else
 	Update.alloc(l, in.readShort(), in.readInt(), update);
+      update.setBootTS(in.readInt());
     }
   }
 
