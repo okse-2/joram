@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -182,89 +182,15 @@ final class Message implements Serializable {
     not = (Notification) in.readObject();
   }
 
-  private final static int BUFLEN = 20;
-
-  // Per-thread buffer for string/stringbuffer conversion
-  private static ThreadLocal perThreadBuffer = new ThreadLocal() {
-    protected synchronized Object initialValue() {
-      return new char[BUFLEN];
-    }
-  };
-
   transient private String stringId = null;
 
   final String toStringId() {
     if (stringId == null) {
-      char[] buf = (char[]) (perThreadBuffer.get());
-      int idx = getChars(stamp, buf, BUFLEN);
-      buf[--idx] = '_';
-      idx = getChars(dest, buf, idx);
-      buf[--idx] = '@';
-      stringId = new String(buf, idx, BUFLEN - idx);
+      stringId = StringId.toStringId('@', '_', dest, stamp, -1);
     }
     return stringId;
   }
 
-  final static char [] DigitTens = {
-    '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
-    '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
-    '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
-    '3', '3', '3', '3', '3', '3', '3', '3', '3', '3',
-    '4', '4', '4', '4', '4', '4', '4', '4', '4', '4',
-    '5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
-    '6', '6', '6', '6', '6', '6', '6', '6', '6', '6',
-    '7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
-    '8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
-    '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
-  } ; 
-
-  final static char [] DigitOnes = { 
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-  } ;
-
-  private final static int getChars(int i, char[] buf, int idx) {
-    int q, r;
-    int charPos = idx;
-    char sign = 0;
-
-    if (i < 0) { 
-      sign = '-';
-      i = -i;
-    }
-
-    // Generate two digits per iteration
-    while (i >= 65536) {
-      q = i / 100;
-      // really: r = i - (q * 100);
-      r = i - ((q << 6) + (q << 5) + (q << 2));
-      i = q;
-      buf [--charPos] = DigitOnes[r];
-      buf [--charPos] = DigitTens[r];
-    }
-
-    // Fall thru to fast mode for smaller numbers
-    // assert(i <= 65536, i);
-    for (;;) { 
-      q = (i * 52429) >>> (16+3);
-      r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
-      buf [--charPos] = DigitOnes[r];
-      i = q;
-      if (i == 0) break;
-    }
-    if (sign != 0) {
-      buf [--charPos] = sign;
-    }
-    return charPos;
-  }
 
   /**
    * Tests if the associated notification is persistent or not.
@@ -346,6 +272,7 @@ final class Message implements Serializable {
 
   void free() {
     not = null;	/* to let gc do its work */
+    stringId = null;
     pool.freeElement(this);
   }
   
@@ -353,6 +280,5 @@ final class Message implements Serializable {
     this.from = (AgentId) from;
     this.to = (AgentId) to;
     if (not != null) this.not = (Notification) not.clone();
-    stringId = null;
   }
 }
