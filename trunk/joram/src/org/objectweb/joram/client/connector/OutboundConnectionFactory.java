@@ -63,7 +63,10 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                     ", " + cxManager + ")");
 
     this.mcf = mcf;
-    this.cxManager = cxManager;
+    if (cxManager != null)
+      this.cxManager = cxManager;
+    else
+      this.cxManager = DefaultConnectionManager.getRef();
   }
 
 
@@ -110,12 +113,7 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                       this + " createConnection cxManager = " + cxManager);
 
-      Object o = null;
-
-      if (cxManager != null)
-        o = cxManager.allocateConnection(mcf, cxRequest);
-      else
-        o = DefaultConnectionManager.getRef().allocateConnection(mcf, cxRequest);
+      Object o = cxManager.allocateConnection(mcf, cxRequest);
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
