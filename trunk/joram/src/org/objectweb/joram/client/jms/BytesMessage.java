@@ -306,6 +306,8 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
         outputStream.writeDouble(((Double) value).doubleValue());
       else if (value instanceof String)
         outputStream.writeUTF((String) value);
+      else if (value instanceof Byte)
+	  outputStream.writeByte(((Byte) value).intValue());
       else if (value instanceof byte[])
         outputStream.write((byte[]) value);
       else

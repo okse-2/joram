@@ -351,6 +351,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
   {
     prepareWrite();
 
+    if (value == null) return;
+
     try {
       outputStream.writeUTF(value);
     }
