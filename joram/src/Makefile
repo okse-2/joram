@@ -186,7 +186,19 @@ build: service
 	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/webportal.conf
 	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/tool.conf
 
-joram:
-	@$(SRCDIR)/makefiles/build.sh $(SRCDIR)/makefiles/ship/joram.conf rm_ship
+joram: clean all
+	rm -fr $(SHIP)/tmp
+	rm -fr $(SHIP)/lib
+	mkdir -p $(SHIP)/tmp
+	mkdir -p $(SHIP)/lib
+	cd $(SHIP)/tmp; \
+	for j in ${a3joram.jar_LIBRARIES}; do \
+	cp -f $(LIBDIR)/$$j $(SHIP)/tmp; \
+	  jar xf $$j; \
+	done
+	rm -fr *.jar META-INF
+	cd $(SHIP)/tmp; jar cMf joram.jar *
+	cp -f $(SHIP)/tmp/joram.jar $(SHIP)/lib
+	rm -fr $(SHIP)/tmp
 
 include $(GENERAL_MK)
