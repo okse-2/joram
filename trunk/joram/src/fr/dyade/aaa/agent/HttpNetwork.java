@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -214,35 +214,27 @@ public class HttpNetwork extends StreamNetwork {
       }
     }
 
-    if (i > 0) {
-//       logmon.log(BasicLevel.DEBUG,
-//                  this.getName() + ": " + i + ", " + new String(buf, 0, i));
-      return new String(buf, 0, i);
-    }
+    if (i > 0) return new String(buf, 0, i);
+
     return null;
   }
   
-  protected void sendRequest(Message msg, OutputStream os) throws Exception {
+  protected void sendRequest(Message msg, OutputStream os, int ack) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
-    if (msg != null) {
-      strbuf.append("PUT ");
-      if (proxy != null) {
-        strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
-      }
-      strbuf.append("/msg#").append(msg.getStamp()).append(" HTTP/1.1");
-      nos.writeMessage(msg);
-    } else {
-      strbuf.append("GET ");
-      if (proxy != null) {
-        strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
-        strbuf.append("/msg HTTP/1.1");
-      }
-    }
-
+    strbuf.append("PUT ");
     if (proxy != null) {
-      strbuf.append("\r\nHost: ").append(server.getHostname());
+      strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
     }
+    if (msg != null) {
+      strbuf.append("/msg#").append(msg.getStamp()).append(" HTTP/1.1");
+    } else {
+        strbuf.append("/msg HTTP/1.1");
+    }
+    nos.writeMessage(msg, ack);
+
+    if (proxy != null)
+      strbuf.append("\r\nHost: ").append(server.getHostname());
     strbuf.append("\r\n" +
                   "User-Agent: ScalAgent 1.0\r\n" +
                   "Accept: image/jpeg;q=0.2\r\n" +
@@ -252,26 +244,25 @@ public class HttpNetwork extends StreamNetwork {
                   "Cache-Control: no-cache\r\n" +
                   "Cache-Control: no-store\r\n" +
                   "Keep-Alive: 300\r\n" +
-                  "Connection: keep-alive\r\n");
-    if (msg != null) {
-      strbuf.append("Content-Length: ").append(nos.size());
-      strbuf.append("\r\n" +
-                    "Content-Type: image/jpeg\r\n");
-    }
+                  "Connection: keep-alive\r\n" +
+                  "Proxy-Connection: keep-alive\r\n" +
+                  "Pragma: no-cache\r\n");
+    strbuf.append("Content-Length: ").append(nos.size());
+    strbuf.append("\r\n" +
+                  "Content-Type: image/jpeg\r\n");
     strbuf.append("\r\n");
 
     os.write(strbuf.toString().getBytes());
     
-    if (msg != null) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, name + ", writes:" + buf.length);
-      nos.writeTo(os);
-      nos.reset();
-    }
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
+    nos.writeTo(os);
+    nos.reset();
+
     os.flush();
   }
 
-  protected Message getRequest(InputStream is) throws Exception {
+  protected void getRequest(InputStream is) throws Exception {
     String line = null;
 
     line = readLine(is);
@@ -292,31 +283,16 @@ public class HttpNetwork extends StreamNetwork {
       }
     }
 
-    if (length != 0) {
-      int nb = nis.readFrom(is, length);
-      
-      if (nb != length) {
-	throw new Exception("Bad request length: " + nb);
-      } else {
-        Message msg = Message.alloc();
-        int boot = nis.readMessage(msg);
-        testBootTS(msg.getSource(), boot);
-	return msg;
-      }
-    }
-    
-    return null;
+    if (nis.readFrom(is) != length)
+      logmon.log(BasicLevel.WARN, name + "Bad request length: " + length);
   }
 
-  protected void sendReply(Message msg, OutputStream os) throws Exception {
+  protected void sendReply(Message msg, OutputStream os, int ack) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
-    if (msg != null) {
-      strbuf.append("HTTP/1.1 200 OK\r\n");
-      nos.writeMessage(msg);
-    } else {
-      strbuf.append("HTTP/1.1 204 No Content\r\n");
-    }
+    strbuf.append("HTTP/1.1 200 OK\r\n");
+
+    nos.writeMessage(msg, ack);
 
     strbuf.append("Date: ").append("Fri, 21 Feb 2003 14:30:51 GMT");
     strbuf.append("\r\n" +
@@ -327,28 +303,25 @@ public class HttpNetwork extends StreamNetwork {
                   "Cache-Control: no-store\r\n" +
                   "Accept-Ranges: bytes\r\n" +
                   "Keep-Alive: timeout=15, max=100\r\n" +
-                  "Connection: Keep-Alive\r\n");
-    if (msg != null) {
-      strbuf.append("Content-Length: ").append(nos.size());
-      strbuf.append("\r\n" +
-                    "Content-Type: image/gif\r\n");
-    } else {
-      strbuf.append("Content-Length: 0\r\n");
-    }
+                  "Connection: Keep-Alive\r\n" +
+                  "Proxy-Connection: Keep-Alive\r\n" +
+                  "Pragma: no-cache\r\n");
+    strbuf.append("Content-Length: ").append(nos.size());
+    strbuf.append("\r\n" +
+                  "Content-Type: image/gif\r\n");
     strbuf.append("\r\n");
 
     os.write(strbuf.toString().getBytes());
     
-    if (msg != null) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, name + ", writes:" + buf.length);
-      nos.writeTo(os);
-      nos.reset();
-    }
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
+    nos.writeTo(os);
+    nos.reset();
+
     os.flush();
   }
 
-  protected Message getReply(InputStream is) throws Exception {
+  protected void getReply(InputStream is) throws Exception {
     String line = null;
 
     line = readLine(is);
@@ -370,20 +343,35 @@ public class HttpNetwork extends StreamNetwork {
       }
     }
 
-    if (length != 0) {
-      int nb = nis.readFrom(is, length);
+    if (nis.readFrom(is) != length)
+      logmon.log(BasicLevel.WARN, name + "Bad reply length: " + length);
+  }
 
-      if (nb != length) {
-	throw new Exception("Bad reply length: " + nb);
-      } else {
-        Message msg = Message.alloc();
-        int boot = nis.readMessage(msg);
-        testBootTS(msg.getSource(), boot);
-	return msg;
-      }
+  protected int handle(Message msgout) throws Exception {
+    int ack = nis.getAckStamp();
+    if ((msgout != null) && (msgout.stamp == ack)) {
+      AgentServer.transaction.begin();
+      //  Suppress the processed notification from message queue,
+      // and deletes it.
+      qout.pop();
+      msgout.delete();
+      msgout.free();
+      AgentServer.transaction.commit();
+      AgentServer.transaction.release();
     }
 
-    return null;
+    Message msg = nis.getMessage();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 this.getName() + ", get: " + msg);
+
+    if (msg != null) {
+      testBootTS(msg.getSource(), nis.getBootTS());
+      deliver(msg);
+      return msg.stamp;
+    }
+
+    return -1;
   }
 
   final class NetServerOut extends Daemon {
@@ -395,6 +383,41 @@ public class HttpNetwork extends StreamNetwork {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+    }
+
+    protected void open() throws IOException {
+      // Open the connection.
+      socket = null;
+      boolean phase1 = true;
+      while (true) {
+        if (proxy == null) {
+          try {
+            socket = createSocket(server);
+            break;
+          } catch (IOException exc) {
+            logmon.log(BasicLevel.WARN,
+                       this.getName() + ", connection refused", exc);
+            if (! phase1) throw exc;
+            phase1 = false;
+            server.resetAddr();
+          }
+        } else {
+          try {
+            socket = createSocket(proxy, proxyport);
+            break;
+          } catch (IOException exc) {
+            logmon.log(BasicLevel.WARN,
+                       this.getName() + ", connection refused", exc);
+            if (! phase1) throw exc;
+            phase1 = false;
+            proxy = InetAddress.getByName(proxyhost);
+          }
+        }
+      }
+      setSocketOption(socket);
+
+      os = socket.getOutputStream();
+      is = socket.getInputStream();
     }
 
     protected void close() {
@@ -417,95 +440,39 @@ public class HttpNetwork extends StreamNetwork {
     }
 
     public void run() {
-      Message msgin = null;
       Message msgout = null;
+      int ack = -1;
 
       try {
 	while (running) {
+          canStop = true;
 	  try {
-	    canStop = true;
-
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
-
 	    try {
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", waiting message");
 	      msgout = qout.get(activationPeriod);
 	    } catch (InterruptedException exc) {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", interrupted");
 	    }
-
-            // Open the connection.
-            socket = null;
-            boolean phase1 = true;
-            while (true) {
-              if (proxy == null) {
-                try {
-                  socket = createSocket(server);
-                  break;
-                } catch (IOException exc) {
-                  logmon.log(BasicLevel.WARN,
-                             this.getName() + ", connection refused", exc);
-                  if (! phase1) throw exc;
-                  phase1 = false;
-                  server.resetAddr();
-                }
-              } else {
-                try {
-                  socket = createSocket(proxy, proxyport);
-                  break;
-                } catch (IOException exc) {
-                  logmon.log(BasicLevel.WARN,
-                             this.getName() + ", connection refused", exc);
-                  if (! phase1) throw exc;
-                  phase1 = false;
-                  proxy = InetAddress.getByName(proxyhost);
-                }
-              }
-            }
-            setSocketOption(socket);
-
-            os = socket.getOutputStream();
-            is = socket.getInputStream();
-
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", connected");
+            open();
 
             do {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendRequest: " + msgout);
 
-              sendRequest(msgout, os);
+              sendRequest(msgout, os, ack);
+              getReply(is);
 
-              msgin = getReply(is);
-
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", getReply: " + msgin);
-
-              if (msgout != null) {
-                AgentServer.transaction.begin();
-                //  Suppress the processed notification from message queue,
-                // and deletes it.
-                qout.pop();
-                msgout.delete();
-                msgout.free();
-                AgentServer.transaction.commit();
-                AgentServer.transaction.release();
-              }
-
-              if (msgin != null) {
-                canStop = false;
-                deliver(msgin);
-                canStop = true;
-              }
-
+              canStop = false;
+              ack = handle(msgout);
+              canStop = true;
               // Get next message to send if any
               msgout = qout.get(0);
-            } while (running && ((msgout != null) || (msgin != null)));
+            } while (running && ((msgout != null) || (ack != -1)));
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
@@ -549,6 +516,16 @@ public class HttpNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
+    protected void open(Socket socket) throws IOException {
+      setSocketOption(socket);
+
+      os = socket.getOutputStream();
+      is = socket.getInputStream();
+
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+    }
+
     protected void close() {
       if (socket != null) {
         try {
@@ -571,8 +548,8 @@ public class HttpNetwork extends StreamNetwork {
     }
 
     public void run() {
-      Message msgin = null;
       Message msgout= null;
+      int ack = -1;
 
       try {
 	while (running) {
@@ -584,57 +561,22 @@ public class HttpNetwork extends StreamNetwork {
               logmon.log(BasicLevel.DEBUG,
                          this.getName() + ", waiting connection");
             socket = listen.accept();
-
-
-            setSocketOption(socket);
-
-            os = socket.getOutputStream();
-            is = socket.getInputStream();
-
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", connected");
+            open(socket);
             
-            msgin = getRequest(is);
+            getRequest(is);
             do {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", getRequest: " + msgin);
-              
-              if (msgin != null) {
-                canStop = false;
-                deliver(msgin);
-                canStop = true;
-              }
-                
+              canStop = false;
+              ack = handle(msgout);
+              canStop = true;
+
               msgout = qout.get(0);
 
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendReply: " + msgout);
 
-              sendReply(msgout, os);
-              
-              msgin = getRequest(is);
-
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", getRequest: " + msgin);
-
-              if (msgout != null) {
-                // Be careful, actually msg should be null !!
-
-                canStop = false;
-
-                AgentServer.transaction.begin();
-                //  Deletes the processed notification
-                qout.pop();
-                msgout.delete();
-                msgout.free();
-                AgentServer.transaction.commit();
-                AgentServer.transaction.release();
-              }
-
+              sendReply(msgout, os, ack);
+              getRequest(is);
             } while (running);
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -671,61 +613,95 @@ public class HttpNetwork extends StreamNetwork {
       super(new byte[256]);
     }
 
-    int readFrom(InputStream is, int length) throws IOException {
+    private void readFully(InputStream is, int length) throws IOException {
       count = 0;
       if (length > buf.length) buf = new byte[length];
-
+      
       int nb = -1;
       do {
         nb = is.read(buf, count, length-count);
         if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, name + ", reads:" + nb);
-        if (nb > 0) count += nb;
-      } while ((nb != -1) && (count != length));
+          logmon.log(BasicLevel.DEBUG, getName() + ", reads:" + nb);
+        if (nb < 0) throw new EOFException();
+        count += nb;
+      } while (count != length);
       pos  = 0;
-      return count;
     }
 
-    int readMessage(Message msg) throws Exception {
-      // Reads boot timestamp of source server
-      int boot = ((buf[0] & 0xFF) << 24) +
-        ((buf[1] & 0xFF) << 16) +
-        ((buf[2] & 0xFF) <<  8) +
-        ((buf[3] & 0xFF) <<  0);
-            
-      // Reads sender's AgentId
-      msg.from = new AgentId(
-        (short) (((buf[4] & 0xFF) <<  8) + (buf[5] & 0xFF)),
-        (short) (((buf[6] & 0xFF) <<  8) + (buf[7] & 0xFF)),
-        ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
-        ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0));
-      // Reads adressee's AgentId
-      msg.to = new AgentId(
-        (short) (((buf[12] & 0xFF) <<  8) + (buf[13] & 0xFF)),
-        (short) (((buf[14] & 0xFF) <<  8) + (buf[15] & 0xFF)),
-        ((buf[16] & 0xFF) << 24) + ((buf[17] & 0xFF) << 16) +
-        ((buf[18] & 0xFF) <<  8) + ((buf[19] & 0xFF) <<  0));
-      // Reads source server id of message
-      msg.source = (short) (((buf[20] & 0xFF) <<  8) +
-                            ((buf[21] & 0xFF) <<  0));
-      // Reads destination server id of message
-      msg.dest = (short) (((buf[22] & 0xFF) <<  8) +
-                          ((buf[23] & 0xFF) <<  0));
-      // Reads stamp of message
-      msg.stamp = ((buf[24] & 0xFF) << 24) +
-        ((buf[25] & 0xFF) << 16) +
-        ((buf[26] & 0xFF) <<  8) +
-        ((buf[27] & 0xFF) <<  0);
-      // Reads if notification is detachable
-      boolean detachable = (buf[28] == 1) ? true : false;
-      pos = 29;
-      // Reads notification object
-      ObjectInputStream ois = new ObjectInputStream(this);
-      msg.not = (Notification) ois.readObject();
-      msg.not.detachable = detachable;
-      msg.not.detached = false;
+    int msgLen;
+    int msgBoot;
+    int msgAck;
 
-      return boot;
+    Message msg = null;
+
+    int readFrom(InputStream is) throws Exception {
+      readFully(is, 12);
+      // Reads message length
+      msgLen = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
+        ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
+      // Reads boot timestamp of source server
+      msgBoot = ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) +
+        ((buf[6] & 0xFF) <<  8) + ((buf[7] & 0xFF) <<  0);
+      msgAck = ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
+        ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0);
+
+      if (msgLen > 36) {
+        msg = Message.alloc();
+        readFully(is, 25);
+
+        // Reads sender's AgentId
+        msg.from = new AgentId(
+          (short) (((buf[0] & 0xFF) <<  8) + (buf[1] & 0xFF)),
+          (short) (((buf[2] & 0xFF) <<  8) + (buf[3] & 0xFF)),
+          ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) +
+          ((buf[6] & 0xFF) <<  8) + ((buf[7] & 0xFF) <<  0));
+        // Reads adressee's AgentId
+        msg.to = new AgentId(
+          (short) (((buf[8] & 0xFF) <<  8) + (buf[9] & 0xFF)),
+          (short) (((buf[10] & 0xFF) <<  8) + (buf[11] & 0xFF)),
+          ((buf[12] & 0xFF) << 24) + ((buf[13] & 0xFF) << 16) +
+          ((buf[14] & 0xFF) <<  8) + ((buf[15] & 0xFF) <<  0));
+        // Reads source server id of message
+        msg.source = (short) (((buf[16] & 0xFF) <<  8) +
+                              ((buf[17] & 0xFF) <<  0));
+        // Reads destination server id of message
+        msg.dest = (short) (((buf[18] & 0xFF) <<  8) +
+                            ((buf[19] & 0xFF) <<  0));
+        // Reads stamp of message
+        msg.stamp = ((buf[20] & 0xFF) << 24) +
+          ((buf[21] & 0xFF) << 16) +
+          ((buf[22] & 0xFF) <<  8) +
+          ((buf[23] & 0xFF) <<  0);
+        // Reads if notification is detachable
+        boolean detachable = (buf[24] == 1) ? true : false;
+
+        readFully(is, msgLen-37);
+        // Reads notification object
+        ObjectInputStream ois = new ObjectInputStream(this);
+        msg.not = (Notification) ois.readObject();
+        msg.not.detachable = detachable;
+        msg.not.detached = false;
+
+        return msgLen;
+      }
+      msg = null;
+      return 12;
+    }
+
+    int getLength() {
+      return msgLen;
+    }
+
+    int getBootTS() {
+      return msgBoot;
+    }
+
+    int getAckStamp() {
+      return msgAck;
+    }
+
+    Message getMessage() {
+      return msg;
     }
   }
 
@@ -739,56 +715,70 @@ public class HttpNetwork extends StreamNetwork {
       super(256);
       oos = new ObjectOutputStream(this);
       count = 0;
-      buf[29] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[30] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[31] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[32] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+      buf[37] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+      buf[38] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+      buf[39] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+      buf[40] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
     }
 
-    void writeMessage(Message msg) throws IOException {
+    void writeMessage(Message msg, int ack) throws IOException {
       // Writes boot timestamp of source server
-      buf[0] = (byte) (getBootTS() >>>  24);
-      buf[1] = (byte) (getBootTS() >>>  16);
-      buf[2] = (byte) (getBootTS() >>>  8);
-      buf[3] = (byte) (getBootTS() >>>  0);
+      buf[4] = (byte) (getBootTS() >>>  24);
+      buf[5] = (byte) (getBootTS() >>>  16);
+      buf[6] = (byte) (getBootTS() >>>  8);
+      buf[7] = (byte) (getBootTS() >>>  0);
 
-      // Writes sender's AgentId
-      buf[4] = (byte) (msg.from.from >>>  8);
-      buf[5] = (byte) (msg.from.from >>>  0);
-      buf[6] = (byte) (msg.from.to >>>  8);
-      buf[7] = (byte) (msg.from.to >>>  0);
-      buf[8] = (byte) (msg.from.stamp >>>  24);
-      buf[9] = (byte) (msg.from.stamp >>>  16);
-      buf[10] = (byte) (msg.from.stamp >>>  8);
-      buf[11] = (byte) (msg.from.stamp >>>  0);
-      // Writes adressee's AgentId
-      buf[12]  = (byte) (msg.to.from >>>  8);
-      buf[13]  = (byte) (msg.to.from >>>  0);
-      buf[14] = (byte) (msg.to.to >>>  8);
-      buf[15] = (byte) (msg.to.to >>>  0);
-      buf[16] = (byte) (msg.to.stamp >>>  24);
-      buf[17] = (byte) (msg.to.stamp >>>  16);
-      buf[18] = (byte) (msg.to.stamp >>>  8);
-      buf[19] = (byte) (msg.to.stamp >>>  0);
-      // Writes source server id of message
-      buf[20]  = (byte) (msg.source >>>  8);
-      buf[21]  = (byte) (msg.source >>>  0);
-      // Writes destination server id of message
-      buf[22] = (byte) (msg.dest >>>  8);
-      buf[23] = (byte) (msg.dest >>>  0);
-      // Writes stamp of message
-      buf[24] = (byte) (msg.stamp >>>  24);
-      buf[25] = (byte) (msg.stamp >>>  16);
-      buf[26] = (byte) (msg.stamp >>>  8);
-      buf[27] = (byte) (msg.stamp >>>  0);
-      // Writes if notification is detachable
-      buf[28] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
-      // Be careful, the stream header is hard-written in buf[29..32]
-      count = 33;
+      // Writes stamp of last received message
+      buf[8] = (byte) (ack >>>  24);
+      buf[9] = (byte) (ack >>>  16);
+      buf[10] = (byte) (ack >>>  8);
+      buf[11] = (byte) (ack >>>  0);
 
-      oos.writeObject(msg.not);
-      oos.reset();
-      oos.flush();
+      count = 12;
+      if (msg != null) {
+        // Writes sender's AgentId
+        buf[12] = (byte) (msg.from.from >>>  8);
+        buf[13] = (byte) (msg.from.from >>>  0);
+        buf[14] = (byte) (msg.from.to >>>  8);
+        buf[15] = (byte) (msg.from.to >>>  0);
+        buf[16] = (byte) (msg.from.stamp >>>  24);
+        buf[17] = (byte) (msg.from.stamp >>>  16);
+        buf[18] = (byte) (msg.from.stamp >>>  8);
+        buf[19] = (byte) (msg.from.stamp >>>  0);
+        // Writes adressee's AgentId
+        buf[20]  = (byte) (msg.to.from >>>  8);
+        buf[21]  = (byte) (msg.to.from >>>  0);
+        buf[22] = (byte) (msg.to.to >>>  8);
+        buf[23] = (byte) (msg.to.to >>>  0);
+        buf[24] = (byte) (msg.to.stamp >>>  24);
+        buf[25] = (byte) (msg.to.stamp >>>  16);
+        buf[26] = (byte) (msg.to.stamp >>>  8);
+        buf[27] = (byte) (msg.to.stamp >>>  0);
+        // Writes source server id of message
+        buf[28]  = (byte) (msg.source >>>  8);
+        buf[29]  = (byte) (msg.source >>>  0);
+        // Writes destination server id of message
+        buf[30] = (byte) (msg.dest >>>  8);
+        buf[31] = (byte) (msg.dest >>>  0);
+        // Writes stamp of message
+        buf[32] = (byte) (msg.stamp >>>  24);
+        buf[33] = (byte) (msg.stamp >>>  16);
+        buf[34] = (byte) (msg.stamp >>>  8);
+        buf[35] = (byte) (msg.stamp >>>  0);
+        // Writes if notification is detachable
+        buf[36] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
+        // Be careful, the stream header is hard-written in buf[29..32]
+        count = 41;
+
+        oos.writeObject(msg.not);
+        oos.reset();
+        oos.flush();
+      }
+      // Writes boot timestamp of source server
+      buf[0] = (byte) (count >>>  24);
+      buf[1] = (byte) (count >>>  16);
+      buf[2] = (byte) (count >>>  8);
+      buf[3] = (byte) (count >>>  0);
     }
   }
 }
