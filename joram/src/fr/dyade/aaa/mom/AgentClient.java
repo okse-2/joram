@@ -28,7 +28,6 @@ package fr.dyade.aaa.mom;
 import java.lang.*;
 import java.io.*; 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.config.*;
 
 /**
  *	@see	fr.dyade.aaa.mom.CommonClientAAA	
