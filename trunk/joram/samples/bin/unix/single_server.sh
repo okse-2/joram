@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo == Launching a transient server 0 ==
+echo "== Launching a transient server 0 =="
 
 . setHome.sh
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo == Launching a persistent server s1 ==
+echo "== Launching a persistent server s1 =="
 
 . setHome.sh
 

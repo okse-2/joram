@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo == Launching the graphical administration tool ==
+echo "== Launching the graphical administration tool =="
 
 . setHome.sh
 

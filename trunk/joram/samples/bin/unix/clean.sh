@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo == Cleaning the persistence directories and configuration settings ==
+echo "== Cleaning the persistence directories and configuration settings =="
 
 . setHome.sh
 
