@@ -109,9 +109,32 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
       return null;
 
     try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
-      ObjectInputStream ois = new ObjectInputStream(bais);
-      return (Serializable) ois.readObject();
+      try {
+        ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        return (Serializable) ois.readObject();
+      }
+      // Could not build serialized object: reason could be linked to 
+      // class loaders hierarchy in an application server.
+      catch (ClassNotFoundException exc) {
+        class Specialized_OIS extends ObjectInputStream
+        {
+          Specialized_OIS(InputStream is) throws IOException
+          {
+            super(is);
+          }
+
+          protected Class resolveClass(ObjectStreamClass osc)
+                    throws IOException, ClassNotFoundException
+          {
+            String n = osc.getName();
+            return Thread.currentThread().getContextClassLoader().loadClass(n);
+          }
+        }
+        ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
+        ObjectInputStream ois = new Specialized_OIS(bais);
+        return (Serializable) ois.readObject(); 
+      }
     }
     catch (Exception exc) {
       MessageFormatException jE =
