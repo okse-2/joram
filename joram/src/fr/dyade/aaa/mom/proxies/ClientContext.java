@@ -117,6 +117,7 @@ class ClientContext implements java.io.Serializable
   /** Removes a temporary destination identifier. */
   void removeTemporaryDestination(AgentId destId)
   {
+    deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
   }
 
