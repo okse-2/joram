@@ -13,28 +13,31 @@
   <body>
     <s1 name="JORAM History">
       <subtitle>January 7, 2005: JORAM 4.2 release candidate 1 is available</subtitle>
-      <p>Joram 4.2 RC1 provides new features as high-avaibility, dynamic configuration, 
+	<p>Joram 4.2 RC1 provides new features as high-availability, dynamic configuration, 
         and a lot of fixes and improvements.</p>
-      <ul>
-	<li><strong>High Availability</strong> This version provides the active replication of JORAM clients, 
-          JORAM servers and ScalAgent servers. It transparently handles network handover and server 
-          failover. This version currently relies on JGroups.</li>
-	<li><strong>Dynamic Configuration</strong> This version provides a runtime mechanism enabling to 
-          remotely add and remove Joram servers dynamically, at runtime, through the Administration API of JORAM.
-          This great feature, combined with updated JMX implementation, initiates a new set of management facilities in JORAM
-          </li>
-	<li><strong>Architecture and Performance improvements</strong>. This version packages a whole set of deep
-          changes within the JORAM and ScalAgent architectures that lead to performance improvements compared to the 4.1 
-          version. Those changes partially concern communication protocols and thus prevent backward compatibility with previous
-          Joram versions. </li>
-      </ul>
-      <p>This version has been sponsored by France Telecom R&amp;D</p>
+	<ul>
+	  <li><strong>High Availability</strong> Joram V4.2 provides the active replication of Joram servers and 
+          underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover 
+          and server failover. This version currently relies on the use of  JGroups.</li>
+	  <li><strong>Dynamic Configuration</strong> Joram V4.2 provide facilities to remotely add and remove Joram
+          servers dynamically, using the Joram Administration API. This key feature, combined with upgraded JMX 
+          implementation, initiates a new set of management facilities for Joram.</li>
+	  <li><strong>Architecture and Performance improvements</strong>. Joram V4.2 provides a packaged version of
+          a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
+          improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
+          preventing backward compatibility with prior Joram versions.</li>
+	</ul>
+        <p>This version has been sponsored by France Telecom R&amp;D</p>
+	<p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@objectweb.org if you want
+        to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
+        proprietary messaging system.</p>
 
       <subtitle>January 7, 2005: JORAM 4.1.5 maintenance release is available</subtitle>
-      <p>Joram 4.1.5 is a maintenance release with bug fixes and configuration improvments.</p>
+      <p>Joram 4.1.5 is a maintenance release with bug fixes and configuration improvements.</p>
 
       <subtitle>December 22,2004: JORAM 4.1.4 maintenance release is available</subtitle>
-      <p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvments.</p>
+      <p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvements.</p>
 
       <subtitle>December 2004: New suite of professional services on JORAM</subtitle>
       <p>Please check the <a href="support.html">Joram Support pages</a> or <a href="http://www.scalagent.com">ScalAgent website</a>.</p>

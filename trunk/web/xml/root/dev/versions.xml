@@ -18,6 +18,7 @@
       <p>The updated documentation, packaged version for download and more detailed announcement will be 
          available soon on  Joram web site.</p>
       <s2 name="New Features ">
+	<ul>
 	  <li>High Availability Joram V4.2 provides the active replication of Joram servers and 
           underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover 
           and server failover. This version currently relies on the use of  JGroups.</li>
@@ -28,7 +29,7 @@
           a wide set of deep changes within the Joram and underlying bus architectures that lead to performance 
           improvements compared to prior version V4.1. Communication protocols are concerned by this evolution, thus 
           preventing backward compatibility with prior Joram versions.</li>
-
+       </ul>
       </s2>
       <s2 name="Bug fixes">
 	<p>JMS message improvement, numerous bug fixes.</p>
