@@ -14,6 +14,18 @@
 
     <s1 name="Recent news">
 
+      <subtitle>March, 6th 2002: </subtitle>
+      
+      <p>The new version of JORAM will be commited in CVS. Since this
+      version is a complete rewrite of JORAM, some problems may occur
+      when commiting into CVS. CVS may be in a inconstitent state for
+      the next two days. Thus we recommend anyone using CVS to avoid
+      to checkout JORAM for the next two days. As soon as the CVS is
+      ok, we will warn you.
+      </p>
+
+      <hr />
+
       <subtitle>March, 1st 2002: new version of JORAM to be expected soon</subtitle>
 
       <p>A new version of JORAM will soon be available (likely next week). JORAM 3.0 is a
@@ -50,17 +62,6 @@
       <p>The <a
       href="http://www.objectweb.org/joram/current/doc/install/index.html">Installation
       guide</a> has been updated to take into account Ant support.</p>
-      
-      <hr/>
-
-      <subtitle>January, 16th 2002: JORAM 2.2 (cvs tag: joram2_2)</subtitle>
-
-      <p>This version adds support for <a
-      href="http://jakarta.apache.org/ant/">Ant</a> build system. Package are
-      also available for download. Have a look <a
-      href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">JORAM CVS
-      repository</a>. Documentation will follow soon...</p>
-      
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
