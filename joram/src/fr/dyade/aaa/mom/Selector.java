@@ -41,7 +41,8 @@ public class Selector implements java.io.Serializable
   public boolean matches(Message msg, String selector)
     throws Exception
   {
-    if (selector.equals(""))
+    if (selector == null || selector.equals(""))
+      // No selector => returning true.
       return true;
 
     fr.dyade.aaa.mom.selectors.parser selectorParser =
