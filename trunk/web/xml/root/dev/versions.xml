@@ -12,7 +12,7 @@
 
   <body>
     <s1 name="JORAM_4_1_4 (December 22, 2004)">
-      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_2.  
+      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_4.  
 	This release contains some minor features and bug fixes (see below the history file).</p>
       <p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
       <s2 name="Configuration improvments">
