@@ -21,7 +21,7 @@ set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%SAMPLE_CLASSES%
 set CLASSPATH=%CLASSPATH%;%CONFIG_ENV%
 
-%JAVA_HOME%\bin\java %1
+%JAVA_HOME%\bin\java -classpath %CLASSPATH% %1
 goto :EOF
 
 :no_arg
