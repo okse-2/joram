@@ -43,8 +43,6 @@ public class QueueSender extends MessageProducer
    * @param sess  The session the sender belongs to.
    * @param queue The queue the sender sends messages to.
    *
-   * @exception JMSSecurityException  If the client is not a WRITER on the
-   *              queue.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason. 
    */

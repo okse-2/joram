@@ -30,13 +30,13 @@ package fr.dyade.aaa.mom.proxies;
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 
 /**
- * A <code>SyncReply</code> is sent by a proxy to itself for integrating
- * the reply it wraps into the causal chain.
+ * A <code>SyncReply</code> is a notification used by a proxy for
+ * synchronizing a reply.
  */
 class SyncReply extends fr.dyade.aaa.agent.Notification
 {
   /**
-   * The key of the connection through which the reply will have to be sent.
+   * The identifier of the client to which the reply will have to be sent.
    */
   int key;
   /** The reply to send. */
@@ -45,7 +45,7 @@ class SyncReply extends fr.dyade.aaa.agent.Notification
   /**
    * Constructs a <code>SyncReply</code> instance.
    *
-   * @param key  The connection key the reply will be sent on.
+   * @param key  The identifier of the client the reply will be sent to.
    * @param reply  The reply to send.
    */
   SyncReply(int key, AbstractJmsReply reply)

@@ -35,7 +35,8 @@ import fr.dyade.aaa.mom.comm.*;
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
 import fr.dyade.aaa.mom.proxies.AdminNotification;
-import fr.dyade.aaa.mom.proxies.JmsProxy;
+import fr.dyade.aaa.mom.proxies.soap.SoapProxy;
+import fr.dyade.aaa.mom.proxies.tcp.JmsProxy;
 import fr.dyade.aaa.ns.*;
 
 import java.util.*;
@@ -55,19 +56,26 @@ public class AdminTopicImpl extends TopicImpl
   private int serverId;
 
   /**
-   * Table holding the users identifications.
+   * Table holding the TCP users identifications.
    * <p>
    * <b>Key:</b> user name<br>
    * <b>Object:</b> user password
    */
   private Hashtable usersTable;
   /**
-   * Table holding the users proxies identifiers.
+   * Table holding the TCP users proxies identifiers.
    * <p>
    * <b>Key:</b> user name<br>
    * <b>Object:</b> proxy's identifier
    */
   private Hashtable proxiesTable;
+  /**
+   * Table holding the SOAP users identifications.
+   * <p>
+   * <b>Key:</b> user name<br>
+   * <b>Object:</b> user password
+   */
+  private Hashtable soapTable;
 
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
@@ -86,6 +94,7 @@ public class AdminTopicImpl extends TopicImpl
     super(topicId, topicId);
     serverId = (new Short(AgentServer.getServerId())).intValue();
     usersTable = new Hashtable();
+    soapTable = new Hashtable();
     proxiesTable = new Hashtable();
   }
 
@@ -96,8 +105,8 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /** 
-   * Registers this AdminTopic into the NameService if located on server0,
-   * or gets the identifier of the AdminTopic deployed on server0.
+   * (Re) initialiazes the AdminTopicImpl reference, and at the first
+   * initialization, registers this topic to the NameService on server 0.
    */
   public void initialize(boolean firstTime)
   {
@@ -105,21 +114,18 @@ public class AdminTopicImpl extends TopicImpl
 
     if (! firstTime)
       return;
-    
+
     AgentId nsId = NameService.getDefault((new Integer(0)).shortValue());
-    SimpleCommand command;
-
-    if (serverId == 0)
-      command = new RegisterCommand(destId, "AdminTopic#0", destId);
-    else
-      command = new LookupCommand(destId, "AdminTopic#0");
-
-    Channel.sendTo(nsId, command);
+    Channel.sendTo(nsId, new RegisterCommand(destId,
+                                             "AdminTopic#initial",
+                                             destId,
+                                             false));
   }
 
   /**
-   * Method used by <code>fr.dyade.aaa.mom.proxies.ConnectionFactory</code>
-   * proxies to get the AgentId of the proxy of a given user.
+   * Method used by <code>fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory</code>
+   * and <code>fr.dyade.aaa.mom.proxies.soap.SoapProxy</code> proxies to check
+   * their clients identification.
    *
    * @exception Exception  If the user does not exist, is wrongly identified,
    *              or does not have any proxy deployed.
@@ -129,22 +135,27 @@ public class AdminTopicImpl extends TopicImpl
     String userPass = null;
     AgentId userProxId = null;
 
-    if (usersTable != null)
-      userPass = (String) usersTable.get(name);
-
-    if (proxiesTable != null)
+    // Checking among the TCP users:
+    userPass = (String) usersTable.get(name);
+    if (userPass != null) {
+      if (! userPass.equals(pass))
+        throw new Exception("Invalid password for user [" + name + "]");
       userProxId = (AgentId) proxiesTable.get(name);
-   
-    if (userPass == null)
+      if (userProxId == null)
+        throw new Exception("No proxy deployed for user [" + name + "]");
+
+      return userProxId;
+    }
+
+    // Checking among the SOAP users:
+    userPass = (String) soapTable.get(name);
+    if (userPass != null) {
+      if (userPass.equals(pass))
+        throw new Exception("Invalid password for user [" + name + "]");
+      return SoapProxy.id;
+    }
+    else
       throw new Exception("User [" + name + "] does not exist");
- 
-    if (! userPass.equals(pass))
-      throw new Exception("Invalid password for user [" + name + "]");
-
-    if (userProxId == null)
-      throw new Exception("No proxy deployed for user [" + name + "]");
-
-    return userProxId;
   }
 
   /** Method returning the id of the admin topic. */ 
@@ -188,12 +199,12 @@ public class AdminTopicImpl extends TopicImpl
     String pass = adminNot.getPass();
 
     usersTable.put(name, pass);
-    proxiesTable.put(name, from);
+    proxiesTable.put(name, adminNot.getProxyId());
 
-    readers.add(from);
-    writers.add(from);
+    readers.add(adminNot.getProxyId());
+    writers.add(adminNot.getProxyId());
    
-    adminProxId = from;
+    adminProxId = adminNot.getProxyId();
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, name + " successfully"
@@ -204,19 +215,21 @@ public class AdminTopicImpl extends TopicImpl
    * Method implementing the reaction to a <code>SimpleReport</code>
    * notification coming from the NameService.
    * <p>
-   * If the report is a <code>LookupReport</code>, it carries the identifier
-   * of the AdminTopic deployed on server0. It is then used for clustering the
-   * AdminTopics together. If the report is a <code>SimpleReport</code>, it
-   * simply notifies of the successful registering of the current AdminTopic.
+   * If the report is a successful <code>LookupReport</code>, it carries the
+   * identifier of the initial AdminTopic. It is then used for clustering the
+   * AdminTopics together.
    */ 
   protected void doReact(AgentId from, SimpleReport report)
   {
-    if (report.getStatus() != 4)
+    // Request to the NameService failed:
+    if (report.getStatus() != 4) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
         MomTracing.dbgDestination.log(BasicLevel.ERROR, "Error occured while"
                                       + " linking admin topics, platform is"
                                       + " not administerable");
-    
+    }
+   
+    // LookupReport: it carries the identifier of the initial AdminTopic. 
     if (report instanceof LookupReport) {
       AgentId adminTopic0Id = ((LookupReport) report).getAgent();
       Channel.sendTo(adminTopic0Id, new ClusterNot(destId));
@@ -561,6 +574,8 @@ public class AdminTopicImpl extends TopicImpl
           doProcess((UnsetFather) request, replyTo, msgId);
         else if (request instanceof CreateUserRequest)
           doProcess((CreateUserRequest) request, replyTo, msgId);
+        else if (request instanceof CreateSoapUserRequest)
+          doProcess((CreateSoapUserRequest) request, replyTo, msgId);
         else if (request instanceof UpdateUser)
           doProcess((UpdateUser) request, replyTo, msgId);
         else if (request instanceof DeleteUser)
@@ -832,7 +847,9 @@ public class AdminTopicImpl extends TopicImpl
    * Processes a <code>CreateUserRequest</code> instance requesting the
    * creation of a <code>JmsProxy</code> agent for a given user.
    *
-   * @exception RequestException  If the proxy deployement failed.
+   * @exception RequestException  If the user already exists and is a SOAP
+   *              user, or if it already exists as a TCP user but with a
+   *              different password, or if the proxy deployment failed.
    */
   private void doProcess(CreateUserRequest request, AgentId replyTo,
                          String msgId) throws RequestException
@@ -842,19 +859,27 @@ public class AdminTopicImpl extends TopicImpl
       return;
 
     String name = request.getUserName();
-    AgentId proxId = (AgentId) proxiesTable.get(name);
+    String pass = request.getUserPass();
 
+    if (soapTable.containsKey(name)) {
+      throw new RequestException("User ["
+                                 + name
+                                 + "] already exists and is a SOAP user");
+    }
+
+    AgentId proxId = (AgentId) proxiesTable.get(name);
     String info;
 
     // The user has already been set. 
     if (proxId != null) {
+      if (! pass.equals((String) usersTable.get(name))) {
+        throw new RequestException("User [" + name + "] already exists"
+                                   + " but with a different password.");
+      }
       info = "Request [" + request.getClass().getName()
              + "], processed by AdminTopic on server [" + serverId
              + "], successful [true]: proxy [" + proxId.toString()
              + "] of user [" + name + "] has been retrieved";
-
-      distributeReply(replyTo, msgId,
-                      new CreateUserReply(proxId.toString(), info));
     }
     else {
       JmsProxy proxy = new JmsProxy();
@@ -870,17 +895,72 @@ public class AdminTopicImpl extends TopicImpl
                + "], successful [true]: proxy ["
                + proxId.toString() + "] for user [" + name 
                + "] has been created and deployed";
-
-        distributeReply(replyTo, msgId,
-                        new CreateUserReply(proxId.toString(), info));
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
       }
       catch (Exception exc) {
         throw new RequestException("User proxy not deployed: " + exc);
       }
     }
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+
+    distributeReply(replyTo, msgId,
+                    new CreateUserReply(proxId.toString(), info));
+  }
+
+  /**
+   * Processes a <code>CreateSoapUserRequest</code> instance requesting the
+   * setting of a new SOAP user on the local SOAP proxy.
+   *
+   * @exception RequestException  If the user already exists and is a TCP
+   *              user, or if it already exists as a SOAP user but with a
+   *              different password, or if the SOAP proxy service has not
+   *              been started on the target server.
+   */
+  private void doProcess(CreateSoapUserRequest request, AgentId replyTo,
+                         String msgId) throws RequestException
+  {
+    // If this server is not the target server, doing nothing:
+    if (request.getServerId() != serverId)
+      return;
+
+    String name = request.getUserName();
+    String pass = request.getUserPass();
+
+    if (usersTable.containsKey(name)) {
+      throw new RequestException("User ["
+                                 + name
+                                 + "] already exists and is a TCP user");
+    }
+
+    // The user has already been set. 
+    String storedPass = (String) soapTable.get(name);
+    if (storedPass != null) {
+      if (! pass.equals(storedPass)) {
+        throw new RequestException("User [" + name + "] already exists"
+                                   + " but with a different password.");
+      }
+    }
+    else
+      soapTable.put(name, pass);
+
+    AgentId proxId = SoapProxy.id;
+    if (proxId == null) {
+      soapTable.remove(name);
+      throw new RequestException("SOAP proxy service does not run on server " 
+                                 + serverId);
+    }
+
+    String info = "Request [" + request.getClass().getName()
+                  + "], processed by AdminTopic on server [" + serverId
+                  + "], successful [true]: proxy [" + proxId.toString()
+                  + "] of user [" + name + "] has been retrieved";
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+
+    distributeReply(replyTo, msgId,
+                    new CreateUserReply(proxId.toString(), info));
   }
 
   /**
@@ -901,19 +981,27 @@ public class AdminTopicImpl extends TopicImpl
       return;
 
     // If the user does not exist: throwing an exception:
-    if (! usersTable.containsKey(name))
+    if (! usersTable.containsKey(name) && ! soapTable.containsKey(name))
       throw new RequestException("User [" + name + "] does not exist");
 
     String newName = request.getNewName();
     // If the new name is already taken:
-    if (usersTable.containsKey(newName))
+    if (usersTable.containsKey(newName) || soapTable.containsKey(newName))
       throw new RequestException("Name [" + newName + "] already used");
 
     String newPass = request.getNewPass();
 
-    usersTable.remove(name);
-    usersTable.put(newName, request.getNewPass());
-    proxiesTable.put(newName, proxId);
+    // The user is a TCP user:
+    if (usersTable.containsKey(name)) {
+      usersTable.remove(name);
+      usersTable.put(newName, request.getNewPass());
+      proxiesTable.put(newName, proxId);
+    }
+    // Else, it is a SOAP user:
+    else {
+      soapTable.remove(name);
+      soapTable.put(newName, request.getNewPass());
+    }
 
     String info = "Request [" + request.getClass().getName()
                   + "], processed by AdminTopic on server [" + serverId
@@ -928,7 +1016,7 @@ public class AdminTopicImpl extends TopicImpl
 
   /**
    * Processes a <code>DeleteUser</code> instance requesting the deletion
-   * of a user proxy.
+   * of a user.
    */
   private void doProcess(DeleteUser request, AgentId replyTo, String msgId)
   {
@@ -937,18 +1025,31 @@ public class AdminTopicImpl extends TopicImpl
 
     // If the user does not belong to this server, or has been deleted, doing
     // nothing.
-    if (proxId.getTo() != serverId || ! usersTable.containsKey(name))
+    if (proxId.getTo() != serverId
+        || (! usersTable.containsKey(name) && ! soapTable.containsKey(name)))
       return;
 
-    Channel.sendTo(proxId, new DeleteNot());
+    String info;
 
-    usersTable.remove(name);
-    proxiesTable.remove(name);
+    // The user to delete is a TCP user:
+    if (usersTable.containsKey(name)) {
+      Channel.sendTo(proxId, new DeleteNot());
+      usersTable.remove(name);
+      proxiesTable.remove(name);
 
-    String info = "Request [" + request.getClass().getName()
-                  + "], sent to AdminTopic on server [" + serverId
-                  + "], successful [true]: proxy [" + proxId
-                  + "], of user [" + name + "] has been notified of deletion";
+      info = "Request [" + request.getClass().getName()
+             + "], sent to AdminTopic on server [" + serverId
+             + "], successful [true]: proxy [" + proxId
+             + "], of user [" + name + "] has been notified of deletion";
+    }
+    // Else, it is a SOAP user:
+    else {
+      soapTable.remove(name);
+
+      info = "Request [" + request.getClass().getName()
+             + "], sent to AdminTopic on server [" + serverId
+             + "], successful [true]: user [" + name + "] has been deleted";
+    }
 
     distributeReply(replyTo, msgId, new AdminReply(true, info));
 
@@ -1362,6 +1463,8 @@ public class AdminTopicImpl extends TopicImpl
 
     message.setIdentifier("ID:" + destId.toString() + ":" + msgCounter);
     message.setCorrelationId(msgId);
+    message.setTimestamp(System.currentTimeMillis());
+    message.setDestination(destId.toString(), false);
 
     try {
       message.setObject(reply);

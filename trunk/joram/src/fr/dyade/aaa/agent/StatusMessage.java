@@ -13,8 +13,8 @@ import java.io.*;
  * @see fr.dyade.aaa.TransientNetworkServer
  */
 class StatusMessage implements Serializable {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.5 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.6 2003-03-19 15:16:06 fmaistre Exp $";
 
   transient byte status;
   transient int stamp = -1;

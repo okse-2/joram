@@ -55,51 +55,6 @@ public class Admin
    * Constructs an <code>Admin</code> instance connected to a given server
    * with a given administrator identification.
    *
-   * @param url  The server's url.
-   * @param adminName  Administrator name.
-   * @param adminPass  Administrator password.
-   * @param timer  Time is seconds allowed for connecting.
-   * @exception ConnectException  In case of a wrong server url or if the
-   *              server is not listening.
-   * @exception AdminException  If the admin identification is incorrect.
-   */
-  public Admin(String url, String adminName, String adminPass, int timer)
-         throws Exception
-  {
-    try {
-      fr.dyade.aaa.joram.JoramUrl jUrl = new fr.dyade.aaa.joram.JoramUrl(url);
-
-      host = jUrl.getHost();
-      port = jUrl.getPort();
-
-      adminImpl = new AdminImpl();
-      adminImpl.connect(host, port, adminName, adminPass, timer);
-
-      this.adminName = adminName;
-
-      disconnected = false;
-
-      jndiCtx = new javax.naming.InitialContext();
-
-      serverId = adminImpl.getServerId();
-    }
-    catch (MalformedURLException mE) {
-      throw new ConnectException("Can't open admin as server's url is"
-                                 + " incorrect: " + url);
-    }
-    catch (UnknownHostException exc) {
-      throw new ConnectException("Can't open admin as the host is incorrect"
-                                 + " in server's url: " + url);
-    }
-    catch (javax.naming.NamingException exc) {
-      throw new AdminException("Can't access any naming server");
-    }
-  }
-
-  /**
-   * Constructs an <code>Admin</code> instance connected to a given server
-   * with a given administrator identification.
-   *
    * @param hostName  Name of the host to connect to.
    * @param port  Port the server is listening on. 
    * @param adminName  Administrator name.
@@ -112,7 +67,24 @@ public class Admin
   public Admin(String hostName, int port, String adminName,
                String adminPass, int timer) throws Exception
   {
-    this("joram://" + hostName + ":" + port, adminName, adminPass, timer);
+    try {
+      adminImpl = new AdminImpl();
+      adminImpl.connect(hostName, port, adminName, adminPass, timer);
+
+      this.adminName = adminName;
+
+      disconnected = false;
+
+      jndiCtx = new javax.naming.InitialContext();
+
+      serverId = adminImpl.getServerId();
+    }
+    catch (UnknownHostException exc) {
+      throw new ConnectException("Unknown host: " + exc);
+    }
+    catch (javax.naming.NamingException exc) {
+      throw new AdminException("Can't access any naming server");
+    }
   }
  
   /**

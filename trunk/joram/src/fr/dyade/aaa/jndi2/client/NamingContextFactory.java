@@ -47,7 +47,7 @@ public class NamingContextFactory implements InitialContextFactory {
    *  when creating an initial context using this factory.
    */
   public final static String HOST_PROPERTY = "java.naming.factory.host";
-  
+
 
   /**
    * @param  env  This contains the hostname and the port.
@@ -59,21 +59,38 @@ public class NamingContextFactory implements InitialContextFactory {
   public Context getInitialContext(Hashtable env)
     throws NamingException {
     try {
-      String host = System.getProperty(HOST_PROPERTY,null);
-      String portStr = System.getProperty(PORT_PROPERTY,null);
-      if (host == null) {
+      String host = null;
+      String portStr = null;
+
+      // URL should be as: joram://host:port
+      String url = System.getProperty(Context.PROVIDER_URL,null);
+      if (url == null)
+        url = (String) env.get(Context.PROVIDER_URL);
+
+      if (url != null) {
+        int indexOfHost = url.indexOf("//") + 2;
+        int indexOfPort = url.indexOf(":", indexOfHost) + 1;
+
+        host = url.substring(indexOfHost, indexOfPort - 1);
+        portStr = url.substring(indexOfPort);
+      }
+
+      if (host == null)
+        host = System.getProperty(HOST_PROPERTY,null);
+      if (host == null)
         host = (String) env.get(HOST_PROPERTY);	  
-        if (host == null) {
-          host = "localhost";//default host
-        }
-      }
-      if (portStr == null) {
+      if (host == null)
+        host = "localhost";//default host
+
+      if (portStr == null)
+        portStr = System.getProperty(PORT_PROPERTY,null);
+      if (portStr == null)
         portStr = (String) env.get(PORT_PROPERTY);
-        if (portStr == null) {
-          portStr = "16400";//default port
-        }
-      }
+      if (portStr == null)
+        portStr = "16400";//default port
+
       int port = Integer.parseInt(portStr);
+
       return new fr.dyade.aaa.jndi2.client.NamingContextImpl(
         new NamingConnection(host, port), 
         new CompositeName());

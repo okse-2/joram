@@ -11,13 +11,13 @@ to have a list of the available Ant targets for JORAM.
 
  $ ant
 will create a new shipment of JORAM with all the needed libraries
-in ship/lib/ (the corresponding target is ship.joram)
+in ship/lib/ (the corresponding target is ship.joram).
 
  $ ant javadoc
-to generate Javadoc
+to generate the javadoc.
 
  $ ant clean
-to clean all generated files
+to clean all generated files.
 
 ###########################
 # JORAM Samples and Demos #

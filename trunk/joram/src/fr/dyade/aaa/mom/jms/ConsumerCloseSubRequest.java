@@ -34,7 +34,7 @@ package fr.dyade.aaa.mom.jms;
 public class ConsumerCloseSubRequest extends AbstractJmsRequest
 {
   /**
-   * Constructs an <code>ConsumerCloseSubRequest</code>.
+   * Constructs a <code>ConsumerCloseSubRequest</code>.
    *
    * @param subName  The name of the closing durable subscription.
    */
@@ -42,4 +42,10 @@ public class ConsumerCloseSubRequest extends AbstractJmsRequest
   {
     super(subName);
   }
+
+  /**
+   * Constructs a <code>ConsumerCloseSubRequest</code>.
+   */
+  public ConsumerCloseSubRequest()
+  {}
 }

@@ -42,8 +42,6 @@ public class TopicPublisher extends MessageProducer
    * @param sess  The session the publisher belongs to.
    * @param topic The topic the publisher publishs messages on.
    *
-   * @exception JMSSecurityException  If the client is not a WRITER on the
-   *              topic.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason. 
    */

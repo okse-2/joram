@@ -39,7 +39,7 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
   private boolean queueMode;
 
   /**
-   * Constructs an <code>ConsumerSetListRequest</code>.
+   * Constructs a <code>ConsumerSetListRequest</code>.
    *
    * @param targetName  Name of the target queue or subscription.
    * @param selector  Selector for filtering messages.
@@ -54,6 +54,23 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
     this.queueMode = queueMode;
   }
 
+  /**
+   * Constructs a <code>ConsumerSetListRequest</code>.
+   */
+  public ConsumerSetListRequest()
+  {}
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
 
   /** Returns the selector for filtering messages. */
   public String getSelector()

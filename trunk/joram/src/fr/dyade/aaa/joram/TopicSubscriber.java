@@ -47,8 +47,6 @@ public class TopicSubscriber extends MessageConsumer
    * @param noLocal <code>true</code> if the subscriber does not wish to
    *          consume messages published through the same connection.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              topic.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */

@@ -92,8 +92,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    *          messages produced by its connection.
    *
    * @exception InvalidSelectorException  If the selector syntax is invalid.
-   * @exception JMSSecurityException  If the user is not a READER on the 
-   *              destination.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
@@ -165,8 +163,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * @param selector  Selector for filtering messages.
    *
    * @exception InvalidSelectorException  If the selector syntax is invalid.
-   * @exception JMSSecurityException  If the user is not a READER on the 
-   *              destination.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
@@ -267,7 +263,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
       this.messageListener = messageListener;
       pendingReq = new ConsumerSetListRequest(targetName, selector, queueMode);
-      pendingReq.setIdentifier(sess.cnx.nextRequestId());
+      pendingReq.setRequestId(sess.cnx.nextRequestId());
       sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
       sess.cnx.asyncRequest(pendingReq);
     }
@@ -308,6 +304,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    *
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
+   * @exception JMSSecurityException  If the requester is not a READER on the
+   *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
   public javax.jms.Message receive(long timeOut) throws JMSException
@@ -335,7 +333,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
       pendingReq = new ConsumerReceiveRequest(targetName, selector, timeOut,
                                               queueMode);
-      pendingReq.setIdentifier(sess.cnx.nextRequestId());
+      pendingReq.setRequestId(sess.cnx.nextRequestId());
       receiving = true;
 
       // In case of a timer, scheduling the receive:
@@ -383,6 +381,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * 
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
+   * @exception JMSSecurityException  If the requester is not a READER on the
+   *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
   public javax.jms.Message receive() throws JMSException
@@ -395,6 +395,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    * 
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
+   * @exception JMSSecurityException  If the requester is not a READER on the
+   *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
   public javax.jms.Message receiveNoWait() throws JMSException
@@ -543,7 +545,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
         // Sending a new request if queue mode:
         if (queueMode) {
           pendingReq = new ConsumerSetListRequest(targetName, selector, true);
-          pendingReq.setIdentifier(sess.cnx.nextRequestId());
+          pendingReq.setRequestId(sess.cnx.nextRequestId());
           sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
           sess.cnx.asyncRequest(pendingReq);
         }

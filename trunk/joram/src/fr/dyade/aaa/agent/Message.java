@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 1996 - 2000 BULL
+ * Copyright (C) 2002-2003 SCALAGENT
+  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
  * The contents of this file are subject to the Joram Public License,
@@ -35,7 +36,7 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $"; 
 
   static final long serialVersionUID =  -2179939607085028300L;
 
@@ -157,6 +158,17 @@ class Message implements Serializable {
   }
 
   /**
+   * Private constructor used in PoolCnxNetwork to create a ghost message
+   * in order to force an acknowledge transmission.
+   */
+  Message(AgentId from, AgentId to) {
+    this.from = from;
+    this.to = to;
+    this.not = null;
+    this.update = new Update(from.getTo(), to.getTo(), 0);
+  }
+
+  /**
    * Construct a new message.
    * @param from	id of source Agent.
    * @param to    	id of destination Agent.
@@ -184,7 +196,7 @@ class Message implements Serializable {
   private static Pool pool = null;
 
   static {
-    int size = Integer.getInteger("fr.dyade.aaa.Message$Pool.size", 50).intValue();
+    int size = Integer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
     pool = new Pool(size);
   }
 
@@ -221,7 +233,7 @@ class Message implements Serializable {
     Object[] elementData =  null;
 
     private Logger logmon = null;
-    private long cpt1, cpt2;
+    private long cpt1, cpt2, cpt3, cpt4;
 
     public Pool(int capacity) {
       elementData = new Object[capacity];
@@ -230,14 +242,19 @@ class Message implements Serializable {
 
     public final synchronized void freeElement(Object obj) {
       // If there is enough free element, let the gc get this element. 
-      if (elementCount == elementData.length)
+      if (elementCount == elementData.length) {
+        cpt4 += 1;
         return;
+      }
       elementData[elementCount] = obj;
       elementCount += 1;
     }
 
     public final synchronized Object allocElement() throws Exception {
-      if (elementCount == 0) throw new Exception();
+      if (elementCount == 0) {
+        cpt3 += 1;
+        throw new Exception();
+      }
       elementCount -= 1;
       Object obj = elementData[elementCount];
       elementData[elementCount] = null; /* to let gc do its work */
@@ -246,7 +263,9 @@ class Message implements Serializable {
       if ((cpt1 & 0xFFFFFL) == 0L) {
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           logmon.log(BasicLevel.DEBUG,
-                     "Message$Pool=" + (cpt2/cpt1) + '/' + elementCount);
+                     "Message$Pool=" + (cpt2/cpt1) + '/' + elementCount +
+                     ", " + cpt3 + ", " + cpt4);
+          cpt3 = 0; cpt4 = 0;
         }
       }
     

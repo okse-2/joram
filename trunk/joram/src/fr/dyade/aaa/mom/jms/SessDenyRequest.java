@@ -76,6 +76,30 @@ public class SessDenyRequest extends AbstractJmsRequest
     this.doNotAck = doNotAck;
   }
 
+  /**
+   * Constructs a <code>SessDenyRequest</code> instance.
+   */
+  public SessDenyRequest()
+  {}
+
+  /** Sets the vector of identifiers. */
+  public void setIds(Vector ids)
+  {
+    this.ids = ids;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Sets the server ack policy. */
+  public void setDoNotAck(boolean doNotAck)
+  {
+    this.doNotAck = doNotAck;
+  }
+
   /** Returns the vector of denyed messages identifiers. */
   public Vector getIds()
   {
@@ -92,7 +116,7 @@ public class SessDenyRequest extends AbstractJmsRequest
    * Returns <code>true</code> if the request must not be acked by the 
    * server.
    */
-  public boolean doNotAck()
+  public boolean getDoNotAck()
   {
     return doNotAck;
   }

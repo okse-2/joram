@@ -143,7 +143,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer
 
     // Sending a listener request:
     currentReq = new ConsumerSetListRequest(targetName, selector, queueMode);
-    currentReq.setIdentifier(cnx.nextRequestId());
+    currentReq.setRequestId(cnx.nextRequestId());
     cnx.requestsTable.put(currentReq.getRequestId(), this);
     cnx.asyncRequest(currentReq);
 
@@ -282,7 +282,7 @@ class CCDaemon extends fr.dyade.aaa.util.Daemon
               cnx.requestsTable.remove(currentReq.getRequestId());
               currentReq = new ConsumerSetListRequest(targetName, selector,
                                                       queueMode);
-              currentReq.setIdentifier(cnx.nextRequestId());
+              currentReq.setRequestId(cnx.nextRequestId());
               cnx.requestsTable.put(currentReq.getRequestId(), cc);
               cnx.asyncRequest(currentReq);
             }

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 SCALAGENT
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -45,8 +45,8 @@ import fr.dyade.aaa.util.*;
  * to save <code>MessageQueue</code> object state.
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
 
   private Logger logmon = null;
   private String logmsg = null;
@@ -145,7 +145,7 @@ public final class MessageQueue {
     if ((cpt1 & 0xFFFFL) == 0L) {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         logmon.log(BasicLevel.DEBUG,
-                   logmsg + ((cpt2*100)/cpt1) + '/' + last);
+                   logmsg + (cpt2/cpt1) + '/' + last);
       }
     }
     
@@ -153,6 +153,22 @@ public final class MessageQueue {
       wait();
     }
     return (Message) data.elementAt(0);
+  }
+
+  synchronized Message get(long timeout) throws InterruptedException {
+    cpt1 += 1; cpt2 += last;
+    if ((cpt1 & 0xFFFFL) == 0L) {
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        logmon.log(BasicLevel.DEBUG,
+                   logmsg + (cpt2/cpt1) + '/' + last);
+      }
+    }
+    
+    if ((last == 0) && (timeout > 0)) wait(timeout);
+    if (last > 0)
+      return (Message) data.elementAt(0);
+
+    return null;
   }
 
   /**

@@ -29,12 +29,13 @@ package fr.dyade.aaa.joram.admin;
 
 import fr.dyade.aaa.joram.Queue;
 import fr.dyade.aaa.joram.Topic;
-import fr.dyade.aaa.joram.ConnectionFactory;
-import fr.dyade.aaa.joram.QueueConnectionFactory;
 import fr.dyade.aaa.joram.TopicConnectionFactory;
-import fr.dyade.aaa.joram.XAConnectionFactory;
-import fr.dyade.aaa.joram.XAQueueConnectionFactory;
-import fr.dyade.aaa.joram.XATopicConnectionFactory;
+import fr.dyade.aaa.joram.tcp.TcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.QueueTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.TopicTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XATcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XAQueueTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XATopicTcpConnectionFactory;
 import fr.dyade.aaa.mom.admin.*;
 
 import java.net.ConnectException;
@@ -48,10 +49,6 @@ import javax.jms.*;
  */
 public class AdminImpl implements AdminItf
 {
-  /** The host name or IP address this client is connected to. */
-  private String localHost;
-  /** The port number of the client connection. */
-  private int localPort;
   /** The identifier of the server the client is connected to. */
   private int localServer;
 
@@ -70,50 +67,50 @@ public class AdminImpl implements AdminItf
   private ObjectMessage requestMsg;
   /** ObjectMessage received from the platform. */
   private ObjectMessage replyMsg;
+
   /** Reply object received from the platform. */
-  private AdminReply reply;
+  protected AdminReply reply;
   
+  /** The host name or IP address this client is connected to. */
+  protected String localHost;
+  /** The port number of the client connection. */
+  protected int localPort;
+
+
   /**
-   * Opens a connection with the Joram server running on a given host and
-   * listening to a given port.
+   * Opens a connection with the Joram server given a
+   * <code>TopicConnectionFactory</code>.
    *
-   * @param host  The name or IP address of the host the server is running on.
-   * @param port  The number of the port the server is listening to.
+   * @param cnxFact  The TopicConnectionFactory to use for connecting.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
-   * @param cnxTimer  Timer in seconds during which connecting to the server
-   *          is attempted.
    *
-   * @exception UnknownHostException  If the host is invalid.
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(String hostName, int port, String name,
-                      String password, int cnxTimer)
-              throws UnknownHostException, ConnectException, AdminException
+  public void connect(TopicConnectionFactory cnxFact, String name,
+                      String password)
+              throws ConnectException, AdminException
   {
     if (cnx != null)
       return;
 
     try {
-      javax.jms.TopicConnectionFactory cnxFact =
-        new TopicConnectionFactory(hostName, port);
-
-      ((fr.dyade.aaa.joram.ConnectionFactory) cnxFact).setCnxTimer(cnxTimer);
-
       cnx = cnxFact.createTopicConnection(name, password);
       sess = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
       topic = sess.createTopic("#AdminTopic");
-
+      
       producer = sess.createProducer(topic);
       requestor = new TopicRequestor(sess, topic);
 
       cnx.start();
 
-      localHost = hostName;
-      localPort = port;
+      fr.dyade.aaa.joram.FactoryParameters params = 
+        ((fr.dyade.aaa.joram.ConnectionFactory) cnxFact).getParameters();
+      localHost = params.getHost();
+      localPort = params.getPort();
 
       // Getting the id of the local server:
       try {
@@ -133,7 +130,36 @@ public class AdminImpl implements AdminItf
   }
 
   /**
-   * Opens a connection with the Joram server running on the default
+   * Opens a TCP connection with the Joram server running on a given host and
+   * listening to a given port.
+   *
+   * @param host  The name or IP address of the host the server is running on.
+   * @param port  The number of the port the server is listening to.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public void connect(String hostName, int port, String name,
+                      String password, int cnxTimer)
+              throws UnknownHostException, ConnectException, AdminException
+  {
+    TopicConnectionFactory cnxFact =
+      new TopicTcpConnectionFactory(hostName, port);
+
+    ((fr.dyade.aaa.joram.ConnectionFactory) cnxFact).getParameters().
+        connectingTimer = cnxTimer;
+
+    this.connect(cnxFact, name, password);
+  }
+
+  /**
+   * Opens a TCP connection with the Joram server running on the default
    * "locahost" host and listening to the default 16010 port.
    *
    * @param name  Administrator's name.
@@ -153,6 +179,8 @@ public class AdminImpl implements AdminItf
     }
     catch (UnknownHostException exc) {}
   }
+
+  
 
   /** Closes the administration connection. */
   public void disconnect()
@@ -872,168 +900,132 @@ public class AdminImpl implements AdminItf
 
   /**
    * Creates a <code>javax.jms.ConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.ConnectionFactory
          createConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new ConnectionFactory(host, port);
+    return new TcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.ConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.ConnectionFactory createConnectionFactory()
-         throws UnknownHostException
   {
     return this.createConnectionFactory(localHost, localPort);
   }
 
   /**
    * Creates a <code>javax.jms.QueueConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.QueueConnectionFactory
          createQueueConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new QueueConnectionFactory(host, port);
+    return new QueueTcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.QueueConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.QueueConnectionFactory createQueueConnectionFactory()
-         throws UnknownHostException
   {
     return this.createQueueConnectionFactory(localHost, localPort);
   }
 
   /**
    * Creates a <code>javax.jms.TopicConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.TopicConnectionFactory
          createTopicConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new TopicConnectionFactory(host, port);
+    return new TopicTcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.TopicConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.TopicConnectionFactory createTopicConnectionFactory()
-         throws UnknownHostException
   {
     return this.createTopicConnectionFactory(localHost, localPort);
   }
 
   /**
    * Creates a <code>javax.jms.XAConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.XAConnectionFactory
          createXAConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new XAConnectionFactory(host, port);
+    return new XATcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.XAConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.XAConnectionFactory createXAConnectionFactory()
-         throws UnknownHostException
   {
     return this.createXAConnectionFactory(localHost, localPort);
   }
 
   /**
    * Creates a <code>javax.jms.XAQueueConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.XAQueueConnectionFactory
          createXAQueueConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new XAQueueConnectionFactory(host, port);
+    return new XAQueueTcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.XAQueueConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.XAQueueConnectionFactory createXAQueueConnectionFactory()
-         throws UnknownHostException
   {
     return this.createXAQueueConnectionFactory(localHost, localPort);
   }
 
   /**
    * Creates a <code>javax.jms.XATopicConnectionFactory</code> instance for
-   * connecting to a given server.
+   * creating TCP connections with a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.XATopicConnectionFactory
          createXATopicConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
-    return new XATopicConnectionFactory(host, port);
+    return new XATopicTcpConnectionFactory(host, port);
   }
 
   /**
    * Creates a <code>javax.jms.XATopicConnectionFactory</code> instance for
-   * connecting to the local server.
-   *
-   * @exception UnknownHostException  In case of a problem with localhost.
+   * creating TCP connections with the local server.
    */ 
   public javax.jms.XATopicConnectionFactory createXATopicConnectionFactory()
-         throws UnknownHostException
   {
     return this.createXATopicConnectionFactory(localHost, localPort);
   }

@@ -43,4 +43,10 @@ public class ServerReply extends AbstractJmsReply
   {
     super(request.getRequestId());
   }
+
+  /**
+   * Constructs a <code>ServerReply</code> instance.
+   */
+  public ServerReply()
+  {}
 }

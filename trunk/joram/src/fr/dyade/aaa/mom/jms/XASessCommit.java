@@ -48,6 +48,18 @@ public class XASessCommit extends AbstractJmsRequest
     this.id = id;
   }
 
+  /**
+   * Constructs an <code>XASessCommit</code> instance.
+   */
+  public XASessCommit()
+  {}
+
+
+  /** Sets the identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
 
   /** Returns the identifier of the resource and the commiting transaction. */
   public String getId()

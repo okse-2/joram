@@ -34,8 +34,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * reflected the totally of Vector interface, then it should be public.
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -125,8 +125,8 @@ final class AgentVector extends AgentObject {
  * to remotely delete agents.
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;

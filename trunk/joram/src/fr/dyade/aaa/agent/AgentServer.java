@@ -135,8 +135,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -814,9 +814,19 @@ public final class AgentServer {
 	  // to insert it in the queue of this consumer.
           try {
             servers[msg.update.getToId()].domain.insert(msg);
+          } catch (NullPointerException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       "AgentServer#" + serverId +
+                       ", discard message to unknown server id#" +
+                       msg.update.getToId());
+            msg.delete();
+            continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId + ", bad server id.");
+                       "AgentServer#" + serverId +
+                       ", discard message to unknown server id#" +
+                       msg.update.getToId());
+            msg.delete();
             continue;
           }
 	} else {
@@ -826,9 +836,19 @@ public final class AgentServer {
 	  // received it.
           try {
             servers[msg.update.getFromId()].domain.insert(msg);
+          } catch (NullPointerException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       "AgentServer#" + serverId +
+                       ", discard message from unknown server id#" +
+                       msg.update.getFromId());
+            msg.delete();
+            continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId + ", bad server id.");
+                       "AgentServer#" + serverId +
+                       ", discard message from unknown server id#" +
+                       msg.update.getFromId());
+            msg.delete();
             continue;
           }
 	}
@@ -1029,6 +1049,11 @@ public final class AgentServer {
     } catch (Throwable exc) {
       System.out.println("AgentServer#" + getServerId() +
                          "initialisation failed: " + exc.toString());
+      if (logmon == null)
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + getServerId() +
+                 " initialisation failed", exc);
       System.exit(1);
     }
     try {
@@ -1036,13 +1061,14 @@ public final class AgentServer {
       // Be careful, the output below is needed by some tools (AdminProxy for
       // example.
       System.out.println("AgentServer#" + getServerId() + " started.");
-    } catch (Exception exc) {
+    } catch (Throwable exc) {
       System.out.println("AgentServer#" + getServerId() + " failed: " +
                          exc.toString());
-
-
+      if (logmon == null)
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + getServerId() + " failed", exc);
       System.exit(1);
     }
   }
 }
-

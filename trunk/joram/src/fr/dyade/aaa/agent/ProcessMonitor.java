@@ -38,8 +38,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
   * @see	ProcessManager
   */
 class ProcessMonitor extends Driver implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */

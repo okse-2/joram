@@ -29,28 +29,57 @@ package fr.dyade.aaa.mom.jms;
 
 /**
  * A <code>CnxConnectReply</code> is sent by a JMS proxy as a reply to a
- * connection <code>CnxConnectRequest</code> and holds the connection's key.
+ * connection <code>CnxConnectRequest</code> and holds the connection's key
+ * and the proxy identifier.
  */
 public class CnxConnectReply extends AbstractJmsReply
 {
   /** The connection's key. */
   private int key;
+  /** The proxy's identifier. */
+  private String proxyId;
 
   /**
    * Constructs a <code>CnxConnectReply</code>.
    *
    * @param req  The replied request.
    * @param key  The connection's key.
+   * @param proxyId  The proxy's identifier.
    */
-  public CnxConnectReply(CnxConnectRequest req, int key)
+  public CnxConnectReply(CnxConnectRequest req, int key, String  proxyId)
   {
     super(req.getRequestId());
     this.key = key;
+    this.proxyId = proxyId;
   }
+
+  /**
+   * Constructs a <code>CnxConnectReply</code>.
+   */
+  public CnxConnectReply()
+  {}
+
+  /** Sets the connection's key. */
+  public void setKey(int key)
+  {
+    this.key = key;
+  }
+
+  /** Sets the proxy's identifier */
+  public void setProxyId(String proxyId)
+  {
+    this.proxyId = proxyId;
+  } 
 
   /** Returns the connection's key. */
   public int getKey()
   {
     return key;
   }
+
+  /** Returns the proxy's identifier */
+  public String getProxyId()
+  {
+    return proxyId;
+  } 
 }

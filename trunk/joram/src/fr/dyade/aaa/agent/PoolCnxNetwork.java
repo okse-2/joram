@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.10 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.11 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -170,6 +170,32 @@ class PoolCnxNetwork extends StreamNetwork {
     return strbuf.toString();
   }
 
+  final class MessageVector extends Vector {
+    public synchronized Message removeMessage(int stamp) {
+      Message msg = null;
+
+      modCount++;
+      for (int index=0 ; index<elementCount ; index++) {
+        try {
+          msg = (Message) elementData[index];
+        } catch (ClassCastException exc) {
+          continue;
+        }
+        if (msg.update.stamp == stamp) {
+          int j = elementCount - index - 1;
+          if (j > 0) {
+	    System.arraycopy(elementData, index + 1, elementData, index, j);
+          }
+          elementCount--;
+          elementData[elementCount] = null; /* to let gc do its work */
+        
+          return msg;
+        }
+      }
+      throw new NoSuchElementException();
+    }
+  }
+
   final class NetSession implements Runnable {
     /**
      * Boolean variable used to stop the daemon properly. The dameon tests
@@ -187,15 +213,6 @@ class PoolCnxNetwork extends StreamNetwork {
     private Thread thread = null;
     /** The session's name. */
     private String name = null;
-
-    /**
-     * StatusMessage used to asynchronously ack message, contains the stamp
-     * of last message to acknowledge.
-     * Be careful, at boot time stamp must be -1 in order to reset other side.
-     */
-    private StatusMessage ack = new StatusMessage(StatusMessage.AckStatus);
-    /** Stamp of last message acknowledged */
-    private int lastAck = -1;
 
     /**
      *  True if a "local" connection is in progress, a local connection
@@ -217,7 +234,7 @@ class PoolCnxNetwork extends StreamNetwork {
     /** */
     private ObjectOutputStream oos = null;
     /** */
-    private Vector sendList;
+    private MessageVector sendList;
 
     private long last = 0L;
 
@@ -232,7 +249,7 @@ class PoolCnxNetwork extends StreamNetwork {
       canStop = false;
       thread = null;
 
-      sendList = new Vector();
+      sendList = new MessageVector();
     }
 
     /**
@@ -323,8 +340,6 @@ class PoolCnxNetwork extends StreamNetwork {
 	ois = getInputStream(sock);
 
 	oos.writeObject(new Boot());
-// AF:
-//      oos.writeObject(ack);
 	oos.flush();
 	oos.reset();
 
@@ -337,18 +352,6 @@ class PoolCnxNetwork extends StreamNetwork {
 	// the connection directly, so we catch a ConnectException.
 	if (statusMsg.status == StatusMessage.NAckStatus)
 	  throw new ConnectException("Nack status received");
-
-        // AF: With a FIFO communication canal we can exchange a StatusMessage
-        // at boot time and clean the sendList.
-
-//      if (statusMsg.stamp == -1)
-//        ack.stamp = -1;
-//      else
-//        doAck(ack.stamp);
-
-        // The remote server has been restarted, the message order could be
-        // different, the ack counter is now invalid.
-        ack.stamp = -1;
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
@@ -414,31 +417,11 @@ class PoolCnxNetwork extends StreamNetwork {
 	// Accept this connection.
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                         getName() + ", send:" + ack);
+                         getName() + ", send AckStatus");
 
-	oos.writeObject(ack);
+	oos.writeObject(new StatusMessage(StatusMessage.AckStatus));
 	oos.flush();
 	oos.reset();
-
-        // AF: With a FIFO communication canal we can exchange a StatusMessage
-        // at boot time and clean the sendList.
-
-// 	StatusMessage statusMsg = (StatusMessage) ois.readObject();
-
-//      if (logmon.isLoggable(BasicLevel.DEBUG))
-//         logmon.log(BasicLevel.DEBUG, getName() + ", receive: " + statusMsg);
-
-//      if (statusMsg.status == StatusMessage.NAckStatus)
-// 	  throw new ConnectException("Nack status received");
-
-//      if (statusMsg.stamp == -1)
-//        ack.stamp = -1;
-//      else
-//        doAck(ack.stamp);
-
-        // The remote server has been restarted, the message order could be
-        // different, the ack counter is now invalid.
-        ack.stamp = -1;
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.sock = sock;
@@ -518,7 +501,7 @@ class PoolCnxNetwork extends StreamNetwork {
       logmon.log(BasicLevel.DEBUG,
 		 getName() + ", send " + waiting.length + " waiting messages");
       for (int i=0; i<waiting.length; i++) {
-	transmit(waiting[i]);
+	transmit((Message) waiting[i]);
       }
     }
 
@@ -574,29 +557,24 @@ class PoolCnxNetwork extends StreamNetwork {
      * begin to end, and it removes always the first element. Other
      * methods using sendList just adds element at the end.
      */
-    final private void doAck(StatusMessage ack) throws IOException {
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", sendList.size=" + sendList.size());
-
+    final private void doAck(int ack) throws IOException {
       Message msg = null;
-      do {
-         msg = (Message) sendList.firstElement();
-
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     getName() + ", remove msg#" + msg.update.stamp);
-
+      try {
         //  Suppress the acknowledged notification from waiting list,
         // and deletes it.
-        sendList.removeElementAt(0);
+        msg = sendList.removeMessage(ack);
         AgentServer.transaction.begin();
         msg.delete();
         AgentServer.transaction.commit();
         AgentServer.transaction.release();
-      } while (msg.update.stamp != ack.stamp);
 
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", sendList.size=" + sendList.size());
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", remove msg#" + msg.update.stamp);
+      } catch (NoSuchElementException exc) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", can't ack, unknown msg#" + ack);
+      }
     }
 
     /**
@@ -604,11 +582,20 @@ class PoolCnxNetwork extends StreamNetwork {
      * overall synchronization of the connection -method start- can dead-lock).
      */
     final void send(Message msg) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        if (msg.not != null) {
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", send msg#" + msg.update.stamp);
+        } else {
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", send ack#" + msg.update.stamp);
+        }
+      }
 
-      sendList.addElement(msg);
+      if (msg.not != null) {
+        sendList.addElement(msg);
+      }
+
       if (sock == null) {
 	// If there is no connection between local and destination server,
 	// try to make one!
@@ -619,25 +606,23 @@ class PoolCnxNetwork extends StreamNetwork {
     }
     
 //  final private synchronized void ack(int stamp) throws IOException {
-    final private  void ack(int stamp) throws IOException {
+    final private void ack(int stamp) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", set ack msg#" + stamp);
 
-      ack.stamp = stamp;
+      Message ack = new Message(AgentId.localId,
+                                AgentId.localId(server.sid));
+      ack.update = new Update(AgentServer.getServerId(),
+                              AgentServer.servers[server.sid].gateway,
+                              stamp);
+      qout.push(ack);
     }
 
-    final private synchronized void transmit(Object msg) {
+    final private synchronized void transmit(Message msg) {
       last = current++;
       try {
         oos.writeObject(msg);
-        if (ack.stamp > lastAck) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ", send ack msg#" + ack.stamp);
-          oos.writeObject(ack);
-          lastAck = ack.stamp;
-        }
         oos.flush();
         oos.reset();
       } catch (IOException exc) {
@@ -688,21 +673,24 @@ class PoolCnxNetwork extends StreamNetwork {
 
 	  canStop = false;
 
-	  if (obj instanceof StatusMessage) {
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG,
-                         getName() +
-                         ", ack received #" + ((StatusMessage) obj).stamp);
-            doAck((StatusMessage) obj);
-	  } else if (obj instanceof Message) {
-	    //  Keep message stamp in order to acknowledge it (be careful,
-	    // the message get a new stamp to be delivered).
-	    int stamp = ((Message) obj).update.stamp;
-	    deliver((Message) obj);
-	    ack(stamp);
+          if (obj instanceof Message) {
+            Message msg = (Message) obj;
+            //  Keep message stamp in order to acknowledge it (be careful,
+            // the message get a new stamp to be delivered).
+            int stamp = msg.update.stamp;
+            if (msg.not != null) {
+              deliver(msg);
+              ack(stamp);
+            } else {
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
+                           getName() +
+                           ", ack received #" + stamp);
+              doAck(stamp);
+            }
 	  } else {
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG, getName() + ", receives " + obj);
+            if (logmon.isLoggable(BasicLevel.WARN))
+              logmon.log(BasicLevel.WARN, getName() + ", receives " + obj);
 	  }
 	}
       } catch (EOFException exc) {

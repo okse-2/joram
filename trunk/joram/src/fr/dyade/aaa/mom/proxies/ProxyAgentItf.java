@@ -27,28 +27,34 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.mom.jms.AbstractJmsReply;
+
 /**
- * An <code>InputNotification</code> instance is created by an input
- * stream filter for wrapping an external request object.
+ * The <code>ProxyAgentItf</code> interface defines the methods provided to
+ * <code>ProxyImpl</code> objects for actually communicating with MOM
+ * destinations and clients.
+ * <p>
+ * This interface is implemented by proxy agents dedicated to a given
+ * communication protocol (as TCP or SOAP).
+ *
+ * @see fr.dyade.aaa.mom.tcp.JmsProxy
+ * @see fr.dyade.aaa.mom.soap.SoapProxy
  */
-public class InputNotification extends fr.dyade.aaa.agent.Notification
+public interface ProxyAgentItf
 {
-  /** The object actually received from the external client. */
-  private Object obj;
+  /** Returns the proxy's <code>AgentId</code> identifier. */
+  public AgentId getAgentId();
+
+  /** Sends a notification to a given agent. */ 
+  public void sendNot(AgentId to, Notification not);
 
   /**
-   * Constructs an <code>InputNotification</code> instance.
+   * Sends an <code>AbstractJmsReply</code> to a given client.
    *
-   * @param obj  The object read on the stream.
+   * @param id  Identifies the client to send the reply to.
+   * @param reply  The reply to send to the client.
    */
-  public InputNotification(Object obj)
-  {
-    this.obj = obj;
-  }
-
-  /** Returns the object read on the input stream. */
-  public Object getObj()
-  {
-    return obj;
-  }
+  public void sendToClient(int id, AbstractJmsReply reply);
 }

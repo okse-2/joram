@@ -60,6 +60,30 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
     this.queueMode = queueMode;
   }
 
+  /**
+   * Constructs a <code>ConsumerReceiveRequest</code>.
+   */
+  public ConsumerReceiveRequest()
+  {}
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
+  }
+
+  /** Sets the time to live value. */
+  public void setTimeToLive(long timeToLive)
+  {
+    this.timeToLive = timeToLive;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
   /** Returns the selector for filtering the messages. */
   public String getSelector()
   {

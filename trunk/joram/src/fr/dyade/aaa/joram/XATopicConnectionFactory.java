@@ -27,64 +27,43 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.UnknownHostException;
-
 import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.XATopicConnectionFactory</code> interface.
  */
-public class XATopicConnectionFactory
-             extends TopicConnectionFactory
-             implements javax.jms.XATopicConnectionFactory
+public abstract class XATopicConnectionFactory
+                extends XAConnectionFactory
+                implements javax.jms.XATopicConnectionFactory
 {
   /**
-   * Constructs an <code>XATopicConnectionFactory</code> instance wrapping a
-   * given server's parameters.
+   * Constructs an <code>XATopicConnectionFactory</code> dedicated to a
+   * given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is unknown.
    */
   public XATopicConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
     super(host, port);
   }
 
-  /**
-   * Constructs an <code>XATopicConnectionFactory</code> instance wrapping a
-   * given server's url.
-   *
-   * @param url  The server's url.
-   *
-   * @exception MalformedURLException  If the url is incorrect.
-   * @exception UnknownHostException  If the host is unknown.
-   */
-  public XATopicConnectionFactory(String url) throws Exception
-  {
-    super(url);
-  }
-
+ 
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "XATCF:" + config.serverAddr.toString();
+    return "XATCF:" + params.getHost() + "-" + params.getPort();
   }
 
   /**
-   * API method.
+   * API method, implemented according to the communication protocol..
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XATopicConnection
-         createXATopicConnection(String name, String password)
-         throws JMSException
-  {
-    return new XATopicConnection(config, name, password);
-  }
+  public abstract javax.jms.XATopicConnection
+                  createXATopicConnection(String name, String password)
+                  throws JMSException;
 
   /**
    * API method.
@@ -99,28 +78,49 @@ public class XATopicConnectionFactory
     return createXATopicConnection("anonymous", "anonymous");
   }
 
-   /**
-   * Method inherited from interface <code>XAConnectionFactory</code>.
+  /**
+   * Method inherited from interface <code>TopicConnectionFactory</code>,
+   * implemented according to the communication protocol.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAConnection
-         createXAConnection(String name, String password) throws JMSException
-  {
-    return new XAConnection(config, name, password);
-  }
+  public abstract javax.jms.TopicConnection
+                  createTopicConnection(String name, String password)
+                  throws JMSException;
 
   /**
-   * Method inherited from interface <code>XAConnectionFactory</code>.
+   * Method inherited from interface <code>TopicConnectionFactory</code>.
    *
    * @exception JMSSecurityException  If the default identification is
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAConnection createXAConnection() throws JMSException
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException
   {
-    return createXAConnection("anonymous", "anonymous");
+    return createTopicConnection("anonymous", "anonymous");
+  }
+
+  /**
+   * Method inherited from interface <code>ConnectionFactory</code>,
+   * implemented according to the communication protocol..
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public abstract javax.jms.Connection
+                  createConnection(String name, String password)
+                  throws JMSException;
+
+  /**
+   * Method inherited from interface <code>ConnectionFactory</code>.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection() throws JMSException
+  {
+    return createConnection("anonymous", "anonymous");
   }
 }
- 

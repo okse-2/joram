@@ -42,4 +42,10 @@ public class TempDestDeleteRequest extends AbstractJmsRequest
   {
     super(name);
   }
+
+  /**
+   * Constructs a <code>TempDestDeleteRequest</code> instance.
+   */
+  public TempDestDeleteRequest()
+  {}
 }

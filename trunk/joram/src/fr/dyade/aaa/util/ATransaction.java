@@ -32,7 +32,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.10 2002-12-11 11:27:00 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.11 2003-03-19 15:19:04 fmaistre Exp $";
 
   public static final String EMPTY_STRING = new String();
 

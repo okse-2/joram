@@ -45,10 +45,22 @@ public class AdminTopic extends Topic
   }
 
   /**
+   * Initializes an <code>AdminTopic</code> as a service.
+   *
+   * @exception IOException  If the AdminTopic deployment fails.
+   */
+  public static void init(String args, boolean firstTime) throws Exception
+  {
+    if (! firstTime)
+      return;
+
+    AdminTopic adminTopic = new AdminTopic();
+    adminTopic.deploy();
+  }
+
+  /**
    * Specializes this <code>Agent</code> method called when (re)deploying 
    * the topic.
-   * <p>
-   * An <code>AdminTopic</code> specifically behaves at (re-)initialization.
    */
   public void initialize(boolean firstTime) throws Exception
   {

@@ -55,6 +55,24 @@ public class SessAckRequest extends AbstractJmsRequest
     this.queueMode = queueMode;
   }
 
+  /**
+   * Constructs a <code>SessAckRequest</code> instance.
+   */
+  public SessAckRequest()
+  {}
+
+  /** Sets the vector of identifiers. */
+  public void setIds(Vector ids)
+  {
+    this.ids = ids;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
   /** Returns the vector of acknowledged messages identifiers. */
   public Vector getIds()
   {

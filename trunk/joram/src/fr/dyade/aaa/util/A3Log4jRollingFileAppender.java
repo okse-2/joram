@@ -36,8 +36,8 @@ import fr.dyade.aaa.agent.AgentServer;
  * agent server id.
  */
 public class A3Log4jRollingFileAppender extends RollingFileAppender {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: A3Log4jRollingFileAppender.java,v 1.2 2002-12-11 11:27:00 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: A3Log4jRollingFileAppender.java,v 1.3 2003-03-19 15:19:04 fmaistre Exp $";
 
   /**
    * The default constructor does not do anything. 

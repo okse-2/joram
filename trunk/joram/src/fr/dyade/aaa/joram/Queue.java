@@ -27,7 +27,12 @@
  */
 package fr.dyade.aaa.joram;
 
+import fr.dyade.aaa.joram.admin.AdministeredObject;
+
+import java.util.Vector;
+
 import javax.jms.JMSException;
+import javax.naming.NamingException;
 
 /**
  * Implements the <code>javax.jms.Queue</code> interface.
@@ -47,7 +52,7 @@ public class Queue extends Destination implements javax.jms.Queue
   /** Returns a String image of the queue. */
   public String toString()
   {
-    return "Queue:" + getName();
+    return "Queue:" + agentId;
   }
 
   /**
@@ -57,6 +62,38 @@ public class Queue extends Destination implements javax.jms.Queue
    */
   public String getQueueName() throws JMSException
   {
-    return getName();
+    return agentId;
+  }
+
+
+  /**
+   * Codes a <code>Queue</code> as a vector for travelling through the
+   * SOAP protocol.
+   *
+   * @exception NamingException  Never thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    Vector vec = new Vector();
+    vec.add("Queue");
+    vec.add(agentId);
+    return vec;
+  }
+
+  /**
+   * Decodes a coded <code>Queue</code>.
+   *
+   * @exception NamingException  If incorrectly coded.
+   */
+  public static fr.dyade.aaa.joram.admin.AdministeredObject decode(Vector vec)
+                throws NamingException
+  {
+    try {
+      return new Queue((String) vec.remove(0));
+    }
+    catch (Exception exc) {
+      throw new NamingException("Vector " + vec.toString()
+                                + " incorrectly codes a Queue.");
+    }
   }
 }

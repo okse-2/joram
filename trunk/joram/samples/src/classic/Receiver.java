@@ -59,6 +59,8 @@ public class Receiver
       msg = qrec.receive();
       if (msg instanceof TextMessage)
         System.out.println("Msg received: " + ((TextMessage) msg).getText());
+      else
+        System.out.println("Msg received: " + msg);
     }
 
     qs.commit();

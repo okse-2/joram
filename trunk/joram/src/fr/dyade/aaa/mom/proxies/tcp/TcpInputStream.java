@@ -25,7 +25,7 @@
  * Initial developer(s): Andre Freyssinet (ScalAgent)
  * Contributor(s):
  */
-package fr.dyade.aaa.mom.proxies;
+package fr.dyade.aaa.mom.proxies.tcp;
 
 import fr.dyade.aaa.agent.NotificationInputStream;
 import fr.dyade.aaa.mom.jms.AbstractJmsRequest;
@@ -33,23 +33,23 @@ import fr.dyade.aaa.mom.jms.AbstractJmsRequest;
 import java.io.*;
 
 /**
- * The <code>JmsInputStream</code> class is used by JMS proxy agents for 
+ * The <code>TcpInputStream</code> class is used by JMS tcp proxy agents for 
  * reading JMS request objects on the input stream and wrapping them
  * into notifications.
  */
-public class JmsInputStream implements NotificationInputStream
+public class TcpInputStream implements NotificationInputStream
 {
   /** The input stream. */
   private ObjectInputStream in;
 
 
   /**
-   * Constructs a <code>JmsInputStream</code> instance for a given
+   * Constructs a <code>TcpInputStream</code> instance for a given
    * <code>InputStream</code>.
    *
    * @param in  The input stream.
    */
-  public JmsInputStream(InputStream in) throws IOException
+  public TcpInputStream(InputStream in) throws IOException
   {
     this.in = new ObjectInputStream(new BufferedInputStream(in));
   }

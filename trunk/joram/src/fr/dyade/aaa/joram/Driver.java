@@ -29,8 +29,7 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -38,63 +37,88 @@ import javax.jms.JMSException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * A <code>Driver</code> daemon is attached to a connection for getting
- * server replies on its input stream.
+ * Each <code>Connection</code> holds a <code>Driver</code> daemon for
+ * listening to asynchronous replies coming from the connected server.
+ *
+ * @see fr.dyade.aaa.joram.tcp.TcpDriver
+ * @see fr.dyade.aaa.joram.soap.SoapDriver
  */
-class Driver extends fr.dyade.aaa.util.Daemon
+public abstract class Driver extends fr.dyade.aaa.util.Daemon
 {
-  /** The connection the driver is attached to. */
+  /** The connection the driver belongs to. */
   private Connection cnx;
-  /** The input stream to listen to. */
-  private ObjectInputStream ois;
 
   /** <code>true</code> if the driver is stopping. */
   boolean stopping = false;
+
   
   /**
    * Constructs a <code>Driver</code> daemon.
    *
-   * @param cnx  The connection the driver listens on.
-   * @param ois  The connection's input stream.
+   * @param cnx  The connection the driver belongs to.
    */
-  public Driver(Connection cnx, ObjectInputStream ois)
+  protected Driver(Connection cnx)
   {
     super(cnx.toString());
     this.cnx = cnx;
-    this.ois = ois;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  /** The driver's loop. */
+  /** String view of a <code>Driver</code> instance. */
+  public String toString()
+  {
+    return "Driver:" + cnx.toString();
+  }
+
+
+  /** The driver's listening loop. */
   public void run()
   {
-    Object obj = null;
+    AbstractJmsReply delivery = null;
+
     try {
       while (running) {
         canStop = true; 
   
-        // Waiting for an object on the stream:
+        // Waiting for an asynchronous delivery:
         try {
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Driver: waiting...");
-          obj = ois.readObject();
+          delivery = getDelivery();
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                       "Driver: got an object!");
+                                       "Driver: got a delivery!");
+        }
+        // Catching an InterruptedException:
+        catch (InterruptedException exc) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+            JoramTracing.dbgClient.log(BasicLevel.WARN,
+                                       "Driver: caught an"
+                                       + " InterruptedException: " + exc);
+          continue;
         }
         // Catching an IOException:
-        catch (IOException ioE) {
+        catch (IOException exc) {
           if (! cnx.closing) {
-            IllegalStateException isE =
+            IllegalStateException jmsExc =
               new IllegalStateException("The connection is broken,"
                                         + " the driver stops.");
-            isE.setLinkedException(ioE);
+            jmsExc.setLinkedException(exc);
   
             // Passing the asynchronous exception to the connection:
-            cnx.onException(isE);
+            cnx.onException(jmsExc);
 
             // Interrupting the synchronous requesters:
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                         + "interrupts synchronous"
+                                         + " requesters.");
+
             java.util.Enumeration enum = cnx.requestsTable.keys();
             String reqId;
+            Object obj;
             while (enum.hasMoreElements()) {
               reqId = (String) enum.nextElement();
               obj = cnx.requestsTable.remove(reqId);
@@ -104,51 +128,53 @@ class Driver extends fr.dyade.aaa.util.Daemon
                 }
               }
             }
+
             // Closing the connection:
-           try {
-             stopping = true;
-             cnx.close();
-           }
-           catch (JMSException jE3) {}
+            stopping = true;
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                         this + ": closes the connection.");
+            try {
+              cnx.close();
+            }
+            catch (javax.jms.JMSException jExc) {}
           }
           canStop = true;
           break;
         }
         // Passing the reply to the connection:
         canStop = false;
-        cnx.distribute((AbstractJmsReply) obj);
+        cnx.distribute(delivery);
       }
     }
-    catch (Exception e) {
-      JMSException jE2 = new JMSException("Exception while getting data from"
-                                          + " the socket.");
-      jE2.setLinkedException(e);
+    catch (Exception exc) {
+      JMSException jmsExc = new JMSException("Exception while getting data"
+                                             + " from the server.");
+      jmsExc.setLinkedException(exc);
   
       // Passing the asynchronous exception to the connection:
-      cnx.onException(jE2);
+      cnx.onException(jmsExc);
     }
     finally {
       finish();
     }
-  } 
+  }
+
+  /**
+   * Returns an <code>AbstractJmsReply</code> delivered by the connected
+   * server.
+   *
+   * @exception Exception  If a problem occurs when getting the delivery.
+   */
+  protected abstract AbstractJmsReply getDelivery() throws Exception;
 
   /** Shuts the driver down. */
-  public void shutdown()
-  {
-    try {
-      ois.close();
-    }
-    catch (Exception e) {}
-    close();
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Driver: shut down."); 
-  }
+  public abstract void shutdown();
 
   /** Releases the driver's resources. */
   public void close()
   {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Driver: finished."); 
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
   }
 }

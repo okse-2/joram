@@ -57,10 +57,12 @@ public class ConsumerMessages extends AbstractJmsReply
                           String comingFrom, boolean queueMode)
   {
     super(correlationId);
-    messages = new Vector();
-    messages.add(message);
     this.comingFrom = comingFrom;
     this.queueMode = queueMode;
+    if (message != null) {
+      messages = new Vector();
+      messages.add(message);
+    }
   }
 
   /**
@@ -129,4 +131,56 @@ public class ConsumerMessages extends AbstractJmsReply
 
     return (Message) messages.elementAt(0);
   }
+
+  /**
+   * Transforms this reply into a vector of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Vector soapCode()
+  {
+    Vector vec = new Vector();
+
+    vec.add("ConsumerMessages");
+
+    // Coding the reply fields:
+    vec.add(getCorrelationId());
+    vec.add(comingFrom);
+    vec.add(new Boolean(queueMode));
+    
+    // Coding and adding the messages into a vector, if any:
+    if (messages != null && ! messages.isEmpty()) {
+      Vector msgs = new Vector();
+      while (! messages.isEmpty())
+        msgs.add(((Message) messages.remove(0)).soapCode());
+
+      vec.add(msgs);
+    }
+    return vec;
+  }
+
+  /** 
+   * Transforms a vector of primitive values into a
+   * <code>ConsumerMessages</code> reply.
+   */
+  public static ConsumerMessages soapDecode(Vector vec)
+  {
+    vec.remove(0);
+
+    String correlationId = (String) vec.remove(0);
+    String comingFrom = (String) vec.remove(0);
+    boolean queueMode = ((Boolean) vec.remove(0)).booleanValue();
+
+    // If the ConsumerMessages does not carry any message:
+    if (vec.isEmpty())
+      return new ConsumerMessages(correlationId, comingFrom, queueMode);
+
+    // Else, decoding the message(s):
+    Vector codedMsgs = (Vector) vec.remove(0);
+    Vector decodedMsgs = new Vector();
+    while (! codedMsgs.isEmpty())
+      decodedMsgs.add(Message.soapDecode((Vector) codedMsgs.remove(0)));
+
+    return new ConsumerMessages(correlationId, decodedMsgs, comingFrom,
+                                queueMode);
+  } 
 }

@@ -68,6 +68,8 @@ public class A3CMLHandler {
   static final String ATT_ARGS = "args";
   /** Syntaxic name for value attribute */
   static final String ATT_VALUE = "value";
+  /** Syntaxic for server jvm arguments */
+  static final String ELT_JVM_ARGS = "jvmArgs";
 
   /**
    * Working attribute used to aggregate services during server's definition
@@ -172,7 +174,15 @@ public class A3CMLHandler {
       }
       reader = new InputStreamReader(is);
     }
+    return getConfig(serverId, reader, cfgFileName);
+  }
 
+
+  
+  public static A3CMLHandler getConfig(short serverId,
+                                       Reader reader,
+                                       String cfgFileName) 
+    throws Exception {
     String cfgName = System.getProperty(CFG_NAME_PROPERTY, DEFAULT_CFG_NAME);
 
     String wrpCName = System.getProperty(A3CMLWRP_PROPERTY, DEFAULT_A3CMLWRP);
@@ -259,6 +269,26 @@ public class A3CMLHandler {
     throw new UnknownServiceException("Service \"" +
 			classname + "\" not found on server#" + sid);
   }
+
+
+  /**
+   * Get the argument to pass to server's jvm on a particular
+   * agent server identified by its id.
+   *
+   * @param id		agent server id
+   * @return		the arguments as declared in configuration file
+   * @exception	UnknownServerException
+   *	The specified server does not exist.
+   */
+  public final String getJvmArgs(short sid) throws UnknownServerException{
+    A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
+    if (server == null)
+      throw new UnknownServerException("Unknown server id. #" + sid);
+    if (server.jvmArgs != null)
+      return server.jvmArgs;
+    return "";
+  }
+  
 
   /**
    * Get the argument strings for a particular service running on a server

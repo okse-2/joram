@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 class AgentIdStamp implements Serializable {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
@@ -271,6 +272,10 @@ public final class AgentId implements Serializable, Cloneable {
    */
   public final static AgentId factoryId(short sid) {
     return new AgentId(sid, sid, FactoryIdStamp);
+  }
+
+  public final static AgentId localId(short sid) {
+    return new AgentId(sid, sid, NullIdStamp);
   }
 
   /**

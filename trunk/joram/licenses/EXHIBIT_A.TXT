@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * The contents of this file are subject to the Joram Public License,

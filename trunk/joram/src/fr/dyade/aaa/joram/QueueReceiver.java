@@ -44,8 +44,6 @@ public class QueueReceiver extends MessageConsumer
    * @param queue  The queue the receiver consumes on.
    * @param selector  The selector for filtering messages.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              queue.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */

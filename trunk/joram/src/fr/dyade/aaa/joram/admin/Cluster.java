@@ -92,4 +92,15 @@ public class Cluster extends AdministeredObject
                               (new Boolean(locked)).toString()));
     return ref;
   }
+
+  /**
+   * Codes an <code>AdministeredObject</code> as a vector for travelling 
+   * through the SOAP protocol; not provided to <code>Cluster</code> objects.
+   *
+   * @exception NamingException  Systematically thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    throw new NamingException("Cluster object is not codable.");
+  }
 }
