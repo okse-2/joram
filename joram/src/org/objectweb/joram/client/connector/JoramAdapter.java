@@ -176,7 +176,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
     AdapterTracing.debugINFO("JORAM adapter starting deployment...");
-    AdapterTracing.debugINFO("Server port is " + serverPort);
 
     workManager = ctx.getWorkManager();
 
@@ -319,6 +318,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     catch (java.io.FileNotFoundException fnfe) { 
       AdapterTracing.debugINFO("  - No administration task requested.");
     }
+
+    AdapterTracing.debugINFO("Server port is " + serverPort);
 
     // Registering MBeans...    
     register(new LocalServer(this));
