@@ -853,6 +853,8 @@ public class PoolCnxNetwork extends StreamNetwork {
             continue;
           }
           canStop = false;
+          if (! running) break;
+          if (msg == null) continue;
 
           // Send the message
           getSession(msg.getToId()).send(msg);

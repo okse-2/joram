@@ -255,92 +255,113 @@ public class SimpleNetwork extends FIFONetwork {
       Message msg = null;
       short msgto;
       ServerDesc server = null;
+      Socket socket = null;
+      ObjectOutputStream oos = null;
+      InputStream is = null;
+
 
       try {
 	while (running) {
-	  try {
-	    canStop = true;
-
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
-
-	    try {
-	      msg = qout.get();
-	    } catch (InterruptedException exc) {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", interrupted");
-	      continue;
-	    }
-	    canStop = false;
-
-	    msgto = msg.getToId();
-
+          canStop = true;
+          try {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", try to send message -> " +
-                         msg + "/" + msgto);
+                              this.getName() + ", waiting message");
+            msg = qout.get();
+          } catch (InterruptedException exc) {
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", interrupted");
+            continue;
+          }
+          canStop = false;
+          if (! running) break;
+          if (msg == null) continue;
+
+          msgto = msg.getToId();
+
+          try {
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", try to send message -> " +
+                              msg + "/" + msgto);
             // Can throw an UnknownServerException...
             server = AgentServer.getServerDesc(msgto);
 
-	    if (! server.active) {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", AgentServer#" + msgto + " is down");
-	      throw new ConnectException("AgentServer#" + msgto + " is down");
-	    }
-	  
-	    // Open the connection.
-	    Socket socket = null;
             try {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
-              socket = createSocket(server.getAddr(), server.port);
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+              if (! server.active) {
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG,
+                                  this.getName() + ", AgentServer#" + msgto + " is down");
+                throw new ConnectException("AgentServer#" + msgto + " is down");
+              }
+	  
+              // Open the connection.
+              try {
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
+                socket = createSocket(server.getAddr(), server.port);
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+              } catch (IOException exc) {
+                this.logmon.log(BasicLevel.WARN,
+                                this.getName() + ", connection refused", exc);
+                server.active = false;
+                server.last = System.currentTimeMillis();
+                server.retry += 1;
+                throw exc;
+              }
+              setSocketOption(socket);
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.WARN,
-                              this.getName() + ", connection refused", exc);
-              server.active = false;
-              server.last = System.currentTimeMillis();
-              server.retry += 1;
-              throw exc;
+                              this.getName() + ", move msg in watchdog list", exc);
+              //  There is a connection problem, put the message in a
+              // waiting list.
+              sendList.addElement(msg);
+              qout.pop();
+              continue;
             }
-	    setSocketOption(socket);
 
-	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", write message");
-	    // Send the message,
-	    ObjectOutputStream oos = getOutputStream(socket);
-	    oos.writeObject(msg);
+            
+            try {
+              // Send the message,
+              oos = getOutputStream(socket);
+              oos.writeObject(msg);
 
-	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait ack");
-	    // and wait the acknowledge.
-	    InputStream is = socket.getInputStream();
-	    if ((ret = is.read()) == -1)
-	      throw new ConnectException("Connection broken");
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait ack");
+              // and wait the acknowledge.
+              is = socket.getInputStream();
+              if ((ret = is.read()) == -1)
+                throw new ConnectException("Connection broken");
 
-	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", receive ack");
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", receive ack");
 	
-	    try {
-	      oos.close();
-	    } catch (IOException exc) {}
-	    try {
-	      is.close();
-	    } catch (IOException exc) {}
-	    try {
-	      socket.close();
-	    } catch (IOException exc) {}
-	  } catch (IOException exc) {
-            this.logmon.log(BasicLevel.WARN,
-                       this.getName() + ", move msg in watchdog list", exc);
-	    //  There is a connection problem, put the message in a
-	    // waiting list.
-	    sendList.addElement(msg);
-	    qout.pop();
-	    continue;
+              try {
+                oos.close();
+              } catch (IOException exc) {}
+              try {
+                is.close();
+              } catch (IOException exc) {}
+              try {
+                socket.close();
+              } catch (IOException exc) {}
+            } catch (IOException exc) {
+              this.logmon.log(BasicLevel.WARN,
+                              this.getName() + ", move msg in watchdog list", exc);
+              if (msg.isPersistent()) {
+                //  There is a problem during network transaction, put the
+                // message in waiting list in order to retry later.
+                // Be careful, if the message is not persistent, a new sending
+                // may cause a duplication
+                sendList.addElement(msg);
+              }
+              qout.pop();
+              continue;
+            }
 	  } catch (UnknownServerException exc) {
             this.logmon.log(BasicLevel.ERROR,
                             this.getName() + ", can't send message: " + msg,
@@ -381,9 +402,6 @@ public class SimpleNetwork extends FIFONetwork {
 
   final class NetServerIn extends Daemon {
     ServerSocket listen = null;
-
-// AF: To be deleted
-//     WatchDog watchDog = null;
 
     NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
@@ -434,7 +452,7 @@ public class SimpleNetwork extends FIFONetwork {
 	    os = socket.getOutputStream();
 	    ois = getInputStream(socket);
 
-	    Object obj = ois.readObject();
+	    Object obj = ois.readObject(); 
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,

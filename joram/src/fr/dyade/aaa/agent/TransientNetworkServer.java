@@ -357,6 +357,8 @@ public final class TransientNetworkServer extends Network {
 	    continue;
 	  }
 	  canStop = false;
+          if (! running) break;
+          if (msg == null) continue;
 
           if (this.logmon.isLoggable(BasicLevel.DEBUG))
             this.logmon.log(BasicLevel.DEBUG,

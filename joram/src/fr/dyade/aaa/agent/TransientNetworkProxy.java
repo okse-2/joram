@@ -315,6 +315,8 @@ public final class TransientNetworkProxy extends Network {
 	    continue;
 	  }
 	  canStop = false;
+          if (! running) break;
+          if (msg == null) continue;
 
 	  // Send the message
 	  try {

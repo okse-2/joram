@@ -158,6 +158,8 @@ public class SingleCnxNetwork extends StreamNetwork {
 	      continue;
 	    }
 	    canStop = false;
+            if (! running) break;
+            if (msg == null) continue;
 
 	    msgto = msg.getToId();
 
