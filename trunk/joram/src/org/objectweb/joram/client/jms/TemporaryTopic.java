@@ -90,7 +90,8 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
       sess = (Session) cnx.sessions.get(i);
       for (int j = 0; j < sess.consumers.size(); j++) {
         cons = (MessageConsumer) sess.consumers.get(j);
-        if (agentId.equals(cons.targetName))
+        // if (agentId.equals(cons.targetName)) //NTA never arrived cons.targetName=subName !=agentId
+        if (cons != null)
           throw new JMSException("Subscribers still exist"
                                  + " for this temp. topic.");
       }
