@@ -16,7 +16,7 @@
 	href="http://www.gnu.org/licenses/lgpl.html">GNU Lesser
 	General Public License</a> (LGPL).
       </p>
-      <p>This test suite also uses <em>external code</em> belonging to the <a
+      <p>This test suite also uses <em>external code</em> belonging to <a
 	  href="http://xml.apache.org/xalan-j/">Xalan</a> which is released
           under
 	  the <a href="http://xml.apache.org/dist/LICENSE.txt">Apache
