@@ -58,6 +58,10 @@
         <li>Running the <a href="../current/doc/joram3_2_SAMPLES.pdf">
         3.2 (and later) releases samples</a>.</li>
       </ul>
+      <ul>
+        <li>Check the <a href="../current/doc/joram3_5_PERFS.pdf">performances
+        comparison</a> between JORAM 3.5 and JORAM 3.4.2.</li>
+      </ul>
     </s1>
 
     <s1 name="JORAM API Documentation">
