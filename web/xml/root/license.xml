@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
+    <author email="joram-team@objectweb.org">JORAM team</author>
     <title>Licenses</title>
     <filename>license.xml</filename>
     <pathtoroot>.</pathtoroot>
@@ -12,7 +12,7 @@
 
   <body>
 
-    <s1 name="JORAM license">
+    <s1 name="JORAM License">
 
       <p>JORAM is provided under the JORAM license which is a union of the <a
       href="licenses/JORAM_LICENSE.TXT">JORAM Public License</a> and the <a
@@ -21,7 +21,7 @@
 
     </s1>
 
-    <s1 name="Other licenses">
+    <s1 name="Other Licenses">
    
       <p>The JORAM distribution includes libraries of <em>external
       softwares</em>.</p>

@@ -4,14 +4,14 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Development topics</title>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>Development Topics</title>
     <filename>topics.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
-    <s1 name="Hot topics">
+    <s1 name="Hot Topics">
     <p>Various topics are currently being addressed.</p>
     </s1>
 

@@ -4,14 +4,14 @@
 
 <document>
   <properties>
-    <author email="test@objectweb.org">test</author>
+    <author email="test@objectweb.org">JORAM team</author>
     <title>Test Suite Documentation</title>
     <filename>doc.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
-    <s1 name="Test Suite documentation">
+    <s1 name="Test Suite Documentation">
       <p>To use the Test Suite, have a look at its <a
 	  href="../current/doc/TEST_SUITE.pdf">documentation</a>.
       </p>

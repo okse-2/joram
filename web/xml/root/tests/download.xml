@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="test@objectweb.org">test</author>
+    <author email="test@objectweb.org">JORAM team</author>
     <title>Test Suite Download</title>
     <filename>download.xml</filename>
     <pathtoroot>..</pathtoroot>
