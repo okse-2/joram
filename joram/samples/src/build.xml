@@ -39,7 +39,7 @@
            nowarn="${nowarn}"
            verbose="${verbose}">
       <classpath refid="project.class.path"/>
-      <include name="joram/**/*.java"/>
+      <include name="**/*.java"/>
     </javac>
   </target>
 
@@ -49,11 +49,11 @@
     <delete dir="${run.dir}"/>
     <mkdir dir="${run.dir}"/>
     <copy file="${ship.dir}/run/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/centralized_jndi.properties"
+    <copy file="${src.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${src.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${src.dir}/centralized_jndi.properties"
           tofile="${obj.dir}/jndi.properties"/>
-    <copy file="${src.dir}/joram/centralized_a3servers.xml"
+    <copy file="${src.dir}/centralized_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"/>
   </target>
 
@@ -61,11 +61,11 @@
   <target name="distributed_init" depends="init">
     <mkdir dir="${run.dir}"/>
     <copy file="${ship.dir}/run/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/joram/distributed_jndi.properties"
+    <copy file="${src.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${src.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${src.dir}/distributed_jndi.properties"
           tofile="${obj.dir}/jndi.properties"/>
-    <copy file="${src.dir}/joram/distributed_a3servers.xml"
+    <copy file="${src.dir}/distributed_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"/>
   </target>
 
