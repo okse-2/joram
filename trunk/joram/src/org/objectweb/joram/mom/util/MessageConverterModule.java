@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.mom.util;
 
@@ -28,6 +28,8 @@ import org.objectweb.joram.shared.messages.MessageType;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Iterator;
 
 import javax.jms.BytesMessage;
 import javax.jms.IllegalStateException;
@@ -192,11 +194,13 @@ public class MessageConverterModule
         ((BytesMessage) jmsMessage).writeBytes(momMessage.getBytes());
       // Filling in the Map message.
       else if (momMessage.getType() == MessageType.MAP) {
-        Hashtable map = momMessage.getMap();
+        Map map = momMessage.getMap();
         String name;
-        for (Enumeration names = map.keys(); names.hasMoreElements();) {
-          name = (String) names.nextElement();
-          ((MapMessage) jmsMessage).setObject(name, map.get(name));
+        if (map.keySet() != null) {
+          for (Iterator it = map.keySet().iterator(); it.hasNext(); ) {
+            name = (String) it.next();
+            ((MapMessage) jmsMessage).setObject(name, map.get(name));
+          }
         }
       }
       // Filling in the Object message.
