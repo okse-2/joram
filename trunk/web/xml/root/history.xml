@@ -115,7 +115,7 @@
       <hr/>
       <subtitle>28 June 2000 : a demo is available</subtitle>
       
-      <p>The <a href="current/doc/demos.html">demo</a> simulates an e-commerce
+      <p>The <a href="current/doc/demos/">demo</a> simulates an e-commerce
       application: several participants interact through asynchronous and
       synchronous messages exchange. The demo is available in CVS,
       <code>joram_src_jar.zip</code>, <code>joram_src_jar.tar.gz</code>,
