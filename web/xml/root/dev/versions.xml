@@ -14,6 +14,12 @@
     <s1 name="CVS base, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
+      <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram4_0_2 (May 4, 2004)">
+      <p>This maintenance version should be integrated within JOnAS 4.1</p>
       <s2 name="Corrected bugs (latest: April 28, 2004)">
       <ul>
         <li>Broken SOAP connections not detected, found by
