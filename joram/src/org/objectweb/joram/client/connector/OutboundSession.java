@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -42,7 +42,8 @@ public class OutboundSession implements javax.jms.Session
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
 
-
+  /** <code>true</code> if the session is started. */
+  boolean started = false;
 
   /**
    * Constructs an <code>OutboundSession</code> instance.
@@ -51,6 +52,7 @@ public class OutboundSession implements javax.jms.Session
   {
     this.sess = sess;
     this.cnx = cnx;
+    cnx.sessions.add(this);
   }
  
 
@@ -345,14 +347,29 @@ public class OutboundSession implements javax.jms.Session
   }
 
   /** 
+   * set started = true 
+   */
+  void start() {
+    started = true;
+  }
+
+  /** 
    * Actually does nothing, closing of the session occurs while closing
    * the component's connection.
    */
   public void close() throws JMSException
   {
     valid = false;
+    cnx.sessions.remove(this);
+    started = false;
   }
 
+  /**
+   * return started value.
+   */
+  public boolean isStarted() {
+    return started;
+  }
 
   /** Checks the validity of the session. */
   void checkValidity() throws IllegalStateException
