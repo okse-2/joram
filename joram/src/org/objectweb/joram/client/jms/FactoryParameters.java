@@ -47,9 +47,10 @@ public class FactoryParameters implements java.io.Serializable
    */
   public int txPendingTimer = 0;
   /** 
-   * Duration in milliseconds during which a connection might pending server
-   * side considered as dead (0 for never); a connection is pending
-   * server side when a client does not properly disconnect.
+   * Period in milliseconds between two ping requests sent by the client
+   * connection to the server; if the server does not receive any ping
+   * request during more than 2 * cnxPendingTimer, the connection is
+   * considered as dead and processed as required.
    */
   public int cnxPendingTimer = 0;
 
