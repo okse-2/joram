@@ -101,7 +101,7 @@ public class Admin
   public Admin(String url, String adminName, String adminPass,
                int timer) throws Exception
   {
-     if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "--- Connecting admin"
                                 + " session: " + this);
     try {
