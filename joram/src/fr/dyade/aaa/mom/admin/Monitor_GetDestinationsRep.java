@@ -26,7 +26,7 @@
  */
 package fr.dyade.aaa.mom.admin;
 
-import java.util.Hashtable;
+import java.util.Vector;
 
 
 /**
@@ -36,41 +36,55 @@ import java.util.Hashtable;
  */
 public class Monitor_GetDestinationsRep extends Monitor_Reply
 {
-  /** Table holding the destinations. */
-  private Hashtable destinations;
+  /** Queues identifiers. */
+  private Vector queues;
+  /** Dead message queues identifiers. */
+  private Vector dmqs;
+  /** Topics identifiers. */
+  private Vector topics;
 
-
-  /**
-   * Constructs a <code>Monitor_GetDestinationsRep</code> instance.
-   */
-  public Monitor_GetDestinationsRep()
-  {
-    destinations = new Hashtable();
-  }
 
 
   /** Adds a queue identifier to the reply. */
   public void addQueue(String id)
   {
-    destinations.put(id, "Queue");
+    if (queues == null)
+      queues = new Vector();
+    queues.add(id);
   }
 
   /** Adds a dead message queue identifier to the reply. */
   public void addDeadMQueue(String id)
   {
-    destinations.put(id, "DeadMQueue");
+    if (dmqs == null)
+      dmqs = new Vector();
+    dmqs.add(id);
   }
 
   /** Adds a topic identifier to the reply. */
   public void addTopic(String id)
   {
-    destinations.put(id, "Topic");
+    if (topics == null)
+      topics = new Vector();
+    topics.add(id);
   }
 
   
-  /** Returns the destinations table. */
-  public Hashtable getDestinations()
+  /** Returns the queues identifiers. */
+  public Vector getQueues()
   {
-    return destinations;
+    return queues;
+  }
+
+  /** Returns the dmqs identifiers. */
+  public Vector getDeadMQueues()
+  {
+    return dmqs;
+  } 
+
+  /** Returns the topics identifiers. */
+  public Vector getTopics()
+  {
+    return topics;
   }
 }
