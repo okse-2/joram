@@ -25,6 +25,13 @@
 PACKAGES = \
 	util agent ip proxy config task ns \
 	model beans services tools \
-	ar nw mom joram jndi
+	ar paf mom joram jndi
+
+# Evidian delivery: Only packages:
+#	util agent ip task ns \
+#	model config services tools \
+#	mom joram jndi
+#
+# For netwall add 'nw' target.
 
 include $(GENERAL_MK)
