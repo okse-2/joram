@@ -128,6 +128,8 @@ The Initial Developer of the Original Code is Dyade. The Original Code and
 portions created by Dyade are Copyright Bull and Copyright INRIA.
 All Rights Reserved. 
 
+The present code contributor is xxx.
+
 
 Exhibit B
      THE SOFTWARE IN THIS PRODUCT WAS IN PART PROVIDED BY
