@@ -95,13 +95,15 @@ final class AgentFactory extends Agent {
 	    new ByteArrayInputStream(
 	      cnot.agentState, 0, cnot.agentState.length));
 	Agent ag = (Agent) ois.readObject();
+        ag.id = cnot.deploy;
 	try {
 	  ois.close();
 	} catch (IOException exc) {}
 
-        // Initializes and creates the agent
+        // Initialize the agent
+        ag.agentInitialize(true);
 // TODO: (ThreadEngine) Thread.currentThread() ...
-        AgentServer.engine.createAgent(cnot.deploy, ag);
+        AgentServer.engine.createAgent(ag);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

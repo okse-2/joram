@@ -21,9 +21,7 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.net.ConnectException;
 import javax.naming.*;
 import javax.swing.tree.*;

@@ -24,8 +24,21 @@ import java.util.*;
 public interface  MXServer {
   public void registerMBean(Object bean,
                             String domain,
-                            String name) throws Exception;
+                            String name,
+                            String type,
+                            String desc) throws Exception;
+
+  public void registerMBean(Object bean,
+                            String name,
+                            String type,
+                            String desc) throws Exception;
 
   public void unregisterMBean(String domain,
-                              String name) throws Exception;
+                              String name,
+                              String type,
+                              String desc) throws Exception;
+
+  public void unregisterMBean(String name,
+                              String type,
+                              String desc) throws Exception;
 }

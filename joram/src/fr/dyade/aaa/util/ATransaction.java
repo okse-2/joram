@@ -37,11 +37,22 @@ public class ATransaction implements Transaction, Runnable {
 
   private static Logger logmon = null;
 
+  static private final int INIT = 0;	  // Initialization state
+  static private final int FREE = 1;	  // No transaction 
+  static private final int RUN = 2;	  // A transaction is running
+  static private final int COMMIT = 3;	  // A transaction is commiting
+  static private final int ROLLBACK = 4;  // A transaction is aborting
+  static private final int GARBAGE = 5;	  // A garbage phase start
+  static private final int FINALIZE = 6;  // During last garbage.
+
+  final static int Kb = 1024;
+  final static int Mb = Kb * Kb;
+
   final static int CLEANUP_THRESHOLD_COMMIT = 9600;
   final static int CLEANUP_THRESHOLD_OPERATION = 36000;
   final static int CLEANUP_THRESHOLD_SIZE = 8 * Mb;
 
-  private int commitCount = 0;    // Number of commited transaction in clog.
+  private int commitCount = 0; // Number of commited transaction in clog.
   private int operationCount = 0; // Number of operations reported to clog.
   private int cumulativeSize = 0; // Byte amount in clog.
 
@@ -53,6 +64,9 @@ public class ATransaction implements Transaction, Runnable {
     Context() {
       log = new Hashtable(15);
       bos = new ByteArrayOutputStream(256);
+//       try {
+//         oos = new ObjectOutputStream(bos);
+//       } catch (IOException exc) { }
     }
   }
 
@@ -532,7 +546,7 @@ public class ATransaction implements Transaction, Runnable {
   }
 
   public final synchronized void release() throws IOException {
-    if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
+    if ((phase != COMMIT) && (phase != ROLLBACK))
       throw new IllegalStateException("Can not release transaction.");
 
     if (((commitCount > CLEANUP_THRESHOLD_COMMIT) || (operationCount > CLEANUP_THRESHOLD_OPERATION) || (cumulativeSize > CLEANUP_THRESHOLD_SIZE)) && !garbage) {

@@ -21,6 +21,9 @@
  */
 package fr.dyade.aaa.agent;
 
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
+
 public interface SCServerMBean {
   public short getServerId();
   public String getName();

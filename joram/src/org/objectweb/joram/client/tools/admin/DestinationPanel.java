@@ -30,7 +30,7 @@ package org.objectweb.joram.client.tools.admin;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.Iterator;
+import java.util.*;
 import javax.jms.*;
 
 import org.objectweb.joram.client.jms.admin.*;

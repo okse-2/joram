@@ -142,6 +142,17 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
+   * Atomicaly invalidates all messages pushed in queue during a reaction.
+   * It must be used during a transaction.
+   */
+  public synchronized void invalidate() {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "invalidate()");
+    while (validated != size())
+      removeMessageAt(validated);
+  }
+
+  /**
    * Looks at the message at the top of this queue without removing
    * it from the queue.
    * It should never be used during a transaction to avoid dead-lock
@@ -224,29 +235,6 @@ final class MessageVector implements MessageQueue {
 
 //     return item;
 //   }
-
-  synchronized int remove(int stamp) {
-    if (validated == 0) return 0;
-    
-    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + stamp);
-
-    int i = 0;
-    for (; i<validated; i++) {
-      Message msg = getMessageAt(i);
-      if (stamp < msg.getStamp()) break;
-    }
-
-    for (int j=0; j<i; j++) {
-      removeMessageAt(0);
-    }
-    validated -= i;
-    
-    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + stamp + " ->" +i);
-
-    return i;
-  }
 
   /**
    * Inserts the specified message to this <code>MessageVector</code> at

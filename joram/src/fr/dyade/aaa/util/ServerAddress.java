@@ -61,15 +61,4 @@ public class ServerAddress implements java.io.Serializable {
   public String toString() {
     return serverName + '=' + hostName + ':' + port;
   }
-
-  public boolean equals(Object obj) {
-    if (obj instanceof ServerAddress) {
-      ServerAddress sa = (ServerAddress)obj;
-      if (! sa.serverName.equals(serverName)) return false;
-      if (! sa.hostName.equals(hostName)) return false;
-      return (sa.port == port);
-    } else {
-      return false;
-    }
-  }
 }

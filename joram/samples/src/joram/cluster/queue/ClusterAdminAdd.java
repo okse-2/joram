@@ -27,8 +27,7 @@ import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.shared.admin.*;
 
-import java.util.Properties;
-import java.util.Hashtable;
+import java.util.*;
 
 /**
  * Administers three agent servers for the cluster sample.

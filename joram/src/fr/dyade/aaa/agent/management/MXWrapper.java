@@ -28,33 +28,56 @@ import org.objectweb.util.monolog.api.LoggerFactory;
 import fr.dyade.aaa.agent.Debug;
 
 public class MXWrapper {
-  /**
-   *  This property allow to configure the JMX server proxy, if it is
-   * null JMX is not used. A JMX server  
-   */
-  public final static String ServerImpl = "MXServer";
+  public final static String ServerImpl = "com.scalagent.MXServerImpl";
 
   public static MXServer mxserver = null;
 
   public static void registerMBean(Object bean,
                                    String domain,
-                                   String name) throws Exception {
+                                   String name,
+                                   String type,
+                                   String desc) throws Exception {
     if (mxserver == null) return;
 
     Debug.getLogger(Debug.A3Debug).log(BasicLevel.WARN,
                                        "registerMBean: " + name + " -> " + mxserver);
 
-    mxserver.registerMBean(bean, domain, name);
+    mxserver.registerMBean(bean, domain, name, type, desc);
+  }
+
+  public static void registerMBean(Object bean,
+                                   String name,
+                                   String type,
+                                   String desc) throws Exception {
+    if (mxserver == null) return;
+
+    Debug.getLogger(Debug.A3Debug).log(BasicLevel.WARN,
+                                       "registerMBean: " + name + " -> " + mxserver);
+
+    mxserver.registerMBean(bean, name, type, desc);
   }
 
   public static void unregisterMBean(String domain, 
-                                     String name) throws Exception {
+                                     String name,
+                                     String type,
+                                     String desc) throws Exception {
     if (mxserver == null) return;
 
     Debug.getLogger(Debug.A3Debug).log(BasicLevel.WARN,
                                        "unregisterMBean: " + name + " -> " + mxserver);
 
-    mxserver.unregisterMBean(domain, name);
+    mxserver.unregisterMBean(domain, name, type, desc);
+  }
+
+  public static void unregisterMBean(String name,
+                                     String type,
+                                     String desc) throws Exception {
+    if (mxserver == null) return;
+
+    Debug.getLogger(Debug.A3Debug).log(BasicLevel.WARN,
+                                       "unregisterMBean: " + name + " -> " + mxserver);
+
+    mxserver.unregisterMBean(name, type, desc);
   }
 
   public static void setMXServer(MXServer server) {

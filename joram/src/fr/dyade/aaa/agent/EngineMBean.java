@@ -27,13 +27,6 @@ public interface EngineMBean {
   public String getName();
 
   /**
-   * Returns the maximum number of agents loaded in memory.
-   *
-   * @return	the maximum number of agents loaded in memory
-   */
-  public int getNbMaxAgents();
-
-  /**
    * Tests if the engine is alive.
    *
    * @return	true if this <code>MessageConsumer</code> is alive; false
@@ -42,13 +35,6 @@ public interface EngineMBean {
   public boolean isRunning();
 
   public String dumpAgent(String id) throws Exception;
-
-  /**
-   * Returns a string representation of this engine. 
-   *
-   * @return	A string representation of this engine.
-   */
-  public String toString();
 
   /** Causes this engine to begin execution */
   public void start() throws Exception;

@@ -69,6 +69,12 @@ interface MessageQueue {
   public void validate();
 
   /**
+   * Atomicaly invalidates all messages pushed in queue during a reaction.
+   * It must be used during a transaction.
+   */
+  public void invalidate();
+
+  /**
    * Looks at the message at the top of this queue without removing
    * it from the queue.
    * It should never be used during a transaction to avoid dead-lock

@@ -120,15 +120,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** Maximum number of memory loaded agents. */
   int NbMaxAgents = 100;
 
-  /**
-   * Returns the maximum number of agents loaded in memory.
-   *
-   * @return	the maximum number of agents loaded in memory
-   */
-  public int getNbMaxAgents() {
-    return NbMaxAgents;
-  }
-
   /** Vector containing id's of all fixed agents. */
   Vector fixedAgentIdList = null;
 
@@ -305,7 +296,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
         fixedAgentIdList = new Vector();
         // Creates factory
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
-        createAgent(AgentId.factoryId, factory);
+        createAgent(factory);
         factory.agentInitialize(true);
         factory.save();
         logmon.log(BasicLevel.WARN, getName() + ", factory created");
@@ -359,10 +350,8 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @exception Exception
    *	unspecialized exception
    */
-  void createAgent(AgentId id, Agent agent) throws Exception {
-    agent.id = id;
+  void createAgent(Agent agent) throws Exception {
     agent.deployed = true;
-    agent.agentInitialize(true);
     if (agent.isFixed()) {
       // Subscribe the agent in pre-loading list.
       addFixedAgentId(agent.getId());
@@ -523,7 +512,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @param	id		The agent identification.
    * @return			The corresponding agent.
    *
-   * cnot.deploy@exception IOException
+   * @exception IOException
    *	when accessing the stored image
    * @exception ClassNotFoundException
    *	if the stored image class may not be found
@@ -534,6 +523,11 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
     throws IOException, ClassNotFoundException, Exception {
     Agent ag = null;
     if ((ag = Agent.load(id)) != null) {
+      agents.put(ag.id, ag);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + "Agent" + ag.id + " [" + ag.name + "] loaded");
+
       try {
         // Set current agent running in order to allow from field fixed
         // for sendTo during agentInitialize (We assume that only Engine
@@ -548,20 +542,13 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                    getName() + "Can't initialize Agent" + ag.id +
                    " [" + ag.name + "]",
                    exc);
-        throw new Exception(getName() + "Can't initialize Agent" + ag.id);
       }
-
       if (ag.logmon == null)
         ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
                                     ".#" + AgentServer.getServerId());
-      agents.put(ag.id, ag);
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + "Agent" + ag.id + " [" + ag.name + "] loaded");
     } else {
       throw new UnknownAgentException();
     }
-
     ag.last = now;
     return ag;
   }

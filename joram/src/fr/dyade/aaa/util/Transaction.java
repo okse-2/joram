@@ -26,17 +26,6 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  final int INIT = 0;	  // Initialization state
-  final int FREE = 1;	  // No transaction 
-  final int RUN = 2;	  // A transaction is running
-  final int COMMIT = 3;	  // A transaction is commiting
-  final int ROLLBACK = 4;  // A transaction is aborting
-  final int GARBAGE = 5;   // A garbage phase start
-  final int FINALIZE = 6;  // During last garbage.
-
-  final int Kb = 1024;
-  final int Mb = Kb * Kb;
-
   void init(String path) throws IOException;
 
   void begin() throws IOException;
