@@ -14,8 +14,21 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications">
-      <p>None, so far...</p>
+      <s2 name="Corrected bugs (latest: November 17, 2003)">
+      <ul>
+        <li>Message delivered twice, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-11/msg00065.html">
+        Dirk Muthorst</a>. In a very specific case, persistent messages might
+        be duplicated by the server. It occured when a message which arrived
+        for example on a queue, was persisted alone, then consumed and denied
+        but with other messages. Then it would be persisted again with the
+        group of denied messages, its original individual persistence file
+        being kept. Thus, the message would finaly be consumed twice after
+        a server recovery (tricky!). The bug is corrected and the
+        updated class is
+        <code>fr.dyade.aaa.mom.messages.PersistenceModule</code>.
+        </li>
+      </ul>
       </s2>
     </s1>
     <s1 name="joram3_7_0 (November 3, 2003)">
