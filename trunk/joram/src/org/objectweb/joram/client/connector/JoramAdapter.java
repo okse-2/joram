@@ -188,8 +188,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       if (persistentPlatform)
         System.setProperty("Transaction", "fr.dyade.aaa.util.ATransaction");   
-      else
+      else {
         System.setProperty("Transaction", "fr.dyade.aaa.util.NullTransaction");
+        System.setProperty("NbMaxAgents", "" + Integer.MAX_VALUE);
+      }
 
       if (platformConfigDir != null) { 
         System.setProperty("fr.dyade.aaa.agent.A3CONF_DIR", platformConfigDir);
