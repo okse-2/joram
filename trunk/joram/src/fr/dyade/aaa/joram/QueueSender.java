@@ -25,7 +25,7 @@
 
 package fr.dyade.aaa.joram; 
 
-import java.lang.*; 
+//import java.lang.*; 
  
 /** 
  *	a QueueSender is as JMS specifications 
@@ -39,149 +39,150 @@ import java.lang.*;
  
 public class QueueSender extends fr.dyade.aaa.joram.MessageProducer implements javax.jms.QueueSender { 
 	
-	/** the Queue associated to the QueueReceiver */
-	fr.dyade.aaa.mom.QueueNaming queue;
+    /** the Queue associated to the QueueReceiver */
+    fr.dyade.aaa.mom.QueueNaming queue;
 
-	/* constructor */
-	public QueueSender(fr.dyade.aaa.joram.Connection refConnectionNew, fr.dyade.aaa.joram.Session refSessionNew, javax.jms.Queue queueNew) {
-		super(refConnectionNew, refSessionNew);
-		queue = (fr.dyade.aaa.mom.QueueNaming) queueNew;
-	}
+    /* constructor */
+    public QueueSender(Connection refConnectionNew, QueueSession refSessionNew, javax.jms.Queue queueNew) {
+	super(refConnectionNew, refSessionNew);
+	queue = (fr.dyade.aaa.mom.QueueNaming) queueNew;
+    }
 	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Queue getQueue() throws javax.jms.JMSException {
-		try {
-			if(queue==null)
-				throw (new fr.dyade.aaa.joram.JMSAAAException("Queue name Unknown",JMSAAAException.DEFAULT_JMSAAA_ERROR));
-			else
-				return queue;
-		} catch (javax.jms.JMSException exc) {
-			throw(exc);
-		} catch (Exception exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		}
+    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    public javax.jms.Queue getQueue() throws javax.jms.JMSException {
+	try {
+	    if(queue==null)
+		throw (new fr.dyade.aaa.joram.JMSAAAException("Queue name Unknown",JMSAAAException.DEFAULT_JMSAAA_ERROR));
+	    else
+		return queue;
+	} catch (javax.jms.JMSException exc) {
+	    throw(exc);
+	} catch (Exception exc) {
+	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+	    except.setLinkedException(exc);
+	    throw(except);
 	}
+    }
 	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void send(javax.jms.Message message) throws javax.jms.JMSException {
-		this.send(this.queue, message, super.deliveryMode, super.priority, super.timeToLive); 		
-	}
+    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    public void send(javax.jms.Message message) throws javax.jms.JMSException {
+	this.send(this.queue, message, super.deliveryMode, super.priority, super.timeToLive); 		
+    }
 	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void send(javax.jms.Message message, int deliveryModeNew, int priorityNew, long timeToLiveNew) throws javax.jms.JMSException {
-		this.send(this.queue, message, deliveryModeNew, priorityNew, timeToLiveNew);
-	}
+    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    public void send(javax.jms.Message message, int deliveryModeNew, int priorityNew, long timeToLiveNew) throws javax.jms.JMSException {
+	this.send(this.queue, message, deliveryModeNew, priorityNew, timeToLiveNew);
+    }
 	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void send(javax.jms.Queue queueNew, javax.jms.Message message)  throws javax.jms.JMSException {
-		this.send(queueNew, message, super.deliveryMode, super.priority, super.timeToLive);
-	}
+    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    public void send(javax.jms.Queue queueNew, javax.jms.Message message)  throws javax.jms.JMSException {
+	this.send(queueNew, message, super.deliveryMode, super.priority, super.timeToLive);
+    }
 	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void send(javax.jms.Queue queueNew, javax.jms.Message message, int deliveryModeNew, int priorityNew, long timeToLiveNew) throws javax.jms.JMSException {
-		try {
-			/* padding the fields of the message */
-			message.setJMSDestination(queueNew);
-			message.setJMSDeliveryMode(deliveryModeNew);
-			message.setJMSPriority(priorityNew);
+    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    public void send(javax.jms.Queue queueNew, javax.jms.Message message, int deliveryModeNew, int priorityNew, long timeToLiveNew) throws javax.jms.JMSException {
+	try {
+	    /* padding the fields of the message */
+	    message.setJMSDestination(queueNew);
+	    message.setJMSDeliveryMode(deliveryModeNew);
+	    message.setJMSPriority(priorityNew);
 		
-			if(timeToLiveNew>0)
-				message.setJMSExpiration(System.currentTimeMillis()+((long) timeToLiveNew));
-			else
-				message.setJMSExpiration((long) 0);
+	    if(timeToLiveNew>0)
+		message.setJMSExpiration(System.currentTimeMillis()+((long) timeToLiveNew));
+	    else
+		message.setJMSExpiration((long) 0);
 			
-			/* set the timestamp which will be updated by "Connection" */
-			message.setJMSTimestamp(System.currentTimeMillis());
+	    /* set the timestamp which will be updated by "Connection" */
+	    message.setJMSTimestamp(System.currentTimeMillis());
 			
-			/*	reset the message to put the mode in readOnly and to
-			 *	destroy the transient attributes
-			 */
-			refSession.resetMessage(message);
+	    /*	reset the message to put the mode in readOnly and to
+	     *	destroy the transient attributes
+	     */
+	    refSession.resetMessage(message);
 			
-			long messageJMSMOMID = refConnection.getMessageMOMID();
-			Long longMsgID = new Long(messageJMSMOMID);
+	    long messageJMSMOMID = refConnection.getMessageMOMID();
+	    Long longMsgID = new Long(messageJMSMOMID);
 			
-			/* construction of the MessageJMSMOM */
-			fr.dyade.aaa.mom.SendingMessageQueueMOMExtern msgSend = new fr.dyade.aaa.mom.SendingMessageQueueMOMExtern(messageJMSMOMID, (fr.dyade.aaa.mom.Message) message);
+	    /* construction of the MessageJMSMOM */
+	    fr.dyade.aaa.mom.SendingMessageQueueMOMExtern msgSend = new fr.dyade.aaa.mom.SendingMessageQueueMOMExtern(messageJMSMOMID, (fr.dyade.aaa.mom.Message) message);
 			
-			if(refSession.transacted) {
-			  /* Queue not ack this msg, this msg is add in the vector and 
-			   * CommonClientAAA acknoledge the vector */
-			  msgSend.message.setJMSDeliveryMode(1);
-			  /* add the message in the vector waiting for the commit */
-			  refSession.XAMessageToSendVector.addElement(msgSend);
-			} else if(message.getJMSDeliveryMode()==fr.dyade.aaa.mom.Message.PERSISTENT) {
+	    if(refSession.transacted) {
+		/* Queue not ack this msg, this msg is add in the vector and 
+		 * CommonClientAAA acknoledge the vector */
+		msgSend.message.setJMSDeliveryMode(1);
+		/* add the message in the vector waiting for the commit */
+		refSession.transactedMessageToSendVector.addElement(msgSend);
+	    } else if(message.getJMSDeliveryMode()==fr.dyade.aaa.mom.Message.PERSISTENT) {
 				/* deliver an agreement to the client if Persistent */
-				Object obj = new Object();
+		Object obj = new Object();
 			
 				/*	synchronization because it could arrive that the notify was
 				 *	called before the wait 
 				 */
-				synchronized(obj) {
-				  /* the processus of the client waits the response */
-				  refConnection.waitThreadTable.put(longMsgID,obj);
-				  /* sends the messageJMSMOM r */
-				  refSession.sendToConnection(msgSend);
+		synchronized(obj) {
+		    /* the processus of the client waits the response */
+		    refConnection.waitThreadTable.put(longMsgID,obj);
+		    /* sends the messageJMSMOM r */
+		    refSession.sendToConnection(msgSend);
 				  
-				  obj.wait();	
-				}
+		    obj.wait();	
+		}
 		
-				if(Debug.debug)
-					if(Debug.connect)
-					 	System.out.println("QueueSender : i wake up");
+		if(Debug.debug)
+		    if(Debug.connect)
+			System.out.println("QueueSender : i wake up");
 		
 				/* the clients wakes up */
-				fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
+		fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
 			
 				/* tests if the key exists 
 				 * dissociates the enumeration null and internal error
 				 */
-				if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-					throw (new fr.dyade.aaa.joram.JMSAAAException("No back Message received ",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
+		if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
+		    throw (new fr.dyade.aaa.joram.JMSAAAException("No back Message received ",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
 	
 				/* get the the message back or the exception*/
-				msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-				if(msgMOM instanceof fr.dyade.aaa.mom.SendingBackMessageMOMExtern) {
-					/* update the fields of the message */
-					fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgSendBack = (fr.dyade.aaa.mom.SendingBackMessageMOMExtern) msgMOM;
-					message = msgSendBack.message;
-				} else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern) {
-					/* exception sent back to the client */
-					fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern) msgMOM;
-					fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-					except.setLinkedException(msgExc.exception);
-					message = msgExc.message;
-					throw(except);
-				} else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern) {
-					/* exception sent back to the client */
-					fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern) msgMOM;
-					javax.jms.InvalidDestinationException except = new javax.jms.InvalidDestinationException("Invalid Queue :  ",String.valueOf(JMSAAAException.MOM_INTERNAL_ERROR));
-					except.setLinkedException(msgExc.exception);
-					throw(except);
-				} else {
-					/* unknown message */
-					/* should never arrived */
-					fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-					throw(except);
-				}
-			} else {
-				/* sends the messageJMSMOM r */
-				refSession.sendToConnection(msgSend);
-			}
-		} catch (javax.jms.JMSException exc) {
-			throw(exc);
-		} catch (ClassCastException exc) {
-			/* TO CHECK : I'm not sure */
-			javax.jms.MessageFormatException except = new javax.jms.MessageFormatException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
-		} catch (Exception exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-			except.setLinkedException(exc);
-			throw(except);
+		msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
+		if(msgMOM instanceof fr.dyade.aaa.mom.SendingBackMessageMOMExtern) {
+		    /* update the fields of the message */
+		    fr.dyade.aaa.mom.SendingBackMessageMOMExtern msgSendBack = (fr.dyade.aaa.mom.SendingBackMessageMOMExtern) msgMOM;
+		    message = msgSendBack.message;
+		} else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern) {
+		    /* exception sent back to the client */
+		    fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionSendMessageMOMExtern) msgMOM;
+		    fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
+		    except.setLinkedException(msgExc.exception);
+		    message = msgExc.message;
+		    throw(except);
+		} else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern) {
+		    /* exception sent back to the client */
+		    fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionUnknownObjMOMExtern) msgMOM;
+		    javax.jms.InvalidDestinationException except = new javax.jms.InvalidDestinationException("Invalid Queue :  ",String.valueOf(JMSAAAException.MOM_INTERNAL_ERROR));
+		    except.setLinkedException(msgExc.exception);
+		    throw(except);
+		} else {
+		    /* unknown message */
+		    /* should never arrived */
+		    fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
+		    throw(except);
 		}
+	    } else {
+				/* sends the messageJMSMOM r */
+		refSession.sendToConnection(msgSend);
+	    }
+	} catch (javax.jms.JMSException exc) {
+	    throw(exc);
+	} catch (ClassCastException exc) {
+	    /* TO CHECK : I'm not sure */
+	    javax.jms.MessageFormatException except = new javax.jms.MessageFormatException("internal Error");
+	    except.setLinkedException(exc);
+	    throw(except);
+	} catch (Exception exc) {
+	    exc.printStackTrace();
+	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
+	    except.setLinkedException(exc);
+	    throw(except);
 	}
+    }
 	
 }

@@ -52,8 +52,10 @@ public class FifoQueue extends Vector {
    */
   public synchronized Object pop() {
     Object obj;
-    obj =elementAt(0);
-    removeElementAt(0);
+    try {
+      obj =elementAt(0);
+      removeElementAt(0);
+    } catch (Exception e) { return null;}
     return obj;
   }
 
@@ -70,5 +72,12 @@ public class FifoQueue extends Vector {
       } catch (InterruptedException e) {}
     }
     return elementAt(0);
+  }
+
+  /**
+   * Removes all object of this queue 
+   */
+  public synchronized void remove() {
+    removeAllElements();
   }
 }

@@ -112,7 +112,7 @@ public class TopicPublisher extends fr.dyade.aaa.joram.MessageProducer implement
 	 * CommonClientAAA acknoledge the vector */
 	msgSend.message.setJMSDeliveryMode(1);
 	/* add the message in the vector waiting for the commit */
-	refSession.XAMessageToSendVector.addElement(msgSend);		
+	refSession.transactedMessageToSendVector.addElement(msgSend);		
       } else if(message.getJMSDeliveryMode()==fr.dyade.aaa.mom.Message.PERSISTENT) {
 				/* deliver an agreement to the client if Persistent */
 			

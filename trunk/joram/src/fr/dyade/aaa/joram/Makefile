@@ -27,12 +27,14 @@ joram.jar_CLASSES = \
 	Debug \
 	Topic \
 	Queue \
-	ResponseAckObject\
-	KeyConnectionSubscription\
+	ResponseAckObject \
+	KeyConnectionSubscription \
 	JMSAAAException \
-	TemporaryTopic\
-	TemporaryQueue\
+	TemporaryTopic \
+	TemporaryQueue \
 	Connection \
+	QueueConnection \
+	TopicConnection \
 	Connection@Driver \
 	MessageConsumer \
 	MessageProducer \
@@ -44,13 +46,27 @@ joram.jar_CLASSES = \
 	TopicSession \
 	TopicPublisher \
 	TopicSubscriber \
-	QueueBrowser\
-	ConnectionFactory\
+	QueueBrowser \
+	ConnectionFactory \
+	QueueConnectionFactory \
+	TopicConnectionFactory \
 	ConnectionMetaData \
 	ConfigURLStreamHandler \
 	ConfigURLStreamHandlerFactory \
-	Admin
+	Admin \
+	ObjectConnectionFactory \
+	XAResource \
+	XASession \
+	XAQueueSession \
+	XATopicSession \
+	XAConnection \
+	XAQueueConnection \
+	XATopicConnection \
+	XAConnectionFactory \
+	XAQueueConnectionFactory \
+	XATopicConnectionFactory \
+	XidTable
 
-LIBS = a3mom.jar:jms.jar:jndi.jar
+LIBS = a3mom.jar:jms.jar:jndi.jar:jta-spec1_0_1.jar
 
 include $(GENERAL_MK)

@@ -128,10 +128,11 @@ public class Admin {
     }
   }
   
-  /** create agent client 
+
+  /** create Topic agent client 
    * @see #delete(fr.dyade.aaa.joram.ConnectionFactory)
    */
-  public fr.dyade.aaa.joram.ConnectionFactory createAgentClient () throws Exception {
+  public fr.dyade.aaa.joram.TopicConnectionFactory createTopicAgentClient () throws Exception {
     sock = new Socket(addr, port);
     if ( sock != null ) {
       sock.setTcpNoDelay(true);
@@ -149,11 +150,89 @@ public class Admin {
       msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
       String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
       sock.close();
-      return new fr.dyade.aaa.joram.ConnectionFactory(agentClient,addr,port);
+      return new fr.dyade.aaa.joram.TopicConnectionFactory(agentClient,addr,port);
+    } else 
+      return null;
+  }
+ 
+  /** create Queue agent client 
+   * @see #delete(fr.dyade.aaa.joram.ConnectionFactory)
+   */
+  public fr.dyade.aaa.joram.QueueConnectionFactory createQueueAgentClient () throws Exception {
+    sock = new Socket(addr, port);
+    if ( sock != null ) {
+      sock.setTcpNoDelay(true);
+      sock.setSoTimeout(0);
+      sock.setSoLinger(true,1000);
+      DataOutputStream dos = new DataOutputStream(sock.getOutputStream()); 
+      dos.writeUTF("NewAgentClient");
+      dos.flush();
+      ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
+      ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+      fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminGetAgentClient(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
+      msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
+      String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      sock.close();
+      return new fr.dyade.aaa.joram.QueueConnectionFactory(agentClient,addr,port);
     } else 
       return null;
   }
   
+  /** create XATopic agent client 
+   * @see #delete(fr.dyade.aaa.joram.ConnectionFactory)
+   */
+  public fr.dyade.aaa.joram.XATopicConnectionFactory createXATopicAgentClient () throws Exception {
+    sock = new Socket(addr, port);
+    if ( sock != null ) {
+      sock.setTcpNoDelay(true);
+      sock.setSoTimeout(0);
+      sock.setSoLinger(true,1000);
+      DataOutputStream dos = new DataOutputStream(sock.getOutputStream()); 
+      dos.writeUTF("NewAgentClient");
+      dos.flush();
+      ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
+      ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+      fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminGetAgentClient(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
+      msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
+      String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      sock.close();
+      return new fr.dyade.aaa.joram.XATopicConnectionFactory(agentClient,addr,port);
+    } else 
+      return null;
+  }
+  
+  /** create XAQueue agent client 
+   * @see #delete(fr.dyade.aaa.joram.ConnectionFactory)
+   */
+  public fr.dyade.aaa.joram.XAQueueConnectionFactory createXAQueueAgentClient () throws Exception {
+    sock = new Socket(addr, port);
+    if ( sock != null ) {
+      sock.setTcpNoDelay(true);
+      sock.setSoTimeout(0);
+      sock.setSoLinger(true,1000);
+      DataOutputStream dos = new DataOutputStream(sock.getOutputStream()); 
+      dos.writeUTF("NewAgentClient");
+      dos.flush();
+      ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
+      ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+      fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminGetAgentClient(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
+      msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
+      String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      sock.close();
+      return new fr.dyade.aaa.joram.XAQueueConnectionFactory(agentClient,addr,port);
+    } else 
+      return null;
+  }
+   
   /** delete agent client */
   public void delete(fr.dyade.aaa.joram.ConnectionFactory cf) throws Exception {
     String agentClient = cf.getAgentClient();
