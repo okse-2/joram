@@ -16,6 +16,11 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: May 7, 2004)">
       <ul>
+        <li>Dependency of a client class to a server class
+        (<code>org.objectweb.joram.shared.client.QBrowseReply</code>). Updated
+        classes are <code>org.objectweb.joram.shared.client.QBrowseReply</code>
+        and <code>org.objectweb.joram.mom.proxies.ProxyImpl</code>.</li>
+        
         <li><code>org.objectweb.joram.client.jms.admin.AdminModule.connect()</code>
         not working with XA factories, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-05/msg00022.html">
