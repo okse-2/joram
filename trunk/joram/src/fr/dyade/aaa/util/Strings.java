@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -16,24 +17,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
-
-
 package fr.dyade.aaa.util;
 
 import java.util.*;
 import java.io.*;
 
-
 /**
  * This class provides a set of static functions for building string
  * representations of complex structures.
- *
- * @author	Lacourte Serge
- * @version	v1.0
  */
 public class Strings {
-
   /**
    * Provides a string representation of an object. Checks if there exists
    * in this class a specialized <code>toString</code> function for the object
