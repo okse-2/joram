@@ -37,21 +37,20 @@ public class Publisher
     System.out.println("Publishes messages on topic on server0...");
 
     ictx = new InitialContext();
-    TopicConnectionFactory cnxF = (TopicConnectionFactory) ictx.lookup("tcf0");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf0");
     Topic dest = (Topic) ictx.lookup("top0");
     ictx.close();
 
-    TopicConnection cnx = cnxF.createTopicConnection("publisher00",
-                                                     "publisher00");
-    TopicSession sess = cnx.createTopicSession(true, 0);
-    TopicPublisher pub = sess.createPublisher(dest);
+    Connection cnx = cnxF.createConnection("publisher00", "publisher00");
+    Session sess = cnx.createSession(true, 0);
+    MessageProducer pub = sess.createProducer(dest);
 
     TextMessage msg = sess.createTextMessage();
 
     int i;
     for (i = 0; i < 10; i++) {
       msg.setText("Msg " + i);
-      pub.publish(msg);
+      pub.send(msg);
     }
 
     sess.commit();

@@ -212,8 +212,9 @@ public class JmsClientProxy extends ConnectionFactory
    * target destinations. Those requests are:
    * <ul>
    * <li><code>SessCreateDestRequest</code></li>
-   * <li><code>ProducedMessages</code></li>
-   * <li><code>QRecReceiveRequest</code></li>
+   * <li><code>ProducerMessages</code></li>
+   * <li><code>ConsumerReceiveRequest</code></li>
+   * <li><code>ConsumerSetListRequest</code></li>
    * <li><code>QBrowseRequest</code></li>
    * </ul>
    * <p>
@@ -244,8 +245,10 @@ public class JmsClientProxy extends ConnectionFactory
             driverDoFwd(key, (SessCreateDestRequest) req);
           else if (req instanceof ProducerMessages)
             driverDoFwd(key, (ProducerMessages) req);
-          else if (req instanceof QRecReceiveRequest)
-            driverDoFwd(key, (QRecReceiveRequest) req);
+          else if (req instanceof ConsumerReceiveRequest)
+            driverDoFwd(key, (ConsumerReceiveRequest) req);
+          else if (req instanceof ConsumerSetListRequest)
+            driverDoFwd(key, (ConsumerSetListRequest) req);
           else if (req instanceof QBrowseRequest)
             driverDoFwd(key, (QBrowseRequest) req);
           // Other requests are forwarded to the proxy:
@@ -277,7 +280,7 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void driverDoFwd(int key, SessCreateDestRequest req)
   {
-    sendTo(AgentId.fromString(req.getTo()), 
+    sendTo(AgentId.fromString(req.getTarget()), 
            new PingRequest(key, req.getRequestId()));
   }
 
@@ -289,22 +292,46 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void driverDoFwd(int key, ProducerMessages req)
   {
-    sendTo(AgentId.fromString(req.getTo()),
+    sendTo(AgentId.fromString(req.getTarget()),
            new ClientMessages(key, req.getRequestId(), req.getMessages()));
 
     doReply(key, new ServerReply(req));
   }
 
   /**
-   * Actually forwards a <code>QRecReceiveRequest</code> request as a
-   * <code>ReceiveRequest</code> directly to the target queue.
+   * Either forwards the <code>ConsumerReceiveRequest</code> request as a
+   * <code>ReceiveRequest</code> directly to the target queue, or wraps it
+   * and sends it to the proxy if destinated to a subscription.
    */
-  private void driverDoFwd(int key, QRecReceiveRequest req)
+  private void driverDoFwd(int key, ConsumerReceiveRequest req)
   {
-    AgentId to = AgentId.fromString(req.getTo());
-    sendTo(to, new ReceiveRequest(key, req.getRequestId(),
-                                  req.getSelector(), req.getTimeToLive(),
-                                  false));
+    if (req.getQueueMode()) {
+      AgentId to = AgentId.fromString(req.getTarget());
+      sendTo(to, new ReceiveRequest(key, req.getRequestId(),
+                                    req.getSelector(), req.getTimeToLive(),
+                                    false));
+    }
+    else
+      sendTo(this.getId(),
+             new DriverNotification(key, new InputNotification(req)));
+  }
+
+  /**
+   * Either forwards the <code>ConsumerSetListRequest</code> request as a
+   * <code>ReceiveRequest</code> directly to the target queue, or wraps it
+   * and sends it to the proxy if destinated to a subscription.
+   */
+  private void driverDoFwd(int key, ConsumerSetListRequest req)
+  {
+    if (req.getQueueMode()) {
+      AgentId to = AgentId.fromString(req.getTarget());
+      ReceiveRequest rr = new ReceiveRequest(key, req.getRequestId(),
+                                             req.getSelector(), -1, false);
+      sendTo(to, rr);
+    }
+    else
+      sendTo(this.getId(),
+             new DriverNotification(key, new InputNotification(req)));
   }
 
   /**
@@ -313,7 +340,7 @@ public class JmsClientProxy extends ConnectionFactory
    */
   private void driverDoFwd(int key, QBrowseRequest req)
   {
-    sendTo(AgentId.fromString(req.getTo()),
+    sendTo(AgentId.fromString(req.getTarget()),
            new BrowseRequest(key, req.getRequestId(), req.getSelector()));
   }
 
@@ -387,23 +414,18 @@ public class JmsClientProxy extends ConnectionFactory
    * <li><code>CnxStopRequest</code></li>
    * <li><code>SessCreateTQRequest</code></li>
    * <li><code>SessCreateTTRequest</code></li>
-   * <li><code>TSessSubRequest</code></li>
-   * <li><code>TSessUnsubRequest</code></li>
-   * <li><code>TSessCloseRequest</code></li>
-   * <li><code>TSubSetListRequest</code></li>
-   * <li><code>TSubUnsetListRequest</code></li>
-   * <li><code>TSubReceiveRequest</code></li>
-   * <li><code>QRecAckRequest</code></li>
-   * <li><code>QRecDenyRequest</code></li>
-   * <li><code>TSubAckRequest</code></li>
-   * <li><code>TSubDenyRequest</code></li>
-   * <li><code>QSessAckRequest</code></li>
-   * <li><code>QSessDenyRequest</code></li>
-   * <li><code>TSessAckRequest</code></li>
-   * <li><code>TSessDenyRequest</code></li>
+   * <li><code>ConsumerSubRequest</code></li>
+   * <li><code>ConsumerUnsubRequest</code></li>
+   * <li><code>ConsumerCloseSubRequest</code></li>
+   * <li><code>ConsumerSetListRequest</code></li>
+   * <li><code>ConsumerUnsetListRequest</code></li>
+   * <li><code>ConsumerReceiveRequest</code></li>
+   * <li><code>ConsumerAckRequest</code></li>
+   * <li><code>ConsumerDenyRequest</code></li>
+   * <li><code>SessAckRequest</code></li>
+   * <li><code>SessDenyRequest</code></li>
    * <li><code>TempDestDeleteRequest</code></li>
-   * <li><code>XAQSessPrepare</code></li>
-   * <li><code>XATSessPrepare</code></li>
+   * <li><code>XASessPrepare</code></li>
    * <li><code>XASessCommit</code></li>
    * <li><code>XASessRollback</code></li>
    * </ul>
@@ -431,40 +453,30 @@ public class JmsClientProxy extends ConnectionFactory
         doReact((SessCreateTQRequest) request);
       else if (request instanceof SessCreateTTRequest)
         doReact((SessCreateTTRequest) request);
-      else if (request instanceof TSessSubRequest)
-        doReact((TSessSubRequest) request);
-      else if (request instanceof TSessUnsubRequest)
-        doReact((TSessUnsubRequest) request);
-      else if (request instanceof TSubCloseRequest)
-        doReact((TSubCloseRequest) request);
-      else if (request instanceof TSubSetListRequest)
-        doReact((TSubSetListRequest) request);
-      else if (request instanceof TSubUnsetListRequest)
-        doReact((TSubUnsetListRequest) request);
-      else if (request instanceof TSubReceiveRequest)
-        doReact((TSubReceiveRequest) request);
-      else if (request instanceof QRecAckRequest)
-        doReact((QRecAckRequest) request);
-      else if (request instanceof QRecDenyRequest)
-        doReact((QRecDenyRequest) request);
-      else if (request instanceof TSubAckRequest)
-        doReact((TSubAckRequest) request);
-      else if (request instanceof TSubDenyRequest)
-        doReact((TSubDenyRequest) request);
-      else if (request instanceof QSessAckRequest)
-        doReact((QSessAckRequest) request);
-      else if (request instanceof QSessDenyRequest)
-        doReact((QSessDenyRequest) request);
-      else if (request instanceof TSessAckRequest)
-        doReact((TSessAckRequest) request);
-      else if (request instanceof TSessDenyRequest)
-        doReact((TSessDenyRequest) request);
+      else if (request instanceof ConsumerSubRequest)
+        doReact((ConsumerSubRequest) request);
+      else if (request instanceof ConsumerUnsubRequest)
+        doReact((ConsumerUnsubRequest) request);
+      else if (request instanceof ConsumerCloseSubRequest)
+        doReact((ConsumerCloseSubRequest) request);
+      else if (request instanceof ConsumerSetListRequest)
+        doReact((ConsumerSetListRequest) request);
+      else if (request instanceof ConsumerUnsetListRequest)
+        doReact((ConsumerUnsetListRequest) request);
+      else if (request instanceof ConsumerReceiveRequest)
+        doReact((ConsumerReceiveRequest) request);
+      else if (request instanceof ConsumerAckRequest)
+        doReact((ConsumerAckRequest) request);
+      else if (request instanceof ConsumerDenyRequest)
+        doReact((ConsumerDenyRequest) request);
+      else if (request instanceof SessAckRequest)
+        doReact((SessAckRequest) request);
+      else if (request instanceof SessDenyRequest)
+        doReact((SessDenyRequest) request);
       else if (request instanceof TempDestDeleteRequest)
         doReact((TempDestDeleteRequest) request);
-      else if (request instanceof XAQSessPrepare)
-        doReact((XAQSessPrepare) request);
-      else if (request instanceof XATSessPrepare)
-        doReact((XATSessPrepare) request);
+      else if (request instanceof XASessPrepare)
+        doReact((XASessPrepare) request);
       else if (request instanceof XASessCommit)
         doReact((XASessCommit) request);
       else if (request instanceof XASessRollback)
@@ -508,11 +520,11 @@ public class JmsClientProxy extends ConnectionFactory
    * <p>
    * It simply forwards it as an <code>AccessRequest</code> to the
    * destination. The reason why this simple forward does not take place
-   * directly in the driver is causal.
+   * directly in the driver is to preserve causality.
    */
   private void doReact(CnxAccessRequest req)
   {
-    sendTo(AgentId.fromString(req.getTo()), 
+    sendTo(AgentId.fromString(req.getTarget()), 
            new AccessRequest(currKey, req.getRequestId(), req.getRight()));
   }
 
@@ -520,8 +532,8 @@ public class JmsClientProxy extends ConnectionFactory
    * Method implementing the proxy reaction to a <code>CnxStartRequest</code>
    * requesting to start a connection.
    * <p>
-   * This method sends the pending <code>QueueMessage</code> and
-   * <code>SubMessages</code> replies, if any.
+   * This method sends the pending <code>ConsumerMessages</code> replies,
+   * if any.
    */
   private void doReact(CnxStartRequest req)
   {
@@ -533,9 +545,9 @@ public class JmsClientProxy extends ConnectionFactory
 
 
     // Delivering the pending deliveries, if any:
-    AbstractJmsReply pending;
+    ConsumerMessages pending;
     while (! cnx.repliesBuffer.isEmpty()) {
-      pending = (AbstractJmsReply) cnx.repliesBuffer.remove(0);
+      pending = (ConsumerMessages) cnx.repliesBuffer.remove(0);
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Sending pending"
@@ -547,13 +559,13 @@ public class JmsClientProxy extends ConnectionFactory
     // Launching deliveries for the active subscriptions:
     String subName;
     ClientSubscription sub;
-    SubMessages subM;
+    ConsumerMessages consM;
     for (int i = 0; i < cnx.activeSubs.size(); i++) {
       subName = (String) cnx.activeSubs.get(i);
       sub = (ClientSubscription) subsTable.get(subName);
-      subM = sub.deliver();
-      if (subM != null)
-        doReply(subM);
+      consM = sub.deliver();
+      if (consM != null)
+        doReply(consM);
     }
   }
 
@@ -581,7 +593,8 @@ public class JmsClientProxy extends ConnectionFactory
    * <p>
    * Creates the queue, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
-   * <code>ProxySyncAck</code> notification it sends to itself.
+   * <code>ProxySyncAck</code> notification it sends to itself. This latest
+   * action's purpose is to preserve causality.
    *
    * @exception RequestException  If the queue could not be deployed.
    */
@@ -600,8 +613,8 @@ public class JmsClientProxy extends ConnectionFactory
       cnx.tempDestinations.add(qId);
 
       sendTo(this.getId(),
-             new ProxySyncAck(currKey, new SessCreateTDReply(req,
-                                                             qId.toString())));
+             new ProxySyncAck(currKey,
+                              new SessCreateTDReply(req, qId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary queue "
@@ -621,7 +634,8 @@ public class JmsClientProxy extends ConnectionFactory
    * <p>
    * Creates the topic, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
-   * <code>ProxySyncAck</code> notification it sends to itself.
+   * <code>ProxySyncAck</code> notification it sends to itself. This latest
+   * action's purpose is to preserve causality.
    *
    * @exception RequestException  If the topic could not be deployed.
    */
@@ -640,8 +654,8 @@ public class JmsClientProxy extends ConnectionFactory
       cnx.tempDestinations.add(tId);
 
       sendTo(this.getId(),
-             new ProxySyncAck(currKey, new SessCreateTDReply(req,
-                                                             tId.toString())));
+             new ProxySyncAck(currKey,
+                              new SessCreateTDReply(req, tId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary topic"
@@ -656,12 +670,12 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to a
-   * <code>TSessSubRequest</code> requesting to subscribe to a topic.
+   * <code>ConsumerSubRequest</code> requesting to subscribe to a topic.
    * <p>
    * Sends a <code>SubscribeRequest</code> to the target proxy, registers
    * the subscription and acknowledges it.
    */
-  private void doReact(TSessSubRequest req) throws RequestException
+  private void doReact(ConsumerSubRequest req) throws RequestException
   {
     if (subsTable == null) {
       subsTable = new Hashtable();
@@ -680,16 +694,16 @@ public class JmsClientProxy extends ConnectionFactory
                                    + " has already been activated.");
 
       // If the subscribed topic does not change:
-      if (req.getTo().equals(sub.topicId.toString())) {
+      if (req.getTarget().equals(sub.topicId.toString())) {
         // If the selector changes, updating the subscription:
         if (sub.selector == null) {
           if (req.getSelector() != null)
-            sendTo(AgentId.fromString(req.getTo()),
+            sendTo(AgentId.fromString(req.getTarget()),
                    new SubscribeRequest(req.getRequestId(), subName,
                                         req.getSelector()));
         }
         else if (! sub.selector.equals(req.getSelector()))
-          sendTo(AgentId.fromString(req.getTo()),
+          sendTo(AgentId.fromString(req.getTarget()),
                  new SubscribeRequest(req.getRequestId(), subName,
                                       req.getSelector()));
       }
@@ -698,10 +712,10 @@ public class JmsClientProxy extends ConnectionFactory
       else {
         sendTo(sub.topicId, new UnsubscribeRequest(req.getRequestId(),
                                                    subName));
-        sendTo(AgentId.fromString(req.getTo()),
+        sendTo(AgentId.fromString(req.getTarget()),
                new SubscribeRequest(req.getRequestId(), subName,
                                     req.getSelector()));
-        sub.topicId = AgentId.fromString(req.getTo());
+        sub.topicId = AgentId.fromString(req.getTarget());
       }
       sub.connectionKey = currKey;
       sub.selector = req.getSelector();
@@ -712,7 +726,7 @@ public class JmsClientProxy extends ConnectionFactory
     // Else, in the case of a new subscription:
     else {
       // Subscribing to the topic.
-      sendTo(AgentId.fromString(req.getTo()),
+      sendTo(AgentId.fromString(req.getTarget()),
              new SubscribeRequest(req.getRequestId(), subName,
                                   req.getSelector()));
 
@@ -730,7 +744,7 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to a
-   * <code>TSubSetListRequest</code> notifying the creation of a client
+   * <code>ConsumerSetListRequest</code> notifying the creation of a client
    * listener.
    * <p>
    * Sets the listener for the subscription, and if the connection is started,
@@ -738,10 +752,10 @@ public class JmsClientProxy extends ConnectionFactory
    *
    * @exception RequestException  If the subscription can't be retrieved.
    */
-  private void doReact(TSubSetListRequest req) throws RequestException
+  private void doReact(ConsumerSetListRequest req) throws RequestException
   {
     // Getting the subscription:
-    String subName = req.getSubName();
+    String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
@@ -757,21 +771,21 @@ public class JmsClientProxy extends ConnectionFactory
 
     // If the connection is started, launching a delivery sequence:
     if (cnx.started) {
-      SubMessages subM = sub.deliver();
-      if (subM != null)
-        doReply(subM);
+      ConsumerMessages consM = sub.deliver();
+      if (consM != null)
+        doReply(consM);
     }
   }
    
   /**
    * Method implementing the JMS proxy reaction to a
-   * <code>TSubUnsetListRequest</code> notifying that a subscriber listener
+   * <code>ConsumerUnsetListRequest</code> notifying that a subscriber listener
    * is unset.
    */
-  private void doReact(TSubUnsetListRequest req) throws RequestException
+  private void doReact(ConsumerUnsetListRequest req) throws RequestException
   {
     // Desactivating the subscription:
-    String subName = req.getSubName();
+    String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
@@ -785,18 +799,19 @@ public class JmsClientProxy extends ConnectionFactory
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Listener has been unset on"
                               + " subscription: " + subName);
 
+    // Acknowledging the request:
     doReply(new ServerReply(req));
   }
 
   /**
    * Method implementing the JMS proxy reaction to a
-   * <code>TSubCloseRequest</code> requesting to desactivate a durable
+   * <code>ConsumerCloseSubRequest</code> requesting to desactivate a durable
    * subscription.
    */
-  private void doReact(TSubCloseRequest req) throws RequestException
+  private void doReact(ConsumerCloseSubRequest req) throws RequestException
   {
     // Getting the name of the subscription:
-    String subName = req.getSubName();
+    String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
@@ -822,15 +837,15 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to a
-   * <code>TSessUnsubRequest</code> requesting to unsubscribe to a topic.
+   * <code>ConsumerUnsubRequest</code> requesting to unsubscribe to a topic.
    * <p>
    * Sends an <code>UnsubscribeRequest</code> to the target proxy, removes
    * the subscription and acknowledges the request.
    */
-  private void doReact(TSessUnsubRequest req) throws RequestException
+  private void doReact(ConsumerUnsubRequest req) throws RequestException
   {
     // Getting the subscription:
-    String subName = req.getSubName();
+    String subName = req.getTarget();
 
     if (subsTable == null)
       throw new RequestException("Can't unsubscribe non existing"
@@ -864,7 +879,7 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the proxy reaction to a
-   * <code>TSubReceiveRequest</code> instance, requesting a message from a
+   * <code>ConsumerReceiveRequest</code> instance, requesting a message from a
    * subscription.
    * <p>
    * This method registers the request and launches a delivery sequence if
@@ -872,9 +887,9 @@ public class JmsClientProxy extends ConnectionFactory
    * may bufferize the reply if the connection is stopped. If with a positive
    * timer, may register the request to the Scheduler if not answered.
    */
-  private void doReact(TSubReceiveRequest req) throws RequestException
+  private void doReact(ConsumerReceiveRequest req) throws RequestException
   {
-    String subName = req.getSubName();
+    String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
@@ -885,27 +900,27 @@ public class JmsClientProxy extends ConnectionFactory
     sub.requestId = reqId;
     sub.toListener = false;
 
-    SubMessages subM = null;
+    ConsumerMessages consM = null;
     boolean replied = false;
 
     // In the case of an immediate delivery request:
     if (req.getTimeToLive() == 0) {
       // Getting something to deliver, or delivering an empty reply:
-      subM = sub.deliver();
-      if (subM == null)
-        subM = new SubMessages(reqId, subName, null);
+      consM = sub.deliver();
+      if (consM == null)
+        consM = new ConsumerMessages(reqId, subName, false);
       // Replying if the connection is started:
       if (cnx.started)
-        doReply(subM);
+        doReply(consM);
       // Or buffering:
       else
-        cnx.repliesBuffer.add(subM);
+        cnx.repliesBuffer.add(consM);
     }
     // Else, if the connection is started, trying to deliver messages:
     else if (cnx.started) {
-      subM = sub.deliver();
-      if (subM != null) {
-        doReply(subM);
+      consM = sub.deliver();
+      if (consM != null) {
+        doReply(consM);
         replied = true;
       }
     }
@@ -929,152 +944,135 @@ public class JmsClientProxy extends ConnectionFactory
 
   /** 
    * Method implementing the JMS proxy reaction to a
-   * <code>QSessAckRequest</code> acknowledging messages on a queue.
+   * <code>SessAckRequest</code> acknowledging messages either on a queue
+   * or on a subscription.
    */
-  private void doReact(QSessAckRequest req)
+  private void doReact(SessAckRequest req)
   {
-    AgentId qId = AgentId.fromString(req.getTo());
-    Vector ids = req.getIds();
-    sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
-    cnx.ackedIds(qId, ids);
-  }
-
-  /** 
-   * Method implementing the JMS proxy reaction to a
-   * <code>TSessAckRequest</code> acknowledging messages on a subscription.
-   */
-  private void doReact(TSessAckRequest req)
-  {
-    String subName = req.getSubName();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-    if (sub != null)
-      sub.acknowledge(req.getIds());
-  }
-
-  /** 
-   * Method implementing the JMS proxy reaction to a
-   * <code>QSessDenyRequest</code> denying messages on a queue.
-   * <p>
-   * Actually sends a deny request to the queue and acknowledges the request.
-   */
-  private void doReact(QSessDenyRequest req)
-  {
-    AgentId qId = AgentId.fromString(req.getTo());
-    Vector ids = req.getIds();
-    cnx.ackedIds(qId, ids);
-    sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
-
-    // Acknowledging the request:
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
-  }
-
-  /** 
-   * Method implementing the JMS proxy reaction to a
-   * <code>TSessDenyRequest</code> denying messages on a subscription.
-   * <p>
-   * This method denies the messages and launches a new delivery sequence.
-   */
-  private void doReact(TSessDenyRequest req)
-  {
-    String subName = req.getSubName();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-
-    if (sub == null) 
-      return;
-
-    sub.deny(req.getIds());
-
-    try {
-      setCnx(sub.connectionKey);
-   
-      // Launching a delivery sequence:
-      if (cnx.started) {
-        SubMessages sM = sub.deliver();
-        if (sM != null)
-          doReply(sM);
-      } 
+    if (req.getQueueMode()) {
+      AgentId qId = AgentId.fromString(req.getTarget());
+      Vector ids = req.getIds();
+      sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
+      cnx.ackedIds(qId, ids);
     }
-    catch (ProxyException pE) {}
+    else {
+      String subName = req.getTarget();
+      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      if (sub != null)
+        sub.acknowledge(req.getIds());
+    }
   }
 
   /** 
    * Method implementing the JMS proxy reaction to a
-   * <code>QRecAckRequest</code> acknowledging a message on a queue.
+   * <code>SessDenyRequest</code> denying messages either on a queue or on
+   * a subscription.
    */
-  private void doReact(QRecAckRequest req)
+  private void doReact(SessDenyRequest req)
   {
-    AgentId qId = AgentId.fromString(req.getTo());
-    String id = req.getId();
-    Vector ids = new Vector();
-    ids.add(id);
-    sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
-    cnx.ackedId(qId, id);
+    if (req.getQueueMode()) {
+      AgentId qId = AgentId.fromString(req.getTarget());
+      Vector ids = req.getIds();
+      cnx.ackedIds(qId, ids);
+      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+
+      // Acknowledging the request unless forbidden:
+      if (! req.doNotAck())
+        sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    }
+    else {
+      String subName = req.getTarget();
+      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+
+      if (sub == null) 
+        return;
+
+      sub.deny(req.getIds());
+
+      try {
+        setCnx(sub.connectionKey);
+   
+        // Launching a delivery sequence:
+        if (cnx.started) {
+          ConsumerMessages consM = sub.deliver();
+          if (consM != null)
+            doReply(consM);
+        } 
+      }
+      catch (ProxyException pE) {}
+    }
   }
 
   /** 
    * Method implementing the JMS proxy reaction to a
-   * <code>TSubAckRequest</code> acknowledging a message on a subscription.
+   * <code>ConsumerAckRequest</code> acknowledging a message either on a queue
+   * or on a subscription.
    */
-  private void doReact(TSubAckRequest req)
+  private void doReact(ConsumerAckRequest req)
   {
-    String subName = req.getSubName();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-    if (sub != null) {
+    if (req.getQueueMode()) {
+      AgentId qId = AgentId.fromString(req.getTarget());
+      String id = req.getId();
+      Vector ids = new Vector();
+      ids.add(id);
+      sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
+      cnx.ackedId(qId, id);
+    }
+    else {
+      String subName = req.getTarget();
+      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+      if (sub != null) {
+        Vector ids = new Vector();
+        ids.add(req.getId());
+        sub.acknowledge(ids);
+      }
+    }
+  }
+
+  /** 
+   * Method implementing the JMS proxy reaction to a
+   * <code>ConsumerDenyRequest</code> denying a message either on a queue
+   * or on a subscription.
+   * <p>
+   * This request is acknowledged when destinated to a queue.
+   */
+  private void doReact(ConsumerDenyRequest req)
+  {
+    if (req.getQueueMode()) {
+      AgentId qId = AgentId.fromString(req.getTarget());
+      String id = req.getId();
+      Vector ids = new Vector();
+      ids.add(id);
+      cnx.ackedId(qId, id);
+      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+
+      // Acknowledging the request, unless forbidden:
+      if (! req.doNotAck())
+        sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    }
+    else {
+      String subName = req.getTarget();
+      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+
+      if (sub == null) 
+        return;
+
       Vector ids = new Vector();
       ids.add(req.getId());
-      sub.acknowledge(ids);
-    }
-  }
+      sub.deny(ids);
 
-  /** 
-   * Method implementing the JMS proxy reaction to a
-   * <code>QRecDenyRequest</code> denying a message on a queue.
-   * <p>
-   * Actually sends a deny request to the queue and acknowledges the request.
-   */
-  private void doReact(QRecDenyRequest req)
-  {
-    AgentId qId = AgentId.fromString(req.getTo());
-    String id = req.getId();
-    Vector ids = new Vector();
-    ids.add(id);
-    cnx.ackedId(qId, id);
-    sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
-
-    // Acknowledging the request:
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
-  }
-
-  /** 
-   * Method implementing the JMS proxy reaction to a
-   * <code>TSubDenyRequest</code> denying a message on a subscription.
-   * <p>
-   * This method simply denies the target message and launches a new
-   * delivery sequence.
-   */
-  private void doReact(TSubDenyRequest req)
-  {
-    String subName = req.getSubName();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-
-    if (sub == null) 
-      return;
-
-    Vector ids = new Vector();
-    ids.add(req.getId());
-    sub.deny(ids);
-
-    try {
-      setCnx(sub.connectionKey);
+      try {
+        setCnx(sub.connectionKey);
    
-      // Launching a delivery sequence:
-      if (cnx.started) {
-        SubMessages sM = sub.deliver();
-        if (sM != null)
-          doReply(sM);
-      } 
+        // Launching a delivery sequence:
+        if (cnx.started) {
+          ConsumerMessages cM = sub.deliver();
+          if (cM != null)
+            doReply(cM);
+        } 
+      }
+      catch (ProxyException pE) {}
     }
-    catch (ProxyException pE) {}
   }
 
   /**
@@ -1088,7 +1086,7 @@ public class JmsClientProxy extends ConnectionFactory
   private void doReact(TempDestDeleteRequest req)
   {
     // Removing the destination from the proxy's list:
-    AgentId tempId = AgentId.fromString(req.getTo());
+    AgentId tempId = AgentId.fromString(req.getTarget());
     cnx.tempDestinations.remove(tempId);
 
     // Sending the request to the destination:
@@ -1100,32 +1098,13 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XAQSessPrepare</code> request holding messages and acknowledgements
+   * <code>XASessPrepare</code> request holding messages and acknowledgements
    * produced in an XA transaction.
    * <p>
    * This method stores the various objects for later commit and acknowledges
    * the request.
    */
-  private void doReact(XAQSessPrepare req)
-  {
-    if (cnx.transactionsTable == null)
-      cnx.transactionsTable = new Hashtable();
-
-    String id = req.getId();
-    cnx.transactionsTable.put(id, req);
-
-    doReply(new ServerReply(req));
-  }
-
-  /**
-   * Method implementing the JMS proxy reaction to an
-   * <code>XATSessPrepare</code> request holding messages and acknowledgements
-   * produced in an XA transaction.
-   * <p>
-   * This method stores the various objects for later commit and acknowledges
-   * the request.
-   */
-  private void doReact(XATSessPrepare req)
+  private void doReact(XASessPrepare req)
   {
     if (cnx.transactionsTable == null)
       cnx.transactionsTable = new Hashtable();
@@ -1148,44 +1127,24 @@ public class JmsClientProxy extends ConnectionFactory
   {
     String id = req.getId();
 
-    Vector sendings;
-    Vector acks;
+    XASessPrepare prepare = (XASessPrepare) cnx.transactionsTable.remove(id);
+    Vector sendings = prepare.getSendings();
+    Vector acks = prepare.getAcks();
+
     ProducerMessages pM;
-
-    Object obj = cnx.transactionsTable.remove(id);
-    if (obj instanceof XAQSessPrepare) {
-      XAQSessPrepare qPrep = (XAQSessPrepare) obj;
-      sendings = qPrep.getSendings();
-      acks = qPrep.getAcks();
-
-      while (! sendings.isEmpty()) {
-        pM = (ProducerMessages) sendings.remove(0);
-        sendTo(AgentId.fromString(pM.getTo()),
-               new ClientMessages(currKey, pM.getRequestId(),
-                                  pM.getMessages()));
-      }
-      while (! acks.isEmpty())
-        doReact((QSessAckRequest) acks.remove(0));
+    while (! sendings.isEmpty()) {
+      pM = (ProducerMessages) sendings.remove(0);
+      sendTo(AgentId.fromString(pM.getTarget()),
+             new ClientMessages(currKey, pM.getRequestId(), pM.getMessages()));
     }
-    else if (obj instanceof XATSessPrepare) {
-      XATSessPrepare tPrep = (XATSessPrepare) obj;
-      sendings = tPrep.getSendings();
-      acks = tPrep.getAcks();
 
-      while (! sendings.isEmpty()) {
-        pM = (ProducerMessages) sendings.remove(0);
-        sendTo(AgentId.fromString(pM.getTo()),
-               new ClientMessages(currKey, pM.getRequestId(),
-                                  pM.getMessages()));
-      }
-      while (! acks.isEmpty())
-        doReact((TSessAckRequest) acks.remove(0));
-    }
+    while (! acks.isEmpty())
+      doReact((SessAckRequest) acks.remove(0));
 
     if (cnx.transactionsTable.isEmpty())
       cnx.transactionsTable = null;
 
-    sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
+    doReply(new ServerReply(req));
   }
 
   /**
@@ -1197,77 +1156,54 @@ public class JmsClientProxy extends ConnectionFactory
   {
     String id = req.getId();
 
-    if (req instanceof XAQSessRollback) {
-      XAQSessRollback qReq = (XAQSessRollback) req;
-
-      String destName;
-      AgentId qId;
-      Vector ids;
-      while (qReq.hasMoreDests()) {
-        destName = qReq.nextDest();
-        qId = AgentId.fromString(destName);
-        ids = qReq.getIds(destName);
-        cnx.ackedIds(qId, ids);
-        sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
-      }
+    String queueName;
+    AgentId qId;
+    Vector ids;
+    while (req.hasMoreQueues()) {
+      queueName = req.nextQueue();
+      qId = AgentId.fromString(queueName);
+      ids = req.getQueueIds(queueName);
+      cnx.ackedIds(qId, ids);
+      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
     }
-    else if (req instanceof XATSessRollback) {
-      XATSessRollback tReq = (XATSessRollback) req;
 
-      String subName;
-      ClientSubscription sub;
-      SubMessages sM;
-      while (tReq.hasMoreSubs()) {
-        subName = tReq.nextSub();
-        sub = (ClientSubscription) subsTable.get(subName);
+    String subName;
+    ClientSubscription sub;
+    ConsumerMessages consM;
+    while (req.hasMoreSubs()) {
+      subName = req.nextSub();
+      sub = (ClientSubscription) subsTable.get(subName);
+      if (sub != null) {
+        sub.deny(req.getSubIds(subName));
 
-        if (sub != null) {
-          sub.deny(tReq.getIds(subName));
-
-          try {
-            setCnx(sub.connectionKey);
+        try {
+          setCnx(sub.connectionKey);
  
-            // Launching a delivery sequence:
-            if (cnx.started) {
-              sM = sub.deliver();
-              if (sM != null)
-                doReply(sM);
-            } 
+          // Launching a delivery sequence:
+          if (cnx.started) {
+            consM = sub.deliver();
+            if (consM != null)
+              doReply(consM);
           }
-          catch (ProxyException pE) {}
         }
+        catch (ProxyException pE) {}
       }
     }
 
     if (cnx.transactionsTable != null) {
-      Vector acks;
+      XASessPrepare prepare = (XASessPrepare) cnx.transactionsTable.remove(id);
+      Vector acks = prepare.getAcks();
 
-      Object obj = cnx.transactionsTable.remove(id);
-      if (obj instanceof XAQSessPrepare) {
-        XAQSessPrepare qPrep = (XAQSessPrepare) obj;
-        acks = qPrep.getAcks();
-        QSessAckRequest qAck;
-
-        while (! acks.isEmpty()) {
-          qAck = (QSessAckRequest) acks.remove(0);
-          doReact(new QSessDenyRequest(qAck.getTo(), qAck.getIds()));
-        }
-      }
-      else if (obj instanceof XATSessPrepare) {
-        XATSessPrepare tPrep = (XATSessPrepare) obj;
-        acks = tPrep.getAcks();
-        TSessAckRequest tAck;
-
-        while (! acks.isEmpty()) {
-          tAck = (TSessAckRequest) acks.remove(0);
-          doReact(new TSessDenyRequest(tAck.getSubName(), tAck.getIds()));
-        }
+      SessAckRequest ack;
+      while (! acks.isEmpty()) {
+        ack = (SessAckRequest) acks.remove(0);
+        doReact(new SessDenyRequest(ack.getTarget(), ack.getIds(),
+                                    ack.getQueueMode(), true));
       }
 
       if (cnx.transactionsTable.isEmpty())
         cnx.transactionsTable = null;
     }
-
 
     sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
   }
@@ -1364,10 +1300,10 @@ public class JmsClientProxy extends ConnectionFactory
 
   /**
    * Actually forwards a <code>QueueMsgReply</code> coming from a destination
-   * as a <code>QueueMessage</code> destinated to the requesting client.
+   * as a <code>ConsumerMessages</code> destinated to the requesting client.
    * <p>
    * If the corresponding connection is stopped, stores the
-   * <code>QueueMessage</code> for later delivery.
+   * <code>ConsumerMessages</code> for later delivery.
    */
   private void doFwd(AgentId from, QueueMsgReply rep)
   {
@@ -1377,7 +1313,9 @@ public class JmsClientProxy extends ConnectionFactory
 
       // Building the reply and storing the wrapped message id for later
       // denying in the case of a failure:
-      QueueMessage jRep = new QueueMessage(rep);
+      ConsumerMessages jRep = new ConsumerMessages(rep.getCorrelationId(),
+                                                   rep.getMessage(),
+                                                   from.toString(), true);
       if (jRep.getMessage() != null)
         cnx.addId(from, jRep.getMessage().getIdentifier());
 
@@ -1425,7 +1363,6 @@ public class JmsClientProxy extends ConnectionFactory
   /**
    * Method implementing the proxy reaction to a <code>TopicMsgsReply</code>
    * holding messages published by a topic.
-   * <p>
    */
   private void doFwd(TopicMsgsReply rep)
   {
@@ -1434,7 +1371,7 @@ public class JmsClientProxy extends ConnectionFactory
 
     String subName;
     ClientSubscription sub;
-    SubMessages subM;
+    ConsumerMessages consM;
 
     // Browsing the target subscriptions:
     while (rep.hasMoreSubs()) {
@@ -1456,9 +1393,9 @@ public class JmsClientProxy extends ConnectionFactory
             setCnx(sub.connectionKey);
 
             if (cnx.started) {
-              subM = sub.deliver();
-              if (subM != null)
-                doReply(subM);
+              consM = sub.deliver();
+              if (consM != null)
+                doReply(consM);
             }
           }
           // The connection is lost: nothing to do.
@@ -1502,7 +1439,7 @@ public class JmsClientProxy extends ConnectionFactory
    * <code>fr.dyade.aaa.task.Condition</code> instance sent by the Scheduler
    * service, notifying the expiry of a request.
    * <p>
-   * The method usually sends a <code>SubMessages</code> back to the
+   * The method usually sends a <code>ConsumerMessages</code> back to the
    * expired request's requester, and a
    * <code>fr.dyade.aaa.task.RemoveConditionListener</code> to the
    * scheduler.
@@ -1524,13 +1461,14 @@ public class JmsClientProxy extends ConnectionFactory
       try {
         setCnx(sub.connectionKey);
 
-        SubMessages subM = new SubMessages(sub.requestId, subName, null);
+        ConsumerMessages consM = new ConsumerMessages(sub.requestId, subName,
+                                                      false);
         sub.requestId = null;
 
         if (cnx.started)
-          doReply(subM);
+          doReply(consM);
         else
-          cnx.repliesBuffer.add(subM);
+          cnx.repliesBuffer.add(consM);
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Request on sub "
@@ -1688,7 +1626,7 @@ public class JmsClientProxy extends ConnectionFactory
       try {
         setCnx(key);
 
-        doReply(new MomExceptionReply("null",
+        doReply(new MomExceptionReply(null,
                                       new ProxyException("Client proxy is "
                                                          + "deleted.")));
 
@@ -1957,11 +1895,11 @@ public class JmsClientProxy extends ConnectionFactory
     /**
      * Constructs a <code>ClientSubscription</code> instance.
      */
-    private ClientSubscription(int key, TSessSubRequest req)
+    private ClientSubscription(int key, ConsumerSubRequest req)
     {
       connectionKey = key;
       name = req.getSubName();
-      topicId = AgentId.fromString(req.getTo());
+      topicId = AgentId.fromString(req.getTarget());
       selector = req.getSelector();
       noLocal = req.getNoLocal();
       durable = req.getDurable();
@@ -2008,10 +1946,10 @@ public class JmsClientProxy extends ConnectionFactory
 
 
     /**
-     * Returns a <code>SubMessages</code> reply if there are messages to
+     * Returns a <code>ConsumerMessages</code> reply if there are messages to
      * deliver to the client subscriber, <code>null</code> otherwise.
      */
-    private SubMessages deliver()
+    private ConsumerMessages deliver()
     {
       // Returning null if no request exists:
       if (requestId == null)
@@ -2134,10 +2072,11 @@ public class JmsClientProxy extends ConnectionFactory
 
       // Finally, returning the reply or null:
       if (! messages.isEmpty()) {
-        SubMessages subM = new SubMessages(requestId, name, messages);
+        ConsumerMessages consM = new ConsumerMessages(requestId, messages,
+                                                      name, false);
         if (! toListener)
           requestId = null;
-        return subM;
+        return consM;
       }
       return null;
     }

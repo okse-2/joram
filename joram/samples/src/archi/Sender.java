@@ -39,14 +39,13 @@ public class Sender
     System.out.println("Sends messages on the queue...");
 
     ictx = new InitialContext();
-    QueueConnectionFactory cnxF = (QueueConnectionFactory) ictx.lookup("qcf0");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf0");
     Queue dest = (Queue) ictx.lookup("queue");
     ictx.close();
     
-    QueueConnection cnx = cnxF.createQueueConnection();
-    QueueSession session = cnx.createQueueSession(true, 0);
-    
-    QueueSender sender = session.createSender(dest);
+    Connection cnx = cnxF.createConnection();
+    Session session = cnx.createSession(true, 0);
+    MessageProducer sender = session.createProducer(dest);
     
     TextMessage message = session.createTextMessage();
   

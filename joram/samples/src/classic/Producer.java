@@ -30,40 +30,40 @@ import javax.jms.*;
 import javax.naming.*;
 
 /**
- * Browses the queue.
+ * Produces messages on the queue and on the topic.
  */
-public class Browser
+public class Producer
 {
   static Context ictx = null; 
 
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Browses the queue: ");
+    System.out.println("Produces messages on the queue and on the topic...");
 
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
-    QueueConnectionFactory qcf = (QueueConnectionFactory) ictx.lookup("qcf");
+    Topic topic = (Topic) ictx.lookup("topic");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
-    QueueConnection qc = qcf.createQueueConnection();
-    QueueSession qs = qc.createQueueSession(true, 0);
-    QueueBrowser browser = qs.createBrowser(queue);
+    Connection cnx = cf.createConnection();
+    Session sess = cnx.createSession(true, 0);
+    MessageProducer producer = sess.createProducer(null);
 
-    java.util.Enumeration messages = browser.getEnumeration();
+    TextMessage msg = sess.createTextMessage();
 
-    Message msg;
-
-    while (messages.hasMoreElements()) {
-      msg = (Message) messages.nextElement();
-
-      if (msg instanceof TextMessage)
-        System.out.println(((TextMessage) msg).getText());
+    int i;
+    for (i = 0; i < 10; i++) {
+      msg.setText("Test number " + i);
+      producer.send(queue, msg);
+      producer.send(topic, msg);
     }
 
-    System.out.println();
-    System.out.println("Queue browsed.");
+    sess.commit();
 
-    qc.close();
+    System.out.println(i + " messages sent.");
+
+    cnx.close();
   }
 }

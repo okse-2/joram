@@ -39,15 +39,14 @@ public class Receiver
     System.out.println("Requests to receive messages...");
 
     ictx = new InitialContext();
-    QueueConnectionFactory cnxF = (QueueConnectionFactory) ictx.lookup("qcf2");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf2");
     Queue dest = (Queue) ictx.lookup("queue");
     ictx.close();
 
-    QueueConnection cnx = cnxF.createQueueConnection();
+    Connection cnx = cnxF.createConnection();
+    Session session = cnx.createSession(true, 0);
+    MessageConsumer rec = session.createConsumer(dest);
 
-    QueueSession session = cnx.createQueueSession(true, 0);
-
-    QueueReceiver rec = session.createReceiver(dest);
     cnx.start();
 
     Message msg;

@@ -39,21 +39,21 @@ public class Publisher
     System.out.println("Publishes messages...");
 
     ictx = new InitialContext();
-    TopicConnectionFactory cnxF = (TopicConnectionFactory) ictx.lookup("tcf0");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf0");
     Topic dest = (Topic) ictx.lookup("topic");
     ictx.close();
     
-    TopicConnection cnx = cnxF.createTopicConnection();
-    TopicSession session = cnx.createTopicSession(true, 0);
+    Connection cnx = cnxF.createConnection();
+    Session session = cnx.createSession(true, 0);
     
-    TopicPublisher pub = session.createPublisher(dest);
+    MessageProducer pub = session.createProducer(dest);
     
     TextMessage message = session.createTextMessage();
 
     int i;
     for (i = 0; i < 10; i ++) {
       message.setText("Message " + i);
-      pub.publish(message);
+      pub.send(message);
     }
     session.commit();
 

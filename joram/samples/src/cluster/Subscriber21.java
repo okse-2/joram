@@ -37,15 +37,13 @@ public class Subscriber21
     System.out.println("Subscribes and listens to topic on server2...");
 
     ictx = new InitialContext();
-    TopicConnectionFactory cnxF = (TopicConnectionFactory) ictx.lookup("tcf2");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf2");
     Topic dest = (Topic) ictx.lookup("top2");
     ictx.close();
 
-    TopicConnection cnx = cnxF.createTopicConnection("subscriber21",
-                                                     "subscriber21");
-    TopicSession sess = cnx.createTopicSession(false,
-                                               Session.AUTO_ACKNOWLEDGE);
-    TopicSubscriber sub = sess.createSubscriber(dest);
+    Connection cnx = cnxF.createConnection("subscriber21", "subscriber21");
+    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer sub = sess.createConsumer(dest);
 
     sub.setMessageListener(new Listener());
 

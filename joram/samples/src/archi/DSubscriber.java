@@ -39,14 +39,13 @@ public class DSubscriber
     System.out.println("Durably subscribes and listens to the topic...");
 
     ictx = new InitialContext();
-    TopicConnectionFactory cnxF = (TopicConnectionFactory) ictx.lookup("tcf2");
+    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf2");
     Topic dest = (Topic) ictx.lookup("topic");
     ictx.close();
 
-    TopicConnection cnx = cnxF.createTopicConnection();
+    Connection cnx = cnxF.createConnection();
 
-    TopicSession session =
-      cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
     TopicSubscriber sub = session.createDurableSubscriber(dest, "mySub");
     sub.setMessageListener(new Listener());
