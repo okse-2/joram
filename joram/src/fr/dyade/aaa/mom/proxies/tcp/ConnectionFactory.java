@@ -78,6 +78,7 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
   /** Incoming messages flow (msgs/s) requested, if any (-1 if none). */
   public static int inFlow = -1;
 
+
   /**
    * Constructs a <code>ConnectionFactory</code> listening to a given port.
    * <p>
@@ -146,6 +147,9 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
   {
     try {
       int port;
+      String secondToken = null;
+      String thirdToken = null;
+      String fourthToken = null;
       String initialAdminName = null;
       String initialAdminPass = null;
 
@@ -153,13 +157,32 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
         StringTokenizer st = new StringTokenizer(args);
 
         port = Integer.parseInt(st.nextToken());
-      
-        if (st.hasMoreTokens()) {
-          initialAdminName = st.nextToken();
-          initialAdminPass = st.nextToken();
-        }
+
+        // Service arguments might be:
+        // port adminName adminPass inFlow
+        // port adminName adminPass
+        // port inFlow
+        // port
+
         if (st.hasMoreTokens())
-          inFlow = Integer.parseInt(st.nextToken());
+          secondToken = st.nextToken();
+        if (st.hasMoreTokens())
+          thirdToken = st.nextToken();
+        if (st.hasMoreTokens()) 
+          fourthToken = st.nextToken();
+
+        if (thirdToken != null) {
+          initialAdminName = secondToken;
+          initialAdminPass = thirdToken;
+          if (fourthToken != null)
+            inFlow = Integer.parseInt(fourthToken);
+        }
+        else if (secondToken != null) {
+          try {
+            inFlow = Integer.parseInt(secondToken);
+          }
+          catch (Exception exc) {}
+        }
       }
       else
         port = defaultPort;
