@@ -191,7 +191,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       AdapterTracing.debugINFO("  - Collocated JORAM server is starting...");
 
       if (persistentPlatform)
-        System.setProperty("Transaction", "fr.dyade.aaa.util.ATransaction");   
+        System.setProperty("Transaction", "fr.dyade.aaa.util.NTransaction");   
       else {
         System.setProperty("Transaction", "fr.dyade.aaa.util.NullTransaction");
         System.setProperty("NbMaxAgents", "" + Integer.MAX_VALUE);
