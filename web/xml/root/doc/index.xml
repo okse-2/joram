@@ -12,51 +12,52 @@
 
   <body>
 
-    <s1 name="Latest release documentation" anchor="latest">
-  
-      <p>The following documentation is available for JORAM:</p>
-      
-      <ol>
-	<li>To install JORAM properly, check the <a
-	href="../current/doc/install/index.html">installation
-	    guide</a> (<a
-	    href="../current/doc/install.pdf">PDF</a>) .</li>
-	<li>To have a first go with JORAM, run the <a
-	href="../current/doc/samples/index.html">samples</a>  (<a
-	    href="../current/doc/samples.pdf">PDF</a>).</li>
-	<li>To configure, launch and administer JORAM, have a look at
-	the <a
-	href="../current/doc/tutorial/index.html">tutorial</a> (<a
-	    href="../current/doc/tutorial.pdf">PDF</a>).</li>
-      </ol>
+    <s1 name="Available documentations">
+      <p>The documentations available here are organized per releases. Please
+      make sure you browse the documents related to the JORAM release you
+      currently use.</p>
+      <p>It is well known by the JORAM team that this documentation is not
+      sufficient and sometimes vague or unclear. Do not hesitate to provide
+      any comment or feedback that could help us improving the doc. Also, 
+      any contribution is welcome.</p>
     </s1>
 
-    
-    <s1 name="Other documentation" anchor="other">
-  
-      <subtitle>JORAM 3.3 tutorial</subtitle>
+    <s1 name="Installing JORAM">
       <ul>
-	<li>JORAM 3.3 is available under CVS. It implements new administration
-        protocol and interfaces and the corresponding tutorial is available
-        as a 
-        <a href="../current/doc/newTutorial.pdf">PDF document</a>
-        .</li>
+        <li>Installing the <a href="../current/doc/joram3_4_INSTALL.pdf">
+        3.4 release</a>.</li>
+        <li>Installing the <a href="../current/doc/joram3_0_INSTALL.pdf">
+        3.0 (and above) releases</a>.</li>
       </ul>
+    </s1>
 
-      <subtitle>JORAM's brochure</subtitle>
+    <s1 name="Administering JORAM">
       <ul>
-	<li>JORAM's brochure is available as a PDF document
-        <a href="../../doc/JORAM.pdf">there.</a></li>
+        <li>Administering the <a href="../current/doc/joram3_4_ADMIN.pdf">
+        3.4 release</a>.</li>
+        <li>Administering the <a href="../current/doc/joram3_3_ADMIN.pdf">
+        3.3 release</a>.</li>
+        <li>Administering the <a href="../current/doc/joram3_2_ADMIN.pdf">
+        3.2 release</a>.</li>
+        <li>Administering the <a href="../current/doc/joram3_1_ADMIN.pdf">
+        3.1 releases</a>.</li>
+        <li>Administering the <a href="../current/doc/joram3_0_ADMIN.pdf">
+        3.0 releases</a>.</li>
       </ul>
-
     </s1>
 
-    <s1 name="Test suite documentation" anchor="test_doc">
-      <p>The Test Suite documentation is available on the Test Suite own <a
-	  href="../tests/doc.html">web page</a>.
-      </p>
+    <s1 name="Running JORAM samples">
+      <ul>
+        <li>Running the <a href="../current/doc/joram3_4_SAMPLES.pdf">
+        3.4 release samples</a>.</li>
+        <li>Running the <a href="../current/doc/joram3_2_SAMPLES.pdf">
+        3.2 release (and above) samples</a>.</li>
+        <li>Running the <a href="../current/doc/joram3_1_SAMPLES.pdf">
+        3.1 release samples</a>.</li>
+        <li>Running the <a href="../current/doc/joram3_0_SAMPLES.pdf">
+        3.0 release samples</a>.</li>
+      </ul>
     </s1>
-
 
   </body>
 
