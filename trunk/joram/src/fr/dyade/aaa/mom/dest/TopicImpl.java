@@ -71,6 +71,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
   /** Table of subscribers' selectors. */
   protected Hashtable selectors;
 
+  /** Internal boolean used for tagging local sendings. */
+  protected transient boolean alreadySentLocally;
+
 
   /**
    * Constructs a <code>TopicImpl</code> instance.
@@ -101,6 +104,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException
   {
+    alreadySentLocally = false;
     int reqId = -1;
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
@@ -718,6 +722,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
         topicId = (AgentId) friends.get(i);
         Channel.sendTo(topicId, new TopicForwardNot(messages, false));
 
+        alreadySentLocally = alreadySentLocally
+                             || (topicId.getTo() == AgentServer.getServerId());
+
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
                                         + "forwarded to fellow "
@@ -726,6 +733,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
     }
     else if (fatherId != null) {
       Channel.sendTo(fatherId, new TopicForwardNot(messages, true));
+
+      alreadySentLocally = (fatherId.getTo() == AgentServer.getServerId());
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
@@ -745,7 +754,6 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
     AgentId subscriber;
     boolean local;
     String selector;
-    boolean alreadySentLocally = false;
     Vector deliverables;
     Message message;
 
@@ -795,7 +803,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
           }
         }  
       }
-      // There are messages to send.
+      // There are message to send.
       if (! deliverables.isEmpty())
         Channel.sendTo(subscriber, new TopicMsgsReply(deliverables));
     }
