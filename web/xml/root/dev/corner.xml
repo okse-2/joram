@@ -27,8 +27,12 @@
       <li>The <connect href="roadMap.xml">road map</connect> presents the
           expected Joram evolutions. It also contains some calls to 
           contributions.</li>
+    </ul>
+    <ul>
       <li>The <connect href="versions.xml">releases description</connect>
           page provides in-depth descriptions of the CVS releases.</li>
+    </ul>
+    <ul>
       <li>The <a href="http://forge.objectweb.org/cvs/?group_id=4">
           CVS Forge page</a> allows you to get JORAM through CVS, browse
           the updates, differencies, etc.</li>
