@@ -41,7 +41,7 @@ import java.lang.*;
  *	@see fr.dyade.aaa.mom.Queue 
  */ 
  
-public class Queue extends fr.dyade.aaa.mom.QueueNaming {
+public class Queue extends fr.dyade.aaa.mom.QueueNaming implements javax.naming.Referenceable, java.io.Serializable {
     /** agent Queue in AAAMOM */
     String agentQueue;
     /** host Name */
@@ -102,6 +102,15 @@ public class Queue extends fr.dyade.aaa.mom.QueueNaming {
     /** return agent Queue in AAAMOM */
     public String getAgentQueue() {
 	return agentQueue;
+    }
+
+    /** comes from the javax.jndi.referenceable interface */
+    public javax.naming.Reference getReference() throws javax.naming.NamingException{
+	javax.naming.Reference ref =  new javax.naming.Reference(this.getClass().getName(),
+					  "fr.dyade.aaa.joram.ObjectConnectionFactory",
+					  null);
+	ref.add(new javax.naming.StringRefAddr("queue.joramURL", url.toString()));
+	return ref;
     }
 
     public String toString() {

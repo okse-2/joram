@@ -41,7 +41,7 @@ import java.lang.*;
  *	@see fr.dyade.aaa.mom.Topic
  */  
  
-public class Topic extends fr.dyade.aaa.mom.TopicNaming {
+public class Topic extends fr.dyade.aaa.mom.TopicNaming implements javax.naming.Referenceable, java.io.Serializable {
     /** agent Topic in AAAMOM */
     String agentTopic;
     /** host Name */
@@ -102,6 +102,15 @@ public class Topic extends fr.dyade.aaa.mom.TopicNaming {
     /** return the agent Topic in AAAMOM */
     public String getAgentTopic() {
 	return agentTopic;
+    }
+
+    /** comes from the javax.jndi.referenceable interface */
+    public javax.naming.Reference getReference() throws javax.naming.NamingException{
+	javax.naming.Reference ref =  new javax.naming.Reference(this.getClass().getName(),
+					  "fr.dyade.aaa.joram.ObjectConnectionFactory",
+					  null);
+	ref.add(new javax.naming.StringRefAddr("topic.joramURL", url.toString()));
+	return ref;
     }
     public String toString() {
 	try {

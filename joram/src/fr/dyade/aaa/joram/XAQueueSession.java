@@ -30,42 +30,39 @@ import javax.transaction.xa.*;
 import fr.dyade.aaa.mom.*;
 
 /**
- * An XATopicSession provides a regular TopicSession which can be used to
- * create TopicSubscribers and TopicPublishers.
+ * An XAQueueSession provides a regular QueueSession which can be used to
+ * create QueueReceivers, QueueSenders and QueueBrowsers. 
  *
  * @author Laurent Chauvirey
  * @version 1.0
  */
 
-public class XATopicSession extends XASession implements javax.jms.XATopicSession {
-
-    /** The associated TopicSession */
-    protected TopicSession ts;
-
+public class XAQueueSession extends XASession implements javax.jms.XAQueueSession {
+    
+    /** The associated QueueSession */
+    protected QueueSession qs;
+    
     /**
-     * Creates a new XATopicSession.
+     * Creates a new XAQueueSession.
      */
-    public XATopicSession(long sessionID, XAConnection refConnection) {
+    protected XAQueueSession(long sessionID, XAConnection refConnection) {
 	super(sessionID, refConnection);
 	this.sessionID = sessionID;
 	this.refConnection = refConnection;
- 	ts = new TopicSession(true, fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED,
+ 	qs = new QueueSession(true, fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED,
 			      sessionID, (Connection) refConnection);
     }
-
-
+    
     /**
-     * Get the topic session associated with this XATopicSession.
+     * Get the queue session associated with this XAQueueSession.
      */
-    public javax.jms.TopicSession getTopicSession() {
-	return ts;
+    public javax.jms.QueueSession getQueueSession() throws JMSException {
+ 	return qs;
     }
-
 
     protected void rollbackDeliveryMsg() throws JMSException {
 	throw new JMSException("Forbidden function call");
     }
-
 
     protected Vector createAckRollbackVector(javax.transaction.xa.Xid xid) throws JMSException {
 	Vector rollbackVector = new Vector();
@@ -81,27 +78,26 @@ public class XATopicSession extends XASession implements javax.jms.XATopicSessio
 	if (msgToAckVector == null) return null;
 	// Create the vector of messages for rollback
 	while (!msgToAckVector.isEmpty()) {
-	    MessageTopicDeliverMOMExtern currentMsg = (MessageTopicDeliverMOMExtern) msgToAckVector.remove(0);
-	    TopicNaming topic = new TopicNaming(((TopicNaming) currentMsg.message.getJMSDestination()).getTopicName(),
-						currentMsg.theme);
-	    AckTopicMessageMOMExtern msgAck = new AckTopicMessageMOMExtern(refConnection.getMessageMOMID(), topic,
-									   currentMsg.nameSubscription,
-									   currentMsg.message.getJMSMessageID(),
-									   CommonClientAAA.AUTO_ACKNOWLEDGE);
-	    rollbackVector.addElement(msgAck);
+	    MessageQueueDeliverMOMExtern currentMsg = (MessageQueueDeliverMOMExtern) msgToAckVector.remove(msgToAckVector.size() - 1);
+	    javax.jms.Destination destination = (javax.jms.Destination) currentMsg.message.getJMSDestination();
+	    String messageMOMID = currentMsg.message.getJMSMessageID();
+	    MessageRollbackMOMExtern msgRollback = new MessageRollbackMOMExtern(currentMsg.getMessageMOMExternID(),
+										currentMsg.message.getJMSDestination(),
+										new Long(sessionID).toString(),
+										currentMsg.message.getJMSMessageID());
+	    rollbackVector.addElement(msgRollback);
 	}
 	return rollbackVector;
     }
-
 
     protected Vector preparesTransactedAck(javax.transaction.xa.Xid xid,
 					   long messageJMSMOMID) throws JMSException {
 	Vector messageToAckVector;
 	Hashtable ackTable = new Hashtable();
-	MessageTopicDeliverMOMExtern msgFromMOM;
+	MessageQueueDeliverMOMExtern msgFromMOM;
 	javax.jms.Message message;
-	TopicNaming destination;
-	
+	QueueNaming destination;
+
 	try {
 	    messageToAckVector = xidTable.getMessageToAckXid(xid);
 	} catch (Exception e) {
@@ -110,16 +106,16 @@ public class XATopicSession extends XASession implements javax.jms.XATopicSessio
 	if (messageToAckVector == null) return null;
 	int index = messageToAckVector.size() - 1; // The last element of the vector
 	while (index >= 0) {
-	    msgFromMOM = (MessageTopicDeliverMOMExtern) messageToAckVector.elementAt(index);
+	    msgFromMOM = (MessageQueueDeliverMOMExtern) messageToAckVector.elementAt(index);
 	    message = msgFromMOM.message;
-	    destination = (TopicNaming) message.getJMSDestination();
+	    destination = (QueueNaming) message.getJMSDestination();
 
 	    if (!ackTable.containsKey(destination)) {
 		ackTable.put(message.getJMSDestination(),
-			     new AckTopicMessageMOMExtern(messageJMSMOMID, destination,
-							  msgFromMOM.nameSubscription,
+			     new AckQueueMessageMOMExtern(messageJMSMOMID, destination,
 							  message.getJMSMessageID(),
-							  CommonClientAAA.TRANSACTED));
+							  CommonClientAAA.TRANSACTED,
+							  new Long(sessionID).toString()));
 	    }
 	    index--;
 	}
@@ -133,22 +129,22 @@ public class XATopicSession extends XASession implements javax.jms.XATopicSessio
 
 
     public Vector getMessageToSendVector() {
-	return ts.transactedMessageToSendVector;
+	return qs.transactedMessageToSendVector;
     }
 
 
     public void setMessageToSendVector(Vector v) {
-	ts.transactedMessageToSendVector = v;
+	qs.transactedMessageToSendVector = v;
     }
 
 
     public Vector getMessageToAckVector() {
-	return ts.transactedMessageToAckVector;
+	return qs.transactedMessageToAckVector;
     }
 
 
     public void setMessageToAckVector(Vector v) {
-	ts.transactedMessageToAckVector = v;
+	qs.transactedMessageToAckVector = v;
     }
 
-} // XATopicSession
+} // XAQueueSession
