@@ -1,7 +1,7 @@
 package fr.dyade.aaa.joram.admin;
 
 import fr.dyade.aaa.joram.*;
-import java.net.ConnectException
+import java.net.ConnectException;
 
 
 /**
@@ -198,7 +198,7 @@ public interface AdminMBean {
      *
      * @throws ConnectException if the administrator is not connected to the server
      */
-    public changeUserPassword(String name, String newPassword) throws ConnectException
+    public void changeUserPassword(String name, String newPassword) throws ConnectException;
 
     /**
      * deletes an user from the server.
