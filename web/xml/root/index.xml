@@ -13,6 +13,54 @@
   <body>
 
     <s1 name="Latest News">
+      <subtitle>February 13, 2004: JORAM 4.0 is released and provides major
+      new features!</subtitle>
+      <p>JORAM 4.0 is the first release of a new JORAM generation with even
+      more features and architecturing capabilities.</p>
+      <p>This new version introduces the following new
+      functionnalities:</p>
+      <ul>
+        <li><strong>Collocated communication protocol</strong>: when a client
+        and its JORAM server run collocated in a same JVM, they may now
+        communicate through a "local" optimised connection rather than a 
+        TCP connection. This feature will highly impact the use of JORAM with
+        JOnAS for example, when set as collocated.</li>
+      </ul>
+      <ul>
+        <li><strong>Distributed JNDI server</strong>: this latest version of
+        JORAM's naming server may now be deployed on many JORAM servers, 
+        so that naming information is accessible from multiple points. 
+        Client applications do not depend anymore on a single central JNDI
+        server.</li>
+      </ul>
+      <ul>
+        <li><strong>Universal JMS bridge</strong>: JORAM may be configured
+        for establishing a link to any JMS compliant foreign JMS provider.
+        This feature allows JORAM client applications to actually communicate
+        with foreign JMS destinations totally transparently.</li>
+      </ul>
+
+      <p><strong>Administration methods</strong> have been largely 
+      modified for simplifying the evolution of management following
+      the new JORAM releases. Old admin and monitoring classes
+      have been kept but this will be temporary.</p>
+
+      <p>This new version also introduces a <strong>new sources
+      tree</strong>, which may be quickly described as follows:</p>
+      <ul>
+        <li><code>com/scalagent</code>: sources of the kJoram client
+        layer</li> 
+        <li><code>fr/dyade/</code>: sources of the agent platform</li>
+        <li><code>org/objectweb/joram</code>: sources of the MOM and JORAM
+        client layers</li>
+      </ul>
+      <p>The new packages are available in the 
+      <a href="download/index.html">download area</a>. The CVS tag is
+      <strong>joram4_0_0</strong>.</p>
+      <p>The <a href="doc/index.html">documentation</a> has also largely been
+      updated.</p>
+      <p>Enjoy!</p>
+
       <subtitle>November 7, 2003: the first major
       contribution from JORAM ever growing community</subtitle>
       <p>JORAM 3.7 includes the long expected graphical tool for
@@ -36,41 +84,18 @@
       An user manual for the new tool has been provided by Alexander, and
       is reachable from the <a href="doc/index.html">documentation area</a>.
       Enjoy!</p>
-      <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
-      <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
-      JORAM platform to <strong>heterogenous</strong> client applications.
-      Where JORAM 3.4, with the support of SOAP as client communication
-      protocol, opened the platform to non-Java applications, the 3.6 release,
-      with its new kJORAM libraries, allows J2ME applications to use JORAM
-      messaging functionnalities. A J2ME application is a lightweight Java
-      application deployed and running on a mobile device such as a PDA or a
-      smart phone.</p>
-      <p>In the <a href="download/index.html">download area</a> you will find
-      the usual JORAM sources and jars-only packages
-      (<code>joram-3.6.0-src.tgz</code> and <code>joram-3.6.0.tgz</code>).
-      You will also find two new packages holding the specific kJORAM client
-      interfaces for the J2ME applications:
-      </p>
-      <ul>
-        <li><code>kjoram-3.6.0-src.tgz</code>, providing the kJORAM sources and
-            sample;</li>
-        <li><code>kjoram-3.6.0.tgz</code> providing the kJORAM libraries and
-            sample.</li>
-      </ul>
-      <p>JORAM and kJORAM are also available through a CVS checkout, tag
-        <strong>joram3_6_0</strong>.</p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
       <subtitle>As a standalone software, JORAM has been downloaded more
-                than 15,000 times</subtitle>
+                than 17,000 times</subtitle>
 
       <table border="0">
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
                width="287" border="0" hspace="2"/></td>
-	  <td valign="middle"><p>Current packaged release: 3.7.0</p>
-	                      <p>Latest CVS tag: joram3_7_0</p></td>
+	  <td valign="middle"><p>Current packaged release: 4.0.0</p>
+	                      <p>Latest CVS tag: joram4_0_0</p></td>
 	</tr>
       </table>
       
@@ -95,7 +120,7 @@
             Pub/Sub interfaces</li>
           <li>Full backward compatibility with JMS 1.0.2b compliant
             applications</li>
-          <li>TCP and SOAP (HTTP/XML) client-server communication
+          <li>Local, TCP and SOAP (HTTP/XML) client-server communication
               protocols</li>
           <li>Message persistence and guarantee of delivery</li>
           <li>Hierarchical topics</li>
@@ -104,11 +129,12 @@
         </ul>
         <p>JORAM also includes the following extra-features:</p>
         <ul>
-          <li>A persistent and reliable JNDI server</li>
+          <li>A persistent, reliable and distributed JNDI server</li>
           <li>A configurable dead message queue</li>
           <li>Load balancing through clustered topics</li>
-          <li>A timer for pending transacted JMS sessions</li>
           <li>Monitoring methods</li>
+          <li>A bridge feature allowing to link JORAM to any JMS compliant
+              messaging platform</li>
           <li>Client libraries allowing J2ME applications to
           access the JORAM platform in a JMS 1.1 "way"</li>
           <li>A graphical administration and monitoring tool</li>
