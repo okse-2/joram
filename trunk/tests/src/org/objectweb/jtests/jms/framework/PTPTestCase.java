@@ -41,12 +41,12 @@ import javax.jms.*;
  * <code>JMSTestCase</code>.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: PTPTestCase.java,v 1.1 2002-03-18 13:34:26 joram Exp $
+ * @version $Id: PTPTestCase.java,v 1.2 2002-04-02 12:15:26 joram Exp $
  */
 public class PTPTestCase extends JMSTestCase {
 
-    private Admin admin;
-    private InitialContext ctx;
+    protected Admin admin;
+    protected InitialContext ctx;
     private static final String QCF_NAME = "testQCF";
     private static final String QUEUE_NAME = "testQueue";
 
