@@ -14,8 +14,15 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: December 3, 2003)">
+      <s2 name="Corrected bugs (latest: December 9, 2003)">
       <ul>
+        <li><code>NullPointerException</code> thrown by a single user's proxy
+        which subscribed to various leafs of a same topic hierarchy, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00019.html">
+        Mark Anderson</a>. This bug is due to an improper processing of
+        duplicated incoming messages. It has been corrected, the impacted class
+        is <code>fr.dyade.aaa.mom.proxies.ClientSubscription</code>.
+        </li>
         <li>Improper message delivery in a topic hierarchy when set on a
         single server, and when consumers subscribe to various leafs of the
         tree. Messages were not appropriately cloned and this resulted in
