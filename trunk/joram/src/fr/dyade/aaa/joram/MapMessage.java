@@ -240,10 +240,10 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   public void setShort(String name, short value) throws JMSException
   {
     if (RObody)
-      throw new IllegalArgumentException("Can't set a value as the message"
+      throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
     if (name == null || name.equals(""))
-      throw new NullPointerException("Invalid null or empty value name.");
+      throw new IllegalArgumentException("Invalid null or empty value name.");
 
     map.put(name, new Short(value));
   }
