@@ -841,8 +841,9 @@ public abstract class Connection implements javax.jms.Connection
           QueueMessage qM = (QueueMessage) reply;
 
           if (qM.getMessage() != null) {
-            syncRequest(new QRecDenyRequest(qM.getMessage().getDestination(),
-                                            qM.getMessage().getIdentifier()));
+            syncRequest(
+              new QRecDenyRequest(qM.getMessage().getDestination().getName(),
+                                  qM.getMessage().getIdentifier()));
           }
         }
         else if (reply instanceof SubMessages) {

@@ -394,7 +394,7 @@ public class MessageProducer implements javax.jms.MessageProducer
     // a proprietary message and then getting the MOM message it wraps:
     else if (message instanceof javax.jms.Message) {
       try {
-        Message joramMessage = Message.convertJMSMessage(message);
+        Message joramMessage = Message.convertJMSMessage(sess, message);
         momMsg = joramMessage.getMomMessage();
       }
       catch (JMSException jE) {
