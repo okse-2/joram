@@ -86,6 +86,14 @@
       <subtitle>JORAM show</subtitle>
       <p>The latest JORAM slides show, presented at the Objectweb conference
       in Paris (20-21 November 2003), is available <a href="http://www.objectweb.org/phorum/download.php/36,68/031120-Joram-OWConf.pdf">here</a>.</p>
+
+      <subtitle>ScalAgent Distributed Technologies</subtitle>
+      <p><a href="http://www.scalagent.com">ScalAgent</a> is the provider
+         of the open-source platform on top of which JORAM's MOM is built,
+         and proposes complementary information and showcases involving
+         JORAM.</li>
+      </ul>
+
       <subtitle>JMS related pages and documentation</subtitle>
       <ul>
         <li>JMS home: <a href="http://java.sun.com/products/jms/">
@@ -116,15 +124,6 @@
         <li>Wireless Developer Homepage:
             <a href="http://wireless.java.sun.com/index.jsp">
             http://wireless.java.sun.com/index.jsp</a></li>
-      </ul>
-
-      <subtitle>ScalAgent Distributed Technologies</subtitle>
-      <p>ScalAgent is the provider of the open-source platform on top of
-         which JORAM's MOM is built.</p> 
-      <ul>
-        <li>Complementary information about JORAM and showcases are
-            browsable on the
-            <a href="http://www.scalagent.com">ScalAgent site</a>.</li>
       </ul>
 
     </s1>
