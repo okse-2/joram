@@ -53,9 +53,9 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
   /**
    * Instanciates a <code>BytesMessage</code>.
    */
-  BytesMessage()
+  BytesMessage(Session sess)
   {
-    super();
+    super(sess);
     bos = new ByteArrayOutputStream();
     dos = new DataOutputStream(bos);
   }

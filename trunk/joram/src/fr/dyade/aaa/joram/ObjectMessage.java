@@ -41,18 +41,18 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   /**
    * Instanciates an empty <code>ObjectMessage</code>.
    */
-  ObjectMessage()
+  ObjectMessage(Session sess)
   {
-    super();
+    super(sess);
   }
 
 
   /**
    * Instanciates an <code>ObjectMessage</code> wrapping a given object.
    */
-  ObjectMessage(Serializable obj)
+  ObjectMessage(Session sess, Serializable obj)
   {
-    super();
+    super(sess);
     this.obj = obj;
   }
   
