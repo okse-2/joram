@@ -57,7 +57,7 @@ public class ManagedConnectionMetaDataImpl
   /** Returns the current JORAM release number. */
   public String getEISProductVersion() throws ResourceException
   {
-    return "4.0.5";
+    return "4.1.0";
   }
 
   /** Returns 0 as JORAM as no upper limit of active connections. */
