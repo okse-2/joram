@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,488 +15,328 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
+package fr.dyade.aaa.joram;
+
+import fr.dyade.aaa.mom.*;
+import fr.dyade.aaa.mom.jms.*;
+
+import java.util.*;
+
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+
+import org.objectweb.monolog.api.BasicLevel;
+
+/**
+ * Implements the <code>javax.jms.QueueSession</code> interface.
+ */
+public class QueueSession extends Session implements javax.jms.QueueSession
+{
+  /** The vector of queue browsers of this session. */
+  Vector browsers;
+
+  /**
+   * Constructs a queue session.
+   *
+   * @param ident  The identifier of the session.
+   * @param cnx  The connection the session belongs to.
+   * @param transacted  <code>true</code> for a transacted session.
+   * @param acknowledgeMode  1 (auto), 2 (client) or 3 (dups ok).
+   *
+   * @exception JMSException  In case of an invalid acknowledge mode.
+   */
+  QueueSession(String ident, Connection cnx, boolean transacted,
+               int acknowledgeMode) throws JMSException
+  {
+    super(ident, cnx, transacted, acknowledgeMode);
+    browsers = new Vector();
+  }
+
+  /** Returns a String image of this session. */
+  public String toString()
+  {
+    return "QueueSess:" + ident;
+  }
 
 
-package fr.dyade.aaa.joram; 
+  /**
+   * API method
+   *
+   * @exception IllegalStateException  If the session is closed.
+   */
+  public javax.jms.QueueBrowser
+       createBrowser(javax.jms.Queue queue, String selector)
+       throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
 
-import java.lang.*; 
-import java.util.*;  
+    return new QueueBrowser(this, (Queue) queue, selector);
+  }
 
-/** 
- *	a QueueSession is as JMS specifications 
- *	InvalidException is never thrown at time in this Object
- * 
- *	@see javax.jms.QueueSession 
- *	@see fr.dyade.aaa.joram.Session
- *	@see javax.jms.Session 
- */ 
- 
-public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jms.QueueSession { 
+  /**
+   * API method
+   *
+   * @exception IllegalStateException  If the session is closed.
+   */
+  public javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue)
+       throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    return new QueueBrowser(this, (Queue) queue, null);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the client is not a WRITER on the
+   *              queue.
+   * @exception IllegalStateException  If the session is closed or if the 
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public javax.jms.QueueSender createSender(javax.jms.Queue queue)
+       throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    return new QueueSender(this, (Queue) queue);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the client is not a READER on the
+   *              queue.
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public javax.jms.QueueReceiver
+       createReceiver(javax.jms.Queue queue, String selector)
+       throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    return new QueueReceiver(this, (Queue) queue, selector);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the client is not a READER on the
+   *              queue.
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue)
+       throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    return new QueueReceiver(this, (Queue) queue, null);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception InvalidDestinationException  If the queue does not exist.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public javax.jms.Queue createQueue(String queueName) throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    SessCreateDestRequest req = new SessCreateDestRequest(queueName);
+    SessCreateDestReply rep = (SessCreateDestReply) cnx.syncRequest(req);
+    return new Queue(queueName);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
+    SessCreateTDReply reply =
+      (SessCreateTDReply) cnx.syncRequest(new SessCreateTQRequest());
+    String tempDest = reply.getAgentId();
+    return new TemporaryQueue(tempDest, cnx);
+  }
+
+
+  /**
+   * Specializes this method called by an application server to the PTP
+   * mode.
+   */
+  public synchronized void run()
+  {
+    int load = repliesIn.size();
+    fr.dyade.aaa.mom.messages.Message momMsg;
+    String msgId;
+    String queueName = connectionConsumer.destName;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "-- " + this
+                                 + ": loaded with " + load
+                                 + " message(s) and started.");
+    try { 
+      // Processing the current number of messages in the queue:
+      for (int i = 0; i < load; i++) {
+        momMsg = (fr.dyade.aaa.mom.messages.Message) repliesIn.pop();
+        msgId = momMsg.getIdentifier();
+
+        // If no message listener has been set for the session, denying the
+        // processed message:
+        if (messageListener == null) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgClient.log(BasicLevel.ERROR, this + ": an"
+                                       + " asynchronous delivery arrived for"
+                                       + " a non existing session listener:"
+                                       + " denying the message.");
+     
+          cnx.syncRequest(new QRecDenyRequest(queueName, msgId));
+        }
+        // Else:
+        else {
+          // Preparing ack for manual sessions:
+          if (! autoAck)
+            prepareAck(queueName, msgId);
   
-    public QueueSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
-	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
-    }
-    
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-    public  javax.jms.Queue createQueue(java.lang.String queueName) throws javax.jms.JMSException {
-	throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
-    }
+          // Passing the current message:
+          try {
+            messageListener.onMessage(Message.wrapMomMessage(this, momMsg));
   
-    /**	The InvalidException is at time never thrown so it could arrive that
-     *	the name of the Queue is invalid
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications
-     */
-    public  javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue) throws javax.jms.JMSException {
-	return this.createReceiver(queue, "");
+            // Auto ack: acknowledging the message:
+            if (autoAck)
+              cnx.asyncRequest(new QRecAckRequest(queueName, msgId));
+          }
+          // Catching a JMSException means that the building of the Joram
+          // message went wrong: denying the message:
+          catch (JMSException jE) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+              JoramTracing.dbgClient.log(BasicLevel.ERROR, this
+                                         + ": error while processing the"
+                                         + " received message: " + jE);
+            cnx.syncRequest(new QRecDenyRequest(queueName, msgId));
+          }
+          // Catching a RuntimeException means that the client onMessage() code
+          // is incorrect; denying the message in auto ack mode:
+          catch (RuntimeException rE) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+              JoramTracing.dbgClient.log(BasicLevel.ERROR, this
+                                         + ": RuntimeException thrown"
+                                         + " by the listener: " + rE);
+            if (autoAck)
+              cnx.syncRequest(new QRecDenyRequest(queueName, msgId));
+          }
+        }
+      }
     }
- 
- 
-  public javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue,
-    java.lang.String messageSelector) throws javax.jms.JMSException
+    catch (JMSException e) {}
+  }
+
+
+  /** Specializes this API method to the PTP mode for closing browsers. */
+  public synchronized void close() throws JMSException
+  {
+    while (! browsers.isEmpty())
+      ((QueueBrowser) browsers.get(0)).close();
+
+    super.close();
+  }
+
+
+  /**
+   * Specializes this method actually acknowledging the received messages.
+   *
+   * @exception IllegalStateException  If the connection is broken.
+   */
+  void acknowledge() throws IllegalStateException
+  { 
+    String dest;
+    Vector ids;
+
+    Enumeration dests = deliveries.keys();
+    while (dests.hasMoreElements()) {
+      dest = (String) dests.nextElement();
+      ids = (Vector) deliveries.remove(dest);
+      cnx.asyncRequest(new QSessAckRequest(dest, ids));
+    }
+  }
+
+  /** Actually denies the received messages. */
+  void deny()
   {
     try {
+      String dest;
+      Vector ids;
 
-      if (messageSelector != null && ! messageSelector.equals("")) {
-        fr.dyade.aaa.mom.selectors.checkParser parser =
-          new fr.dyade.aaa.mom.selectors.checkParser(
-          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
-
-        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
-        Object result = parser.parse().value;
+      Enumeration dests = deliveries.keys();
+      while (dests.hasMoreElements()) {
+        dest = (String) dests.nextElement();
+        ids = (Vector) deliveries.remove(dest);
+        cnx.syncRequest(new QSessDenyRequest(dest, ids));
       }
+    }
+    catch (JMSException jE) {}
+  }
 
-        if (super.messageListener != null)
-          throw new javax.jms.JMSException("Canno't create a receiver in a session that has a messageListener set");
+  /**
+   * Specializes this method called by the session daemon for passing an
+   * asynchronous message delivery to the appropriate receiver.
+   */
+  void distribute(AbstractJmsReply asyncReply)
+  {
+    // Getting the message:
+    QueueMessage reply = (QueueMessage) asyncReply;
+    fr.dyade.aaa.mom.messages.Message momMsg = reply.getMessage();
 
-        
-        
-	    Object obj = new Object();
-	    long messageJMSMOMID = refConnection.getMessageMOMID();
-	    Long longMsgID = new Long(messageJMSMOMID);
-	    fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern msgCreation = new fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern(messageJMSMOMID, (fr.dyade.aaa.mom.QueueNaming) queue);
-	    /*	synchronization because it could arrive that the notify was
-	     *	called before the wait 
-	     */
-	    synchronized(obj) {
-		/* the processus of the client waits the response */
-		refConnection.waitThreadTable.put(longMsgID,obj);
-		/* get the messageJMSMOM identifier */
-		this.sendToConnection(msgCreation);
-	
-		obj.wait();
-	    }
-      
-	    /* the clients wakes up */
-	    fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-      
-	    /* tests if the key exists 
-	     * dissociates the message null (on receiveNoWait) and internal error
-	     */
-	    if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-		throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-      
-	    /* get the the message back or the exception*/
-	    msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-	    if(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-		fr.dyade.aaa.joram.QueueReceiver queueReceiver = new fr.dyade.aaa.joram.QueueReceiver( new Long(counterConsumerID).toString(), refConnection, this, queue, messageSelector);
-        counterConsumerID ++;
-		if(queueReceiver==null)
-		    throw (new fr.dyade.aaa.joram.JMSAAAException("Internal Error during creation QueueReceiver",JMSAAAException.ERROR_CREATION_MESSAGECONSUMER));
-	
-		/* inscription in the Table of the Session */
-		synchronized(messageConsumerTable) {	
-		    java.util.Vector v;
-		    if((v = (java.util.Vector) messageConsumerTable.get((fr.dyade.aaa.mom.QueueNaming) queue))!=null) {
-			/* already a MessageConsumer of this session is receiving from the queue */
-			v.addElement(queueReceiver);
-		    } else {
-			/* first MessageConsumer receiving from the Queue */
-			v = new java.util.Vector();
-			v.addElement(queueReceiver);
-			messageConsumerTable.put((fr.dyade.aaa.mom.QueueNaming) queue, v);
-		    }
-		}
-		return queueReceiver;
-	    } else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-		/* exception sent back to the client */
-		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		except.setLinkedException(msgExc.exception);
-		throw(except);
-	    } else {
-		/* unknown message */
-		/* should never arrived */
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		throw(except);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    
-    }
-  
-    /**	The InvalidException is at time never thrown so it could arrive that
-     *	the name of the Queue is invalid
-     *	But the exception is thrown during the send method
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications
-     */
-    public  javax.jms.QueueSender createSender(javax.jms.Queue queue) throws javax.jms.JMSException {
-	fr.dyade.aaa.joram.QueueSender queueSender = new fr.dyade.aaa.joram.QueueSender(refConnection, this, queue);
-	if(queueSender==null)
-	    throw (new fr.dyade.aaa.joram.JMSAAAException("Internal Error during creation QueueSender",JMSAAAException.ERROR_CREATION_MESSAGECONSUMER));
-	else 
-	    return queueSender;
-    }
-  
-    /**	The InvalidException is at time never thrown so it could arrive that
-     *	the name of the Queue is invalid
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications
-     */
-    public  javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue) throws javax.jms.JMSException {
-	return this.createBrowser(queue, "");
-    }
-  
-    /**	The InvalidException is at time never thrown so it could arrive that
-     *	the name of the Queue is invalid
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications
-     */
-    public  javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue, java.lang.String messageSelector) throws javax.jms.JMSException {
-	try {
-	    Object obj = new Object();
-	    long messageJMSMOMID = refConnection.getMessageMOMID();
-	    Long longMsgID = new Long(messageJMSMOMID);
-      
-	    fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern msgCreation = new fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern(messageJMSMOMID, (fr.dyade.aaa.mom.QueueNaming) queue);
-	    /*	synchronization because it could arrive that the notify was
-	     *	called before the wait 
-	     */
-	    synchronized(obj) {
-		/* the processus of the client waits the response */
-		refConnection.waitThreadTable.put(longMsgID,obj);
-		/* get the messageJMSMOM identifier */
-		this.sendToConnection(msgCreation);
-				
-		obj.wait();
-	    }
-      
-	    /* the clients wakes up */
-	    fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-      
-	    /* tests if the key exists 
-	     * dissociates the message null (on receiveNoWait) and internal error
-	     */
-	    if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-		throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-      
-	    /* get the the message back or the exception*/
-	    msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-	    if(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-		fr.dyade.aaa.joram.QueueBrowser queueBrowser = new fr.dyade.aaa.joram.QueueBrowser(refConnection, this, queue, messageSelector);
-		if(queueBrowser==null)
-		    throw (new fr.dyade.aaa.joram.JMSAAAException("Internal Error during creation QueueSender",JMSAAAException.ERROR_CREATION_MESSAGECONSUMER));
-		else 
-		    return queueBrowser;
-	    } else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-		/* exception sent back to the client */
-		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		except.setLinkedException(msgExc.exception);
-		throw(except);
-	    } else {
-		/* unknown message */
-		/* should never arrived */
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		throw(except);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-  
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-    public  javax.jms.TemporaryQueue createTemporaryQueue() throws javax.jms.JMSException {
-	try {
-	    Object obj = new Object();
-	    long messageJMSMOMID = refConnection.getMessageMOMID();
-	    Long longMsgID = new Long(messageJMSMOMID);
-      
-	    fr.dyade.aaa.mom.CreationTemporaryQueueMOMExtern msgCreation = new fr.dyade.aaa.mom.CreationTemporaryQueueMOMExtern(messageJMSMOMID);
-	    /*	synchronization because it could arrive that the notify was
-	     *	called before the wait 
-	     */
-	    synchronized(obj) {
-		/* the processus of the client waits the response */
-		refConnection.waitThreadTable.put(longMsgID,obj);
-		/* get the messageJMSMOM identifier */
-		this.sendToConnection(msgCreation);
-	
-		obj.wait();
-	    }
-      
-	    /* the clients wakes up */
-	    fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-      
-	    /* tests if the key exists 
-	     * dissociates the message null (on receiveNoWait) and internal error
-	     */
-	    if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-		throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-      
-	    /* get the the message back or the exception*/
-	    msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-	    if(msgMOM instanceof fr.dyade.aaa.mom.CreationBackDestinationMOMExtern) {
-		/* return the temporaryTopic Object with the name given by the agentClient */
-		fr.dyade.aaa.mom.QueueNaming queue = (fr.dyade.aaa.mom.QueueNaming) ((fr.dyade.aaa.mom.CreationBackDestinationMOMExtern) msgMOM).destination;
-		fr.dyade.aaa.joram.TemporaryQueue tempQueue = new fr.dyade.aaa.joram.TemporaryQueue(refConnection, this, queue.getQueueName());
-		return tempQueue;
-	    } else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-		/* exception sent back to the client */
-		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		except.setLinkedException(msgExc.exception);
-		throw(except);
-	    } else {
-		/* unknown message */
-		/* should never arrived */
-		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-		throw(except);
-	    }
-	} catch (Exception exc) {
-	    javax.jms.JMSException except = new javax.jms.JMSException("internal Error");
-	    except.setLinkedException(exc);
-	    throw(except);
-	}
-    }
-  
-    /**overwrite the methode from MessageConsumer  */
-    public void close()  throws javax.jms.JMSException {
-      if (listener != null)
-        listener.stop();
-	  messageConsumerTable.clear();
-      super.close() ;
-    }
+    // Getting the consumer:
+    QueueReceiver rec =
+      (QueueReceiver) cnx.requestsTable.remove(reply.getCorrelationId());
 
-    /** prepares the messages to acknowledge so as to decrease the overhead 
-     */
-    protected Vector preparesHandlyAck(String messageID, long messageJMSMOMID) throws javax.jms.JMSException{
-	int i = 0;
-	int indexMessage = -1;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern currentMsg ;
-	fr.dyade.aaa.mom.QueueNaming currentQueue;
-    
-	Vector resultVector = new Vector();
-    
-	/* first pass to find the index of the message in the vector */
-	while(i<lastNotAckVector.size()) {
-	    currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) lastNotAckVector.elementAt(i);
-      
-	    if(messageID.equals(currentMsg.message.getJMSMessageID())) {
-		indexMessage = i;
-		break;
-	    }
-	    i++;
-	}
-    
-	/*	prepares the vector of the message 2nd pass 
-	 *	begins the indexMessage-1 and continues until the index 0
-	 */
-	javax.jms.Message message;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern previousMsg ;
-	fr.dyade.aaa.mom.QueueNaming previousQueue;
-	i = indexMessage;
-	while(i>=0) {
-	    /* add the elment in the ack Vector & removes from the other */
-	    currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) lastNotAckVector.elementAt(i);
-	    currentQueue = (fr.dyade.aaa.mom.QueueNaming) currentMsg.message.getJMSDestination();
-	    message = currentMsg.message;
-	    resultVector.addElement(new fr.dyade.aaa.mom.AckQueueMessageMOMExtern(messageJMSMOMID, currentQueue, message.getJMSMessageID(), acknowledgeMode, new Long(sessionID).toString()));
-      
-	    int j = i-1;
-	    while(j>=0) {
-		previousMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) lastNotAckVector.elementAt(j);
-		previousQueue = (fr.dyade.aaa.mom.QueueNaming) previousMsg.message.getJMSDestination();
-	
-		if(currentQueue.equals(previousQueue)) {
-		    lastNotAckVector.removeElementAt(j);
-		    j--;
-		    i--;
-		} else
-		    j--;
-	    }
-      
-	    /* removes the message from the vector */
-	    lastNotAckVector.removeElementAt(i);
-	    i--;
-	}
-	return resultVector;
+    // The target receiver of the received message may be null if it has
+    // been closed without having stopped the connection: denying the msg:
+    if (rec == null) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+        JoramTracing.dbgClient.log(BasicLevel.WARN, this + ": an asynchronous"
+                                   + " delivery arrived for an improperly"
+                                   + " closed receiver: denying the"
+                                   + " message.");
+     
+      try { 
+        cnx.syncRequest(new QRecDenyRequest(momMsg.getDestination(),
+                                            momMsg.getIdentifier()));
+      }
+      catch (JMSException jE) {}
     }
-  
-    /** prepares the messages to acknowledge so as to decrease the overhead  */
-    protected Vector preparesTransactedAck(long messageJMSMOMID) throws javax.jms.JMSException {
-	int i = transactedMessageToAckVector.size()-1;
-	Vector resultVector = new Vector();
-    
-	/*	prepares the vector of the message 2nd pass 
-	 *	begins the indexMessage-1 and continues until the index 0
-	 */
-	javax.jms.Message message;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern currentMsg ;
-	fr.dyade.aaa.mom.QueueNaming currentQueue;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern previousMsg ;
-	fr.dyade.aaa.mom.QueueNaming previousQueue;
-	while(i>=0) {
-	    /* add the elment in the ack Vector & removes from the other */
-	    currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) transactedMessageToAckVector.elementAt(i);
-	    currentQueue = (fr.dyade.aaa.mom.QueueNaming) currentMsg.message.getJMSDestination();
-	    message = currentMsg.message;
-	    resultVector.addElement(new fr.dyade.aaa.mom.AckQueueMessageMOMExtern(messageJMSMOMID, currentQueue, message.getJMSMessageID(), acknowledgeMode, new Long(sessionID).toString()));
-
-	    int j = i-1;
-	    while(j>=0) {
-		previousMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) transactedMessageToAckVector.elementAt(j);
-		previousQueue = (fr.dyade.aaa.mom.QueueNaming) previousMsg.message.getJMSDestination();
-	
-		if(currentQueue.equals(previousQueue)) {
-		    transactedMessageToAckVector.removeElementAt(j);
-		    j--;
-		    i--;
-		} else
-		    j--;
-	    }
-      
-	    /* removes the message from the vector */
-	    transactedMessageToAckVector.removeElementAt(i);
-	    i--;
-	}
-	return resultVector;
-    }
-  
-    /** prepares the messages to recover the messages of the session */
-    protected fr.dyade.aaa.mom.RecoverObject[] preparesRecover() throws javax.jms.JMSException {
-	int i = lastNotAckVector.size()-1;
-	Vector resultVector = new Vector();
-    
-	/*	prepares the vector of the message 2nd pass 
-	 *	begins the indexMessage-1 and continues until the index 0
-	 */
-	javax.jms.Message message;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern currentMsg ;
-	fr.dyade.aaa.mom.QueueNaming currentQueue;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern previousMsg ;
-	fr.dyade.aaa.mom.QueueNaming previousQueue;
-	while(i>=0) {
-	    /* add the elment in the ack Vector & removes from the other */
-	    currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) lastNotAckVector.elementAt(i);
-	    currentQueue = (fr.dyade.aaa.mom.QueueNaming) currentMsg.message.getJMSDestination();
-	    message = currentMsg.message;
-	    resultVector.addElement(new fr.dyade.aaa.mom.RecoverQueue(currentQueue, message.getJMSMessageID()));
-      
-	    int j = i-1;
-	    while(j>=0) {
-		previousMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) lastNotAckVector.elementAt(j);
-		previousQueue = (fr.dyade.aaa.mom.QueueNaming) previousMsg.message.getJMSDestination();
-	
-		if(currentQueue.equals(previousQueue)) {
-		    lastNotAckVector.removeElementAt(j);
-		    j--;
-		    i--;
-		} else
-		    j--;
-	    }
-      
-	    /* removes the message from the vector */
-	    lastNotAckVector.removeElementAt(i);
-	    i--;
-	}
-	int size = resultVector.size();
-	fr.dyade.aaa.mom.RecoverQueue[] ackTab = new fr.dyade.aaa.mom.RecoverQueue[size];
-	resultVector.copyInto(ackTab);
-	return ackTab;
-    
-    }
-   
-    /**
-     * Allows the session to rollback a message delivered to the JMS client
-     */
-    protected void rollbackDeliveryMsg() throws javax.jms.JMSException {
-	try {
-	    Vector rollbackDeliveryMsg = new Vector();
-	    while (!transactedMessageToAckVector.isEmpty()) {
-		fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) transactedMessageToAckVector.remove(transactedMessageToAckVector.size()-1);
-	
-		/* built Vector for Rollback */
-		javax.jms.Destination destination = (javax.jms.Destination) currentMsg.message.getJMSDestination();
-		String messageMOMID = currentMsg.message.getJMSMessageID();
-		fr.dyade.aaa.mom.MessageRollbackMOMExtern msgRollback = new fr.dyade.aaa.mom.MessageRollbackMOMExtern(currentMsg.getMessageMOMExternID(), destination ,new Long(sessionID).toString(), messageMOMID);
-		rollbackDeliveryMsg.addElement(msgRollback);
-	    }
-	    if (!rollbackDeliveryMsg.isEmpty()) {
-		/* send vector for rollback */
-		long messageJMSMOMID = refConnection.getMessageMOMID();
-		fr.dyade.aaa.mom.MessageMOMExtern msgSend = new fr.dyade.aaa.mom.MessageTransactedRollback(messageJMSMOMID,rollbackDeliveryMsg,false);
-		sendMessage(msgSend);
-	    }
-	} catch (javax.jms.JMSException exc) {
-	    throw(exc);
-	}
-    }
-  
-    /** prepares the messages to rollback the messages of the session */
-    protected fr.dyade.aaa.mom.QueueNaming[] preparesRollback() throws javax.jms.JMSException {
-	int i = transactedMessageToAckVector.size()-1;
-	Vector resultVector = new Vector();
-    
-	/*	prepares the vector of the message 2nd pass 
-	 *	begins the indexMessage-1 and continues until the index 0
-	 */
-	javax.jms.Message message;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern currentMsg ;
-	fr.dyade.aaa.mom.QueueNaming currentQueue;
-	fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern previousMsg ;
-	fr.dyade.aaa.mom.QueueNaming previousQueue;
-	while(i>=0) {
-	    /* add the elment in the ack Vector & removes from the other */
-	    currentMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) transactedMessageToAckVector.elementAt(i);
-	    currentQueue = (fr.dyade.aaa.mom.QueueNaming) currentMsg.message.getJMSDestination();
-	    message = currentMsg.message;
-	    resultVector.addElement(currentQueue);
-      
-	    int j = i-1;
-	    while(j>=0) {
-		previousMsg = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) transactedMessageToAckVector.elementAt(j);
-		previousQueue = (fr.dyade.aaa.mom.QueueNaming) previousMsg.message.getJMSDestination();
-	
-		if(currentQueue.equals(previousQueue)) {
-		    transactedMessageToAckVector.removeElementAt(j);
-		    j--;
-		    i--;
-		} else
-		    j--;
-	    }
-      
-	    /* removes the message from the vector */
-	    transactedMessageToAckVector.removeElementAt(i);
-	    i--;
-	}
-	int size = resultVector.size();
-	fr.dyade.aaa.mom.QueueNaming[] ackTab = new fr.dyade.aaa.mom.QueueNaming[size];
-	resultVector.copyInto(ackTab);
-	return ackTab;
-    }
-  
+    // Passing the message:
+    else
+      rec.onMessage(momMsg);
+  }
 }

@@ -31,8 +31,8 @@ import org.objectweb.monolog.api.Monitor;
 import fr.dyade.aaa.util.*;
 
 public abstract class AgentDriver extends Driver {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentDriver.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;

@@ -16,8 +16,8 @@ import org.objectweb.monolog.api.Monitor;
  * @see fr.dyade.aaa.TransientNetworkServer
  */
 class StatusMessage implements Serializable {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.1 2002-01-16 12:56:21 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: StatusMessage.java,v 1.2 2002-03-06 16:50:00 joram Exp $";
 
   transient byte status;
   transient int stamp;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,137 +15,204 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-
 package fr.dyade.aaa.joram;
 
+import fr.dyade.aaa.mom.jms.*;
+
 import java.util.*;
-import javax.jms.*;
+
+import javax.jms.JMSException;
 import javax.transaction.xa.*;
-import fr.dyade.aaa.mom.*;
+
+import org.objectweb.monolog.api.BasicLevel;
 
 /**
- * An XAQueueSession provides a regular QueueSession which can be used to
- * create QueueReceivers, QueueSenders and QueueBrowsers. 
- *
- * @author Laurent Chauvirey
- * @version 1.0
+ * Implements the <code>javax.jms.XAQueueSession</code> interface.
+ * <p>
+ * An XA QueueSession actually wraps what looks like a "normal" QueueSession
+ * object. This object takes care of producing and consuming messages, the
+ * actual sendings and acknowledgement being managed by this XA wrapper.
  */
+public class XAQueueSession extends XASession 
+                            implements javax.jms.XAQueueSession
+{
+  /**
+   * An XA QueueSession actually wraps what looks like a "normal"
+   * session object.
+   */
+  private QueueSession qs;
 
-public class XAQueueSession extends XASession implements javax.jms.XAQueueSession {
     
-    /** The associated QueueSession */
-    protected QueueSession qs;
+  /**
+   * Constructs an <code>XAQueueSession</code> instance.
+   *
+   * @param ident  Identifier of the session.
+   * @param cnx  The connection the session belongs to.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  XAQueueSession(String ident, XAQueueConnection cnx) throws JMSException
+  {
+    super(ident, cnx);
+    qs = new QueueSession(ident, cnx, true, 0);
+
+    // The wrapped session is removed from the connection's list, as it
+    // is to be only seen by the wrapping XA session.
+    cnx.sessions.remove(qs);
+  }
+
+  
+  /** Returns a String image of this session. */
+  public String toString()
+  {
+    return "XAQueueSess:" + ident;
+  }
+
+
+  /** API method. */ 
+  public javax.jms.QueueSession getQueueSession() throws JMSException
+  {
+    return qs;
+  }
+
+  /** 
+   * This method inherited from the <code>XASession</code> class processes
+   * the asynchronous deliveries coming from a connection consumer.
+   * <p>
+   * These deliveries are actually handed to the wrapped session.
+   */
+  public void run()
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": running...");
+    qs.messageListener = super.messageListener;
+    qs.connectionConsumer = super.connectionConsumer;
+    qs.repliesIn = super.repliesIn;
+    qs.run();
+    super.repliesIn.removeAllElements();
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": runned.");
+  }
+
+  /**
+   * Method basically inherited from session, but intercepted here for
+   * adapting its behaviour to the XA context.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void close() throws JMSException
+  {
+    // Ignoring the call if the session is already closed:
+    if (closed)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "---" + this
+                                 + ": closing..."); 
+
+    // Stopping the wrapped session:
+    qs.stop();
+
+    // Closing the wrapped session's resources:
+    while (! qs.consumers.isEmpty())
+      ((MessageConsumer) qs.consumers.get(0)).close();
+    while (! qs.producers.isEmpty())
+      ((MessageProducer) qs.producers.get(0)).close();
+
+    qs.closed = true;
+
+    cnx.sessions.remove(this);
+
+    closed = true;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
+  }
+
+
+  /** 
+   * This method is called by the wrapped <code>XAResource</code> for saving
+   * the "state" of the wrapped session for later modifying it or commiting it.
+   * <p>
+   * The word "state" actually means the messages produced by the session's
+   * producers, and the acknowledgements due to its consumers.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction. 
+   */
+  void saveTransaction(Xid xid) throws XAException
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
+
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": saves transaction "
+                                 + xid.toString()); 
     
-    /**
-     * Creates a new XAQueueSession.
-     */
-    protected XAQueueSession(long sessionID, QueueConnection refConnection) {
-	super(sessionID, refConnection);
-	this.sessionID = sessionID;
-	this.refConnection = refConnection;
- 	qs = new QueueSession(true, fr.dyade.aaa.mom.CommonClientAAA.TRANSACTED,
-			      sessionID, (Connection) refConnection);
-    }
-    
-    /**
-     * Get the queue session associated with this XAQueueSession.
-     */
-    public javax.jms.QueueSession getQueueSession() throws JMSException {
- 	return qs;
-    }
+    xaC.addSendings(qs.sendings);
+    xaC.addDeliveries(qs.deliveries);
+  }
 
-    protected void rollbackDeliveryMsg() throws JMSException {
-	throw new JMSException("Forbidden function call");
-    }
+  /**
+   * This method is called by the wrapped <code>XAResource</code> for
+   * preparing the session by sending the corresponding messages and
+   * acknowledgements previously saved.
+   *
+   * @exception XAException  If the session is not involved with this
+   *              transaction. 
+   * @exception JMSException If the prepare failed because of the
+   *              Joram server.
+   */
+  void prepareTransaction(Xid xid) throws Exception
+  {
+    XAContext xaC = (XAContext) transactionsTable.get(xid);
 
-    protected Vector createAckRollbackVector(javax.transaction.xa.Xid xid) throws JMSException {
-	Vector rollbackVector = new Vector();
-	Vector msgToAckVector;
+    if (xaC == null)
+      throw new XAException("Resource is not involved in specified"
+                            + " transaction.");
 
-	try {
-	    msgToAckVector = xidTable.getMessageToAckXid(xid);
-	} catch (Exception e) {
-	    JMSException jmse = new JMSException("Internal error");
-	    jmse.setLinkedException(e);
-	    throw jmse;
-	}
-	if (msgToAckVector == null) return null;
-	// Create the vector of messages for rollback
-	while (!msgToAckVector.isEmpty()) {
-	    MessageQueueDeliverMOMExtern currentMsg = (MessageQueueDeliverMOMExtern) msgToAckVector.remove(msgToAckVector.size() - 1);
-	    javax.jms.Destination destination = (javax.jms.Destination) currentMsg.message.getJMSDestination();
-	    String messageMOMID = currentMsg.message.getJMSMessageID();
-	    MessageRollbackMOMExtern msgRollback = new MessageRollbackMOMExtern(currentMsg.getMessageMOMExternID(),
-										currentMsg.message.getJMSDestination(),
-										new Long(sessionID).toString(),
-										currentMsg.message.getJMSMessageID());
-	    rollbackVector.addElement(msgRollback);
-	}
-	return rollbackVector;
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": prepares transaction "
+                                 + xid.toString()); 
+
+    Enumeration dests;    
+    String dest;
+    Vector pMs = new Vector();
+    Vector ids;
+    Vector acks = new Vector();
+
+    // Getting all the ProducerMessages to send:
+    dests = xaC.sendings.keys();
+    while (dests.hasMoreElements()) {
+      dest = (String) dests.nextElement();
+      pMs.add(xaC.sendings.remove(dest));
     }
 
-    protected Vector preparesTransactedAck(javax.transaction.xa.Xid xid,
-					   long messageJMSMOMID) throws JMSException {
-	Vector messageToAckVector;
-	Hashtable ackTable = new Hashtable();
-	MessageQueueDeliverMOMExtern msgFromMOM;
-	javax.jms.Message message;
-	QueueNaming destination;
-
-	try {
-	    messageToAckVector = xidTable.getMessageToAckXid(xid);
-	} catch (Exception e) {
-	    throw new JMSException("Internal error");
-	}
-	if (messageToAckVector == null) return null;
-	int index = messageToAckVector.size() - 1; // The last element of the vector
-	while (index >= 0) {
-	    msgFromMOM = (MessageQueueDeliverMOMExtern) messageToAckVector.elementAt(index);
-	    message = msgFromMOM.message;
-	    destination = (QueueNaming) message.getJMSDestination();
-
-	    if (!ackTable.containsKey(destination)) {
-		ackTable.put(message.getJMSDestination(),
-			     new AckQueueMessageMOMExtern(messageJMSMOMID, destination,
-							  message.getJMSMessageID(),
-							  CommonClientAAA.TRANSACTED,
-							  new Long(sessionID).toString()));
-	    }
-	    index--;
-	}
-	return new Vector(ackTable.values());
+    // Getting all the QSessAckRequest to send:
+    dests = xaC.deliveries.keys();
+    while (dests.hasMoreElements()) {
+      dest = (String) dests.nextElement();
+      ids = (Vector) xaC.deliveries.remove(dest);
+      acks.add(new QSessAckRequest(dest, ids));
     }
 
-
-    protected RecoverObject[] preparesRecover() throws JMSException {
-	throw new JMSException("Not implemented");
-    }
-
-
-    public Vector getMessageToSendVector() {
-	return qs.transactedMessageToSendVector;
-    }
-
-
-    public void setMessageToSendVector(Vector v) {
-	qs.transactedMessageToSendVector = v;
-    }
-
-
-    public Vector getMessageToAckVector() {
-	return qs.transactedMessageToAckVector;
-    }
-
-
-    public void setMessageToAckVector(Vector v) {
-	qs.transactedMessageToAckVector = v;
-    }
-
-} // XAQueueSession
+    // Sending to the proxy:
+    qs.cnx.syncRequest(new XAQSessPrepare(ident + " " + xid.toString(),
+                                          pMs, acks));
+  }
+}

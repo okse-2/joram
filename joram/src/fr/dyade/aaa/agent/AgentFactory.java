@@ -37,8 +37,8 @@ import org.objectweb.monolog.api.Monitor;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -130,8 +130,8 @@ final class AgentVector extends AgentObject {
  * @author  Andre Freyssinet
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -150,6 +150,14 @@ final class AgentFactory extends Agent {
     super("AgentFactory#" + AgentServer.getServerId(),
 	  true,
 	  AgentId.factoryId);
+  }
+
+
+  /**
+   * Returns log topic for factory agent.
+   */
+  protected String getLogTopic() {
+    return Debug.A3Agent + ".AgentFactory.#" + AgentServer.getServerId();
   }
 
   /**
@@ -268,7 +276,12 @@ final class AgentFactory extends Agent {
     } else if (not instanceof AgentDeleteRequest) {
       try {
         deleteAgent(from);
-      } catch (Exception exc) {}
+	if (((AgentDeleteRequest) not).reply != null)
+          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from));
+      } catch (Exception exc) {
+	if (((AgentDeleteRequest) not).reply != null)
+          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from, exc));
+      }
     } else {
       try {
 	super.react(from, not);
@@ -298,7 +311,7 @@ final class AgentFactory extends Agent {
       throw new Exception("Can't delete unknown Agent" + from);
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR,
-                 "AgentFactory" + id + ", can't delete Agent" + from);
+                 "AgentFactory" + id + ", can't delete Agent" + from, exc);
       throw new Exception("Can't delete Agent" + from);
     }
     if (ag.isFixed()) removeFixedAgentId(ag.id);

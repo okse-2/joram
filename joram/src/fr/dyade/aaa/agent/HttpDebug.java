@@ -47,8 +47,8 @@ import fr.dyade.aaa.util.Daemon;
  * output flow.
  */
 public class HttpDebug {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.4 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.5 2002-03-06 16:50:00 joram Exp $"; 
 
   static HttpDebug httpd = null;
 
@@ -188,62 +188,62 @@ public class HttpDebug {
 
     public void run() {
       try {
-	while (running) {
-	  canStop = true;
-	  try {
-	    socket = listen.accept();
-	    canStop = false;
-	  } catch (IOException exc) {
-	    if (running)
+        while (running) {
+          canStop = true;
+          try {
+            socket = listen.accept();
+            canStop = false;
+          } catch (IOException exc) {
+            if (running)
               logmon.log(BasicLevel.ERROR,
-                       getName() + ", error during accept", exc);
-	  }
+                         getName() + ", error during accept", exc);
+          }
 
-	  if (! running) break;
+          if (! running) break;
 
-	  try {
-	    // Get the streams
-	    reader = new BufferedReader(
-	      new InputStreamReader(socket.getInputStream()));
-	    writer = new PrintWriter(socket.getOutputStream(), true);
+          try {
+            // Get the streams
+            reader = new BufferedReader(
+              new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream(), true);
 	  
-	    // Reads then parses the request
-	    doRequest(reader.readLine());
+            // Reads then parses the request
+            doRequest(reader.readLine());
 
-	    writer.flush();
-	  } catch (Exception exc) {
-	    logmon.log(BasicLevel.ERROR,
+            writer.flush();
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR,
                        getName() + ", error during connection", exc);
-	  } finally {
-	    // Closes the connection
-	    try {
-	      reader.close();
-	    } catch (Exception exc) {}
-	    reader = null;
-	    try {
-	      writer.close();
-	    } catch (Exception exc) {}
-	    writer = null;
-	    try {
-	      socket.close();
-	    } catch (Exception exc) {}
-	    socket = null;
-	  }
-	}
+          } finally {
+            // Closes the connection
+            try {
+              reader.close();
+            } catch (Exception exc) {}
+            reader = null;
+            try {
+              writer.close();
+            } catch (Exception exc) {}
+            writer = null;
+            try {
+              socket.close();
+            } catch (Exception exc) {}
+            socket = null;
+          }
+        }
       } finally {
-	running = false;
-	thread = null;
-	// Close any ressources no longer needed, eventually stop the
-	// enclosing component.
-	shutdown();
+        finish();
       }
     }
 
-    public void shutdown() {
+    protected void close() {
       try {
 	listen.close();
       } catch (Exception exc) {}
       listen = null;
+    }
+
+    protected void shutdown() {
+      close ();
     }
 
     void header(String title) throws IOException {
@@ -1136,9 +1136,12 @@ public class HttpDebug {
 // 	} catch (IOException exc2) {}
 // 	exc.printStackTrace();
 //       } finally {
+//         finish();
 //       }
     }
    
-    public void shutdown() {}
+    protected void close() {}
+
+    protected void shutdown() {}
   }
 }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,108 +15,133 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.joram; 
- 
-import javax.jms.*;
+package fr.dyade.aaa.joram;
+
+import java.util.Vector;
+
+import javax.jms.IllegalStateException;
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
+
+import org.objectweb.monolog.api.BasicLevel;
 
 /**
- * A <code>ConnectionConsumer</code> is a special facility for
- * consuming messages arriving on a <code>Connection</code>.
- * <br>To be used by application servers only.
- *
- * @author Frederic Maistre
+ * Implements the <code>javax.jms.ConnectionConsumer</code> interface.
  */
-public class ConnectionConsumer implements javax.jms.ConnectionConsumer
+public abstract class ConnectionConsumer
+                    implements javax.jms.ConnectionConsumer
 {
-  /** The destination the consumed messages come from. */
-  private Destination destination;
-  /** Selector for filtering the messages. */
-  private String selector;
-  /** The ServerSessionPool from which getting the Sessions. */
-  private ServerSessionPool ssp;
-  /** The number of messages to pass to a same Session. */
-  private int maxMessages;
+  /** The daemon taking care of the asynchronous deliveries distribution. */
+  protected fr.dyade.aaa.util.Daemon ccDaemon;
+  /** The connection the consumer belongs to. */
+  protected Connection cnx;
+  /** The selector for filtering messages. */
+  protected String selector;
+  /** The session pool provided by the application server. */
+  protected javax.jms.ServerSessionPool sessionPool;
+  /** The maximum number of messages a session may process at once. */
+  protected int maxMessages;
 
-  private ServerSession serverSession;
-  private fr.dyade.aaa.joram.Session session;
-  private int counter = 1;
+  /**
+   * The FIFO queue where the connection pushes the asynchronous server
+   * deliveries.
+   */
+  protected fr.dyade.aaa.util.Queue repliesIn;
+  /** The current consuming request. */
+  protected fr.dyade.aaa.mom.jms.AbstractJmsRequest currentReq = null;
+  /** <code>true</code> if the connection consumer is closed. */
+  protected boolean closed = false;
 
-  private Connection connection;
-
-
-  /** Constructor. */
-  public ConnectionConsumer(Destination destination, String selector, 
-    ServerSessionPool ssp, int maxMessages)
-  {
-    this.destination = destination;
-    this.selector = selector;
-    this.ssp = ssp;
-    this.maxMessages = maxMessages;
-  }
+  /** The name of the destination the consumer consumes on. */
+  String destName;
 
 
-  /** Method setting the QueueConnectionListener, if any. */
-  public void setConnection(Connection connection)
-  {
-    this.connection = connection;
-  }
-
-
-  /** Method returning the ServerSessionPool parameter. */
-  public ServerSessionPool getServerSessionPool() throws JMSException
-  {
-    if (ssp != null)
-      return ssp;
-    else
-      throw new JMSException("ServerSessionPool is null");
-  }
-
-  /** Method getting the messages from the connection. */
-  public void getMessage(fr.dyade.aaa.mom.MessageMOMExtern msg)
-    throws JMSException
+  /**
+   * Constructs a <code>ConnectionConsumer</code>.
+   *
+   * @param cnx  The connection the consumer belongs to.
+   * @param destName  The name of the destination where consuming messages.
+   * @param selector  The selector for filtering messages.
+   * @param sessionPool  The session pool provided by the application server.
+   * @param maxMessages  The maximum number of messages to be passed at once
+   *          to a session.
+   *
+   * @exception InvalidSelectorException  If the selector syntax is wrong.
+   * @exception InvalidDestinationException  If the target destination does not
+   *              exist.
+   * @exception JMSSecurityException  If the user is not a READER on the
+   *              destination.
+   * @exception JMSException  If one of the parameters is wrong.
+   */
+  protected ConnectionConsumer(Connection cnx, String destName,
+                               String selector,
+                               javax.jms.ServerSessionPool sessionPool,
+                               int maxMessages) throws JMSException
   {
     try {
-      if (counter == 1) {
-        // When starting to work on a new series of messages,
-        // getting new ServerSession and Session.
-        serverSession = ssp.getServerSession();
-        session = (fr.dyade.aaa.joram.Session) serverSession.getSession();
-      }
-      // Putting the message in the session.
-      session.addCCMessage(msg);
-     
-      if (counter == maxMessages) {
-        // When reaching the maximum number of messages per Session,
-        // starting the ServerSession, and resetting counter to start. 
-        serverSession.start();
-        counter = 1;
-      }
-      else
-        counter++;
-    } catch (JMSException e) {
-      throw (e);
+      fr.dyade.aaa.mom.selectors.Selector.checks(selector);
     }
-  }
-  
+    catch (fr.dyade.aaa.mom.excepts.SelectorException sE) {
+      throw new InvalidSelectorException("Invalid selector syntax: " + sE);
+    }
+
+    if (sessionPool == null)
+      throw new JMSException("Invalid ServerSessionPool parameter: "
+                             + sessionPool);
+    if (maxMessages <= 0)
+      throw new JMSException("Invalid maxMessages parameter: "
+                             + maxMessages);
+
+    this.cnx = cnx;
+    this.destName = destName;
+    this.selector = selector;
+    this.sessionPool = sessionPool;
+    this.maxMessages = maxMessages;
+
+    // Checking the user's access permission:
+    cnx.isReader(destName);
+
+    repliesIn = new fr.dyade.aaa.util.Queue();
+
+    if (cnx.cconsumers == null)
+      cnx.cconsumers = new Vector();
  
-  /** Closing method. */ 
-  public void close() 
-  {
-    connection.connectionConsumer = null;
+    cnx.cconsumers.add(this);
 
-    // Stopping the queueConnectionListener if needed.
-    if (connection instanceof QueueConnection) {
-      ((QueueConnection) connection).queueConnectionListener.stop();
-    }
-
-      System.gc();
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
+  /** Returns a string image of the connection consumer. */
+  public String toString()
+  {
+    return "ConnCons:" + cnx.toString();
+  }
+
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the ConnectionConsumer is closed.
+   */
+  public javax.jms.ServerSessionPool getServerSessionPool() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " ConnectionConsumer.");
+    return sessionPool;
+  }
+
+
+  /** API method, implemented in subclasses. */
+  public abstract void close() throws JMSException;
 }

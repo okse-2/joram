@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,12 +15,14 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
 package fr.dyade.aaa.agent;
 
@@ -33,7 +36,6 @@ package fr.dyade.aaa.agent;
  * drivers belonging to a <code>ProxyAgent</code>. The wrapped
  * <code>Notification</code> come either from the <code>DriverIn</code> or
  * is destinated to the <code>DriverOut</code> of this pair.
- * 
  */
 public class DriverNotification extends Notification
 {
@@ -65,11 +67,9 @@ public class DriverNotification extends Notification
     return not;
   }
 
-
   /** Returns the connection key of this <code>DriverNotification</code>. */
   public int getDriverKey() 
   {
     return driverKey;
   }
-
 }

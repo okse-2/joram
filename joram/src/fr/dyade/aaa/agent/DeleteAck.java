@@ -21,22 +21,37 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
-//====================================================================
- /**
-  * DeleteAck - Acknowledge for deleting an agent
-  * @author  Nono Depalma
-  * @date    23/03/98
-  * @revisions
-  * @see
-  */
- //====================================================================
 package fr.dyade.aaa.agent;
 
+/**
+ * DeleteAck - Acknowledge for deleting an agent
+ */
 public class DeleteAck extends Notification { 
+  public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
-public static final String RCS_VERSION="@(#)$Id: DeleteAck.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+  public AgentId agent = null;
 
+  public static final int OK = 0;
+  public static final int DENIED = 1;
+  public static final int EXCEPTION = 2;
 
+  public int status = OK;
+
+  public Throwable exc;
+
+  public DeleteAck(AgentId agent) {
+    this.status = OK;
+    this.agent = agent;
   }
+
+  public DeleteAck(AgentId agent, Throwable exc) {
+    this.status = EXCEPTION;
+    this.agent = agent;
+    this.exc = exc;
+  }
+
+  public DeleteAck(AgentId agent, int status) {
+    this.status = status;
+    this.agent = agent;
+  }
+}

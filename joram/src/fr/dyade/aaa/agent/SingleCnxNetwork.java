@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * a time.
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.5 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.6 2002-03-06 16:50:00 joram Exp $";
 
   Vector sendList;
 
@@ -142,8 +142,9 @@ class SingleCnxNetwork extends StreamNetwork {
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
+    protected void close() {}
 
-    public void shutdown() {}
+    protected void shutdown() {}
 
     public void run() {
       int ret;
@@ -266,11 +267,8 @@ class SingleCnxNetwork extends StreamNetwork {
 	  }
 	}
       } finally {
-        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", stopped");
-
-	running = false;
-	thread = null;
-     }
+        finish();
+      }
     }
   }
 
@@ -286,11 +284,15 @@ class SingleCnxNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {
       try {
 	listen.close();
-      } catch (IOException exc) {}
+      } catch (Exception exc) {}
       listen = null;
+    }
+
+    protected void shutdown() {
+      close();
     }
 
     public void run() {
@@ -396,9 +398,7 @@ class SingleCnxNetwork extends StreamNetwork {
 	  }
 	}
       } finally {
-	this.logmon.log(BasicLevel.DEBUG, ", ends");
-	running = false;
-	thread = null;
+        finish();
       }
     }
   }
@@ -415,7 +415,9 @@ class SingleCnxNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {}
+
+    protected void shutdown() {
       wakeup();
     }
 
@@ -454,8 +456,8 @@ class SingleCnxNetwork extends StreamNetwork {
       short msgto;
       ServerDesc server = null;
       
-      synchronized (lock) {
-	try {
+      try {
+        synchronized (lock) {
 	  while (running) {
 	    try {
 	      if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -605,11 +607,9 @@ class SingleCnxNetwork extends StreamNetwork {
               }
 	    }
 	  }
-	} finally {
-	  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
-	  running = false;
-	  thread = null;
-	}
+        }
+      } finally {
+        finish();
       }
     }
   }

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -14,118 +13,200 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
+package fr.dyade.aaa.joram;
 
+import fr.dyade.aaa.mom.jms.*;
 
-package fr.dyade.aaa.joram; 
+import java.util.*;
 
-/** 
- *	a QueueBrowser is as JMS specifications 
- * 
- *	@see	javax.jms.QueueBrowser
- *	@see	fr.dyade.aaa.mom.Queue 
- */ 
- 
-public class QueueBrowser implements javax.jms.QueueBrowser { 
-	
-	/** the Queue associated to the QueueReceiver */
-	private fr.dyade.aaa.mom.QueueNaming queue;
-	
-	/** the selector for the corresponding Queue/Topic */
-	private java.lang.String selector;
-	
-	/** reference to the COnnection Object to retrieve Message from Connection */
-	private fr.dyade.aaa.joram.Connection refConnection;
-	
-	/** reference to the Session Object so send Message to the socket */
-	private fr.dyade.aaa.joram.Session refSession;
-	
-	
-	/** constructor with no selector */
-	public QueueBrowser(fr.dyade.aaa.joram.Connection refConnectionNew, fr.dyade.aaa.joram.Session refSessionNew, javax.jms.Queue queueNew) {
-		this(refConnectionNew, refSessionNew, queueNew, "");
-	}
-	
-	/** constructor with selector chosen by the client */
-	public QueueBrowser(fr.dyade.aaa.joram.Connection refConnection, fr.dyade.aaa.joram.Session refSession, javax.jms.Queue queue, String selector) {
-		this.queue = (fr.dyade.aaa.mom.QueueNaming) queue;
-		this.selector = selector;
-		this.refConnection = refConnection;
-		this.refSession = refSession;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Queue getQueue() throws javax.jms.JMSException {
-		if(queue==null)
-			throw (new fr.dyade.aaa.joram.JMSAAAException("Queue name Unknown",JMSAAAException.DEFAULT_JMSAAA_ERROR));
-		else
-			return queue;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public java.lang.String getMessageSelector() throws javax.jms.JMSException {
-		return selector;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public java.util.Enumeration getEnumeration() throws javax.jms.JMSException {
-		try {
-			Object obj = new Object();
-			long messageJMSMOMID = refConnection.getMessageMOMID();
-			Long longMsgID = new Long(messageJMSMOMID);
-			
-			/* construction of the MessageJMSMOM */
-			fr.dyade.aaa.mom.ReadOnlyMessageMOMExtern msgRead = new fr.dyade.aaa.mom.ReadOnlyMessageMOMExtern(messageJMSMOMID, queue, selector);
-		
-			/*	synchronization because it could arrive that the notify was
-			 *	called before the wait 
-			 */
-			synchronized(obj) {
-			  /* the processus of the client waits the response */
-			  refConnection.waitThreadTable.put(longMsgID,obj);
-			  /* get the messageJMSMOM identifier */
-			  refSession.sendToConnection(msgRead);
-				
-			  obj.wait();
-			}
-			/* the clients wakes up */
-			fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-		
-			/* tests if the key exists 
-			 * dissociates the enumeration null and internal error
-			 */
-			if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-				throw (new fr.dyade.aaa.joram.JMSAAAException("No back Message received ",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-	
-			/* get the the message back or the exception*/
-			msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-			if(msgMOM instanceof fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern) {
-				/* return the enumeration of the messages of the queue */
-				fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern msgEnum = (fr.dyade.aaa.mom.ReadDeliverMessageMOMExtern) msgMOM;
-				return msgEnum.messageEnumerate.elements();
-			} else {
-				/* exception sent back to the client */
-				fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-				fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-				except.setLinkedException(msgExc.exception);
-				throw(except);
-			}
-			
-		} catch (InterruptedException exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("Internal Error : ",String.valueOf(JMSAAAException.DEFAULT_JMSAAA_ERROR));
-			except.setLinkedException(exc);
-			throw(except);
-		} 
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void close()  throws javax.jms.JMSException {
-	  System.gc();
-	}
+import javax.jms.InvalidSelectorException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+
+import org.objectweb.monolog.api.BasicLevel;
+
+/**
+ * Implements the <code>javax.jms.QueueBrowser</code> interface.
+ */
+public class QueueBrowser implements javax.jms.QueueBrowser
+{
+  /** The session the browser belongs to. */
+  private QueueSession sess;
+  /** The queue the browser browses. */
+  private Queue queue;
+  /** The selector for filtering messages. */
+  private String selector;
+  /** <code>true</code> if the browser is closed. */
+  private boolean closed = false;
+
+  /**
+   * Constructs a browser.
+   *
+   * @param sess  The session the browser belongs to.
+   * @param queue  The queue the browser browses.
+   * @param selector  The selector for filtering messages.
+   *
+   * @exception InvalidSelectorException  If the selector syntax is invalid.
+   * @exception JMSSecurityException  If the client is not a READER on the
+   *              queue.
+   * @exception IllegalStateException  If the connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  QueueBrowser(QueueSession sess, Queue queue,
+               String selector) throws JMSException
+  {
+    if (queue == null)
+      throw new InvalidDestinationException("Invalid queue: " + queue);
+
+    try {
+      fr.dyade.aaa.mom.selectors.Selector.checks(selector);
+    }
+    catch (fr.dyade.aaa.mom.excepts.SelectorException sE) {
+      throw new InvalidSelectorException("Invalid selector syntax: " + sE);
+    }
+
+    // Checking the user's access permission:
+    sess.cnx.isReader(queue.getName());
+
+    this.sess = sess;
+    this.queue = queue;
+    this.selector = selector;
+
+    if (sess.browsers == null)
+      sess.browsers = new Vector();
+    sess.browsers.add(this);
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+  }
+
+  /** Returns a string view of this browser. */
+  public String toString()
+  {
+    return "QueueBrowser:" + sess.ident;
+  }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the browser is closed.
+   */
+  public javax.jms.Queue getQueue() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed browser.");
+
+    return queue;
+  }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the browser is closed.
+   */
+  public String getMessageSelector() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed browser.");
+
+    return selector;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the browser is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public Enumeration getEnumeration() throws JMSException
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                 + ": requests an enumeration.");
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed browser.");
+
+    // Sending a "browse" request:
+    QBrowseRequest browReq = new QBrowseRequest(queue.getName(), selector);
+    // Expecting an answer:
+    QBrowseReply reply = (QBrowseReply) sess.cnx.syncRequest(browReq);
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
+                                 + ": received an enumeration.");
+
+    // Processing the received messages:
+    Vector momMessages = reply.getMessages();
+    Vector messages = new Vector();
+    while (! momMessages.isEmpty())
+      messages.add(Message.wrapMomMessage(null,
+                                          (fr.dyade.aaa.mom.messages.Message)
+                                          momMessages.remove(0)));
+    // Return an enumeration:
+    return new QueueEnumeration(messages);
+  }
+
+  /**
+   * API method.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void close() throws JMSException
+  {
+    // Ignoring the call if the browser is already closed:
+    if (closed)
+      return;
+
+    sess.browsers.remove(this);
+    closed = true;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + " closed.");
+  }
+
+  /**
+   * The <code>QueueEnumeration</code> class is used to enumerate the browses
+   * sent by queues.
+   */
+  private class QueueEnumeration implements java.util.Enumeration
+  {
+    /** The vector of messages. */
+    private Vector messages;
+
+    /**
+     * Constructs a <code>QueueEnumeration</code> instance.
+     *
+     * @param messages  The vector of messages to enumerate.
+     */
+    private QueueEnumeration(Vector messages)
+    {
+      this.messages = messages;
+    }
+
+    /** API method. */
+    public boolean hasMoreElements()
+    {
+      return (! messages.isEmpty());
+    }
+
+    /** API method. */
+    public Object nextElement()
+    {
+      if (messages.isEmpty())
+        throw new NoSuchElementException();
+
+      return messages.remove(0);
+    }
+  }
 }

@@ -21,42 +21,68 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.util;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * The <code>Queue</code> class represents a First-In-First-Out 
- * (FIFO) list of objects. 
- *
- * @author  Andr* Freyssinet
- * @version 1.0, 10/22/97
+ * The <code>Queue</code> class implements a First-In-First-Out 
+ * (FIFO) list of objects.
+ * <p>
+ * A queue is for the exclusive use of one single consumer, whereas many
+ * producers may access it. It is ready for use after instanciation. A
+ * producer may wait for the queue to be empty by calling the
+ * <code>stop()</code> method. This method returns when the queue is
+ * actually empty, and prohibitis any further call to the <code>push</code>
+ * method. To be able to use the queue again, it must be re-started through
+ * the <code>start()</code> method.
  */
-public class Queue extends Vector {
-
-public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+public class Queue extends Vector
+{
+  public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.8 2002-03-06 16:58:48 joram Exp $"; 
 
   /**
-   * Pushes an item onto the bottom of this queue. 
-   *
-   * @param   item   the item to be pushed onto this queue.
+   * <code>true</code> if a producer called the <code>stop()</code>
+   * method.
    */
-  public synchronized void push(Object item) {
+  private boolean stopping;
+
+
+  /**
+   * Constructs a <code>Queue</code> instance.
+   */
+  public Queue()
+  {
+    super();
+    start();
+  }
+
+
+  /**
+   * Pushes an item at the end of this queue. 
+   *
+   * @param item  The item to be pushed at the end of this queue.
+   * @exception  StoppedQueueException  If the queue is stopping or stopped.
+   */
+  public synchronized void push(Object item)
+  {
+    if (stopping)
+      throw new StoppedQueueException();
+
     addElement(item);
     notify();
   }
 
+
   /**
-   * Removes the object at the top of this queue and returns that 
-   * object as the value of this function. 
+   * Removes and returns the object at the top of this queue.
    *
-   * @return     The object at the top of this queue.
-   * @exception  EmptyQueueException  if this queue is empty.
+   * @return  The object at the top of this queue.
+   * @exception  EmptyQueueException  If the queue is empty.
    */
-  public synchronized Object pop() {
+  public synchronized Object pop()
+  {
     Object obj;
     
     if (size() == 0)
@@ -65,20 +91,44 @@ public static final String RCS_VERSION="@(#)$Id: Queue.java,v 1.7 2002-01-16 12:
     obj =elementAt(0);
     removeElementAt(0);
 
+    if (stopping && size() == 0)
+      notify();
+
     return obj;
   }
 
+
   /**
-   * Looks at the object at the top of this queue without removing it 
-   * from the queue. 
+   * Waits for an object to be pushed in the queue, and eventually returns
+   * it without removing it.
    *
-   * @return     the object at the top of this queue. 
-   * @exception  EmptyQueueException  if this queue is empty.
+   * @return  The object at the top of this queue. 
    */
-  public synchronized Object get() throws InterruptedException {
-    while (size() == 0) {
-	wait();
-    }
+  public synchronized Object get() throws InterruptedException
+  {
+    while (size() == 0)
+      wait();
+
     return elementAt(0);
+  }
+
+
+  /** Authorizes the use of the queue by producers. */
+  public void start()
+  {
+    stopping = false;
+  }
+
+
+  /**
+   * Stops the queue by returning when it is empty and prohibiting any
+   * further producers call to the <code>push</code> method.
+   */
+  public synchronized void stop() throws InterruptedException
+  {
+    stopping = true;
+
+    if (size() != 0)
+      wait();
   }
 }

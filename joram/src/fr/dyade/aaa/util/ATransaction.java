@@ -26,11 +26,18 @@ package fr.dyade.aaa.util;
 import java.io.*;
 import java.util.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
+import fr.dyade.aaa.agent.Debug;
+
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.6 2002-01-16 12:46:47 joram Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $";
 
   // State of the transaction monitor.
   private int phase;
+
+  private static Monitor logmon = null;
 
   static private final int INIT = 0;	  // Initialization state
   static private final int FREE = 1;	  // No transaction 
@@ -73,7 +80,7 @@ public final class ATransaction implements Transaction, Runnable {
 
   class Context extends ThreadLocal {
     protected Object initialValue() {
-      return new Hashtable();
+      return new Hashtable(15);
     }
   }
   /**
@@ -119,14 +126,10 @@ public final class ATransaction implements Transaction, Runnable {
 
   static final boolean debug = false;
 
-  static final void trace(String BPT) {
-    if (debug) {
-      System.out.println(BPT + " [" + Thread.currentThread() + "]");
-    }
-  }
-
   public ATransaction(String path) throws IOException {
     phase = INIT;
+
+    logmon = Debug.getMonitor(Debug.A3Debug + ".Transaction");
 
     /*  Search for log files: plog then clog, reads it, then apply all
      * committed operation, finally deletes it.
@@ -141,9 +144,9 @@ public final class ATransaction implements Transaction, Runnable {
 
 //     log = new Hashtable(20);
     ctx = new Context();
-    clog = new Hashtable(151);
+    clog = new Hashtable(400);
     // the object created here will never be used.
-    plog = new Hashtable(11);
+    plog = new Hashtable(15);
 
     logFile = new RandomAccessFile(new File(dir, LOG), "rw");
     logFD = logFile.getFD();
@@ -193,13 +196,11 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   private final void setPhase(int newPhase) {
-    trace("setPhase -> " + newPhase);
     phase = newPhase;
   }
 
 
   public synchronized void begin() throws IOException {
-    trace("begin1");
     while (phase != FREE) {
       try {
 	wait();
@@ -208,7 +209,6 @@ public final class ATransaction implements Transaction, Runnable {
     }
     // Change the transaction state.
     setPhase(RUN);
-    trace("begin2");
   }
 
   // Be careful: only used in Server 
@@ -222,19 +222,11 @@ public final class ATransaction implements Transaction, Runnable {
     oos.writeObject(obj);
     oos.flush();
 
-// AF: TO REMOVE
-//     if (phase == RUN) {
     Hashtable log = (Hashtable) ctx.get();
     // We are during a transaction put the new state in the log.
     log.put(name, new Operation(Operation.SAVE,
 				name,
 				bos.toByteArray()));
-//     } else {
-//       // Save the new state on the disk.
-//       FileOutputStream fos = new FileOutputStream(new File(dir, name));
-//       fos.write(bos.toByteArray());
-//       fos.close();
-//     }
   }
 
   private final Object getFromLog(Hashtable log, String name)
@@ -249,7 +241,7 @@ public final class ATransaction implements Transaction, Runnable {
 	return ois.readObject();
       } else if (op.type == Operation.DELETE) {
 	// The object was deleted.
-	return null;
+	throw new FileNotFoundException();
       }
     }
     return null;
@@ -259,20 +251,17 @@ public final class ATransaction implements Transaction, Runnable {
     Object obj;
 
     // First searchs in the logs a new value for the object.
-// AF: TO REMOVE
-//     if (phase == RUN) {
     Hashtable log = (Hashtable) ctx.get();
-    if ((obj = getFromLog(log, name)) != null)
-      return obj;
-//     }
-
-    if (((obj = getFromLog(clog, name)) != null) ||
-	((obj = getFromLog(plog, name)) != null)) {
-      return obj;
-    }
-
-    // Gets it from disk.
     try {
+      if ((obj = getFromLog(log, name)) != null)
+        return obj;
+
+      if (((obj = getFromLog(clog, name)) != null) ||
+	  ((obj = getFromLog(plog, name)) != null)) {
+        return obj;
+      }
+
+      // Gets it from disk.
       File file = new File(dir, name);
       FileInputStream fis = new FileInputStream(file);
       
@@ -282,23 +271,16 @@ public final class ATransaction implements Transaction, Runnable {
       obj = ois.readObject();
       
       fis.close();
+      return obj;
     } catch (FileNotFoundException exc) {
       return null;
     }
-
-    return obj;
   }
 
   public void delete(String name) {
-// AF: TO REMOVE
-//     if (phase == RUN) {
     // We are during a transaction mark the object deleted in the log.
     Hashtable log = (Hashtable) ctx.get();
     log.put(name, new Operation(Operation.DELETE, name));
-//   } else {
-//       File file = new File(dir, name);
-//       file.delete();
-//     }
   }
 
   int nbc = 0; // Number of commited transaction in clog.
@@ -308,6 +290,10 @@ public final class ATransaction implements Transaction, Runnable {
   public synchronized void commit() throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
+
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
+		 "ATransaction, Commit() - begin");
     
     nbc += 1; // AF: Monitoring
     Hashtable log = (Hashtable) ctx.get();
@@ -331,6 +317,10 @@ public final class ATransaction implements Transaction, Runnable {
     logFD.sync();
 
     log.clear();
+
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
+		 "ATransaction, Commit() - end");
 
     setPhase(COMMIT);
   }
@@ -374,22 +364,38 @@ public final class ATransaction implements Transaction, Runnable {
   /**
    * Reports all operations in log on disk.
    */
-  private void commit(Hashtable log) throws IOException { 
+  private void commit(Hashtable log) throws IOException {
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
+		 "ATransaction, Commit(" + log + ") - begin");
+
     // Reports all operation on disk...
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
       Operation op = (Operation) e.nextElement();
-
       if (op.type == Operation.SAVE) {
-	trace("Save " + op.name);
+	if (logmon.isLoggable(BasicLevel.DEBUG))
+	  logmon.log(BasicLevel.DEBUG,
+		     "ATransaction, Save " + op.name);
 	FileOutputStream fos = new FileOutputStream(new File(dir, op.name));
 	fos.write(op.value);
 	fos.getFD().sync();
 	fos.close();
       } else if (op.type == Operation.DELETE) {
-	trace("Delete " + op.name);
-	new File(dir, op.name).delete();
+	if (logmon.isLoggable(BasicLevel.DEBUG))
+	  logmon.log(BasicLevel.DEBUG,
+		     "ATransaction, Delete " + op.name);
+	if ((! new File(dir, op.name).delete()) &&
+	    (new File(dir, op.name).exists()))
+	  logmon.log(BasicLevel.ERROR,
+		     "ATransaction, can't delete " +
+		     new File(dir, op.name).getCanonicalPath());
       }
     }
+
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
+		 "ATransaction, Commit(" + log + ") - end");
+
   }
 
   public final synchronized void stop() {
@@ -431,11 +437,13 @@ public final class ATransaction implements Transaction, Runnable {
 
 	garbage = false;
 
-	trace("Wakeup: " + nbc + ", " + nbo + ", " + nbs);
+	if (logmon.isLoggable(BasicLevel.INFO))
+	  logmon.log(BasicLevel.INFO,
+		     "ATransaction, Wakeup: " + nbc + ", " + nbo + ", " + nbs);
 	nbc = nbo = nbs = 0;
 
 	plog = clog;
-	clog = new Hashtable();
+	clog = new Hashtable(400);
 
 	logFile.close();
 	
@@ -449,14 +457,19 @@ public final class ATransaction implements Transaction, Runnable {
 	// plog will be cleared by next garbage.
 	new File(dir, PLOG).delete();
 
-	trace("Wakeup: end");
+	if (logmon.isLoggable(BasicLevel.INFO))
+	  logmon.log(BasicLevel.INFO,
+		     "ATransaction, Wakeup: end");
       }
     } catch (IOException exc) {
       // TODO: ?
       exc.printStackTrace();
     } finally {
       isRunning = false;
-      trace(this.toString() + " exits.");
+
+      if (logmon.isLoggable(BasicLevel.INFO))
+	  logmon.log(BasicLevel.INFO,
+		     "ATransaction,  exits.");
     }
   }
 }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,289 +15,319 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
- */
-
-
-package fr.dyade.aaa.joram; 
-
-import java.lang.*; 
-
-/** 
- *	Before closing a session or a TopicSubscriber, messages must be acknowledged
- *	or else the are rest in the Queue and put as redelivered
  *
- *	a TopicPublisher is an object associated with a real Topic
- *	in the MOM 
- * 
- *	@see javax.jms.MessageConsumer
- *	@see javax.jms.TopicSubscriber
- *	@see fr.dyade.aaa.mom.Topic 
- */ 
- 
-public class TopicSubscriber extends fr.dyade.aaa.joram.MessageConsumer implements javax.jms.TopicSubscriber { 
+ * The present code contributor is ScalAgent Distributed Technologies.
+ */
+package fr.dyade.aaa.joram;
 
-	/** the Topic associated to the TopicSubscriber */
-	fr.dyade.aaa.mom.TopicNaming topic;
-	
-	/** the noLocal attribute of the TopicPublisher */
-	private boolean noLocal;
-	
-	/** the name of the subscription */
-	protected String nameSubscription;
-	
-	/** gets if the TopicSubscriber concerns a durable subscription or not */
-	protected boolean subDurable;
+import fr.dyade.aaa.mom.jms.*;
 
-	/** constructor with nolocal default value = false and no selector */
-    public TopicSubscriber(String consumerID, fr.dyade.aaa.joram.Connection refConnection, fr.dyade.aaa.joram.Session refSession, String nameSubscription, javax.jms.Topic topic, String selector, boolean noLocal, boolean subDurable) {
-		super(consumerID, refConnection, refSession, selector);
-		this.topic = (fr.dyade.aaa.mom.TopicNaming) topic;
-		this.noLocal = noLocal;
-		this.nameSubscription = nameSubscription;
-		this.subDurable = subDurable;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public javax.jms.Topic getTopic() throws javax.jms.JMSException {
-		if(topic==null)
-			throw (new fr.dyade.aaa.joram.JMSAAAException("Topic name Unknown",JMSAAAException.DEFAULT_JMSAAA_ERROR));
-		else
-			return topic;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public boolean getNoLocal() throws javax.jms.JMSException {
-		return noLocal;
-	}
-	
-	/**overwrite the methode from MessageConsumer  */
-	public void close()  throws javax.jms.JMSException {
-		try {
-			/* decrements the counter of no durable ubscription if yes */
-			if(!subDurable)
-				((fr.dyade.aaa.joram.TopicSession)refSession).decrementNbTemporarySub();
-			
-			synchronized(refSession.messageConsumerTable) {	
-				/* cancel the entry to the Connection table*/
-				fr.dyade.aaa.joram.KeyConnectionSubscription key = new fr.dyade.aaa.joram.KeyConnectionSubscription(nameSubscription, topic.getTopicName(), topic.getTheme());
-				refConnection.subscriptionListenerTable.remove(key);
-				
-				/* cancel the inscription in the Table of the Session */
-				java.util.Vector v;
-				if((v = (java.util.Vector) refSession.messageConsumerTable.get(topic))==null)
-					throw (new fr.dyade.aaa.joram.JMSAAAException("Internal Error during close",JMSAAAException.DEFAULT_JMSAAA_ERROR));
-				if(v.size()==1) {
-					/* remove the entry of the hahtable */
-					refSession.messageConsumerTable.remove(topic);
-				} else {
-					/* others MessageConsumer waiting the messages */
-					/* discard this elment of the vector */
-					v.removeElementAt(0);
-				
-					/* set the reception OK in the firstElement of the vector */
-					fr.dyade.aaa.joram.TopicSubscriber topicSubscriber = (fr.dyade.aaa.joram.TopicSubscriber) v.firstElement();
-					topicSubscriber.setDeliveryMessage(true);
-				}
-			}
-			
-			Object obj = new Object();
-			long messageJMSMOMID = refConnection.getMessageMOMID();
-			Long longMsgID = new Long(messageJMSMOMID);
-				
-			fr.dyade.aaa.mom.CloseSubscriberMOMExtern msgClose = new fr.dyade.aaa.mom.CloseSubscriberMOMExtern(messageJMSMOMID, nameSubscription, topic, new Long(refSession.sessionID).toString(), subDurable);
-				
-			/*	synchronization because it could arrive that the notify was
-			 *	called before the wait 
-			 */
-			synchronized(obj) {
-			  /* the processus of the client waits the response */
-			  refConnection.waitThreadTable.put(longMsgID,obj);
-			  /* get the messageJMSMOM identifier */
-			  refSession.sendToConnection(msgClose);
+import java.util.Vector;
 
-			  obj.wait();
-			}
-				
-			/* the clients wakes up */
-			fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-		
-			/* tests if the key exists 
-			 * dissociates the message null (on receiveNoWait) and internal error
-			 */
-			if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-				throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-	
-			/* get the the message back or the exception*/
-			msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-			if(!(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern)) {
-				/* exception sent back to the client */
-				fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-				fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-				except.setLinkedException(msgExc.exception);
-				throw(except);
-			}
-		} catch (InterruptedException exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("Internal Error : ",String.valueOf(JMSAAAException.DEFAULT_JMSAAA_ERROR));
-			except.setLinkedException(exc);
-			throw(except);
-		}
-		super.close();
-	}
-	
-	/** overwrite the methode  */
-	public void setMessageListener(javax.jms.MessageListener listener) throws javax.jms.JMSException {
-     if (listener != null && messageListener != null)
-      throw (new javax.jms.JMSException("A listener has already been set"));
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
 
-		try {
-            if (refSession.listener == null) {
-              refSession.listener = new SessionListener(new Long(refSession.sessionID),
-                refConnection, refSession, true);
-              refSession.listener.setDaemon(true);
-              refSession.listener.start();
-            }
-			Object obj = new Object();
-			long messageJMSMOMID = refConnection.getMessageMOMID();
-			Long longMsgID = new Long(messageJMSMOMID);
-			
-			fr.dyade.aaa.mom.SettingListenerMOMExtern msgSet = new fr.dyade.aaa.mom.SettingListenerMOMExtern(messageJMSMOMID, nameSubscription, topic, true);
-				
-			/*	synchronization because it could arrive that the notify was
-			 *	called before the wait 
-			 */
-			synchronized(obj) {
-			  /* the processus of the client waits the response */
-			  refConnection.waitThreadTable.put(longMsgID,obj);
-			  /* get the messageJMSMOM identifier */
-			  refSession.sendToConnection(msgSet);
-				
-			  obj.wait();
-			}
-				
-			/* the clients wakes up */
-			fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-		
-			/* tests if the key exists 
-			 * dissociates the message null (on receiveNoWait) and internal error
-			 */
-			if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-				throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-	
-			/* get the the message back or the exception*/
-			msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-			if(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern) {
-				/* keep the reference to the MesageListener */
-				messageListener = listener;
-			} else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-				/* exception sent back to the client */
-				fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-				fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-				except.setLinkedException(msgExc.exception);
-				throw(except);
-			} else {
-				/* unknown message */
-				/* should never arrived */
-				fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-				throw(except);
-			}
-		} catch (InterruptedException exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("Internal Error : ",String.valueOf(JMSAAAException.DEFAULT_JMSAAA_ERROR));
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+import org.objectweb.monolog.api.BasicLevel;
 
+/**
+ * Implements the <code>javax.jms.TopicSubscriber</code> interface.
+ */
+public class TopicSubscriber extends MessageConsumer
+                             implements javax.jms.TopicSubscriber
+{
+  /**
+   * <code>true</code> if the subscriber does not wish to consume messages
+   * published by the same connection.
+   */
+  private boolean noLocal;
+  /** <code>true</code> if the subscription is durable. */
+  private boolean durable;
+
+  /** The subscription's name. */
+  String name;
+  
+  /**
+   * Constructs a subscriber.
+   *
+   * @param sess  The session the subscriber belongs to.
+   * @param topic  The topic the subscriber subscribes to.
+   * @param name  The subscription name.
+   * @param selector  The selector for filtering messages.
+   * @param noLocal <code>true</code> if the subscriber does not wish to
+   *          consume messages published through the same connection.
+   * @param durable  <code>true</code> if the subscription is durable.
+   *
+   * @exception JMSSecurityException  If the client is not a READER on the
+   *              topic.
+   * @exception IllegalStateException  If the connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  TopicSubscriber(TopicSession sess, Topic topic, String name, String selector,
+                  boolean noLocal, boolean durable) throws JMSException
+  {
+    super(sess, topic, selector);
+    this.noLocal = noLocal;
+    this.durable = durable;
+    this.name = name;
+
+    sess.cnx.syncRequest(new TSessSubRequest(destName, name, selector,
+                                             noLocal, durable));
+  }
+
+   /** Returns a string view of this receiver. */
+  public String toString()
+  {
+    return "TopicSub:" + name;
+  }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the subscriber is closed.
+   */
+  public boolean getNoLocal() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " subscriber.");
+    return noLocal;
+  }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the subscriber is closed.
+   */
+  public javax.jms.Topic getTopic() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " subscriber.");
+    return (Topic) dest;
+  }
 
   /**
-   * Method used for synchronous reception. 
+   * Specializes this API method to the PubSub mode.
+   * <p>
+   * This method must not be called if the connection the subscriber belongs to
+   * is started, because the session would then be accessed by the thread
+   * calling this method and by the thread controlling asynchronous deliveries.
+   * This situation is clearly forbidden by the single threaded nature of
+   * sessions. Moreover, unsetting a message listener without stopping the 
+   * connection may lead to the situation where asynchronous deliveries would
+   * arrive on the connection, the session or the subscriber without being
+   * able to reach their target listener!
    *
-   * @param timeOut  Time-to-live attribute of the reception request in MOM
-   * (ms).
-   *
-   * @author Frederic Maistre
+   * @exception IllegalStateException  If the subscriber is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
    */
-  public javax.jms.Message receive(long timeOut) throws javax.jms.JMSException
+  public void setMessageListener(javax.jms.MessageListener messageListener)
+            throws JMSException
   {
-    long requestID = refConnection.getMessageMOMID();
-    Long longRequestID = new Long(requestID);
+    // Getting the current listener:
+    javax.jms.MessageListener previousML = super.messageListener;
+    // Setting the new one:
+    super.setMessageListener(messageListener);
 
-    // Building the request.
-    fr.dyade.aaa.mom.SynchronousReceptionRequestMsg requestMsg = 
-      new fr.dyade.aaa.mom.SynchronousReceptionRequestMsg(requestID, timeOut);
-    requestMsg.setSubName(nameSubscription);
-
-    Object lock = new Object();
-
-    // Sending the request and waiting for an answer.
-    try {
-      synchronized (lock) {
-        refConnection.waitThreadTable.put(longRequestID, lock);
-        refSession.sendToConnection(requestMsg);
-        lock.wait();
-      }
-    } catch (InterruptedException iE) {
-      javax.jms.JMSException jE =
-        new javax.jms.JMSException("Error while waiting for MOM's answer.");
-      jE.setLinkedException(iE);
-      throw(jE);
+    // If setting a new listener, sending a request to the proxy:
+    if (messageListener != null && previousML == null) {
+      pendingReq = new TSubSetListRequest(name);
+      pendingReq.setIdentifier(sess.cnx.nextRequestId());
+      sess.cnx.requestsTable.put(pendingReq.getRequestId(), this);
+      sess.cnx.asyncRequest(pendingReq);
     }
+    // If unsetting the listener, sending a request to the proxy:
+    else if (messageListener == null && previousML != null) {
+      sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+      pendingReq = null;
+      TSubUnsetListRequest unsetLR = new TSubUnsetListRequest(name);
+      sess.cnx.syncRequest(unsetLR);
+    }
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": MessageListener"
+                                 + " set.");
+  }
+
+  /**
+   * Specializes this API method to the Pub/Sub mode.
+   *
+   * @exception IllegalStateException  If the receiver is closed, or if the
+   *              connection is broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public javax.jms.Message receive(long timeOut) throws JMSException
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": requests to receive a message.");
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed receiver.");
     
-    if (!refConnection.messageJMSMOMTable.containsKey(longRequestID))
-      throw new javax.jms.JMSException("MOM's answer does not match the request!");
+    if (listenerSet) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+        JoramTracing.dbgClient.log(BasicLevel.WARN, this + ": invalid"
+                                   + " call as a listener exists for"
+                                   + " this subscriber.");
+    }
+    else if (sess.msgListeners > 0) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+        JoramTracing.dbgClient.log(BasicLevel.WARN, "Improper call as"
+                                   + " asynchronous consumers have already"
+                                   + " been set on the session.");
+    }
 
-    fr.dyade.aaa.mom.MessageMOMExtern momMsg = (fr.dyade.aaa.mom.MessageMOMExtern)
-      refConnection.messageJMSMOMTable.remove(longRequestID);
+    // Sending a synchronous "receive" request and synchronizing with
+    // a possible "close":
+    synchronized(this) {
+      pendingReq = new TSubReceiveRequest(name, timeOut);
+      receiving = true;
+    }
+    // Expecting an answer:
+    SubMessages reply = (SubMessages) sess.cnx.syncRequest(pendingReq);
+    pendingReq = null;
 
-    // Acknowledging the answer.
-    if (momMsg instanceof fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) {
-      fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern msg =
-        (fr.dyade.aaa.mom.MessageTopicDeliverMOMExtern) momMsg;
-      if (msg.message != null) {
-        if (!refSession.transacted) {
-          if (refSession.acknowledgeMode ==
-            fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-            
-            fr.dyade.aaa.mom.AckTopicMessageMOMExtern ackMsg =
-              new fr.dyade.aaa.mom.AckTopicMessageMOMExtern(refConnection.getMessageMOMID(),
-              topic, nameSubscription, msg.message.getJMSMessageID(),
-              fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE);
-            
-            refSession.sendToConnection(ackMsg);
-          }
-          else {
-            refSession.lastNotAckVector.addElement(msg);
-            msg.message.setRefSessionItf(refSession);
-          }
-        }
-        else {
-          synchronized(refSession.transactedSynchroObject) {
-            refSession.transactedMessageToAckVector.addElement(msg);
-          }
-        }
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
+                                 + " reply.");
+    
+    // Processing the received reply and synchronizing with a possible
+    // "close":
+    synchronized(this) {
+      receiving = false;
+      if (reply.getMessages() != null) {
+        String msgId = reply.getMessage().getIdentifier();
+        // Auto ack: acknowledging the message:
+        if (sess.autoAck)
+          sess.cnx.asyncRequest(new TSubAckRequest(name, msgId));
+        // Session ack: passing the id for later ack or deny:
+        else
+          sess.prepareAck(name, msgId);
+
+        return Message.wrapMomMessage(sess, reply.getMessage());
       }
-      refSession.resetMessage(msg.message);
-      return msg.message;
-    }
-
-    // Processing the exception cases.
-    else if (momMsg instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
-      fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc =
-        (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) momMsg;
-
-      javax.jms.JMSException except = new javax.jms.JMSException("MOM internal error"); 
-      except.setLinkedException(msgExc.exception);
-      throw(except);
-    }
-    else {
-      javax.jms.JMSException except = new javax.jms.JMSException("MOM internal error"); 
-      throw(except);
+      else
+        return null;
     }
   }
 
+  /**
+   * Specializes this API method to the Pub/Sub mode.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void close() throws JMSException
+  {
+    // Ignoring call if the subscriber is already closed:
+    if (closed)
+      return;
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closing...");
+
+    // Synchronizing with a pending "receive" or "onMessage":
+    super.syncro();
+
+    // Unsetting the listener, if any:
+    if (listenerSet) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unsetting listener.");
+
+      sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+      pendingReq = null;
+      sess.cnx.syncRequest(new TSubUnsetListRequest(name));
+    }
+    // De-activating the subscription if durable:
+    if (durable)
+      sess.cnx.syncRequest(new TSubCloseRequest(name));
+    // Unsubscribing if non durable:
+    else
+      sess.cnx.syncRequest(new TSessUnsubRequest(name));
+
+    // In the case of a pending "receive" request, replying by a null to it:
+    if (receiving) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Replying to the"
+                                   + " pending receive "
+                                   + pendingReq.getRequestId()
+                                   + " with a null message.");
+
+      sess.cnx.repliesTable.put(pendingReq.getRequestId(), new SubMessages());
+      Object lock = sess.cnx.requestsTable.remove(pendingReq.getRequestId());
+      synchronized(lock) {
+        lock.notify();
+      }
+    }
+    // Synchronizing again:
+    super.syncro();
+
+    super.close();
+  }
+
+  
+  /**
+   * Specializes this method called by the session daemon for passing an
+   * asynchronous message delivery to the subcriber's listener.
+   */
+  synchronized void onMessage(fr.dyade.aaa.mom.messages.Message message)
+  {
+    String msgId = message.getIdentifier();
+
+    try {
+      // The target listener of the received message may be null if it has
+      // been unset without having stopped the connection: denying the msg:
+      if (messageListener == null) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN, this + ": an"
+                                     + " asynchronous delivery arrived"
+                                     + " for an improperly unset listener:"
+                                     + " denying the message.");
+        sess.cnx.asyncRequest(new TSubDenyRequest(name, msgId));
+      }
+      else {
+        // In session ack mode, preparing later ack or deny:
+        if (! sess.autoAck)
+          sess.prepareAck(name, msgId);
+
+        try {
+          messageListener.onMessage(Message.wrapMomMessage(sess, message));
+          // Auto ack: acknowledging the message:
+          if (sess.autoAck)
+            sess.cnx.asyncRequest(new TSubAckRequest(name, msgId));
+        }
+        // Catching a JMSException means that the building of the Joram
+        // message went wrong: denying the message:
+        catch (JMSException jE) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgClient.log(BasicLevel.ERROR, this
+                                       + ": error while processing the"
+                                       + " received message: " + jE);
+          sess.cnx.asyncRequest(new TSubDenyRequest(name, msgId));
+        } 
+        // Catching a RuntimeException means that the client onMessage() code
+        // is incorrect; denying as expected by the JMS spec:
+        catch (RuntimeException rE) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgClient.log(BasicLevel.ERROR, this
+                                       + ": RuntimeException thrown"
+                                       + " by the listener: " + rE);
+          if (sess.autoAck)
+            sess.cnx.asyncRequest(new TSubDenyRequest(name, msgId));
+        }
+      }
+    }
+    // Catching an IllegalStateException means that the acknowledgement or
+    // denying went wrong because the connection has been lost. Nothing more
+    // can be done here.
+    catch (JMSException jE) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, this + ": " + jE);
+    }
+  }
 }

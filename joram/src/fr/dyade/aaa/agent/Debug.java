@@ -62,18 +62,26 @@ import org.objectweb.monolog.api.MonitorFactory;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
 
   static MonitorFactory factory = null;
 
+  /** Property name for A3 debug configuration directory */
   public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_DIR";
+  /** Default directory for A3 debug configuration file */
   public final static String DEFAULT_DEBUG_DIR = ".";
+  /** Property name for A3 debug configuration filename */
   public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3DEBUG_FILE";
+  /** Default filename for A3 debug configuration */
   public final static String DEFAULT_DEBUG_FILE = "a3debug.cfg";
+  /** Property name for A3 debug produced files */ 
+  public final static String AUDIT_DIR_PROPERTY = "fr.dyade.aaa.agent.A3AUDIT_DIR";
+  /** Default directory for A3 debug produced files */
+  public final static String DEFAULT_AUDIT_DIR = ".";
 
   /**
    * Initializes the package.
@@ -111,9 +119,12 @@ public final class Debug {
       root.setPriority(org.apache.log4j.Priority.ERROR);
     } else if (serverId >= 0) {
       try {
+        String auditDir = System.getProperty(AUDIT_DIR_PROPERTY,
+                                             DEFAULT_AUDIT_DIR);
         // Try to create local appender if defined...
         FileAppender local = (FileAppender) root.getAppender("local");
-        local.setFile("server#" + serverId + ".audit");
+        File auditFile = new File(auditDir, "server#" + serverId + ".audit");
+        local.setFile(auditFile.getCanonicalPath());
       } catch (Exception exc) { }
     }
 

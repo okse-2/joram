@@ -98,7 +98,7 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  */
 public class NameService extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.4 2002-01-16 12:46:47 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.5 2002-03-06 16:34:37 joram Exp $";
 
   /** initializes service only once */
   private static boolean initialized = false;
@@ -147,7 +147,7 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.4 2002-01-
    * @exception Exception
    *	unspecialized exception
    */
-  public static AgentId getDefault(short serverId) throws Exception {
+  public static AgentId getDefault(short serverId) {
     return new AgentId(serverId, serverId, AgentId.NameServiceStamp);
   }
 
@@ -160,7 +160,7 @@ public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.4 2002-01-
    * @exception Exception
    *	unspecialized exception
    */
-  public static AgentId getDefault() throws Exception {
+  public static AgentId getDefault() {
     return getDefault(AgentServer.getServerId());
   }
 

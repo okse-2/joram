@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,241 +15,67 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-import java.io.*;
-import javax.jms.*;
+import java.net.ConnectException;
+
+import javax.jms.JMSException;
 
 /**
- * A client uses a TopicConnectionFactory to create TopicConnections
- * with a JMS Pub/Sub provider.
+ * Implements the <code>javax.jms.TopicConnectionFactory</code> interface.
  */
-public class TopicConnectionFactory extends ConnectionFactory implements javax.jms.TopicConnectionFactory {
-    
-  /** Socket use to create New Topic (or delete Topic)*/
-  protected Socket sock = null;
-  /** ObjectOutputStream */
-  protected ObjectOutputStream oos = null; 
-  /** ObjectInputStream */
-  protected ObjectInputStream ois = null;
-
+public class TopicConnectionFactory extends ConnectionFactory
+                                    implements javax.jms.TopicConnectionFactory
+{
   /**
-   * Constructs a new TopicConnectionFactory.
+   * Constructs a <code>TopicConnectionFactory</code> instance wrapping a 
+   * given agent server url.
+   *
+   * @param url  Url of the agent server.
+   * @exception ConnectException  If the url is incorrect.
    */
-  public TopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
-    super(agentClient, addrProxy, portProxy);
+  public TopicConnectionFactory(String url) throws ConnectException
+  {
+    super(url);
   }
-
-  /**
-   * Constructs a new TopicConnectionFactory.
-   */
-  public TopicConnectionFactory(String stringURL) {
-    super(stringURL);
+  
+  /** Returns a string view of the connection factory. */
+  public String toString()
+  {
+    return "TCF:" + serverAddr.toString();
   }
 
   /**
-   * Create a topic connection with default user identity.
+   * API method.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
-    return new TopicConnection(agentClient, addrProxy, portProxy, login, passwd);
+  public javax.jms.TopicConnection
+       createTopicConnection(String name, String password)
+       throws JMSException
+  {
+    return new TopicConnection(serverAddr, port, name, password, timer);
   }
-    
-    
+
   /**
-   * Create a topic connection with specified user identity.
+   * API method.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection createTopicConnection(String userName, String password) throws JMSException {
-    this.login = userName;
-    this.passwd = password;
-    return createTopicConnection();
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException
+  {
+    return createTopicConnection("anonymous", "anonymous");
   }
-
-  /** Create New Topic 
-   * @see #delete(javax.jms.Topic)
-   */
-  public javax.jms.Topic createNewTopic () throws javax.jms.JMSException {
-    try {
-      if (Debug.debug)
-	if (Debug.admin)
-	  System.out.println("->TopicConnectionFactory : createNewTopic (Protocol=" + url.getProtocol() +
-			     ", Host=" + url.getHost() +
-			     ", Port=" + url.getPort() +
-			     ", AgentId=" + url.getAgentId() + ")");
-	    
-      if ( url.getProtocol().equals("joram") ) {
-	sock = new Socket(addrProxy, portProxy);
-	if ( sock != null ) {
-	  sock.setTcpNoDelay(true);
-	  sock.setSoTimeout(0);
-	  sock.setSoLinger(true,1000);
-		
-	  /* send the name of the agentClient */
-	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-	  dos.writeUTF(agentClient);
-	  dos.flush();
-	  /* creation of the objectinputStream and ObjectOutputStream */
-	  oos = new ObjectOutputStream(sock.getOutputStream());
-	  ois = new ObjectInputStream(sock.getInputStream());
-	    
-	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateTopic(1, agentClient,null);
-	  if (oos != null) {
-	    oos.writeObject(msgMOM);
-	    oos.flush();
-	    oos.reset();
-	  }
-	  if (ois != null) {
-	    fr.dyade.aaa.mom.MessageAdminCreateTopic msg = (fr.dyade.aaa.mom.MessageAdminCreateTopic) ois.readObject();
-	    if (Debug.debug)
-	      if (Debug.admin)
-		System.out.println("<-TopicConnectionFactory : createNewTopic  msg=" + msg.toString());
-
-	    return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
-						"://" + url.getHost() +
-						":" + url.getPort() +
-						"/" + msg.getTopicName());
-	  } 
-	}
-      }
-
-      return null;
-    } catch (Exception exc) {
-      javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewTopic");
-      except.setLinkedException(exc);
-      throw(except);
-    } finally {
-      try {
-	oos.close();
-      } catch (IOException exc) {}
-      try {
-	ois.close();
-      } catch (IOException exc) {}
-      try {
-	sock.close();
-      } catch (IOException exc) {}
-    }
-  }
-
-  /** Create New Specific Topic
-   * your Class className must extends fr.dyade.aaa.mom.Topic
-   * @see #delete(javax.jms.Topic)
-   */
-  public javax.jms.Topic createNewSpecificTopic(String className) throws javax.jms.JMSException {
-    try {
-      if (Debug.debug)
-	if (Debug.admin)
-	  System.out.println("->TopicConnectionFactory : createNewSpecificTopic (Protocol=" + url.getProtocol() +
-			     ", Host=" + url.getHost() +
-			     ", Port=" + url.getPort() +
-			     ", AgentId=" + url.getAgentId() + ")");
-	    
-      if ( url.getProtocol().equals("joram") ) {
-	sock = new Socket(addrProxy, portProxy);
-	if ( sock != null ) {
-	  sock.setTcpNoDelay(true);
-	  sock.setSoTimeout(0);
-	  sock.setSoLinger(true,1000);
-		
-	  /* send the name of the agentClient */
-	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-	  dos.writeUTF(agentClient);
-	  dos.flush();
-	  /* creation of the objectinputStream and ObjectOutputStream */
-	  oos = new ObjectOutputStream(sock.getOutputStream());
-	  ois = new ObjectInputStream(sock.getInputStream());
-	    
-	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateSpecific(1, agentClient,className);
-	  if (oos != null) {
-	    oos.writeObject(msgMOM);
-	    oos.flush();
-	    oos.reset();
-	  }
-	  if (ois != null) {
-	    fr.dyade.aaa.mom.MessageAdminCreateSpecific msg = (fr.dyade.aaa.mom.MessageAdminCreateSpecific) ois.readObject();
-	    if (Debug.debug)
-	      if (Debug.admin)
-		System.out.println("<-TopicConnectionFactory : createNewSpecificTopic  msg=" + msg.toString());
-
-	    return new fr.dyade.aaa.joram.Topic(url.getProtocol() +
-						"://" + url.getHost() +
-						":" + url.getPort() +
-						"/" + msg.getID());
-	  } 
-	}
-      }
-
-      return null;
-    } catch (Exception exc) {
-      javax.jms.JMSException except = new javax.jms.JMSException("Exception=TopicConnectionFactory : createNewSpecificTopic");
-      except.setLinkedException(exc);
-      throw(except);
-    } finally {
-      try {
-	oos.close();
-      } catch (IOException exc) {}
-      try {
-	ois.close();
-      } catch (IOException exc) {}
-      try {
-	sock.close();
-      } catch (IOException exc) {}
-    }
-  }
-
-  /** delete Topic */
-  public void delete(javax.jms.Topic topic) throws javax.jms.JMSException {
-    try {
-      if (Debug.debug)
-	if (Debug.admin)
-	  System.out.println("->TopicConnectionFactory : delete  Topic" + topic.getTopicName());
-      if ( url.getProtocol().equals("joram") ) {
-	sock = new Socket(addrProxy, portProxy);
-	if ( sock != null ) {
-	  sock.setTcpNoDelay(true);
-	  sock.setSoTimeout(0);
-	  sock.setSoLinger(true,1000);
-
-	  /* send the name of the agentClient */
-	  DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-	  dos.writeUTF(agentClient);
-	  dos.flush();
-		    
-	  /* creation of the objectinputStream and ObjectOutputStream */
-	  oos = new ObjectOutputStream(sock.getOutputStream());
-	  ois = new ObjectInputStream(sock.getInputStream());
-
-	  fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminDeleteTopic(1, agentClient,topic.getTopicName());
-	  if (oos != null) {
-	    oos.writeObject(msgMOM);
-	    oos.flush();
-	    oos.reset();
-	  }
-	}
-      }
-      if ((Debug.debug) && (Debug.admin))
-	System.out.println("<-TopicConnectionFactory : delete");
-    } catch (Exception exc) {
-      javax.jms.JMSException except = new javax.jms.JMSException("Exception TopicConnectionFactory : delete");
-      except.setLinkedException(exc);
-      throw(except);
-    } finally {
-      try {
-	oos.close();
-      } catch (IOException exc) {}
-      try {
-	ois.close();
-      } catch (IOException exc) {}
-      try {
-	sock.close();
-      } catch (IOException exc) {}
-    }
-  }        
-
-} // TopicConnectionFactory
+}

@@ -134,8 +134,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -171,15 +171,6 @@ public final class AgentServer {
   public static Transaction getTransaction() {
     return transaction;
   }
-
-  /** server properties, publicly accessible (see get/set operation) */
-  static Properties properties = null;
-
-  /** Set the property pair (key, value). */
-  public static Object setProperty(String key,
-				   String value) {
-    return properties.setProperty(key, value);
-  }
   
   /**
    * Searches for the property with the specified key in the server property
@@ -190,12 +181,12 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key) {
-    return properties.getProperty(key);
+    return System.getProperty(key);
   }
 
   public static String getProperty(String key,
-			    String value) {
-    return properties.getProperty(key, value);
+                                   String value) {
+    return System.getProperty(key, value);
   }
 
   /**
@@ -209,7 +200,7 @@ public final class AgentServer {
    */
   public static Integer getInteger(String key) {
     try {
-      return Integer.decode(properties.getProperty(key));
+      return Integer.decode(System.getProperty(key));
     } catch (Exception exc) {
       return null;
     }
@@ -709,7 +700,6 @@ public final class AgentServer {
     Debug.init(serverId);
     logmon = Debug.getMonitor(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
-    properties = new Properties(System.getProperties());
 
     // Read and parse the configuration file.
     boolean isTransient;
@@ -741,8 +731,6 @@ public final class AgentServer {
                  "AgentServer#" + serverId + ", can't initialize", exc);
 	throw new Exception("Can't initialize server");
       }
-      if (a3configHdl.properties != null)
-	properties.putAll(a3configHdl.properties);
     }
 
     try {
@@ -926,21 +914,8 @@ public final class AgentServer {
    * and may be in progress when the method ends.
    */
   public static void stop() {
-    // Stop all message consumers.
-    for (int i=0; i<consumers.length; i++) {
-      if (consumers[i] != null) consumers[i].stop();
-    }
-    // Stop all services.
-    ServiceManager.stop();
-
-    // Wait for all message consumers and services before stop the TM !!
-
-    // Stop the transaction manager.
-    if (transaction != null) transaction.stop();
-    logmon.log(BasicLevel.WARN,
-                 "AgentServer#" + serverId + ", stopped at " + new Date());
-
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      // Trace all threads that keep alive !!
       Thread t = new Thread() {
         public void run() {
           int i = 0;
@@ -978,6 +953,29 @@ public final class AgentServer {
       t.setDaemon(true);
       t.start();
     }
+
+    // Stop all message consumers.
+    for (int i=0; i<consumers.length; i++) {
+      if (consumers[i] != null) {
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     "AgentServer#" + serverId + ", stop " + consumers[i]);
+        consumers[i].stop();
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     "AgentServer#" + serverId + ", " +
+                     consumers[i] + "stopped");
+      }
+    }
+    // Stop all services.
+    ServiceManager.stop();
+
+    // Wait for all message consumers and services before stop the TM !!
+
+    // Stop the transaction manager.
+    if (transaction != null) transaction.stop();
+    logmon.log(BasicLevel.WARN,
+               "AgentServer#" + serverId + ", stopped at " + new Date());
   }
 
   /**

@@ -44,8 +44,8 @@ import fr.dyade.aaa.util.Daemon;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.4 2002-01-16 12:46:47 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.5 2002-03-06 16:50:00 joram Exp $"; 
 
   static AdminProxy proxy = null;
 
@@ -142,33 +142,36 @@ public class AdminProxy {
     proxy = null;
   }
 
-  static final String HELP = "help";
-  static final String NONE = "";
+  public static final String HELP = "help";
+  public static final String NONE = "";
 
   // Server's administration commands
-  static final String LAUNCH_SERVER = "launch";
-  static final String STOP_SERVER = "quit";
-  static final String CRASH_SERVER = "crash";
+  public static final String LAUNCH_SERVER = "launch";
+  public static final String STOP_SERVER = "quit";
+  public static final String CRASH_SERVER = "crash";
 
     // Environment control
-  static final String SET_VARIABLE = "set";
-  static final String GET_VARIABLE = "get";
+  public static final String SET_VARIABLE = "set";
+  public static final String GET_VARIABLE = "get";
 
     // JVM's monitoring and control
-  static final String GC = "gc";
-  static final String THREADS = "threads";
+  public static final String GC = "gc";
+  public static final String THREADS = "threads";
 
     // Consumer's administration commands
-  static final String LIST_MCONS = "consumers";
-  static final String START_MCONS = "start";
-  static final String STOP_MCONS = "stop";
+  public static final String LIST_MCONS = "consumers";
+  public static final String START_MCONS = "start";
+  public static final String STOP_MCONS = "stop";
 
   // Service's administration commands
-  static final String LIST_SERVICE = "services";
-  static final String ADD_SERVICE = "add";
-  static final String REMOVE_SERVICE = "remove";
+  public static final String LIST_SERVICE = "services";
+  public static final String ADD_SERVICE = "add";
+  public static final String REMOVE_SERVICE = "remove";
 
-  static final String PUT_FILE = "putf";
+  // Debug's tool
+  public static final String DUMP = "dump";
+
+  public static final String PUT_FILE = "putf";
 
   /**
    * Provides a string image for this object.
@@ -214,62 +217,62 @@ public class AdminProxy {
 
     public void run() {
       try {
-	while (running) {
-	  canStop = true;
-	  try {
-	    socket = listen.accept();
-	    canStop = false;
-	  } catch (IOException exc) {
+        while (running) {
+          canStop = true;
+          try {
+            socket = listen.accept();
+            canStop = false;
+          } catch (IOException exc) {
             if (running)
               logmon.log(BasicLevel.ERROR,
                          getName() + ", error during accept", exc);
-	  }
+          }
 
-	  if (! running) break;
+          if (! running) break;
 
-	  try {
-	    // Get the streams
-	    reader = new BufferedReader(
-	      new InputStreamReader(socket.getInputStream()));
-	    writer = new PrintWriter(socket.getOutputStream(), true);
+          try {
+            // Get the streams
+            reader = new BufferedReader(
+              new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream(), true);
 	  
-	    // Reads then parses the request
-	    doRequest(reader.readLine());
+            // Reads then parses the request
+            doRequest(reader.readLine());
 
-	    writer.flush();
-	  } catch (Exception exc) {
+            writer.flush();
+          } catch (Exception exc) {
             logmon.log(BasicLevel.ERROR,
                        getName() + ", error during connection", exc);
-	  } finally {
-	    // Closes the connection
-	    try {
-	      reader.close();
-	    } catch (Exception exc) {}
-	    reader = null;
-	    try {
-	      writer.close();
-	    } catch (Exception exc) {}
-	    writer = null;
-	    try {
-	      socket.close();
-	    } catch (Exception exc) {}
-	    socket = null;
-	  }
-	}
+          } finally {
+            // Closes the connection
+            try {
+              reader.close();
+            } catch (Exception exc) {}
+            reader = null;
+            try {
+              writer.close();
+            } catch (Exception exc) {}
+            writer = null;
+            try {
+              socket.close();
+            } catch (Exception exc) {}
+            socket = null;
+          }
+        }
       } finally {
-	running = false;
-	thread = null;
-	// Close any ressources no longer needed, eventually stop the
-	// enclosing component.
-	shutdown();
+        finish();
       }
     }
 
-    public void shutdown() {
+    protected void close() {
       try {
 	listen.close();
       } catch (Exception exc) {}
       listen = null;
+    }
+
+    protected void shutdown() {
+      close();
     }
 
     public void doRequest(String request) {
@@ -284,8 +287,16 @@ public class AdminProxy {
 	cmd = st.nextToken();
 	if (cmd.equals(STOP_SERVER)) {
 	  // Stop the AgentServer
+	  // Creates a thread to execute AgentServer.stop in order to
+	  // allow AdminProxy service stopping and avoid deadlock.
+	  Thread t = new Thread() {
+	    public void run() {
+	      AgentServer.stop();
+	    }
+	  };
+	  t.setDaemon(true);
+	  t.start();
           logmon.log(BasicLevel.WARN, getName() + ", bye.");
-	  AgentServer.stop();
 	} else if (cmd.equals(CRASH_SERVER)) {
           // Stop the AgentServer
           logmon.log(BasicLevel.WARN, getName() + ", crash!");
@@ -453,26 +464,30 @@ public class AdminProxy {
 			   (services[i].isRunning()?" running":""));
 	  }
 	} else if (cmd.equals(ADD_SERVICE)) {
-	  // Add a new Service
-	  String sclass = null;
-	  String args = null;
-	  try {
-	    sclass = st.nextToken();
-	    if (st.hasMoreTokens())
-	      args = st.nextToken();
-	  } catch (NoSuchElementException exc) {
-	    writer.println("Usage: add <sclass> [<args>]");
-	  }
-	  try {
-	    ServiceManager.register(sclass, args);
-	    writer.println("Service <" + sclass + "> registred.");
-	    ServiceManager.start(sclass);
-	    writer.println("Service <" + sclass + "> started.");
-	  } catch (Exception exc) {
-	    // Report the error
-	    writer.println("Can't start service: " + exc.getMessage());
-	    if (debug) exc.printStackTrace(writer);
-	  }
+          try {
+            // Add a new Service
+            String sclass = null;
+            String args = null;
+            try {
+              sclass = st.nextToken();
+              if (st.hasMoreTokens())
+                args = st.nextToken();
+            } catch (NoSuchElementException exc) {
+              throw new Exception("Usage: add <sclass> [<args>]");
+            }
+            try {
+              ServiceManager.register(sclass, args);
+              writer.println("Service <" + sclass + "> registred.");
+              ServiceManager.start(sclass);
+              writer.println("Service <" + sclass + "> started.");
+            } catch (Exception exc) {
+              // Report the error
+              writer.println("Can't start service: " + exc.getMessage());
+              if (debug) exc.printStackTrace(writer);
+            }
+          } catch (Exception exc) {
+            writer.println(exc.getMessage());
+          } 
 	} else if (cmd.equals(REMOVE_SERVICE)) {
 	  // Remove an existing Service
 	  String sclass = null;
@@ -480,6 +495,7 @@ public class AdminProxy {
 	    sclass = st.nextToken();
 	  } catch (NoSuchElementException exc) {
 	    writer.println("Usage: " + REMOVE_SERVICE + " <sclass> [<args>]");
+            return;
 	  }
 	  try {
 	    ServiceManager.stop(sclass);
@@ -505,6 +521,20 @@ public class AdminProxy {
           
           try {
             writer.println(AdminProxy.startAgentServer((short) sid));
+          } catch (Exception exc) {
+            writer.println("Can't launch server: " + exc.getMessage());
+            if (debug) exc.printStackTrace(writer);
+          }
+	} else if (cmd.equals(DUMP)) {
+          AgentId id = null;
+          try {
+            id = AgentId.fromString(st.nextToken());
+          } catch (IllegalArgumentException exc) {
+            writer.println("Usage: " + DUMP + " #x.y.z");
+            return;
+          }
+          try {
+            writer.println(Agent.dumpAgent(id));
           } catch (Exception exc) {
             writer.println("Can't launch server: " + exc.getMessage());
             if (debug) exc.printStackTrace(writer);
@@ -590,6 +620,33 @@ public class AdminProxy {
    * @param sid		id of agent server to start
    */
   public static String startAgentServer(short sid) throws Exception {
+    return startAgentServer(sid, null, null);
+  }
+
+  /**
+   * Starts an agent server from its id in the current working directory.
+   * Be careful an AgentServer must be initialized.
+   *
+   * @param sid		id of agent server to start
+   * @param jvmarg	arguments to pass to the created java program
+   */
+  public static String startAgentServer(short sid,
+                                        String[] jvmarg) throws Exception {
+    return startAgentServer(sid, null, jvmarg);
+  }
+
+  /**
+   * Starts an agent server from its id. Be careful an AgentServer must
+   * be initialized.
+   *
+   * @param sid		id of agent server to start
+   * @param dir		new working directory for the created agent server,
+   *	current working directory if <code>null</code>
+   * @param jvmarg	arguments to pass to the created java program
+   */
+  public static String startAgentServer(short sid,
+					File dir,
+                                        String[] jvmarg) throws Exception {
     xlogmon.log(BasicLevel.DEBUG,
                "AdminProxy#" + AgentServer.getServerId() +
                ": start AgentServer#" + sid);
@@ -614,7 +671,7 @@ public class AdminProxy {
       new File(new File(System.getProperty("java.home"), "bin"),
                "java").getPath();
     String classpath = System.getProperty("java.class.path");
-    String userdir = System.getProperty("user.dir");
+    String transaction = System.getProperty("Transaction");
 
     if (! AgentServer.getHostname(sid).equals(AgentServer.getHostname(AgentServer.getServerId()))) {
      xlogmon.log(BasicLevel.WARN,
@@ -627,17 +684,28 @@ public class AdminProxy {
     argv.addElement(javapath);
     argv.addElement("-classpath");
     argv.addElement(classpath);
+    // AF: Should be removed -> verify that it is useless.
     if (AgentServer.isTransient(sid)) {
       argv.addElement("-Xmx64m");
+    } else if (transaction != null) {
+      argv.addElement("-DTransaction=" + transaction);
+    }
+    if (jvmarg != null) {
+      for (int i=0; i<jvmarg.length; i++)
+        argv.addElement(jvmarg[i]);
     }
     argv.addElement("fr.dyade.aaa.agent.AgentServer");
     argv.addElement(Short.toString(sid));
-    argv.addElement(new File(userdir, "s" + sid).getPath());
+    argv.addElement("s" + sid);
 	  
     String[] command = new String[argv.size()];
     argv.copyInto(command);
 
-    p = Runtime.getRuntime().exec(command);
+    if (dir == null) {
+      p = Runtime.getRuntime().exec(command);
+    } else {
+      p = Runtime.getRuntime().exec(command, null, dir);
+    }
     proxy.ASP.put(new Short(sid), p);
 
     xlogmon.log(BasicLevel.DEBUG,
@@ -646,7 +714,21 @@ public class AdminProxy {
 
     BufferedReader br =
       new BufferedReader(new InputStreamReader(p.getInputStream()));
-    return br.readLine();
+    String status = br.readLine();
+
+    // Close all streams of subprocess in order to avoid deadlock due
+    // to limited buffer size.
+    try {
+      p.getInputStream().close();
+    } catch (Exception exc) {}
+    try {
+      p.getOutputStream().close();
+    } catch (Exception exc) {}
+    try {
+      p.getErrorStream().close();
+    } catch (Exception exc) {}
+
+    return status;
   }
 
   static void close(Socket socket) {

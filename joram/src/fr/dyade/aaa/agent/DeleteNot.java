@@ -21,12 +21,7 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.agent;
-
-import java.io.*;
-
 
 /**
  * This notification is used to ask aaa agent destruction
@@ -34,20 +29,19 @@ import java.io.*;
  * @version 1.0, 7/10/98
  */
 public class DeleteNot extends Notification {
+  public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
 
-public static final String RCS_VERSION="@(#)$Id: DeleteNot.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
-
- 
-  // the agent identified by 'reply' will receive a DeleteAck
-  // when destruction complete
-
+  /**
+   * the agent identified by 'reply' will receive a DeleteAck
+   * when destruction complete
+   */
   public AgentId reply;
  
-  public DeleteNot() throws IOException {
+  public DeleteNot() {
     this(null);
   }
 
-  public DeleteNot(AgentId reply) throws IOException {
+  public DeleteNot(AgentId reply) {
     super();
     this.reply = reply;
   }

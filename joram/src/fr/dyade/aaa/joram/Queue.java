@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,98 +15,47 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
- */
-
-package fr.dyade.aaa.joram; 
-
-import java.net.*; 
-import java.util.*;
-import java.lang.*;
-
-/** 
- *	a Queue is an object associated with a real Queue
- *	in the MOM, it's its name
- *      
- *      sample : Queue("joram://host:port/#x.y.z");
- * 
- *      @author     Nicolas Tachker
  *
- *	@see subclasses
- *	@see javax.jms.Queue
- *	@see fr.dyade.aaa.mom.Queue 
- */ 
- 
-public class Queue extends fr.dyade.aaa.mom.QueueNaming implements javax.naming.Referenceable, java.io.Serializable {
-    /** agent Queue in AAAMOM */
-    String agentQueue;
-    /** host Name */
-    String host; 
-    /** port */
-    int port;
-    /** Joram URL */
-    CURL url;
-    // The static table of all Queue (jndi)
-    private static Hashtable qList = new Hashtable();
+ * The present code contributor is ScalAgent Distributed Technologies.
+ */
+package fr.dyade.aaa.joram;
 
-    /** contructor : Queue("joram://host:port/#x.y.z"); */
-    public Queue(String stringURL) {
-	super(null);
-	try {
-	    url = new CURL(stringURL);
-	    if (Debug.debug)
-		if (Debug.queue)
-		    System.out.println("Queue (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=" + url.getAgentId() + ")");
-	    
-	    if ( url.getProtocol().equals("joram") ) {
-		agentQueue = url.getAgentId();
-		host = url.getHost();
-		port = url.getPort();
-		dest = agentQueue;
-	    }
-	} catch (Exception e) {
-	    System.out.println("Queue Exception");
-	    e.printStackTrace();
-	}
-    }
+import javax.jms.JMSException;
 
-    /** return agent Queue in AAAMOM */
-    public String getAgentQueue() {
-	return agentQueue;
-    }
+/**
+ * Implements the <code>javax.jms.Queue</code> interface.
+ */
+public class Queue extends Destination implements javax.jms.Queue
+{
+  /** 
+   * Constructs a queue.
+   *
+   * @param agentId  Identifier of the queue agent.
+   */
+  public Queue(String agentId)
+  {
+    super(agentId);
+  }
 
-    /** comes from the javax.jndi.referenceable interface */
-    public javax.naming.Reference getReference() throws javax.naming.NamingException{
-	javax.naming.Reference ref =  new javax.naming.Reference(this.getClass().getName(),
-					  "fr.dyade.aaa.joram.ObjectConnectionFactory",
-					  null);
-	ref.add(new javax.naming.StringRefAddr("queue.joramURL", url.toString()));
-	return ref;
-    }
+  /** Returns a String image of the queue. */
+  public String toString()
+  {
+    return "Queue:" + agentId;
+  }
 
-    // use for jndi
-    public void setQueueList(String s) {
-	qList.put(s,this);
-    }
-    public static Queue getQueue(String s) {
-	return (Queue) qList.get(s);
-    }
-
-    public String toString() {
-	try {
-	    return url.toString();
-	} catch (Exception e) {
-	    System.out.println("Queue Exception ");
-	    e.printStackTrace();
-	    return null;
-	}
-    }
+  /**
+   * API method.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public String getQueueName() throws JMSException
+  {
+    return agentId;
+  }
 }

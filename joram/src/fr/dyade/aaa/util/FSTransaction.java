@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class FSTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: FSTransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
 
   private File dir = null;
 

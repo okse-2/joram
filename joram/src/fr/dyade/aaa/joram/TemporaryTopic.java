@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -14,86 +13,81 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.joram; 
+package fr.dyade.aaa.joram;
 
-import java.lang.*; 
+import fr.dyade.aaa.mom.jms.TempDestDeleteRequest;
 
-/** 
- *	a TemporaryTopic is a Topic for the time of the Connexion
- *	this object is not in the fr.dyade.aaa.mom package because it's not used and
- *	has not any utility in the MOM
- * 
- *	@see fr.dyade.aaa.mom.TopicNaming
- *	@see javax.jms.Topic
- *	@see fr.dyade.aaa.mom.Topic
- *	@see fr.dyade.aaa.mom.TemporaryTopic
- */ 
- 
-public class TemporaryTopic extends fr.dyade.aaa.mom.TopicNaming implements javax.jms.TemporaryTopic { 
-	
-	/** reference to the COnnection Object to retrieve Message from Connection */
-	protected fr.dyade.aaa.joram.Connection refConnection;
-	
-	/** reference to the Session Object so send Message to the socket */
-	protected fr.dyade.aaa.joram.Session refSession;
-	
-	/* constructor of the TemporaryTopic */
-	public TemporaryTopic(fr.dyade.aaa.joram.Connection refConnection, fr.dyade.aaa.joram.Session refSession, String nameTopic, String theme) {
-		super(nameTopic, theme);
-		this.refConnection = refConnection;
-		this.refSession = refSession;
-	}
-	
-	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-	public void delete() throws javax.jms.JMSException {
-		try {
-			Object obj = new Object();
-			long messageJMSMOMID = refConnection.getMessageMOMID();
-			Long longMsgID = new Long(messageJMSMOMID);
-			
-			fr.dyade.aaa.mom.CloseDestinationMOMExtern msgClose = new fr.dyade.aaa.mom.CloseDestinationMOMExtern(messageJMSMOMID, this);
-			/*	synchronization because it could arrive that the notify was
-			 *	called before the wait 
-			 */
-			synchronized(obj) {
-				/* the processus of the client waits the response */
-				refConnection.waitThreadTable.put(longMsgID,obj);
-				/* get the messageJMSMOM identifier */
-				refSession.sendToConnection(msgClose);
-				
-				obj.wait();
-			}
-			
-			/* the clients wakes up */
-			fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-		
-			/* tests if the key exists 
-			 * dissociates the message null (on receiveNoWait) and internal error
-			 */
-			if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
-				throw (new fr.dyade.aaa.joram.JMSAAAException("No Request Agree received",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-	
-			/* get the the message back or the exception*/
-			msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
-			if(!(msgMOM instanceof fr.dyade.aaa.mom.RequestAgreeMOMExtern)) {
-				/* exception sent back to the client */
-				fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
-				fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
-				except.setLinkedException(msgExc.exception);
-				throw(except);
-			}
-		} catch (InterruptedException exc) {
-			javax.jms.JMSException except = new javax.jms.JMSException("Internal Error : ",String.valueOf(JMSAAAException.DEFAULT_JMSAAA_ERROR));
-			except.setLinkedException(exc);
-			throw(except);
-		}
-	}
+import javax.jms.JMSException;
 
+import org.objectweb.monolog.api.BasicLevel;
+
+/**
+ * Implements the <code>javax.jms.TemporaryTopic</code> interface.
+ */
+public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
+{
+  /** The connection the topic belongs to. */
+  private Connection cnx;
+
+  /** 
+   * Constructs a temporary topic.
+   *
+   * @param agentId  Identifier of the topic agent.
+   * @param cnx  The connection the queue belongs to.
+   */
+  public TemporaryTopic(String agentId, Connection cnx)
+  {
+    super(agentId);
+    this.cnx = cnx;
+  }
+
+  /** Returns a String image of the topic. */
+  public String toString()
+  {
+    return "TempTopic:" + getName();
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed or broken.
+   * @exception JMSException  If the request fails for any other reason.
+   */
+  public void delete() throws JMSException
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+                                 + ": deleting...");
+
+    // Checking the connection's subscribers:
+    Session sess;
+    MessageConsumer cons;
+    for (int i = 0; i < cnx.sessions.size(); i++) {
+      sess = (Session) cnx.sessions.get(i);
+      for (int j = 0; j < sess.consumers.size(); j++) {
+        cons = (MessageConsumer) sess.consumers.get(j);
+        if (agentId.equals(cons.destName)) {
+          JMSException jE = new JMSException("Subscribers still exist"
+                                             + " for this temp. topic.");
+
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+            JoramTracing.dbgClient.log(BasicLevel.WARN, jE);
+        }
+      }
+    }
+    // Sending the request to the server:
+    cnx.syncRequest(new TempDestDeleteRequest(agentId));
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");
+  }
 }

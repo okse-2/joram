@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,114 +15,55 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
-
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-import javax.jms.*;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
 
 /**
- * An XATopicConnection provides the same create options as TopicConnection
- * (optional). The only difference is that an XAConnection is by definition
- * transacted.
- *
- * @author Laurent Chauvirey
- * @version 1.0
+ * Implements the <code>javax.jms.XATopicConnection</code> interface.
  */
+public class XATopicConnection extends TopicConnection
+                               implements javax.jms.XATopicConnection
+{
+  /**
+   * Constructs an <code>XATopicConnection</code> instance and opens a TCP
+   * connection with a given agent server.
+   *
+   * @param serverAddr  Address of the server to connect to.
+   * @param port  Port the server is listening to.
+   * @param name  User's name.
+   * @param password  User's password.
+   * @param timer  Time in seconds allowed for (re-)connecting.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  XATopicConnection(java.net.InetAddress serverAddr, int port, String name,
+                    String password, int timer) throws javax.jms.JMSException
+  {
+    super(serverAddr, port, name, password, timer);
+  }
 
-public class XATopicConnection extends XAConnection implements javax.jms.XATopicConnection {
- 
-    private TopicConnection tc;   
-    /**
-     * Construct an <code>XATopicConnection</code>. The difference with
-     * <code>Connection</code> is that a <code>XAConnection</code>
-     * is by definition transacted.
-     */
-    public XATopicConnection(String proxyAgentIdString,
-			     InetAddress proxyAddress, int proxyPort,
-			     String login, String passwd) throws javax.jms.JMSException {
-	tc = new TopicConnection(proxyAgentIdString, proxyAddress, proxyPort, login, passwd);
-    }
-    
-    /**
-     * Create an <code>XATopicSession</code>.
-     */
-    public javax.jms.XATopicSession createXATopicSession() throws JMSException {
-	long sessionID = getNextSessionID();
-	return new XATopicSession(sessionID, tc);
-    }
-
-    /**
-     * Create a <code>TopicSession</code>.
-     */
-    public javax.jms.TopicSession createTopicSession(boolean transacted,
-						     int acknowledgeMode) throws JMSException {
-      long sessionID = getNextSessionID();
-	  return new TopicSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, tc);
-    }
-
-    /**
-     * Create a connection consumer for this connection (optional operation).
-     * This is an expert facility not used by regular JMS clients.
-     */ 
-    public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Topic topic,
-								 String messageSelector,
-								 javax.jms.ServerSessionPool sessionPool,
-								 int maxMessages) throws JMSException {
-      return tc.createConnectionConsumer(topic, messageSelector, sessionPool, maxMessages);
-    }
-
-    /**
-     * Create a durable connection consumer for this connection (optional
-     * operation). This is an expert facility not used by regular JMS clients.
-     */
-    public javax.jms.ConnectionConsumer createDurableConnectionConsumer(javax.jms.Topic topic,
-									String subscriptionName,
-									String messageSelector,
-									javax.jms.ServerSessionPool sessionPool,
-									int maxMessages) throws JMSException {
-      return tc.createDurableConnectionConsumer(topic, subscriptionName, messageSelector,
-        sessionPool, maxMessages);
-    }
-
-    public void close() throws JMSException
-    {
-      tc.close();
-    }
-    public void start() throws JMSException
-    {
-      tc.start();
-    }
-    public void stop() throws JMSException
-    {
-      tc.stop();
-    }
-    public String getClientID() throws JMSException 
-    {
-      return tc.getClientID();
-    }
-    public void setClientID(String clientID) throws JMSException
-    {
-      tc.setClientID(clientID);
-    }
-    public javax.jms.ConnectionMetaData getMetaData() throws JMSException
-    {
-      return tc.getMetaData();
-    }
-    public ExceptionListener getExceptionListener() throws JMSException
-    {
-      return tc.getExceptionListener();
-    }
-    public void setExceptionListener(ExceptionListener listener) throws JMSException
-    {
-      tc.setExceptionListener(listener);
-    } 
-
-} // XATopicConnection
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  If the connection is closed.
+   */
+  public javax.jms.XATopicSession createXATopicSession() throws JMSException
+  {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed"
+                                      + " connection.");
+    return new XATopicSession(nextSessionId(), this);
+  }
+}

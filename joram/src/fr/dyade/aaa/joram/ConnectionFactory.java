@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2002 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -14,111 +15,103 @@
  * the specific terms governing rights and limitations under the License. 
  * 
  * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
  * 
  * The Initial Developer of the Original Code is Dyade. The Original Code and
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
+ *
+ * The present code contributor is ScalAgent Distributed Technologies.
  */
+package fr.dyade.aaa.joram;
 
+import java.net.*;
+import java.util.Hashtable;
+
+import javax.naming.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+
+/**
+ * Implements the <code>javax.jms.ConnectionFactory</code> interface.
+ */
+public abstract class ConnectionFactory implements javax.jms.ConnectionFactory,
+                                                   javax.naming.Referenceable,
+                                                   java.io.Serializable
+{
+  /**
+   * Class table holding the <code>ConnectionFactory</code> instances, needed
+   * by the naming service.
+   * <p>
+   * <b>Key:</b> cf's hashcode<br>
+   * <b>Object:</b> cf's instance
+   */
+  protected static Hashtable instancesTable = new Hashtable();
+
+  /** Address of the server clients will connect to. */
+  protected InetAddress serverAddr;  
+  /** Port on which the server is listening. */
+  protected int port; 
+  /** Url for connecting to the server. */
+  protected JoramUrl serverUrl;
+  /** Time in seconds allowed to connections for connecting. */
+  protected int timer = 60;
 
  
-package fr.dyade.aaa.joram; 
- 
-import java.lang.*;
-import java.io.*;
-import java.net.*; 
-  
-/** 
-  * @author      Nicolas Tachker
-  * 
-  * @see         javax.jms.QueueConnectionFactory 
-  * @see         javax.jms.TopicConnectionFactory
-  */ 
- 
- 
-public abstract class ConnectionFactory implements javax.jms.ConnectionFactory, javax.naming.Referenceable, java.io.Serializable {
-  
-    /** - addrProxy : host address where is TCP Proxy */ 
-    protected InetAddress addrProxy;  
+  /**
+   * Constructs a <code>ConnectionFactory</code> instance wrapping a given
+   * agent server url.
+   *
+   * @param url  Url of the agent server.
+   * @exception ConnectException  If the url is incorrect.
+   */
+  public ConnectionFactory(String url) throws ConnectException
+  {
+    try {
+      serverUrl = new JoramUrl(url);
+      serverAddr = InetAddress.getByName(serverUrl.getHost());
+    }
+    catch (MalformedURLException mE) {
+      throw new ConnectException("Incorrect server url: " + url);
+    }
+    catch (UnknownHostException uE) {
+      throw new ConnectException("Unknown host in server url: " + url);
+    }
+    port = serverUrl.getPort();
+
+    // Registering the instance in the table:
+    instancesTable.put(url, this);
+
     
-    /** - portProxy	: lisent port TCP Proxy */ 
-    protected int portProxy; 
-    
-    /** the name of the agentClient in the mom */
-    protected String agentClient; 
-    
-    /* the security reference */	 
-    protected String login = "anonymous"; 
-    protected String passwd = "anonymous";
-    
-    /** URL for Joram naming */
-    CURL url = null;
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created."); 
+  }
 
-    // The static table of all ConnectionFactory (jndi)
-    private static java.util.Hashtable cfList = new java.util.Hashtable();
+  /**
+   * Resets the timer value.
+   *
+   * @param timer  Time in seconds for connecting.
+   */
+  public void resetTimer(int timer)
+  {
+    if (timer >= 0)
+      this.timer = timer;
+  } 
 
-    public ConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) { 
-	this.agentClient = agentClient;
-	this.addrProxy = addrProxy;
-	this.portProxy = portProxy;
-	try {
-	    url = new CURL(addrProxy.getHostName(),portProxy,agentClient);
-	} catch (Exception e) {
-	    System.out.println("Jms ConnectionFactory");
-	    e.printStackTrace();
-	}
-    }
-    
-    /** call ConnectionFactory like
-     * ConnectionFactory("joram://host:port/#x.y.z")
-     */
-    public ConnectionFactory(String stringURL) {
-	try {
-	    url = new CURL(stringURL);
-	    if (Debug.debug)
-		if (Debug.admin)
-		    System.out.println("->ConnectionFactory (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=" + url.getAgentId() + ")");
-	    
-	    if ( url.getProtocol().equals("joram") ) {
- 		this.agentClient = url.getAgentId();
-		this.addrProxy = InetAddress.getByName(url.getHost());
-		this.portProxy = url.getPort();
-	    }
-	} catch (Exception e) {
-	    System.out.println("ConnectionFactory Exception");
-	    e.printStackTrace();
-	}
-    }
+  /** Sets the naming reference of this connection factory. */
+  public Reference getReference() throws NamingException
+  {
+    Reference ref = new Reference(this.getClass().getName(),
+                                  "fr.dyade.aaa.joram.ObjectFactory",
+                                  null);
+    ref.add(new StringRefAddr("cFactory.url", serverUrl.toString()));
+    return ref;
+  }
 
-    /** get AgentID string */
-    public String getAgentClient() {
-	return agentClient;
-    }
-
-    /** comes from the javax.jndi.referenceable interface */
-    public javax.naming.Reference getReference() throws javax.naming.NamingException{
-	javax.naming.Reference ref =  new javax.naming.Reference(this.getClass().getName(),
-					  "fr.dyade.aaa.joram.ObjectConnectionFactory",
-					  null);
-	ref.add(new javax.naming.StringRefAddr("cnxfactory.joramURL", url.toString()));
-	return ref;
-    }
-
-    // use for jndi
-    public void setConnectionFactoryList(String s) {
-	cfList.put(s,this);
-    }
-    public static Object getConnectionFactory(String s) {
-	return cfList.get(s);
-    }
-
-    public String toString() {
-	return url.toString();
-    }
+  /** Returns this connection factory to the name service. */
+  public static Object getInstance(String url)
+  {
+    return instancesTable.get(url);
+  }
 }
- 

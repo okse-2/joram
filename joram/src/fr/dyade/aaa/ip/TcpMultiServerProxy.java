@@ -29,6 +29,8 @@ import java.net.*;
 import java.util.*;
 import fr.dyade.aaa.agent.*;
 
+import org.objectweb.monolog.api.*;
+
 /**
  * Class providing a TCP Server. This class is used to create a server
  * proxy to handle multiple connections. There are two modes of using it:
@@ -41,15 +43,15 @@ import fr.dyade.aaa.agent.*;
  * This allows a closing proxy not to reject a connection. However this may
  * lead to a client waiting forever a really busy target proxy.
  * <p>
- * Connections may also be accepted even if the target proxy is busy. This
+ * Connsections may also be accepted even if the target proxy is busy. This
  * leads to a new connection set creation (drivers pair, qout, ois, oos,...).
  * Only true when the ProxyAgent is set as multiConn.
  *
- * @author	Freyssinet Andre
+ * @author	The Freyssinet Andre
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 2002-01-16 12:46:47 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.7 2002-03-06 16:55:06 joram Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */
@@ -59,6 +61,10 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
   protected Integer key = null;
   /** Connection Socket */
   protected transient Socket socket = null;
+  /** Connection Input Stream. */ 
+  protected transient DataInputStream dis = null;
+  /** Connection Output Stream. */ 
+  protected transient DataOutputStream dos = null;
 
   /**
    * simple incremented counter providing socket identifiers.
@@ -215,8 +221,10 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
    *
    * @return
    *	the agent identifier of the proxy
+   *
+   * @exception Exception  If the string identification is incorrect.
    */
-  protected AgentId idFromString(String str) {
+  protected AgentId idFromString(String str) throws Exception {
     return AgentId.fromString(str);
   }
 
@@ -236,18 +244,28 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
         sockets.put(key, sock);
       }
       if (newClient) {
-        Channel.sendTo(getId(), new ConnectNot(key));
+        sendTo(getId(), new ConnectNot(key));
       }
       else {        
         // Gets the destination agent id from intput stream, then
-        // sends it a ConnectNot.
-        DataInputStream dis = new DataInputStream(sock.getInputStream());
+        // sends it a ConnectNot. Open the output stream for later
+        // acknowledgement.
+        dis = new DataInputStream(sock.getInputStream());
+        dos = new DataOutputStream(sock.getOutputStream());
         String header = dis.readUTF();
-        AgentId to = idFromString(header);
+        AgentId to = null;
+        try {
+          to = idFromString(header);
+        }
+        catch (Exception e) {
+          acknowledgeOutsideRequest(1, e.getMessage());
+          return;
+        }
+        acknowledgeOutsideRequest(0, "" + to);
         if (to == null) 
-          Channel.sendTo(getId(), new ConnectNot(key, header));
-        else 
-          Channel.sendTo(to, new ConnectNot(key, header));
+          sendTo(getId(), new ConnectNot(key, header));
+        else
+          sendTo(to, new ConnectNot(key, header));
       }
     } else if (socket != null) {
       // this is a connected client
@@ -261,6 +279,15 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
       }
     }
   }
+
+  /**
+   * Acknowledges a request read on the input stream.
+   * To be overriden by subclasses according to their acknowledgement
+   * policies.
+   */
+  protected void acknowledgeOutsideRequest(int status, String info)
+               throws IOException
+  {}
 
   /**
    * Closes the connection with the outside.
@@ -359,6 +386,10 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
    * @param not		notification to react to
    */
   public void react(AgentId from, Notification not) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, 
+                 "TcpMultiServerProxy.react(" + 
+                 from + ',' + not + ')');
     try {
       if (not instanceof ConnectNot) {
         ConnectNot cnot = (ConnectNot) not;
@@ -401,7 +432,8 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
             }
           }
         }
-      } else if (not instanceof UnknownAgent) {
+      }
+      else if (not instanceof UnknownAgent) {
         UnknownAgent ua = (UnknownAgent)not;
         if (ua.not instanceof ConnectNot) {
           ConnectNot cnot = (ConnectNot)ua.not;
@@ -433,6 +465,8 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.6 
    * @param key the key of the socket to close.
    */
   protected void rejectConnection(Integer key) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "rejectConnection(" + key + ')');
     Socket socket = (Socket)sockets.get(key);
     if (socket != null) {
       socket.close();

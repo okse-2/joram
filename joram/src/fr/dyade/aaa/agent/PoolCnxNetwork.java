@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.5 2002-01-16 12:46:47 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.6 2002-03-06 16:50:00 joram Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -176,7 +176,7 @@ class PoolCnxNetwork extends StreamNetwork {
      * @see start
      * @see stop
      */
-    private volatile boolean isRunning = false;
+    private volatile boolean running = false;
     /**
      * True if the sessions can be stopped, false otherwise. A session can
      * be stopped if it is waiting.
@@ -220,7 +220,7 @@ class PoolCnxNetwork extends StreamNetwork {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", created");
       
-      isRunning = false;
+      running = false;
       canStop = false;
       thread = null;
 
@@ -296,8 +296,7 @@ class PoolCnxNetwork extends StreamNetwork {
 	  return false;
 	}
 
-	//  Set the local attribute in order to block all others local
-	// attempts.
+	// Set the local attribute in order to block all others local attempts.
 	this.local = true;
       }
 
@@ -342,6 +341,9 @@ class PoolCnxNetwork extends StreamNetwork {
 	try {
 	  sock.close();
 	} catch (Exception exc2) {}
+
+	// Reset the local attribute to allow future attempts.
+        this.local = false;
 
 	return false;
       }
@@ -454,7 +456,7 @@ class PoolCnxNetwork extends StreamNetwork {
       thread = new Thread(this, getName());
       thread.setDaemon(false);
 
-      isRunning = true;
+      running = true;
       canStop = true;
       thread.start();
 
@@ -471,17 +473,28 @@ class PoolCnxNetwork extends StreamNetwork {
     /**
      *
      */
-    synchronized void stop() {
-      isRunning = false;
+    void stop() {
+      running = false;
       
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", stopped.");
 
-      if (thread == null)
-	// The session is idle.
-	return;
+      while ((thread != null) && thread.isAlive()) {
+        if (canStop) {
+          if (thread.isAlive()) thread.interrupt();
+          shutdown();
+        }
+        try {
+          thread.join(1000L);
+        } catch (InterruptedException exc) {
+          continue;
+        }
+        thread = null;
+      }
+    }
 
-      if (canStop && (sock != null)) close();
+    public void shutdown() {
+      close();
     }
 
     synchronized void close() {
@@ -550,7 +563,7 @@ class PoolCnxNetwork extends StreamNetwork {
       Object obj;
 
       try {
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -622,20 +635,19 @@ class PoolCnxNetwork extends StreamNetwork {
 	  }
 	}
       } catch (EOFException exc) {
-        if (isRunning)
+        if (running)
           logmon.log(BasicLevel.WARN,
                      this.getName() + ", connection closed", exc);
       } catch (SocketException exc) {
-        if (isRunning)
+        if (running)
           logmon.log(BasicLevel.WARN,
                      this.getName() + ", connection closed", exc);
       } catch (Exception exc) {
 	logmon.log(BasicLevel.ERROR, getName() + ", exited", exc);
       } finally {
 	logmon.log(BasicLevel.DEBUG, getName() + ", ends");
-	isRunning = false;
+	running = false;
 	close();
-	thread = null;
       }
     }
   }
@@ -648,11 +660,15 @@ class PoolCnxNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {
       try {
 	listen.close();
       } catch (Exception exc) {}
       listen = null;
+    }
+
+    protected void shutdown() {
+      close();
     }
 
     /**
@@ -721,15 +737,14 @@ class PoolCnxNetwork extends StreamNetwork {
 	      } catch (Exception exc2) {}
 	    }
 	  } catch (Exception exc) {
-	    this.logmon.log(BasicLevel.ERROR, ", bad connection setup", exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", bad connection setup", exc);
 	  }
 	}
       } catch (IOException exc) {
-	this.logmon.log(BasicLevel.ERROR, ", exited", exc);
+	this.logmon.log(BasicLevel.ERROR, this.getName() + ", exited", exc);
       } finally {
-	this.logmon.log(BasicLevel.DEBUG, ", ends");
-	running = false;
-	thread = null;
+        finish();
       }
     }
   }
@@ -741,26 +756,33 @@ class PoolCnxNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
-    public void shutdown() {}
+    protected void close() {}
+
+    protected void shutdown() {}
 
     public void run() {
       Message msg = null;
       
-      while (running) {
-	canStop = true;
+      try {
+        while (running) {
+          canStop = true;
 
-        if (this.logmon.isLoggable(BasicLevel.DEBUG))
-          this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
-	try {
-	  msg = qout.get();
-	} catch (InterruptedException exc) {
-	  continue;
-	}
-	canStop = false;
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", waiting message");
+          try {
+            msg = qout.get();
+          } catch (InterruptedException exc) {
+            continue;
+          }
+          canStop = false;
 
-	// Send the message
-	getSession(msg.update.getToId()).send(msg);
-	qout.pop();
+          // Send the message
+          getSession(msg.update.getToId()).send(msg);
+          qout.pop();
+        }
+      } finally {
+        finish();
       }
     }
   }
@@ -776,7 +798,9 @@ class PoolCnxNetwork extends StreamNetwork {
       this.logmon = logmon;
     }
 
-    public void shutdown() {
+    protected void close() {}
+
+    protected void shutdown() {
       wakeup();
     }
 
@@ -791,27 +815,31 @@ class PoolCnxNetwork extends StreamNetwork {
       Message msg = null;
       long currentTimeMillis;
       
-      synchronized (lock) {
-	while (running) {
-	  try {
-	    lock.wait(WDActivationPeriod);
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG,
-                              this.getName() + ", activated");
-	  } catch (InterruptedException exc) {
-	    continue;
-	  }
+      try {
+        synchronized (lock) {
+          while (running) {
+            try {
+              lock.wait(WDActivationPeriod);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", activated");
+            } catch (InterruptedException exc) {
+              continue;
+            }
 
-	  if (! running) break;
+            if (! running) break;
 
-	  for (int sid=0; sid<sessions.length; sid++) {
-	    if ((sessions[sid] != null) &&
-		(sessions[sid].sendList.size() > 0) &&
-		(! sessions[sid].isRunning)) {
-	      sessions[sid].start();
-	    }
-	  }
-	}
+            for (int sid=0; sid<sessions.length; sid++) {
+              if ((sessions[sid] != null) &&
+                  (sessions[sid].sendList.size() > 0) &&
+                  (! sessions[sid].running)) {
+                sessions[sid].start();
+              }
+            }
+          }
+        }
+      } finally {
+        finish();
       }
     }
   }

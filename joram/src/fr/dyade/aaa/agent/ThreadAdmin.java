@@ -30,7 +30,7 @@ import java.util.*;
  * <code>Thread</code> used for recuperation of value on each A3 server.
  */
 public final class ThreadAdmin extends Thread {
-public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: ThreadAdmin.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
     
     /**
      * frequence of recuperation of values (in millisecond)
