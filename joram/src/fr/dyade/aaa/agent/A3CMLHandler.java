@@ -366,23 +366,8 @@ public class A3CMLHandler extends DefaultHandler {
   }
 
   /**
-   * Returns the specified AgentServer desc.
-   *
-   * @param id		agent server id
-   * @return		the arguments as declared in configuration file
-   */
-  public final
-  A3CMLServer getServer(short sid) throws UnknownServerException {
-    A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
-    if (server == null)
-      throw new UnknownServerException("Unknown server id. #" + sid);
-    return server;
-  }
-
-  /**
    * Tests if the specified agent server is transient.
    *
-   * @param id		agent server id
    * @return	true if the server is transient; false otherwise; 
    * @exception UnknownServerException
    *	The specified server does not exist.

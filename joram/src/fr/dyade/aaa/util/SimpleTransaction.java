@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.9 2002-05-27 15:17:33 jmesnil Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
   private File dir = null;
 

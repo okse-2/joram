@@ -60,8 +60,8 @@ import org.objectweb.util.monolog.api.LoggerFactory;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.10 2002-05-27 15:17:12 jmesnil Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
