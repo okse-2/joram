@@ -5,7 +5,7 @@
 <document>
   <properties>
     <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Homepage</title>
+    <title>Home page</title>
     <filename>index.xml</filename>
     <pathtoroot>.</pathtoroot>
   </properties>
@@ -30,8 +30,7 @@
 
       <p>The <em>ObjectWeb Consortium</em> has been officially created on 5
       February 2002. ObjectWeb is now organised as an international open
-      consortium hosted by <a
-      href="http://www.inria.fr/index.en.html">INRIA</a> (<connect
+      consortium hosted by <a href="http://www.inria.fr/">INRIA</a> (<connect
       href="../doc/index.xml#annoucement">more informations</connect>).</p>
 
       <hr/>
@@ -77,10 +76,10 @@
 	<p>JORAM provides large support to <em>JMS 1.0.2a</em>.</p>
 
 	<ul>
-	  <li>Point-to-Point (<em>PTP</em>) Model involving queues.</li>
-	  <li>Publish / Subscribe (<em>Pub/Sub</em>) Model involving topics.</li>
-	  <li>Message <em>selection</em>.</li>
-	  <li><em>ASF</em> classes and methods for performing JMS operations
+	  <li>Point-to-Point (PTP) Model involving queues.</li>
+	  <li>Publish / Subscribe (Pub/Sub) Model involving topics.</li>
+	  <li>Message selection.</li>
+	  <li>ASF classes and methods for performing JMS operations
 	    through an application server.</li>
 	  <li>Plus a "light" <em>JNDI 1.1.2</em> implementation.</li>
 	</ul>
