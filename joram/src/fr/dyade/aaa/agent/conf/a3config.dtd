@@ -57,7 +57,7 @@
 	sid  CDATA #REQUIRED
 	natHost CDATA #REQUIRED
 	natPort CDATA #REQUIRED>
-<!ELEMENT cluster (serverCluster | property)*>
+<!ELEMENT cluster (server | property)*>
 <!ATTLIST cluster
 	id CDATA #REQUIRED
 	name CDATA "">

@@ -23,13 +23,13 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT config (domain | server | transient | property)*>
+<!ELEMENT config (domain | server | transient | property | cluster)*>
 <!ATTLIST config name CDATA "default">
 <!ELEMENT domain EMPTY>
 <!ATTLIST domain
 	name CDATA #REQUIRED
-	network CDATA "fr.dyade.aaa.agent.SingleCnxNetwork">
-<!ELEMENT server (network | service | property)*>
+	network CDATA "fr.dyade.aaa.agent.SimpleNetwork">
+<!ELEMENT server (network | service | property | nat)*>
 <!ATTLIST server
 	id CDATA #REQUIRED
 	name CDATA ""
@@ -52,3 +52,12 @@
 <!ATTLIST property
 	name  CDATA #REQUIRED
 	value CDATA #REQUIRED>
+<!ELEMENT nat EMPTY>
+<!ATTLIST nat
+	sid  CDATA #REQUIRED
+	natHost CDATA #REQUIRED
+	natPort CDATA #REQUIRED>
+<!ELEMENT cluster (server | property)*>
+<!ATTLIST cluster
+	id CDATA #REQUIRED
+	name CDATA "">
