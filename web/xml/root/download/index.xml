@@ -14,45 +14,84 @@
 
     <s1 name="Download JORAM free JMS implementation">
 
-      <ol>
-	<li>Check that your <a href="../current/doc/install/">JORAM
-	installation</a> meets the minimum requirements.</li>
+      <p>To download a JORAM release, fill the form below. Please read the
+      following license agreement carefully before clicking on the "Submit"
+      button. To get the current development release, you have to use <connect
+      href="../../resources/cvs.xml">CVS</connect>.</p>
+
+      <p>You are granted access, revision and deletion rights to personal
+      information gathered through this form (see the ObjectWeb <connect
+      href="../../privacy.xml">privacy policy</connect> for more
+      informations). Those are only collected for statistical purposes.</p>
+
+      <p>For installation instructions , see the <a
+      href="../current/doc/install/">JORAM Installation Guide</a>. Check first
+      that your JORAM installation meets the minimum requirements.</p>
+      
+      <form method="post" action="../../cgi-bin/joram/download.cgi">
 	
-	<li>Enter your name, email and company references.  Those are only
-	collected for statistical purposes.  You are granted access, revision
-	and deletion rights to personal information gathered through this form
-	(see the ObjectWeb <connect href="../../privacy.xml">privacy policy</connect>
-	for more informations).</li>
+	<input type="hidden" name="to" value="joram-download@objectweb.org"/>
+<!--	<input type="hidden" name="to" value="mathieu.peltier@inrialpes.fr"/>  --> 
 	
-	<li>Please read the following license agreement before clicking on the
-	Accept button.</li>
-      </ol>
-
-      <form method="post" action="../../cgi-bin/joram/joram_mail.cgi">
-
-        <input type="hidden" name="to" value="joram-download@objectweb.org"/>
-<!--   <input type="hidden" name="to" value="mmathieu.peltier@inrialpes.fr"/> -->
-
         <table border="0">
-
+	  
           <tr> 
-            <td align="right" valign="middle">Name: </td>
-            <td><input type="text" name="Name" size="30"/></td>
+            <td align="right">Name: </td>
+            <td><input type="text" name="name" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
+	  </tr>
+	  
+	  <tr> 
+            <td align="right">E-mail: </td>
+            <td><input type="text" name="email" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
+          </tr>
+	  
+          <tr> 
+            <td align="right">Organization: </td>
+            <td><input type="text" name="organization" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
           </tr>
 
-          <tr> 
-            <td align="right" valign="middle">E-mail: </td>
-            <td><input type="text" name="Email" size="30"/></td>
-          </tr>
-
-          <tr> 
-            <td  align="right" valign="middle">Company: </td>
-            <td><input type="text" name="Company" size="30"/></td>
-          </tr>
-
+	  <tr>
+	    <td align="right" valign="top">Release: </td>
+	    <td>
+	      <input type="radio" name="file" value="joram-2.2.tar.gz" checked="checked"/>JORAM 2.2 jars (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.2.zip"/>JORAM 2.2 jars (zip)<br/>
+	      
+	      <input type="radio" name="file" value="joram-2.2-src.tar.gz"/>JORAM 2.2 sources (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.2-src.zip"/>JORAM 2.2 sources (zip)
+	    </td>
+	  </tr>
+	  
+	  <tr>
+	    <td align="right" valign="top">&#140;</td>
+	    <td>
+	      <input type="radio" name="file" value="joram-2.1.1.tar.gz"/>JORAM 2.1.1 jars (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.1.1.zip"/>JORAM 2.1.1 jars (zip)<br/>
+	      
+	      <input type="radio" name="file" value="joram-2.1.1-src.tar.gz"/>JORAM 2.1.1 sources (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.1.1-src.zip"/>JORAM 2.1.1 sources (zip)
+	    </td>
+	  </tr>
+	  
+	  <tr>
+	    <td colspan="2">Please select a download site closed to your site:</td>
+	  </tr>
+	  
+	  <tr>
+	    <td align="right">Download site: </td>
+	    <td><select name="site" size="1">
+		<option value="http://www.objectweb.org/joram/download/">HTTP download from France</option>
+		<option value="http://objectweb.cs.rice.edu/joram/download/">HTTP download from United Stated</option>
+	      </select>
+	    </td>
+	  </tr>
+	  
+	  <tr>
+	    <td colspan="2">By clicking on the "Submit" button below, you accept the following license agreement:</td>
+	  </tr>
+	  
           <tr> 
             <td colspan="2">
-                <textarea rows="30" name="Agreement" cols="90" wrap="soft">
+	      <textarea rows="30" cols="90">
 JORAM LICENSE
 
 1. Definitions
@@ -631,14 +670,14 @@ EXHIBIT B.
         described in section 6.4 above, text file provided by the Initial
         Developer. This license is not valid or complete with out that
         file.
-</textarea>
-</td>
+	      </textarea>
+	    </td>
           </tr>
-
+	  
           <tr> 
             <td colspan="2" align="center">
-              <input type="submit" value="Accept" name="submit" />
-              <input type="reset" value="Reset" name="reset" />
+              <input type="submit" value="Submit" />
+              <input type="reset" value="Reset" />
             </td>
           </tr>
         </table>
@@ -649,8 +688,7 @@ EXHIBIT B.
       countries. Bull is independent of Sun Microsystems, Inc.. AIX is a
       trademark of IBM Corp. and is being used under licence. Windows NT is a
       registered trademark of Microsoft Corporation.</copyright>
-
     </s1>
     
-</body>
+  </body>
 </document>
