@@ -14,6 +14,12 @@
 
     <s1 name="Recent news">
 
+      <subtitle>January, 16th 2002: JORAM 2.2 (cvs tag:
+      joram2_2</subtitle>
+      <p>This version adds support for <a
+	  href="http://jakarta.apache.org/ant">Ant</a> build
+      system. Package and documentation will follow soon...</p>
+      
       <subtitle>Linux Expo / Linux World Paris 2002</subtitle>
 
       <p><em>ObjectWeb</em> will be present at the Linux Expo in Paris on
