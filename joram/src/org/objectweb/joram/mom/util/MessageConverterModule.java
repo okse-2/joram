@@ -28,6 +28,7 @@ import org.objectweb.joram.shared.messages.MessageType;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 
@@ -74,7 +75,7 @@ public class MessageConverterModule
       // Building a Map message.
       else if (jmsMessage instanceof MapMessage) {
         String name;
-        Hashtable map = new Hashtable();
+        HashMap map = new HashMap();
         for (Enumeration names = ((MapMessage) jmsMessage).getMapNames();
              names.hasMoreElements();) {
           name = (String) names.nextElement();
