@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -361,7 +361,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": received a"
                                    + " reply.");
-  
+
       Vector msgs = reply.getMessages();
       if (msgs != null && ! msgs.isEmpty()) {
         org.objectweb.joram.shared.messages.Message msg =
@@ -407,6 +407,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receiveNoWait() throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed consumer.");
+    if (!sess.cnx.started)
+      return null;
     return receive(-1);
   }
 
@@ -514,9 +518,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer
         try {
           messageListener.onMessage(Message.wrapMomMessage(sess, message));
           // Auto ack: acknowledging the message:
-          if (sess.autoAck)
+          if (sess.autoAck && !sess.toRecover)
             sess.cnx.asyncRequest(new ConsumerAckRequest(targetName, msgId,
                                                          queueMode));
+          else if (sess.toRecover) {
+            sess.toRecover = false;
+            throw new RuntimeException("Recover...");
+          }
         }
         // Catching a JMSException means that the building of the Joram
         // message went wrong: denying as expected by the spec:
