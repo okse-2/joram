@@ -39,12 +39,20 @@ import javax.jms.MessageEOFException;
  */
 public class BytesMessage extends Message implements javax.jms.BytesMessage
 {
+  /** <code>true</code> if body data has been written. */
+  private boolean written = false;
+  /** The buffer containing the written bytes. */
+  private ByteArrayOutputStream writtenBos;
   /** The stream containing the written bytes. */
-  private DataOutputStream dos;
-  /** The array temporary storing the written bytes. */
-  private ByteArrayOutputStream bos;
+  private DataOutputStream writtenDos;
+  /** The bytes array keeping the sent data. */
+  private byte[] bytes = null;
+
   /** The stream for reading the carried bytes. */
   private DataInputStream dis = null;
+
+  /** The bytes body size. */
+  private long size;
 
   /** <code>true</code> if the message body is write-only. */
   protected boolean WObody = true;
@@ -56,8 +64,8 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
   BytesMessage(Session sess)
   {
     super(sess);
-    bos = new ByteArrayOutputStream();
-    dos = new DataOutputStream(bos);
+    writtenBos = new ByteArrayOutputStream();
+    writtenDos = new DataOutputStream(writtenBos);
   }
  
 
@@ -71,7 +79,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     if (WObody)
       throw new MessageNotReadableException("Can't get not readable message's"
                                             + " size.");
-    return momMsg.getSize();
+    return size;
   } 
 
   /** 
@@ -85,16 +93,18 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     super.clearBody();
 
     try {
-      if (bos != null)
-        bos.close();
-      if (dos != null)
-        dos.close();
+      if (writtenBos != null)
+        writtenBos.close();
+      if (writtenDos != null)
+        writtenDos.close();
       if (dis != null)
         dis.close();
 
-      bos = new ByteArrayOutputStream();
-      dos = new DataOutputStream(bos);
+      writtenBos = new ByteArrayOutputStream();
+      writtenDos = new DataOutputStream(writtenBos);
+      bytes = null;
       WObody = true;
+      written = false;
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while closing the streams: "
@@ -115,13 +125,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try { 
-      dos.writeBoolean(value);
+      writtenDos.writeBoolean(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -135,13 +146,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.write(value);
+      writtenDos.write(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -155,13 +167,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.write(value);
+      writtenDos.write(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
 
   /** 
@@ -176,13 +189,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.write(value, offset, length);
+      writtenDos.write(value, offset, length);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -196,13 +210,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeChar(value);
+      writtenDos.writeChar(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -216,13 +231,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " messaeg body is read-only.");
     try {
-      dos.writeDouble(value);
+      writtenDos.writeDouble(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -236,13 +252,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeFloat(value);
+      writtenDos.writeFloat(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -256,13 +273,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeInt(value);
+      writtenDos.writeInt(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -276,13 +294,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeLong(value);
+      writtenDos.writeLong(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -298,21 +317,21 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
                                              + " message body is read-only.");
     try {
       if (value instanceof Boolean)
-        dos.writeBoolean(((Boolean) value).booleanValue());
+        writtenDos.writeBoolean(((Boolean) value).booleanValue());
       else if (value instanceof Character)
-        dos.writeChar(((Character) value).charValue());
+        writtenDos.writeChar(((Character) value).charValue());
       else if (value instanceof Integer)
-        dos.writeInt(((Integer) value).intValue());
+        writtenDos.writeInt(((Integer) value).intValue());
       else if (value instanceof Long)
-        dos.writeLong(((Long) value).longValue());
+        writtenDos.writeLong(((Long) value).longValue());
       else if (value instanceof Float)
-        dos.writeFloat(((Float) value).floatValue());
+        writtenDos.writeFloat(((Float) value).floatValue());
       else if (value instanceof Double)
-        dos.writeDouble(((Double) value).doubleValue());
+        writtenDos.writeDouble(((Double) value).doubleValue());
       else if (value instanceof String)
-        dos.writeUTF((String) value);
+        writtenDos.writeUTF((String) value);
       else if (value instanceof byte[])
-        dos.write((byte[]) value);
+        writtenDos.write((byte[]) value);
       else
         throw new MessageFormatException("Can't write non Java primitive type"
                                          + " as a bytes array.");
@@ -322,6 +341,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
   
   /** 
@@ -335,13 +355,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeShort(value);
+      writtenDos.writeShort(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
  
   /** 
@@ -355,13 +376,14 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
       throw new MessageNotWriteableException("Can't write a value as the"
                                              + " message body is read-only.");
     try {
-      dos.writeUTF(value);
+      writtenDos.writeUTF(value);
     }
     catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value: "
                                          + ioE);
       jE.setLinkedException(ioE);
     }
+    written = true;
   }
 
 
@@ -621,7 +643,7 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
-  public int readBytes(byte[] bytes) throws JMSException
+  public int readBytes(byte[] value) throws JMSException
   {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
@@ -629,18 +651,19 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
     int counter = 0;
 
     try {
-      for (int i = 0; i < bytes.length; i ++) {
-        bytes[i] = dis.readByte();
+      for (int i = 0; i < value.length; i ++) {
+        value[i] = dis.readByte();
         counter++;
       }
     }
-    catch (Exception e) {
+    // End of array has been reached:
+    catch (EOFException eofE) {}
+    // An error has occured!
+    catch (IOException ioE) {
       JMSException jE = null;
-      if (e instanceof IOException) {
-        jE = new JMSException("Could not read the bytes array: " + e);
-        jE.setLinkedException(e);
-        throw jE;
-      }
+      jE = new JMSException("Could not read the bytes array: " + ioE);
+      jE.setLinkedException(ioE);
+      throw jE;
     }
     if (counter == 0)
       return -1;
@@ -653,29 +676,29 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception JMSException  If an exception occurs while reading the bytes.
    */
-  public int readBytes(byte[] bytes, int length) throws JMSException
+  public int readBytes(byte[] value, int length) throws JMSException
   {
     if (WObody)
       throw new MessageNotReadableException("Can't read the message body as"
                                             + " it is write-only.");
-    if (length > bytes.length || length < 0)
+    if (length > value.length || length < 0)
       throw new IndexOutOfBoundsException("Invalid length parameter: "
                                           + length);
     int counter = 0;
 
     try {
       for (int i = 0; i < length; i ++) {
-        bytes[i] = dis.readByte();
+        value[i] = dis.readByte();
         counter++;
       }
     }
-    catch (Exception e) {
+    // End of array has been reached:
+    catch (EOFException eofE) {}
+    // An error has occured!
+    catch (IOException ioE) {
       JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array: " + e);
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array: " + e);
-      jE.setLinkedException(e);
+      jE = new JMSException("Could not read the bytes array: " + ioE);
+      jE.setLinkedException(ioE);
       throw jE;
     }
     if (counter == 0)
@@ -717,8 +740,17 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
   public void reset() throws JMSException
   {
     try {
-      dos.flush();
-      dis = new DataInputStream(new ByteArrayInputStream(bos.toByteArray())); 
+      writtenDos.close();
+   
+      if (bytes == null || written)
+        bytes = writtenBos.toByteArray();
+
+      writtenBos.close();
+      writtenBos = new ByteArrayOutputStream();
+      writtenDos = new DataOutputStream(writtenBos);
+
+      dis = new DataInputStream(new ByteArrayInputStream(bytes));
+      size = bytes.length;
   
       RObody = true;
       WObody = false;
@@ -737,8 +769,20 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
    */
   protected void prepare() throws Exception
   {
-    dos.flush();
-    momMsg.setBytes(bos.toByteArray());
+    super.prepare();
+
+    writtenDos.close();
+
+    if (bytes == null || written)
+      bytes = writtenBos.toByteArray();
+
+    momMsg.setBytes(bytes);
+
+    writtenBos.close();
+    writtenBos = new ByteArrayOutputStream();
+    writtenDos = new DataOutputStream(writtenBos);
+  
+    written = false;
   }
 
   /** 
@@ -748,9 +792,11 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
    */
   protected void restore() throws Exception
   {
-    dis = new DataInputStream(new ByteArrayInputStream(momMsg.getBytes())); 
+    dis = new DataInputStream(new ByteArrayInputStream(momMsg.getBytes()));
+
+    size = momMsg.getBytes().length;
+
     RObody = true;
     WObody = false;
   }
 }
-
