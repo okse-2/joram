@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE config SYSTEM "a3config.dtd">
+<config>
+  <domain name="D1"/>
+    <server id="0" name="s0" hostname="localhost">
+      <property name="Transaction" value="fr.dyade.aaa.util.ATransaction"/>
+      <network domain="D1" port="16301"/>
+      <service class="fr.dyade.aaa.ns.NameService"/>
+      <service class="fr.dyade.aaa.mom.dest.AdminTopic"/>
+      <service class="fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory"
+               args="16010 root root"/>
+      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+    </server>
+    <server id="1" name="s1" hostname="localhost">
+      <property name="Transaction" value="fr.dyade.aaa.util.ATransaction"/>
+      <network domain="D1" port="16302"/>
+      <service class="fr.dyade.aaa.mom.dest.AdminTopic"/>
+      <service class="fr.dyade.aaa.mom.proxies.soap.SoapProxy"
+               args="root root"/>
+    </server>
+</config>
