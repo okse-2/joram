@@ -54,7 +54,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>AdminTopicImpl</code> class implements the admin topic behaviour,
  * basically processing administration requests.
  */
-public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
+public class AdminTopicImpl extends TopicImpl
 {
   /** Reference of the server's local AdminTopicImpl instance. */
   public static AdminTopicImpl ref;
@@ -100,12 +100,6 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
   private Hashtable requestsTable;
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
-
-  /**
-   * Identifier of the admin proxy, kept for supporting the old
-   * ADMIN protocol.
-   */
-  private AgentId adminProxId;
 
   /**
    * Identifier of the server's default dead message queue, kept here for
@@ -234,8 +228,6 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
 
     if (not instanceof AdminNotification)
       doReact(from, (AdminNotification) not);
-    else if (not instanceof MBeanNotification)
-      doReact(from, (MBeanNotification) not);
     else if (not instanceof org.objectweb.joram.mom.notifications.AdminReply)
       doReact(from, (org.objectweb.joram.mom.notifications.AdminReply) not);
     else
@@ -257,41 +249,9 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
 
     clients.put(adminNot.getProxyId(), new Integer(READWRITE));
    
-    adminProxId = adminNot.getProxyId();
-
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, name + " successfully"
                                     + " set as admin client.");
-  }
-
-  /**
-   * Reacts to an <code>MBeanNotification</code> by passing the wrapped
-   * administration request to the appropriate method.
-   */
-  protected void doReact(AgentId from, MBeanNotification not)
-  {
-    try {
-      if (not.request instanceof CreateDestinationRequest)
-        doProcess((CreateDestinationRequest) not.request, null, null);
-      else if (not.request instanceof CreateUserRequest)
-        doProcess((CreateUserRequest) not.request, null, null);
-      else if (not.request instanceof DeleteDestination)
-        doProcess((DeleteDestination) not.request, null, null);
-      else if (not.request instanceof UpdateUser)
-        doProcess((UpdateUser) not.request, null, null);
-      else if (not.request instanceof DeleteUser)
-        doProcess((DeleteUser) not.request, null, null);
-      else if (not.request instanceof SetReader)
-        doProcess((SetReader) not.request, null, null);
-      else if (not.request instanceof SetWriter)
-        doProcess((SetWriter) not.request, null, null);
-      else if (not.request instanceof UnsetReader)
-        doProcess((UnsetReader) not.request, null, null);
-      else if (not.request instanceof UnsetWriter)
-        doProcess((UnsetWriter) not.request, null, null);
-    }
-    catch (UnknownServerException exc) {}
-    catch (RequestException exc) {}
   }
 
   /**
@@ -695,10 +655,6 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
           doProcess((UnsetQueueThreshold) request, replyTo, msgId);
         else if (request instanceof UnsetUserThreshold)
           doProcess((UnsetUserThreshold) request, replyTo, msgId);
-        else if (request instanceof OldAddAdminId)
-          doProcess((OldAddAdminId) request, replyTo, msgId);
-        else if (request instanceof OldDelAdminId)
-          doProcess((OldDelAdminId) request, replyTo, msgId);
         else if (request instanceof Monitor_GetServersIds)
           doProcess((Monitor_GetServersIds) request, replyTo, msgId);
         else if (request instanceof Monitor_GetDestinations)
@@ -1431,46 +1387,6 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
       requestsTable.put(msgId, replyTo);
   }
 
-  /** Temporary method kept for maintaining the old administration. */
-  private void doProcess(OldAddAdminId request,
-                         AgentId replyTo,
-                         String msgId)
-               throws UnknownServerException, RequestException
-  {
-    if (! checkServerId(request.getServerId()))
-      return;
-
-    String name = request.getName();
-
-    if (usersTable.containsKey(name))
-      throw new RequestException("Name [" + name + "] already taken");
-
-    usersTable.put(name, request.getPass());
-    proxiesTable.put(name, adminProxId);
-
-    distributeReply(replyTo, msgId, new AdminReply(true, null));
-  }
-
-  /** Temporary method kept for maintaining the old administration. */
-  private void doProcess(OldDelAdminId request,
-                         AgentId replyTo,
-                         String msgId)
-               throws UnknownServerException, RequestException
-  {
-    if (! checkServerId(request.getServerId()))
-      return;
-
-    String name = request.getName();
-
-    if (! usersTable.containsKey(name))
-      throw new RequestException("Name [" + name + "] is not known");
-
-    usersTable.remove(name);
-    proxiesTable.remove(name);
-
-    distributeReply(replyTo, msgId, new AdminReply(true, null));
-  }
-
   /**
    * Processes a <code>Monitor_GetServersIds</code> request by sending 
    * the list of the platform servers' ids.
@@ -1827,77 +1743,6 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
       Channel.sendTo(to, clientMessages);
     }
     catch (Exception exc) {}
-  }
-
-
-  /**
-   * MBean interface implementation; returns the administered queues
-   * identifiers.
-   */
-  public String getAdministeredQueuesIds()
-  {
-    Vector result = new Vector();
-    for (int i = 0; i < queues.size(); i++)
-      result.add(queues.get(i).toString());
-
-    return result.toString();
-  }
-
-  /**
-   * MBean interface implementation; returns the administered topics
-   * identifiers.
-   */
-  public String getAdministeredTopicsIds()
-  {
-    Vector result = new Vector();
-    for (int i = 0; i < topics.size(); i++)
-      result.add(topics.get(i).toString());
-
-    return result.toString();
-  }
-
-  /**
-   * Returns the names and proxies identifiers of the administered JMS users.
-   */
-  public String getAdministeredJmsUsers()
-  {
-    return proxiesTable.toString();
-  }
-
-  /**
-   * MBean interface implementation: creates a local JMS proxy.
-   *
-   * @param name  User name.
-   * @param pass  User password.
-   *
-   * @exception Exception  If the user identification is already taken.
-   */
-  public void createLocalJmsUser(String name, String pass)
-              throws Exception
-  {
-    if (proxiesTable.containsKey(name))
-      throw new Exception("User [" + name + "] has already been defined.");
-
-    CreateUserRequest request = new CreateUserRequest(name, pass, serverId);
-    Channel.sendTo(destId, new MBeanNotification(request));
-  }
-
-  /** MBean interface implementation: creates a local topic. */
-  public void createLocalTopic()
-  {
-    CreateDestinationRequest request = 
-      new CreateDestinationRequest(serverId,
-                                   "org.objectweb.joram.mom.dest.Topic");
-    Channel.sendTo(destId, new MBeanNotification(request));
-  }
-  
-  /** MBean interface implementation: creates a local queue. */
-  public void createLocalQueue()
-  {
-    CreateDestinationRequest request = 
-      new CreateDestinationRequest(serverId,
-                                   "org.objectweb.joram.mom.dest.Queue");
-    Channel.sendTo(destId, new MBeanNotification(request));
   }
 
 
