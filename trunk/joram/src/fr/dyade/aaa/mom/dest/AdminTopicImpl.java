@@ -985,8 +985,11 @@ public class AdminTopicImpl extends TopicImpl
       throw new RequestException("User [" + name + "] does not exist");
 
     String newName = request.getNewName();
-    // If the new name is already taken:
-    if (usersTable.containsKey(newName) || soapTable.containsKey(newName))
+    // If the new name is already taken by an other user than the modified
+    // one:
+    if (! newName.equals(name)
+        && (usersTable.containsKey(newName)
+            || soapTable.containsKey(newName)))
       throw new RequestException("Name [" + newName + "] already used");
 
     String newPass = request.getNewPass();
@@ -994,6 +997,7 @@ public class AdminTopicImpl extends TopicImpl
     // The user is a TCP user:
     if (usersTable.containsKey(name)) {
       usersTable.remove(name);
+      proxiesTable.remove(name);
       usersTable.put(newName, request.getNewPass());
       proxiesTable.put(newName, proxId);
     }
