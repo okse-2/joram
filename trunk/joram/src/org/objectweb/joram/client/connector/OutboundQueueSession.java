@@ -26,6 +26,7 @@ import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Session;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>OutboundQueueSession</code> instance wraps a JMS QueueSession
@@ -37,18 +38,35 @@ public class OutboundQueueSession extends OutboundSession
   /**
    * Constructs an <code>OutboundQueueSession</code> instance.
    */
-  OutboundQueueSession(Session sess, OutboundConnection cnx)
-  {
+  OutboundQueueSession(Session sess, OutboundConnection cnx) {
     super(sess, cnx);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundQueueSession(" + sess + 
+                                    ", " + cnx + ")");
   }
 
+  /**
+   * Constructs an <code>OutboundQueueSession</code> instance.
+   */
+  OutboundQueueSession(Session sess, 
+                       OutboundConnection cnx,
+                       boolean transacted) {
+    super(sess, cnx, transacted);
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "OutboundQueueSession(" + sess + 
+                                    ", " + cnx + ")");
+  }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.QueueSender createSender(Queue queue)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createSender(" + queue + ")");
+
     checkValidity();
     return new OutboundSender(sess.createProducer(queue), this);
   }
@@ -57,8 +75,12 @@ public class OutboundQueueSession extends OutboundSession
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.QueueReceiver createReceiver(Queue queue, String selector)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " createReceiver(" + queue + 
+                                    ", " + selector + ")");
+
     checkValidity();
     return new OutboundReceiver(queue,
                                 sess.createConsumer(queue, selector),
@@ -69,8 +91,10 @@ public class OutboundQueueSession extends OutboundSession
    * Delegates the call to the wrapped JMS session.
    */
   public javax.jms.QueueReceiver createReceiver(Queue queue)
-         throws JMSException
-  {
+    throws JMSException {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createReceiver(" + queue + ")");
+
     checkValidity();
     return new OutboundReceiver(queue, sess.createConsumer(queue), this);
   }
@@ -82,7 +106,7 @@ public class OutboundQueueSession extends OutboundSession
    */
   public javax.jms.TopicSubscriber
       createDurableSubscriber(javax.jms.Topic topic, 
-                                 String name,
+                              String name,
                               String selector,
                               boolean noLocal) 
     throws JMSException  {
