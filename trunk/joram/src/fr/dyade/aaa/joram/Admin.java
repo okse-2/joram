@@ -149,6 +149,11 @@ public class Admin {
       oos.reset();
       msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
       String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      // stop Driver in MOM
+      msgMOM = new fr.dyade.aaa.mom.MessageAdminCleanDriver(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
       sock.close();
       return new fr.dyade.aaa.joram.TopicConnectionFactory(agentClient,addr,port);
     } else 
@@ -175,6 +180,11 @@ public class Admin {
       oos.reset();
       msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
       String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      // stop Driver in MOM
+      msgMOM = new fr.dyade.aaa.mom.MessageAdminCleanDriver(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
       sock.close();
       return new fr.dyade.aaa.joram.QueueConnectionFactory(agentClient,addr,port);
     } else 
@@ -201,6 +211,11 @@ public class Admin {
       oos.reset();
       msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
       String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      // stop Driver in MOM
+      msgMOM = new fr.dyade.aaa.mom.MessageAdminCleanDriver(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
       sock.close();
       return new fr.dyade.aaa.joram.XATopicConnectionFactory(agentClient,addr,port);
     } else 
@@ -227,6 +242,11 @@ public class Admin {
       oos.reset();
       msgMOM = (fr.dyade.aaa.mom.MessageAdminGetAgentClient) ois.readObject();
       String agentClient = ((fr.dyade.aaa.mom.MessageAdminGetAgentClient) msgMOM).getAgent();
+      // stop Driver in MOM
+      msgMOM = new fr.dyade.aaa.mom.MessageAdminCleanDriver(1);
+      oos.writeObject(msgMOM);
+      oos.flush();
+      oos.reset();
       sock.close();
       return new fr.dyade.aaa.joram.XAQueueConnectionFactory(agentClient,addr,port);
     } else 
