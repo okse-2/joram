@@ -639,7 +639,9 @@ public class AdminTopicImpl extends TopicImpl
         }
         catch (Exception exc) {}
 
-        if (request instanceof CreateQueueRequest)
+        if (request instanceof StopServerRequest)
+          doProcess((StopServerRequest) request, replyTo, msgId);
+        else if (request instanceof CreateQueueRequest)
           doProcess((CreateQueueRequest) request, replyTo, msgId);
         else if (request instanceof CreateTopicRequest)
           doProcess((CreateTopicRequest) request, replyTo, msgId);
@@ -754,6 +756,28 @@ public class AdminTopicImpl extends TopicImpl
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     }
+  }
+
+  /**
+   * Processes a <code>StopServerRequest</code> instance requesting to stop
+   * a given server.
+   */
+  private void doProcess(StopServerRequest request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    // If this server is not the target server, doing nothing:
+    if (request.getServerId() != serverId)
+      return;
+
+    distributeReply(replyTo, msgId, new AdminReply(true, "Server stopped"));
+
+    new Thread() {
+      public void run()
+      {
+        AgentServer.stop();
+      }
+    }.start();
   }
 
   /**
