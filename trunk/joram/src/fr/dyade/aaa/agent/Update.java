@@ -48,15 +48,27 @@ final class Update {
    */
   transient Update next;
 
+  /**
+   * Returns a string representation for this object.
+   *
+   * @return	A string representation of this object. 
+   */
   public String toString() {
-    StringBuffer strbuf = new StringBuffer();
+    return appendToString(new StringBuffer()).toString();
+  }
 
+  /**
+   *  Adds a string representation for this object in the
+   * StringBuffer parameter.
+   *
+   * @return	A string representation of this object. 
+   */
+  public StringBuffer appendToString(StringBuffer strbuf) {
     strbuf.append('(').append(super.toString());
     strbuf.append(',').append(l).append(',')
 	.append(c).append(',')
 	.append(stamp).append(')');
-
-    return strbuf.toString();
+    return strbuf;
   }
 
   /**
@@ -71,25 +83,6 @@ final class Update {
     this.stamp = s;
     this.next = null;
   }
-
-//   /**
-//    * Creates an element and links it after the head.
-//    * @param	l	Matrix line.
-//    * @param	c	Matrix column.
-//    * @param	s	Element stamp. 
-//    * @param 	list    The head list element.
-//    */
-//   private Update(short l, short c, int s, Update list) {
-//     this.l = l;
-//     this.c = c;
-//     this.stamp = s;
-//     if (list != null) {
-//       this.next = list.next;
-//       list.next = this;
-//     } else {
-//       this.next = null;
-//     }
-//   }
 
   /**
    * Return the source server of the message associated with this stamp.
