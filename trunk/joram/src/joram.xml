@@ -36,6 +36,7 @@
       <include name="fr/dyade/aaa/util/AFastTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
       <include name="org/objectweb/joram/**/*.java"/>
+      <include name="com/scalagent/jmx/*.java"/>
     </patternset>
 
     <!-- Specific classpath needed for compilation -->
@@ -80,6 +81,7 @@
         <include name="org/objectweb/joram/mom/proxies/soap/*.class"/>
         <include name="org/objectweb/joram/mom/proxies/tcp/*.class"/>
         <include name="org/objectweb/joram/mom/util/*.class"/>
+        <include name="com/scalagent/jmx/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
@@ -113,7 +115,7 @@
   <target name="build.kjoram" depends="prepare"
       description="--> Builds kjoram jars.">
     <!-- Compilation phase -->
-    <javac target="1.1"
+    <javac source="1.3" target="1.1"
            bootclasspath="${lib.dir}/midpapi.jar"
            classpath="${lib.dir}/kxml.jar"
            srcdir="${src.dir}:${obj.dir}"
