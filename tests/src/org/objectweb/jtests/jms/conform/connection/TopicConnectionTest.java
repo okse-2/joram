@@ -19,7 +19,7 @@
  * USA
  * 
  * Initial developer(s): Jeff Mesnil (jmesnil@inrialpes.fr)
- * Contributor(s): ______________________________________.
+ * Contributor(s): Andreas Mueller <am@iit.de>
  */
 
 package org.objectweb.jtests.jms.conform.connection;

@@ -19,7 +19,7 @@
  * USA
  * 
  * Initial developer(s): Jeff Mesnil (jmesnil@inrialpes.fr)
- * Contributor(s): ______________________________________.
+ * Contributor(s): Andreas Mueller <am@iit.de>.
  */
 
 package org.objectweb.jtests.jms.conform.message.headers;
@@ -33,7 +33,7 @@ import javax.naming.* ;
  * Test the headers of a message
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageHeaderTest.java,v 1.5 2002-04-08 13:48:15 joram Exp $
+ * @version $Id: MessageHeaderTest.java,v 1.6 2002-04-08 14:48:32 joram Exp $
  */
 public class MessageHeaderTest extends PTPTestCase {
 
