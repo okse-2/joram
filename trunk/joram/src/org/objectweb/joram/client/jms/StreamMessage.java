@@ -394,7 +394,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public boolean readBoolean() throws JMSException
   {
@@ -405,13 +406,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readBoolean();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -419,7 +414,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public byte readByte() throws JMSException
   {
@@ -430,13 +426,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readByte();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
  
@@ -444,7 +434,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public short readShort() throws JMSException
   {
@@ -455,13 +446,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readShort();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -469,7 +454,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public char readChar() throws JMSException
   {
@@ -480,13 +466,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readChar();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -494,7 +474,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public int readInt() throws JMSException
   {
@@ -505,13 +486,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readInt();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -519,7 +494,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public long readLong() throws JMSException
   {
@@ -530,13 +506,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readLong();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -544,7 +514,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public float readFloat() throws JMSException
   {
@@ -555,13 +526,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readFloat();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -569,7 +534,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public double readDouble() throws JMSException
   {
@@ -580,13 +546,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readDouble();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -594,7 +554,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public int readBytes(byte[] bytes) throws JMSException
   {
@@ -617,10 +578,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
     catch (EOFException eofE) {}
     // An error has occured!
     catch (IOException ioE) {
-      JMSException jE = null;
-      jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(ioE);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + ioE);
     }
     if (counter == 0)
       return -1;
@@ -631,7 +589,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the expected type is
+   *                                         not possible.
    */
   public String readString() throws JMSException
   {
@@ -642,15 +601,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readUTF();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      else
-        jE = new JMSException("Exc: " + e);
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the expected type: " + e);
     }
   }
 
@@ -658,7 +609,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * API method.
    *
    * @exception MessageNotReadableException  If the message body is write-only.
-   * @exception JMSException  If an exception occurs while reading the bytes.
+   * @exception MessageFormatException       If reading the body is
+   *                                         not possible.
    */
   public Object readObject() throws JMSException
   {
@@ -669,13 +621,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readObject();
     }
     catch (Exception e) {
-      JMSException jE = null;
-      if (e instanceof EOFException)
-        jE = new MessageEOFException("Unexpected end of bytes array.");
-      else if (e instanceof IOException)
-        jE = new JMSException("Could not read the bytes array.");
-      jE.setLinkedException(e);
-      throw jE;
+      throw new MessageFormatException("Can't read the body: " + e);
     }
   }
 
