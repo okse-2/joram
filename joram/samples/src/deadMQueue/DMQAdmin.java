@@ -29,61 +29,56 @@ package deadMQueue;
 
 import fr.dyade.aaa.joram.admin.*;
 
-import javax.jms.*;
-import javax.naming.*;
-
 /**
  * Administers an agent server for the deadMQueue samples.
  */
 public class DMQAdmin
 {
-  static Context ictx = null; 
-
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("DMQ administration phase... ");
+    System.out.println("DMQ administration...");
 
-    Admin admin = new Admin("root", "root", 60);
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
-    Queue queue = admin.createQueue("queue");
-    Topic topic = admin.createTopic("topic");
+    javax.jms.Queue queue = admin.createQueue(0);
+    javax.jms.Topic topic = admin.createTopic(0);
 
-    DeadMQueue userDmq = admin.createDeadMQueue("userDmq");
-    DeadMQueue destDmq = admin.createDeadMQueue("destDmq");
+    DeadMQueue userDmq = admin.createDeadMQueue(0);
+    DeadMQueue destDmq = admin.createDeadMQueue(0);
 
-    User anonymous = admin.createUser("anonymous", "anonymous");
-    User dmqWatcher = admin.createUser("dmq", "dmq");
+    User ano = admin.createUser("anonymous", "anonymous", 0);
+    User dmq = admin.createUser("dmq", "dmq", 0);
 
-    ConnectionFactory cnxFact = admin.createConnectionFactory();
+    javax.jms.ConnectionFactory cnxFact =
+      admin.createConnectionFactory("localhost", 16010);
 
-    anonymous.setDMQ(userDmq);
-    admin.setDestinationDMQ("queue", destDmq);
-    admin.setDestinationDMQ("topic", destDmq);
+    admin.setUserDMQ(ano, userDmq);
+    admin.setDestinationDMQ(queue, destDmq);
+    admin.setDestinationDMQ(topic, destDmq);
 
-    anonymous.setThreshold(2);
+    admin.setUserThreshold(ano, 2);
     admin.setQueueThreshold(queue, 2);
 
-    admin.setFreeReading("queue");
-    admin.setFreeWriting("queue");
-    admin.setFreeReading("topic");
-    admin.setFreeWriting("topic");
-    admin.setReader(dmqWatcher, "userDmq");
-    admin.setWriter(dmqWatcher, "userDmq");
-    admin.setReader(dmqWatcher, "destDmq");
-    admin.setWriter(dmqWatcher, "destDmq");
+    admin.setFreeReading(queue);
+    admin.setFreeWriting(queue);
+    admin.setFreeReading(topic);
+    admin.setFreeWriting(topic);
+    admin.setReader(dmq, userDmq);
+    admin.setWriter(dmq, userDmq);
+    admin.setReader(dmq, destDmq);
+    admin.setWriter(dmq, destDmq);
 
-    admin.close();
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("queue", queue);
+    jndiCtx.bind("topic", topic);
+    jndiCtx.bind("userDmq", userDmq);
+    jndiCtx.bind("destDmq", destDmq);
+    jndiCtx.bind("cnxFact", cnxFact);
+    jndiCtx.close();
+
+    admin.disconnect();
     System.out.println("Admin closed.");
-
-    System.out.println("Binding objects in JNDI... ");
-    ictx = new InitialContext();
-    ictx.rebind("queue", queue);
-    ictx.rebind("topic", topic);
-    ictx.rebind("userDmq", userDmq);
-    ictx.rebind("destDmq", destDmq);
-    ictx.rebind("cnxFact", cnxFact);
-    ictx.close();
-    System.out.println("Objects binded.");
   }
 }

@@ -25,60 +25,53 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-
 package archi;
 
 import fr.dyade.aaa.joram.admin.*;
 
-import javax.jms.*;
-import javax.naming.*;
-
+/**
+ * Administers two agent servers for the archi samples.
+ */
 public class ArchiAdmin
 {
-  static Context ictx = null; 
-    
   public static void main(String args[]) throws Exception
   {
     System.out.println();
     System.out.println("Archi administration...");
 
-    // Getting InitialContext:
-    ictx = new InitialContext();
+    // Connecting the administrator:
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
-    // Connecting to the servers as the default administrator:
-    Admin admin0 = new Admin("localhost", 16010, "root", "root", 120);
-    Admin admin1 = new Admin("localhost", 16011, "root", "root", 120);
-    Admin admin2 = new Admin("localhost", 16012, "root", "root", 120);
-
-    // Creating access for user anonymous:
-    User ano0 = admin0.createUser("anonymous", "anonymous");
-    User ano2 = admin2.createUser("anonymous", "anonymous");
+    // Creating access for user anonymous on servers 0 and 2:
+    User user0 = admin.createUser("anonymous", "anonymous", 0);
+    User user2 = admin.createUser("anonymous", "anonymous", 2);
 
     // Creating the destinations on server 1:
-    Queue queue = admin1.createQueue("queue");
-    Topic topic = admin1.createTopic("topic");
+    javax.jms.Queue queue = admin.createQueue(1);
+    javax.jms.Topic topic = admin.createTopic(1);
 
     // Setting free access to the destinations:
-    admin1.setFreeReading("queue");
-    admin1.setFreeReading("topic");
-    admin1.setFreeWriting("queue");
-    admin1.setFreeWriting("topic");
+    admin.setFreeReading(queue);
+    admin.setFreeReading(topic);
+    admin.setFreeWriting(queue);
+    admin.setFreeWriting(topic);
 
     // Creating the connection factories for connecting to the servers 0 and 2:
-    ConnectionFactory cf0 = admin0.createConnectionFactory();
-    ConnectionFactory cf2 = admin2.createConnectionFactory();
+    javax.jms.ConnectionFactory cf0 =
+      admin.createConnectionFactory("localhost", 16010);
+    javax.jms.ConnectionFactory cf2 =
+      admin.createConnectionFactory("localhost", 16012);
 
-    // Registering the administered objects in JNDI:
-    ictx.rebind("cf0", cf0);
-    ictx.rebind("cf2", cf2);
-    ictx.rebind("queue", queue);
-    ictx.rebind("topic", topic);
+    // Binding the objects in JNDI:
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("queue", queue);
+    jndiCtx.bind("topic", topic);
+    jndiCtx.bind("cf0", cf0);
+    jndiCtx.bind("cf2", cf2);
+    jndiCtx.close();
 
-    ictx.close();
-    admin0.close();
-    admin1.close();
-    admin2.close();
-
-    System.out.println("Admins closed.");
+    admin.disconnect();
+    System.out.println("Admin closed.");
   } 
 }

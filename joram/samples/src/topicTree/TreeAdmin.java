@@ -29,57 +29,52 @@ package topicTree;
 
 import fr.dyade.aaa.joram.admin.*;
 
-import javax.jms.*;
-import javax.naming.*;
 
 /**
  * Administers an agent server for the topic tree samples.
  */
 public class TreeAdmin
 {
-  static Context ictx = null; 
-
   public static void main(String[] args) throws Exception
   {
     System.out.println();
-    System.out.println("Tree sample administration phase... ");
+    System.out.println("Tree administration...");
 
-    Admin admin = new Admin("root", "root", 60);
+    AdminItf admin = new fr.dyade.aaa.joram.admin.AdminImpl();
+    admin.connect("root", "root", 60);
 
-    Topic newsT = admin.createTopic("newsT");
-    Topic businessT = admin.createTopic("businessT");
-    Topic sportsT = admin.createTopic("sportsT");
-    Topic tennisT = admin.createTopic("tennisT");
+    javax.jms.Topic news = admin.createTopic(0);
+    javax.jms.Topic business = admin.createTopic(0);
+    javax.jms.Topic sports = admin.createTopic(0);
+    javax.jms.Topic tennis = admin.createTopic(0);
 
-    admin.setSubTopic("newsT", businessT);
-    admin.setSubTopic("newsT", sportsT);
-    admin.setSubTopic("sportsT", tennisT);
+    admin.setFather(news, business);
+    admin.setFather(news, sports);
+    admin.setFather(sports, tennis);
 
-    ConnectionFactory cf = admin.createConnectionFactory();
+    javax.jms.ConnectionFactory cf =
+      admin.createConnectionFactory("localhost", 16010);
 
-    User user = admin.createUser("anonymous", "anonymous");
+    User user = admin.createUser("anonymous", "anonymous", 0);
 
-    admin.setFreeReading("newsT");
-    admin.setFreeWriting("newsT");
-    admin.setFreeReading("businessT");
-    admin.setFreeWriting("businessT");
-    admin.setFreeReading("sportsT");
-    admin.setFreeWriting("sportsT");
-    admin.setFreeReading("tennisT");
-    admin.setFreeWriting("tennisT");
+    admin.setFreeReading(news);
+    admin.setFreeWriting(news);
+    admin.setFreeReading(business);
+    admin.setFreeWriting(business);
+    admin.setFreeReading(sports);
+    admin.setFreeWriting(sports);
+    admin.setFreeReading(tennis);
+    admin.setFreeWriting(tennis);
 
-    admin.close();
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("news", news);
+    jndiCtx.bind("business", business);
+    jndiCtx.bind("sports", sports);
+    jndiCtx.bind("tennis", tennis);
+    jndiCtx.bind("cf", cf);
+    jndiCtx.close();
 
-    System.out.println("Binding objects in JNDI... ");
-    ictx = new InitialContext();
-    ictx.rebind("news", newsT);
-    ictx.rebind("business", businessT);
-    ictx.rebind("sports", sportsT);
-    ictx.rebind("tennis", tennisT);
-    ictx.rebind("cf", cf);
-    ictx.close();
-    System.out.println("Objects binded.");
-
+    admin.disconnect();
     System.out.println("Admin closed.");
   }
 }
