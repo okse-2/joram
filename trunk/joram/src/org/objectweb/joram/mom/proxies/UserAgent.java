@@ -228,8 +228,24 @@ public class UserAgent extends Agent
     }
   }
 
+  /**
+   * This saving policy should be coded in ProxyImpl.
+   */
+  private void save(AbstractJmsRequest request) {
+    if (request instanceof ProducerMessages ||
+        request instanceof QBrowseRequest) {
+      setNoSave();
+    } else if (request instanceof ConsumerReceiveRequest) {
+      ConsumerReceiveRequest crr = (ConsumerReceiveRequest)request;
+      if (crr.getQueueMode()) setNoSave();
+    } else if (request instanceof ConsumerSetListRequest) {
+      ConsumerSetListRequest cslr = (ConsumerSetListRequest)request;
+      if (cslr.getQueueMode()) setNoSave();
+    }
+  }
+
   private void doReact(RequestNot not) {
-    setNoSave();
+    save((AbstractJmsRequest)not.getMessage());
     Integer key = new Integer(not.getConnectionKey());
     if (connections != null) {
       ConnectionContext ctx = 
@@ -265,17 +281,7 @@ public class UserAgent extends Agent
 
   private void doReact(ProxyMessageNot not) {
     ProxyMessage msg = not.getMessage();
-    if (msg.getObject() instanceof ProducerMessages ||
-        msg.getObject() instanceof QBrowseRequest) {
-      setNoSave();
-    } else if (msg.getObject() instanceof ConsumerReceiveRequest) {
-      ConsumerReceiveRequest crr = (ConsumerReceiveRequest)msg.getObject();
-      if (crr.getQueueMode()) setNoSave();
-    } else if (msg.getObject() instanceof ConsumerSetListRequest) {
-      ConsumerSetListRequest cslr = (ConsumerSetListRequest)msg.getObject();
-      if (cslr.getQueueMode()) setNoSave();
-    }
-
+    save((AbstractJmsRequest)msg.getObject());
     Integer key = new Integer(not.getConnectionKey());
     if (connections != null) {
       ReliableConnectionContext ctx = 
