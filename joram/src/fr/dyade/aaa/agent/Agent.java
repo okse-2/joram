@@ -73,7 +73,7 @@ public abstract class Agent implements Serializable {
    * This field value is initialized as <code>true</code>, so that by default
    * the agent state is saved after a reaction.
    */
-  private transient boolean updated;
+  private transient boolean updated = true;
 
   /**
    * Sets the <code>updated</code> field to <code>false</code> so that the
