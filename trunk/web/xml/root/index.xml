@@ -14,12 +14,18 @@
 
     <s1 name="Latest News">
       <subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
-      <p>Following the JORAM community constant increase, a JORAM users' day is
-      organized in Paris on the 17th of June. Its goal is to allow JORAM
-      developers and users to meet and exchange their views about the usage 
-      and evolutions of the JORAM platform.</p>
-      <p>The complete announcement is available
+      <p>ObjectWeb and the JORAM core development team are setting up
+      a JORAM Users' Day on June 17th in Paris (place to be defined later).</p>
+      <p>This day is intended to be the first attempt of direct exchanges
+      between members of the JORAM community. The meeting is an opportunity
+      to report on the credibility of the JORAM solution and to raise
+      questions and answers about the durability and evolution of this open
+      source product.</p>
+      <p>Details about the JORAM Users Day can be found
       <a href="current/doc/JORAM-Day.pdf">here</a>.</p>
+      <p>A french version of this annoucement is also available at:
+      <a href="http://www.scalagent.com/pages/fr/products/joram-usergroup.htm">
+      http://www.scalagent.com/pages/fr/products/joram-usergroup.htm</a>.</p>
       <subtitle>February 13, 2004: JORAM 4.0 is released and provides major
       new features!</subtitle>
       <p>JORAM 4.0 is the first release of a new JORAM generation with even
