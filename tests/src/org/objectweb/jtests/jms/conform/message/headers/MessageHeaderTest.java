@@ -33,7 +33,7 @@ import javax.naming.* ;
  * Test the headers of a message
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageHeaderTest.java,v 1.4 2002-04-08 08:48:40 joram Exp $
+ * @version $Id: MessageHeaderTest.java,v 1.5 2002-04-08 13:48:15 joram Exp $
  */
 public class MessageHeaderTest extends PTPTestCase {
 
@@ -163,7 +163,7 @@ public class MessageHeaderTest extends PTPTestCase {
     /**
      * Test that the <code>JMSDestination</code> header field value is ignored when the message
      * is sent and that after completion of the sending method, it holds the <code>Destination</code>
-     * specified by the sending method.<br />
+     * specified by the sending method.
      * Also test that the value of the header on the received message is the same that on the sent message.
      */
     public void testJMSDestination() {
@@ -186,7 +186,8 @@ public class MessageHeaderTest extends PTPTestCase {
 	    Message msg = receiver.receive();
 	    assertEquals("§3.4.1 When a message is received, its destination value must be equivalent  " +
 			 " to the value assigned when it was sent.\n",
-			 ((Queue)message.getJMSDestination()).getQueueName(), ((Queue)msg.getJMSDestination()).getQueueName());
+			 ((Queue)message.getJMSDestination()).getQueueName(), 
+			 ((Queue)msg.getJMSDestination()).getQueueName());
 
 	    admin.deleteQueue("anotherQueue");
 	} catch (JMSException e) {

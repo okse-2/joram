@@ -29,12 +29,12 @@ import javax.jms.*;
 import junit.framework.*;
 
 /**
- * Test connections
+ * Test connections.
  * 
  * See JMS specifications, §4.3.5 Closing a Connection
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: ConnectionTest.java,v 1.1 2002-03-18 13:43:16 joram Exp $
+ * @version $Id: ConnectionTest.java,v 1.2 2002-04-08 13:46:57 joram Exp $
  */
 public class ConnectionTest extends PTPTestCase {
   
