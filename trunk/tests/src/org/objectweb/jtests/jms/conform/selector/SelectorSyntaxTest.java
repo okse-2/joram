@@ -35,7 +35,7 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.5 2002-05-15 09:25:09 jmesnil Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.6 2002-05-21 15:24:02 jmesnil Exp $
  */
 public class SelectorSyntaxTest extends PTPTestCase {
 
@@ -55,11 +55,6 @@ public class SelectorSyntaxTest extends PTPTestCase {
             receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
 
             identifier = "$correct";
-            assertTrue(identifier +" starts with an invalid Java identifier start character",
-                       Character.isJavaIdentifierStart(identifier.charAt(0)));
-            receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
-
-            identifier = "£correct";
             assertTrue(identifier +" starts with an invalid Java identifier start character",
                        Character.isJavaIdentifierStart(identifier.charAt(0)));
             receiver  = receiverSession.createReceiver(receiverQueue, identifier +" IS NULL");            
