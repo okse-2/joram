@@ -35,183 +35,119 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.3 2002-04-08 13:48:33 joram Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.4 2002-04-08 15:32:28 joram Exp $
  */
-public class SelectorSyntaxTest extends JMSTestCase {
-  
-    private String qcfName = "testQCF" ;
-    private String queueName = "testQueue";
-    private Admin admin = null;
-    private InitialContext ctx = null;
-
-    /**
-     * Queue used by a receiver
-     */
-    protected Queue receiverQueue;
-
-    /**
-     * Receiver on queue
-     */
-    protected QueueReceiver receiver;
-
-    /**
-     * QueueConnection of the receiver
-     */
-    protected QueueConnection receiverConnection;
-
-    /**
-     * QueueSession of the receiver
-     */
-    protected QueueSession receiverSession;
+public class SelectorSyntaxTest extends PTPTestCase {
 
     /**
      * Test syntax of "<em>identifier</em> IS [NOT] NULL"
      */
     public void testNull() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "prop_name IS NULL");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "prop_name IS NOT NULL");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "prop_name IS NULL");
+            receiver  = receiverSession.createReceiver(receiverQueue, "prop_name IS NOT NULL");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
   
     /**
      * Test syntax of "<em>identifier</em> [NOT] LIKE <em>pattern-value</em> [ESCAPE <em>escape-character</em>]"
      */
     public void testLike() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "phone LIKE '12%3'");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "word LIKE 'l_se'");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "underscored LIKE '\\_%' ESCAPE '\\'");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "phone NOT LIKE '12%3'");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "phone LIKE '12%3'");
+            receiver  = receiverSession.createReceiver(receiverQueue, "word LIKE 'l_se'");
+            receiver  = receiverSession.createReceiver(receiverQueue, "underscored LIKE '\\_%' ESCAPE '\\'");
+            receiver  = receiverSession.createReceiver(receiverQueue, "phone NOT LIKE '12%3'");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
 
     /**
      * Test syntax of "<em>identifier</em> [NOT] IN (<em>string-literal1</em>, <em>string-literal2</em>,...)"
      */
     public void testIn() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "Country IN ('UK', 'US', 'France')");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "Country NOT IN ('UK', 'US', 'France')");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "Country IN ('UK', 'US', 'France')");
+            receiver  = receiverSession.createReceiver(receiverQueue, "Country NOT IN ('UK', 'US', 'France')");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
   
     /**
      * Test syntax of "<em>arithmetic-expr1</em> [NOT] BETWEEN <em>arithmetic-expr2</em> and <em>arithmetic-expr3</em>"
      */
     public void testBetween() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "age BETWEEN 15 and 19");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "age NOT BETWEEN 15 and 19");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "age BETWEEN 15 and 19");
+            receiver  = receiverSession.createReceiver(receiverQueue, "age NOT BETWEEN 15 and 19");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
   
     /**
      * Test diffent syntax for approximate numeric literal (+6.2, -95.7, 7.)
      */
     public void testApproximateNumericLiteral() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "average = +6.2");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "average = -95.7");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "average = 7.");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "average = +6.2");
+            receiver  = receiverSession.createReceiver(receiverQueue, "average = -95.7");
+            receiver  = receiverSession.createReceiver(receiverQueue, "average = 7.");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
 
     /**
      * Test diffent syntax for exact numeric literal (+62, -957, 57)
      */
     public void testExactNumericLiteral() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "average = +62");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = -957");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 57");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "average = +62");
+            receiver  = receiverSession.createReceiver(receiverQueue, "max = -957");
+            receiver  = receiverSession.createReceiver(receiverQueue, "max = 57");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
 
     /**
      * Test diffent syntax for zero as an exact or an approximate numeric literal (0, 0.0, 0.)
      */
     public void testZero() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.0");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "max = 0");
+            receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.0");
+            receiver  = receiverSession.createReceiver(receiverQueue, "max = 0.");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
 
     /**
      * Test diffent syntax for string literal ('literal' and 'literal''s')
      */
     public void testString() {
-	try {
-	    receiver  = receiverSession.createReceiver(receiverQueue, "string = 'literal'");
-	    receiver  = receiverSession.createReceiver(receiverQueue, "string = 'literal''s'");
-	} catch (JMSException e) {
-	    fail(e);
-	}
+        try {
+            receiver  = receiverSession.createReceiver(receiverQueue, "string = 'literal'");
+            receiver  = receiverSession.createReceiver(receiverQueue, "string = 'literal''s'");
+        } catch (JMSException e) {
+            fail(e);
+        }
     }
-  
-    /**
-     * Create administrated objects and one session ready to use for tests.
-     * Start connections.
-     */
-    protected void setUp() {
-	try {
-	    admin = AdminFactory.getAdmin();
-	    admin.createQueueConnectionFactory(qcfName);
-	    admin.createQueue(queueName);
-	    ctx = admin.createInitialContext();
-	    QueueConnectionFactory receiverQCF = (QueueConnectionFactory)ctx.lookup(qcfName);
-	    receiverQueue = (Queue)ctx.lookup(queueName);
-	    receiverConnection = receiverQCF.createQueueConnection();
-	    receiverSession = receiverConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-	} catch (Exception e) { 
-	    //XXX
-	    e.printStackTrace();
-	}
-    }
-
-    /**
-     * Stop administrated objects and the session.
-     * Stop connections.
-     */
-    protected void tearDown() {
-	try {
-	    receiverConnection.close();
-	    admin.deleteQueueConnectionFactory(qcfName);
-	    admin.deleteQueue(queueName);
-	    ctx.close();
-	} catch (Exception e) {
-	    //XXX
-	    e.printStackTrace();
-	} finally {
-	    receiverQueue = null;
-	    receiver = null;
-	}
-    }
-  
+    
     /** 
      * Method to use this class in a Test suite
      */
     public static Test suite() {
-	return new TestSuite(SelectorSyntaxTest.class);
+        return new TestSuite(SelectorSyntaxTest.class);
     }
-  
+    
     public SelectorSyntaxTest(String name) {
-	super(name);
+        super(name);
     }
 }
