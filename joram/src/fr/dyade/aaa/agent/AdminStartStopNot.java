@@ -32,8 +32,8 @@ import fr.dyade.aaa.admin.script.*;
  * @see AdminAckStartStopNot
  */
 public class AdminStartStopNot extends Notification {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminStartStopNot.java,v 1.3 2004-02-13 08:12:56 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminStartStopNot.java,v 1.4 2004-02-13 10:15:21 fmaistre Exp $";
 
   /** start script vector */
   public StartScript startScript = null;

@@ -24,8 +24,8 @@ import java.io.*;
 import java.util.*;
 
 public class SetNetworkPortCmd extends NetworkCmd {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: SetNetworkPortCmd.java,v 1.2 2004-02-13 08:12:03 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: SetNetworkPortCmd.java,v 1.3 2004-02-13 10:13:20 fmaistre Exp $"; 
   
   public int port;
 

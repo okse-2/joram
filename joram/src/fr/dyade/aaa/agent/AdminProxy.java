@@ -43,8 +43,8 @@ import fr.dyade.aaa.agent.conf.A3CMLConfig;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.9 2004-02-13 08:12:56 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.10 2004-02-13 10:15:21 fmaistre Exp $"; 
 
   static AdminProxy proxy = null;
 
