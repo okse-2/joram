@@ -73,11 +73,6 @@ public interface MessageConsumer {
   void validate();
 
   /**
-   * Invalidates all messages pushed in queue during transaction session.
-   */
-  void invalidate();
-
-  /**
    * Causes this component to begin execution.
    *
    * @see stop
@@ -90,6 +85,16 @@ public interface MessageConsumer {
    * @see start
    */
   void stop();
+
+  /**
+   * Deletes the component, removes all persistent datas. The component
+   * may have been previously stopped, and removed from MessageConsumer
+   * list.
+   * This operation use Transaction calls, you may use commit to validate it.
+   *
+   * @see fr.dyade.aaa.util.Transaction 
+   */
+  void delete() throws IllegalStateException;
 
   /**
    *  Get this consumer's <code>MessageQueue</code>. Use in administration and
