@@ -96,7 +96,7 @@ public class OutboundConnection implements javax.jms.Connection
 
     Session sess = managedCx.session;
     if (sess == null)
-      sess = xac.createSession(transacted, acknowledgeMode);
+      sess = xac.createSession(false, acknowledgeMode);
 
     return new OutboundSession(sess, this);
   }
