@@ -15,7 +15,20 @@
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications">
+      <p>None, so far...</p>
+      </s2>
+    </s1>
+    <s1 name="joram3_6_3 (October 14, 2003)">
+      <p>This release is integrated into JOnAS 3.3.1.</p>
+      <s2 name="Modifications">
       <ul>
+        <li>New possibility to create JORAM destinations with a name, so that
+        such destinations may be permanently retrieved independently of JNDI.
+        The modified classes are
+        <code>fr.dyade.aaa.joram.admin.AdminItf</code>,
+        <code>fr.dyade.aaa.joram.admin.AdminImpl</code>,
+        <code>fr.dyade.aaa.mom.admin.CreateDestinationRequest</code> and
+        <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.</li>
         <li>New <code>build.xml</code> file for simplier building and
         cleaning targets.</li>
         <ul>
@@ -25,7 +38,7 @@
         </ul>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: October 6th, 2003)">
+      <s2 name="Corrected bugs">
       <ul>
         <li>Impossible to bind <code>TopicSoapConnectionFactory</code> objects
         when using JORAM JNDI through the SOAP protocol, found by
