@@ -29,11 +29,13 @@ package fr.dyade.aaa.mom.comm;
 
 import fr.dyade.aaa.agent.AgentId;
 
+
 /**
- * A <code>SetDMQRequest</code> instance is used by a <b>client</b> agent
- * for notifying a destination which dead message queue is attributed to it.
+ * A <code>SetDMQRequest</code> instance is used by a client agent
+ * for notifying a destination to which dead message queue it must send its
+ * dead messages.
  */
-public class SetDMQRequest extends AbstractRequest
+public class SetDMQRequest extends AdminRequest
 {
   /** The dead message queue identifier, <code>null</code> for no DMQ. */
   private AgentId dmqId;
@@ -42,15 +44,16 @@ public class SetDMQRequest extends AbstractRequest
   /**
    * Constructs a <code>SetDMQRequest</code> instance.
    *
-   * @param requestId  See superclass.
+   * @param id  Identifier of the request, may be null.
    * @param dmqId  The dead message queue identifier, <code>null</code> for
    *          none.
    */
-  public SetDMQRequest(String requestId, AgentId dmqId)
+  public SetDMQRequest(String id, AgentId dmqId)
   {
-    super(0, requestId);
+    super(id);
     this.dmqId = dmqId;
   }
+
 
   /**
    * Returns the dead message queue identifier, <code>null</code> for none.

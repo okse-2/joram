@@ -338,6 +338,7 @@ public class ProxyImpl implements java.io.Serializable
    * <li><code>SetDMQRequest</code> admin notifications,</li>
    * <li><code>SetThreshRequest</code> admin notifications,</li>
    * <li><code>AbstractReply</code> destination replies,</li>
+   * <li><code>AdminReply</code> administration replies,</li>
    * <li><code>fr.dyade.aaa.agent.UnknownAgent</code>,</li>
    * </ul>
    * @exception UnknownNotificationException  If the notification is not
@@ -354,15 +355,17 @@ public class ProxyImpl implements java.io.Serializable
     }
     // Notifications setting the DMQ and threshold parameters:
     else if (not instanceof SetDMQRequest)
-      doReact((SetDMQRequest) not);
+      doReact(from, (SetDMQRequest) not);
     else if (not instanceof SetThreshRequest)
-      doReact((SetThreshRequest) not);
+      doReact(from, (SetThreshRequest) not);
     // Notification sent by the proxy to itself for causal reasons:
     else if (not instanceof SyncReply)
       doReact((SyncReply) not);
     // Notifications sent by a destination:
     else if (not instanceof AbstractReply) 
       doFwd(from, (AbstractReply) not);
+    else if (not instanceof AdminReply)
+      doReact((AdminReply) not);
     // Platform notifications:
     else if (not instanceof UnknownAgent)
       doReact((UnknownAgent) not);
@@ -1214,18 +1217,23 @@ public class ProxyImpl implements java.io.Serializable
    * Method implementing the reaction to a <code>SetDMQRequest</code>
    * instance setting the dead message queue identifier for this proxy.
    */
-  private void doReact(SetDMQRequest not)
+  private void doReact(AgentId from, SetDMQRequest not)
   {
     dmqId = not.getDmqId();
+    proxyAgent.sendNot(from, new AdminReply(not, true, "DMQ set: " + dmqId));
   }
 
   /**
    * Method implementing the reaction to a <code>SetThreshRequest</code>
    * instance setting the threshold value for this proxy.
    */
-  private void doReact(SetThreshRequest not)
+  private void doReact(AgentId from, SetThreshRequest not)
   {
     threshold = not.getThreshold();
+    proxyAgent.sendNot(from,
+                       new AdminReply(not,
+                                      true,
+                                      "Threshold set: " + threshold));
   }
 
   /**
@@ -1451,6 +1459,13 @@ public class ProxyImpl implements java.io.Serializable
       } 
     }
   }
+
+  /** 
+   * An <code>AdminReply</code> acknowledges the setting of a temporary
+   * destination; nothing more is done.
+   */
+  private void doReact(AdminReply reply)
+  {}
 
   /**
    * Method implementing the JMS proxy reaction to an <code>UnknownAgent</code>

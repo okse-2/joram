@@ -30,29 +30,30 @@ package fr.dyade.aaa.mom.comm;
 import fr.dyade.aaa.agent.AgentId;
 
 /**
- * A <code>SetFatherRequest</code> instance is used by a <b>client</b> agent
- * for notifying a topic it belongs to a hierarchy as the son of a given
- * topic.
+ * A <code>SetFatherRequest</code> instance is used by a client agent
+ * for notifying a topic of the identifier of an other topic to set a
+ * hierarchy with.
  */
-public class SetFatherRequest extends AbstractRequest
+public class SetFatherRequest extends AdminRequest
 {
-  /** The identifier of the father topic. */
+  /** The hierarchical father identifier. */
   private AgentId fatherId;
 
 
   /**
    * Constructs a <code>SetFatherRequest</code> instance.
    *
-   * @param requestId  See superclass.
-   * @param fatherId  The identifier of the father in the hierarchy.
+   * @param id  Identifier of the request, may be null.
+   * @param fatherId  The hierarchical father identifier.
    */
-  public SetFatherRequest(String requestId, AgentId fatherId)
+  public SetFatherRequest(String id, AgentId fatherId)
   {
-    super(0, requestId);
+    super(id);
     this.fatherId = fatherId;
   }
 
-  /** Returns the identifier of the father in the hierarchy. */
+
+  /** Returns the hierarchical father identifier. */
   public AgentId getFatherId()
   {
     return fatherId;

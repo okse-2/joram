@@ -29,11 +29,12 @@ package fr.dyade.aaa.mom.comm;
 
 import fr.dyade.aaa.agent.AgentId;
 
+
 /**
- * A <code>SetRightRequest</code> instance is used by a <b>client</b> agent
+ * A <code>SetRightRequest</code> instance is used by a client agent
  * for setting users right on a destination.
  */
-public class SetRightRequest extends AbstractRequest
+public class SetRightRequest extends AdminRequest
 {
   /** Identifier of the user, <code>null</code> stands for all users. */
   private AgentId client;
@@ -46,23 +47,22 @@ public class SetRightRequest extends AbstractRequest
 
   
   /**
-   * Constructs a <code>SetRightRequest</code> involved in an external
-   * client - MOM interaction.
+   * Constructs a <code>SetRightRequest</code> instance.
    *
-   * @param requestId  See superclass.
+   * @param id  Identifier of the request, may be null.
    * @param client  AgentId of client which right is to be set,
    *          <code>null</code> for all users.
    * @param right  Right to grant, authorized values: -3, -2, -1, 1, 2, 3.
    */
-  public SetRightRequest(String requestId, AgentId client, int right)
+  public SetRightRequest(String id, AgentId client, int right)
   {
-    super(0, requestId);
+    super(id);
     this.client = client;
     this.right = right;
   }
 
  
-  /** Returns the AgentId of the client which right is to be set. */
+  /** Returns the AgentId of the client which right is set. */
   public AgentId getClient()
   {
     return client;
