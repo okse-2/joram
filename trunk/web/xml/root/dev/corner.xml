@@ -6,7 +6,7 @@
   <properties>
     <author email="joram-team@objectweb.org">joram-team</author>
     <title>Developers' corner</title>
-    <filename>contrib.xml</filename>
+    <filename>corner.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
@@ -29,7 +29,7 @@
           page provides in-depth descriptions of the CVS releases.</li>
       <li>The <connect href="topics.xml">hot topics</connect> page lists all
           the current developement tasks. If you want to join, feel free.</li>
-      <li>The <a href="http://debian-sf.objectweb.org/cvs/?group_id=4">
+      <li>The <a href="http://forge.objectweb.org/cvs/?group_id=4">
           CVS</a> allows you to get JORAM through CVS, browse the updates,
           differencies, etc.</li>
     </ul>
