@@ -360,10 +360,10 @@ final class MessageVector implements MessageQueue {
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
     
-    strbuf.append('(').append(super.toString()).append(',');
-    strbuf.append(first).append(',');
-    strbuf.append(count).append(',');
-    strbuf.append(validated).append(",(");
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",first=").append(first);
+    strbuf.append(",count=").append(count);
+    strbuf.append(",validated=").append(validated).append(",(");
     for (int i=0; i<data.length; i++) {
       strbuf.append(data[i]).append(',');
     }
@@ -372,8 +372,7 @@ final class MessageVector implements MessageQueue {
     return strbuf.toString();
   }
   
-  final class MessageSoftRef
-    extends java.lang.ref.SoftReference {
+  final class MessageSoftRef extends java.lang.ref.SoftReference {
     /**
      *  Name for persistent message, used to retrieve garbaged message
      * from persistent storage.
@@ -426,6 +425,23 @@ final class MessageVector implements MessageQueue {
         throw new TransactionError(exc);
       }
       return msg;
+    }
+
+    /**
+     * Returns a string representation of this <code>MessageSoftRef</code>
+     * object.
+     *
+     * @return	A string representation of this object. 
+     */
+    public String toString() {
+      StringBuffer strbuf = new StringBuffer();
+      
+      strbuf.append('(').append(super.toString());
+      strbuf.append(",name=").append(name);
+      strbuf.append(",ref=").append(ref);
+      strbuf.append("))");
+      
+      return strbuf.toString();
     }
   }
 
