@@ -41,8 +41,8 @@ import fr.dyade.aaa.util.*;
  * to save <code>MessageQueue</code> object state.
  */
 public final class MessageQueue {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.14 $ */
+  public static final String RCS_VERSION="@(#)$Id: MessageQueue.java,v 1.14 2003-09-11 09:53:25 fmaistre Exp $";
 
   private Logger logmon = null;
   private String logmsg = null;

@@ -97,11 +97,13 @@
       description="--> Builds Joram server and client jars.">
     <jar jarfile="${build.dir}/mom.jar">
       <fileset dir="${obj.dir}">
+        <include name="com/scalagent/jmx/*.class"/>
         <include name="fr/dyade/aaa/admin/*.class"/>
         <include name="fr/dyade/aaa/admin/cmd/*.class"/>
         <include name="fr/dyade/aaa/admin/script/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
+        <include name="fr/dyade/aaa/agent/management/*.class"/>
         <include name="fr/dyade/aaa/ip/*.class"/>
         <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>

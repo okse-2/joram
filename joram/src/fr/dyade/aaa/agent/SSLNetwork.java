@@ -24,6 +24,7 @@ import java.net.*;
 import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 
 public final class SSLNetwork extends PoolCnxNetwork {
   public final static String SSLCONTEXT = "fr.dyade.aaa.agent.SSLNetwork.SSLContext";
@@ -41,23 +42,27 @@ public final class SSLNetwork extends PoolCnxNetwork {
     super();
     name = "SSLNetwork#" + AgentServer.getServerId();
 
-    SSLContext ctx;
-    KeyManagerFactory kmf;
-    KeyStore ks;
+    char[] pass =  AgentServer.getProperty(PASS, "A3TBJAP").toCharArray();
+    String keyFile = AgentServer.getProperty(KEYFILE, "./keyfile");
+    KeyStore keystore = KeyStore.getInstance(
+      AgentServer.getProperty(KTYPE, "JKS"));
+    keystore.load(new FileInputStream(keyFile), pass);
 
-    char[] pass;
-    String keyFile;
-
-    ctx = SSLContext.getInstance(
-      AgentServer.getProperty(SSLCONTEXT, "SSL"));
-    kmf = KeyManagerFactory.getInstance(
+    KeyManagerFactory kmf = KeyManagerFactory.getInstance(
       AgentServer.getProperty(KMGRFACT, "SunX509"));
-    ks = KeyStore.getInstance(AgentServer.getProperty(KTYPE, "JKS"));
-    pass =  AgentServer.getProperty(PASS, "A3TBJAP").toCharArray();
-    keyFile = AgentServer.getProperty(KEYFILE, "./keyfile");
-    ks.load(new FileInputStream(keyFile), pass);
-    kmf.init(ks, pass);
-    ctx.init(kmf.getKeyManagers(), null, null);
+    kmf.init(keystore, pass);
+    KeyManager[] keymanager = kmf.getKeyManagers();
+    // Create trust manager. The trust manager hold other peers'
+    // certificates.
+    TrustManagerFactory trustmanagerfactory =
+      TrustManagerFactory.getInstance("SunX509");
+    trustmanagerfactory.init(keystore);
+    TrustManager[] trustmanager = trustmanagerfactory.getTrustManagers();
+
+    SSLContext ctx = SSLContext.getInstance(
+      AgentServer.getProperty(SSLCONTEXT, "SSL"));
+    SecureRandom securerandom = SecureRandom.getInstance("SHA1PRNG");
+    ctx.init(keymanager, trustmanager, securerandom);
 
     socketFactory = ctx.getSocketFactory();
     serverSocketFactory = ctx.getServerSocketFactory();

@@ -23,7 +23,7 @@ import java.io.*;
 import java.util.*;
 
 public class JTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.13 2003-06-23 13:45:20 fmaistre Exp $";
+  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.14 2003-09-11 09:54:24 fmaistre Exp $";
 
   public static final String EMPTY_STRING = new String();
 

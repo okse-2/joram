@@ -247,7 +247,15 @@ public class SingleCnxNetwork extends StreamNetwork {
                        this.getName() + ", unrecoverable exception", exc);
 	    //  There is an unrecoverable exception during the transaction
 	    // we must exit from server.
-	    AgentServer.stop();
+            // Creates a thread to execute AgentServer.stop in order to
+            // avoid deadlock.
+            Thread t = new Thread() {
+                public void run() {
+                  AgentServer.stop();
+                }
+              };
+            t.setDaemon(true);
+            t.start();
 	  }
 	}
       } finally {
@@ -523,7 +531,15 @@ public class SingleCnxNetwork extends StreamNetwork {
                                     exc);
                     //  There is an unrecoverable exception during the
                     // transaction we must exit from server.
-                    AgentServer.stop();
+                    // Creates a thread to execute AgentServer.stop in order to
+                    // avoid deadlock.
+                    Thread t = new Thread() {
+                        public void run() {
+                          AgentServer.stop();
+                        }
+                      };
+                    t.setDaemon(true);
+                    t.start();
                   }
                 }
               } catch (SocketException exc) {
@@ -555,7 +571,15 @@ public class SingleCnxNetwork extends StreamNetwork {
                                   exc2);
                   //  There is an unrecoverable exception during the
                   // transaction we must exit from server.
-                  AgentServer.stop();
+                  // Creates a thread to execute AgentServer.stop in order to
+                  // avoid deadlock.
+                  Thread t = new Thread() {
+                      public void run() {
+                        AgentServer.stop();
+                      }
+                    };
+                  t.setDaemon(true);
+                  t.start();
                 }
               } catch (Exception exc) {
                 this.logmon.log(BasicLevel.ERROR,

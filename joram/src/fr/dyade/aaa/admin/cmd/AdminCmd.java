@@ -23,7 +23,7 @@ package fr.dyade.aaa.admin.cmd;
 
 public interface AdminCmd {
 
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminCmd.java,v 1.1 2003-06-23 13:36:06 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminCmd.java,v 1.2 2003-09-11 09:51:41 fmaistre Exp $"; 
 
 }

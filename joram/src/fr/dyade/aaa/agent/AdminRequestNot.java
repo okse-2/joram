@@ -31,8 +31,8 @@ import fr.dyade.aaa.admin.script.*;
  * @see AdminReplyNot
  */
 public class AdminRequestNot extends Notification {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: AdminRequestNot.java,v 1.1 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: AdminRequestNot.java,v 1.2 2003-09-11 09:53:25 fmaistre Exp $"; 
 
   /** configuration script. */
   public Script script = null;

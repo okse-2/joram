@@ -29,6 +29,7 @@ import org.objectweb.util.monolog.api.LoggerFactory;
 
 import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.agent.conf.*;
+import fr.dyade.aaa.agent.management.MXWrapper;
 
 /**
  * The <code>AgentServer</code> class manages the global configuration
@@ -129,13 +130,8 @@ import fr.dyade.aaa.agent.conf.*;
  * @see Network
  * @see MessageQueue
  * @see fr.dyade.aaa.util.Transaction
- *
- * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.16 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.16 2003-06-26 09:15:06 fmaistre Exp $"; 
-
   public final static short NULL_ID = -1;
 
   public final static String ADMIN_DOMAIN = "D0";
@@ -235,11 +231,10 @@ public final class AgentServer {
    * A3CMLConfig object. This method fills the object graph configuration
    * in a <code>A3CMLConfig</code> object.
    *
-   * @param domainName  list of domain's names
+   * @param domains  	list of domain's names
    * @return	        a <code>A3CMLConfig</code> object.
    */
-  public static A3CMLConfig
-      getAppConfig(String[] domains) throws Exception {
+  public static A3CMLConfig getAppConfig(String[] domains) throws Exception {
     return getConfig().getDomainConfig(domains);
   }
 
@@ -503,17 +498,14 @@ public final class AgentServer {
     ServerDesc local = new ServerDesc(root.sid, root.name, root.hostname);
     servers.put(new Short(root.sid), local);
     if (root instanceof A3CMLPServer) {
-//       local.isTransient = false;
       configure((A3CMLPServer) root);
     } else if (root instanceof A3CMLTServer) {
-//       local.isTransient = true;
       configure((A3CMLTServer) root);
     } else {
       throw new Exception("Unknown agent server type: " + serverId);
     }
     initServices(root, local);
     local.domain = engine;
-
 
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       for (Enumeration e=elementsServerDesc(); e.hasMoreElements(); ) {
@@ -579,11 +571,6 @@ public final class AgentServer {
         desc = new ServerDesc(server.sid, server.name, server.hostname);
         // ServerDesc already initialized for current server
         servers.put(new Short(server.sid), desc);
-//         if (server instanceof A3CMLPServer) {
-//           desc.isTransient = false;
-//         } else if (server instanceof A3CMLTServer) {
-//           desc.isTransient = true;
-//         }
         desc.gateway = root.gateway;
         desc.domain = getConsumer("transient");
         initServices(server, desc);
@@ -670,7 +657,7 @@ public final class AgentServer {
     // messages; if the server is directly accessible: itself.
     if ((desc.gateway == -1) || (desc.gateway == server.sid)) {
       desc.gateway = server.sid;
-      desc.port = server.port;
+      desc.port = server.port;      
       A3CMLServer current = getConfig().getServer(getServerId());
       if (current.containsNat(server.sid)) {
         A3CMLNat nat = current.getNat(server.sid);
@@ -686,11 +673,9 @@ public final class AgentServer {
   static void initServerDesc(ServerDesc desc,
                              A3CMLTServer server) throws Exception {
     if (server.gateway == getServerId()) {
-//       desc.isTransient = true;
       desc.gateway = server.sid;
       desc.domain = getConsumer("transient");
     } else {
-//       desc.isTransient = true;
       A3CMLPServer router = null;
       try {
         router = (A3CMLPServer) getConfig().getServer(server.gateway);
@@ -711,7 +696,10 @@ public final class AgentServer {
     if (! server.visited)
       throw new Exception(server + " inaccessible");
     
-    ServerDesc desc = new ServerDesc(server.sid, server.name, server.hostname);
+    ServerDesc desc = new ServerDesc(
+      server.sid, 
+      server.name, 
+      server.hostname);
     if (server instanceof A3CMLPServer) {
       initServerDesc(desc, (A3CMLPServer) server);
     } else if (server instanceof A3CMLTServer) {
@@ -763,23 +751,28 @@ public final class AgentServer {
     public static final int INSTALLED = 0;
     public static final int INITIALIZING = 0x1;
     public static final int INITIALIZED = 0x2;
-    public static final int STARTING = 0x4;
-    public static final int STARTED = 0x8;
-    public static final int STOPPING = 0x10;
-    public static final int STOPPED = 0x20;
+    public static final int STARTING = 0x3;
+    public static final int STARTED = 0x4;
+    public static final int STOPPING = 0x5;
+    public static final int STOPPED = 0x6;
 
     private int value = INSTALLED;
 
-//     synchronized void setStatus(int status) {
-//       this.status = status;
-//     }
-
-//     synchronized int getStatus() {
-//       return status;
-//     }
+    public static String[] info = {"installed",
+                                   "initializing", "initialized",
+                                   "starting", "started",
+                                   "stopping", "stopped"};
   }
 
   static Status status = new Status();
+
+  public static int getStatus() {
+    return status.value;
+  }
+
+  public static String getStatusInfo() {
+    return Status.info[status.value];
+  }
 
   /**
    * Parses agent server arguments, then initializes this agent server. The
@@ -936,6 +929,16 @@ public final class AgentServer {
 
     // set properties
     setProperties(serverId);
+
+    String mxname = getProperty(MXWrapper.ServerImpl);
+    logmon.log(BasicLevel.INFO, "MXWrapper.ServerImpl -> " + mxname);
+    try {
+      if ((mxname != null) && (mxname.length() > 0))
+        Class.forName(mxname).newInstance();
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 "can't instantiate MXServer: " + mxname, exc);
+    }
 
     if (transaction == null) {
       boolean isTransient = false;
@@ -1148,6 +1151,14 @@ public final class AgentServer {
         if (cons != null) {
           try {
             cons.start();
+            try {
+              MXWrapper.registerMBean(cons,
+                                      cons.getName(),
+                                      "AgentServer",
+                                      null);
+            } catch (Exception exc) {
+              logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+            }
           } catch (IOException exc) {
             ok = false;
             logmon.log(BasicLevel.FATAL,
@@ -1239,7 +1250,7 @@ public final class AgentServer {
                    tab[j]);
       }
       try {
-        Thread.currentThread().sleep(2500);
+        Thread.sleep(2500);
       } catch (InterruptedException e) {}
     }
 
@@ -1284,6 +1295,17 @@ public final class AgentServer {
                  getName() + " initialisation failed", exc);
       System.exit(1);
     }
+
+    try {
+      SCServerMBean bean = new SCServer();
+      MXWrapper.registerMBean(bean, getName(), "AgentServer", null);
+    } catch (Exception exc) {
+      if (logmon == null)
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+      logmon.log(BasicLevel.ERROR,
+                 getName() + " jmx failed", exc);
+    }
+
     try {
       start();
       // Be careful, the output below is needed by some tools (AdminProxy for

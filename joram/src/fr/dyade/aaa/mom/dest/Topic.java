@@ -19,12 +19,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package fr.dyade.aaa.mom.dest;
 
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.management.MXWrapper;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
@@ -36,7 +39,7 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  *
  * @see TopicImpl
  */
-public class Topic extends Agent
+public class Topic extends Agent implements AdminDestinationItf
 {
   /**
    * The reference of the <code>TopicImpl</code> instance providing this
@@ -44,6 +47,10 @@ public class Topic extends Agent
    */
   protected TopicImpl topicImpl;
 
+  /**
+   * Empty constructor for newInstance(). 
+   */ 
+  public Topic() {}
 
   /**
    * Constructs a <code>Topic</code> agent. 
@@ -53,7 +60,7 @@ public class Topic extends Agent
    */ 
   public Topic(AgentId adminId)
   {
-    topicImpl = new TopicImpl(getId(), adminId);
+    init(adminId);
   }
 
   /**
@@ -66,7 +73,46 @@ public class Topic extends Agent
     super(fixed);
   }
 
+  /**
+   * Initializes the topic.
+   *
+   * @param adminId  Identifier of the topic administrator.
+   */
+  public void init(AgentId adminId) {
+    topicImpl = new TopicImpl(getId(), adminId);
+  }
 
+  /**
+   * Sets properties for the topic.
+   * <p>
+   * Empty method as no properties may be set for the topic.
+   */
+  public void setProperties(Properties prop) {}
+
+  
+  /** (Re)initializes the agent when (re)loading. */
+  public void initialize(boolean firstTime) throws Exception
+  {
+    super.initialize(firstTime);
+    MXWrapper.registerMBean(topicImpl,
+                            "JORAM destinations",
+                            getId().toString(),
+                            "Topic",
+                            null);
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize()
+  {
+    try {
+      MXWrapper.unregisterMBean("JORAM destinations",
+                                getId().toString(),
+                                "Topic",
+                                null);
+    }
+    catch (Exception exc) {}
+  }
+  
   /**
    * Reactions to notifications are implemented in the
    * <code>TopicImpl</code> class.

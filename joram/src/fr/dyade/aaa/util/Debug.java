@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.8 2003-06-23 13:45:20 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.9 2003-09-11 09:54:24 fmaistre Exp $";
 
   /** */
   public final static String DEBUG_CONFIGURE_PROPERTY = "fr.dyade.aaa.DEBUG_CONFIGURE";

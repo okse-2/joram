@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,31 +20,37 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package fr.dyade.aaa.mom.admin;
+package fr.dyade.aaa.mom.proxies;
+
 
 /**
- * A <code>CreateTopicRequest</code> instance requests the creation of a 
- * topic on a given server.
+ * The <code>ProxyImplMBean</code> interface defines the JMX instrumentation
+ * for administering a JORAM proxy.
  */
-public class CreateTopicRequest extends AdminRequest
+public interface ProxyImplMBean
 {
-  /** Id of the server where deploying the topic. */
-  private int serverId;
+  /** Returns the user name. */
+  public String getUserName();
+
+  /** Returns the user password. */
+  public String getUserPassword();
+
+  /** Deletes the proxy. */
+  public void delete();
 
   /**
-   * Constructs a <code>CreateTopicRequest</code> instance.
+   * Changes the user name.
    *
-   * @param serverId  The id of the server where deploying the topic.
+   * @param name  New name.
+   *
+   * @exception Exception  If the new name is already taken.
    */
-  public CreateTopicRequest(int serverId)
-  {
-    this.serverId = serverId;
-  }
+  public void updateUserName(String name) throws Exception;
 
-
-  /** Returns the id of the server where deploying the topic. */
-  public int getServerId()
-  {
-    return serverId;
-  }
+  /**
+   * Changes the user password.
+   *
+   * @param pass  New password.
+   */
+  public void updateUserPassword(String pass);
 }

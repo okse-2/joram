@@ -36,6 +36,7 @@ import fr.dyade.aaa.mom.admin.*;
 
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 import javax.jms.*;
 
@@ -223,8 +224,8 @@ public class AdminImpl implements AdminItf
   public javax.jms.Queue createQueue(int serverId)
                          throws ConnectException, AdminException
   {
-    reply = doRequest(new CreateQueueRequest(serverId));
-    return new Queue(((CreateDestinationReply) reply).getDestId());
+    return new Queue(createDestination(serverId,
+                                       "fr.dyade.aaa.mom.dest.Queue"));
   }
 
   /**
@@ -256,8 +257,8 @@ public class AdminImpl implements AdminItf
   public javax.jms.Topic createTopic(int serverId)
                          throws ConnectException, AdminException
   {
-    reply = doRequest(new CreateTopicRequest(serverId));
-    return new Topic(((CreateDestinationReply) reply).getDestId());
+    return new Topic(createDestination(serverId,
+                                       "fr.dyade.aaa.mom.dest.Topic"));
   }
 
   /**
@@ -289,8 +290,8 @@ public class AdminImpl implements AdminItf
   public DeadMQueue createDeadMQueue(int serverId)
                     throws ConnectException, AdminException
   {
-    reply = doRequest(new CreateDMQRequest(serverId));
-    return new DeadMQueue(((CreateDestinationReply) reply).getDestId());
+    return new DeadMQueue(createDestination(serverId,
+                                            "fr.dyade.aaa.mom.dest.DeadMQueue"));
   }
 
   /**
@@ -305,6 +306,44 @@ public class AdminImpl implements AdminItf
   public DeadMQueue createDeadMQueue() throws ConnectException, AdminException
   {
     return this.createDeadMQueue(localServer);
+  }
+
+  /**
+   * Creates and deploys a destination on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the destination.
+   * @param className Name of class to be instanciated.
+   * @param prop      Destination object properties.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String createDestination(int serverId, String className, Properties prop)
+    throws ConnectException, AdminException {
+    CreateDestinationRequest cdr = new CreateDestinationRequest(serverId,className);
+    cdr.setProperties(prop);
+    reply = doRequest(cdr);
+    return ((CreateDestinationReply) reply).getDestId();
+  }
+
+  /**
+   * Creates and deploys a destination on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the destination.
+   * @param className Name of class to be instanciated.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String createDestination(int serverId, String className) 
+    throws ConnectException, AdminException {
+    return createDestination(serverId,className,null);
   }
 
   /**

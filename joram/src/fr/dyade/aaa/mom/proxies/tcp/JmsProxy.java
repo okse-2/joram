@@ -24,6 +24,7 @@
 package fr.dyade.aaa.mom.proxies.tcp;
 
 import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.management.MXWrapper;
 import fr.dyade.aaa.mom.MomTracing;
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
 import fr.dyade.aaa.mom.jms.AbstractJmsRequest;
@@ -44,6 +45,8 @@ import java.io.StreamCorruptedException;
 public class JmsProxy extends ConnectionFactory
                       implements fr.dyade.aaa.mom.proxies.ProxyAgentItf
 {
+  /** <code>true</code> if this proxy is an administrator proxy. */
+  private boolean admin = false;
   /**
    * The reference to the <code>ProxyImpl</code> object providing this
    * proxy with its behaviour.
@@ -77,6 +80,7 @@ public class JmsProxy extends ConnectionFactory
     super();
     super.multiConn = true;
 
+    admin = true;
     proxyImpl = new ProxyImpl(name, pass);
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -95,6 +99,27 @@ public class JmsProxy extends ConnectionFactory
   {
     super.initialize(firstTime);
     proxyImpl.initialize(firstTime, this);
+    if (! admin)
+      MXWrapper.registerMBean(proxyImpl,
+                              "JORAM proxies",
+                              getId().toString(),
+                              "JmsProxy",
+                              null);
+  }
+
+  /** Finalizes the agent before it is garbaged. */
+  public void agentFinalize()
+  {
+    if (admin)
+      return;
+
+    try {
+      MXWrapper.unregisterMBean("JORAM proxies",
+                                getId().toString(),
+                                "JmsProxy",
+                                null);
+    }
+    catch (Exception exc) {}
   }
 
 

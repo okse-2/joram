@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,9 +38,6 @@ import fr.dyade.aaa.agent.conf.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $"; 
-
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
 
@@ -150,7 +147,6 @@ public class ServiceManager implements Serializable {
                    "AgentServer#" + AgentServer.getServerId() +
                    ".ServiceManager, cannot start service:" +
                    desc.getClassName(), exc);
-        throw exc;
       }
     }
   }

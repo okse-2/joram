@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,8 +23,6 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.13 2003-06-23 13:45:20 fmaistre Exp $"; 
-
   static final String separator = "_";
 
   void init(String path) throws IOException;

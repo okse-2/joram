@@ -28,10 +28,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Arrays;
 
-public abstract class Network implements MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Network.java,v 1.14 2003-06-23 13:37:51 fmaistre Exp $";
-
+public abstract class Network implements MessageConsumer, NetworkMBean {
   /** Time between two activation of watch-dog thread */
   final static long WDActivationPeriod = 1000L;
   /** Number of try at stage 1 */
@@ -51,25 +48,21 @@ public abstract class Network implements MessageConsumer {
    * Reference to the current network component in order to be used
    * by inner daemon's.
    */
-  Network network;
+  protected Network network;
+  /** The component's name. */
+  protected String name;
   /** The domain name. */
-  String name;
+  protected String domain;
   /** The communication port. */
-  int port;
+  protected int port;
   /** The <code>MessageQueue</code> associated with this network component. */
-  MessageQueue qout;
+  protected MessageQueue qout;
   /** The logical clock associated to this network component. */
-  LogicalClock clock;
-//   /**
-//    * List of id. for all servers in the domain, this list is sorted.
-//    * Be careful, this array is shared with the <code>MatrixClock</code>
-//    * components.
-//    */
-//   short[] servers;
+  protected LogicalClock clock;
   /**
    * The waiting list: it contains all messages that waiting to be delivered.
    */
-  Vector waiting;
+  protected Vector waiting;
 
   /**
    * Returns this session's name.
@@ -78,6 +71,15 @@ public abstract class Network implements MessageConsumer {
    */
   public final String getName() {
     return name;
+  }
+
+  /**
+   * Returns the corresponding domain's name.
+   *
+   * @return this domain's name.
+   */
+  public final String getDomainName() {
+    return domain;
   }
 
   /**
@@ -173,6 +175,7 @@ public abstract class Network implements MessageConsumer {
    */
   public void init(String name, int port, short[] servers) throws Exception {
     this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
+    this.domain = name;
     this.port = port;
 
     // Get the logging monitor from current server MonologLoggerFactory

@@ -25,7 +25,7 @@ import java.util.*;
 
 public class StartWithFilter implements FilenameFilter {
 
-public static final String RCS_VERSION="@(#)$Id: StartWithFilter.java,v 1.12 2003-06-23 13:45:20 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: StartWithFilter.java,v 1.13 2003-09-11 09:54:24 fmaistre Exp $"; 
 
   private String prefix;
 

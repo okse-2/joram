@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,30 +20,15 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package fr.dyade.aaa.mom.admin;
+package fr.dyade.aaa.mom.dest;
+
 
 /**
- * A <code>CreateQueueRequest</code> instance requests the creation of a
- * queue on a given server.
+ * The <code>TopicImplMBean</code> interface defines the JMX instrumentation
+ * for administering a JORAM topic.
  */
-public class CreateQueueRequest extends AdminRequest
+public interface TopicImplMBean extends DestinationImplMBean
 {
-  /** Id of the server where deploying the queue. */
-  private int serverId;
-
-  /**
-   * Constructs a <code>CreateQueueRequest</code> instance.
-   *
-   * @param serverId  The id of the server where deploying the queue.
-   */
-  public CreateQueueRequest(int serverId)
-  {
-    this.serverId = serverId;
-  }
-
-  /** Returns the id of the server where deploying the queue. */
-  public int getServerId()
-  {
-    return serverId;
-  }
+  /** Returns the number of subscribers to the topic. */
+  public int getNumberOfSubscribers();
 }

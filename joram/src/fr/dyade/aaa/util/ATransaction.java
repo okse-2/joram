@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -29,8 +29,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.12 2003-06-23 13:45:20 fmaistre Exp $";
-
   public static final String EMPTY_STRING = new String();
 
   // State of the transaction monitor.
@@ -133,9 +131,8 @@ public final class ATransaction implements Transaction, Runnable {
 
     logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
 
-    /*  Search for log files: plog then clog, reads it, then apply all
-     * committed operation, finally deletes it.
-     */
+    //  Search for log files: plog then clog, reads it, then apply all
+    // committed operation, finally deletes it.
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())

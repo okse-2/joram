@@ -35,7 +35,7 @@ import fr.dyade.aaa.agent.*;
   */
 public class SimpleReport extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: SimpleReport.java,v 1.10 2003-06-23 13:44:58 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: SimpleReport.java,v 1.11 2003-09-11 09:54:12 fmaistre Exp $"; 
 
   public static class Status {
     /** initializing */
