@@ -64,13 +64,6 @@ public class TcpRequestContext
       } catch (Exception exc) {
         Trace.logger.log(BasicLevel.ERROR, "", exc);
       }
-      try {
-        receiver.readObject();
-      } catch (Exception exc) {
-        // Do nothing
-      } finally {
-        close();
-      }
     }
   }
   
