@@ -343,10 +343,14 @@ public class ConfigController {
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.addDomain(" + name + ',' + className + ')');
     checkStatus(Status.CONFIG);
-    a3cmlConfig.addDomain(new A3CMLDomain(name, className));
+    try {
+      a3cmlConfig.addDomain(new A3CMLDomain(name, className));
+    } catch (Exception exc) {
+      // idempotent
+    }
   }
 
-  public void addServer(String name, String hostName, short id) 
+  public int addServer(String name, String hostName, short id) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -374,13 +378,15 @@ public class ConfigController {
       serverDesc.gateway = id;
       newServers.addElement(serverDesc);
     } else {
-      throw new Exception("Server already added: " + name + ')');
+      // idempotent
     }
     
     if (id != AgentServer.getServerId()) {
       startScript.addElement(
         new StartServerCmd(id));
     }
+
+    return id;
   }
 
   public void addService(String serverName,

@@ -45,13 +45,7 @@ public class AdminCommandDialog extends JDialog {
     abortButton = new JButton("Abort");
     abortButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        try {
-          AdminModule.abortRequest();
-        } catch (Exception exc) {
-          if (Log.logger.isLoggable(BasicLevel.DEBUG))
-            Log.logger.log(BasicLevel.DEBUG, "", exc);
-        }
-        AdminCommandDialog.this.setVisible(false);
+        abort();
       }
     });
 
@@ -60,9 +54,25 @@ public class AdminCommandDialog extends JDialog {
     Container contentPane = getContentPane();
     contentPane.add(msgLabel, BorderLayout.CENTER);
     contentPane.add(abortButton, BorderLayout.SOUTH);
+
+    addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent e) {
+          abort();
+        }
+      });  
     
     setLocationRelativeTo(frame);
     pack();
+  }
+
+  private void abort() {
+    try {
+      AdminModule.abortRequest();
+    } catch (Exception exc) {
+      if (Log.logger.isLoggable(BasicLevel.DEBUG))
+        Log.logger.log(BasicLevel.DEBUG, "", exc);
+    }
+    setVisible(false);
   }
 
   public void showDialog() {

@@ -700,18 +700,24 @@ public class AdminModule
         request, requestTimeout);
       reply = (AdminReply) replyMsg.getObject();
 
-      if (! reply.succeeded())
-        throw new AdminException(reply.getInfo());
-
-      return reply;
-    }
-    catch (JMSException exc) {
+      if (! reply.succeeded()) {
+        switch (reply.getErrorCode()) {
+        case AdminReply.NAME_ALREADY_USED:
+          throw new NameAlreadyUsedException(reply.getInfo());
+        case AdminReply.START_FAILURE:
+          throw new StartFailureException(reply.getInfo());
+        default:
+          throw new AdminException(reply.getInfo());
+        }
+      } else {
+        return reply;
+      }
+    } catch (JMSException exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(
           BasicLevel.ERROR, "", exc);
       throw new ConnectException("Connection failed: " + exc.getMessage());
-    }
-    catch (ClassCastException exc) {
+    } catch (ClassCastException exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(
           BasicLevel.ERROR, "", exc);

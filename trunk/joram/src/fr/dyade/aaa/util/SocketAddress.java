@@ -107,7 +107,7 @@ public class SocketAddress {
     SocketAddress sa = (SocketAddress) obj;
 
     if ((hostname.equals(sa.hostname)) &&
-        (addr.equals(sa.addr)) &&
+        (addr != null && addr.equals(sa.addr)) &&
         (port == sa.port))
       return true;
     return false;

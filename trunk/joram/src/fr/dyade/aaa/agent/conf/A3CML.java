@@ -168,7 +168,6 @@ public class A3CML {
     }
     
     out.write("</" + ELT_CONFIG + ">\n");
-    out.close();
   }
 
   private static final void writeToXMLServer(Object obj,

@@ -366,8 +366,8 @@ public final class AgentServer {
     servers.put(new Short(desc.sid), desc);
   }
 
-  static void removeServerDesc(short sid) throws Exception {
-    servers.remove(new Short(sid));
+  static ServerDesc removeServerDesc(short sid) throws Exception {
+    return (ServerDesc) servers.remove(new Short(sid));
   }
 
   public static Enumeration elementsServerDesc() {
