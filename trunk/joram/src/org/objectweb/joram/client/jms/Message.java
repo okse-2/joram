@@ -245,15 +245,8 @@ public class Message implements javax.jms.Message
    * @exception JMSException  Actually never thrown.
    */
   public void setJMSCorrelationIDAsBytes(byte[] correlationID)
-    throws JMSException {
-    try {
-      momMsg.setCorrelationId(ConversionHelper.toString(correlationID));
-    } catch (MessageValueException exc) {
-      JMSException jE =
-        new JMSException(exc.getMessage());
-      jE.setLinkedException(exc);
-      throw jE;
-    }
+  {
+    momMsg.setCorrelationId(ConversionHelper.toString(correlationID));
   }
   
   /**
@@ -422,14 +415,7 @@ public class Message implements javax.jms.Message
   public String getJMSType() 
     throws JMSException {
     Object value = momMsg.getOptionalHeader("JMSType");
-    try {
-      return ConversionHelper.toString(value);
-    } catch (MessageValueException exc) {
-      JMSException jE =
-        new JMSException(exc.getMessage());
-      jE.setLinkedException(exc);
-      throw jE;
-    }
+    return ConversionHelper.toString(value);
   }
 
   /**
@@ -689,14 +675,7 @@ public class Message implements javax.jms.Message
    */
   public String getStringProperty(String name) 
     throws JMSException {
-    try {
-      return ConversionHelper.toString(doGetProperty(name));
-    } catch (MessageValueException exc) {
-      JMSException jE =
-        new JMSException(exc.getMessage());
-      jE.setLinkedException(exc);
-      throw jE;
-    }
+    return ConversionHelper.toString(doGetProperty(name));
   }
 
   /**
