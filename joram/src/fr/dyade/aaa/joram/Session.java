@@ -34,7 +34,7 @@ import javax.jms.JMSException;
 import javax.jms.TransactionRolledBackException;
 import javax.jms.IllegalStateException;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.

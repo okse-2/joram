@@ -33,7 +33,7 @@ import java.util.*;
 import javax.jms.JMSException;
 import javax.transaction.xa.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.XATopicSession</code> interface.

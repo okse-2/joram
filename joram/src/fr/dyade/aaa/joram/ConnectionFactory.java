@@ -31,7 +31,7 @@ import java.util.Hashtable;
 
 import javax.naming.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.

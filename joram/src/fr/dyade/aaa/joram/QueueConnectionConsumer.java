@@ -30,7 +30,7 @@ import java.util.Vector;
 
 import javax.jms.JMSException;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Specializes the <code>ConnectionConsumer</code> implementation to the

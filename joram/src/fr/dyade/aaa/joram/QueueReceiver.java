@@ -31,7 +31,7 @@ import fr.dyade.aaa.mom.jms.*;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.QueueReceiver</code> interface.

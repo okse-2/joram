@@ -34,7 +34,7 @@ import fr.dyade.aaa.task.*;
 
 import java.util.Vector;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>QueueImpl</code> class provides the MOM queue behaviour,

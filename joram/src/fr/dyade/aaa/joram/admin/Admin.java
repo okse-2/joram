@@ -33,7 +33,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * An <code>Admin</code> instance is used by an administrator for performing
