@@ -1,26 +1,22 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -53,12 +49,19 @@ import fr.dyade.aaa.util.Arrays;
  * @see		TransientNetworkServer
  * @see		AgentServer
  */
-final class TransientNetworkProxy extends Network {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.8 2003-03-19 15:16:06 fmaistre Exp $";
-
+public final class TransientNetworkProxy extends Network {
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;
+  /** */
+  short[] servers = null;
+
+  /**
+   * Returns the index of the specified server.
+   */
+  protected final int index(short id) {
+    int idx = Arrays.binarySearch(servers, id);
+    return idx;
+  }
 
   /**
    * Creates a new <code>TransientNetworkProxy</code> component. This simple
@@ -67,7 +70,13 @@ final class TransientNetworkProxy extends Network {
    *
    * The configuration of component is then done by <code>init</code> method.
    */
-  TransientNetworkProxy() {}
+  public TransientNetworkProxy() {
+    super();
+  }
+
+  public LogicalClock createsLogicalClock(String name, short[] servers) {
+    return null;
+  }
 
   /**
    * Initializes a new <code>TransientNetworkProxy</code> component. This
@@ -97,7 +106,7 @@ final class TransientNetworkProxy extends Network {
    *
    * @param msg		the message
    */
-  public final void insert(Message msg) {
+  public void insert(Message msg) {
     // Update stamp to maximum known.
     if (msg.update.stamp > stamp)
       stamp = msg.update.stamp;
@@ -111,13 +120,13 @@ final class TransientNetworkProxy extends Network {
    * computed at initialization (see <code><a href="#insert()">insert()</a>
    * </code>.
    */
-  public final void save() throws IOException {}
+  public void save() throws IOException {}
 
   /**
    * Restores logical clock information from persistent storage. This class is
    * used to handle transient server, so there is no need of persistancy.
    */
-  public final void restore() throws IOException {}
+  public void restore() throws IOException {}
 
   /**
    *  Adds a message in "ready to deliver" list.  There is no need of stamp
@@ -125,7 +134,7 @@ final class TransientNetworkProxy extends Network {
    * 
    * @param msg		the message
    */
-  public final void post(Message msg) throws IOException {
+  public void post(Message msg) throws Exception {
     msg.update = new Update(AgentServer.getServerId(),
 			    msg.to.to,
 			    ++stamp);
@@ -157,29 +166,32 @@ final class TransientNetworkProxy extends Network {
   /**
    * Causes this component to begin execution.
    */
-  public final void start() throws Exception {
+  public synchronized void start() throws Exception {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
 
     try {
-      if (isRunning())
-	throw new IOException("Consumer already running.");
-
       // Creates a manager.
-      manager = new Manager(getName(), logmon);
+      if (manager == null)
+        manager = new Manager(getName(), logmon);
       // Creates a listener.
-      listener = new Listener(getName(), logmon);
+     if (listener == null)
+       listener = new Listener(getName(), logmon);
       // For all transient servers, creates a monitor driver.
-      monitors = new Monitor[servers.length];
+      if (monitors == null)
+        monitors = new Monitor[servers.length];
       for (int i=0; i<monitors.length; i++) {
-	// Get characteristics of server, then initialize the monitor.
-	monitors[i] = new Monitor(getName(),
-				  AgentServer.getServerDesc(servers[i]));
+        try {
+          // Get characteristics of server, then initialize the monitor.
+          if (monitors[i] == null)
+            monitors[i] = new Monitor(getName(),
+                                      AgentServer.getServerDesc(servers[i]));
+        } catch (UnknownServerException exc) {
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ", can't start Monitor#" + servers[i], exc);
+        }
       }
-      listener.start();
-      manager.start();
-    } catch (UnknownServerException exc) {
-      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
-      throw exc;
+      if (! listener.isRunning()) listener.start();
+      if (! manager.isRunning()) manager.start();
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
@@ -187,10 +199,56 @@ final class TransientNetworkProxy extends Network {
     logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
+  public synchronized void addServer(short sid) throws Exception {
+    // First we have to verify that sid is not already in servers
+    int idx = index(sid);
+    if (idx >= 0) return;
+    idx = -idx -1;
+    // Allocates new array for server and monitor
+    short[] newServers = new short[servers.length+1];
+    Monitor[] newMonitors = new Monitor[servers.length+1];
+    // Copy old data from server and monitor, let a free room for the new one.
+    int j = 0;
+    for (int i=0; i<servers.length; i++) {
+      if (i == idx) j++;
+      newServers[j] = servers[i];
+      newMonitors[j] = monitors[i];
+      j++;
+    }
+    newServers[idx] = sid;
+    newMonitors[idx] = new Monitor(getName(),
+                                   AgentServer.getServerDesc(sid));
+
+    servers = newServers;
+    monitors = newMonitors;
+  }
+
+  public synchronized void delServer(short sid) throws Exception {
+    // First we have to verify that sid is already in servers
+    int idx = index(sid);
+    if (idx < 0) return;
+    
+    short[] newServers = new short[servers.length-1];
+    Monitor[] newMonitors = new Monitor[servers.length-1];
+
+    int j = 0;
+    for (int i=0; i<servers.length; i++) {
+      if (sid == servers[i]) {
+        if (monitors[i]!= null) monitors[i].stop();
+        continue;
+      }
+      newServers[j] = servers[i];
+      newMonitors[j] = monitors[i];
+      j++;
+    }
+    servers = newServers;
+    monitors = newMonitors;
+  }
+
   /**
    * Forces the component to stop executing.
    */
-  public final void stop() {
+  public synchronized void stop() {
     if (listener != null) listener.stop();
     if (manager != null) manager.stop();
     for (int i=0; i<monitors.length; i++) {
@@ -213,7 +271,7 @@ final class TransientNetworkProxy extends Network {
       return false;
   }
 
-  final Monitor getMonitor(short sid) {
+  Monitor getMonitor(short sid) {
     return monitors[index(sid)];
   }
 
@@ -227,7 +285,8 @@ final class TransientNetworkProxy extends Network {
       super(name + ".manager");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
-      setDaemon(true);
+      this.setDaemon(true);
+      this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
     protected void close() {}
@@ -325,6 +384,7 @@ final class TransientNetworkProxy extends Network {
       }
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+      this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
     protected void close() {
@@ -474,7 +534,7 @@ final class TransientNetworkProxy extends Network {
      *
      * @return this <code>daemon</code>'s name.
      */
-    public final String getName() {
+    public String getName() {
       return name;
     }
 
@@ -528,7 +588,7 @@ final class TransientNetworkProxy extends Network {
 	}
       }
 
-      thread = new Thread(this, this.getName());
+      thread = new Thread(AgentServer.getThreadGroup(), this, this.getName());
       thread.setDaemon(true);
       canStop = true;
       running = true;

@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -28,7 +24,9 @@
 package fr.dyade.aaa.mom.jms;
 
 import fr.dyade.aaa.mom.messages.Message;
-
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Enumeration;
 import java.util.Vector;
 
 /**
@@ -38,8 +36,11 @@ import java.util.Vector;
  */
 public class QBrowseReply extends AbstractJmsReply
 {
+  /** The message carried by this reply. */
+  private Message message = null;
   /** The vector of messages carried by this reply. */
-  private Vector messages;
+  private Vector messages = null;
+
 
   /**
    * Constructs a <code>QBrowseReply</code> instance.
@@ -49,66 +50,98 @@ public class QBrowseReply extends AbstractJmsReply
   public QBrowseReply(fr.dyade.aaa.mom.comm.BrowseReply destReply)
   {
     super(destReply.getCorrelationId());
-    this.messages = destReply.getMessages();
+    Vector vec = destReply.getMessages();
+    if (vec != null && vec.size() == 1)
+      message = (Message) vec.get(0);
+    else
+      messages = vec;
   }
 
   /**
-   * Constructs a <code>QBrowseReply</code> instance.
-   *
-   * @param correlationId  The identifier of the replied request.
-   * @param messages  The vector of browsed messages.
+   * Constructs an empty <code>QBrowseReply</code>.
    */
-  public QBrowseReply(String correlationId, Vector messages)
+  private QBrowseReply(int correlationId)
+  {
+    super(correlationId);
+  }
+
+  /**
+   * Constructs a <code>QBrowseReply</code>.
+   */
+  private QBrowseReply(int correlationId, Message message)
+  {
+    super(correlationId);
+    this.message = message;
+  }
+
+  /**
+   * Constructs a <code>QBrowseReply</code>.
+   */
+  private QBrowseReply(int correlationId, Vector messages)
   {
     super(correlationId);
     this.messages = messages;
   }
 
+  public QBrowseReply() {
+    messages = new Vector();
+  }
+
   /** Returns the vector of messages carried by this reply. */
   public Vector getMessages()
   {
+    if (message != null) {
+      Vector vec = new Vector();
+      vec.add(message);
+      return vec;
+    }
     return messages;
   }
 
-  /**
-   * Transforms this reply into a vector of primitive values that can
-   * be vehiculated through the SOAP protocol.
-   */
-  public Vector soapCode()
-  {
-    Vector vec = new Vector();
+  public void addMessage(Message msg) {
+    messages.addElement(msg);
+  }
 
-    vec.add("QBrowseReply");
+  public void setMessage(Message msg) {
+    message = msg;
+  }
 
-    // Coding the reply fields:
-    vec.add(getCorrelationId());
-    
-    // Coding and adding the messages into a vector:
-    Vector msgs = new Vector();
-    while (! messages.isEmpty())
-      msgs.add(((Message) messages.remove(0)).soapCode());
-
-    vec.add(msgs);
-
-    return vec;
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    // Coding and adding the messages into a array:
+    int size = 0;
+    if (messages != null)
+      size = messages.size();
+    if (size > 0) {
+      Hashtable [] arrayMsg = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        Message msg = (Message) messages.elementAt(0);
+        messages.removeElementAt(0);
+        arrayMsg[i] = msg.soapCode();
+      }
+      if (arrayMsg != null)
+        h.put("arrayMsg",arrayMsg);
+    } else {
+      if (message != null) {
+        h.put("singleMsg",message.soapCode());
+      }
+    }
+    return h;
   }
 
   /** 
-   * Transforms a vector of primitive values into a
+   * Transforms a hashtable of primitive values into a
    * <code>QBrowseReply</code> reply.
    */
-  public static QBrowseReply soapDecode(Vector vec)
-  {
-    vec.remove(0);
-
-    String correlationId = (String) vec.remove(0);
-    Vector codedMsgs = (Vector) vec.remove(0);
-
-    Vector decodedMsgs = new Vector();
-    // Decoding the messages:
-    while (! codedMsgs.isEmpty())
-      decodedMsgs.add(Message.soapDecode((Vector) codedMsgs.remove(0)));
-
-    return new QBrowseReply(correlationId, decodedMsgs);
+  public static Object soapDecode(Hashtable h) {
+    QBrowseReply req = new QBrowseReply();
+    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
+    Map [] arrayMsg = (Map []) h.get("arrayMsg");
+    if (arrayMsg != null) {
+      for (int i = 0; i<arrayMsg.length; i++)
+        req.addMessage(Message.soapDecode((Hashtable) arrayMsg[i]));
+    } else
+      req.setMessage(Message.soapDecode((Hashtable) h.get("singleMsg")));
+    return req;
   }
 }

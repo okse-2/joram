@@ -1,26 +1,22 @@
 /*
- * Copyright (C) 2001 - 2002 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -32,6 +28,7 @@ import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
 import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
 
 /**
  * The <code>AgentServer</code> class manages the global configuration
@@ -136,19 +133,32 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.14 2003-06-17 11:46:37 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.15 2003-06-23 13:37:51 fmaistre Exp $"; 
 
   public final static short NULL_ID = -1;
+
+  public final static String ADMIN_DOMAIN = "D0";
+  public final static String ADMIN_SERVER = "s0";
 
   private static short serverId = NULL_ID;
 
   private static Logger logmon = null;
 
-  public final static short getServerId() {
-    return serverId;
-  }
+  public final static String CFG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3CONF_DIR";
+  public final static String DEFAULT_CFG_DIR = null;
+  
+  public final static String CFG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3CONF_FILE";
+  public final static String DEFAULT_CFG_FILE = "a3servers.xml";
+  public final static String DEFAULT_SER_CFG_FILE = "a3cmlconfig";
+  
+  public final static String CFG_NAME_PROPERTY = "fr.dyade.aaa.agent.A3CONF_NAME";
+  public final static String DEFAULT_CFG_NAME = "default";
+  
+  public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
+  public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
 
+  static ThreadGroup tgroup = null;
  /**
    * Static reference to the engine. Used in <code>Channel.sendTo</code> to
    * know if the method is called from a react or no.
@@ -161,11 +171,94 @@ public final class AgentServer {
    * Static references to all messages consumumers initialized in this
    * agent server (including <code>Engine</code>).
    */
-  static MessageConsumer[] consumers = null;
+  private static Hashtable consumers = null;
   /** Static description of all known agent servers. */
-  static ServerDesc[] servers = null;
+  private static Hashtable servers = null;
   /** Static reference to the transactional monitor. */
   static Transaction transaction = null;
+
+  /** Static reference to the configuration. */
+  private static A3CMLConfig a3config = null;
+  
+  public static ThreadGroup getThreadGroup() {
+    return tgroup;
+  }
+
+  public static Engine getEngine() {
+    return engine;
+  }
+
+  static void addConsumer(String domain,
+                          MessageConsumer consumer) throws Exception {
+    if (consumers.containsKey(domain))
+      throw new Exception("Consumer for domain " + domain + " already exist");
+    consumers.put(domain, consumer);
+  }
+
+  static Enumeration getConsumers() {
+    return consumers.elements();
+  }
+
+  static MessageConsumer getConsumer(String domain) throws Exception {
+    if (! consumers.containsKey(domain))
+      throw new Exception("Unknown consumer for domain " + domain);
+    return (MessageConsumer) consumers.get(domain);
+  }
+
+  /**
+   * set the agent server configuration.
+   *
+   * @param a3config  A3CMLConfig
+   */
+  final static void setConfig(A3CMLConfig a3config) {
+    AgentServer.a3config = a3config;
+  }
+  
+  /**
+   * Returns the agent server configuration.
+   *
+   * @return  agent server configuration (A3CMLConfig)
+   */
+  public final static A3CMLConfig getConfig() throws Exception {
+    if (a3config == null) throw new Exception("Server not configured");
+    return a3config;
+  }
+
+  /**
+   *  Gets configuration of agent servers for a domain from the current
+   * A3CMLConfig object. This method fills the object graph configuration
+   * in a <code>A3CMLConfig</code> object.
+   *
+   * @param domainName  list of domain's names
+   * @return	        a <code>A3CMLConfig</code> object.
+   */
+  public static A3CMLConfig
+      getAppConfig(String[] domains) throws Exception {
+    return getConfig().getDomainConfig(domains);
+  }
+
+  public final static short getServerId() {
+    return serverId;
+  }
+
+  private static String name = null;
+
+  public final static String getName() {
+    if (name == null)
+      name = new StringBuffer("AgentServer#").append(getServerId()).toString();
+    return name;
+  }
+
+  /**
+   * Returns the identifier of the agent server which name is specified.
+   *
+   * @param name the name of the agent server
+   * @return the identifier of the agent server
+   * @exception Exception if the server name is unknown.
+   */
+  public static short getServerIdByName(String name) throws Exception {
+    return getConfig().getServerIdByName(name);
+  }
 
   /**
    * Returns the agent server transaction context.
@@ -224,7 +317,7 @@ public final class AgentServer {
     } catch (UnknownServerException exc) {
       // should never happened.
       logmon.log(BasicLevel.ERROR,
-                 "AgentServer#" + serverId + ", not already initialized", exc);
+                 getName() + ", not already initialized", exc);
       return false;
     }
   }
@@ -238,10 +331,28 @@ public final class AgentServer {
    */
   public final static boolean isTransient(short sid) throws UnknownServerException {
     try {
-      return getServerDesc(sid).isTransient;
-    } catch (NullPointerException exc) {
+      return a3config.isTransient(sid);
+//       return getServerDesc(sid).isTransient;
+    } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
       throw new UnknownServerException("Unknown server id. #" + sid);
     }
+  }
+
+  static void addServerDesc(ServerDesc desc) throws Exception {
+    if (desc == null) return;
+    servers.put(new Short(desc.sid), desc);
+  }
+
+  static void removeServerDesc(short sid) throws Exception {
+    servers.remove(new Short(sid));
+  }
+
+  public static Enumeration elementsServerDesc() throws Exception {
+    return servers.elements();
+  }
+
+  public static Enumeration getServersIds() {
+    return servers.keys();
   }
 
   /**
@@ -250,7 +361,7 @@ public final class AgentServer {
    * @return	the number of server.
    */
   final static int getServerNb() {
-    return servers.length;
+    return servers.size();
   }
 
   /**
@@ -261,11 +372,10 @@ public final class AgentServer {
    */
   final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
     try {
-      if (servers[sid] == null)
+      ServerDesc serverDesc = (ServerDesc) servers.get(new Short(sid));
+      if (serverDesc == null)
         throw new UnknownServerException("Unknow server id. #" + sid);
-      return servers[sid];
-    } catch (ArrayIndexOutOfBoundsException exc) {
-      throw new UnknownServerException("Unknow server id. #" + sid);
+      return serverDesc;
     } catch (NullPointerException exc) {
       throw new UnknownServerException("Bad server configuration");
     }
@@ -298,20 +408,8 @@ public final class AgentServer {
    * @return		server host name as declared in configuration file
    */
   final static ServiceDesc[] getServices() {
-    return servers[getServerId()].services;
+    return ((ServerDesc) servers.get(new Short(getServerId()))).services;
   }
-
-//   /**
-//    * Get the description of all services of an agent server.
-//    *
-//    * @param id		agent server id
-//    * @return		server host name as declared in configuration file
-//    */
-//   public final static ServiceDesc[] getServices(short sid) {
-//     // We have not to clone this array to avoid user modification since
-//     // ServiceDesc is constant outside of this package.
-//     return getServerDesc(sid).services;
-//   }
 
   /**
    * Get the argument strings for a particular service.
@@ -319,7 +417,7 @@ public final class AgentServer {
    * only available if this file contains service's informations for all
    * nodes.
    *
-   * @see A3CMLHandler#getServiceArgs(short,String)
+   * @see A3CMLConfig#getServiceArgs(short,String)
    *
    * @param id		agent server id
    * @param classname	the service class name
@@ -334,11 +432,7 @@ public final class AgentServer {
   public final static
   String getServiceArgs(short sid,
 			String classname) throws Exception {
-    if (a3configHdl != null)
-      return a3configHdl.getServiceArgs(sid, classname);
-    else
-      throw new Exception("Service \"" +
-			  classname + "\" not found on server#" + sid);
+    return getConfig().getServiceArgs(sid, classname);
   }
 
   /**
@@ -348,7 +442,7 @@ public final class AgentServer {
    * only available if this file contains service's informations for all
    * nodes.
    *
-   * @see A3CMLHandler#getServiceArgsFamily(short,String)
+   * @see A3CMLConfig#getServiceArgsFamily(short,String)
    *
    * @param id		agent server id
    * @param classname	the service class name
@@ -363,11 +457,7 @@ public final class AgentServer {
   public final static
   String getServiceArgsFamily(short sid,
 			      String classname) throws Exception {
-    if (a3configHdl != null)
-      return a3configHdl.getServiceArgsFamily(sid, classname);
-    else
-      throw new Exception("Service \"" +
-			  classname + "\" not found on family server#" + sid);
+    return getConfig().getServiceArgsFamily(sid, classname);
   }
 
   /**
@@ -377,7 +467,7 @@ public final class AgentServer {
    * only available if this file contains service's informations for all
    * nodes.
    *
-   * @see A3CMLHandler#getServiceArgs(String, String)
+   * @see A3CMLConfig#getServiceArgs(String, String)
    *
    * @param hostname	hostname
    * @param classname	the service class name
@@ -390,306 +480,300 @@ public final class AgentServer {
   public final static
   String getServiceArgs(String hostname,
 			String classname) throws Exception {
-    if (a3configHdl != null)
-      return a3configHdl.getServiceArgs(hostname, classname);
-    else
-      throw new Exception("Service \"" +
-			  classname + "\" not found on host " + hostname);
+    return getConfig().getServiceArgsHost(hostname, classname);
   }
-
-  private static A3CMLHandler a3configHdl = null;
 
   /**
    * The second step of initialization. It needs the Transaction component be
-   * up, then it initializes all <code>Server</code> structures from the
-   * <code>A3CMLHandler</code> ones.
+   * up, then it initializes all <code>AgentServer</code> structures from the
+   * <code>A3CMLConfig</code> ones.
    */
   private static void configure() throws Exception {
-    if (a3configHdl == null) {
-      throw new Exception("Cannot find configuration file");
-
-      // It's an isolated server.
-      // Creates the local MessageConsumer: the Engine.
-//       engine = Engine.newInstance();
-//       consumers = new MessageConsumer[1];
-//       consumers[0] = engine;
-
-//       servers = new ServerDesc[1];
-//       servers[0] = new ServerDesc(serverId, "default", "localhost");
-//       servers[0].isTransient = false;
-//       servers[0].domain = engine;
+    A3CMLServer root = getConfig().getServer(serverId);
+    //Allocates the descriptors array for each server.
+    servers = new Hashtable();
+    // Initialized the descriptor of current server in order to permit
+    // Channel and Engine initialization (use of isTransient method).
+    ServerDesc local = new ServerDesc(root.sid, root.name, root.hostname);
+    servers.put(new Short(root.sid), local);
+    if (root instanceof A3CMLPServer) {
+//       local.isTransient = false;
+      configure((A3CMLPServer) root);
+    } else if (root instanceof A3CMLTServer) {
+//       local.isTransient = true;
+      configure((A3CMLTServer) root);
     } else {
-      A3CMLServer root;
-      root = (A3CMLServer) a3configHdl.servers.get(new Short(serverId));
-      //Allocates the descriptors array for each server.
-      servers = new ServerDesc[a3configHdl.maxid +1];
-      // Initialized the descriptor of current server in order to permit
-      // Channel and Engine initialization (use of isTransient method).
-      servers[root.sid] = new ServerDesc(root.sid,
-                                         root.name,
-                                         root.hostname);
-      if (root instanceof A3CMLPServer) {
-	servers[root.sid].isTransient = false;
-	configure((A3CMLPServer) root);
-      } else if (root instanceof A3CMLTServer) {
-	servers[root.sid].isTransient = true;
-	configure((A3CMLTServer) root);
-      } else {
-	throw new Exception("Unknown agent server type: " + serverId);
+      throw new Exception("Unknown agent server type: " + serverId);
+    }
+    initServices(root, local);
+    local.domain = engine;
+
+
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      for (Enumeration e=elementsServerDesc(); e.hasMoreElements(); ) {
+        ServerDesc server = (ServerDesc) e.nextElement();
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", servers[]=(" + 
+                   "sid=" + server.sid + 
+                   ", name=" + server.name + 
+                   ", gateway=" + server.gateway + 
+                   ", domain=" + server.domain + ")");
       }
     }
+
     return;
   }
 
-  private static void configure(A3CMLTServer root) throws Exception {
-    short rootid = root.sid;
+  private static void configure(A3CMLPServer root) throws Exception {
+    getConfig().configure(root);
 
-    // AF: Be careful, a transient server can not be configured as well.
-    // In this case, there is 2 domains: a local one, and a network one that
-    // route all remote messages to the proxy server.
-    consumers = new MessageConsumer[2];
-    // Creates the local MessageConsumer: the Engine.
-    engine = Engine.newInstance();
-    consumers[0] = engine;
-    // Creates the network MessageConsumer and initialize it.
+    // Creates all the local MessageConsumer.
+    createConsumers(root);
     
-    consumers[1] = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkServer").newInstance();
-    ((Network) consumers[1]).init("transient", -1, null);
-
-    // Gets the descriptor of gateway server.
-    A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(root.gateway));
-    // Initializes the descriptors of each server.
-    for (Enumeration s = a3configHdl.servers.elements(); s.hasMoreElements();) {
+    for (Enumeration s = getConfig().servers.elements();
+         s.hasMoreElements();) {
       A3CMLServer server = (A3CMLServer) s.nextElement();
-      if (server.sid != rootid) {
-        // ServerDesc already initialized for current server
-        servers[server.sid] = new ServerDesc(server.sid,
-                                             server.name,
-                                             server.hostname);
-        if (server instanceof A3CMLPServer) {
-          servers[server.sid].isTransient = false;
-        } else if (server instanceof A3CMLTServer) {
-          servers[server.sid].isTransient = true;
-        }
-      }
-      servers[server.sid].gateway = root.gateway;
-      servers[server.sid].domain = consumers[1];
-      if (server.services != null) {
-	ServiceDesc services[]  = new ServiceDesc[server.services.size()];
-	int idx = 0;
-	for (Enumeration x = server.services.elements(); x.hasMoreElements();) {
-	  A3CMLService service = (A3CMLService) x.nextElement();
-	  services[idx++] = new ServiceDesc(service.classname, service.args);
-	}
-	servers[server.sid].services = services;
-      }
-    }
+      if (server.sid == root.sid) continue;
 
-    // Fixes the current transient server properties.
-    // Be careful, the gateway attribute is used by NetworkTransientServer
-    // to determine the proxy id server.
-    servers[rootid].gateway = root.gateway;
-    servers[rootid].domain = consumers[0];
-
-    // Search the listen port of proxy
-    for (Enumeration n = gateway.networks.elements(); n.hasMoreElements();) {
-      A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
-      if (network.domain.equals("transient"))
-	servers[root.gateway].port = network.port;
+      ServerDesc desc = createServerDesc(server);
+      servers.put(new Short(server.sid), desc);
     }
-    if (servers[root.gateway].port == -1)
-      throw new Exception("There is no transient network on server #" +
-			  root.gateway + ", bad configuration.");
   }
 
-  private static void configure(A3CMLPServer root) throws Exception {
-    short rootid = root.sid;
-    Vector toExplore = new Vector();
+  private static void configure(A3CMLTServer root) throws Exception {
+    getConfig().configure(root);
 
-    Hashtable consumersTempHT = new Hashtable();
+    // Creates all the local MessageConsumer.
+    createConsumers(root);
+
+    // Gets the descriptor of gateway server.
+    A3CMLPServer gateway = (A3CMLPServer) getConfig().getServer(root.gateway);
+    // Initializes the descriptors of each server.
+    for (Enumeration s = getConfig().servers.elements();
+         s.hasMoreElements();) {
+      A3CMLServer server = (A3CMLServer) s.nextElement();
+
+      ServerDesc desc = null;
+      if (server.sid == root.sid) {
+        desc = getServerDesc(root.sid);
+        // Fixes the current transient server properties.
+        // Be careful, the gateway attribute is used by NetworkTransientServer
+        // to determine the proxy id server.
+        desc.gateway = root.gateway;
+        desc.domain = engine;
+      } else if (server.sid == root.gateway) {
+        desc = new ServerDesc(server.sid, server.name, server.hostname);
+        // ServerDesc already initialized for current server
+        servers.put(new Short(server.sid), desc);
+        desc.gateway = root.gateway;
+        desc.domain = getConsumer("transient");
+        desc.port = ((A3CMLPServer) server).port;
+        initServices(server, desc);
+      } else {
+        desc = new ServerDesc(server.sid, server.name, server.hostname);
+        // ServerDesc already initialized for current server
+        servers.put(new Short(server.sid), desc);
+//         if (server instanceof A3CMLPServer) {
+//           desc.isTransient = false;
+//         } else if (server instanceof A3CMLTServer) {
+//           desc.isTransient = true;
+//         }
+        desc.gateway = root.gateway;
+        desc.domain = getConsumer("transient");
+        initServices(server, desc);
+      }
+    }
+  }
+
+  private static void createConsumers(A3CMLTServer root) throws Exception {
+    // AF: Be careful, a transient server cannot be configured as well.
+    // In this case, there is 2 domains: a local one, and a network one that
+    // route all remote messages to the proxy server.
+    consumers = new Hashtable();
+
     // Creates the local MessageConsumer: the Engine.
     engine = Engine.newInstance();
-    consumersTempHT.put("local", engine);
-    
+    consumers.put("local", engine);
+
+    // Creates the network MessageConsumer and initialize it.
+    Network network = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkServer").newInstance();
+    network.init("transient", -1, null);
+    consumers.put("transient", network);
+  }
+
+  private static void createConsumers(A3CMLPServer root) throws Exception {
+    consumers = new Hashtable();
+
+    // Creates the local MessageConsumer: the Engine.
+    engine = Engine.newInstance();
+    consumers.put("local", engine);
+
     // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements();
 	 n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
-      if (! network.domain.equals("transient")) {
-	A3CMLDomain domain = (A3CMLDomain) a3configHdl.domains.get(network.domain);
-	domain.gateway = rootid;
-	toExplore.addElement(domain);
 
-	// Creates the corresponding MessageConsumer.
-	try {
-	  Network consumer = (Network) Class.forName(domain.network).newInstance();
-	  // Initializes it with domain description. Be careful, this array
-	  // is kept in consumer, don't reuse it!!
-	  short[] domainSids = new short[domain.servers.size()];
-	  for (int i=0; i<domainSids.length; i++) {
-	    domainSids[i] = ((A3CMLServer) domain.servers.elementAt(i)).sid;
-	  }
-	  consumer.init(domain.name, network.port, domainSids);
-	  consumersTempHT.put(network.domain, consumer);
-	} catch (ClassNotFoundException exc) {
-	  throw exc;
-	} catch (InstantiationException exc) {
-	  throw exc;
-	} catch (IllegalAccessException exc) {
-	  throw exc;
-	}
+      A3CMLDomain domain = getConfig().getDomain(network.domain);
+//       if (! network.domain.equals("transient")) {
+      // Creates the corresponding MessageConsumer.
+      try {
+        Network consumer = (Network) Class.forName(domain.network).newInstance();
+        // Initializes it with domain description. Be careful, this array
+        // is kept in consumer, don't reuse it!!
+        consumer.init(domain.name, network.port, domain.getServersId());
+//         domain.consumer = consumer;
+        consumers.put(network.domain, consumer);
+      } catch (ClassNotFoundException exc) {
+        throw exc;
+      } catch (InstantiationException exc) {
+        throw exc;
+      } catch (IllegalAccessException exc) {
+        throw exc;
+      }
+//       } else {
+// 	Vector tdomain = new Vector();
+// 	// Initializes it with domain description. Be careful, this array
+// 	// is kept in consumer, don't reuse it!!
+// 	for (Enumeration s = a3config.servers.elements(); s.hasMoreElements();) {
+// 	  A3CMLServer server = (A3CMLServer) s.nextElement();
+// 	  if ((server instanceof A3CMLTServer)  &&
+// 	      ( server.gateway == root.sid)) {
+// 	    tdomain.addElement(server);
+// 	  }
+// 	}
+// 	if (tdomain.size() > 0) {
+// 	  short[] domainSids = new short[tdomain.size()];
+// 	  for (int i=0; i<domainSids.length; i++) {
+// 	    domainSids[i] = ((A3CMLServer) tdomain.elementAt(i)).sid;
+// 	  }
+// 	  // Creates a transient server's proxy and initializes it.
+//           MessageConsumer consumer = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkProxy").newInstance();
+//           ((Network) consumer).init("transient", network.port, domainSids);
+//           domain.consumer = consumer;
+//           consumers.addElement(consumer);
+// 	}
+//       }
+    }
+  }
+
+  static void initServerDesc(ServerDesc desc,
+                             A3CMLPServer server) throws Exception {
+//     desc.isTransient = false;
+    desc.gateway = server.gateway;
+    // For each server set the gateway to the real next destination of
+    // messages; if the server is directly accessible: itself.
+    if ((desc.gateway == -1) || (desc.gateway == server.sid)) {
+      desc.gateway = server.sid;
+      desc.port = server.port;
+      A3CMLServer current = getConfig().getServer(getServerId());
+      if (current.containsNat(server.sid)) {
+        A3CMLNat nat = current.getNat(server.sid);
+        desc.setPort(nat.port);
+        desc.setHostname(nat.host);
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + " : NAT sDesc = " + desc);
+      }
+    }
+    desc.domain = getConsumer(server.domain);
+  }   
+
+  static void initServerDesc(ServerDesc desc,
+                             A3CMLTServer server) throws Exception {
+    if (server.gateway == getServerId()) {
+//       desc.isTransient = true;
+      desc.gateway = server.sid;
+      desc.domain = getConsumer("transient");
+    } else {
+//       desc.isTransient = true;
+      A3CMLPServer router = null;
+      try {
+        router = (A3CMLPServer) getConfig().getServer(server.gateway);
+      } catch (ClassCastException exc) {
+        throw new Exception(router + " can't route transient " + server);
+      }
+      if (router.gateway == -1) {
+        desc.gateway = router.sid;
       } else {
-	Vector tdomain = new Vector();
-	// Initializes it with domain description. Be careful, this array
-	// is kept in consumer, don't reuse it!!
-	for (Enumeration s = a3configHdl.servers.elements(); s.hasMoreElements();) {
-	  A3CMLServer server = (A3CMLServer) s.nextElement();
-	  if ((server instanceof A3CMLTServer)  &&
-	      (((A3CMLTServer) server).gateway == rootid)) {
-	    tdomain.addElement(server);
-	  }
-	}
-	if (tdomain.size() > 0) {
-	  short[] domainSids = new short[tdomain.size()];
-	  for (int i=0; i<domainSids.length; i++) {
-	    domainSids[i] = ((A3CMLServer) tdomain.elementAt(i)).sid;
-	  }
-	  // Creates a transient server's proxy and initializes it.
-          MessageConsumer consumer = (Network) Class.forName("fr.dyade.aaa.agent.TransientNetworkProxy").newInstance();
-          ((Network) consumer).init("transient", network.port, domainSids);
-	  consumersTempHT.put(network.domain, consumer);
-	}
+        desc.gateway =  router.gateway;
+      }
+      desc.domain = getConsumer(router.domain);
+    }
+  }
+
+  private static ServerDesc
+      createServerDesc(A3CMLServer server) throws Exception {
+    if (! server.visited)
+      throw new Exception(server + " inaccessible");
+    
+    ServerDesc desc = new ServerDesc(server.sid, server.name, server.hostname);
+    if (server instanceof A3CMLPServer) {
+      initServerDesc(desc, (A3CMLPServer) server);
+    } else if (server instanceof A3CMLTServer) {
+      initServerDesc(desc, (A3CMLTServer) server);
+    } else {
+      // TODO: Throw an UnknownServerType
+    }
+    initServices(server, desc);
+
+    return desc;
+  }
+
+  private static void initServices(A3CMLServer server, ServerDesc desc) {
+    if (server.services != null) {
+      ServiceDesc services[]  = new ServiceDesc[server.services.size()];
+      int idx = 0;
+      for (Enumeration x = server.services.elements();
+           x.hasMoreElements();) {
+        A3CMLService service = (A3CMLService) x.nextElement();
+        services[idx++] = new ServiceDesc(service.classname, service.args);
+      }
+      desc.services = services;
+    }
+  }
+  
+  private static void setProperties(short sid) throws Exception {
+    if (a3config == null) return;
+    // add global properties
+    if (a3config.properties != null) {
+      for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
+        A3CMLProperty p = (A3CMLProperty) e.nextElement();
+        System.getProperties().put(p.name,p.value);
       }
     }
-
-    consumers = new MessageConsumer[consumersTempHT.size()];
-    int i = 0;
-    for (Enumeration e = consumersTempHT.elements(); e.hasMoreElements() ;) {
-      consumers[i++] = (MessageConsumer) e.nextElement();
-    }
-
-    root.visited = true;
-    root.gateway = -1;
-    root.domain = "local";
-
-    servers = new ServerDesc[a3configHdl.maxid +1];
-    while (toExplore.size() > 0) {
-      A3CMLDomain domain = (A3CMLDomain) toExplore.elementAt(0);
-      toExplore.removeElementAt(0);
-      A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(domain.gateway));
-      // Parse all nodes of this domain
-      for (Enumeration s = domain.servers.elements();
-	   s.hasMoreElements();) {
-	A3CMLPServer server = (A3CMLPServer) s.nextElement();
-	if (! server.visited) {
-	  server.visited = true;
-	  if (domain.gateway == rootid) {
-	    server.gateway = -1;
-	    server.domain = domain.name;
-	  } else {
-	    server.gateway = domain.gateway;
-	    server.domain = gateway.domain;
-	  }
-
-	  // If the server is a router then add the accessible domains
-	  // to the list.
-	  for (Enumeration n = server.networks.elements();
-	       n.hasMoreElements();) {
-	    A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
-	    if (! network.domain.equals("transient")) {
-	      A3CMLDomain d2 = (A3CMLDomain) a3configHdl.domains.get(network.domain);
-	      if (d2.gateway == -1) {
-		// The domain is not already explored.
-		if (server.gateway == -1)
-		  d2.gateway = server.sid;
-		else
-		  d2.gateway = server.gateway;
-		toExplore.addElement(d2);
-	      } else if (d2 != domain) {
-		// More than one route to this domain.
-		throw new Exception("more than one route to: " + domain);
-	      } else {
-		if (server.gateway == -1) {
-		  // The server is directly accessible from root server by
-		  // this network interface; fixes the communication port
-		  // for this server.
-		  server.port = network.port;
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-
-    servers = new ServerDesc[a3configHdl.maxid +1];    
-    for (Enumeration s = a3configHdl.servers.elements(); s.hasMoreElements();) {
-      A3CMLServer server = (A3CMLServer) s.nextElement();
-      servers[server.sid] = new ServerDesc(server.sid,
-					   server.name,
-					   server.hostname);
-
-      if (server instanceof A3CMLPServer) {
-	A3CMLPServer serverP = (A3CMLPServer) server;
-	if (serverP.visited) {
-	  servers[server.sid].isTransient = false;
-	  servers[server.sid].gateway = serverP.gateway;
-	  // For each server set the gateway to the real next destination of
-	  // messages; if the server is directly accessible: itself.
-	  if (servers[server.sid].gateway == -1) {
-	    servers[server.sid].gateway = serverP.sid;
-	    servers[server.sid].port = serverP.port;
-	  }
-	  servers[server.sid].domain = (MessageConsumer) consumersTempHT.get(serverP.domain);
-	  if (server.services != null) {
-	    ServiceDesc services[]  = new ServiceDesc[server.services.size()];
-	    int idx = 0;
-	    for (Enumeration x = server.services.elements(); x.hasMoreElements();) {
-	      A3CMLService service = (A3CMLService) x.nextElement();
-	      services[idx++] = new ServiceDesc(service.classname, service.args);
-	    }
-	    servers[server.sid].services = services;
-	  }
-	} else {
-	  throw new Exception(serverP + " inaccessible");
-	}
-      } else if (server instanceof A3CMLTServer) {
-	A3CMLTServer serverT = (A3CMLTServer) server;
-	if (serverT.gateway == rootid) {
-	  servers[server.sid].isTransient = true;
-	  servers[server.sid].gateway = -1;
-	  servers[server.sid].domain = (MessageConsumer) consumersTempHT.get("transient");
-	} else {
-	  servers[server.sid].isTransient = true;
-	  A3CMLServer router = (A3CMLServer) a3configHdl.servers.get(new Short(serverT.gateway));
-	  if (! (router instanceof A3CMLPServer)) {
-	    throw new Exception("transient " + router +
-			" can't route transient " + serverT);
-	  }
-	  if (((A3CMLPServer) router).visited) {
-	    if (((A3CMLPServer) router).gateway == -1) {
-	      servers[server.sid].gateway = router.sid;
-	      servers[server.sid].domain = (MessageConsumer) consumersTempHT.get(((A3CMLPServer) router).domain);
-	    } else {
-	      servers[server.sid].gateway = ((A3CMLPServer) router).gateway;
-	      servers[server.sid].domain = (MessageConsumer) consumersTempHT.get(((A3CMLPServer) router).domain);
-	    }
-	  } else {
-	    throw new Exception(serverT + "/" + router + " inaccessible");
-	  }
-	}
-	if (server.services != null) {
-	  ServiceDesc services[]  = new ServiceDesc[server.services.size()];
-	  int idx = 0;
-	  for (Enumeration x = server.services.elements(); x.hasMoreElements();) {
-	    A3CMLService service = (A3CMLService) x.nextElement();
-	    services[idx++] = new ServiceDesc(service.classname, service.args);
-	  }
-	  servers[server.sid].services = services;
-	}
+    // add local properties
+    A3CMLServer s = null;
+    try {
+      s = a3config.getServer(sid);
+    } catch (Exception e) {return;}
+    if (s != null && s.properties != null) {
+      for (Enumeration e = s.properties.elements(); e.hasMoreElements();) {
+        A3CMLProperty p = (A3CMLProperty) e.nextElement();
+        System.getProperties().put(p.name,p.value);
       }
     }
   }
+  
+  static class Status {
+    public static final int INSTALLED = 0;
+    public static final int INITIALIZING = 0x1;
+    public static final int INITIALIZED = 0x2;
+    public static final int STARTING = 0x4;
+    public static final int STARTED = 0x8;
+    public static final int STOPPING = 0x10;
+    public static final int STOPPED = 0x20;
+
+    private int value = INSTALLED;
+
+//     synchronized void setStatus(int status) {
+//       this.status = status;
+//     }
+
+//     synchronized int getStatus() {
+//       return status;
+//     }
+  }
+
+  static Status status = new Status();
 
   /**
    * Parses agent server arguments, then initializes this agent server. The
@@ -705,19 +789,17 @@ public final class AgentServer {
    * @exception Exception
    *	unspecialized exception
    */
-  public static int
-  init(String args[]) throws Exception {
+  public static int init(String args[]) throws Exception {
     if (args.length < 2)
       throw new Exception("usage: java <main> sid storage");
-    short sId;
+    short sid = -1;
     try {
-      sId = (short) Integer.parseInt(args[0]);
+      sid = (short) Integer.parseInt(args[0]);
     } catch (NumberFormatException exc) {
       throw new Exception("usage: java <main> sid storage");
     }
-   
     String path = args[1];
-    init(sId, path, null);
+    init(sid, path, null);
     return 2;
   }
 
@@ -728,7 +810,7 @@ public final class AgentServer {
    * agents may be created and deployed, and notifications may be sent using
    * the <code>Channel</code> <code>sendTo</code> function.
    *
-   * @param serverid	the server id
+   * @param sid		the server id
    * @param path        the persistency directory.
    * @param loggerFactory the monolog LoggerFactory;
    * 	
@@ -736,95 +818,178 @@ public final class AgentServer {
    * @exception Exception
    *	unspecialized exception
    */
-  public static void
-  init(short sId, String path, LoggerFactory loggerFactory) throws Exception {
-    serverId = sId; 
-    if (loggerFactory != null) {
-        Debug.setLoggerFactory(loggerFactory);
+  public static void init(short sid,
+                          String path,
+                          LoggerFactory loggerFactory) throws Exception {
+    serverId = sid; 
+    if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
+
+    synchronized(status) {
+      if ((status.value != Status.INSTALLED) &&
+          (status.value != Status.STOPPED))
+        throw new Exception("cannot initialize, bad status: " + status.value);
+      status.value = Status.INITIALIZING;
     }
+
     logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer" +
                               ".#" + AgentServer.getServerId());
 
-    // Read and parse the configuration file.
-    boolean isTransient;
-    
+    tgroup = new ThreadGroup(getName()) {
+      public void uncaughtException(Thread t, Throwable e) {
+        if (logmon.isLoggable(BasicLevel.WARN)) {
+          logmon.log(BasicLevel.WARN,
+                     "Abnormal termination for " +
+                     t.getThreadGroup().getName() + "." + t.getName(),
+                     e);
+        }
+      }
+    };
+   
+    //  Try to get transaction type from disk, then initialize the rigth
+    // transaction manager and get the configuration.
+    File dir = new File(path);
+    if (dir.exists() && dir.isDirectory()) {
+      File tfc = new File(dir, "TFC");
+      if (tfc.exists()) {
+        DataInputStream dis = null;
+        try {
+          dis = new DataInputStream(new FileInputStream(tfc));
+          String tname = dis.readUTF();
+          Class tclass = Class.forName(tname);
+          transaction = (Transaction) tclass.newInstance();
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", can't instanciate transaction manager",
+                     exc);
+          throw new Exception("Can't instanciate transaction manager");
+        } finally {
+          if (dis != null) dis.close();
+        }
+        try {
+          transaction.init(path);
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", can't start transaction manager", exc);
+          throw new Exception("Can't start transaction manager");
+        }
+
+      }
+    }
+
     // Gets static configuration of agent servers from a file. This method
-    // fills the object graph configuration in the <code>A3CMLHandler</code>
+    // fills the object graph configuration in the <code>A3CMLConfig</code>
     // object, then the configure method really initializes the server.
     // There are two steps because the configuration step needs the transaction
     // components to be initialized.
-    try {
-      a3configHdl = A3CMLHandler.getConfig(serverId);
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId +
-                 ", problem during configuration parsing", exc);
-      throw new Exception("Problem during configuration parsing");
-    }
 
-    if (a3configHdl == null) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId +
-                 ", can't initialize (no configuration)");
-      throw new Exception("Can't initialize server (no configuration)");
-    } else {
+    if (transaction != null) {
+      // Try to read the serialiazed configuration (trough transaction)
       try {
-	isTransient = a3configHdl.isTransient(serverId);
+        a3config = A3CMLConfig.load();
       } catch (Exception exc) {
-	logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't initialize", exc);
-	throw new Exception("Can't initialize server");
+        logmon.log(BasicLevel.WARN, getName() + ", config not found");
       }
     }
 
-    try {
-      if (isTransient) {
-        Class tclass = Class.forName("fr.dyade.aaa.util.SimpleTransaction");
-	transaction = (Transaction) tclass.newInstance();
-      } else {
-	String tname = getProperty("Transaction",
-                                   "fr.dyade.aaa.util.ATransaction");
+    if (a3config == null) {
+      //  Try to load an initial configuration (serialized or XML), or
+      // generates a default one in case of failure.
+      try {
+        a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", serialized a3cmlconfig not found");
+      }
+
+      if (a3config == null) {
+        // Try to found XML configuration file, then parse it.
+        try {
+          a3config = A3CML.getXMLConfig();
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", XML configuration file not found");
+        }
+      }
+
+      if (a3config == null) {
+        // 3rd, Generate A3CMLConfig base.
+        logmon.log(BasicLevel.WARN,
+                   "Generate default configuration");
+        A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN,
+                                        "fr.dyade.aaa.agent.SimpleNetwork");
+        A3CMLPServer s = new A3CMLPServer((short) 0, ADMIN_SERVER, "localhost");
+        s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
+        s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
+        s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.HttpDebug","20080"));
+        d.addServer(s);
+        a3config = new A3CMLConfig();
+        a3config.addDomain(d);
+        a3config.addServer(s);
+      }
+    }
+
+    // set properties
+    setProperties(serverId);
+
+    if (transaction == null) {
+      boolean isTransient = false;
+      DataOutputStream dos = null;
+      try {
+        String tname = null;
+        if (a3config.isTransient(serverId))
+          tname = "fr.dyade.aaa.util.SimpleTransaction";
+        else
+          tname = getProperty("Transaction", "fr.dyade.aaa.util.ATransaction");
         Class tclass = Class.forName(tname);
-        transaction = (Transaction) tclass.newInstance();
+        transaction = (Transaction) Class.forName(tname).newInstance();
+        dir = new File(path);
+        if (!dir.exists()) dir.mkdir();
+        if (!dir.isDirectory())
+          throw new FileNotFoundException(path + " is not a directory.");
+        File tfc = new File(dir, "TFC");
+        if (tfc.exists())
+          throw new Exception();
+        dos = new DataOutputStream(new FileOutputStream(tfc));
+        dos.writeUTF(tname);
+        dos.flush();
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't instanciate transaction manager", exc);
+        throw new Exception("Can't instanciate transaction manager");
+      } finally {
+        if (dos != null) dos.close();
       }
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId +
-                 ", can't instanciate transaction manager", exc);
-      throw new Exception("Can't instanciate transaction manager");
+
+      try {
+        transaction.init(path);
+      } catch (IOException exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't start transaction manager", exc);
+        throw new Exception("Can't start transaction manager");
+      }
     }
 
-    try {
-      transaction.init(path);
-    } catch (IOException exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId +
-                 ", can't start transaction manager", exc);
-      throw new Exception("Can't start transaction manager");
-    }
+    // save A3CMLConfig (May be we can omit it in some case).
+    a3config.save();
 
     try {
       // Initialize AgentId class's variables.
       AgentId.init();
     } catch (ClassNotFoundException exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't initialize AgentId",
-                 exc);
+                 getName() + ", can't initialize AgentId", exc);
       throw new Exception("Can't initialize AgentId, bad classpath");
     } catch (IOException exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't initialize AgentId",
-                 exc);
+                 getName() + ", can't initialize AgentId", exc);
       throw new Exception("Can't initialize AgentId, storage problems");
     }
-
 
     try {
       // Configure the agent server.
       configure();
     } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't configure", exc);
+      logmon.log(BasicLevel.FATAL, getName() + ", can't configure", exc);
       throw new Exception("Can't configure server");
     }
 
@@ -839,18 +1004,16 @@ public final class AgentServer {
 	  // deliver to its consumer (Engine or Network component). So we have
 	  // to insert it in the queue of this consumer.
           try {
-            servers[msg.update.getToId()].domain.insert(msg);
+            ((ServerDesc) servers.get(new Short(msg.update.getToId()))).domain.insert(msg);
           } catch (NullPointerException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId +
-                       ", discard message to unknown server id#" +
+                       getName() + ", discard message to unknown server id#" +
                        msg.update.getToId());
             msg.delete();
             continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId +
-                       ", discard message to unknown server id#" +
+                       getName() + ", discard message to unknown server id#" +
                        msg.update.getToId());
             msg.delete();
             continue;
@@ -861,18 +1024,16 @@ public final class AgentServer {
 	  // have to insert it in waiting list of the network component that
 	  // received it.
           try {
-            servers[msg.update.getFromId()].domain.insert(msg);
+            ((ServerDesc) servers.get(new Short(msg.update.getFromId()))).domain.insert(msg);
           } catch (NullPointerException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId +
-                       ", discard message from unknown server id#" +
+                       getName() + ", discard message from unknown server id#" +
                        msg.update.getFromId());
             msg.delete();
             continue;
           } catch (ArrayIndexOutOfBoundsException exc) {
             logmon.log(BasicLevel.ERROR,
-                       "AgentServer#" + serverId +
-                       ", discard message from unknown server id#" +
+                       getName() + ", discard message from unknown server id#" +
                        msg.update.getFromId());
             msg.delete();
             continue;
@@ -881,11 +1042,11 @@ public final class AgentServer {
       }
     } catch (ClassNotFoundException exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't restore messages", exc);
+                 getName() + ", can't restore messages", exc);
       throw new Exception("Can't restore messages, bad classpath");
     } catch (IOException exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't restore messages", exc);
+                 getName() + ", can't restore messages", exc);
       throw new Exception("Can't restore messages, storage problems");
     }
 
@@ -895,6 +1056,10 @@ public final class AgentServer {
     try {
       //  Initialize and start services.
       ServiceManager.init();
+
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", ServiceManager initialized");
+
       /* Actually get Services from A3CML configuration file. */
       ServiceDesc services[] = AgentServer.getServices();
       if (services != null) {
@@ -914,13 +1079,14 @@ public final class AgentServer {
 // 	  Debug.trace("Unknown request", false);
 //    }
       /* End */
-      ServiceManager.save();
       // May be we can launch services in AgentServer.start()
       ServiceManager.start();
+      // Be careful, we have to save ServiceManager after start (initialized
+      // attribute).
+      ServiceManager.save();
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId + ", can't initialize services",
-                 exc);
+                 getName() + ", can't initialize services", exc);
       throw new Exception("Can't initialize services");
     }
 
@@ -932,22 +1098,24 @@ public final class AgentServer {
       ProcessManager.init();
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL,
-                 "AgentServer#" + serverId +
-                 ", can't initialize ProcessManager", exc);
+                 getName() + ", can't initialize ProcessManager", exc);
       throw new Exception("Can't initialize ProcessManager");
     }
 
     logmon.log(BasicLevel.WARN,
-               "AgentServer#" + serverId + ", initialized at " + new Date());
+               getName() + ", initialized at " + new Date());
 
     // Commit all changes.
     transaction.begin();
     transaction.commit();
     transaction.release();
 
+    synchronized(status) {
+      if (status.value != Status.INITIALIZING)
+        throw new Exception("Bad initialization, status: " + status.value);
+      status.value = Status.INITIALIZED;
+    }
   }
-
-
 
   /**
    *  Causes this AgentServer to begin its execution. This method starts all
@@ -955,25 +1123,38 @@ public final class AgentServer {
    */
   public static void
   start() throws Exception {
-    boolean ok = true;
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", start()", new Exception());
+    else
+      logmon.log(BasicLevel.WARN, getName() + ", start()");
 
-    // Now we can start all message consumers.
-    for (int i=0; i<consumers.length; i++) {
-      try {
-	consumers[i].start();
-      } catch (IOException exc) {
-	ok = false;
-	logmon.log(BasicLevel.FATAL,
-                   "AgentServer#" + serverId + 
-                   ", problem during " + consumers[i].getName() + " starting",
-                   exc);
-      }
+    synchronized(status) {
+      if (status.value != Status.INITIALIZED)
+        throw new Exception("cannot start, bad status: " + status.value);
+      status.value = Status.STARTING;
     }
 
+    boolean ok = true;
+    // Now we can start all message consumers.
+    if (consumers != null) {
+      for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+	MessageConsumer cons = (MessageConsumer) c.nextElement();
+        if (cons != null) {
+          try {
+            cons.start();
+          } catch (IOException exc) {
+            ok = false;
+            logmon.log(BasicLevel.FATAL,
+                       getName() +
+                       ", problem during " + cons.getName() + " starting", exc);
+          }
+        }
+      }
+    }
     // The server is running.
     if (ok) {
       logmon.log(BasicLevel.WARN,
-                 "AgentServer#" + serverId + ", started at " + new Date());
+                 getName() + ", started at " + new Date());
     } else {
       throw new Exception("Problem during MessageConsumer starting");
     }
@@ -982,81 +1163,97 @@ public final class AgentServer {
     transaction.begin();
     transaction.commit();
     transaction.release();
+
+    synchronized(status) {
+      if (status.value != Status.STARTING)
+        throw new Exception("bad start, status: " + status.value);
+      status.value = Status.STARTED;
+    }
   }
 
   /**
    *  Forces this AgentServer to stop executing. This method stops all
-   * consumers and services. Be careful, the stop process is asynchronous
-   * and may be in progress when the method ends.
+   * consumers and services. Be careful, the stop process is now synchronous
+   * and wait for all server's thread to terminate ; If this method is called
+   * from a server's thread it should result a dead-lock.
    */
   public static void stop() {
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      // Trace all threads that keep alive !!
-      Thread t = new Thread() {
-        public void run() {
-          int i = 0;
-          ThreadGroup tg = Thread.currentThread().getThreadGroup();
-          while (tg.getParent() != null)
-            tg = tg.getParent();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", servers=(" + servers + ")");
 
-          try {
-            sleep(10000L);
-          } catch (InterruptedException e) {}
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", stop()", new Exception());
+    else
+      logmon.log(BasicLevel.WARN, getName() + ", stop()");
 
-          while (true) {
-            int nbt = tg.activeCount();
-            Thread[] tab = new Thread[nbt];
-            tg.enumerate(tab);
-            
-            for (int j=0; j<nbt; j++) {
-              if (tab[j] == this) continue;
-              logmon.log(BasicLevel.DEBUG,
-                         "[" + i + "-" +
-                         tab[j].getThreadGroup().getName() + "." +
-                         tab[j].getName() + ":" +
-                         (tab[j].isAlive()?"alive":"-") + "/" +
-                         (tab[j].isDaemon()?"daemon":"-") + "," +
-                         tab[j]);
-            }
-            try {
-              sleep(60000L);
-              i += 1;
-            } catch (InterruptedException e) {}
-          }
-        }
-      };
-      t.setName("TFD");
-      t.setDaemon(true);
-      t.start();
+    synchronized(status) {
+      if (status.value != Status.STARTED) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + "cannot stop, bad status: " + status.value);
+        return;
+      }
+      status.value = Status.STOPPING;
     }
 
     // Stop all message consumers.
-    for (int i=0; i<consumers.length; i++) {
-      if (consumers[i] != null) {
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     "AgentServer#" + serverId +
-                     ", stop " + consumers[i].getName());
-        consumers[i].stop();
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     "AgentServer#" + serverId + ", " +
-                     consumers[i].getName() + " stopped");
+    if (consumers != null) {
+      for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+	MessageConsumer cons = (MessageConsumer) c.nextElement();
+        if (cons != null) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ", stop " + cons.getName());
+          cons.stop();
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ", " + cons.getName() + " stopped");
+        }
       }
     }
     // Stop all services.
     ServiceManager.stop();
+    // Stop all drivers
+    Driver.stopAll();
 
-    // Wait for all message consumers and services before stop the TM !!
+    // Wait for all threads before stop the TM !!
+    while (true) {
+      int nbt = getThreadGroup().activeCount();
+      if (nbt == 0) break;
+
+      Thread[] tab = new Thread[nbt];
+      getThreadGroup().enumerate(tab);
+      if ((nbt == 1) && (tab[0] == Thread.currentThread())) break;
+
+      for (int j=0; j<tab.length; j++) {
+        logmon.log(BasicLevel.DEBUG,
+                   "[" +  tab[j].getName() + ":" +
+                   (tab[j].isAlive()?"alive":"-") + "/" +
+                   (tab[j].isDaemon()?"daemon":"-") + "," +
+                   tab[j]);
+      }
+      try {
+        Thread.currentThread().sleep(2500);
+      } catch (InterruptedException e) {}
+    }
 
     // Stop the transaction manager.
     if (transaction != null) transaction.stop();
 
+    // Wait for the transaction manager stop
+
     Runtime.getRuntime().gc();
     System.runFinalization();
 
+    synchronized(status) {
+      if (status.value != Status.STOPPING)
+        logmon.log(BasicLevel.WARN,
+                   getName() + "bad stop, status: " + status.value);
+      status.value = Status.STOPPED;
+    }
+
     logmon.log(BasicLevel.WARN,
-               "AgentServer#" + serverId + ", stopped at " + new Date());
+               getName() + ", stopped at " + new Date());
   }
 
   /**
@@ -1074,27 +1271,23 @@ public final class AgentServer {
     try {
       init(args);
     } catch (Throwable exc) {
-      System.out.println("AgentServer#" + getServerId() +
-                         "initialisation failed: " + exc.toString());
+      System.out.println(getName() + "initialisation failed: " + exc.toString());
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR,
-                 "AgentServer#" + getServerId() +
-                 " initialisation failed", exc);
+                 getName() + " initialisation failed", exc);
       System.exit(1);
     }
     try {
       start();
       // Be careful, the output below is needed by some tools (AdminProxy for
       // example.
-      System.out.println("AgentServer#" + getServerId() + " started.");
+      System.out.println(getName() + " started.");
     } catch (Throwable exc) {
-      System.out.println("AgentServer#" + getServerId() + " failed: " +
-                         exc.toString());
+      System.out.println(getName() + " failed: " + exc.toString());
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
-      logmon.log(BasicLevel.ERROR,
-                 "AgentServer#" + getServerId() + " failed", exc);
+      logmon.log(BasicLevel.ERROR, getName() + " failed", exc);
       System.exit(1);
     }
   }

@@ -3,27 +3,23 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package fr.dyade.aaa.joram.soap;
 
@@ -45,6 +41,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -86,69 +83,74 @@ public class SoapConnection implements fr.dyade.aaa.joram.ConnectionItf
     BeanSerializer beanSer = new BeanSerializer();
 
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "request"),
+                        new QName("urn:ProxyService", "AbstractJmsRequest"),
                                   AbstractJmsRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "connectRequest"),
+                        new QName("urn:ProxyService", "CnxConnectRequest"),
                                   CnxConnectRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "startRequest"),
+                        new QName("urn:ProxyService", "CnxStartRequest"),
                                   CnxStartRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "stopRequest"),
+                        new QName("urn:ProxyService", "CnxStopRequest"),
                                   CnxStopRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "closeRequest"),
+                        new QName("urn:ProxyService", "CnxCloseRequest"),
                                   CnxCloseRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "consAckRequest"),
+                        new QName("urn:ProxyService", "ConsumerAckRequest"),
                                   ConsumerAckRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "consDenyRequest"),
+                        new QName("urn:ProxyService", "ConsumerDenyRequest"),
                                   ConsumerDenyRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "receiveRequest"),
+                        new QName("urn:ProxyService", 
+                                  "ConsumerReceiveRequest"),
                                   ConsumerReceiveRequest.class, beanSer,
                                   beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "setListRequest"),
+                        new QName("urn:ProxyService", 
+                                  "ConsumerSetListRequest"),
                                   ConsumerSetListRequest.class, beanSer,
                                   beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "unsetListRequest"),
+                        new QName("urn:ProxyService",
+                                  "ConsumerUnsetListRequest"),
                                   ConsumerUnsetListRequest.class, beanSer,
                                   beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "subRequest"),
+                        new QName("urn:ProxyService", "ConsumerSubRequest"),
                                   ConsumerSubRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "unsubRequest"),
-                                  ConsumerUnsubRequest.class, beanSer, beanSer);
+                        new QName("urn:ProxyService", "ConsumerUnsubRequest"),
+                                  ConsumerUnsubRequest.class,
+                                  beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "closeSubRequest"),
+                        new QName("urn:ProxyService",
+                                  "ConsumerCloseSubRequest"),
                                   ConsumerCloseSubRequest.class, beanSer,
                                   beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "browseRequest"),
+                        new QName("urn:ProxyService", "QBrowseRequest"),
                                   QBrowseRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "sessAckRequest"),
+                        new QName("urn:ProxyService", "SessAckRequest"),
                                   SessAckRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "sessDenyRequest"),
+                        new QName("urn:ProxyService", "SessDenyRequest"),
                                   SessDenyRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "createTQRequest"),
+                        new QName("urn:ProxyService", "SessCreateTQRequest"),
                                   SessCreateTQRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "createTTRequest"),
+                        new QName("urn:ProxyService", "SessCreateTTRequest"),
                                   SessCreateTTRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "tdDeleteRequest"),
+                        new QName("urn:ProxyService", "TempDestDeleteRequest"),
                                   TempDestDeleteRequest.class, beanSer,
                                   beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "adminRequest"),
+                        new QName("urn:ProxyService", "GetAdminTopicRequest"),
                                   GetAdminTopicRequest.class, beanSer,
                                   beanSer);
 
@@ -180,22 +182,13 @@ public class SoapConnection implements fr.dyade.aaa.joram.ConnectionItf
   public synchronized void send(AbstractJmsRequest request)
                            throws IllegalStateException
   {
-    Vector vec = null;
-
-    // A ProducerMessages is specifically coded into a Vector:
-    if (request instanceof ProducerMessages)
-      vec = ((ProducerMessages) request).soapCode();
-    // Other requests will be coded by SOAP:
-    else {
-      vec = new Vector();
-      vec.add(request);
-    }
+    Hashtable h = request.soapCode();
 
     // Setting the call's parameters:
     Vector params = new Vector();
     params.add(new Parameter("cnxId", Integer.class,
                              new Integer(cnxId), null));
-    params.add(new Parameter("vec", Vector.class, vec, null));
+    params.add(new Parameter("map", Hashtable.class, h, null));
     sendCall.setParams(params);
 
     // Sending the request, checking the reply:

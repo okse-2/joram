@@ -436,4 +436,44 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+  <!-- Runs the perfs tests administrator -->
+  <target name="perfs_admin" depends="init"
+    description="--> Starts the PERFS admin">
+    <java classname="perfs.PerfsAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests sender -->
+  <target name="perfs_sender" depends="init"
+    description="--> Starts the PERFS sender">
+    <java classname="perfs.PerfsSender" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests receiver -->
+  <target name="perfs_receiver" depends="init"
+    description="--> Starts the PERFS receiver">
+    <java classname="perfs.PerfsReceiver" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests publisher -->
+  <target name="perfs_pub" depends="init"
+    description="--> Starts the PERFS publisher">
+    <java classname="perfs.PerfsPublisher" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests subscriber -->
+  <target name="perfs_sub" depends="init"
+    description="--> Starts the PERFS subscriber">
+    <java classname="perfs.PerfsSubscriber" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
 </project>

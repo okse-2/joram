@@ -3,65 +3,53 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Andre Freyssinet (ScalAgent)
  * Contributor(s): Frederic Maistre (INRIA)
  */
 package fr.dyade.aaa.mom.proxies.tcp;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.NotificationInputStream;
+import fr.dyade.aaa.agent.NotificationOutputStream;
 import fr.dyade.aaa.mom.MomTracing;
-import fr.dyade.aaa.mom.dest.AdminTopic;
 import fr.dyade.aaa.mom.dest.AdminTopicImpl;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StreamCorruptedException;
+import java.net.ServerSocket;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
 
 /**
  * A <code>ConnectionFactory</code> proxy is started as a service in each
  * MOM agent server for allowing connections with external clients; this
  * class is also the super class of the MOM TCP proxy agents directly
  * connected to their specific external clients and acting as their MOM
- * representatives. 
- * <p>
- * As stated above, each agent server holds a <code>ConnectionFactory</code>
- * service listening to a given port, on which connection requests from
- * the outside are read. Those requests contain a user identification 
- * the ConnectionFactory uses to retrieve the right proxy agent to pass
- * the connection to. This latest agent is a proxy agent inheriting
- * from this class but no actively listening on a port. It is just waiting for
- * the server's ConnectionFactory service to pass a connection. This sub
- * proxy is the <code>JmsProxy</code> agent, representative of a JMS client,
- * or of a JMS administrator.
- * <p>
- * To pass the connections to the right proxies, the
- * <code>ConnectionFactory</code> accesses data contained in the local
- * <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.
+ * representants. 
  */
 public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
 {
-
   /**
    * The listen socket of the proxy is statically
    * created (@see init).

@@ -3,24 +3,20 @@
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -85,8 +81,8 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.14 2003-03-19 15:16:06 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.15 2003-06-23 13:37:51 fmaistre Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
@@ -460,7 +456,7 @@ abstract class Engine implements Runnable, MessageConsumer {
   public void start() {
     if (isRunning) return;
 
-    thread = new Thread(this, name);
+    thread = new Thread(AgentServer.getThreadGroup(), this, name);
     thread.setDaemon(false);
 
     logmon.log(BasicLevel.DEBUG, getName() + " starting.");
@@ -487,15 +483,24 @@ abstract class Engine implements Runnable, MessageConsumer {
    * @see start
    */
   public void stop() {
+    logmon.log(BasicLevel.DEBUG, getName() + ", stops.");
     isRunning = false;
 
-    logmon.log(BasicLevel.DEBUG, getName() + " stopped.");
+    if (thread != null) {
+      while (thread.isAlive()) {
+        if (canStop) {
 
-    if (thread == null)
-      // The session is idle.
-      return;
-
-    if (canStop) thread.interrupt();
+          if (thread.isAlive())
+            thread.interrupt();
+        }
+        try {
+          thread.join(1000L);
+        } catch (InterruptedException exc) {
+          continue;
+        }
+      }
+      thread = null;
+    }
   }
 
   /**
@@ -557,7 +562,18 @@ abstract class Engine implements Runnable, MessageConsumer {
                      msg.from + ", " + msg.not + ")",
                      exc);
 	  agent = null;
-          AgentServer.stop();
+          {
+            // Stop the AgentServer
+            // Creates a thread to execute AgentServer.stop in order to
+            // allow AdminProxy service stopping and avoid deadlock.
+            Thread t = new Thread() {
+                public void run() {
+                  AgentServer.stop();
+                }
+              };
+            t.setDaemon(true);
+            t.start();
+          }
           break main_loop;
 	}
 
@@ -592,7 +608,16 @@ abstract class Engine implements Runnable, MessageConsumer {
 	      // then continue.
 	      continue;
 	    case RP_EXIT:
-	      AgentServer.stop();
+              // Stop the AgentServer
+              // Creates a thread to execute AgentServer.stop in order to
+              // allow AdminProxy service stopping and avoid deadlock.
+              Thread t = new Thread() {
+                  public void run() {
+                    AgentServer.stop();
+                  }
+                };
+              t.setDaemon(true);
+              t.start();
 	      break main_loop;
 	    }
 	  }
@@ -608,17 +633,26 @@ abstract class Engine implements Runnable, MessageConsumer {
                  getName() + ": Fatal error",
                  exc);
       canStop = false;
-      AgentServer.stop();
+      // Stop the AgentServer
+      // Creates a thread to execute AgentServer.stop in order to
+      // allow AdminProxy service stopping and avoid deadlock.
+      Thread t = new Thread() {
+          public void run() {
+            AgentServer.stop();
+          }
+        };
+      t.setDaemon(true);
+      t.start();
     } finally {
       terminate();
-      logmon.log(BasicLevel.DEBUG, getName() + ": Stopped.");
+      logmon.log(BasicLevel.DEBUG, getName() + " stopped.");
     }
   }
 
   /**
    * Commit the agent reaction in case of rigth termination.
    */
-  abstract void commit() throws IOException;
+  abstract void commit() throws Exception;
 
   /**
    * Abort the agent reaction in case of error during execution.
@@ -694,7 +728,7 @@ final class TransactionEngine extends Engine {
    * new time stamp to the message ; be Careful, changing the stamp imply
    * the filename change too.
    */
-  public void post(Message msg) throws IOException {
+  public void post(Message msg) throws Exception {
     modified = true;
     msg.update = new Update(AgentServer.getServerId(),
 			    AgentServer.getServerId(),
@@ -712,7 +746,7 @@ final class TransactionEngine extends Engine {
    * <li>then commit the transaction to validate all changes.
    * </ul>
    */
-  void commit() throws IOException {
+  void commit() throws Exception {
     AgentServer.transaction.begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
@@ -799,7 +833,7 @@ final class TransientEngine extends Engine {
   /**
    * Commit the agent reaction in case of rigth termination.
    */
-  void commit() throws IOException {
+  void commit() throws Exception {
     // Suppress the processed notification from message queue ..
     qin.pop();
     // .. then frees it.

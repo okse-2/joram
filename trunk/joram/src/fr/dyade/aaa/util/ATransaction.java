@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.util;
 
@@ -32,7 +29,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.11 2003-03-19 15:19:04 fmaistre Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.12 2003-06-23 13:45:20 fmaistre Exp $";
 
   public static final String EMPTY_STRING = new String();
 
@@ -487,9 +484,9 @@ public final class ATransaction implements Transaction, Runnable {
   public final synchronized void stop() {
     synchronized (lock) {
       while (phase != FREE) {
-	// Waits the transaction subsystem is free.
-	try {
-	  wait();
+        // Waits the transaction subsystem is free.
+        try {
+          wait();
 	} catch (InterruptedException exc) {
 	}
       }
@@ -553,9 +550,15 @@ public final class ATransaction implements Transaction, Runnable {
     } finally {
       isRunning = false;
 
+      try {
+        logFile.close();
+      } catch (IOException exc) {
+        logmon.log(BasicLevel.WARN, "ATransaction, can't close", exc);
+      }
+
       if (logmon.isLoggable(BasicLevel.INFO))
 	  logmon.log(BasicLevel.INFO,
-		     "ATransaction,  exits.");
+		     "ATransaction, exits.");
     }
   }
 

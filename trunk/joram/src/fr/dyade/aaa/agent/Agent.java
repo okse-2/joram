@@ -3,24 +3,20 @@
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -69,16 +65,45 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.14 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.14 2003-03-19 15:16:06 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.15 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.15 2003-06-23 13:37:51 fmaistre Exp $"; 
 
   static final long serialVersionUID = 2955513886633164244L;
 
+  /**
+   * <code>true</code> if the agent state has changed.
+   * <p>
+   * This field value is initialized as <code>true</code>, so that by default
+   * the agent state is saved after a reaction.
+   */
+  private transient boolean updated;
+
+  /**
+   * Sets the <code>updated</code> field to <code>false</code> so that the
+   * agent state is not saved after the current reaction; the field is set
+   * back to <code>true</code> for the next reaction.
+   */
+  protected void setNoSave()
+  {
+    updated = false;
+  }
+
+  /**
+   * Saves the agent state unless not requested.
+   */
   protected void save() throws IOException {
-    AgentServer.transaction.save(this, id.toString());
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "Agent" + id + " [" + name + "] saved");
+    if (updated) {
+      AgentServer.transaction.save(this, id.toString());
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "Agent" + id + " [" + name + "] saved");
+    }
+    else {
+      updated = true;
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "Agent" + id + " [" + name + "] not saved");
+    }
   }
 
   //  Declares all fields transient in order to avoid useless
@@ -158,6 +183,7 @@ public abstract class Agent implements Serializable {
       if ((name = in.readUTF()).equals(nullName))
 	name = nullName;
       fixed = in.readBoolean();
+      updated = true;
 //       if(AgentServer.MONITOR_AGENT) {
 // 	  monitored = in.readBoolean();
 // 	  if(monitored) mListeners = (Hashtable)in.readObject();
@@ -339,7 +365,7 @@ public abstract class Agent implements Serializable {
   }
 
   /**
-   * Determines if the currently <code>Agent</code> has already been deployed.
+   * Determines if the current <code>Agent</code> has already been deployed.
    */
   boolean deployed = false;
 
@@ -475,6 +501,8 @@ public abstract class Agent implements Serializable {
   protected void initialize(boolean firstTime) throws Exception {
     // Get the logging monitor from current server MonologLoggerFactory
     this.logmon = Debug.getLogger(getLogTopic());
+    // Initializes the updated field to true:
+    this.updated = true;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  "Agent" + id + " [" + name +

@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -51,7 +47,7 @@ import javax.jms.*;
 public class AdminImpl implements AdminItf
 {
   /** The identifier of the server the client is connected to. */
-  private int localServer;
+  int localServer;
 
   /** The connection used to link the administrator and the platform. */
   private TopicConnection cnx = null;
@@ -198,11 +194,13 @@ public class AdminImpl implements AdminItf
   /**
    * Stops a given server of the platform.
    * <p>
-   * The method never returns if the server is not part of the platform.
+   * The request fails if the target server does not belong to the platform.
    *
    * @param serverId  Identifier of the server to stop.
+   *
+   * @exception AdminException  If the request fails.
    */
-  public void stopServer(int serverId)
+  public void stopServer(int serverId) throws AdminException
   {
     try {
       doRequest(new StopServerRequest(serverId));
@@ -214,8 +212,8 @@ public class AdminImpl implements AdminItf
    * Creates and deploys a queue destination on a given server, instanciates
    * the corresponding <code>javax.jms.Queue</code> object.
    * <p>
-   * The method never returns if the server does not belong to the platform.
-   * It fails if the destination deployement fails server side.
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
    *
    * @param serverId  The identifier of the server where deploying the queue.
    *
@@ -247,8 +245,8 @@ public class AdminImpl implements AdminItf
    * Creates and deploys a topic destination on a given server, intanciates
    * the corresponding <code>javax.jms.Topic</code> object.
    * <p>
-   * The method never returns if the server does not belong to the platform.
-   * It fails if the destination deployement fails server side.
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
    *
    * @param serverId  The identifier of the server where deploying the topic.
    *
@@ -280,8 +278,8 @@ public class AdminImpl implements AdminItf
    * Creates and deploys a dead message queue on a given server, instanciates
    * the corresponding <code>DeadMQueue</code> object.
    * <p>
-   * The method never returns if the server does not belong to the platform.
-   * It fails if the destination deployement fails server side.
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
    *
    * @param serverId  The identifier of the server where deploying the dmq.
    *
@@ -411,9 +409,9 @@ public class AdminImpl implements AdminItf
    * Creates a user for a given server and instanciates the corresponding
    * <code>User</code> object.
    * <p>
-   * The method never returns if the server does not belong to the platform.
-   * If the user has already been set on this server, it simply returns
-   * the corresponding <code>User</code> object. It fails if a proxy could not
+   * If the user has already been set on this server, the method simply
+   * returns the corresponding <code>User</code> object. Its fails if the
+   * target server does not belong to the platform, or if a proxy could not
    * be deployed server side for a new user. 
    *
    * @param name  Name of the user.
@@ -634,12 +632,14 @@ public class AdminImpl implements AdminItf
 
   /**
    * Sets a given dead message queue as the default DMQ for a given server.
-   *
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
    * @param serverId  The identifier of the server.
    * @param dmq  The dmq to be set as the default one.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setDefaultDMQ(int serverId, DeadMQueue dmq)
               throws ConnectException, AdminException
@@ -664,7 +664,7 @@ public class AdminImpl implements AdminItf
   /**
    * Sets a given dead message queue as the DMQ for a given destination.
    * <p>
-   * The request fails if the destination is deleted.
+   * The request fails if the target server does not belong to the platform.
    *
    * @param dest  The destination.
    * @param dmq  The dead message queue to be set.
@@ -700,11 +700,13 @@ public class AdminImpl implements AdminItf
 
   /**
    * Unsets the default dead message queue of a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
    *
    * @param serverId  The identifier of the server.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void unsetDefaultDMQ(int serverId)
               throws ConnectException, AdminException
@@ -758,12 +760,14 @@ public class AdminImpl implements AdminItf
 
   /**
    * Sets a given value as the default threshold for a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
    *
    * @param serverId  The identifier of the server.
    * @param threshold  The threshold value to be set.
    *
    * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
+   * @exception AdminException  If the request fails.
    */
   public void setDefaultThreshold(int serverId, int threshold)
               throws ConnectException, AdminException
@@ -823,6 +827,8 @@ public class AdminImpl implements AdminItf
 
   /**
    * Unsets the default threshold of a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
    *
    * @param serverId  The identifier of the server.
    *

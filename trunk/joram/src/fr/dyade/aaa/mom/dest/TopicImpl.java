@@ -3,24 +3,20 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
@@ -28,6 +24,7 @@
 package fr.dyade.aaa.mom.dest;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -39,9 +36,12 @@ import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.messages.Message;
 import fr.dyade.aaa.mom.selectors.*;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
 
 /**
  * The <code>TopicImpl</code> class implements the MOM topic behaviour,
@@ -58,38 +58,36 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class TopicImpl extends DestinationImpl
 {
-  /**
-   * Table of subscriptions.
-   * <p>
-   * <b>Key:</b> subscriber identifier<br>
-   * <b>Object:</b> vector of <code>SubscribeRequest</code> instances
-   */
-  private Hashtable subsTable;
-
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
   /** Vector of cluster fellows, if any. */
   protected Vector friends = null;
+  
+  /** Vector of subscribers' identifiers. */
+  protected Vector subscribers;
+  /** Table of subscribers' selectors. */
+  protected Hashtable selectors;
 
 
   /**
    * Constructs a <code>TopicImpl</code> instance.
    *
-   * @param topicId  See superclass.
-   * @param adminId  See superclass.
+   * @param destId  Identifier of the agent hosting the topic.
+   * @param adminId  Identifier of the administrator of the topic.
    */
-  public TopicImpl(AgentId topicId, AgentId adminId)
+  public TopicImpl(AgentId destId, AgentId adminId)
   {
-    super(topicId, adminId);
-
-    subsTable = new Hashtable();
+    super(destId, adminId);
+    subscribers = new Vector();
+    selectors = new Hashtable();
   }
 
-  /** Returns a string view of this TopicImpl instance. */
+
   public String toString()
   {
     return "TopicImpl:" + destId.toString();
   }
+
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -100,7 +98,7 @@ public class TopicImpl extends DestinationImpl
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException
   {
-    String reqId = null;
+    int reqId = -1;
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
 
@@ -145,7 +143,7 @@ public class TopicImpl extends DestinationImpl
       else
         super.react(from, not);
     }
-    // MOM Exceptions are sent to the requester.
+    // MOM exceptions are sent to the requester.
     catch (MomException exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
         MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
@@ -410,7 +408,7 @@ public class TopicImpl extends DestinationImpl
                   + "], successful [true]: topic ["
                   + from + "] set as father";
     Channel.sendTo(not.requester, new AdminReply(not.request, true, info));
-
+  
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
@@ -459,15 +457,7 @@ public class TopicImpl extends DestinationImpl
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    int number = 0;
-    if (subsTable != null) {
-      Vector subs;
-      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) {
-        subs = (Vector) subsTable.get(keys.nextElement());
-        number = number + subs.size();
-      }
-    }
-    Channel.sendTo(from, new Monit_GetNumberRep(not, number));
+    Channel.sendTo(from, new Monit_GetNumberRep(not, subscribers.size()));
   }
 
   /**
@@ -514,7 +504,7 @@ public class TopicImpl extends DestinationImpl
 
   /**
    * Method implementing the reaction to a <code>SubscribeRequest</code>
-   * instance, requesting to set a new subscription.
+   * instance. 
    *
    * @exception AccessException  If the sender is not a READER.
    */
@@ -524,88 +514,40 @@ public class TopicImpl extends DestinationImpl
     if (! isReader(from))
       throw new AccessException("READ right not granted");
 
-    Vector clientSubs;
-    SubscribeRequest currSub;
-    boolean added = false;
+    // Adding new subscriber.
+    if (! subscribers.contains(from))
+      subscribers.add(from);
 
-    // If the sender already has subscriptions, adding the new one, or
-    // replacing the one that has the same name:
-    if (subsTable.containsKey(from)) {
-      clientSubs = (Vector) subsTable.get(from);
-      for (int i = 0; i < clientSubs.size(); i++) {
-        currSub = (SubscribeRequest) clientSubs.get(i);
-        if ((currSub.getName()).equals(not.getName())) {
-          clientSubs.setElementAt(not, i);
-          added = true;
-          break;
-        }
-      }	
-      if (! added)
-        clientSubs.add(not);
-    }
-    // Else, creating its entry and adding the new subscription:
-    else {
-      clientSubs = new Vector();
-      clientSubs.add(not);
-      subsTable.put(from, clientSubs);
-    }
+    // The requester might either be a new subscriber, or an existing one;
+    // setting the selector, possibly by removing or modifying an already set
+    // expression.
+    if (not.getSelector() != null && ! not.getSelector().equals(""))
+      selectors.put(from, not.getSelector());
+    else
+      selectors.remove(from);
+
+    Channel.sendTo(from, new SubscribeReply(not));
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription "
-                                    + not.getName() + " of client " + from
-                                    + " stored.");
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    "Client " + from
+                                    + " set as a subscriber with selector "
+                                    + not.getSelector());
   }
 
   /**
    * Method implementing the reaction to an <code>UnsubscribeRequest</code>
-   * instance, requesting to remove one or many client subscriptions.
-   *
-   * @exception RequestException  If the subscription to remove does not exist.
+   * instance, requesting to remove a subscriber.
    */
   protected void doReact(AgentId from, UnsubscribeRequest not)
-                 throws RequestException
   {
-    // Getting the name of the subscription to remove:
-    String subName = not.getName();
-    // Getting the subscriptions of the requester:
-    Vector clientSubs = (Vector) subsTable.get(from);
+    subscribers.remove(from);
+    selectors.remove(from);
 
-    // If the requester has subscriptions: 
-    if (clientSubs != null) {
-      // If it requests to remove all its subscriptions, removing them:
-      if (subName == null) {
-        subsTable.remove(from);
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "All subscriptions" 
-                                        + " of client " + from + " removed.");
-        return;
-      }
-      // Else, removing the identified subscription:
-      else {
-        int i = 0;
-        SubscribeRequest sub;
-        while (i < clientSubs.size()) {
-          sub = (SubscribeRequest) clientSubs.get(i);
-          if (subName.equals(sub.getName())) {
-            clientSubs.remove(i);
-
-            if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription " 
-                                            + subName + " removed.");
-
-            // If no more subs are available for this requester, removing
-            // its entry:
-            if (clientSubs.isEmpty())
-              subsTable.remove(from);
-
-            return;
-          }
-          else
-            i++;
-        }
-      }
-    }
-    throw new RequestException("Subscription [" + subName
-                               + "] does not exist");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    "Client " + from
+                                    + " removed from the subscribers.");
   } 
 
   /**
@@ -644,8 +586,8 @@ public class TopicImpl extends DestinationImpl
   /**
    * Method specifically processing a <code>SetRightRequest</code> instance.
    * <p>
-   * When a reader is removed, deleting this reader's subscriptions if any,
-   * and sending <code>ExceptionReply</code> notifications to the client.
+   * When a reader is removed, deleting this reader's subscription if any,
+   * and sending an <code>ExceptionReply</code> notification to the client.
    */
   protected void doProcess(SetRightRequest not)
   {
@@ -654,19 +596,25 @@ public class TopicImpl extends DestinationImpl
       return;
 
     AgentId user = not.getClient();
+    AccessException exc = new AccessException("READ right removed.");
 
-    if (! subsTable.containsKey(user))
-      return;
-
-    Vector subs = (Vector) subsTable.remove(user);
-
-    SubscribeRequest sub;
-    ExceptionReply reply;
-    while (! subs.isEmpty()) {
-      sub = (SubscribeRequest) subs.remove(0);
-      reply = new ExceptionReply(sub.getConnectionKey(), sub.getName(),
-                                 new AccessException("READ right removed"));
-      Channel.sendTo(user, reply);
+    // Identified user: removing it.
+    if (user != null) {
+      subscribers.remove(user);
+      selectors.remove(user);
+      Channel.sendTo(user, new ExceptionReply(exc));
+    }
+    // Free reading right removed: removing all non readers.
+    else {
+      for (Enumeration subs = subscribers.elements(); 
+           subs.hasMoreElements();) {
+        user = (AgentId) subs.nextElement();
+        if (! isReader(user)) {
+          subscribers.remove(user);
+          selectors.remove(user);
+          Channel.sendTo(user, new ExceptionReply(exc));
+        }
+      }
     }
   }
 
@@ -680,10 +628,9 @@ public class TopicImpl extends DestinationImpl
   protected void doProcess(ClientMessages not)
   {
     // Forwarding the messages to the father or the cluster fellows, if any:
-    forwardMessages(not.getMessages());
-    
+    forwardMessages(not);
     // Processing the messages:
-    processMessages(not.getMessages());
+    processMessages(not);
   }
 
   /**
@@ -716,10 +663,13 @@ public class TopicImpl extends DestinationImpl
     }
     else {
       // Removing the deleted client's subscriptions, if any.
-      subsTable.remove(agId);
+      subscribers.remove(agId);
+      selectors.remove(agId);
+
       // Removing the father identifier, if needed.
       if (fatherId != null && agId.equals(fatherId))
         fatherId = null;
+
     }
   }
 
@@ -727,8 +677,8 @@ public class TopicImpl extends DestinationImpl
    * Method specifically processing a
    * <code>fr.dyade.aaa.agent.DeleteNot</code> instance.
    * <p>
-   * <code>UnknownAgent</code> notifications are sent for each
-   * subscription, and <code>UnclusterNot</code> notifications to the cluster
+   * <code>UnknownAgent</code> notifications are sent to each subscriber
+   * and <code>UnclusterNot</code> notifications to the cluster
    * fellows.
    */
   protected void doProcess(DeleteNot not)
@@ -738,17 +688,10 @@ public class TopicImpl extends DestinationImpl
     SubscribeRequest sub;
 
     // For each subscriber...
-    Enumeration keys = subsTable.keys();
-    while (keys.hasMoreElements()) {
-      clientId = (AgentId) keys.nextElement();
-      subs = (Vector) subsTable.remove(clientId);
-
-      while (! subs.isEmpty()) {
-        sub = (SubscribeRequest) subs.remove(0);
-        Channel.sendTo(clientId, new UnknownAgent(destId, sub));
-      }
+    for (int i = 0; i < subscribers.size(); i++) {
+      clientId = (AgentId) subscribers.get(i);
+      Channel.sendTo(clientId, new UnknownAgent(destId, null));
     }
-    subsTable = null;
 
     // For each cluster fellow if any...
     if (friends != null) {
@@ -764,7 +707,7 @@ public class TopicImpl extends DestinationImpl
    * Actually forwards a vector of messages to the father or the cluster
    * fellows, if any.
    */
-  protected void forwardMessages(Vector messages)
+  protected void forwardMessages(ClientMessages messages)
   {
     if (friends != null && ! friends.isEmpty()) {
       AgentId topicId;
@@ -790,58 +733,68 @@ public class TopicImpl extends DestinationImpl
 
   /**
    * Actually processes the distribution of the received messages to the
-   * valid subscriptions by sending <code>TopicMsgsReply</code> to the
-   * valid subscribers.
+   * valid subscriptions by sending a <code>TopicMsgsReply</code> notification
+   * to the valid subscribers.
    */
-  protected void processMessages(Vector messages)
+  protected void processMessages(ClientMessages not)
   {
-    AgentId client;
-    Vector clientSubs;
-    TopicMsgsReply rep;
-    Message msg;
-    Vector subNames;
-    SubscribeRequest sub;
+    Vector messages = not.getMessages();
+    AgentId subscriber;
+    boolean local;
+    String selector;
+    boolean alreadySentLocally = false;
+    Vector deliverables;
+    Message message;
 
-    // For each client of the topic:
-    Enumeration clients = subsTable.keys();
-    while (clients.hasMoreElements()) {
-      client = (AgentId) clients.nextElement();
-      clientSubs = (Vector) subsTable.get(client);
-      rep = new TopicMsgsReply();
+    // Browsing the subscribers.
+    for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
+      subscriber = (AgentId) subs.nextElement();
+      local = (subscriber.getTo() == AgentServer.getServerId());
+      selector = (String) selectors.get(subscriber);
 
-      // For each message:
-      for (int i = 0; i < messages.size(); i++) {
-        try {
-          msg = (Message) messages.get(i);
-          subNames = new Vector();
-          
-          // For each client subscription: checking the message
-          for (int j = 0; j < clientSubs.size(); j++) { 
-            sub = (SubscribeRequest) clientSubs.get(j);
-
-            // If selection works, adding the current subscription to the
-            // vector of replied subscriptions:
-            if (Selector.matches(msg, sub.getSelector()))
-              subNames.add(sub.getName());
-          }
-          // If the current message replies to subscriptions, adding it in
-          // the reply: 
-          if (! subNames.isEmpty()) {
-            rep.addMessage(msg, subNames);
-
-           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-             MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                           + msg.getIdentifier() + " added"
-                                           + " for delivery to "
-                                           + client.toString());
-          }
+      // Current subscriber does not filter messages: all messages will be
+      // sent.
+      if (selector == null || selector.equals("")) {
+        // Subscriber not local, or no other sending occured locally: directly
+        // sending the messages.
+        if (! local)
+          deliverables = messages;
+        else if (! alreadySentLocally) {
+          deliverables = messages;
+          alreadySentLocally = true;
         }
-        // Invalid message class: going on.
-        catch (ClassCastException cE) {}
+        // A local sending already occured: cloning the messages.
+        else {
+          deliverables = new Vector();
+          for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();)
+            deliverables.add(((Message) msgs.nextElement()).clone());
+        }
       }
-      // If the reply is not empty, sending it:
-      if (! rep.isEmpty())
-        Channel.sendTo(client, rep);
+      // Current subscriber filters messages; sending the matching messages.
+      else {
+        deliverables = new Vector();
+        for (int i = 0; i < messages.size(); i++) {
+          message = (Message) messages.get(i);
+        
+          if (Selector.matches(message, selector)) {
+
+            // Subscriber not local, or no other sending occured locally:
+            // directly sending the message.
+            if (! local)
+              deliverables.add(message);
+            else if (! alreadySentLocally) {
+              deliverables.add(message);
+              alreadySentLocally = true;
+            }
+            // A local sending already occured: cloning the message.
+            else
+              deliverables.add(message.clone());
+          }
+        }  
+      }
+      // There are message to send.
+      if (! deliverables.isEmpty())
+        Channel.sendTo(subscriber, new TopicMsgsReply(deliverables));
     }
   }
 }

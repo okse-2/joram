@@ -3,29 +3,28 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.jms;
+
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /**
  * A <code>CnxConnectReply</code> is sent by a JMS proxy as a reply to a
@@ -35,7 +34,7 @@ package fr.dyade.aaa.mom.jms;
 public class CnxConnectReply extends AbstractJmsReply
 {
   /** The connection's key. */
-  private int key;
+  private int cnxKey;
   /** The proxy's identifier. */
   private String proxyId;
 
@@ -43,13 +42,13 @@ public class CnxConnectReply extends AbstractJmsReply
    * Constructs a <code>CnxConnectReply</code>.
    *
    * @param req  The replied request.
-   * @param key  The connection's key.
+   * @param cnxKey  The connection's key.
    * @param proxyId  The proxy's identifier.
    */
-  public CnxConnectReply(CnxConnectRequest req, int key, String  proxyId)
+  public CnxConnectReply(CnxConnectRequest req, int cnxKey, String  proxyId)
   {
     super(req.getRequestId());
-    this.key = key;
+    this.cnxKey = cnxKey;
     this.proxyId = proxyId;
   }
 
@@ -59,10 +58,11 @@ public class CnxConnectReply extends AbstractJmsReply
   public CnxConnectReply()
   {}
 
-  /** Sets the connection's key. */
-  public void setKey(int key)
+ 
+   /** Sets the connection key. */
+  public void setCnxKey(int cnxKey)
   {
-    this.key = key;
+    this.cnxKey = cnxKey;
   }
 
   /** Sets the proxy's identifier */
@@ -70,11 +70,11 @@ public class CnxConnectReply extends AbstractJmsReply
   {
     this.proxyId = proxyId;
   } 
-
+ 
   /** Returns the connection's key. */
-  public int getKey()
+  public int getCnxKey()
   {
-    return key;
+    return cnxKey;
   }
 
   /** Returns the proxy's identifier */
@@ -82,4 +82,19 @@ public class CnxConnectReply extends AbstractJmsReply
   {
     return proxyId;
   } 
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    h.put("cnxKey",new Integer(cnxKey));
+    h.put("proxyId",proxyId);
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    CnxConnectReply req = new CnxConnectReply();
+    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
+    req.setCnxKey(((Integer) h.get("cnxKey")).intValue());
+    req.setProxyId((String) h.get("proxyId"));
+    return req;
+  }
 }

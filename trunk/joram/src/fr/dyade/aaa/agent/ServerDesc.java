@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 SCALAGENT
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -30,11 +27,13 @@ import fr.dyade.aaa.util.Strings;
 
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
- * <code>Network</code> objects.
+ * <code>Network</code> objects. Be careful, this structure is initialized
+ * in AgentServer, but it can be viewed outside of the agent package, so
+ * it's very important to make all modifiers package.
  */
 public final class ServerDesc implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.13 2003-06-23 13:37:51 fmaistre Exp $";
 
   /**  Server unique identifier. */
   short sid;
@@ -42,14 +41,14 @@ public final class ServerDesc implements Serializable {
   String name;
   /** Host name. */
   String hostname;
-  /** Is the server transient? */
-  boolean isTransient;
+//   /** Is the server transient? */
+//   boolean isTransient;
   /** Host address, use getAddr() method instead. */
   private transient InetAddress addr = null;
   /**
    * Description of services running on this server.
    */
-  ServiceDesc[] services = null;
+  transient ServiceDesc[] services = null;
   /**
    * Server Id. of a gateway server for this server if it is not in a
    * adjoining domain.
@@ -58,7 +57,7 @@ public final class ServerDesc implements Serializable {
   /**
    * Domain description of this server.
    */
-  MessageConsumer domain = null;
+  transient MessageConsumer domain = null;
 
   /**
    * The communication port. This variable is set only if the server is
@@ -114,14 +113,18 @@ public final class ServerDesc implements Serializable {
     return hostname;
   }
 
-  /**
-   * Is the server transient?
-   *
-   * @return true if the server is transient, false otherwise.
-   */
-  public boolean isTransient() {
-    return isTransient;
+  void setHostname(String hostname) {
+    this.hostname = hostname;
   }
+
+//   /**
+//    * Is the server transient?
+//    *
+//    * @return true if the server is transient, false otherwise.
+//    */
+//   public boolean isTransient() {
+//     return isTransient;
+//   }
 
   /**
    * Returns an IP address for its server.
@@ -139,6 +142,14 @@ public final class ServerDesc implements Serializable {
     return addr;
   }
 
+  public int getPort() {
+    return port;
+  }
+
+  void setPort(int port) {
+    this.port = port;
+  }
+
   /**
    * Gets the description of services running on this server.
    *
@@ -148,20 +159,40 @@ public final class ServerDesc implements Serializable {
     return services;
   }
 
+  public short getGateway() {
+    return gateway;
+  }
+
+  public String getDomainName() {
+    return domain.getName();
+  }
+
+
+  public Class getDomainType() {
+    return domain.getClass();
+  }
+
   /**
    * Provides a string image for this object.
    *
    * @return	printable image of this object
    */
   public String toString() {
-    return "(" + getClass().getName() +
-      ",sid=" + sid + 
-      ",name=" + name +
-      ",isTransient=" + isTransient +
-      ",hostname=" + hostname +
-      ",addr=" + addr +
-      ",services=" + Strings.toString(services) +
-      ",active=" + active +
-      ",last=" + last + ")";
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("(").append(super.toString());
+    strBuf.append(",sid=").append(sid);
+    strBuf.append(",name=").append(name);
+//     strBuf.append(",isTransient=").append(isTransient);
+    strBuf.append(",hostname=").append(hostname);
+    strBuf.append(",addr=").append(addr);
+    strBuf.append(",services=");
+    Strings.toString(strBuf, services);
+    strBuf.append(",active=").append(active);
+    strBuf.append(",last=").append(last);
+    strBuf.append(",gateway=").append(gateway);
+    strBuf.append(",port=").append(port);
+    strBuf.append(",domain=").append(domain);
+    strBuf.append(")");
+    return strBuf.toString();
   }
 }

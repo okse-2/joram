@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -27,24 +24,19 @@ import java.io.*;
 
 /**
  * Description of a service.
- *
- * @author	Lacourte Serge
- * @version	v1.0
  */
 public final class ServiceDesc implements Serializable {
-public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
-
   /** service class name */
-  String scname;
+  transient String scname;
 
   /** starting arguments, may be null */
-  String args;
+  transient String args;
 
   /** */
-  boolean initialized;
+  transient boolean initialized;
 
   /** */
-  boolean running;
+  transient boolean running;
 
   /**
    * Constructor.
@@ -58,6 +50,26 @@ public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.12 2003-03
     this.args = args;
     this.initialized = false;
     this.running = false;
+  }
+
+  private void writeObject(java.io.ObjectOutputStream out)
+    throws IOException {
+    out.writeUTF(scname);
+    if (args != null)
+      out.writeUTF(args);
+    else
+      out.writeUTF("");
+    out.writeBoolean(initialized);
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+    throws IOException, ClassNotFoundException {
+    scname = in.readUTF();
+    args = in.readUTF();
+    if (args.length() == 0)
+      args = null;
+    initialized = in.readBoolean();
+    running = false;
   }
 
   /**
@@ -88,13 +100,6 @@ public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.12 2003-03
   }
 
   /**
-   * Set the initialized property.
-   */
-  public void setInitialized(boolean initialized) {
-    this.initialized = initialized;
-  }
-
-  /**
    * Tests if this <code>Service</code> is running.
    *
    * @return true if the <code>Service</code> is running.
@@ -109,10 +114,13 @@ public static final String RCS_VERSION="@(#)$Id: ServiceDesc.java,v 1.12 2003-03
    * @return	printable image of this object
    */
   public String toString() {
-    return "(" + getClass().getName() +
-      ",scname=" + scname +
-      ",args=" + args +
-      ",initialized=" + initialized +
-      ",running=" + running + ")";
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("(").append(super.toString());
+    strBuf.append(",scname=").append(scname);
+    strBuf.append(",args=").append(args);
+    strBuf.append(",initialized=").append(initialized);
+    strBuf.append(",running=").append(running);
+    strBuf.append(")");
+    return strBuf.toString();
   }
 }

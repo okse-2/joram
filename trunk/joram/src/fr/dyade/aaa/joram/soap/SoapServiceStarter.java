@@ -3,27 +3,23 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package fr.dyade.aaa.joram.soap;
 
@@ -123,137 +119,138 @@ public class SoapServiceStarter
 
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "request"),
+                      new QName("urn:ProxyService", "AbstractJmsRequest"),
                       "fr.dyade.aaa.mom.jms.AbstractJmsRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "connectRequest"),
+                      new QName("urn:ProxyService", "CnxConnectRequest"),
                       "fr.dyade.aaa.mom.jms.CnxConnectRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "startRequest"),
+                      new QName("urn:ProxyService", "CnxStartRequest"),
                       "fr.dyade.aaa.mom.jms.CnxStartRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "stopRequest"),
+                      new QName("urn:ProxyService", "CnxStopRequest"),
                       "fr.dyade.aaa.mom.jms.CnxStopRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "closeRequest"),
+                      new QName("urn:ProxyService", "CnxCloseRequest"),
                       "fr.dyade.aaa.mom.jms.CnxCloseRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "consAckRequest"),
+                      new QName("urn:ProxyService", "ConsumerAckRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerAckRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "consDenyRequest"),
+                      new QName("urn:ProxyService", "ConsumerDenyRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerDenyRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "receiveRequest"),
+                      new QName("urn:ProxyService", "ConsumerReceiveRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerReceiveRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "setListRequest"),
+                      new QName("urn:ProxyService", "ConsumerSetListRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerSetListRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
        new TypeMapping(encoding,
-                       new QName("urn:ProxyService", "unsetListRequest"),
+                       new QName("urn:ProxyService",
+                                 "ConsumerUnsetListRequest"),
                        "fr.dyade.aaa.mom.jms.ConsumerUnsetListRequest",
                        bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "subRequest"),
+                      new QName("urn:ProxyService", "ConsumerSubRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerSubRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "closeSubRequest"),
+                      new QName("urn:ProxyService", "ConsumerCloseSubRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerCloseSubRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "unsubRequest"),
+                      new QName("urn:ProxyService", "ConsumerUnsubRequest"),
                       "fr.dyade.aaa.mom.jms.ConsumerUnsubRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "browseRequest"),
+                      new QName("urn:ProxyService", "QBrowseRequest"),
                       "fr.dyade.aaa.mom.jms.QBrowseRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "sessAckRequest"),
+                      new QName("urn:ProxyService", "SessAckRequest"),
                       "fr.dyade.aaa.mom.jms.SessAckRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "sessDenyRequest"),
+                      new QName("urn:ProxyService", "SessDenyRequest"),
                       "fr.dyade.aaa.mom.jms.SessDenyRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "createTQRequest"),
+                      new QName("urn:ProxyService", "SessCreateTQRequest"),
                       "fr.dyade.aaa.mom.jms.SessCreateTQRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "createTTRequest"),
+                      new QName("urn:ProxyService", "SessCreateTTRequest"),
                       "fr.dyade.aaa.mom.jms.SessCreateTTRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "tdDeleteRequest"),
+                      new QName("urn:ProxyService", "TempDestDeleteRequest"),
                       "fr.dyade.aaa.mom.jms.TempDestDeleteRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "adminRequest"),
+                      new QName("urn:ProxyService", "GetAdminTopicRequest"),
                       "fr.dyade.aaa.mom.jms.GetAdminTopicRequest",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "reply"),
+                      new QName("urn:ProxyService", "AbstractJmsReply"),
                       "fr.dyade.aaa.mom.jms.AbstractJmsReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "serverReply"),
+                      new QName("urn:ProxyService", "ServerReply"),
                       "fr.dyade.aaa.mom.jms.ServerReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "excReply"),
+                      new QName("urn:ProxyService", "MomExceptionReply"),
                       "fr.dyade.aaa.mom.jms.MomExceptionReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "connectReply"),
+                      new QName("urn:ProxyService", "CnxConnectReply"),
                       "fr.dyade.aaa.mom.jms.CnxConnectReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "closeReply"),
+                      new QName("urn:ProxyService", "CnxCloseReply"),
                       "fr.dyade.aaa.mom.jms.CnxCloseReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "createTDReply"),
+                      new QName("urn:ProxyService", "SessCreateTDReply"),
                       "fr.dyade.aaa.mom.jms.SessCreateTDReply",
                       bSerializer, bSerializer);
     mappings[i++] =
       new TypeMapping(encoding,
-                      new QName("urn:ProxyService", "adminReply"),
+                      new QName("urn:ProxyService", "GetAdminTopicReply"),
                       "fr.dyade.aaa.mom.jms.GetAdminTopicReply",
                       bSerializer, bSerializer);
 

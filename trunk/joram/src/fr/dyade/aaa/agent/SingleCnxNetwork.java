@@ -1,25 +1,22 @@
 /*
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Dyade Public License,
- * as defined by the file JORAM_LICENSE_ADDENDUM.html
- *
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Dyade web site (www.dyade.fr).
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied.
- * See the License for the specific terms governing rights and
- * limitations under the License.
- *
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released April 20, 2000.
- *
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -37,17 +34,12 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class with a single connection at
  * a time.
  */
-class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.10 2003-03-19 15:16:06 fmaistre Exp $";
-
+public class SingleCnxNetwork extends StreamNetwork {
   /** FIFO list of all messages to be sent by the watch-dog thead */
   Vector sendList;
 
-  final static boolean TempNetwallFix = false;
-
   /** Creates a new network component */
-  SingleCnxNetwork() {
+  public SingleCnxNetwork() {
     super();
   }
 
@@ -205,11 +197,6 @@ class SingleCnxNetwork extends StreamNetwork {
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", write message");
 	    // Send the message,
 	    ObjectOutputStream oos = getOutputStream(socket);
-	    // AF: Configuration coherency verification.
-	    if (TempNetwallFix) {
-	      oos.writeObject(mclock.getNetU1(msgto));
-	      oos.writeObject(mclock.getNetU2(msgto));
-	    }
 	    oos.writeObject(msg);
 
 	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -324,30 +311,6 @@ class SingleCnxNetwork extends StreamNetwork {
 	    // Read the message,
 	    os = socket.getOutputStream();
 	    ois = getInputStream(socket);
-
-// AF: Configuration coherency verification - Netwall temporary fix.
-// Si le serveur emetteur a "crashe", le serveur destinataire est cense
-// avoir une connaissance plus "complete" du passe que celui-ci, donc:
-//   He[e, r] < Hr[e, r] => e a crashe
-//   ou He[e, r] = nb msg emis /e vers r (connaissance de e)
-//   et Hr[e, r] = nb msg recu /r depuis e (connaissance de r)
-//
-// De meme, si le serveur destinataire a "crashe", alors le serveur
-// emetteur aura une connaissance plus "complete" du passe que celui-ci,
-// donc:
-//   He[r, e] > Hr[r, e] => r a crashe
-//   ou He[r, e] = nb msg recu /e depuis r (connaissance de e)
-//   et Hr[r, e] = nb msg emis /r vers e(connaissance de r)
-//
-// Dans tous les cas, la connection doit etre refusee.
-
-	    if (TempNetwallFix) {
-	      Update u1 = (Update) ois.readObject();
-	      Update u2 = (Update) ois.readObject();
-	      if (mclock.testNU(u1, u2)) {
-		throw new ConnectException("Bad serial version id.");
-	      }
-	    }
 	    Object obj = ois.readObject();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -522,11 +485,6 @@ class SingleCnxNetwork extends StreamNetwork {
 
 		  // Send the message,
 		  ObjectOutputStream oos = getOutputStream(socket);
-		  // AF: Configuration coherency verification.
-		  if (TempNetwallFix) {
-		    oos.writeObject(mclock.getNetU1(msgto));
-		    oos.writeObject(mclock.getNetU2(msgto));
-		  }
 		  oos.writeObject(msg);
 
 		  if (this.logmon.isLoggable(BasicLevel.DEBUG))

@@ -3,27 +3,23 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package fr.dyade.aaa.mom.messages;
 
@@ -31,7 +27,6 @@ import fr.dyade.aaa.mom.excepts.*;
 
 import java.io.*;
 import java.util.*;
-
 
 /** 
  * The <code>Message</code> class actually provides the transport facility
@@ -45,6 +40,9 @@ public class Message implements Cloneable, Serializable
 {
   /** The message type (SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES). */
   int type;
+
+  /** <code>true</code> if the message must be persisted. **/
+  boolean persistent = true;
 
   /** The message identifier. */
   String id = null;
@@ -80,12 +78,7 @@ public class Message implements Cloneable, Serializable
   /** <code>true</code> if the body is read-only. */
   boolean bodyRO = false;
 
-  /**
-   * The message properties table.
-   * <p>
-   * <b>Key:</b> property name<br>
-   * <b>Object:</b> property (native objects)
-   */
+  /** The message properties table. */
   Hashtable properties = null;
   /** <code>true</code> if the properties are read-only. */
   boolean propertiesRO = false;
@@ -97,26 +90,28 @@ public class Message implements Cloneable, Serializable
    * consumer.
    */
   public boolean denied = false;
-  /**
-   * The identifier of the consumer, used by queues for managing
-   * acknowledgemebnts.
-   */
-  public String consId = null;
-  /**
-   * The number of acknowledgements a message still expects from its 
-   * subscribers before having been fully consumed (field used by JMS proxies).
-   */
-  public int acksCounter = 0;
-
+  
   /** <code>true</code> if the message target destination is deleted. */
   public boolean deletedDest = false;
   /** <code>true</code> if the message expired. */
   public boolean expired = false;
   /** <code>true</code> if the message could not be written on the dest. */
-  public boolean notWritable = false;
+  public boolean notWriteable = false;
   /** <code>true</code> if the message is considered as undeliverable. */
   public boolean undeliverable = false;
-  
+
+  /**
+   * The number of acknowledgements a message still expects from its 
+   * subscribers before having been fully consumed by them (field used
+   * by JMS proxies).
+   */
+  public transient int acksCounter;
+  /**
+   * The number of acknowledgements a message still expects from its 
+   * durable subscribers before having been fully consumed by them (field used
+   * by JMS proxies).
+   */
+  public transient int durableAcksCounter;
 
   /**
    * Constructs a <code>Message</code> instance.
@@ -131,6 +126,12 @@ public class Message implements Cloneable, Serializable
   public void setIdentifier(String id)
   {
     this.id = id;
+  }
+
+  /** Sets the message persistence mode. */
+  public void setPersistent(boolean persistent)
+  {
+    this.persistent = persistent;
   }
 
   /**
@@ -217,6 +218,12 @@ public class Message implements Cloneable, Serializable
   public String getIdentifier()
   {
     return id;
+  }
+
+  /** Returns <code>true</code> if the message is persistent. */
+  public boolean getPersistent()
+  {
+    return persistent;
   }
 
   /** Returns the message priority. */
@@ -573,7 +580,7 @@ public class Message implements Cloneable, Serializable
     properties.clear();
     properties = null;
   }
-
+  
   
   /**
    * Sets an object as the body of the message. 
@@ -667,7 +674,6 @@ public class Message implements Cloneable, Serializable
   {
     if (body_bytes == null || type != MessageType.OBJECT)
       return null;
-
     ByteArrayInputStream bais = new ByteArrayInputStream(body_bytes);
     ObjectInputStream ois = new ObjectInputStream(bais);
     return ois.readObject();
@@ -725,22 +731,31 @@ public class Message implements Cloneable, Serializable
     return ((expiration - System.currentTimeMillis()) > 0);
   }
 
-  /** Clones this object. */
+  /** Clones the message. */
   public Object clone()
   {
     try {
       Message clone = (Message) super.clone();
       if (body_map != null) {
         clone.body_map = new Hashtable();
-        clone.body_map.putAll(body_map);
+        for (Enumeration e = body_map.keys(); e.hasMoreElements(); ) {
+          Object key = e.nextElement();
+          clone.body_map.put(key,body_map.get(key));
+        }
       }
       if (optionalHeader != null) {
         clone.optionalHeader = new Hashtable();
-        clone.optionalHeader.putAll(optionalHeader);
+        for (Enumeration e = optionalHeader.keys(); e.hasMoreElements(); ) {
+          Object key = e.nextElement();
+          clone.optionalHeader.put(key,optionalHeader.get(key));
+        }
       }
       if (properties != null) {
         clone.properties = new Hashtable();
-        clone.properties.putAll(properties);
+        for (Enumeration e = properties.keys(); e.hasMoreElements(); ) {
+          Object key = e.nextElement();
+          clone.properties.put(key,properties.get(key));
+        }
       }
       return clone;
     }
@@ -749,6 +764,111 @@ public class Message implements Cloneable, Serializable
     }
   }
 
+  /**
+   * Transforms this message into a table of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Hashtable soapCode() {
+    Hashtable h = new Hashtable();
+
+    // Building a hashtable containg the fields values: 
+    Hashtable fieldsTb = new Hashtable();
+
+    fieldsTb.put("type", new Integer(type));
+    fieldsTb.put("id", id);
+    fieldsTb.put("persistent", new Boolean(persistent));
+    fieldsTb.put("priority", new Integer(priority));
+    fieldsTb.put("expiration", new Long(expiration));
+    fieldsTb.put("timestamp", new Long(timestamp));
+    fieldsTb.put("toId", toId);
+    fieldsTb.put("toQueue", new Boolean(toQueue));
+    if (correlationId != null)
+      fieldsTb.put("correlationId", correlationId);
+    if (replyToId != null) {
+      fieldsTb.put("replyToId", replyToId);
+      fieldsTb.put("replyToQueue", new Boolean(replyToQueue));
+    }
+    if (body_bytes != null)
+      fieldsTb.put("body_bytes", body_bytes);
+    else if (body_map != null)
+      fieldsTb.put("body_map", body_map);
+    else if (body_text != null)
+      fieldsTb.put("body_text", body_text);
+    fieldsTb.put("bodyRO", new Boolean(bodyRO));
+    fieldsTb.put("propertiesRO", new Boolean(propertiesRO));
+    fieldsTb.put("deliveryCount", new Integer(deliveryCount));
+    fieldsTb.put("denied", new Boolean(denied));
+    fieldsTb.put("deletedDest", new Boolean(deletedDest));
+    fieldsTb.put("expired", new Boolean(expired));
+    fieldsTb.put("notWriteable", new Boolean(notWriteable));
+    fieldsTb.put("undeliverable", new Boolean(undeliverable));
+
+    h.put("fieldsTb",fieldsTb);
+
+    // Adding the hashtable of optional headers:
+    if (optionalHeader != null)
+      h.put("optionalHeader",optionalHeader);
+
+    // Adding the hashtable of properties:
+    if (properties != null)
+      h.put("properties",properties);
+
+    return h;
+  }
+
+  /** 
+   * Transforms a table of primitive values into a <code>Message</code>
+   * instance.
+   */
+  public static Message soapDecode(Hashtable h) 
+  {
+    if (h == null) return null;
+
+    Hashtable fieldsTb = (Hashtable) h.get("fieldsTb");
+
+    Message msg = new Message();
+
+    try {
+      msg.type = ConversionHelper.toInt(fieldsTb.get("type"));
+      msg.id = (String) fieldsTb.get("id");
+      msg.persistent = ConversionHelper.toBoolean(fieldsTb.get("persistent"));
+      msg.priority = ConversionHelper.toInt(fieldsTb.get("priority"));
+      msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
+      msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
+      msg.toId = (String) fieldsTb.get("toId");
+      msg.toQueue = ConversionHelper.toBoolean(fieldsTb.get("toQueue"));
+      msg.correlationId = (String) fieldsTb.get("correlationId");
+      msg.replyToId = (String) fieldsTb.get("replyToId");
+      if (msg.replyToId != null) {
+        msg.replyToQueue =
+          ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
+      }
+      msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
+      msg.body_map = (Hashtable) fieldsTb.get("body_map");
+      msg.body_text = (String) fieldsTb.get("body_text");
+      msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
+      msg.propertiesRO =
+        ConversionHelper.toBoolean(fieldsTb.get("propertiesRO"));
+      msg.deliveryCount =
+        ConversionHelper.toInt(fieldsTb.get("deliveryCount"));
+      msg.denied = ConversionHelper.toBoolean(fieldsTb.get("denied"));
+      msg.deletedDest =
+        ConversionHelper.toBoolean(fieldsTb.get("deletedDest"));
+      msg.expired = ConversionHelper.toBoolean(fieldsTb.get("expired"));
+      msg.notWriteable =
+        ConversionHelper.toBoolean(fieldsTb.get("notWriteable"));
+      msg.undeliverable =
+        ConversionHelper.toBoolean(fieldsTb.get("undeliverable"));
+
+      msg.optionalHeader = (Hashtable) h.get("optionalHeader");
+      msg.properties = (Hashtable) h.get("properties");
+    }
+    // Should never happen!
+    catch (MessageValueException exc) {}
+  
+    return msg;
+  }
+ 
   /**
    * Method actually preparing the setting of a new property.
    *
@@ -781,108 +901,15 @@ public class Message implements Cloneable, Serializable
     propertiesRO = true;
   }
 
-
   /**
-   * Transforms this message into a vector of primitive values that can
-   * be vehiculated through the SOAP protocol.
+   * Specializes the deserialization method for initializing the message's
+   * transient fields.
    */
-  public Vector soapCode()
+  private void readObject(ObjectInputStream s)
+               throws IOException, ClassNotFoundException
   {
-    Vector vec = new Vector();
-   
-    // Building a hashtable containg the fields values: 
-    Hashtable fieldsTb = new Hashtable();
-
-    fieldsTb.put("type", new Integer(type));
-    fieldsTb.put("id", id);
-    fieldsTb.put("priority", new Integer(priority));
-    fieldsTb.put("expiration", new Long(expiration));
-    fieldsTb.put("timestamp", new Long(timestamp));
-    fieldsTb.put("toId", toId);
-    fieldsTb.put("toQueue", new Boolean(toQueue));
-    if (correlationId != null)
-      fieldsTb.put("correlationId", correlationId);
-    if (replyToId != null) {
-      fieldsTb.put("replyToId", replyToId);
-      fieldsTb.put("replyToQueue", new Boolean(replyToQueue));
-    }
-    if (body_bytes != null)
-      fieldsTb.put("body_bytes", body_bytes);
-    else if (body_map != null)
-      fieldsTb.put("body_map", body_map);
-    else if (body_text != null)
-      fieldsTb.put("body_text", body_text);
-    fieldsTb.put("bodyRO", new Boolean(bodyRO));
-    fieldsTb.put("propertiesRO", new Boolean(propertiesRO));
-    fieldsTb.put("deliveryCount", new Integer(deliveryCount));
-    fieldsTb.put("denied", new Boolean(denied));
-    if (consId != null)
-      fieldsTb.put("consId", consId);
-    fieldsTb.put("acksCounter", new Integer(acksCounter));
-    fieldsTb.put("deletedDest", new Boolean(deletedDest));
-    fieldsTb.put("expired", new Boolean(expired));
-    fieldsTb.put("notWritable", new Boolean(notWritable));
-    fieldsTb.put("undeliverable", new Boolean(undeliverable));
-
-    vec.add(fieldsTb);
-
-    // Adding the hashtable of optional headers:
-    vec.add(optionalHeader);
-
-    // Adding the hashtable of properties:
-    vec.add(properties);
-
-    return vec;
-  }
-
-  /** 
-   * Transforms a vector of primitive values into a <code>Message</code>
-   * instance.
-   */
-  public static Message soapDecode(Vector vec) 
-  {
-    Hashtable fieldsTb = (Hashtable) vec.remove(0);
-    Hashtable optTb = (Hashtable) vec.remove(0);
-    Hashtable propsTb = (Hashtable) vec.remove(0);
-
-    Message msg = new Message();
-
-    try {
-      msg.type = ConversionHelper.toInt(fieldsTb.get("type"));
-      msg.id = (String) fieldsTb.get("id");
-      msg.priority = ConversionHelper.toInt(fieldsTb.get("priority"));
-      msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
-      msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
-      msg.toId = (String) fieldsTb.get("toId");
-      msg.toQueue = ConversionHelper.toBoolean(fieldsTb.get("toQueue"));
-      msg.correlationId = (String) fieldsTb.get("correlationId");
-      msg.replyToId = (String) fieldsTb.get("replyToId");
-      if (msg.replyToId != null) {
-        msg.replyToQueue =
-          ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
-      }
-      msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
-      msg.body_map = (Hashtable) fieldsTb.get("body_map");
-      msg.body_text = (String) fieldsTb.get("body_text");
-      msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
-      msg.propertiesRO =
-        ConversionHelper.toBoolean(fieldsTb.get("propertiesRO"));
-      msg.deliveryCount = ConversionHelper.toInt(fieldsTb.get("deliveryCount"));
-      msg.denied = ConversionHelper.toBoolean(fieldsTb.get("denied"));
-      msg.consId = (String) fieldsTb.get("consId");
-      msg.acksCounter = ConversionHelper.toInt(fieldsTb.get("acksCounter"));
-      msg.deletedDest = ConversionHelper.toBoolean(fieldsTb.get("deletedDest"));
-      msg.expired = ConversionHelper.toBoolean(fieldsTb.get("expired"));
-      msg.notWritable = ConversionHelper.toBoolean(fieldsTb.get("notWritable"));
-      msg.undeliverable =
-        ConversionHelper.toBoolean(fieldsTb.get("undeliverable"));
-
-      msg.optionalHeader = optTb;
-      msg.properties = propsTb;
-    }
-    // Should never happen!
-    catch (MessageValueException exc) {}
-  
-    return msg;
+    s.defaultReadObject();
+    acksCounter = 0;
+    durableAcksCounter = 0;
   }
 }

@@ -1,26 +1,22 @@
 /*
- * Copyright (C) 2001 - 2003 SCALAGENT
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
- * The contents of this file are subject to the Dyade Public License,
- * as defined by the file JORAM_LICENSE_ADDENDUM.html
- *
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Dyade web site (www.dyade.fr).
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied.
- * See the License for the specific terms governing rights and
- * limitations under the License.
- *
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released April 20, 2000.
- *
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  */
 package fr.dyade.aaa.agent;
 
@@ -38,9 +34,9 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class for stream sockets that manages
  * multiple connection.
  */
-class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.11 2003-03-19 15:16:06 fmaistre Exp $";
+public class PoolCnxNetwork extends StreamNetwork {
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.12 2003-06-23 13:37:51 fmaistre Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -59,8 +55,35 @@ class PoolCnxNetwork extends StreamNetwork {
   /**
    * Creates a new network component.
    */
-  PoolCnxNetwork() throws Exception {
+  public PoolCnxNetwork() throws Exception {
     super();
+  }
+
+  /**
+   * Initializes a new network component. This method is used in order to
+   * easily creates and configure a Network component from a class name.
+   * So we can use the <code>Class.newInstance()</code> method for create
+   * (whitout any parameter) the component, then we can initialize it with
+   * this method.<br>
+   * This method initializes the logical clock for the domain.
+   *
+   * @param name	The domain name.
+   * @param port	The listen port.
+   * @param servers	The list of servers directly accessible from this
+   *			network interface.
+   */
+  public void init(String name, int port, short[] servers) throws Exception {
+    super.init(name, port, servers);
+
+    // Creates a session for all domain's server.
+    sessions = new NetSession[servers.length];
+    for (int i=0; i<sessions.length; i++) {
+      if (servers[i] != AgentServer.getServerId())
+        sessions[i] = new NetSession(getName(), servers[i]);
+    }
+    wakeOnConnection = new WakeOnConnection(getName(), logmon);
+    dispatcher = new Dispatcher(getName(), logmon);
+    watchDog = new WatchDog(getName(), logmon);
   }
 
   /**
@@ -82,18 +105,11 @@ class PoolCnxNetwork extends StreamNetwork {
       if (isRunning())
 	throw new IOException("Consumer already running.");
 
-      activeSessions = new NetSession[nbMaxCnx];
-    
-      // Creates a session for all domain's server.
-      sessions = new NetSession[servers.length];
-      for (int i=0; i<servers.length; i++) {
-	if (servers[i] != AgentServer.getServerId())
-	  sessions[i] = new NetSession(getName(),
-				       AgentServer.getServerDesc(servers[i]));
+      for (int i=0; i<sessions.length; i++) {
+        if (sessions[i] != null) sessions[i].init();
       }
-      wakeOnConnection = new WakeOnConnection(getName(), logmon);
-      dispatcher = new Dispatcher(getName(), logmon);
-      watchDog = new WatchDog(getName(), logmon);
+
+      activeSessions = new NetSession[nbMaxCnx];
 
       wakeOnConnection.start();
       dispatcher.start();
@@ -133,16 +149,16 @@ class PoolCnxNetwork extends StreamNetwork {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((wakeOnConnection == null) || wakeOnConnection.isRunning() ||
-	(dispatcher == null) || dispatcher.isRunning() ||
-	(watchDog == null) || watchDog.isRunning())
-      return false;
+    if ((wakeOnConnection != null) && wakeOnConnection.isRunning() &&
+	(dispatcher != null) && dispatcher.isRunning() &&
+	(watchDog != null) && watchDog.isRunning())
+      return true;
 
-    return true;
+    return false;
   }
 
   final NetSession getSession(short sid) {
-    return sessions[index(sid)];
+    return sessions[clock.index(sid)];
   }
 
   /**
@@ -197,6 +213,8 @@ class PoolCnxNetwork extends StreamNetwork {
   }
 
   final class NetSession implements Runnable {
+    /** Destination server id */
+    private short sid;
     /**
      * Boolean variable used to stop the daemon properly. The dameon tests
      * this variable between each request, and stops if it is false.
@@ -238,9 +256,9 @@ class PoolCnxNetwork extends StreamNetwork {
 
     private long last = 0L;
 
-    NetSession(String name, ServerDesc server) {
-      this.server = server;
-      this.name = name + ".netSession#" + server.sid;
+    NetSession(String name, short sid) {
+      this.sid = sid;
+      this.name = name + ".netSession#" + sid;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", created");
@@ -250,6 +268,10 @@ class PoolCnxNetwork extends StreamNetwork {
       thread = null;
 
       sendList = new MessageVector();
+    }
+
+    void init() throws UnknownServerException {
+      server = AgentServer.getServerDesc(sid);
     }
 
     /**
@@ -606,7 +628,7 @@ class PoolCnxNetwork extends StreamNetwork {
     }
     
 //  final private synchronized void ack(int stamp) throws IOException {
-    final private void ack(int stamp) throws IOException {
+    final private void ack(int stamp) throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", set ack msg#" + stamp);
@@ -614,7 +636,8 @@ class PoolCnxNetwork extends StreamNetwork {
       Message ack = new Message(AgentId.localId,
                                 AgentId.localId(server.sid));
       ack.update = new Update(AgentServer.getServerId(),
-                              AgentServer.servers[server.sid].gateway,
+                              AgentServer.getServerDesc(
+                                server.sid).gateway,
                               stamp);
       qout.push(ack);
     }

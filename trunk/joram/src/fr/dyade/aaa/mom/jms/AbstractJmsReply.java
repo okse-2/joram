@@ -3,45 +3,45 @@
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
  * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
- * fr.dyade.aaa.util, released May 24, 2000.
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package fr.dyade.aaa.mom.jms;
 
+import java.util.Hashtable;
+import java.util.Enumeration;
+
 /**
- * The <code>AbstractJmsReply</code> class is used by MOM JMS proxies to send
- * replies back to their Joram JMS clients.
+ * An <code>AbstractJmsReply</code> is sent by a proxy to a Joram client as a 
+ * reply to an <code>AbstractJmsRequest</code>.
  */
-public abstract class AbstractJmsReply implements java.io.Serializable
+public class AbstractJmsReply implements java.io.Serializable
 {
-  /** Identifier of the reply. */
-  private String correlationId;
+  /** Identifier of the replied request. */
+  protected int correlationId = -1;
+
 
   /**
    * Constructs an <code>AbstractJmsReply</code>.
    *
-   * @param correlationId  Identifier of the reply.
+   * @param correlationId  Identifier of the replied request.
    */
-  public AbstractJmsReply(String correlationId)
+  public AbstractJmsReply(int correlationId)
   {
     this.correlationId = correlationId;
   }
@@ -52,15 +52,34 @@ public abstract class AbstractJmsReply implements java.io.Serializable
   public AbstractJmsReply()
   {}
 
-  /** Sets the reply identifier. */
-  public void setCorrelationId(String correlationId)
+
+  /** Sets the replied request identifier. */
+  public void setCorrelationId(int correlationId)
   {
     this.correlationId = correlationId;
   }
 
-  /** Returns this reply identifier. */
-  public String getCorrelationId()
+  /** Returns the replied request identifier. */
+  public int getCorrelationId()
   {
     return correlationId;
+  }
+
+  /** Returns the identifier as an hashtable key. */
+  public Integer getKey()
+  {
+    return new Integer(correlationId);
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = new Hashtable();
+    h.put("className",getClass().getName());
+    h.put("correlationId",getKey());
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    return new AbstractJmsReply(
+      ((Integer) h.get("correlationId")).intValue());
   }
 }
