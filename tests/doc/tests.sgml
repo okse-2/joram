@@ -69,7 +69,7 @@
     <title>Installing the test suite</title>
     <sect2>
       <title>CVS repository</title>
-      <para>The test suite is available only by CVS. To setup the CVS
+      <para>The test suite is available by CVS. To setup the CVS
         software, see <ulink url="http://www.cvshome.org">CVS
           website</ulink></para> 
       <para>To access the CVS repository in anonymous mode, simply use the
@@ -97,6 +97,15 @@
         <command>diff</command>. When running the
         <command>cvs update</command> command, make sure that you are
         in the correct	directory. 
+      </para>
+    </sect2>
+    <sect2>
+      <title>Package</title>
+      <para>The test suite can also be retrieved as a package at the
+        <ulink
+          url="http://www.objectweb.org/joram/tests/download.html">download page</ulink>.
+        The file is a Gzipped Tar file, so you will need both
+        gzip and tar utilities to open it.
       </para>
     </sect2>
     <sect2>
