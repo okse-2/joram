@@ -253,7 +253,15 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
             if (tokenizer.hasMoreTokens()) {
               firstToken = tokenizer.nextToken();
-              if (firstToken.equalsIgnoreCase("Queue")) {
+              if (firstToken.equalsIgnoreCase("Host")) {
+                if (tokenizer.hasMoreTokens())
+                  hostName = tokenizer.nextToken();
+              }
+              else if (firstToken.equalsIgnoreCase("Port")) {
+                if (tokenizer.hasMoreTokens())
+                  serverPort = Integer.parseInt(tokenizer.nextToken());
+              }
+              else if (firstToken.equalsIgnoreCase("Queue")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createQueue(name);
