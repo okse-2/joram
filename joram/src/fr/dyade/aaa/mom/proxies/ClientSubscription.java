@@ -381,7 +381,7 @@ class ClientSubscription implements java.io.Serializable
           || (Selector.matches(message, selector)
               && (! noLocal
                   || (msgId.indexOf(proxyId.toString()) == -1
-                      && msgId.indexOf("c" + contextId + "m") == -1)))) {
+                      || msgId.indexOf("c" + contextId + "m") == -1)))) {
 
         message.acksCounter++;
         if (message.acksCounter == 1)
