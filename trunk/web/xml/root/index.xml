@@ -13,7 +13,7 @@
   <body>
 
     <s1 name="Recent news">
-      <subtitle>March 14th, 2003: new JORAM releases.</subtitle>
+      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
       <p>JORAM 3.3 is now available as a packaged version.
       As a reminder, it provides a new administration implementation. In CVS it
       is now tagged joram3_3_1. Compared to joram3_3_0, it is a maintenance

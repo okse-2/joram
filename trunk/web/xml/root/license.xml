@@ -5,33 +5,39 @@
 <document>
   <properties>
     <author email="joram-team@objectweb.org">joram-team</author>
-    <title>License</title>
+    <title>Licenses</title>
     <filename>license.xml</filename>
     <pathtoroot>.</pathtoroot>
   </properties>
 
   <body>
 
-    <s1 name="JORAM licence">
+    <s1 name="JORAM license">
 
-      <p>JORAM license is a union of the <a
+      <p>JORAM is provided under the JORAM license which is a union of the <a
       href="licenses/JORAM_LICENSE.TXT">JORAM Public License</a> and the <a
       href="licenses/OPL_1_0.TXT">Open Public License</a> (OPL 1.0) stating the
       general licensing policy of the software.</p>
+
+    </s1>
+
+    <s1 name="Other licenses">
    
-      <p>JORAM uses <em>external code</em> belonging to the <a
-      href="http://xml.apache.org/">Xerces</a> and the <a
-      href="http://jakarta.apache.org/">Jakarta Apache</a> projects, requesting
-      the following licenses to be made available:</p>
+      <p>The JORAM distribution includes libraries of <em>external
+      softwares</em>.</p>
+
+      <p>The <a href="http://jakarta.apache.org/regexp/">Regexp</a> regular
+      expression parser, the <a href="http://ws.apache.org/soap/">SOAP</a>
+      implementation, and the <a href="http://xml.apache.org/">Xerces</a>
+      XML parser are Apache's projects covered by the
+      <a href="licenses/APACHE_LICENSE.TXT">Apache license</a>.
+      </p>
+
+      <p>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
+      JavaCup</a> Java parser generator is covered by
+      <a href="licenses/CUP_LICENSE.TXT">this</a> licence.
+      </p>
    
-      <ul>
-	<li><a href="licenses/XERCES_LICENSE.TXT">Xerces license</a>,</li>
-	<li><a href="licenses/JAKARTA-REGEXP_LICENSE.TXT">Jakarta-Regexp license</a>.</li>
-      </ul>
-      
-      <p>JORAM also uses code belonging to the javaCUP project, requesting <a
-      href="licenses/CUP_LICENSE.TXT">this license</a> to be made available.</p>
-      
     </s1>
     
   </body>

@@ -24,7 +24,7 @@
 
       <subtitle>Contributors</subtitle>
 
-      <p>We would also like to thank all the following people who have also
+      <p>We would also like to thank all the following people who have
       contributed to JORAM:</p>
 
       <ul>
@@ -40,8 +40,8 @@
 	<li>JC Waeny (<a href="http://www.dfjug.org">Brasilia (Brazil) Java Users Group</a>)</li>
       </ul>
 
-      <p>We apologize if we miss someone. Please <a
-      href="mailto:joram-team@objectweb.org">email us</a> to correct that.</p>
+      <p>If you feel forgotten, please <a
+      href="mailto:joram-team@objectweb.org">contact</a> us.</p>
     </s1>    
   </body>
 </document>
