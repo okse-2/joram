@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -74,4 +74,60 @@ public class OutboundQueueSession extends OutboundSession
     checkValidity();
     return new OutboundReceiver(queue, sess.createConsumer(queue), this);
   }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically.
+   */
+  public javax.jms.TopicSubscriber
+      createDurableSubscriber(javax.jms.Topic topic, 
+                                 String name,
+                              String selector,
+                              boolean noLocal) 
+    throws JMSException  {
+    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+  }
+
+  /** 
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically.
+   */
+  public javax.jms.TopicSubscriber
+         createDurableSubscriber(javax.jms.Topic topic, 
+                                 String name)
+         throws JMSException {
+    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically.
+   */
+  public javax.jms.Topic createTopic(String topicName) 
+    throws JMSException {
+    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically.
+   */
+  public javax.jms.TemporaryTopic createTemporaryTopic() 
+    throws JMSException {
+    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  Systematically.
+   */
+  public void unsubscribe(String name) 
+    throws JMSException {
+    throw new IllegalStateException("Forbidden call on a OutboundQueueSession.");
+  }    
 }
