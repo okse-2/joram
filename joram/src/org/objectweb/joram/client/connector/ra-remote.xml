@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  JORAM: Java(TM) Open Reliable Asynchronous Messaging
  Copyright (C) 2004 - Bull SA
@@ -19,25 +18,19 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  USA.
 -->
-
-<connector xmlns="http://java.sun.com/xml/ns/j2ee"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
-           http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
-           version="1.5">
-   <description>
-      J2EE 1.4 Resource Adapter for the JORAM JMS messaging platform
-   </description>
+<connector
+  xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+  http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+  version="1.5">
+   <description> J2EE 1.4 Resource Adapter for the JORAM JMS messaging platform</description>
    <display-name>JORAM Resource Adapter</display-name>
-   <icon></icon>
    <vendor-name>ObjectWeb Consortium</vendor-name>
    <eis-type>Java Message Service v 1.1</eis-type>
    <resourceadapter-version>1.0</resourceadapter-version>
-
    <resourceadapter>
-      <resourceadapter-class>
-         org.objectweb.joram.client.connector.JoramAdapter
-      </resourceadapter-class>
+      <resourceadapter-class>org.objectweb.joram.client.connector.JoramAdapter</resourceadapter-class>
       <config-property>
          <config-property-name>HostName</config-property-name>
          <config-property-type>java.lang.String</config-property-type>
@@ -57,12 +50,9 @@
          <config-property-type>java.lang.String</config-property-type>
          <config-property-value>joram-admin.cfg</config-property-value>
       </config-property>
-
       <outbound-resourceadapter>
          <connection-definition>
-            <managedconnectionfactory-class>
-               org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl
-            </managedconnectionfactory-class>
+            <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</managedconnectionfactory-class>
             <config-property>
               <config-property-name>UserName</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
@@ -73,21 +63,13 @@
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
             </config-property>
-            <connectionfactory-interface>
-               javax.jms.QueueConnectionFactory
-            </connectionfactory-interface>
-            <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.OutboundQueueConnectionFactory
-            </connectionfactory-impl-class>
+            <connectionfactory-interface>javax.jms.QueueConnectionFactory</connectionfactory-interface>
+            <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundQueueConnectionFactory</connectionfactory-impl-class>
             <connection-interface>javax.jms.QueueConnection</connection-interface>
-            <connection-impl-class>
-               org.objectweb.joram.client.connector.OutboundQueueConnection
-            </connection-impl-class>
+            <connection-impl-class>org.objectweb.joram.client.connector.OutboundQueueConnection</connection-impl-class>
          </connection-definition>
          <connection-definition>
-            <managedconnectionfactory-class>
-               org.objectweb.joram.client.connector.ManagedTopicConnectionFactoryImpl
-            </managedconnectionfactory-class>
+            <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedTopicConnectionFactoryImpl</managedconnectionfactory-class>
             <config-property>
               <config-property-name>UserName</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
@@ -98,21 +80,13 @@
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
             </config-property>
-            <connectionfactory-interface>
-               javax.jms.TopicConnectionFactory
-            </connectionfactory-interface>
-            <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.OutboundTopicConnectionFactory
-            </connectionfactory-impl-class>
+            <connectionfactory-interface>javax.jms.TopicConnectionFactory</connectionfactory-interface>
+            <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundTopicConnectionFactory</connectionfactory-impl-class>
             <connection-interface>javax.jms.TopicConnection</connection-interface>
-            <connection-impl-class>
-               org.objectweb.joram.client.connector.OutboundTopicConnection
-            </connection-impl-class>
+            <connection-impl-class>org.objectweb.joram.client.connector.OutboundTopicConnection</connection-impl-class>
          </connection-definition>
          <connection-definition>
-            <managedconnectionfactory-class>
-               org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl
-            </managedconnectionfactory-class>
+            <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
             <config-property>
               <config-property-name>UserName</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
@@ -123,29 +97,20 @@
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
             </config-property>
-            <connectionfactory-interface>
-               javax.jms.ConnectionFactory
-            </connectionfactory-interface>
-            <connectionfactory-impl-class>
-               org.objectweb.joram.client.connector.OutboundConnectionFactory
-            </connectionfactory-impl-class>
+            <connectionfactory-interface>javax.jms.ConnectionFactory</connectionfactory-interface>
+            <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundConnectionFactory</connectionfactory-impl-class>
             <connection-interface>javax.jms.Connection</connection-interface>
-            <connection-impl-class>
-               org.objectweb.joram.client.connector.OutboundConnection
-            </connection-impl-class>
+            <connection-impl-class>org.objectweb.joram.client.connector.OutboundConnection</connection-impl-class>
          </connection-definition>
          <transaction-support>XATransaction</transaction-support>
          <reauthentication-support>false</reauthentication-support>
       </outbound-resourceadapter>
-
       <inbound-resourceadapter>
          <messageadapter>
             <messagelistener>
                <messagelistener-type>javax.jms.MessageListener</messagelistener-type>
                <activationspec>
-                  <activationspec-class>
-                     org.objectweb.joram.client.connector.ActivationSpecImpl
-                  </activationspec-class>
+                  <activationspec-class>org.objectweb.joram.client.connector.ActivationSpecImpl</activationspec-class>
                   <required-config-property>
                      <config-property-name>destinationType</config-property-name>
                   </required-config-property>
@@ -156,6 +121,5 @@
             </messagelistener>
          </messageadapter>
       </inbound-resourceadapter>
-
    </resourceadapter>
 </connector>
