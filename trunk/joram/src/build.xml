@@ -125,7 +125,6 @@
  
   <target name="javadoc" depends="init"
       description="--> Generate Javadoc">
-    <echo message="project.class.path" />
     <javadoc packagenames="fr.dyade.aaa.*"
       sourcepath="${src.dir}"
       classpathref="project.class.path"
