@@ -38,17 +38,17 @@ public class TextMessage extends Message implements javax.jms.TextMessage
   /** 
    * Instanciates an empty <code>TextMessage</code>.
    */
-  TextMessage()
+  TextMessage(Session sess)
   {
-    super();
+    super(sess);
   }
   
   /**
    * Instanciates a <code>TextMessage</code> wrapping a given string.
    */
-  TextMessage(String text)
+  TextMessage(Session sess, String text)
   {
-    super();
+    super(sess);
     this.text = text;
   }
 

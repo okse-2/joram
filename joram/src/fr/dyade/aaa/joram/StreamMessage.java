@@ -55,9 +55,9 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    *
    * @exception JMSException  In case of an error while creating the stream.
    */
-  StreamMessage() throws JMSException
+  StreamMessage(Session sess) throws JMSException
   {
-    super();
+    super(sess);
     bos = new ByteArrayOutputStream();
 
     try {

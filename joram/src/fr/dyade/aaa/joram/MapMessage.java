@@ -42,9 +42,9 @@ public class MapMessage extends Message implements javax.jms.MapMessage
   /**
    * Instanciates a <code>MapMessage</code>.
    */
-  MapMessage()
+  MapMessage(Session sess)
   {
-    super();
+    super(sess);
     map = new Hashtable();
   }
   
