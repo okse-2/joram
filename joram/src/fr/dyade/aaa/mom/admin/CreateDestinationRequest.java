@@ -34,11 +34,30 @@ public class CreateDestinationRequest extends AdminRequest
   /** Id of the server where deploying the destination. */
   private int serverId;
 
+  /** Name attributed to the destination. */
+  private String name;
+
   /** Name of the class to be instanciated. */
   private String className = null;
  
   /** Properties needed to create destination object. */
   private Properties prop = null;
+
+
+  /**
+   * Constructs a <code>CreateDestinationRequest</code> instance.
+   *
+   * @param serverId   The id of the server where deploying the destination.
+   * @param name  Name attributed to the destination.
+   * @param className  Name of the class to be instanciated.
+   */
+  public CreateDestinationRequest(int serverId,
+                                  String name,
+                                  String className) {
+    this.serverId = serverId;
+    this.name = name;
+    this.className = className;
+  }
 
   /**
    * Constructs a <code>CreateDestinationRequest</code> instance.
@@ -48,13 +67,18 @@ public class CreateDestinationRequest extends AdminRequest
    */
   public CreateDestinationRequest(int serverId,
                                   String className) {
-    this.serverId = serverId;
-    this.className = className;
+    this(serverId, null, className);
   }
 
   /** Returns the id of the server where deploying the destination. */
   public int getServerId() {
     return serverId;
+  }
+
+  /** Returns the name attributed to the destination. */
+  public String getDestinationName()
+  {
+    return name;
   }
 
   /** Returns the class name of destination (queue, topic, ...). */
