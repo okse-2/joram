@@ -2,34 +2,27 @@
 
   <!-- Initializes the environment paths and properties -->
   <target name="init">
-    <!-- Gets the user defined properties from file -->
-    <property file="../../src/build.properties"/>
     <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../../classes"/>
-    <property name="ship.dir" location="../../../ship"/>
-    <property name="lib.dir" location="${ship.dir}/lib"/>
+    <property name="lib.dir" location="../../../lib"/>
     <!-- Project classpath needed for execution -->
     <path id="project.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
-         <include name="*.jar"/>
+         <include name="kjoram.jar"/>
+         <include name="kxml.jar"/>
+         <include name="midpapi.jar"/>
       </fileset>
-      <fileset dir="../../../lib">
-         <include name="*.jar"/>
-      </fileset>
-      <pathelement path="${obj.dir}"/>
-      <pathelement path="${obj.dir}"/>
-      <pathelement path="${src.dir}/kjoram"/>
     </path>
     <property name="project.class.path" refid="project.class.path"/>
   </target>
 
   <!-- Cleans samples - deletes generated files -->
   <target name="clean" depends="init"
-          description="--> delete generated files">
+          description="--> Deletes generated files">
     <delete dir="${obj.dir}"/>
-    <delete dir="${build.dir}"/>
+    <delete dir="${run.dir}"/>
   </target>
 
   <!-- Prepares the compilation phase -->

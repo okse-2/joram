@@ -33,7 +33,7 @@ package com.scalagent.kjoram.util;
  */
 public class EmptyQueueException extends RuntimeException {
 
-public static final String RCS_VERSION="@(#)$Id: EmptyQueueException.java,v 1.4 2004-02-13 10:12:42 fmaistre Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: EmptyQueueException.java,v 1.5 2004-03-16 09:58:36 fmaistre Exp $"; 
 
   /**
    * Constructs a new <code>EmptyQueueException</code> with no detail message.
