@@ -59,7 +59,7 @@
       <subtitle>23rd April 2002: Pramati supports the Test
         Suite</subtitle>
       <p>Thanks to <a href="mailto:rajdeep@pramati.com">Rajdeep
-          Dua</a>, <a href="http://www.pramati.com">Pramati</a> has
+          Dua</a>, <a href="http://www.pramati.com/">Pramati</a> has
         contributed to the Test Suite and offered 
         an Admin implementation to use the Test Suite with both their
         Application Server and Message Server. Thanks Rajdeep!</p>
@@ -86,9 +86,9 @@
         that any provider can implement. For the moment, we provide
         implementations for:</p>
       <ul>
-        <li><a href="http://www.objectweb.org/joram">JORAM</a></li>
-        <li><a href="http://www.pramati.com">Pramati</a></li>
-        <li><a href="http://www.ashnasoft.com">AshnaMQ</a></li>
+        <li><a href="http://www.objectweb.org/joram/">JORAM</a></li>
+        <li><a href="http://www.pramati.com/">Pramati</a></li>
+        <li><a href="http://www.ashnasoft.com/">AshnaMQ</a></li>
         <li><a
             href="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ</a></li>
       </ul>
