@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 class AgentIdStamp implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.13 2003-04-23 09:25:07 fmaistre Exp $";
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
@@ -231,6 +231,8 @@ public final class AgentId implements Serializable, Cloneable {
   public static int FileTransfertStamp = 6;
   /** Reserved stamp for JNDI service <code>AgentId</code>. */
   public static int JndiServiceStamp = 7;
+  /** Reserved stamp for local JNDI service <code>AgentId</code>. */
+  public static int LocalJndiServiceStamp = 8;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
