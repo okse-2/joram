@@ -44,6 +44,20 @@
 	  href="../jonas/index.xml">JOnAS</connect> transaction service and to
 	  <connect href="index.xml">JORAM</connect>.</td>
 	</tr>
+
+        <tr>
+	  <td rowspan="1" colspan="1" valign="middle" align="center"><a
+	  href="http://www.minefi.gouv.fr/"><img src="images/partners/logomefi.gif"
+	  border="0" width="166" height="45" alt="Minefi logo" align="middle"
+	  /></a></td>
+
+	  <td rowspan="1" colspan="1" valign="middle" align="left">The <a
+	  href="http://www.minefi.gouv.fr/"> French Ministry of the Economy,
+          Finance and Industry</a> supports JORAM through the financing of
+          several projects.
+	  </td>
+	</tr>
+
         <tr>
           <td align="center" valign="middle">
             <a href="http://www.scalagent.com/">
