@@ -47,11 +47,18 @@
 	<para><ulink
 	    url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ 5.21</ulink> (provided by me, not by Fiorano)</para>
       </listitem>
+      <listitem>
+	<para><ulink
+	    url="http://www.pramati.com/product/server30/index.htm">Pramati
+	    Application Server 3.0 or Message Server</ulink>
+	  (provided by <ulink url="mailto:rajdeep@pramati.com">Rajdeep
+	    Dua</ulink>)
+	</para>
+      </listitem>
     </itemizedlist>
     <para><ulink url="http://www.iit.de/">SwiftMQ</ulink> will be
-      supported soon when version 3.2.0 is released. <ulink
-	url="http://www.pramati.com/">Pramati</ulink> should also
-      contribute soon to the test suite.</para>
+      supported soon when version 3.2.0 is released.  
+    </para>
   </sect1>
   <sect1>
     <title>Installing the test suite</title>
@@ -211,6 +218,38 @@
 	</para>
       </sect3>
       <sect3>
+	<title>Compile Pramati Admin</title> 
+	<para>First install
+	  Pramati Message Server and copy the following jars to the
+	  <filename>providers/pramati</filename> directory from
+	  <filename>$PRAMATI_INSTALL_ROOT/jms/lib/ext</filename>
+	  and
+	  <filename>$PRAMATI_INSTALL_ROOT/jms/lib/pramati</filename>:
+	  <simplelist type="horiz" columns="4">
+	    <member>jaas.jar</member>
+	    <member>jce1_2_1.jar</member>
+	    <member>jcert.jar</member>
+	    <member>jmxri.jar</member>
+	    <member>jndi.jar</member>
+	    <member>jnet.jar</member>
+	    <member>jsse.jar</member>
+	    <member>pramati_jms_client.jar</member>
+	    <member>pramati_jms_xa.jar</member>
+	    <member>pramati_jmxconn.jar</member>
+	    <member>pramati_naming.jar</member>
+	    <member>pramati_security.jar</member>
+	    <member>pramati_serveradmin.jar</member>
+	    <member>pramati_spi.jar</member>
+	    <member>pramati_util.jar</member>
+	    <member>xml.jar</member>
+	  </simplelist>
+	  and type in the <filename>tests</filename> directory:
+	  <simplelist>
+	    <member><command>ant compile.pramati</command></member>
+	  </simplelist>
+	</para>
+      </sect3>
+      <sect3>
 	<title>Compile FioranoMQ Admin</title>
 	<para>To compile FioranoMQ <varname>Admin</varname>
 	  implementation, you have first to install and propertly
@@ -252,6 +291,12 @@
 	  want persistence. <varname>0 s0</varname> is there to know
 	  which JORAM configuration is to be used (see
 	  <filename>a3servers.xml</filename> file).
+	</para>
+      </sect3>
+      <sect3>
+	<title>Pramati</title>
+	<para>Please refer to Pramati Message Server's <ulink
+	    url="http://www.pramati.com/docstore/1230006/help/index1.htm">documentation</ulink>
 	</para>
       </sect3>
       <sect3>
