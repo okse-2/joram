@@ -73,6 +73,13 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
   private Vector deadMQueues;
   /** Vector holding the local server's topics' identifiers. */
   private Vector topics;
+  /**
+   * Table holding the local server's destinations names.
+   * <p>
+   * <b>Key:</b> destination name<br>
+   * <b>Object:</b> destination agent identifier
+   */
+  private Hashtable destinationsTable;
 
   /**
    * Table holding the TCP users identifications.
@@ -133,6 +140,7 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
     queues = new Vector();
     deadMQueues = new Vector();
     topics = new Vector();
+    destinationsTable = new Hashtable();
     usersTable = new Hashtable();
     soapTable = new Hashtable();
     proxiesTable = new Hashtable();
@@ -859,51 +867,70 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
     if (! checkServerId(request.getServerId()))
       return;
 
+    String destName = request.getDestinationName();
+    boolean destNameActivated = (destName != null && ! destName.equals(""));
+
+    AgentId destId;
+
     Agent dest = null;
+    String info;
     String clazz = request.getClassName();
     Properties properties = request.getProperties();
 
+    // Retrieving an existing destination:
+    if (destNameActivated && destinationsTable.containsKey(destName)) {
+      destId = (AgentId) destinationsTable.get(destName);
+      info = "Request [" + request.getClass().getName()
+             + "], processed by AdminTopic on server [" + serverId
+             + "], successful [true]: destination ["
+             + destName + "] has been retrieved";
+    }
     // Instanciating the destination class.
-    try {
-      if ((clazz != null) && (clazz.length() > 0)) {
-        dest = (Agent) Class.forName(clazz).newInstance();
-        if (properties != null)
-          ((AdminDestinationItf) dest).setProperties(properties);
-        ((AdminDestinationItf) dest).init(destId);
-      } else throw new Exception("Invalid empty class name.");
-    } catch (Exception exc) {
-      if (exc instanceof ClassCastException)
-        throw new RequestException("Class [" + clazz + "] is not a Destination class.");
-      else
-        throw new RequestException("Could not instanciate Destination class [" + clazz + "]: " + exc);
+    else {
+      try {
+        if ((clazz != null) && (clazz.length() > 0)) {
+          dest = (Agent) Class.forName(clazz).newInstance();
+          if (properties != null)
+            ((AdminDestinationItf) dest).setProperties(properties);
+          ((AdminDestinationItf) dest).init(this.destId);
+        } else throw new Exception("Invalid empty class name.");
+      } catch (Exception exc) {
+        if (exc instanceof ClassCastException)
+          throw new RequestException("Class [" + clazz + "] is not a Destination class.");
+        else
+          throw new RequestException("Could not instanciate Destination class [" + clazz + "]: " + exc);
+      }
+
+      try {
+        dest.deploy();
+        destId = dest.getId();
+
+        if (dest instanceof DeadMQueue)
+          deadMQueues.add(destId);
+        else if (dest instanceof Topic)
+          topics.add(destId);
+        else if (dest instanceof Queue)
+          queues.add(destId);
+
+        if (destNameActivated)
+          destinationsTable.put(destName, destId);
+
+        info = "Request [" + request.getClass().getName()
+               + "], processed by AdminTopic on server [" + serverId
+               + "], successful [true]: " + clazz + " ["
+               + destId.toString() + "] has been created and deployed";
+      }
+      catch (Exception exc) {
+        throw new RequestException("Error while deploying Destination [" + clazz + "]: " + exc);
+      }
     }
 
-    try {
-      dest.deploy();
-      AgentId destId = dest.getId();
+    distributeReply(replyTo,
+                    msgId,
+                    new CreateDestinationReply(destId.toString(), info));
 
-      if (dest instanceof DeadMQueue)
-        deadMQueues.add(destId);
-      else if (dest instanceof Topic)
-        topics.add(destId);
-      else if (dest instanceof Queue)
-        queues.add(destId);
-
-      String info = "Request [" + request.getClass().getName()
-                    + "], processed by AdminTopic on server [" + serverId
-                    + "], successful [true]: " + clazz + " ["
-                    + destId.toString() + "] has been created and deployed";
-
-      distributeReply(replyTo,
-                      msgId,
-                      new CreateDestinationReply(destId.toString(), info));
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
-    }
-    catch (Exception exc) {
-      throw new RequestException("Error while deploying Destination [" + clazz + "]: " + exc);
-    }
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -922,6 +949,16 @@ public class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean
     queues.remove(destId);
     topics.remove(destId);
     deadMQueues.remove(destId);
+
+    String name;
+    AgentId id;
+    for (Enumeration names = destinationsTable.keys();
+         names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      id = (AgentId) destinationsTable.get(name);
+      if (id.equals(destId))
+        destinationsTable.remove(name);
+    }
 
     Channel.sendTo(destId, new DeleteNot());
 
