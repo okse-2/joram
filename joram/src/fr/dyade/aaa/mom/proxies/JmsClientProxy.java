@@ -1573,7 +1573,7 @@ public class JmsClientProxy extends ConnectionFactory
       cnx.deny();
 
       // Removing or desactivating the subscriptions:
-      String subName;
+      String subName = null;
       ClientSubscription sub;
       while (! cnx.activeSubs.isEmpty()) {
         subName = (String) cnx.activeSubs.remove(0);
@@ -1597,11 +1597,6 @@ public class JmsClientProxy extends ConnectionFactory
             MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
                                     + name + " deleted.");
         }
-      }
-
-      if (subsTable != null && subsTable.isEmpty()) {
-        subsTable = null;
-        messagesTable = null;
       }
 
       // Deleting the temporary destinations:
@@ -1867,8 +1862,11 @@ public class JmsClientProxy extends ConnectionFactory
      */ 
     private void updateCurrentQueue(AgentId qId)
     {
-      if (qId.equals(this.qId))
+      if (qId.equals(this.qId)) {
+        if (qDeliveries.isEmpty())
+          qDeliveries.put(qId, ids);
         return;
+      }
 
       ids = (Vector) qDeliveries.get(qId);
       if (ids == null) {
