@@ -2,8 +2,6 @@
 
   <!-- Initializes the environment paths and properties -->
   <target name="init">
-    <!-- Get the user defined properties from file -->
-    <property file="../../../src/build.properties"/>
     <!-- Initialize the directory structure properties -->
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
@@ -22,10 +20,9 @@
   </target>
 
   <!-- Clean samples - delete generated files -->
-  <target name="clean" 
+  <target name="clean" depends="init"
           description="--> delete generated files">
     <delete dir="${obj.dir}"/>
-    <delete dir="${build.dir}"/>
   </target>
 
   <!-- Prepares the compilation phase -->
@@ -59,7 +56,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
     <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
     <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/> 
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
     <copy file="${conf.dir}/jndi.properties"
           todir="${obj.dir}"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
