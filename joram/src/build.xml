@@ -1,4 +1,4 @@
-<project default="build" basedir=".">
+<project default="ship.joram" basedir=".">
   <!-- Generic build file used by core developper -->
 
   <!-- Initializes properties -->
