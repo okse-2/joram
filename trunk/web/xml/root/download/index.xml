@@ -24,10 +24,6 @@
       href="../../privacy.xml">privacy policy</connect> for more
       informations). Those are only collected for statistical purposes.</p>
 
-      <p>For installation instructions , see the <a
-      href="../current/doc/install/">JORAM Installation Guide</a>. Check first
-      that your JORAM installation meets the minimum requirements.</p>
-      
       <form method="post" action="../../cgi-bin/joram/download.cgi">
 	
 	<input type="hidden" name="to" value="joram-download@objectweb.org"/>

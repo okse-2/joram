@@ -5,26 +5,64 @@
 <document>
   <properties>
     <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Version information</title>
+    <title>Releases info</title>
     <filename>versions.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
 
-    
-    <s1 name="Informations on JORAM 3.3">
+    <s1 name="joram3_4_0"> 
+      <s2 name="Support of SOAP as a client/server communication protocol">
+      <p>This version is only available in CVS with tag joram3_4_0. So far, 
+      Joram provided a TCP link between its clients and servers. Now,
+      it also provides a SOAP link, based on HTTP and XML.</p>
+     
+      <p>For more info on SOAP, check
+      <a href="http://www.w3.org/TR/SOAP ">W3C's SOAP</a> site.
+      </p>
 
-      <s2 name="New administration protocol">
+      <p>The support of the SOAP protocol led to re-architecturing 
+      the server side proxies (fr.dyade.aaa.mom.proxies) and client side
+      connection classes (fr.dyade.aaa.joram.Connection,
+      fr.dyade.aaa.joram.Driver, fr.dyade.aaa.joram.tcp,
+      fr.dyade.aaa.joram.soap).</p>
+
+      <p><a href="../doc/index.html">Documentation</a> is available, samples
+      have been added for testing. Testing requires the use of a servlet
+      container such as Apache's <a href="http://jakarta.apache.org/tomcat/">
+      Tomcat</a>.</p>
+      </s2>
+    </s1>
+
+    <s1 name="joram3_3_1"> 
+      <s2 name="Maintenance release of joram3_3_0">
+      This version comes as packages and is tagged joram3_3_1 in CVS. It
+      is similar to the joram3_3_0 version except that it corrects
+      a few bugs.
+      </s2>
+      <s2 name="Corrected bugs">
       <ul>
-      <li>This version of JORAM includes a totally refactored administration
+      <li>Non serializable ConnectionFactory objects, found by
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-02/msg00027.html">
+      Tony Thompson</a>. FactoryConfiguration and JoramUrl classes were not
+      serializable and thus, the serialization of a ConnectionFactory instance
+      would fail.</li>
+      <li>Bug in fr.dyade.aaa.agent.A3CMLDomain, found by
+      <a href="http://www.objectweb.org/wws/arc/joram/2003-02/msg00035.html">
+      Tony Thompson</a>. Launching an AgentServer with no DTD could not work.
+      </li>
+      </ul>
+      </s2>
+    </s1>
+    <s1 name="joram3_3_0">
+      <s2 name="New administration protocol">
+      This version of JORAM includes a totally refactored administration
       protocol. Administration is now based on JMS communication and is much
       more flexible than the past implementation. The new administration
       implementation comes with a new administration interface. Old
       administration codes should go on working even if they now use
       deprecated methods. 
-      </li>
-      </ul>
       </s2>
       <s2 name="Corrected bugs">
       <ul>
@@ -34,12 +72,21 @@
           A MessageConsumer.receive(timeOut) would not return if the connection
           it belongs to was in stopped mode, even if the timer expired.
       </li>
+      <li>Incorrect behaviour of temporary destinations, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-10/msg00011.html">
+          Armin Schieber</a>.
+          A client building a temporary destination from the 
+          Message.getJMSReplyTo() method was able to consume messages from
+          the temporary destination, and also to delete it, even if it did
+          not belong to the connection which actually created the temporary
+          destination. Also, it was not possible to retrieve a temporary
+          destination binded in JNDI.
+      </li>
       </ul>
       </s2>
     </s1>
 
-
-    <s1 name="Information on the current version">
+    <s1 name="joram3_2_0">
       <s2 name="New features">
       <ul>
       <li>A dead message queue is a destination getting undeliverable messages.
@@ -99,23 +146,6 @@
           server. If this latest server was down, the producer would block
           because of a synchronous call to the destination to check the access
           permission of the producer.</li>
-      </ul>
-      </s2>
-
-      <s2 name="Identified bugs (oops!)">
-      <ul>
-      <li>Incorrect behaviour of temporary destinations, found by
-          <a href="http://www.objectweb.org/wws/arc/joram/2002-10/msg00011.html">
-          Armin Schieber</a>.
-          A client building a temporary destination from the 
-          Message.getJMSReplyTo() method was able to consume messages from
-          the temporary destination, and also to delete it, even if it did
-          not belong to the connection which actually created the temporary
-          destination. Also, it was not possible to retrieve a temporary
-          destination binded in JNDI. These bugs have been corrected. The
-          impacted classes (Connection, Message, MessageConsumer,
-          ObjectFactory, TemporaryQueue, TemporaryTopic in 
-          fr.dyade.aaa.joram) are available in the CVS distribution.</li>
       </ul>
       </s2>
     </s1>

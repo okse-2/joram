@@ -13,6 +13,22 @@
   <body>
 
     <s1 name="Recent news">
+      <subtitle>March 14th, 2003: new JORAM releases.</subtitle>
+      <p>JORAM 3.3 is now available as a packaged version.
+      As a reminder, it provides a new administration implementation. In CVS it
+      is now tagged joram3_3_1. Compared to joram3_3_0, it is a maintenance
+      version, correcting a few bugs.
+      </p>
+      <p>JORAM 3.4 is available only in the CVS distribution. This
+      release tagged joram3_4_0 supports the SOAP protocol as a link between
+      a Joram client and a Joram platform. It rearchitectures the JMS proxy
+      server side, and the JMS connection client side, for supporting multiple 
+      protocols (currently TCP and SOAP).
+      </p>
+      <p>Both versions features are detailed in the
+      <a href="dev/versions.html">releases page</a> and
+      <a href="doc/index.html">documented</a>.</p>
+      <hr />
 
       <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
       available in the CVS distribution.</subtitle>
@@ -32,52 +48,6 @@
       </p>
       <hr />
 
-      <subtitle>October 21st, 2002: JORAM 3.2 provides new features!</subtitle>
-      <p>The main added values of Joram 3.2.0 are the new implementations of
-         <em>hierarchical topics</em> and <em>dead message queues</em>.
-      </p>
-      <p>According to the JMS specification, topics might have a hierarchical
-         structure allowing clients to subscribe or publish to given subtopics.
-         Joram's fully distributed structure allows a topic hierarchy to be
-         spread over many servers.
-      </p>
-      <p>A dead message queue is a destination getting undeliverable messages.
-         Messages might be considered undeliverable because they expired 
-         before delivery, because they were sent on a non accessible
-         destination or because they are constantly denied when consumed.
-      </p>
-      <p>This new version also provides a <em>flow control mechanism</em> in
-         order to prevent a Joram platform to be overloaded by a heavily
-         producing client.
-      </p>
-      <p><em>Bugs</em> have also been corrected: check the
-         <a href="dev/versions.html">versions info</a> page.
-      </p> 
-      <hr />
-
-      <subtitle>June 18th, 2002: JMS Test Suite tests for JMS 1.1 support!
-                </subtitle>
-      <p>The <em>JMS Test Suite</em> has its own
-         <a href="tests/index.html">page</a>.<br />
-	 The suite tests JMS features. All code of the test suite is
-	 pure JMS without any dependency to JORAM.
-     </p>
-      
-      <hr />
-
-     <subtitle>June 10th, 2002: JORAM now implements the new JMS 1.1
-        specification!</subtitle>
-      <p><em>Joram 3.1.0 fully implements JMS 1.1</em> providing unified
-        messaging interfaces for the Point-to-Point and Pub/Sub
-        domains. In the previous versions of Joram and JMS, the
-        client programming model made a strong distinction between
-        these two domains. Now, the domain unification simplifies
-        the model and allows to include PTP and Pub/Sub messaging in
-        a same transaction.</p>
-      <p>No need to modify existing applications: code written for
-        the previous Joram and JMS versions will work as is with
-        these new versions.</p>
-      
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
@@ -85,7 +55,7 @@
       <table border="0">
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
-	  <td valign="middle">Current release: 3.2.0</td>
+	  <td valign="middle">Current release: 3.3.1</td>
 	</tr>
       </table>
       
@@ -128,7 +98,9 @@
 	JORAM is welcome. JORAM, as an <em>open source</em> project,
 	also welcomes <em>external contributions</em>. Interested?
 	Contact <a
-	href="mailto:joram-team@objectweb.org">us</a>.</p>
+	href="mailto:joram-team@objectweb.org">us</a> or check the
+        <a href="dev/contrib.html">developer's corner</a>.
+        </p>
 
       </s2>  
     </s1>

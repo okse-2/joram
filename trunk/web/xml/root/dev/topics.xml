@@ -5,72 +5,41 @@
 <document>
   <properties>
     <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Development topics</title>
+    <title>Contribution topics</title>
     <filename>topics.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
 
-    <s1 name="Hot topics">
-      <subtitle>Administration refactoring</subtitle>
-      <p>A wide interest has been shown in the refactoring of
-      JORAM's administration. This topic includes:</p>
+    <s1 name="Administration">
+      <subtitle>Description</subtitle>
+      <p>This topic includes:</p>
       <ul>
-        <li>The refactoring of the administration interface as well as
-        of the internal communication protocol.</li>
-        <li>The development of a graphical tool for allowing easier and
+        <li>The development of graphical tools for allowing easier and
         friendlier admin work.</li>
-        <li>Supporting JMX for allowing an easier administration of JORAM
-            inside JOnAS.</li>
+        <li>Supporting JMX for a better integration of JORAM administration
+        within JOnAS.</li>
       </ul>
+      <subtitle>Status</subtitle>
+      <p>Refactored administration API and protocol are available in JORAM
+      3.3. Graphical tools and JMX support are still to come.</p>
+    </s1>
 
-      <subtitle>kJoram: a light Joram for portable devices</subtitle>
+    <s1 name = "kJoram">
+      <subtitle>Description</subtitle>
       <p>The aim of this work is to provide to client applications running
       on portable devices a gate for accessing Joram messaging
       functionnalities. This work includes:</p>
       <ul>
         <li>The development of an HTTP/SOAP proxy in Joram's server for
         allowing external communications based on HTTP and XML.</li>
-        <li>The development of a JMS-like client interface for applications
-        running on J2ME.</li>
+        <li>The development of a Joram client running on J2ME and accessing
+        the SOAP proxy through the kSoap interfaces.</li>
       </ul>
-      
-    </s1>
-
-    <s1 name="Administration refactoring">
-      <s2 name="Documentation">
-      <p>The new administration protocol has been implemented and is included
-      in JORAM 3.3 in the CVS distribution. It is described in a
-      <a href="../current/doc/newTutorial.pdf">PDF document</a>.</p>
-      </s2>
-
-      <s2 name="Contributions">
-      <p>Contributors also started to work. Many thanks to all of them.</p>
-      <ul>
-        <li>Fernando Rocha and Jose Carlos Waeny developed
-        a GUI prototype based on the current admin interface:
-        <a href="../download/adminGUI.zip">try it !</a></li>
-        <li>Jeff Mesnil provided us with an insight of what administration
-        looks like when based on JMX:
-        <a href="../download/adminJMX.zip">try it !</a></li>
-      </ul>
-      </s2>
-
-      <s2 name="Feeding back, or getting involved">
-      <p>The contact person for this topic is
-         <a href="mailto:joram-team@objectweb.org">Frederic Maistre</a> .</p>
-      </s2>
-
-    </s1>
-
-    <s1 name="kJoram">
-    <p>All the work on this topic has been done by Alexandre Gimard and Sylvain
-    Treboz at INRIA in Grenoble. They managed to develop the proxy server side
-    and the client interface and successfuly tested it.</p>
-    <p>Their work is still based on Joram's and JMS' old versions, and will be
-    adapted to the latest releases.</p>
-
+      <subtitle>Status</subtitle>
+      <p>SOAP server and client are available in JORAM 3.4. kSoap client is
+      still to be done.</p>
     </s1>
 
   </body>
