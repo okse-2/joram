@@ -16,4 +16,4 @@ CLASSPATH=$CLASSPATH:$JORAM_LIBS/log4j.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
 CLASSPATH=$CLASSPATH:$CONFIG_ENV
 
-$JAVA_HOME/bin/java org.objectweb.joram.client.tools.admin.AdminTool
+$JAVA_HOME/bin/java -classpath $CLASSPATH org.objectweb.joram.client.tools.admin.AdminTool

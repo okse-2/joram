@@ -26,4 +26,4 @@ then
 fi
 cd $RUN_DIR
 
-$JAVA_HOME/bin/java -DTransaction=fr.dyade.aaa.util.ATransaction fr.dyade.aaa.agent.AgentServer 0 ./s0
+$JAVA_HOME/bin/java -classpath $CLASSPATH -DTransaction=fr.dyade.aaa.util.ATransaction fr.dyade.aaa.agent.AgentServer 0 ./s0
