@@ -309,6 +309,28 @@ public class AdminImpl implements AdminItf
   }
 
   /**
+   * Creates or retrieves a destination with a given name on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the destination.
+   * @param name  The destination name.
+   * @param className Name of class to be instanciated.
+   * @param prop      Destination object properties.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String createDestination(int serverId, String name, String className, Properties prop)
+    throws ConnectException, AdminException {
+    CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className);
+    cdr.setProperties(prop);
+    reply = doRequest(cdr);
+    return ((CreateDestinationReply) reply).getDestId();
+  }
+
+  /**
    * Creates and deploys a destination on a given server.
    * <p>
    * The request fails if the target server does not belong to the platform,
