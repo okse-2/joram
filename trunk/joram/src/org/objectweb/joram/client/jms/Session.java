@@ -719,6 +719,8 @@ public class Session implements javax.jms.Session
    *
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
+   * @exception InvalidDestinationException  If the subscription does not 
+   *              exist.
    * @exception JMSException  If the request fails for any other reason.
    */
   public void unsubscribe(String name) throws JMSException
