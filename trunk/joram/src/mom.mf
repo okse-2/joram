@@ -1,0 +1,2 @@
+Class-Path: jakarta-regexp-1.2.jar log4j.jar owlogapi.jar owlogwrpl4j.jar xerces.jar JCup.jar jndi.jar
+Main-Class: fr.dyade.aaa.agent.AgentServer
