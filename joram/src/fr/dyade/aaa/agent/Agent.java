@@ -68,8 +68,8 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.10 2002-05-27 15:17:12 jmesnil Exp $"; 
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.11 2002-06-10 08:33:44 jmesnil Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -96,8 +96,8 @@ public abstract class Agent implements Serializable {
     agents = new Hashtable();
 
     // Get the logging monitor from current server MonologLoggerFactory
-    xlogmon = Debug.getLogger(Debug.A3Agent +
-                               ".#" + AgentServer.getServerId());
+    xlogmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                              ".#" + AgentServer.getServerId());
 
     // Initialize 
     if ((AgentServer.isTransient()) ||
@@ -305,7 +305,7 @@ public abstract class Agent implements Serializable {
    * By default it returns <code>Debug.A3Agent</code>.
    */
   protected String getLogTopic() {
-    return Debug.A3Agent;
+    return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
   private static String nullName = "";

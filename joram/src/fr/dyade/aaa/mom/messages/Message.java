@@ -331,6 +331,12 @@ public class Message implements Cloneable, Serializable
     return body;
   }
 
+  /** Returns the size of the bytes body of the message. */
+  public long getSize()
+  {
+    return body.length;
+  }
+
 
   /**
    * Returns the value corresponding to a given header field or property
@@ -343,15 +349,15 @@ public class Message implements Cloneable, Serializable
   {
     Object res = null;
 
-    if (name.equals("JMSMessageID")) {
+    if (name.equals("JMSMessageID"))
       res = id;
-    } else if (name.equals("JMSPriority")) {
+    else if (name.equals("JMSPriority"))
       res = new Integer(priority);
-    } else if (name.equals("JMSTimestamp")) {
+    else if (name.equals("JMSTimestamp"))
       res = new Long(timestamp);
-    } else if (name.equals("JMSCorrelationID")) {
+    else if (name.equals("JMSCorrelationID"))
       res = correlationId;
-    } else if (name.equals("JMSDeliveryMode")) {
+    else if (name.equals("JMSDeliveryMode")) {
       //XXX it would be better to check userIntHeader based on the constants
       //XXX of javax.jms.DeliveryMode instead of the hard-coded values.
       //XXX but without creating a dependency on javax.jms in mom package.
@@ -362,16 +368,16 @@ public class Message implements Cloneable, Serializable
         // JMSDeliveryMode is set to PERSISTENT
         res = "PERSISTENT";
       }
-    } else if (name.equals("JMSType")) {
+    }
+    else if (name.equals("JMSType"))
       res = userStringHeader;
-    } else {
+    else {
       // we've checked JMS header fields. now we have
       // to check JMS properties 
-      if (properties == null) {
-          res = null;
-      } else {
-          res = properties.get(name);
-      }
+      if (properties == null)
+        res = null;
+      else
+        res = properties.get(name);
     }
     
     if (res instanceof String) {
