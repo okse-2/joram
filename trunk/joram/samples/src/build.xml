@@ -10,6 +10,7 @@
     <property name="ship.dir" location="../../ship"/>
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../run"/>
+    <property name="conf.dir" location="../../config"/>
     <!-- Project classpath needed for execution -->
     <path id="project.class.path">
       <pathelement path="${java.class.path}/"/>
@@ -48,24 +49,28 @@
   <target name="simple_init" depends="init">
     <delete dir="${run.dir}"/>
     <mkdir dir="${run.dir}"/>
-    <copy file="${ship.dir}/run/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${src.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/centralized_jndi.properties"
-          tofile="${obj.dir}/jndi.properties"/>
-    <copy file="${src.dir}/centralized_a3servers.xml"
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          todir="${obj.dir}"/>
+    <copy file="${conf.dir}/centralized_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"/>
   </target>
 
   <!-- Initializes the distributed configuration -->
   <target name="distributed_init" depends="init">
     <mkdir dir="${run.dir}"/>
-    <copy file="${ship.dir}/run/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${src.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/clientDebug.cfg" todir="${run.dir}"/>
-    <copy file="${src.dir}/distributed_jndi.properties"
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/clientDebug.cfg" todir="${src.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
           tofile="${obj.dir}/jndi.properties"/>
-    <copy file="${src.dir}/distributed_a3servers.xml"
+    <copy file="${conf.dir}/distributed_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"/>
   </target>
 
