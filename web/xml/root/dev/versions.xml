@@ -74,6 +74,23 @@
           permission of the producer.</li>
       </ul>
       </s2>
+
+      <s2 name="Identified bugs (oops!)">
+      <ul>
+      <li>Incorrect behaviour of temporary destinations, found by
+          <a href="http://www.objectweb.org/wws/arc/joram/2002-10/msg00011.html">
+          Armin Schieber</a>.
+          A client building a temporary destination from the 
+          Message.getJMSReplyTo() method was able to consume messages from
+          the temporary destination, and also to delete it, even if it did
+          not belong to the connection which actually created the temporary
+          destination. Also, it was not possible to retrieve a temporary
+          destination binded in JNDI. These bugs have been corrected. The
+          impacted classes (Connection, Message, MessageConsumer,
+          ObjectFactory, TemporaryQueue, TemporaryTopic in 
+          fr.dyade.aaa.joram) are available in the CVS distribution.</li>
+      </ul>
+      </s2>
     </s1>
 
     <s1 name="What's up for the next version?">
