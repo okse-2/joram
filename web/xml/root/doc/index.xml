@@ -89,6 +89,13 @@
         <li>TheServerSide article about architectural issues: <a href="http://www.theserverside.com/resources/article.jsp?l=JMSArchitecture">"JMS Application Architectures"</a></li>
       </ul>
 
+      <subtitle>J2EE resource</subtitle>
+      <ul>
+        <li>A
+            <a href="http://www.wiley.com/WileyCDA/WileyTitle/productCd-0471444359,descCd-description.html">book</a>
+            talking about JORAM?</li>
+      </ul>
+
       <subtitle>J2ME related site</subtitle>
       <ul>
         <li>Wireless Developer Homepage:
@@ -103,7 +110,8 @@
         <li>Show cases involving JORAM are browsable on the
             <a href="http://www.scalagent.com">ScalAgent site</a>.</li>
       </ul>
+
     </s1>
   </body>
 
-</document>
+</document> 
