@@ -37,9 +37,9 @@
 
     <s1 name="joram3_3_1"> 
       <s2 name="Maintenance release of joram3_3_0">
-      This version comes as packages and is tagged joram3_3_1 in CVS. It
+      <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
       is similar to the joram3_3_0 version except that it corrects
-      a few bugs.
+      a few bugs.</p>
       </s2>
       <s2 name="Corrected bugs">
       <ul>
@@ -57,12 +57,12 @@
     </s1>
     <s1 name="joram3_3_0">
       <s2 name="New administration protocol">
-      This version of JORAM includes a totally refactored administration
+      <p>This version of JORAM includes a totally refactored administration
       protocol. Administration is now based on JMS communication and is much
       more flexible than the past implementation. The new administration
       implementation comes with a new administration interface. Old
       administration codes should go on working even if they now use
-      deprecated methods. 
+      deprecated methods. </p>
       </s2>
       <s2 name="Corrected bugs">
       <ul>
