@@ -103,11 +103,8 @@ public interface AdminItf
    * Stops a given server of the platform.
    *
    * @param serverId  Identifier of the server to stop.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
    */
-  public void stopServer(int serverId) throws ConnectException, AdminException;
+  public void stopServer(int serverId);
 
 
   /**
