@@ -13,6 +13,32 @@
   <body>
 
     <s1 name="Latest News">
+      <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
+      <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
+      JORAM platform to <em>heterogenous</em> client applications. Where
+      JORAM 3.4, with the support of SOAP as client communication protocol,
+      opened the platform to non-Java applications, the 3.6 release, with
+      its new kJORAM libraries, allows J2ME applications to use JORAM messaging
+      functionnalities. A J2ME application is a lightweight Java application
+      deployed and running on a mobile device such as a PDA or a smart
+      phone.</p>
+      <p>In the
+      <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
+      download area</a> you will find the usual JORAM sources and jars-only
+      packages (<code>joram-3.6.0-src.tgz</code> and
+      <code>joram-3.6.0.tgz</code>). You will also find two new packages 
+      holding the specific kJORAM client interfaces for the J2ME applications:
+      </p>
+      <ul>
+        <li><code>kjoram-3.6.0-src.tgz</code>, providing the kJORAM sources and
+            sample;</li>
+        <li><code>kjoram-3.6.0.tgz</code> providing the kJORAM libraries and
+            sample.</li>
+      </ul>
+      <p>JORAM and kJORAM are also available through a CVS checkout, tag
+        <em>joram3_6_0</em>.</p>
+      <p>The installation and samples guide have been updated to help you
+      having an easy and quick first go with kJORAM. Enjoy!</p>
       <subtitle>June 24th, 2003: JORAM 3.5 is available under the
                 LGPL licence!</subtitle>
       <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
@@ -29,19 +55,6 @@
       performances may be found.</p>
       <p>
       JORAM is now released under the <em>LGPL</em> licence.</p>
-
-      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
-      <p>JORAM 3.3 is now available as a packaged version.
-      As a reminder, it provides a new administration implementation. In CVS it
-      is now tagged joram3_3_1. Compared to joram3_3_0, it is a maintenance
-      version, correcting a few bugs.
-      </p>
-      <p>JORAM 3.4 is available only in the CVS distribution. This
-      release tagged joram3_4_0 supports the SOAP protocol as a link between
-      a Joram client and a Joram platform. It rearchitectures the JMS proxy
-      server side, and the JMS connection client side, for supporting multiple 
-      protocols (currently TCP and SOAP).
-      </p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
@@ -50,8 +63,8 @@
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
                width="287" border="0" hspace="2"/></td>
-	  <td valign="middle"><p>Current packaged release: 3.5.0</p>
-	                      <p>Latest CVS tag: joram3_5_0</p></td>
+	  <td valign="middle"><p>Current packaged release: 3.6.0</p>
+	                      <p>Latest CVS tag: joram3_6_0</p></td>
 	</tr>
       </table>
       
@@ -75,20 +88,20 @@
             applications</li>
           <li>TCP and SOAP (HTTP/XML) client-server communication
               protocols</li>
+          <li>Message persistence and guarantee of delivery</li>
           <li>Hierarchical topics</li>
           <li>Message selection</li>
-          <li>Plus a timer for pending transacted sessions</li>
-          <li>"Clusterizable" topics</li>
-          <li>Configurable dead message queue feature</li>
-          <li>Monitoring methods</li>
-          <li>Plus a "light" JNDI 1.1.2 implementation</li>
         </ul>
-
-        <p>JORAM also implements the ASF interfaces and methods for
-          performing JMS operations through an application server, and
-          is integrated to <a
-            href="http://jonas.objectweb.org/">JOnAS</a> EJB 
-	  platform.</p>
+        <p>JORAM also includes the following extra-features:</p>
+        <ul>
+          <li>A persistent and reliable JNDI server</li>
+          <li>A configurable dead message queue</li>
+          <li>Load balancing through clustered topics</li>
+          <li>A timer for pending transacted JMS sessions</li>
+          <li>Monitoring methods</li>
+          <li>Client libraries allowing J2ME applications to
+          access the JORAM platform in a JMS 1.1 "way"</li>
+        </ul>
       </s2>
 
       <s2 name="Getting Involved">

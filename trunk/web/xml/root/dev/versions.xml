@@ -14,9 +14,19 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Modifications (latest: July 24th, 2003)">
+    </s1>
+    <s1 name="joram3_6_0 (August 7, 2003)"> 
+      <p>This version provides the kJORAM libraries allowing J2ME applications
+      to connect to the JORAM platform.</p>
+      <s2 name="Modifications">
       <ul>
-      <li>Improvement of the closing of a dead connection; particularly, calling
+        <li>Major modifications occured to the CVS tree. kJORAM sources are
+        located in the <code>src/com/scalagent</code> directory. JORAM samples
+        have been moved to the <code>samples/src/joram</code> directory, and
+        the configuration files directory is now <code>samples/config</code>.
+        The kJORAM samples are located in the <code>samples/src/kjoram</code>
+        directory.</li>
+        <li>Improvement of the closing of a dead connection; particularly, calling
         <code>Connection.close()</code> within the <code>onException</code> method of
         an <code>ExceptionListener</code> would generate an infinite closing loop.
         The impacted class is <code>fr.dyade.aaa.joram.Driver</code>.

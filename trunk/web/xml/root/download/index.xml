@@ -13,13 +13,30 @@
   <body>
 
     <s1 name="Download JORAM free JMS Implementation">
+      <s2 name="Packages download">
+      <p>The latest release packages are:</p>
+      <ul>
+        <li><code>joram-3.6.0.tgz</code>, including JORAM libraries and
+        samples;</li>
+        <li><code>joram-3.6.0-src.tgz</code>, including JORAM sources and
+        samples;</li>
+        <li><code>kjoram-3.6.0.tgz</code>, including kJORAM libraries and 
+        sample;</li>
+        <li><code>kjoram-3.6.0-src.tgz</code>, including kJORAM sources and
+        sample.</li>
+     </ul>
+     <p>The download area is at
+     <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
+     ObjectWeb Forge</a>.</p>
+     </s2>
 
-      <p>You can download JORAM releases from the <a
-      href="http://forge.objectweb.org/project/showfiles.php?group_id=4">ObjectWeb
-      Forge</a>.</p>
+    <s2 name="CVS checkout">
+    <p>JORAM and kJORAM are available by checking out the <em>joram</em>
+    module from <a href="http://forge.objectweb.org/cvs/?group_id=4">
+    CVS</a>.</p>
+    <p>The latest release tag is <em>joram3_6_0</em>.</p>
+    </s2>
 
-      <p>To get the current development release, you have to use <a
-      href="http://forge.objectweb.org/cvs/?group_id=4">CVS</a>.</p>
     </s1>
     
   </body>
