@@ -43,16 +43,18 @@ public class XATopicSession extends XASession
    *
    * @exception JMSException  Actually never thrown.
    */
-  XATopicSession(XATopicConnection cnx, XAResourceMngr rm) throws JMSException
+  XATopicSession(XATopicConnection cnx, 
+                 TopicSession ts, 
+                 XAResourceMngr rm) throws JMSException
   {
-    super(cnx, new TopicSession(cnx, true, 0), rm);
+    super(cnx, ts, rm);
   }
 
   
   /** Returns a String image of this session. */
   public String toString()
   {
-    return "XATopicSess:" + ident;
+    return "XATopicSess:" + sess.getId();
   }
 
 

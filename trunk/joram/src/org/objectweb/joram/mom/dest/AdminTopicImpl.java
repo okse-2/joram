@@ -32,6 +32,9 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.UnknownServerException;
+import fr.dyade.aaa.agent.ConfigController;
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.agent.conf.A3CML;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.shared.admin.AdminRequest;
@@ -46,6 +49,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Properties;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -690,6 +695,16 @@ public class AdminTopicImpl extends TopicImpl {
         doProcess((Monitor_GetSubscriptions) request, replyTo, msgId);
       else if (request instanceof SpecialAdmin)
         doProcess((SpecialAdmin) request, replyTo, msgId);
+      else if (request instanceof AddServerRequest)
+        doProcess((AddServerRequest) request, replyTo, msgId);
+      else if (request instanceof AddDomainRequest)
+        doProcess((AddDomainRequest) request, replyTo, msgId);
+      else if (request instanceof RemoveServerRequest)
+        doProcess((RemoveServerRequest) request, replyTo, msgId);
+      else if (request instanceof RemoveDomainRequest)
+        doProcess((RemoveDomainRequest) request, replyTo, msgId);
+      else if (request instanceof GetConfigRequest)
+        doProcess((GetConfigRequest) request, replyTo, msgId);
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
@@ -729,7 +744,7 @@ public class AdminTopicImpl extends TopicImpl {
       // It's the local server, process the request.
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server stopped"));
-      AgentServer.stop(false);
+      AgentServer.stop(false, 1000);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
@@ -1792,6 +1807,135 @@ public class AdminTopicImpl extends TopicImpl {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault(destId.getTo()),
              new AdminRequestNot(replyTo, msgId, request));
+    }
+  }
+
+  private void doProcess(AddDomainRequest request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      ConfigController ctrl = AgentServer.getConfigController();
+      ctrl.beginConfig();
+      ctrl.addDomain(request.getDomainName(),
+                     "fr.dyade.aaa.agent.SimpleNetwork");
+      ctrl.addNetwork(request.getServerName(),
+                      request.getDomainName(),
+                      request.getPort());
+      ctrl.commitConfig();
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Domain added"));
+      if (replyTo != null) {
+        broadcastRequest(request);
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(RemoveDomainRequest request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      ConfigController ctrl = AgentServer.getConfigController();
+      ctrl.beginConfig();
+      ctrl.removeDomain(request.getDomainName());
+      ctrl.commitConfig();
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Domain removed"));
+      if (replyTo != null) {
+        broadcastRequest(request);
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+  
+  private void doProcess(AddServerRequest request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      ConfigController ctrl = AgentServer.getConfigController();
+      ctrl.beginConfig();
+      ctrl.addServer(request.getServerName(),
+                     request.getHostName(),
+                     request.getServerId());
+      ctrl.addNetwork(request.getServerName(),
+                      request.getDomainName(),
+                      request.getPort());
+      ctrl.addService(request.getServerName(),
+                      "org.objectweb.joram.mom.proxies.ConnectionManager",
+                      "root root");
+      ctrl.commitConfig();
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Server added"));
+      if (replyTo != null) {
+        broadcastRequest(request);
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(RemoveServerRequest request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      ConfigController ctrl = AgentServer.getConfigController();
+      ctrl.beginConfig();
+      ctrl.removeServer(request.getServerName());
+      ctrl.commitConfig();
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Server removed"));
+      if (replyTo != null) {
+        broadcastRequest(request);
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(GetConfigRequest request,
+                         AgentId replyTo,
+                         String msgId) {
+    try {
+      A3CMLConfig a3cmlConfig = AgentServer.getConfig();
+      ByteArrayOutputStream baos = 
+        new ByteArrayOutputStream();
+      PrintWriter out = new PrintWriter(baos);
+      A3CML.toXML(a3cmlConfig, out);
+      baos.flush();
+      baos.close();
+      String config = baos.toString();
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, config));
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void broadcastRequest(AdminRequest req) {
+    AdminRequestNot not = new AdminRequestNot(null, null, req);
+    Enumeration ids = AgentServer.getServersIds();
+    while (ids.hasMoreElements()) {
+      short id = ((Short) ids.nextElement()).shortValue();
+      if (id != AgentServer.getServerId()) {
+        Channel.sendTo(AdminTopic.getDefault(id), not);
+      }
     }
   }
 

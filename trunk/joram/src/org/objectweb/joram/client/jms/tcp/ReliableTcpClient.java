@@ -366,6 +366,18 @@ public class ReliableTcpClient {
     addresses.addElement(new ServerAddress(host, port));
   }
 
+  public String toString() {
+    return '(' + super.toString() + 
+      ",params=" + params + 
+      ",name=" + name + 
+      ",password=" + password + 
+      ",key=" + key + 
+      ",connection=" + connection + 
+      ",status=" + statusNames[status] + 
+      ",error=" + error + 
+      ",addresses=" + addresses + ')';
+  }
+
   static class ServerAddress {
     String hostName;
     int port;

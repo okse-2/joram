@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -19,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): Nicolas Tachker (Bull SA)
+ *                 ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.connector;
 
@@ -630,7 +632,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
-          
+
           connection =
             connectionFactory.createXAConnection(userName, password);
   
@@ -1032,7 +1034,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   {
     this.serverPort = serverPort.intValue();
   }
-
+  
   public void setConnectingTimer(java.lang.Integer connectingTimer) {
     this.connectingTimer = connectingTimer.intValue();
   }

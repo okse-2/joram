@@ -26,15 +26,16 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+
 /**
  * Implements the <code>javax.jms.XATopicConnection</code> interface.
  */
 public class XATopicConnection extends TopicConnection
-                               implements javax.jms.XATopicConnection
-{
+    implements javax.jms.XATopicConnection {
+
   /** Resource manager instance. */
   private XAResourceMngr rm;
-
 
   /**
    * Creates an <code>XATopicConnection</code> instance.
@@ -46,9 +47,9 @@ public class XATopicConnection extends TopicConnection
    * @exception IllegalStateException  If the server is not listening.
    */
   public XATopicConnection(FactoryParameters factoryParameters,
-                           ConnectionItf connectionImpl) throws JMSException
+                           RequestChannel requestChannel) throws JMSException
   {
-    super(factoryParameters, connectionImpl);
+    super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
 
@@ -60,13 +61,8 @@ public class XATopicConnection extends TopicConnection
    */
   public javax.jms.TopicSession
          createTopicSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    
-    return new TopicSession(this, transacted, acknowledgeMode);
+         throws JMSException {
+    return super.createTopicSession(transacted, acknowledgeMode);
   }
 
   /** 
@@ -76,10 +72,11 @@ public class XATopicConnection extends TopicConnection
    */
   public javax.jms.XATopicSession createXATopicSession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XATopicSession(this, rm);
+    checkClosed();
+    TopicSession s = new TopicSession(this, true, 0, getRequestMultiplexer());
+    XATopicSession xas = new XATopicSession(this, s, rm);
+    addSession(s);
+    return xas;
   }
 
   /** 
@@ -90,13 +87,8 @@ public class XATopicConnection extends TopicConnection
    */
   public javax.jms.Session
          createSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new Session(this, transacted, acknowledgeMode);
+         throws JMSException {
+    return super.createSession(transacted, acknowledgeMode);
   }
 
   /** 
@@ -106,10 +98,11 @@ public class XATopicConnection extends TopicConnection
    */
   public javax.jms.XASession createXASession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XASession(this, rm);
+    checkClosed();
+    Session s = new Session(this, true, 0, getRequestMultiplexer());
+    XASession xas = new XASession(this, s, rm);
+    addSession(s);
+    return xas;
   }
 
   /**

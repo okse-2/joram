@@ -41,15 +41,13 @@ public abstract class ConnectionFactory
   /** Object containing the factory's parameters. */
   protected FactoryParameters params;
 
-
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public ConnectionFactory(String host, int port)
-  {
+  public ConnectionFactory(String host, int port) {
     super(host + ":" + port);
     params = new FactoryParameters(host, port);
 
@@ -60,13 +58,11 @@ public abstract class ConnectionFactory
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
    */
-  public ConnectionFactory()
-  {}
+  public ConnectionFactory() {}
 
 
   /** Returns a string view of the connection factory. */
-  public String toString()
-  {
+  public String toString() {
     return "CF:" + params.getHost() + "-" + params.getPort();
   }
 
@@ -92,7 +88,7 @@ public abstract class ConnectionFactory
    * property.
    */
   final static String dfltPassword = "anonymous";
-
+ 
   /**
    * Returns default login name for connection.
    * Default value "anonymous" can be adjusted by setting the
@@ -110,30 +106,27 @@ public abstract class ConnectionFactory
   public static String getDefaultPassword() {
     return System.getProperty("JoramDfltPassword", dfltPassword);
   }
-
-  /**
+ 
+   /**
    * API method.
    *
    * @exception JMSSecurityException  If the default identification is
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection() throws JMSException
-  {
+  public javax.jms.Connection createConnection() throws JMSException {
     return createConnection(getDefaultLogin(), getDefaultPassword());
   }
 
 
   /** Returns the factory's configuration parameters. */
-  public FactoryParameters getParameters()
-  {
+  public FactoryParameters getParameters() {
     return params;
   } 
 
   
   /** Sets the naming reference of a connection factory. */
-  public Reference getReference() throws NamingException
-  {
+  public Reference getReference() throws NamingException {
     Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.host", params.getHost()));
     ref.add(new StringRefAddr("cFactory.port",

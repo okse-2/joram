@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologie
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -39,15 +39,13 @@ public abstract class XATopicConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XATopicConnectionFactory(String host, int port)
-  {
+  public XATopicConnectionFactory(String host, int port) {
     super(host, port);
   }
 
  
   /** Returns a string view of the connection factory. */
-  public String toString()
-  {
+  public String toString() {
     return "XATCF:" + params.getHost() + "-" + params.getPort();
   }
 
@@ -69,8 +67,7 @@ public abstract class XATopicConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XATopicConnection
-         createXATopicConnection() throws JMSException
-  {
+         createXATopicConnection() throws JMSException {
     return createXATopicConnection(ConnectionFactory.getDefaultLogin(),
                                    ConnectionFactory.getDefaultPassword());
   }

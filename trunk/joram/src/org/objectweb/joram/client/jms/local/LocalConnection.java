@@ -17,18 +17,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.local;
 
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.Driver;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import fr.dyade.aaa.agent.*;
 
@@ -39,9 +39,9 @@ import javax.jms.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class LocalConnection 
-    implements org.objectweb.joram.client.jms.ConnectionItf {
+    implements RequestChannel {
 
-  private AgentId proxyId;    
+  private AgentId proxyId;
 
   private int key;
 
@@ -83,7 +83,7 @@ public class LocalConnection
   }
 
   public void send(AbstractJmsRequest request) 
-    throws javax.jms.IllegalStateException {
+    throws Exception {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
@@ -97,15 +97,8 @@ public class LocalConnection
     }
   }
 
-  public Driver createDriver(Connection cnx) {
-    LocalDriver driver = 
-      new LocalDriver(cnx, this);
-    driver.setDaemon(true);
-    return driver;
-  }
-
-  AbstractJmsReply getReply() 
-    throws InterruptedException {
+  public AbstractJmsReply receive() 
+    throws Exception {
     AbstractJmsReply reply = 
       (AbstractJmsReply)replyQueue.get();
     replyQueue.pop();

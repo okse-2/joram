@@ -41,10 +41,13 @@ public class QueueBrowser implements javax.jms.QueueBrowser
 {
   /** The session the browser belongs to. */
   private Session sess;
+
   /** The queue the browser browses. */
   private Queue queue;
+
   /** The selector for filtering messages. */
   private String selector;
+
   /** <code>true</code> if the browser is closed. */
   private boolean closed = false;
 
@@ -75,10 +78,6 @@ public class QueueBrowser implements javax.jms.QueueBrowser
     this.queue = queue;
     this.selector = selector;
 
-    if (sess.browsers == null)
-      sess.browsers = new Vector();
-    sess.browsers.add(this);
-
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
@@ -86,7 +85,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
   /** Returns a string view of this browser. */
   public String toString()
   {
-    return "QueueBrowser:" + sess.ident;
+    return "QueueBrowser:" + sess.getId();
   }
 
   /** 
@@ -94,7 +93,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception IllegalStateException  If the browser is closed.
    */
-  public javax.jms.Queue getQueue() throws JMSException
+  public synchronized javax.jms.Queue getQueue() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
@@ -107,7 +106,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception IllegalStateException  If the browser is closed.
    */
-  public String getMessageSelector() throws JMSException
+  public synchronized String getMessageSelector() throws JMSException
   {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
@@ -124,7 +123,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *              queue.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public Enumeration getEnumeration() throws JMSException
+  public synchronized Enumeration getEnumeration() throws JMSException
   {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
@@ -135,7 +134,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
     // Sending a "browse" request:
     QBrowseRequest browReq = new QBrowseRequest(queue.getName(), selector);
     // Expecting an answer:
-    QBrowseReply reply = (QBrowseReply) sess.cnx.syncRequest(browReq);
+    QBrowseReply reply = (QBrowseReply) sess.syncRequest(browReq);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
@@ -161,13 +160,13 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void close() throws JMSException
+  public synchronized void close() throws JMSException
   {
     // Ignoring the call if the browser is already closed:
     if (closed)
       return;
 
-    sess.browsers.remove(this);
+    sess.closeBrowser(this);
     closed = true;
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))

@@ -33,8 +33,14 @@ import java.util.Enumeration;
  */
 public class AbstractJmsRequest implements java.io.Serializable
 {
-  /** Identifier of the request. */
-  private int requestId = -1;
+  /** 
+   * Identifier of the request. 
+   * Declared volatile to allow a thread that is not the
+   * thread sending the request to get the identifier
+   * in order to cancel it during a close.
+   */
+  private volatile int requestId = -1;
+
   /**
    * The request target is either a destination agent name, or a subscription 
    * name.
@@ -60,7 +66,9 @@ public class AbstractJmsRequest implements java.io.Serializable
   {}
 
 
-  /** Sets the request identifier. */
+  /** 
+   * Sets the request identifier. 
+   */
   public void setRequestId(int requestId)
   {
     this.requestId = requestId;
@@ -73,7 +81,7 @@ public class AbstractJmsRequest implements java.io.Serializable
   }
   
   /** Returns the request identifier. */
-  public int getRequestId()
+  public synchronized int getRequestId()
   {
     return requestId;
   }

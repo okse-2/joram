@@ -105,4 +105,10 @@ public class ConsumerUnsetListRequest extends AbstractJmsRequest
     req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
     return req;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",queueMode=" + queueMode + 
+      ",cancelledRequestId=" + cancelledRequestId + ')';
+  }
 }

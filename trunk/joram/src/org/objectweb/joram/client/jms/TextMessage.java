@@ -109,4 +109,10 @@ public class TextMessage extends Message implements javax.jms.TextMessage
     momMsg.clearBody();
     momMsg.setText(text);
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",text=" + text +
+      ",RObody=" + RObody + ')';
+  }
 }

@@ -85,4 +85,11 @@ public class AdminReply implements java.io.Serializable
   public Object getReplyObject() {
     return replyObj;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",success=" + success +
+      ",info=" + info + 
+      ",replyObj=" + replyObj + ')';
+  }
 }

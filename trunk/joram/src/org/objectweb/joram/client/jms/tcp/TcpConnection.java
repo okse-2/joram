@@ -24,9 +24,10 @@
 package org.objectweb.joram.client.jms.tcp;
 
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.Driver;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import java.io.*;
 import java.net.*;
@@ -41,9 +42,9 @@ import javax.jms.JMSSecurityException;
  * <p>
  * Requests and replies travel through the socket after serialization.
  */
-public class TcpConnection implements org.objectweb.joram.client.jms.ConnectionItf 
-{ 
-
+public class TcpConnection 
+    implements RequestChannel { 
+  
   private ReliableTcpClient tcpClient;
 
   /**
@@ -56,9 +57,10 @@ public class TcpConnection implements org.objectweb.joram.client.jms.ConnectionI
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public TcpConnection(FactoryParameters params, String name,
-                       String password) throws JMSException
-  {
+  public TcpConnection(FactoryParameters params, 
+                       String name,
+                       String password) 
+    throws JMSException {
     tcpClient = new ReliableTcpClient(
       params, 
       name,
@@ -70,39 +72,27 @@ public class TcpConnection implements org.objectweb.joram.client.jms.ConnectionI
   }
   
   /**
-   * Creates a driver for the connection.
-   *
-   * @param cnx  The calling <code>Connection</code> instance.
-   */
-  public Driver createDriver(Connection cnx)
-  {
-    Driver driver = new TcpDriver(cnx, tcpClient);
-    driver.setDaemon(true);
-    return driver;
-  }
-
-  /**
    * Sending a JMS request through the TCP connection.
    *
    * @exception IllegalStateException  If the connection is broken.
    */
   public synchronized void send(AbstractJmsRequest request)
-                           throws IllegalStateException
-  {
-    try {
-      tcpClient.send(request);
-    } catch (Exception exc) {
-      IllegalStateException jmsExc;
-      jmsExc = new IllegalStateException("The connection is broken.");
-      jmsExc.setLinkedException(exc);
-      throw jmsExc;
-    }
+    throws Exception {
+    tcpClient.send(request);
+  }
+
+  public AbstractJmsReply receive()
+    throws Exception {
+    return (AbstractJmsReply)tcpClient.receive();
   }
 
   /** Closes the TCP connection. */
-  public void close()
-  {
+  public void close() {
     tcpClient.close();
   }
 
+  public String toString() {
+    return '(' + super.toString() + 
+      ",tcpClient=" + tcpClient + ')';
+  }
 }

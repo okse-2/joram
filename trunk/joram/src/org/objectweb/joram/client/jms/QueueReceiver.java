@@ -52,7 +52,7 @@ public class QueueReceiver extends MessageConsumer
   /** Returns a string view of this receiver. */
   public String toString()
   {
-    return "QueueRec:" + sess.ident;
+    return "QueueRec:" + sess.getId();
   }
 
   /** 
@@ -62,9 +62,7 @@ public class QueueReceiver extends MessageConsumer
    */
   public javax.jms.Queue getQueue() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed receiver.");
-
+    checkClosed();
     return (javax.jms.Queue) dest;
   }
 }

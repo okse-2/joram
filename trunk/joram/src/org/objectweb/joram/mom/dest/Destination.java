@@ -110,7 +110,6 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    ((DestinationImpl) destImpl).strbuf = new StringBuffer();
   }
 
   /**

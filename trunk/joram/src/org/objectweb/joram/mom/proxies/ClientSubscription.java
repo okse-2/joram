@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,6 +37,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
@@ -163,10 +163,12 @@ class ClientSubscription implements java.io.Serializable {
                               this + ": created.");
   }
 
+
   public String toString()
   {
     return "ClientSubscription" + proxyId + name;
   }
+
 
   /** Returns the subscription's context identifier. */
   int getContextId()
@@ -209,6 +211,7 @@ class ClientSubscription implements java.io.Serializable {
   {
     return active;
   }
+
   
   /**
    * Re-initializes the client subscription.
@@ -304,7 +307,7 @@ class ClientSubscription implements java.io.Serializable {
                               this + ": reactivated.");
   }
 
-  /** De-activates the subscription, denies the non acknowledgded messages. */
+  /** De-activates the subscription, denies the non acknowledgded messages. */  
   void deactivate()
   {
     unsetListener();
@@ -381,6 +384,7 @@ class ClientSubscription implements java.io.Serializable {
   {
     this.threshold = threshold;
   }
+
   
   /**
    * Browses messages and keeps those which will have to be delivered
@@ -693,7 +697,7 @@ class ClientSubscription implements java.io.Serializable {
 
       deliveredIds.remove(id);
       msg = (Message) messagesTable.get(id);
-      
+
       // Message may be null if it is not valid anymore
       if (msg == null) continue denyLoop;
 
@@ -728,7 +732,7 @@ class ClientSubscription implements java.io.Serializable {
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
                                   " -> put back to the messages to deliver");
-       
+        
         i = 0;
         insertLoop:
         while (i < messageIds.size()) {
@@ -741,8 +745,8 @@ class ClientSubscription implements java.io.Serializable {
             if (currentO > msg.order) {
               break insertLoop;
             } else {
-          i++;
-        }
+              i++;
+            }
           } else {
             // Remove the invalid message
             messageIds.removeElementAt(i);

@@ -49,7 +49,7 @@ public class TopicPublisher extends MessageProducer
   /** Returns a string view of this receiver. */
   public String toString()
   {
-    return "TopicPub:" + sess.ident;
+    return "TopicPub:" + sess.getId();
   }
 
   /** 

@@ -26,6 +26,8 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
+
 /**
  * Implements the <code>javax.jms.QueueSession</code> interface.
  */
@@ -40,16 +42,18 @@ public class QueueSession extends Session implements javax.jms.QueueSession
    *
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  QueueSession(Connection cnx, boolean transacted,
-               int acknowledgeMode) throws JMSException
+  QueueSession(Connection cnx, 
+               boolean transacted,
+               int acknowledgeMode,
+               RequestMultiplexer mtpx) throws JMSException
   {
-    super(cnx, transacted, acknowledgeMode);
+    super(cnx, transacted, acknowledgeMode, mtpx);
   }
 
   /** Returns a String image of this session. */
   public String toString()
   {
-    return "QueueSess:" + ident;
+    return "QueueSess:" + getId();
   }
 
 
@@ -60,13 +64,13 @@ public class QueueSession extends Session implements javax.jms.QueueSession
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public javax.jms.QueueSender createSender(javax.jms.Queue queue)
+  public synchronized javax.jms.QueueSender createSender(javax.jms.Queue queue)
        throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new QueueSender(this, (Queue) queue);
+    checkClosed();
+    QueueSender qc = new QueueSender(this, (Queue) queue);
+    addProducer(qc);
+    return qc;
   }
 
   /**
@@ -80,10 +84,10 @@ public class QueueSession extends Session implements javax.jms.QueueSession
          createReceiver(javax.jms.Queue queue, String selector)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new QueueReceiver(this, (Queue) queue, selector);
+    checkClosed();
+    QueueReceiver qr = new QueueReceiver(this, (Queue) queue, selector);
+    addConsumer(qr);
+    return qr;
   }
 
   /**
@@ -96,10 +100,10 @@ public class QueueSession extends Session implements javax.jms.QueueSession
   public javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
-    return new QueueReceiver(this, (Queue) queue, null);
+    checkClosed(); 
+    QueueReceiver qr = new QueueReceiver(this, (Queue) queue, null);
+    addConsumer(qr);
+    return qr;
   }
 
   /** 

@@ -50,7 +50,7 @@ public class QueueSender extends MessageProducer
   /** Returns a string view of this receiver. */
   public String toString()
   {
-    return "QueueSend:" + sess.ident;
+    return "QueueSend:" + sess.getId();
   }
 
   /** 

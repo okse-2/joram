@@ -26,15 +26,16 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+
 /**
  * Implements the <code>javax.jms.XAQueueConnection</code> interface.
  */
 public class XAQueueConnection extends QueueConnection
-                               implements javax.jms.XAQueueConnection
-{
+    implements javax.jms.XAQueueConnection {
+
   /** Resource manager instance. */
   private XAResourceMngr rm;
-
 
   /**
    * Creates an <code>XAQueueConnection</code> instance.
@@ -46,12 +47,11 @@ public class XAQueueConnection extends QueueConnection
    * @exception IllegalStateException  If the server is not listening.
    */
   public XAQueueConnection(FactoryParameters factoryParameters,
-                           ConnectionItf connectionImpl) throws JMSException
+                           RequestChannel requestChannel) throws JMSException
   {
-    super(factoryParameters, connectionImpl);
+    super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
-
   
   /**
    * API method.
@@ -61,13 +61,8 @@ public class XAQueueConnection extends QueueConnection
    */
   public javax.jms.QueueSession
          createQueueSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new QueueSession(this, transacted, acknowledgeMode);
+    throws JMSException {
+    return super.createQueueSession(transacted, acknowledgeMode);
   }
 
   /** 
@@ -77,10 +72,11 @@ public class XAQueueConnection extends QueueConnection
    */
   public javax.jms.XAQueueSession createXAQueueSession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XAQueueSession(this, rm);
+    checkClosed();
+    QueueSession s = new QueueSession(this, true, 0, getRequestMultiplexer());
+    XAQueueSession xas = new XAQueueSession(this, s, rm);
+    addSession(s);
+    return xas;
   }
 
   /** 
@@ -93,11 +89,7 @@ public class XAQueueConnection extends QueueConnection
          createSession(boolean transacted, int acknowledgeMode)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new Session(this, transacted, acknowledgeMode);
+    return super.createSession(transacted, acknowledgeMode);
   }
 
   /** 
@@ -107,10 +99,11 @@ public class XAQueueConnection extends QueueConnection
    */
   public javax.jms.XASession createXASession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XASession(this, rm);
+    checkClosed();
+    Session s = new Session(this, true, 0, getRequestMultiplexer());
+    XASession xas = new XASession(this, s, rm);
+    addSession(s);
+    return xas;
   }
 
   /**

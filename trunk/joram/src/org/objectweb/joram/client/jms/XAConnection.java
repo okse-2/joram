@@ -29,16 +29,17 @@ import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 /**
  * Connection used within global transactions; an instance of this class
  * acts as a resource manager.
  */
-public class XAConnection extends Connection implements javax.jms.XAConnection
-{
+public class XAConnection extends Connection 
+    implements javax.jms.XAConnection {
+
   /** Resource manager instance. */
   private XAResourceMngr rm;
-
 
   /**
    * Creates a <code>XAConnection</code> instance.
@@ -50,13 +51,11 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
    * @exception IllegalStateException  If the server is not listening.
    */
   public XAConnection(FactoryParameters factoryParameters,
-                      ConnectionItf connectionImpl)
-         throws JMSException
-  {
-    super(factoryParameters, connectionImpl);
+                      RequestChannel requestChannel)
+    throws JMSException {
+    super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
-
 
   /** 
    * Creates a non-XA session.
@@ -68,11 +67,7 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
          createSession(boolean transacted, int acknowledgeMode)
          throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-
-    return new Session(this, transacted, acknowledgeMode);
+    return super.createSession(transacted, acknowledgeMode);
   }
 
   /** 
@@ -82,10 +77,11 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
    */
   public javax.jms.XASession createXASession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed"
-                                      + " connection.");
-    return new XASession(this, rm);
+    checkClosed();
+    Session s = new Session(this, true, 0, getRequestMultiplexer());
+    XASession xas = new XASession(this, s, rm);
+    addSession(s);
+    return xas;
   }
 
   /**

@@ -23,10 +23,14 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Properties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
@@ -37,7 +41,7 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  *
  * @see QueueImpl
  */
-public class Queue extends Destination {
+public class Queue extends Destination implements BagSerializer {
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -67,5 +71,15 @@ public class Queue extends Destination {
    */
   public DestinationImpl createsImpl(AgentId adminId) {
     return new QueueImpl(getId(), adminId);
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    ((QueueImpl) destImpl).readBag(in);
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    ((QueueImpl) destImpl).writeBag(out);
   }
 }

@@ -42,16 +42,18 @@ public class XAQueueSession extends XASession
    *
    * @exception JMSException  Actually never thrown.
    */
-  XAQueueSession(XAQueueConnection cnx, XAResourceMngr rm) throws JMSException
+  XAQueueSession(XAQueueConnection cnx, 
+                 QueueSession qs, 
+                 XAResourceMngr rm) throws JMSException
   {
-    super(cnx, new QueueSession(cnx, true, 0), rm);
+    super(cnx, qs, rm);
   }
 
   
   /** Returns a String image of this session. */
   public String toString()
   {
-    return "XAQueueSess:" + ident;
+    return "XAQueueSess:" + sess.getId();
   }
 
 

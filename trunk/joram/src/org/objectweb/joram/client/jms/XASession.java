@@ -43,40 +43,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * consuming messages, the actual sendings and acknowledgement being managed
  * by this XA wrapper.
  */
-public class XASession extends Session implements javax.jms.XASession {
+public class XASession implements javax.jms.XASession {
+
   /** The XA resource representing the session to the transaction manager. */
   private javax.transaction.xa.XAResource xaResource;
   
-  /**
-   * An XA Session actually wraps what looks like a "normal" session object.
-   */
   protected Session sess;
-
-
-  /**
-   * Constructs an <code>XASession</code>.
-   *
-   * @param cnx  The connection the session belongs to.
-   * @param rm   The resource manager.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  XASession(Connection cnx, XAResourceMngr rm) throws JMSException
-  {
-    super(cnx, true, 0);
-    sess = new Session(cnx, true, 0);
-    // The wrapped session is removed from the connection's list, as it
-    // is to be only seen by the wrapping XA session.
-    cnx.sessions.remove(sess);
-
-    xaResource = new XAResource(rm, sess);
-
-    // This session's resources are not used by XA sessions:
-    consumers = null;
-    producers = null;
-    sendings = null;
-    deliveries = null;
-  }
 
   /**
    * Constructs an <code>XASession</code>.
@@ -89,30 +61,23 @@ public class XASession extends Session implements javax.jms.XASession {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public XASession(Connection cnx, Session sess, XAResourceMngr rm)
-    throws JMSException
-  {
-    super(cnx, true, 0);
+  public XASession(Connection cnx, 
+                   Session sess, 
+                   XAResourceMngr rm)
+    throws JMSException {
     this.sess = sess;
-    // The wrapped session is removed from the connection's list, as it
-    // is to be only seen by the wrapping XA session.
-    cnx.sessions.remove(sess);
-
     xaResource = new XAResource(rm, sess);
+  }
 
-    // This session's resources are not used by XA sessions:
-    consumers = null;
-    producers = null;
-    sendings = null;
-    deliveries = null;
+  public final Session getDelegateSession() {
+    return sess;
   }
 
    /** Returns a String image of this session. */
   public String toString()
   {
-    return "XASess:" + ident;
+    return "XASess:" + sess.getId();
   }
-
   
   /**
    * API method.
@@ -121,9 +86,6 @@ public class XASession extends Session implements javax.jms.XASession {
    */
   public javax.jms.Session getSession() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-
     return sess;
   }
  
@@ -140,9 +102,7 @@ public class XASession extends Session implements javax.jms.XASession {
    */
   public boolean getTransacted() throws JMSException
   {
-    if (closed)
-      throw new IllegalStateException("Forbidden call on a closed session.");
-    return true;
+    return sess.getTransacted();
   }
 
   /**
@@ -261,65 +221,100 @@ public class XASession extends Session implements javax.jms.XASession {
   }
 
   /**
-   * API method inherited from session, but intercepted here for
-   * adapting its behaviour to the XA context.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void close() throws JMSException
-  {
-    // Ignoring the call if the session is already closed:
-    if (closed)
-      return;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "---" + this
-                                 + ": closing..."); 
-
-    // Emptying the current pending deliveries:
-    try {
-      sess.repliesIn.stop();
-    }
-    catch (InterruptedException iE) {}
-
-    // Stopping the wrapped session:
-    sess.stop();
-
-    // Closing the wrapped session's resources:
-    while (! sess.consumers.isEmpty())
-      ((MessageConsumer) sess.consumers.get(0)).close();
-    while (! sess.producers.isEmpty())
-      ((MessageProducer) sess.producers.get(0)).close();
-
-    sess.closed = true;
-
-    cnx.sessions.remove(this);
-
-    closed = true;
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
+  public void close() throws JMSException {
+    sess.close();
   }
-
   
   /** 
-   * API method inherited from session, but intercepted here for
-   * adapting its behaviour to the XA context.
-   * <p>
-   * This method processes asynchronous deliveries coming from a connection
-   * consumer by passing them to the wrapped session.
+   *
    */
-  public void run()
-  {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": running...");
-    sess.messageListener = super.messageListener;
-    sess.connectionConsumer = super.connectionConsumer;
-    sess.repliesIn = super.repliesIn;
+  public void run() {
     sess.run();
-    super.repliesIn.removeAllElements();
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": runned.");
+  }
+
+  public void unsubscribe(String name)
+    throws JMSException {
+    sess.unsubscribe(name);
+  }
+
+  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() 
+    throws JMSException {
+    return sess.createTemporaryQueue();
+  }
+
+  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() 
+    throws JMSException {
+    return sess.createTemporaryTopic();
+  }
+
+  public synchronized javax.jms.Topic createTopic(
+    String topicName) 
+    throws JMSException {
+    return sess.createTopic(topicName);
+  }
+
+  public javax.jms.Queue createQueue(String queueName) 
+    throws JMSException {
+    return sess.createQueue(queueName);
+  }
+
+  public void setMessageListener(
+    javax.jms.MessageListener messageListener)
+    throws JMSException {
+    sess.setMessageListener(messageListener);
+  }
+
+  public javax.jms.MessageListener 
+      getMessageListener() 
+    throws JMSException {
+    return sess.getMessageListener();
+  }
+
+  public int getAcknowledgeMode() 
+    throws JMSException {
+    return sess.getAcknowledgeMode();
+  }
+
+  public javax.jms.TextMessage createTextMessage() 
+    throws JMSException {
+    return sess.createTextMessage();
+  }
+
+  public javax.jms.TextMessage createTextMessage(String text)
+    throws JMSException {
+    return sess.createTextMessage(text);
+  }
+
+  public javax.jms.StreamMessage createStreamMessage()
+    throws JMSException {
+    return sess.createStreamMessage();
+  }
+
+  public javax.jms.ObjectMessage createObjectMessage()
+    throws JMSException {
+    return sess.createObjectMessage();
+  }
+
+  public javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj)
+    throws JMSException {
+    return sess.createObjectMessage(obj);
+  }
+
+  public javax.jms.Message createMessage() 
+    throws JMSException {
+    return sess.createMessage();
+  }
+
+  public javax.jms.MapMessage createMapMessage()
+    throws JMSException {
+    return sess.createMapMessage();
+  }
+
+  public javax.jms.BytesMessage createBytesMessage()
+    throws JMSException {
+    return sess.createBytesMessage();
   }
 }
