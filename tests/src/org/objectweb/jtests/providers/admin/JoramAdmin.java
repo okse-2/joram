@@ -43,6 +43,15 @@ public class JoramAdmin implements Admin {
 	return ictx;
     }
   
+    public void createConnectionFactory(String name) {
+	try {
+	    fr.dyade.aaa.joram.ConnectionFactory cf = admin.createConnectionFactory();
+	    ictx.rebind(name, cf);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+    }
+  
     public void createQueueConnectionFactory(String name) {
 	try {
 	    fr.dyade.aaa.joram.QueueConnectionFactory qcf = admin.createQueueConnectionFactory();
@@ -94,6 +103,14 @@ public class JoramAdmin implements Admin {
     public void deleteTopic(String name) {
 	try {
 	    admin.deleteDestination(name);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+    }
+
+    public void deleteConnectionFactory(String name) {
+	try {
+	    ictx.unbind(name);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
