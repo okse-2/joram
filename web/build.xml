@@ -40,7 +40,7 @@
   <!-- prepare -->
   <!-- ===================================================================== -->
   <target name="prepare"
-	  depends="unzip_common_web,check"
+	  depends="unzip_common_web,install_common_web, check"
 	  description="Prepare the website build">	  
 
     <!-- mkdirs -->
@@ -71,11 +71,6 @@
       </fileset>
     </copy>
     
-    <!-- copy common images into ${common.images.dest} -->
-    <copy todir="${common.images.dest}">
-      <fileset dir="${common.images.src}" />
-    </copy>
-
     <!-- copy HTML files into ${html.dest} -->
     <copy todir="${html.dest}">
       <fileset dir="${html.src}" />
@@ -135,6 +130,20 @@
 	   dest="${common.dir}"
 	   overwrite="false"/>
 
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- install_common_web -->
+  <!-- ===================================================================== -->
+
+  <target name="install_common_web"
+	  description="Copy common images into ${common.images.dest}"
+	  if="install.common">
+
+    <copy todir="${common.images.dest}">
+      <fileset dir="${common.images.src}" />
+    </copy>
+    
   </target>
 
   <!-- ===================================================================== -->
@@ -211,6 +220,7 @@
 common.html.dest=${common.html.dest}
 html.dest=${html.dest}
 cgi.dest=${cgi.dest}
+install.common=${install.common}
 validation.required=${validation.required}
 release-files=${release-files}
 
