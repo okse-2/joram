@@ -104,6 +104,7 @@
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
         <include name="fr/dyade/aaa/agent/management/*.class"/>
         <include name="fr/dyade/aaa/ip/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
         <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/jndi2/server/*.class"/>
