@@ -53,6 +53,17 @@
 	  <tr>
 	    <td align="right" valign="top">Release: </td>
 	    <td>
+	      <input type="radio" name="file" value="joram-3.0.1.tgz" checked="checked"/>JORAM 3.0.1 jars (tgz)<br/>
+	      <input type="radio" name="file" value="joram-3.0.1.zip"/>JORAM 3.0.1 jars (zip)<br/>
+	      
+	      <input type="radio" name="file" value="joram-3.0.1-src.tgz"/>JORAM 3.0.1 sources (tgz)<br/>
+	      <input type="radio" name="file" value="joram-3.0.1-src.zip"/>JORAM 3.0.1 sources (zip)
+	    </td>
+	  </tr>
+
+	  <tr>
+	    <td align="right" valign="top">Release: </td>
+	    <td>
 	      <input type="radio" name="file" value="joram-3.0.0.tgz" checked="checked"/>JORAM 3.0.0 jars (tgz)<br/>
 	      <input type="radio" name="file" value="joram-3.0.0.zip"/>JORAM 3.0.0 jars (zip)<br/>
 	      
