@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -26,13 +27,19 @@ package org.objectweb.joram.shared.client;
 import java.util.*;
 
 /**
- * An <code>XASessPrepare</code> instance is used by an <code>XASession</code>
- * for sending messages and acknowledgements to the proxy.
+ * An <code>XACnxPrepare</code> instance is used by an
+ * <code>XAConnection</code> for sending messages and acknowledgements to
+ * the proxy.
  */
-public class XASessPrepare extends AbstractJmsRequest
+public class XACnxPrepare extends AbstractJmsRequest
 {
-  /** Identifier of the resource and the preparing transaction. */
-  private String id;
+  /** Transaction branch qualifier. */
+  private byte[] bq;
+  /** Transaction identifier format. */
+  private int fi;
+  /** Global transaction identifier. */
+  private byte[] gti;
+
   /** Vector of <code>ProducerMessages</code> instances. */
   private Vector sendings;
   /** Vector of <code>SessAckRequest</code> instances. */
@@ -40,46 +47,81 @@ public class XASessPrepare extends AbstractJmsRequest
   
 
   /**
-   * Constructs an <code>XASessPrepare</code> instance.
+   * Constructs an <code>XACnxPrepare</code> instance.
    *
-   * @param id  Identifier of the resource and the preparing transaction.
+   * @param bq        Transaction branch qualifier.
+   * @param fi        Transaction identifier format.
+   * @param gti       Global transaction identifier.
    * @param sendings  Vector of <code>ProducerMessages</code> instances.
-   * @param acks  Vector of <code>SessAckRequest</code> instances.
+   * @param acks      Vector of <code>SessAckRequest</code> instances.
    */
-  public XASessPrepare(String id, Vector sendings, Vector acks)
+  public XACnxPrepare(byte[] bq,
+                       int fi, 
+                       byte[] gti,
+                       Vector sendings,
+                       Vector acks)
   {
     super();
-    this.id = id;
+    this.bq = bq;
+    this.fi = fi;
+    this.gti = gti;
     this.sendings = sendings;
     this.acks = acks;
   }
 
-  public XASessPrepare() {
+  public XACnxPrepare() {
     super(null);
     sendings = new Vector();
     acks = new Vector();
   }
 
-  /** Returns the identifier of the resource and the commiting transaction. */
-  public String getId()
+  /** Returns the transaction branch qualifier. */
+  public byte[] getBQ()
   {
-    return id;
+    return bq;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  /** Returns the transaction identifier format. */
+  public int getFI()
+  {
+    return fi;
+  }
+
+  /** Returns the global transaction identifier. */
+  public byte[] getGTI()
+  {
+    return gti;
   }
 
   /** Returns the vector of <code>ProducerMessages</code> instances. */
   public Vector getSendings()
   {
+    if (sendings == null)
+      sendings = new Vector();
     return sendings;
   }
 
   /** Returns the vector of <code>SessAckRequest</code> instances. */
   public Vector getAcks()
   {
+    if (acks == null)
+      acks = new Vector();
     return acks;
+  }
+
+  public void setBQ(byte[] bq)
+  {
+    this.bq = bq;
+  }
+
+  public void setFI(int fi)
+  {
+    this.fi = fi;
+  }
+
+  public void setGTI(byte[] gti)
+  {
+    this.gti = gti;
   }
 
   public void addProducerMessages(ProducerMessages pm) {
@@ -92,8 +134,9 @@ public class XASessPrepare extends AbstractJmsRequest
 
   public Hashtable soapCode() {
     Hashtable h = super.soapCode();
-    if (id != null)
-      h.put("id",id);
+    h.put("bq",bq);
+    h.put("fi", new Integer(fi));
+    h.put("gti", gti);
     int size = sendings.size();
     if (size > 0) {
       Hashtable [] arrayPM = new Hashtable[size];
@@ -120,10 +163,12 @@ public class XASessPrepare extends AbstractJmsRequest
   }
 
   public static Object soapDecode(Hashtable h) {
-    XASessPrepare req = new XASessPrepare();
+    XACnxPrepare req = new XACnxPrepare();
+    req.setBQ((byte[]) h.get("bq"));
+    req.setFI(((Integer) h.get("fi")).intValue());
+    req.setGTI((byte[]) h.get("gti"));
     req.setRequestId(((Integer) h.get("requestId")).intValue());
     req.setTarget((String) h.get("target"));
-    req.setId((String) h.get("id"));
     Map [] arrayPM = (Map []) h.get("arrayPM");
     if (arrayPM != null) {
       for (int i = 0; i<arrayPM.length; i++)

@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -26,13 +27,19 @@ package org.objectweb.joram.shared.client;
 import java.util.*;
 
 /**
- * An <code>XASessRollback</code> instance is used by an <code>XASession</code>
- * for rolling back the operations performed during a transaction.
+ * An <code>XACnxRollback</code> instance is used by an
+ * <code>XAConnection</code> for rolling back the operations performed
+ * during a transaction.
  */
-public class XASessRollback extends AbstractJmsRequest
+public class XACnxRollback extends AbstractJmsRequest
 {
-  /** Identifier of the resource and the rolling back transaction. */
-  private String id;
+  /** Transaction branch qualifier. */
+  private byte[] bq;
+  /** Transaction identifier format. */
+  private int fi;
+  /** Global transaction identifier. */
+  private byte[] gti;
+
   /** Table holding the identifiers of the messages to deny on queues. */
   private Hashtable qDenyings = null;
   /** Table holding the identifiers of the messages to deny on subs. */
@@ -40,20 +47,25 @@ public class XASessRollback extends AbstractJmsRequest
 
 
   /**
-   * Constructs an <code>XASessRollback</code> instance.
+   * Constructs an <code>XACnxRollback</code> instance.
    *
-   * @param id  Identifier of the resource and the rolling back transaction.
+   * @param bq        Transaction branch qualifier.
+   * @param fi        Transaction identifier format.
+   * @param gti       Global transaction identifier.
    */
-  public XASessRollback(String id)
+  public XACnxRollback(byte[] bq, int fi, byte[] gti)
   {
     super(null);
-    this.id = id;
+    this.bq = bq;
+    this.fi = fi;
+    this.gti = gti;
   }
 
   /**
-   * Constructs an <code>XASessRollback</code> instance.
+   * Constructs an <code>XACnxRollback</code> instance.
    */
-  public XASessRollback() {}
+  public XACnxRollback() {}
+
  
   /**
    * Adds a vector of denied messages' identifiers.
@@ -78,17 +90,38 @@ public class XASessRollback extends AbstractJmsRequest
     }
   }
 
-  /** Sets the identifier. */
-  public void setId(String id)
+
+  public void setBQ(byte[] bq)
   {
-    this.id = id;
+    this.bq = bq;
+  }
+
+  public void setFI(int fi)
+  {
+    this.fi = fi;
+  }
+
+  public void setGTI(byte[] gti)
+  {
+    this.gti = gti;
   }
   
-  
-  /** Returns the id of the resource and the rolling back transaction. */
-  public String getId()
+  /** Returns the transaction branch qualifier. */
+  public byte[] getBQ()
   {
-    return id;
+    return bq;
+  }
+
+  /** Returns the transaction identifier format. */
+  public int getFI()
+  {
+    return fi;
+  }
+
+  /** Returns the global transaction identifier. */
+  public byte[] getGTI()
+  {
+    return gti;
   }
 
   /** Returns the queues enumeration. */
@@ -137,8 +170,9 @@ public class XASessRollback extends AbstractJmsRequest
 
   public Hashtable soapCode() {
     Hashtable h = super.soapCode();
-    if (id != null)
-      h.put("id",id);
+    h.put("bq",bq);
+    h.put("fi", new Integer(fi));
+    h.put("gti", gti);
     if (qDenyings != null)
       h.put("qDenyings",qDenyings);
     if (subDenyings != null)
@@ -147,10 +181,12 @@ public class XASessRollback extends AbstractJmsRequest
   }
 
   public static Object soapDecode(Hashtable h) {
-    XASessRollback req = new XASessRollback();
+    XACnxRollback req = new XACnxRollback();
     req.setRequestId(((Integer) h.get("requestId")).intValue());
     req.setTarget((String) h.get("target"));
-    req.setId((String) h.get("id"));
+    req.setBQ((byte[]) h.get("bq"));
+    req.setFI(((Integer) h.get("fi")).intValue());
+    req.setGTI((byte[]) h.get("gti"));
     req.setQDenyings((Hashtable) h.get("qDenyings"));
     req.setSubDenyings((Hashtable) h.get("subDenyings"));
     return req;
