@@ -14,12 +14,9 @@
 
   <s1 name="Road map">
   
-    <subtitle>Joram 4.1 (mid 2004)</subtitle>
+    <subtitle>Joram 4.2 (end 2004)</subtitle>
     <p>This release will provide:</p>
     <ul>
-      <li>A JCA 1.5 standard Resource Adapter for plugging Joram into any
-      JCA compliant platform</li>
-      <li>Clustering features for Load Balancing and Fail Over</li>
       <li>Clustering features providing High Availability</li>
     </ul>
 
