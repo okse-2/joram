@@ -764,19 +764,24 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   static Destination createQueue(String name)
          throws AdminException, NamingException
   {
+    Context ctx = new InitialContext();
     try {
-      Queue queue = Queue.create(name);
-      queue.setFreeReading();
-      queue.setFreeWriting();
-      AdapterTracing.debugINFO("  - Queue [" + name + "] has been created.");
-      Context ctx = new InitialContext();
-      ctx.rebind(name, queue);
-      register(new LocalQueue(queue));
-      return queue;
+      return (Queue) ctx.lookup(name);
     }
-    catch (ConnectException exc) {
-      throw new AdminException("createQueue() failed: admin connection "
-                               + "has been lost.");
+    catch (javax.naming.NamingException exc) {
+      try {
+        Queue queue = Queue.create(name);
+        queue.setFreeReading();
+        queue.setFreeWriting();
+        AdapterTracing.debugINFO("  - Queue [" + name + "] has been created.");
+        ctx.rebind(name, queue);
+        register(new LocalQueue(queue));
+        return queue;
+      }
+      catch (ConnectException exc2) {
+        throw new AdminException("createQueue() failed: admin connection "
+                                 + "has been lost.");
+      }
     }
   }
 
@@ -790,19 +795,24 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   static Destination createTopic(String name)
          throws AdminException, NamingException
   {
+    Context ctx = new InitialContext();
     try {
-      Topic topic = Topic.create(name);
-      topic.setFreeReading();
-      topic.setFreeWriting();
-      AdapterTracing.debugINFO("  - Topic [" + name + "] has been created.");
-      Context ctx = new InitialContext();
-      ctx.rebind(name, topic);
-      register(new LocalTopic(topic));
-      return topic;
+      return (Topic) ctx.lookup(name);
     }
-    catch (ConnectException exc) {
-      throw new AdminException("createTopic() failed: admin connection "
-                               + "has been lost.");
+    catch (javax.naming.NamingException exc) {
+      try {
+        Topic topic = Topic.create(name);
+        topic.setFreeReading();
+        topic.setFreeWriting();
+        AdapterTracing.debugINFO("  - Topic [" + name + "] has been created.");
+        ctx.rebind(name, topic);
+        register(new LocalTopic(topic));
+        return topic;
+      }
+      catch (ConnectException exc2) {
+        throw new AdminException("createTopic() failed: admin connection "
+                                 + "has been lost.");
+      }
     }
   }
 
