@@ -153,6 +153,7 @@
     <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/>
     <!-- copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/ -->
     <!-- copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/ -->
@@ -164,8 +165,8 @@
     <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-kclient.jar" todir="${ship.dir}/lib"/>
-    <mkdir dir="${ship.dir}/licences"/>
-    <copy todir="${ship.dir}/licences" flatten="yes">
+    <mkdir dir="${ship.dir}/licenses"/>
+    <copy todir="${ship.dir}/licenses" flatten="yes">
       <fileset dir="${licenses.dir}">
         <include name="APACHE_LICENSE.TXT"/>
         <include name="CUP_LICENSE.TXT"/>
@@ -294,7 +295,7 @@
         <include name="samples/src/**"/>
         <include name="samples/config/**"/>
         <include name="samples/bin/**"/>
-        <include name="licences/**"/>
+        <include name="licenses/**"/>
       </tarfileset>
     </tar>
     <delete file="${releases.dir}/joram-${version}-src.tar.tgz"/>
