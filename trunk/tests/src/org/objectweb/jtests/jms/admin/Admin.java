@@ -54,6 +54,7 @@ public interface Admin {
      * Creates a <code>ConnectionFactory</code> and makes it available 
      *from JNDI with name <code>name</code>.
      *
+     * @since JMS 1.1
      * @param name JNDI name of the <code>ConnectionFactory</code>
      */
     public void createConnectionFactory(String name);
@@ -107,6 +108,7 @@ public interface Admin {
     /** 
      * Removes the <code>ConnectionFactory</code> of name <code>name</code> from JNDI and deletes it
      *
+     * @since JMS 1.1
      * @param name JNDI name of the <code>ConnectionFactory</code>
      */
     public void deleteConnectionFactory (String name);
