@@ -33,14 +33,14 @@ import javax.jms.JMSException;
  */
 public class ConnectionMetaData implements javax.jms.ConnectionMetaData
 {
-  private static int jmsMajorVersion = 1;
-  private static int jmsMinorVersion = 1;
-  private static String jmsProviderName = "Joram";
-  private static String jmsVersion = "1.1";
-  private static int providerMajorVersion = 4;
-  private static int providerMinorVersion = 1;
-  private static String providerVersion = "4.1.0";
-  private static Vector jmsxProperties = new Vector();
+  public final static int jmsMajorVersion = 1;
+  public final static int jmsMinorVersion = 1;
+  public final static String jmsProviderName = "Joram";
+  public final static String jmsVersion = "1.1";
+  public final static int providerMajorVersion = 4;
+  public final static int providerMinorVersion = 1;
+  public final static String providerVersion = "4.1.4";
+  public final static Vector jmsxProperties = new Vector();
 
   static
   {

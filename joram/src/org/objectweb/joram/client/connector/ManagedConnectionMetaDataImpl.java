@@ -23,8 +23,8 @@
 package org.objectweb.joram.client.connector;
 
 import javax.resource.ResourceException;
-
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 /**
  * A <code>ManagedConnectionMetaDataImpl</code> instance provides information
@@ -51,13 +51,13 @@ public class ManagedConnectionMetaDataImpl
   /** Returns JORAM's name. */
   public String getEISProductName() throws ResourceException
   {
-    return "JORAM";
+    return ConnectionMetaData.jmsProviderName;
   }
 
   /** Returns the current JORAM release number. */
   public String getEISProductVersion() throws ResourceException
   {
-    return "4.1.0";
+    return ConnectionMetaData.providerVersion;
   }
 
   /** Returns 0 as JORAM as no upper limit of active connections. */
