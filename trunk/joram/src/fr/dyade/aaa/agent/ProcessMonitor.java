@@ -42,8 +42,8 @@ import java.io.*;
   */
 class ProcessMonitor extends Driver implements Serializable {
 
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.3 2000-10-05 15:15:22 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessMonitor.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
 
   transient Process process;	/** monitored process */
   AgentId agent;		/** registering agent */
@@ -64,15 +64,18 @@ class ProcessMonitor extends Driver implements Serializable {
     * <code>ProcessManager</code> object.
     */
   public void run() {
-    int exitValue;
+    int exitValue = 0;
     String errorMessage = null;
     try {
-      while (true) {
-	try {
-	  exitValue = process.waitFor();
+      while (isRunning) {
+	  canStop = true;
+	  try {
+	      exitValue = process.waitFor();
+	  } catch (InterruptedException exc) {
+	      continue;
+	  }
+	  canStop = false;
 	  break;
-	} catch (InterruptedException exc) {
-	}
       }
       if (exitValue != 0) {
 	// get the error stream as error message
@@ -89,4 +92,6 @@ class ProcessMonitor extends Driver implements Serializable {
       Debug.trace("failure in ProcessMonitor.run(): " + exc, false);
     }
   }
+
+  public void close() {}
 }

@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  */
 abstract public class Channel {
 
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.4 2000-10-20 13:56:13 tachkeni Exp $";
 
   public static Channel channel = null;
 
@@ -204,7 +204,15 @@ final class TransactionChannel extends Channel {
 
   synchronized void dispatch() throws IOException {
     while (! mq.isEmpty()) {
-      Message msg = (Message) mq.get();
+      Message msg = null;
+      while (msg == null) {
+	  try {
+	      msg = (Message) mq.get();
+	  } catch(InterruptedException e) {
+	      msg = null; 
+	      continue;
+	  }
+      }
       if (msg.from == null) msg.from = AgentId.localId;
       msg.update = mclock.getSendUpdate(msg.to.to);
       msg.save();

@@ -31,8 +31,8 @@ import fr.dyade.aaa.util.*;
 
 class DriverOut extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.4 2000-10-05 15:15:20 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.5 2000-10-20 13:56:13 tachkeni Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;
@@ -68,21 +68,40 @@ class DriverOut extends Driver {
   }
 
   public void run() {
-    Notification m;
+    Notification m = null;
     mainLoop:
-    while (true) {
-	m = (Notification) mq.get();
-      if (Debug.driversData)
-	Debug.trace("out driver write " + m, false);
-      try {
-	out.writeNotification(m);
-      } catch (IOException exc) {
-	if (Debug.error)
-	  Debug.trace("out driver write " + m, exc);
-	break mainLoop;
-      }
-      mq.pop();
+    while (isRunning) {
+	try {
+	    canStop = true;
+	    m = (Notification) mq.get();
+	    if (! isRunning)
+		break;
+	    if (Debug.driversData)
+		Debug.trace("out driver write " + m, false);
+	    canStop = false;
+	    out.writeNotification(m);
+	} catch (IOException exc) {
+	    if (Debug.error)
+		Debug.trace("out driver write " + m, exc);
+	    break mainLoop;
+	} catch (InterruptedException exc) {
+	    if (Debug.error)
+		Debug.trace("out driver write " + m, exc);
+	    break mainLoop;
+	}
+
+	mq.pop();
     }
+  }
+    
+  /**
+   * Close the OutputStream.
+   */
+    public void close() {
+    try {
+      out.close();
+    } catch (Exception exc) {}
+    out = null;
   }
 
   /**

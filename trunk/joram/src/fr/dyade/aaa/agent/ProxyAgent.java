@@ -30,7 +30,7 @@ import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.4 2000-10-05 15:15:22 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.5 2000-10-20 13:56:14 tachkeni Exp $"; 
 
 
   public static final int DRIVER_IN = 1;
@@ -313,4 +313,6 @@ class DriverConnect extends Driver {
       proxy.createDrivers();
     } while (multipleCnx);
   }
+
+  public void close() {}
 }
