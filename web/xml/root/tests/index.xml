@@ -21,7 +21,7 @@
     <s1 name="About">
       <p>This Test Suite is available under LGPL.
 	it tests JMS<sup>TM</sup> features and its code base is
-	<strong><em>pure JMS<sup>TM</sup> without dependency from any vendor</em></strong>.
+	<em>pure JMS<sup>TM</sup> without dependency from any vendor</em>.
       </p>
       <p>Technically, the administration step is done through a simple interface
 	that any provider can implement. For the moment, we provide a
