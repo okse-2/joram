@@ -191,7 +191,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       else
         System.setProperty("Transaction", "fr.dyade.aaa.util.NullTransaction");
 
-      if (platformConfigDir != null) {
+      if (platformConfigDir != null) { 
         System.setProperty("fr.dyade.aaa.agent.A3CONF_DIR", platformConfigDir);
         System.setProperty("fr.dyade.aaa.DEBUG_DIR", platformConfigDir);
       }
