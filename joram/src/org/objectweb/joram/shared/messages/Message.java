@@ -72,7 +72,7 @@ public class Message implements Cloneable, Serializable
   /** The bytes body. */
   byte[] body_bytes = null;
   /** The map body. */
-  Hashtable body_map = null;
+  Map body_map = null;
   /** The text body. */
   String body_text = null;
   /** <code>true</code> if the body is read-only. */
@@ -546,6 +546,7 @@ public class Message implements Cloneable, Serializable
   {
     if (properties == null)
       return null;
+
     return ConversionHelper.toString(properties.get(name));
   }
   
@@ -615,7 +616,7 @@ public class Message implements Cloneable, Serializable
    * @exception IOException  In case of an error while setting the map.
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setMap(Hashtable map) throws Exception
+  public void setMap(Map map) throws Exception
   {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
@@ -684,7 +685,7 @@ public class Message implements Cloneable, Serializable
   /**
    * Returns the map body of the message.
    */ 
-  public Hashtable getMap()
+  public Map getMap()
   {
     return body_map;
   }
@@ -733,10 +734,12 @@ public class Message implements Cloneable, Serializable
     try {
       Message clone = (Message) super.clone();
       if (body_map != null) {
-        clone.body_map = new Hashtable();
-        for (Enumeration e = body_map.keys(); e.hasMoreElements(); ) {
-          Object key = e.nextElement();
-          clone.body_map.put(key,body_map.get(key));
+        clone.body_map = new HashMap();
+        if (body_map.keySet() != null) {
+          for (Iterator it = body_map.keySet().iterator(); it.hasNext(); ) {
+            Object key = it.next();
+            clone.body_map.put(key,body_map.get(key));
+          }
         }
       }
       if (optionalHeader != null) {
@@ -840,7 +843,7 @@ public class Message implements Cloneable, Serializable
           ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
       }
       msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
-      msg.body_map = (Hashtable) fieldsTb.get("body_map");
+      msg.body_map = (Map) fieldsTb.get("body_map");
       msg.body_text = (String) fieldsTb.get("body_text");
       msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
       msg.propertiesRO =
