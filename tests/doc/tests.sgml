@@ -36,37 +36,73 @@
       suite, results became better really fast.</para>
   </sect1>
   <sect1>
+    <title>JMS API versions</title>
+    <para>The test suite has been updated to test JMS 1.1
+      API. However, this change of API has introduced changes in
+      <varname> Admin</varname> interface, thus
+    <varname>Admin</varname> implementations provided for JMS 1.0.2
+    are no longer compatible with the JMS 1.1 test suite.</para>
+    <para>But, of course, both version of the test suite will continue
+    to coexist. A branch has been created in the CVS repository to
+    make it possible for the 2 test suites to do so:
+      <itemizedlist>
+        <listitem>
+          <para>the main branch of CVS is for JMS 1.1</para>
+        </listitem>
+        <listitem>
+          <para>the branch <varname>jms-1_0_2b</varname> is for 
+          JMS 1.0.2b</para>
+        </listitem>
+      </itemizedlist>
+      Contributions and new tests are still welcome for both test
+      suites. If they concern both JMS API, they will be added in both
+      test suites, otherwise they'll only be added to the right test suite.
+    </para>
+  </sect1>
+  <sect1>
     <title>Supported JMS providers</title>
-    <para>At the present time, the supported JMS providers are</para>
-    <itemizedlist>
-      <listitem>
-        <para><ulink url="http://www.objectweb.org/joram">JORAM 3.0.1</ulink></para>
-      </listitem>
-      <listitem>
-        <para><ulink url="http://www.ashnasoft.com">AshnaMQ
-            2.0</ulink>  Standard Edition or Enterprise Edition
-          (provided by <ulink
-            url="mailto:support@ashnasoft.com">Ashnasoft</ulink>)</para>
-      </listitem>
-      <listitem>
-        <para><ulink
-            url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ 5.21</ulink> (provided by me, not by Fiorano)</para>
-      </listitem>
-      <listitem>
-        <para><ulink
-            url="http://www.pramati.com/product/server30/index.htm">Pramati
-            Application Server 3.0 or Message Server</ulink>
-          (provided by <ulink url="mailto:rajdeep@pramati.com">Rajdeep
-            Dua</ulink>)
-        </para>
-      </listitem>
-      <listitem>
-        <para><ulink url="http://www.swiftmq.com/">SwiftMQ
-            3.2.0</ulink> (provided by <ulink
-            url="mailto:am@iit.de">Andreas Mueller</ulink>)
-        </para>
-      </listitem>
-    </itemizedlist>
+    <sect2>
+      <title>JMS 1.1 providers</title>
+      <para>At the present time, the only supported JMS 1.1 provider is</para>
+      <itemizedlist>
+        <listitem>
+          <para><ulink url="http://www.objectweb.org/joram">JORAM 3.1</ulink></para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2>
+      <title>JMS 1.0.2b providers</title>
+      <para>At the present time, the supported JMS 1.0.2b providers are</para>
+      <itemizedlist>
+        <listitem>
+          <para><ulink url="http://www.objectweb.org/joram">JORAM 3.0.x</ulink></para>
+        </listitem>
+        <listitem>
+          <para><ulink url="http://www.ashnasoft.com">AshnaMQ
+              2.0</ulink>  Standard Edition or Enterprise Edition
+            (provided by <ulink
+              url="mailto:support@ashnasoft.com">Ashnasoft</ulink>)</para>
+        </listitem>
+        <listitem>
+          <para><ulink
+              url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ 5.21</ulink> (provided by me, not by Fiorano)</para>
+        </listitem>
+        <listitem>
+          <para><ulink
+              url="http://www.pramati.com/product/server30/index.htm">Pramati
+              Application Server 3.0 or Message Server</ulink>
+            (provided by <ulink url="mailto:rajdeep@pramati.com">Rajdeep
+              Dua</ulink>)
+          </para>
+        </listitem>
+        <listitem>
+          <para><ulink url="http://www.swiftmq.com/">SwiftMQ
+              3.2.0</ulink> (provided by <ulink
+              url="mailto:am@iit.de">Andreas Mueller</ulink>)
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
   <sect1>
     <title>Installing the test suite</title>
