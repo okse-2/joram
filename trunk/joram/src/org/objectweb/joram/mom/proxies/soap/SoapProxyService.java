@@ -122,7 +122,7 @@ public class SoapProxyService {
     if (userConnection != null) {
       userConnection.send(request);
     } else {
-      throw new ProxyException(
+      throw new StateException(
         "Connection " + name + 
         ':' + cnxId + " closed.");
     }
@@ -142,7 +142,7 @@ public class SoapProxyService {
     UserConnection userConnection = 
       ConnectionManager.getConnection(name, cnxId);
     if (userConnection == null) {
-      throw new ProxyException(
+      throw new StateException(
         "Connection " + name + 
         ':' + cnxId + " closed.");
     } else {
