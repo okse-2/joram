@@ -134,10 +134,18 @@ public class QueueImpl extends DestinationImpl
       throw new AccessException("ADMIN right not granted");
 
     threshold = req.getThreshold();
+    
+    String info = "Request ["
+                  + req.getClass().getName()
+                  + "], sent to Queue ["
+                  + destId
+                  + "], successful [true]: threshold ["
+                  + threshold
+                  + "] set";
+    Channel.sendTo(from, new AdminReply(req, true, info));
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Threshold set to "
-                                    + threshold);
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -214,7 +222,7 @@ public class QueueImpl extends DestinationImpl
       // messages:
       else {
         messages.remove(i);
-
+        
         // If message was not consumed, decreasing the deliverables counter:
         if (message.consId == null)
           deliverables--;
@@ -592,9 +600,9 @@ public class QueueImpl extends DestinationImpl
           // dead messages:
           else {
             messages.remove(j);
-             
-            // If message was not consumed, decreasing the
-            // deliverables counter:
+            
+            // If message was not consumed, decreasing the deliverables
+            // counter:
             if (msg.consId == null)
               deliverables--;
   

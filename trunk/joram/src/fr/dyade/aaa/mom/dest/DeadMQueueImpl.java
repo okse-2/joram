@@ -81,23 +81,17 @@ public class DeadMQueueImpl extends QueueImpl
   }
 
   /**
-   * Overrides this <code>DestinationImpl</code> method; the
-   * <code>SetDMQRequest</code> request actually sets the default DMQ for 
-   * the local server.
+   * Overrides this <code>DestinationImpl</code> method; this request is
+   * not expected by a dead message queue.
    *
-   * @exception AccessException  If the requester is not the administrator.
+   * @exception AccessException  Not thrown.
    */
   protected void doReact(AgentId from, SetDMQRequest req)
                  throws AccessException
   {
-    if (! isAdministrator(from))
-      throw new AccessException("ADMIN right not granted");
-
-    id = req.getDmqId();
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Default DMQ id set to "
-                                    + dmqId);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "Unexpected request: " + req);
   }
   
   /**
@@ -120,19 +114,14 @@ public class DeadMQueueImpl extends QueueImpl
    * <code>SetThreshRequest</code> request actually sets the default
    * threshold value for the local server.
    *
-   * @exception AccessException  If the requester is not the administrator.
+   * @exception AccessException  Not thrown.
    */
   protected void doReact(AgentId from, SetThreshRequest req)
                  throws AccessException
   {
-    if (! isAdministrator(from))
-      throw new AccessException("ADMIN right not granted");
-
-    threshold = req.getThreshold();
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Default threshold set"
-                                                      + " to " + threshold);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "Unexpected request: " + req);
   }
 
   /**

@@ -139,9 +139,9 @@ public abstract class DestinationImpl implements java.io.Serializable
    * notification requesting rights to be set for a user.
    *
    * @exception AccessException  If the requester is not the administrator.
-   * @exception RequestException If the right requested is invalid.
    */
-  protected void doReact(AgentId from, SetRightRequest not) throws MomException
+  protected void doReact(AgentId from, SetRightRequest not)
+                 throws AccessException
   {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
@@ -149,44 +149,65 @@ public abstract class DestinationImpl implements java.io.Serializable
     AgentId user = not.getClient();
     int right = not.getRight();
 
-    // Setting "all" users rights:
-    if (user == null) {
-      if (right == READ)
-        freeReading = true;
-      else if (right == WRITE)
-        freeWriting = true;
-      else if (right == -READ) {
-        freeReading = false;
-        specialProcess(not);
+    try {
+      // Setting "all" users rights:
+      if (user == null) {
+        if (right == READ)
+          freeReading = true;
+        else if (right == WRITE)
+          freeWriting = true;
+        else if (right == -READ) {
+          freeReading = false;
+          specialProcess(not);
+        }
+        else if (right == -WRITE)
+          freeWriting = false;
+        else
+          throw new RequestException("Invalid right value: " + right);
       }
-      else if (right == -WRITE)
-        freeWriting = false;
-      else
-        throw new RequestException("Invalid right value: " + right);
-    }
-    // Setting a specific user right:
-    else {
-      if (right == READ) {
-        if (! readers.contains(user))
-          readers.add(user);
+      // Setting a specific user right:
+      else {
+        if (right == READ) {
+          if (! readers.contains(user))
+            readers.add(user);
+        }
+        else if (right == WRITE) {
+          if (! writers.contains(user))
+            writers.add(user);
+        }
+        else if (right == -READ) {
+          readers.remove(user);
+          specialProcess(not);
+        }
+        else if (right == -WRITE)
+          writers.remove(user);
+        else
+          throw new RequestException("Invalid right value: " + right);
       }
-      else if (right == WRITE) {
-        if (! writers.contains(user))
-          writers.add(user);
-      }
-      else if (right == -READ) {
-        readers.remove(user);
-        specialProcess(not);
-      }
-      else if (right == -WRITE)
-        writers.remove(user);
-      else
-        throw new RequestException("Invalid right value: " + right);
-    }
+      String info = "Request ["
+                    + not.getClass().getName()
+                    + "], sent to Destination ["
+                    + destId
+                    + "], successful [true]: user ["
+                    + user
+                    + "] set with right [" + right +"]";
+      Channel.sendTo(from, new AdminReply(not, true, info)); 
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "User " + user 
-                                    + " right set to " + right);
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    }
+    catch (RequestException exc) {
+      String info = "Request ["
+                    + not.getClass().getName()
+                    + "], sent to Destination ["
+                    + destId
+                    + "], successful [false]: "
+                    + exc.getMessage();
+      Channel.sendTo(from, new AdminReply(not, false, info));
+
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    }
   }
 
   /**
@@ -197,16 +218,24 @@ public abstract class DestinationImpl implements java.io.Serializable
    * @exception AccessException  If the requester is not the administrator.
    */
   protected void doReact(AgentId from, SetDMQRequest not)
-                 throws MomException
+                 throws AccessException
   {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     dmqId = not.getDmqId();
+    
+    String info = "Request ["
+                  + not.getClass().getName()
+                  + "], sent to Destination ["
+                  + destId
+                  + "], successful [true]: dmq ["
+                  + dmqId
+                  + "] set" ;
+    Channel.sendTo(from, new AdminReply(not, true, info));
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "DMQ id set to "
-                                    + dmqId);
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
