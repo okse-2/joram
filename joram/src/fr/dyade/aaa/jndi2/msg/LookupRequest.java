@@ -25,7 +25,8 @@ package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
-public class LookupRequest extends JndiRequest {
+public class LookupRequest extends JndiRequest 
+    implements JndiReadRequest {
 
   public LookupRequest(CompositeName name) {
     super(name);

@@ -25,7 +25,8 @@ package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
-public class ListRequest extends JndiRequest {
+public class ListRequest extends JndiRequest 
+    implements JndiReadRequest {
 
   public ListRequest(CompositeName name) {
     super(name);

@@ -58,6 +58,14 @@ public class NamingContextFactory implements InitialContextFactory {
       Trace.logger.log(
         BasicLevel.DEBUG, 
         "NamingContextFactory.getInitialContext(" + env + ')');
+    return new fr.dyade.aaa.jndi2.client.NamingContextImpl(
+      getNamingConnection(env), 
+      new CompositeName());    
+  }
+
+  public static NamingConnection getNamingConnection(
+    Hashtable env) 
+    throws NamingException {    
     try {
       String host = null;
       String portStr = null;
@@ -69,17 +77,17 @@ public class NamingContextFactory implements InitialContextFactory {
       }      
       if (url == null)
         url = System.getProperty(Context.PROVIDER_URL, null);
-
+    
       if (url != null) {
         if (url.startsWith("scn")) {
           int indexOfHost = url.indexOf("//") == -1 ? 0 : url.indexOf("//") + 2; 
           int indexOfPort = url.indexOf(":", indexOfHost) + 1;
-          
+        
           host = url.substring(indexOfHost, indexOfPort - 1);
           portStr = url.substring(indexOfPort);
         }
       }
-
+    
       if (host == null && env != null)
         host = (String) env.get(HOST_PROPERTY);
       if (host == null)
@@ -88,7 +96,7 @@ public class NamingContextFactory implements InitialContextFactory {
         //default host
         host = "localhost";
       }
-
+    
       if (portStr == null && env != null)
         portStr = (String) env.get(PORT_PROPERTY);
       if (portStr == null)
@@ -99,14 +107,13 @@ public class NamingContextFactory implements InitialContextFactory {
       }
       int port = Integer.parseInt(portStr);
 
-      return new fr.dyade.aaa.jndi2.client.NamingContextImpl(
-        new NamingConnection(host, port), 
-        new CompositeName());
+      return new NamingConnection(host, port);
     } catch (ClassCastException e) {
       NamingException nx = 
-        new NamingException("ClassCastException!  Are " + 
-                            HOST_PROPERTY + " and " + 
-                            PORT_PROPERTY + " String objects?");
+        new NamingException(
+          "ClassCastException!  Are " + 
+          HOST_PROPERTY + " and " + 
+          PORT_PROPERTY + " String objects?");
       nx.setRootCause(e);
       throw nx;
     } catch (NumberFormatException e) {
@@ -117,11 +124,11 @@ public class NamingContextFactory implements InitialContextFactory {
       throw nx;
     } catch (Exception e) {
       NamingException nx = 
-        new NamingException("exception creating NamingContext: " +
-                            e.toString());
+        new NamingException(
+          "exception creating NamingContext: " +
+          e.toString());
       nx.setRootCause(e);
       throw nx;
     }
   }
-
 }

@@ -25,6 +25,7 @@ package fr.dyade.aaa.jndi2.server;
 
 import fr.dyade.aaa.jndi2.msg.*;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.util.Strings;
 
 public class JndiScriptReplyNot extends Notification {
 
@@ -36,5 +37,13 @@ public class JndiScriptReplyNot extends Notification {
 
   public final JndiReply[] getReplies() {
     return replies;
+  }
+
+  public String toString() {
+    StringBuffer buf = new StringBuffer();
+    buf.append('(' + super.toString());
+    buf.append(",replies=");
+    Strings.toString(buf, replies);
+    return buf.toString();
   }
 } 

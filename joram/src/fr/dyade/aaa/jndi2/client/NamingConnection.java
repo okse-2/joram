@@ -33,7 +33,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.jndi2.msg.*;
 
-class NamingConnection {
+public class NamingConnection {
 
   private String hostName;
 
@@ -45,7 +45,7 @@ class NamingConnection {
 
   private ObjectInputStream receiver;
 
-  NamingConnection(String hostName, int port) {
+  public NamingConnection(String hostName, int port) {
     this.hostName = hostName;
     this.port = port;
     this.socket = null;

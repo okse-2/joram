@@ -25,7 +25,8 @@ package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
-public class ListBindingsRequest extends JndiRequest {
+public class ListBindingsRequest extends JndiRequest 
+    implements JndiReadRequest {
 
   public ListBindingsRequest(CompositeName name) {
     super(name);

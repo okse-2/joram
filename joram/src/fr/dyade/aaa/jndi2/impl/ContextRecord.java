@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +24,20 @@ package fr.dyade.aaa.jndi2.impl;
 
 public class ContextRecord extends Record {
 
-  public ContextRecord(String name) {
+  private NamingContextId id;
+
+  public ContextRecord(String name,
+                       NamingContextId id) {
     super(name);
+    this.id = id;
+  }
+
+  public final NamingContextId getId() {
+    return id;
+  }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",id=" + id + ')';
   }
 }
