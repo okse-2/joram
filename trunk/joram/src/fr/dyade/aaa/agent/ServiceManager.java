@@ -27,8 +27,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -40,13 +40,13 @@ import fr.dyade.aaa.util.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.6 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.7 2002-03-26 16:08:39 joram Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
 
-  static Monitor xlogmon = null;
+  static Logger xlogmon = null;
   
   /**
    * Initializes the <code>ServiceManager</code> object. Synchronize the
@@ -56,7 +56,7 @@ public class ServiceManager implements Serializable {
    */
   static void init() throws Exception {
     // Get the logging monitor from current server MonologMonitorFactory
-    xlogmon = Debug.getMonitor(Debug.A3Service);
+    xlogmon = Debug.getLogger(Debug.A3Service);
 
     manager = ServiceManager.load();
     if (manager == null) {
@@ -219,15 +219,20 @@ public class ServiceManager implements Serializable {
   }
 
   static ServiceDesc[] getServices() {
-    Collection values = manager.registry.values();
-    ServiceDesc[] services = new ServiceDesc[values.size()];
-    try {
-      services = (ServiceDesc[]) values.toArray(services);
-    } catch (ArrayStoreException exc) {
-      xlogmon.log(BasicLevel.ERROR,
-                 "AgentServer#" + AgentServer.getServerId() +
-                 ".ServiceManager, can't get services.", exc);
+    ServiceDesc[] services = new ServiceDesc[manager.registry.size()];
+    int i = 0;
+    for (Enumeration e = manager.registry.elements(); e.hasMoreElements();) {
+      services[i++] = (ServiceDesc) e.nextElement();
     }
+// 1.2    Collection values = manager.registry.values();
+// 1.2    ServiceDesc[] services = new ServiceDesc[values.size()];
+// 1.2    try {
+// 1.2      services = (ServiceDesc[]) values.toArray(services);
+// 1.2    } catch (ArrayStoreException exc) {
+// 1.2      xlogmon.log(BasicLevel.ERROR,
+// 1.2                 "AgentServer#" + AgentServer.getServerId() +
+// 1.2                 ".ServiceManager, can't get services.", exc);
+// 1.2    }
     return services;
   }
 

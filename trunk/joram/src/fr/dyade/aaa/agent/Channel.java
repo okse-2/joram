@@ -25,8 +25,8 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * localizing the target agent.
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   static Channel channel = null;
 
@@ -57,15 +57,15 @@ abstract public class Channel {
     return channel;
   }
 
-  protected Monitor logmon = null;
+  protected Logger logmon = null;
 
   /**
    * Constructs a new <code>Channel</code> object (can only be used by
    * subclasses).
    */
   protected Channel() {
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getMonitor(Debug.A3Engine);
+    // Get the logging monitor from current server MonologLoggerFactory
+    logmon = Debug.getLogger(Debug.A3Engine);
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
 
     this.mq = new Queue();
@@ -263,8 +263,8 @@ abstract public class Channel {
 }
 
 final class TransactionChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
@@ -350,8 +350,8 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   /**
    * Constructs a new <code>TransientChannel</code> object. this method

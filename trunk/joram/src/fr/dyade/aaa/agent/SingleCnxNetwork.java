@@ -27,8 +27,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * a time.
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.6 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.7 2002-03-26 16:08:39 joram Exp $";
 
   Vector sendList;
 
@@ -137,7 +137,7 @@ class SingleCnxNetwork extends StreamNetwork {
   }
 
   final class NetServerOut extends Daemon {
-    NetServerOut(String name, Monitor logmon) {
+    NetServerOut(String name, Logger logmon) {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -277,7 +277,7 @@ class SingleCnxNetwork extends StreamNetwork {
 
     WatchDog watchDog = null;
 
-    NetServerIn(String name, Monitor logmon) throws IOException {
+    NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
       listen = createServerSocket();
       // Overload logmon definition in Daemon
@@ -408,7 +408,7 @@ class SingleCnxNetwork extends StreamNetwork {
     /** Use to synchronize thread */
     private Object lock;
 
-    WatchDog(String name, Monitor logmon) {
+    WatchDog(String name, Logger logmon) {
       super(name + ".WatchDog");
       lock = new Object();
       // Overload logmon definition in Daemon

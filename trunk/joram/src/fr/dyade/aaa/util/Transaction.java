@@ -26,9 +26,11 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public interface Transaction {
-  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Transaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
   static final String separator = "_";
+
+  void init(String path) throws IOException;
 
   void begin() throws IOException;
 

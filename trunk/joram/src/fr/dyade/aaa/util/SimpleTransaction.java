@@ -27,11 +27,13 @@ import java.io.*;
 import java.util.*;
 
 public class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
   private File dir = null;
 
-  public SimpleTransaction(String path) throws IOException {
+  public SimpleTransaction() {}
+
+  public void init(String path) throws IOException {
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory()) {

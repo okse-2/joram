@@ -21,7 +21,6 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.jndi;
 
 import java.io.*;
@@ -29,12 +28,9 @@ import java.net.*;
 import java.util.*;
 import javax.naming.*;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- *
- *  @author Nicolas Tachker
- *
  *	@see ProxyContext
  */
 public class NamingContext implements Context {

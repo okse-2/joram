@@ -37,7 +37,7 @@ import java.io.*;
  */
 public class ConditionItem implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: ConditionItem.java,v 1.1 2002-03-06 16:52:20 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ConditionItem.java,v 1.2 2002-03-26 16:09:59 joram Exp $"; 
 
 
   /** condition name */

@@ -26,8 +26,8 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.net.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
 
@@ -46,41 +46,38 @@ import fr.dyade.aaa.util.Daemon;
  * @see		TransientNetworkProxy
  * @see		AgentServer
  */
-final class TransientNetworkServer implements MessageConsumer {
-  /** The domain name. */
-  String name;
-  /** The <code>MessageQueue</code> associated with this network component */
-  MessageQueue qout;
-  /**  */
-  TransientNetworkServer server = null;
+final class TransientNetworkServer extends Network {
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkServer.java,v 1.4 2002-03-26 16:08:39 joram Exp $";
+
   /**  */
   NetServerIn netServerIn = null;
   /**  */
   NetServerOut netServerOut = null;
 
-  protected Monitor logmon = null;
-
-  /**
-   * Returns this <code>MessageConsumer</code>'s name.
-   *
-   * @return this <code>MessageConsumer</code>'s name.
-   */
-  public final String getName() {
-    return name;
-  }
-
   /**
    * Creates and initializes a new <code>TransientNetworkProxy</code>
    * component.
    */
-  TransientNetworkServer() {
-    server = this;
+  TransientNetworkServer() {}
 
-    qout = new MessageQueue();
-
-    name = "AgentServer#" + AgentServer.getServerId() + ".transient";
-    // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getMonitor(Debug.A3Network + '.' + name);
+  /**
+   * Initializes a new network component. This method is used in order to
+   * easily creates and configure a Network component from a class name.
+   * So we can use the <code>Class.newInstance()</code> method for create
+   * (whitout any parameter) the component, then we can initialize it with
+   * this method.<br>
+   * This method initializes the logical clock for the domain.
+   *
+   * @param name	The domain name.
+   * @param port	The listen port.
+   * @param servers	The list of servers directly accessible from this
+   *			network interface.
+   */
+  public void init(String name, int port, short[] servers) throws Exception {
+    name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
+    // Get the logging monitor from current server MonologLoggerFactory
+    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
     logmon.log(BasicLevel.DEBUG, name + ", initialized");
 
     netServerIn = new NetServerIn(getName(), logmon);
@@ -118,18 +115,9 @@ final class TransientNetworkServer implements MessageConsumer {
   }
 
   /**
-   * Validates all messages pushed in queue during transaction session.
+   * Wakes up the watch-dog thread.
    */
-  public void validate() {
-    qout.validate();
-  }
-
-  /**
-   * Invalidates all messages pushed in queue during transaction session.
-   */
-  public void invalidate() {
-    qout.invalidate();
-  }
+  public void wakeup() {}
 
   /** communication socket */
   Socket sock = null;
@@ -228,10 +216,6 @@ final class TransientNetworkServer implements MessageConsumer {
       return false;
   }
 
-  public MessageQueue getQueue() {
-    return qout;
-  }
-
   /**
    * Close the connection.
    */
@@ -251,14 +235,14 @@ final class TransientNetworkServer implements MessageConsumer {
   }
 
   final class NetServerIn extends Daemon {
-    NetServerIn(String name, Monitor logmon) {
+    NetServerIn(String name, Logger logmon) {
       super(name + ".netServerIn");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
 
     protected void close() {
-      server.close();
+      ((TransientNetworkServer) network).close();
     }
 
     protected void shutdown() {
@@ -331,14 +315,14 @@ final class TransientNetworkServer implements MessageConsumer {
   }
 
   final class NetServerOut extends Daemon {
-    NetServerOut(String name, Monitor logmon) {
+    NetServerOut(String name, Logger logmon) {
       super(name + ".netServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
 
     protected void close() {
-      server.close();
+      ((TransientNetworkServer) network).close();
     }
 
     protected void shutdown() {

@@ -31,7 +31,7 @@ import fr.dyade.aaa.util.*;
  * 
  */
 class Message implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Message.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.

@@ -27,9 +27,10 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
-import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.Arrays;
 
 /**
  * A <code>TransientNetworkProxy</code> component is responsible for handling
@@ -50,47 +51,42 @@ import fr.dyade.aaa.util.Daemon;
  * @see		TransientNetworkServer
  * @see		AgentServer
  */
-final class TransientNetworkProxy implements MessageConsumer {
-  /** The domain name. */
-  String name;
+final class TransientNetworkProxy extends Network {
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.4 2002-03-26 16:08:39 joram Exp $";
+
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;
-  /** The listen port. */
-  int port = -1;
-  /** the domain's servers. */
-  short[] servers = null;
-  /** The <code>MessageQueue</code> associated with this network component */
-  MessageQueue qout = null;
-
-  protected org.objectweb.monolog.api.Monitor logmon = null;
 
   /**
-   * Creates and initializes a new <code>TransientNetworkProxy</code>
-   * component.
+   * Creates a new <code>TransientNetworkProxy</code> component. This simple
+   * constructor is required in order to use <code>Class.newInstance()</code>
+   * method during configuration.
+   *
+   * The configuration of component is then done by <code>init</code> method.
+   */
+  TransientNetworkProxy() {}
+
+  /**
+   * Initializes a new <code>TransientNetworkProxy</code> component. This
+   * method is used in order to easily creates and configure a component
+   * from a class name. So we can use the <code>Class.newInstance()</code>
+   * method for create (whitout any parameter) the component, then we can
+   * initialize it with this method.
    *
    * @param port	the listen port.
    * @param servers	the domain's servers.
    */
-  TransientNetworkProxy(int port, short[] servers) {
+  public void init(String name, int port, short[] servers) {
+    this.name = "AgentServer#" + AgentServer.getServerId() + '.' + name;
     this.port = port;
     this.servers = servers;
     // Sorts the array of server ids into ascending numerical order.
-    java.util.Arrays.sort(servers);
-    qout = new MessageQueue();
+    Arrays.sort(servers);
 
-    name = "AgentServer#" + AgentServer.getServerId() + ".transient";
     // Get the logging monitor from current server MonologMonitorFactory
-    logmon = Debug.getMonitor(Debug.A3Network + '.' + name);
+    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
     logmon.log(BasicLevel.DEBUG, name + ", initialized");
-  }
-
-  /**
-   * Returns this <code>MessageConsumer</code>'s name.
-   *
-   * @return this <code>MessageConsumer</code>'s name.
-   */
-  public final String getName() {
-    return name;
   }
 
   /**
@@ -136,18 +132,9 @@ final class TransientNetworkProxy implements MessageConsumer {
   }
 
   /**
-   * Validates all messages pushed in queue during transaction session.
+   * Wakes up the watch-dog thread.
    */
-  public final void validate() {
-    qout.validate();
-  }
-
-  /**
-   * Invalidates all messages pushed in queue during transaction session.
-   */
-  public final void invalidate() {
-    qout.invalidate();
-  }
+  public void wakeup() {}
 
   /**
    * The <code>Listener</code> object that waits for transient agent
@@ -224,12 +211,8 @@ final class TransientNetworkProxy implements MessageConsumer {
       return false;
   }
 
-  public MessageQueue getQueue() {
-    return qout;
-  }
-
   final Monitor getMonitor(short sid) {
-    return monitors[java.util.Arrays.binarySearch(servers, sid)];
+    return monitors[index(sid)];
   }
 
   /**
@@ -238,7 +221,7 @@ final class TransientNetworkProxy implements MessageConsumer {
    * local persistent agent server.
    */
   final class Manager extends Daemon {
-    Manager(String name, org.objectweb.monolog.api.Monitor logmon) {
+    Manager(String name, org.objectweb.util.monolog.api.Logger logmon) {
       super(name + ".manager");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -324,7 +307,7 @@ final class TransientNetworkProxy implements MessageConsumer {
   final class Listener extends Daemon {
     ServerSocket listen = null;
 
-    Listener(String name, org.objectweb.monolog.api.Monitor logmon) {
+    Listener(String name, org.objectweb.util.monolog.api.Logger logmon) {
       super(name + ".listener");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -613,7 +596,7 @@ final class TransientNetworkProxy implements MessageConsumer {
      */
     synchronized void send(Serializable msg) throws IOException {
       if (oos == null) {
-	sendList.add(msg);
+	sendList.addElement(msg);
 	return;
       }
 

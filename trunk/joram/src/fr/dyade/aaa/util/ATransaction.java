@@ -26,18 +26,18 @@ package fr.dyade.aaa.util;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $";
 
   // State of the transaction monitor.
   private int phase;
 
-  private static Monitor logmon = null;
+  private static Logger logmon = null;
 
   static private final int INIT = 0;	  // Initialization state
   static private final int FREE = 1;	  // No transaction 
@@ -126,10 +126,12 @@ public final class ATransaction implements Transaction, Runnable {
 
   static final boolean debug = false;
 
-  public ATransaction(String path) throws IOException {
+  public ATransaction() {}
+
+  public void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getMonitor(Debug.A3Debug + ".Transaction");
+    logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
 
     /*  Search for log files: plog then clog, reads it, then apply all
      * committed operation, finally deletes it.

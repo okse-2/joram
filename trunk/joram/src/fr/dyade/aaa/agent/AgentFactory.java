@@ -26,8 +26,7 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>AgentVector</code> class. This class should be completed to
@@ -37,8 +36,8 @@ import org.objectweb.monolog.api.Monitor;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -130,16 +129,16 @@ final class AgentVector extends AgentObject {
  * @author  Andre Freyssinet
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.8 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.9 2002-03-26 16:08:39 joram Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
 
-  /** Used for server monitoring. */
-  public static Vector agentsList;
-  /** Used for server monitoring. */
-  private static AdminEventReactor adminEventReactor;
+//   /** Used for server monitoring. */
+//   public static Vector agentsList;
+//   /** Used for server monitoring. */
+//   private static AdminEventReactor adminEventReactor;
 
   /**
    * Allocates a new <code>AgentFactory</code> agent.

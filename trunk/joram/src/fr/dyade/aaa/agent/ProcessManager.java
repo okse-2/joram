@@ -26,8 +26,8 @@ package fr.dyade.aaa.agent;
 import java.util.*;
 import java.io.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -47,13 +47,13 @@ import fr.dyade.aaa.util.*;
  * @see		ProcessMonitor
  */
 public class ProcessManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.8 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.9 2002-03-26 16:08:39 joram Exp $"; 
 
   /** the unique <code>ProcessManager</code> in the agent server */
   public static ProcessManager manager;
 
-  static Monitor xlogmon = null;
+  static Logger xlogmon = null;
 
   /**
    * Initializes the <code>ProcessManager</code> object.
@@ -62,8 +62,8 @@ public class ProcessManager implements Serializable {
    *	unspecialized exception
    */
   static void init() throws Exception {
-    // Get the logging monitor from current server MonologMonitorFactory
-    xlogmon = Debug.getMonitor(Debug.A3Debug + ".ProcessManager");
+    // Get the logging monitor from current server MonologLoggerFactory
+    xlogmon = Debug.getLogger(Debug.A3Debug + ".ProcessManager");
 
     manager = ProcessManager.load();
     if (manager == null) {

@@ -28,7 +28,7 @@ import java.io.*;
 import java.util.Hashtable;
 
 public class SimplePropertiesReader {
-  public static final String RCS_VERSION="@(#)$Id: SimplePropertiesReader.java,v 1.3 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: SimplePropertiesReader.java,v 1.4 2002-03-26 16:10:07 joram Exp $"; 
   private Hashtable propertiesTable;
   private File file;
 

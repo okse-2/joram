@@ -26,15 +26,15 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import fr.dyade.aaa.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * Internal class to catch the end of the thread running the driver.
  */
 class ThreadFinalizer implements Runnable {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.9 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.10 2002-03-26 16:08:39 joram Exp $";
 
   /** driver to start */
   Driver driver;
@@ -104,8 +104,8 @@ class ThreadFinalizer implements Runnable {
  * @version	v1.1
  */
 public abstract class Driver {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.9 2002-03-06 16:50:00 joram Exp $"; 
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.10 2002-03-26 16:08:39 joram Exp $"; 
 
   /** separate thread running the driver */
   protected Thread thread;
@@ -118,7 +118,7 @@ public abstract class Driver {
   volatile boolean isRunning = false;
   volatile boolean canStop = false;
 
-  protected Monitor logmon = null;
+  protected Logger logmon = null;
   protected String name = null;
 
   /**
@@ -131,10 +131,10 @@ public abstract class Driver {
     this.id = id;
     isRunning = true;
 
-    // Get the logging monitor from current server MonologMonitorFactory
+    // Get the logging monitor from current server MonologLoggerFactory
     // It should be overloaded in subclass in order to specialize traces.
     String classname = getClass().getName();
-    logmon = Debug.getMonitor(Debug.A3Proxy + '.' +
+    logmon = Debug.getLogger(Debug.A3Proxy + '.' +
       classname.substring(classname.lastIndexOf('.') +1));
   }
 

@@ -26,9 +26,11 @@ package fr.dyade.aaa.util;
 import java.io.*;
 
 public class NullTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: NullTransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
-  public NullTransaction(String path) throws IOException {
+  public NullTransaction() {}
+
+  public void init(String path) throws IOException {
   }
 
   public File getDir() {

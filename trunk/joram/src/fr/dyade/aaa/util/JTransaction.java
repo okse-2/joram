@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class JTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.7 2002-03-06 16:58:48 joram Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.8 2002-03-26 16:10:07 joram Exp $"; 
 
   private File dir = null;
 
@@ -35,10 +35,12 @@ public class JTransaction implements Transaction {
   private RandomAccessFile logFile = null; 
   private Hashtable log = null;
 
-  class Operation implements Serializable {
-    static final int SAVE = 1;
-    static final int DELETE = 2;
+  // SAVE and DELETE should be static attribute of Operation inner class.
+  // Unfortunatly it's unsupported in Java 1.1.x.
+  static final int SAVE = 1;
+  static final int DELETE = 2;
 
+  class Operation implements Serializable {
     int type;
     byte[] value = null;
 
@@ -61,8 +63,9 @@ public class JTransaction implements Transaction {
   static private final int COMMIT = 3;		// A transaction is commiting
   static private final int ROLLBACK = 4;	// A transaction is aborting
 
+  public JTransaction() {}
 
-  public JTransaction(String path) throws IOException {
+  public void init(String path) throws IOException {
     phase = INIT;
 
     dir = new File(path);
@@ -85,10 +88,10 @@ public class JTransaction implements Transaction {
 	String name;
 	while (!(name = logFile.readUTF()).equals("")) {
 	  op = logFile.read();
-	  if (op == Operation.SAVE) {
+	  if (op == SAVE) {
 	    byte buf[] = new byte[logFile.readInt()];
 	    logFile.readFully(buf);
-	    log.put(name, new Operation(Operation.SAVE, buf));
+	    log.put(name, new Operation(SAVE, buf));
 	  } else {
 	    log.put(name, new Operation(op));
 	  }
@@ -134,7 +137,7 @@ public class JTransaction implements Transaction {
 
     if (phase == RUN) {
       // We are during a transaction put the new state in the log.
-      log.put(name, new Operation(Operation.SAVE, bobj));
+      log.put(name, new Operation(SAVE, bobj));
     } else {
       // Save the new state on the disk.
       FileOutputStream fos = new FileOutputStream(new File(dir, name));
@@ -150,12 +153,12 @@ public class JTransaction implements Transaction {
       // first search in the log a new value for the object.
       Operation op = (Operation) log.get(name);
       if (op != null) {
-	if (op.type == Operation.SAVE) {
+	if (op.type == SAVE) {
 	  ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
 	  ObjectInputStream ois = new ObjectInputStream(bis);
 	  
 	  return ois.readObject();
-	} else if (op.type == Operation.DELETE) {
+	} else if (op.type == DELETE) {
 	  // l'objet a *t* d*truit.
 	  return null;
 	}
@@ -182,7 +185,7 @@ public class JTransaction implements Transaction {
   public void delete(String name) {
     if (phase == RUN) {
       // We are during a transaction mark the object deleted in the log.
-      log.put(name, new Operation(Operation.DELETE));
+      log.put(name, new Operation(DELETE));
     } else {
       File file = new File(dir, name);
       file.delete();
@@ -201,7 +204,7 @@ public class JTransaction implements Transaction {
 
       logFile.writeUTF(name);
       logFile.writeByte(op.type);
-      if (op.type == Operation.SAVE) {
+      if (op.type == SAVE) {
 	logFile.writeInt(op.value.length);
 	logFile.write(op.value);
       }
@@ -217,12 +220,12 @@ public class JTransaction implements Transaction {
       String name = (String) e.nextElement();
       Operation op = (Operation) log.get(name);
 
-      if (op.type == Operation.SAVE) {
+      if (op.type == SAVE) {
 	FileOutputStream fos = new FileOutputStream(new File(dir, name));
 	fos.write(op.value);
 	fos.getFD().sync();
 	fos.close();
-      } else if (op.type == Operation.DELETE) {
+      } else if (op.type == DELETE) {
 	File file = new File(dir, name);
 	file.delete();
       } else {

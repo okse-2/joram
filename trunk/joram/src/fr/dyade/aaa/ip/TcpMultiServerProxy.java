@@ -29,7 +29,7 @@ import java.net.*;
 import java.util.*;
 import fr.dyade.aaa.agent.*;
 
-import org.objectweb.monolog.api.*;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Class providing a TCP Server. This class is used to create a server
@@ -51,7 +51,7 @@ import org.objectweb.monolog.api.*;
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.7 2002-03-06 16:55:06 joram Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.8 2002-03-26 16:08:48 joram Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */

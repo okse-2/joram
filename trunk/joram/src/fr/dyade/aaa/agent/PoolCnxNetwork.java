@@ -27,8 +27,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import org.objectweb.monolog.api.BasicLevel;
-import org.objectweb.monolog.api.Monitor;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.6 2002-03-06 16:50:00 joram Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.7 2002-03-26 16:08:39 joram Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -655,7 +655,7 @@ class PoolCnxNetwork extends StreamNetwork {
   final class WakeOnConnection extends Daemon {
     ServerSocket listen = null;
 
-    WakeOnConnection(String name, Monitor logmon) {
+    WakeOnConnection(String name, Logger logmon) {
       super(name + ".wakeOnConnection");
       this.logmon = logmon;
     }
@@ -750,7 +750,7 @@ class PoolCnxNetwork extends StreamNetwork {
   }
 
   final class Dispatcher extends Daemon {
-    Dispatcher(String name, Monitor logmon) {
+    Dispatcher(String name, Logger logmon) {
       super(name + ".dispatcher");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -791,7 +791,7 @@ class PoolCnxNetwork extends StreamNetwork {
    /** Use to synchronize thread */
     private Object lock;
 
-    WatchDog(String name, Monitor logmon) {
+    WatchDog(String name, Logger logmon) {
       super(name + ".watchdog");
       lock = new Object();
       // Overload logmon definition in Daemon

@@ -47,7 +47,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class ScheduleItem implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: ScheduleItem.java,v 1.1 2002-03-06 16:52:20 joram Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ScheduleItem.java,v 1.2 2002-03-26 16:09:59 joram Exp $"; 
 
 
   /** may be of a derived class */
