@@ -98,6 +98,25 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
     if (sessionPool == null)
       throw (new JMSException("ServerSessionPool parameter is null!"));
 
+    if (messageSelector != null && ! messageSelector.equals("")) {
+      fr.dyade.aaa.mom.selectors.checkParser parser =
+        new fr.dyade.aaa.mom.selectors.checkParser(
+        new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+      // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+      try {
+        Object result = parser.parse().value;
+      }
+      catch (javax.jms.JMSException jE) {
+        throw jE;
+      }
+      catch (Exception e) {
+        javax.jms.JMSException jE = new javax.jms.JMSException("Parsing error");
+        jE.setLinkedException(e);
+        throw jE;
+      }
+    }
+
     // Building the connectionConsumer.
     this.connectionConsumer =
       new ConnectionConsumer(queue, messageSelector, sessionPool, maxMessages);

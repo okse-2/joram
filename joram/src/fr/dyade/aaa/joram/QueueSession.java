@@ -62,7 +62,7 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
   {
     try {
 
-      if (! messageSelector.equals("")) {
+      if (messageSelector != null && ! messageSelector.equals("")) {
         fr.dyade.aaa.mom.selectors.checkParser parser =
           new fr.dyade.aaa.mom.selectors.checkParser(
           new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));

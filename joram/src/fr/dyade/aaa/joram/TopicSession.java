@@ -71,7 +71,7 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
     java.lang.String messageSelector, boolean noLocal) throws javax.jms.JMSException
   {
     try {
-      if (! messageSelector.equals("")) {
+      if (messageSelector != null && ! messageSelector.equals("")) {
         fr.dyade.aaa.mom.selectors.checkParser parser =
           new fr.dyade.aaa.mom.selectors.checkParser(
           new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
@@ -114,6 +114,22 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
     public javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic, java.lang.String name, java.lang.String messageSelector, boolean noLocal) throws javax.jms.JMSException {
+    try {
+      if (messageSelector != null && ! messageSelector.equals("")) {
+        fr.dyade.aaa.mom.selectors.checkParser parser =
+          new fr.dyade.aaa.mom.selectors.checkParser(
+          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+        Object result = parser.parse().value;
+      }
+    } catch (javax.jms.InvalidSelectorException jE) {
+      throw (jE);
+    } catch (Exception e) {
+      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
+      jE.setLinkedException(e);
+      throw (jE);
+    }
 	/* subscribe to the agentClient */
 	javax.jms.TopicSubscriber topicSubscriber = createMySubscriber(new Long(counterConsumerID).toString(), name, topic, messageSelector, noLocal, true);
 		
