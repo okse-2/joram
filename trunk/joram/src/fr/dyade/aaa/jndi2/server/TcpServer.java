@@ -99,6 +99,9 @@ public class TcpServer {
             ServerSocket listen = tcpServer.getListen();
             if (listen != null) {
               socket = listen.accept();
+              socket.setTcpNoDelay(true);
+              socket.setSoTimeout(0);
+              socket.setSoLinger(true, 1000);
               canStop = false;
             } else {
               break loop;
