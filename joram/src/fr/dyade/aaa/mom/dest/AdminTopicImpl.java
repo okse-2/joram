@@ -888,6 +888,10 @@ public class AdminTopicImpl extends TopicImpl
     if (destId.getTo() != serverId)
       return;
 
+    queues.remove(destId);
+    topics.remove(destId);
+    deadMQueues.remove(destId);
+
     Channel.sendTo(destId, new DeleteNot());
 
     String info = "Request [" + request.getClass().getName()
