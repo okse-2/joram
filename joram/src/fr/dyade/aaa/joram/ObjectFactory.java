@@ -48,6 +48,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
   String xatcfClassName = "fr.dyade.aaa.joram.XATopicConnectionFactory";
   String qClassName = "fr.dyade.aaa.joram.Queue";
   String tClassName = "fr.dyade.aaa.joram.Topic";
+  String tqClassName = "fr.dyade.aaa.joram.TemporaryQueue";
+  String ttClassName = "fr.dyade.aaa.joram.TemporaryTopic";
   String dmqClassName = "fr.dyade.aaa.joram.admin.DeadMQueue";
 
   /** Returns the looked up object. */
@@ -197,6 +199,30 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
 
       if (t == null)
         t = new Topic(tName);
+      else
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + t + " retrieved by naming service.");
+      return t;
+    }
+    else if (ref.getClassName().equals(tqClassName)) {
+      String qName = (String) ref.get("dest.name").getContent();
+      TemporaryQueue q = (TemporaryQueue) Destination.getInstance(qName);
+
+      if (q == null)
+        q = new TemporaryQueue(qName, null);
+      else
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "
+                                     + q + " retrieved by naming service.");
+      return q;
+    }
+    else if (ref.getClassName().equals(ttClassName)) {
+      String tName = (String) ref.get("dest.name").getContent();
+      TemporaryTopic t = (TemporaryTopic) Destination.getInstance(tName);
+
+      if (t == null)
+        t = new TemporaryTopic(tName, null);
       else
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Administered object "

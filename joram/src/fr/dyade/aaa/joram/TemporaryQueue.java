@@ -30,6 +30,7 @@ package fr.dyade.aaa.joram;
 import fr.dyade.aaa.mom.jms.TempDestDeleteRequest;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -38,14 +39,15 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
 {
-  /** The connection the queue belongs to. */
+  /** The connection the queue belongs to, <code>null</code> if not known. */
   private Connection cnx;
 
   /** 
    * Constructs a temporary queue.
    *
    * @param agentId  Identifier of the queue agent.
-   * @param cnx  The connection the queue belongs to.
+   * @param cnx  The connection the queue belongs to, <code>null</code> if
+   *          not known.
    */
   public TemporaryQueue(String agentId, Connection cnx)
   {
@@ -67,6 +69,10 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
    */
   public void delete() throws JMSException
   {
+    if (cnx == null)
+      throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
+                                     + " does not belong to this connection.");
+
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": deleting...");
@@ -88,5 +94,14 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");
+  }
+
+  /**
+   * Returns the connection this temporary queue belongs to,
+   * <code>null</code> if not known.
+   */
+  Connection getCnx()
+  {
+    return cnx;
   }
 }

@@ -35,6 +35,7 @@ import javax.jms.InvalidSelectorException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -98,6 +99,21 @@ public class MessageConsumer implements javax.jms.MessageConsumer
   {
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
+
+    if (dest instanceof TemporaryQueue) {
+      Connection tempQCnx = ((TemporaryQueue) dest).getCnx();
+
+      if (tempQCnx == null || ! tempQCnx.equals(sess.cnx))
+        throw new JMSSecurityException("Forbidden consumer on this "
+                                       + "temporary destination.");
+    }
+    else if (dest instanceof TemporaryTopic) {
+      Connection tempTCnx = ((TemporaryTopic) dest).getCnx();
+    
+      if (tempTCnx == null || ! tempTCnx.equals(sess.cnx))
+        throw new JMSSecurityException("Forbidden consumer on this "
+                                       + "temporary destination.");
+    }
 
     try {
       fr.dyade.aaa.mom.selectors.Selector.checks(selector);
