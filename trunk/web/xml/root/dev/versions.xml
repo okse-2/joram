@@ -28,7 +28,7 @@
         Martin Thompson</a>. When disconnecting an administrator from a stopped
         server, the <code>disconnect()</code> call would block and never
         return. The bug is corrected, the updated class is
-        <code>org.objectweb.joram.client.admin.AdminModule</code>.</li>
+        <code>org.objectweb.joram.client.jms.admin.AdminModule</code>.</li>
         <li>Improper construction of the <code>mom.jar</code> library, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00102.html">
         Nigel Rantor</a>. The <code>fr.dyade.aaa.jndi2.distributed</code> 
