@@ -32,12 +32,8 @@
     </s1>
 
     <s1 name="Test suite documentation" anchor="test_doc">
-      <p>To use the test suite, have a look at its <a
-	  href="../current/doc/tests/index.html">documentation</a> (<a
-	  href="../current/doc/tests.pdf">PDF</a>).
-      </p>
-      <p>You can also browse the test suite <a
-          href="../current/javadoc/tests/index.html">Javadoc</a>.
+      <p>The Teste Suite documentation has now its own <a
+	  href="../tests/doc.html">web page</a>.
       </p>
     </s1>
 
