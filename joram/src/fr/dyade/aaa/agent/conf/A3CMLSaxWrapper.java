@@ -26,11 +26,13 @@ import fr.dyade.aaa.agent.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import org.xml.sax.XMLReader;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -38,10 +40,6 @@ import org.xml.sax.SAXParseException;
  * XML SAX Wrapper for A3 configuration file.
  */
 public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
-
-  final static String PARSER_NAME_PROPERTY = "org.xml.sax.driver";
-  final static String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
-
   protected Logger logmon = null;
   protected A3CMLConfig a3cmlConfig = null;
 
@@ -110,19 +108,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
 
     a3cmlConfig = new A3CMLConfig();
 
-    XMLReader reader =
-      (XMLReader)(Class.forName(System.getProperty(PARSER_NAME_PROPERTY,
-                                                   DEFAULT_PARSER_NAME),
-                                true,
-                                this.getClass().getClassLoader()).newInstance());
-
-//     XMLReader reader =
-//       XMLReaderFactory.createXMLReader(
-// 	System.getProperty(PARSER_NAME_PROPERTY, DEFAULT_PARSER_NAME));
-//     XMLReader reader = XMLReaderFactory.createXMLReader();
-    reader.setContentHandler(this);
-    reader.setErrorHandler(this);
-    reader.parse(new InputSource(cfgReader));
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    SAXParser parser = factory.newSAXParser();
+    parser.parse(new InputSource(cfgReader), this);
 
     return a3cmlConfig;
   }
