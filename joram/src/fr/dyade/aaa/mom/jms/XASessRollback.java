@@ -26,7 +26,7 @@ package fr.dyade.aaa.mom.jms;
 
 /**
  * An <code>XASessRollback</code> instance is used by an <code>XASession</code>
- * for rolling back the operations performed during a transaction.
+ * for rolling back the messages and acknowledgements it sent to the proxy.
  */
 public class XASessRollback extends AbstractJmsRequest
 {

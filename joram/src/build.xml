@@ -17,11 +17,6 @@
     <property name="lib.dir" location="../lib"/>
     <property name="build.dir" location="../build"/>
     <property name="doc.dir" location="../javadoc"/>
-    <property name="conf.dir" location="../config"/>
-    <property name="licenses.dir" location="../licenses"/>
-    <property name="samples.dir" location="../samples"/>
-    <property name="releases.dir" location="../releases"/>
-    <property name="readme.file" location="../README"/>
 
     <!-- Base classpath needed for execution -->
     <path id="base.class.path">
@@ -69,7 +64,7 @@
       description="--> Compile JORAM">
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
-           debug="on"
+           debug="true"
            deprecation="${deprecation}"
            optimize="false"
            nowarn="${nowarn}"
@@ -157,50 +152,5 @@
       <link href="http://java.sun.com/j2ee/sdk_1.3/techdocs/api/" />
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />
     </javadoc>
-  </target>
-
-  <target name="releases" depends="release.src, release.jar"
-    if="version"
-    description="--> Create two releases (source and jars) (version is specified by -Dversion=x.y.z)" />
-  
-  <target name="release.jar" depends="clean,ship.joram" if="version"
-    description="--> Create a release jar files (version is specified by -Dversion=x.y.z)">
-    <copy todir="../../joram-${version}" includeEmptyDirs="no">
-      <fileset dir="../../joram">
-	<exclude name="build/**" />
-	<exclude name="src/**" />
-	<exclude name="classes/**" />
-	<exclude name="releases/**" />
-      </fileset>
-    </copy>
-    <tar tarfile="joram-${version}.tar"
-      longfile="gnu"
-      basedir="../.."
-      includes="joram-${version}/**" />
-    <gzip zipfile="joram-${version}.tgz" src="joram-${version}.tar" />
-    <delete file="joram-${version}.tar" /> 
-    <delete dir="../../joram-${version}" /> 
-    <mkdir dir="${releases.dir}" />
-    <move file="joram-${version}.tgz" todir="${releases.dir}" />
-  </target>
-
-  <target name="release.src" depends="clean" if="version"
-    description="--> Create a release with source (version is specified by -Dversion=x.y.z)">
-    <copy todir="../../joram-${version}-src" includeEmptyDirs="no">
-      <fileset dir="../../joram">
-	<exclude name="build/**" />
-	<exclude name="classes/**" />
-	<exclude name="releases/**" />
-      </fileset>
-    </copy>
-    <tar tarfile="joram-${version}-src.tar"
-      longfile="gnu"
-      basedir="../.."
-      includes="joram-${version}-src/**" />
-    <gzip zipfile="joram-${version}-src.tgz" src="joram-${version}-src.tar" />
-    <delete file="joram-${version}-src.tar" /> 
-    <delete dir="../../joram-${version}-src" /> 
-    <mkdir dir="${releases.dir}" />
-    <move file="joram-${version}-src.tgz" todir="${releases.dir}" />
   </target>
 </project>

@@ -24,16 +24,12 @@
  */
 package fr.dyade.aaa.joram;
 
-import fr.dyade.aaa.util.TimerTask;
-
-import java.util.*;
-
 /**
  * The <code>TxTimerTask</code> class is used by non-XA transacted sessions
  * for taking care of closing them if they tend to be pending, and if a
  * transaction timer has been set.
  */
-class TxTimerTask extends TimerTask
+class TxTimerTask extends java.util.TimerTask
 {
   /** The session the task must close. */
   private Session sess;

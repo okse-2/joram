@@ -101,7 +101,7 @@ public class Admin
   public Admin(String url, String adminName, String adminPass,
                int timer) throws Exception
   {
-     if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "--- Connecting admin"
                                 + " session: " + this);
     try {
@@ -194,7 +194,7 @@ public class Admin
   /** Returns a String image of this <code>Admin</code> instance. */
   public String toString()
   {
-    return "Admin::"+ serverUrl +"::"+ adminName;
+    return "Admin:serverAddr:" + adminName;
   }
 
   /**
@@ -799,7 +799,6 @@ public class Admin
                                                    + " has been lost.");
         if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
           JoramTracing.dbgAdmin.log(BasicLevel.WARN, cE);
-	throw cE;
       }
       // If reconnected, trying again to send the request:
       sendRequest(request);

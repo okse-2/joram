@@ -28,7 +28,6 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.jms.*;
-import fr.dyade.aaa.util.Timer;
 
 import java.io.*;
 import java.net.*;
@@ -114,8 +113,6 @@ public abstract class Connection implements javax.jms.Connection
    * <b>Object:</b> reply object
    */
   Hashtable repliesTable;
-  /** Timer for terminating pending transactions. */
-  Timer transactimer = null;
 
   /**
    * Opens a connection.
@@ -145,9 +142,6 @@ public abstract class Connection implements javax.jms.Connection
     readables = new Vector();
     writables = new Vector();
     deleteds = new Vector();
-
-    if (factory.txTimer != 0)
-      transactimer = new Timer();
 
     try {
       // Opening the connection:
@@ -287,7 +281,6 @@ public abstract class Connection implements javax.jms.Connection
     Session session;
     for (int i = 0; i < sessions.size(); i++) {
       session = (Session) sessions.get(i);
-      session.repliesIn.start();
       session.start();
     }
     // Sending a start request to the server:
@@ -375,10 +368,6 @@ public abstract class Connection implements javax.jms.Connection
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this 
                                  + ": closing...");
-
-    // Finishing the timer, if any:
-    if (transactimer != null)
-      transactimer.cancel();
 
     // Stopping the connection:
     try {
@@ -794,8 +783,7 @@ public abstract class Connection implements javax.jms.Connection
       isE.setLinkedException(iE);
 
       // Removes the potentially stored requester:
-      if (request.getRequestId() != null)
-        requestsTable.remove(request.getRequestId());
+      requestsTable.remove(request.getRequestId());
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
@@ -819,9 +807,6 @@ public abstract class Connection implements javax.jms.Connection
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": got reply: "
                                    + correlationId);
-
-    if (correlationId == null)
-      return;
 
     // Getting the object related to the replied request:
     Object obj = requestsTable.get(correlationId);
@@ -856,9 +841,9 @@ public abstract class Connection implements javax.jms.Connection
           QueueMessage qM = (QueueMessage) reply;
 
           if (qM.getMessage() != null) {
-            asyncRequest(
-               new QRecDenyRequest(qM.getMessage().getDestination().getName(),
-                                   qM.getMessage().getIdentifier()));
+            syncRequest(
+              new QRecDenyRequest(qM.getMessage().getDestination().getName(),
+                                  qM.getMessage().getIdentifier()));
           }
         }
         else if (reply instanceof SubMessages) {

@@ -215,47 +215,4 @@ public class XAQueueSession extends XASession
     qs.cnx.syncRequest(new XAQSessPrepare(ident + " " + xid.toString(),
                                           pMs, acks));
   }
-
-  /** 
-   * Method called by the XA resource when the transaction rolls back.
-   *
-   * @exception XAException  If the session is not involved with this
-   *              transaction.
-   * @exception JMSException  If the rollback fails because of Joram server.
-   */
-  void rollbackTransaction(Xid xid) throws Exception
-  {
-    XAContext xaC = (XAContext) transactionsTable.get(xid);
-
-    if (xaC == null)
-      throw new XAException("Resource is not involved in specified"
-                            + " transaction.");
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": rolls back transaction "
-                                 + xid.toString()); 
-
-    Enumeration dests;    
-    String dest;
-    Vector ids;
-
-    XASessRollback rollbackRequest;
-
-    dests = xaC.deliveries.keys();
-
-    if (xaC.deliveries.isEmpty())
-      rollbackRequest = new XASessRollback(ident + " " + xid.toString());
-    else
-      rollbackRequest = new XAQSessRollback(ident + " " + xid.toString());
-
-    while (dests.hasMoreElements()) {
-      dest = (String) dests.nextElement();
-      ids = (Vector) xaC.deliveries.remove(dest);
-      ((XAQSessRollback) rollbackRequest).add(dest, ids);
-    }
-
-    // Sending to the proxy:
-    qs.cnx.syncRequest(rollbackRequest);
-  }
 }

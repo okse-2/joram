@@ -120,13 +120,6 @@ public class QueueConnectionConsumer extends ConnectionConsumer
           try {
             // Expecting a reply:
             repliesIn.get();
-            cnx.requestsTable.remove(currentReq.getRequestId());
-
-            // Sending a new request:
-            currentReq = new QRecReceiveRequest(destName, selector, -1);
-            currentReq.setIdentifier(cnx.nextRequestId());
-            cnx.requestsTable.put(currentReq.getRequestId(), qcc);
-            cnx.asyncRequest(currentReq);
           }
           catch (Exception iE) {
             continue;
@@ -148,15 +141,24 @@ public class QueueConnectionConsumer extends ConnectionConsumer
             // As long as there are messages to deliver, passing to session(s)
             // as many messages as possible:
             while (repliesIn.size() > 0) {
+              // Sending a new request:
+              cnx.requestsTable.remove(currentReq.getRequestId());
+              currentReq = new QRecReceiveRequest(destName, selector, -1);
+              currentReq.setIdentifier(cnx.nextRequestId());
+              cnx.requestsTable.put(currentReq.getRequestId(), qcc);
+              cnx.asyncRequest(currentReq);
+
               reply = (QueueMessage) repliesIn.pop();
+
               if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
                 JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Passes a"
                                            + " message to a session.");
+
               sess.repliesIn.push(reply.getMessage());
               counter++;
-  
+
               // If the maximum number of messages is reached, starting the 
-              // session and if ned, getting the next one for going on:
+              // session and if needed, getting the next one for going on:
               if (counter > maxMessages) {
                 serverSess.start(); 
                 counter = 1;
