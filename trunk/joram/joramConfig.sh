@@ -22,6 +22,7 @@
 # sensitive.
 
 # UNIX OS:
+#export OSTYPE=unix
 #export ROOTDIR=/home/joram
 # WINDOWS OS:
 export ROOTDIR=//e/joram
