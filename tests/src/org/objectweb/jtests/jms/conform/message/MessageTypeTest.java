@@ -24,13 +24,12 @@
 
 package org.objectweb.jtests.jms.conform.message;
 
-import org.objectweb.jtests.jms.framework.GenericJMSTestCase;
+import org.objectweb.jtests.jms.framework.PTPTestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import javax.jms.*;
 import java.util.Vector;
 import java.util.Enumeration;
-
 
 /**
  * Test the different types of messages provided by JMS.
@@ -49,9 +48,9 @@ import java.util.Enumeration;
  * with an empty body or not.
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageTypeTest.java,v 1.2 2002-03-15 16:01:17 joram Exp $
+ * @version $Id: MessageTypeTest.java,v 1.3 2002-03-18 13:37:14 joram Exp $
  */
-public class MessageTypeTest extends GenericJMSTestCase {
+public class MessageTypeTest extends PTPTestCase {
 
    /**
     * Send a <code>StreamMessage</code> with 2 Java primitives in its body (a <code>
