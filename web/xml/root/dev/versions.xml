@@ -13,74 +13,71 @@
   <body>
 
     <s1 name="Information on the current version">
-      <s2 name="Bugs">
+      <s2 name="New features">
+      <ul>
+      <li>A dead message queue is a destination getting undeliverable messages.
+          Messages might be considered undeliverable because they expired
+          before delivery, because they were sent on a non accessible
+          destination or because they are constantly denied when consumed. 
+      </li>
+      <li>According to the JMS specification, topics might have a hierarchical
+          structure allowing clients to subscribe or publish to given
+          subtopics. Joram's fully distributed structure allows a topic
+          hierarchy to be spread over many servers.</li>
+      </ul>
+      </s2>
+      <s2 name="Enhancements">
+      <p>In order to prevent a Joram platform to be overloaded by a heavily
+         producing client, a flow control mechanism has been added.</p>
+      </s2>
+      <s2 name="Corrected bugs">
       <ul>
       <li>Timeout in MessageConsumer.receive not compliant, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-09/msg00003.html">
           Gerald Schröder</a>.
-          A MessageConsumer.receive(0) behaves as a receiveNoWait() instead
-          of behaving as a receive() (by waiting indefinitely for a message).
-          The fix has been submitted in the CVS distribution, in the
-          fr.dyade.aaa.joram package.</li>
+          A MessageConsumer.receive(0) behaved as a receiveNoWait() instead
+          of behaving as a receive() (by waiting indefinitely for a message).</li>
       <li>Listener not active if set after its connection was started, found by
           Gerald Schröder.
           When setting a listener on a consumer belonging to a connection already
           started, the session thread for distributing the asynchronous deliveries
-          was actually never started. The fix has been submitted in the CVS
-          distribution, in the fr.dyade.aaa.joram package.</li>
+          was actually never started.</li>
       <li>Connection not properly closed when failing, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-08/msg00036.html">
           Roy</a>.
           In the case of a connection failure, the related Connection object and
-          its resources are not properly closed. The fix hasn't been submitted
-          yet.</li>
+          its resources were not properly closed.</li>
       <li>Incorrect BytesMessage and StreamMessage implementations, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00021.html">
           Mark Trumpler</a>.
           BytesMessage and StreamMessage were wrongly behaving in the case of
           multiple sendings, modified or not. Also, their readBytes(...)
-          methods were wrong. The fix has been submitted in the CVS
-          distribution, in the fr.dyade.aaa.joram package.</li>
+          methods were wrong.</li>
       <li>Messages never delivered in the case of an incorrect listener
           removal, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-07/msg00012.html">
           Gerald Schröder</a>.
           When a listener is removed client side (by calling
           setMessageListener(null)), messages that reach the connection are
-          denied. However, if the connection is stopped, the message are stored
-          server side until it is started again. If the connection is never
-          started, and also never closed, the messages are kept there for ever,
-          and thus never delivered. The fix hasn't been submitted yet.</li>
+          denied. However, if the connection is stopped, the message were
+          stored server side until it was started again. If the connection was
+          never started, and also never closed, the messages were kept there
+          for ever, and thus never delivered.</li>
       <li>MessageProducers synchronized with the destinations, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-06/msg00024.html">
           Jan Kester</a>.
-          This incorrect behaviour is encountered in distributed
-          configurations, when a producer client is connected to a server and
-          produces a message destinated to a destination located on an other
-          server. If this latest server is down, the producer will block
+          This incorrect behaviour was encountered in distributed
+          configurations, when a producer client was connected to a server and
+          produced a message destinated to a destination located on an other
+          server. If this latest server was down, the producer would block
           because of a synchronous call to the destination to check the access
-          permission of the producer. The fix involves dead message queues and
-          is not available yet.</li>
+          permission of the producer.</li>
       </ul>
       </s2>
     </s1>
 
     <s1 name="What's up for the next version?">
-      <s2 name="New features">
-      <ul>
-      <li>Dead message queue: a dead message queue is a queue deployed on a server and getting
-          all the undeliverable messages this server deals with. Messages might be seen as
-          undeliverable because they were sent on a non accessible destination or because they
-          are constantly denied when consumed.</li>
-      <li>Hierarchical topic: according to the JMS specification topics might have a hierarchical
-          structure allowing clients to subscribe or publish to given subtopics. On top of that
-          Joram's hierarchical topic will be able to be distributed among many servers.</li>
-      </ul>
-      </s2>
-      <s2 name="Enhancements">
-      <p>In order to prevent a Joram platform to be overloaded by a heavily producing client, the
-         next version will provide a flow control mechanism.</p>
-      </s2>
+      
     </s1>
 
   </body>
