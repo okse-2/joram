@@ -282,8 +282,9 @@ public class ProxyImpl implements java.io.Serializable {
    * Some of the client requests are directly forwarded, some others are
    * sent to the proxy so that their processing occurs in a transaction.
    * <p>
-   * A <code>MomExceptionReply</code> wrapping a <code>RequestException</code>
-   * might be sent back if a target destination can't be identified.
+   * A <code>MomExceptionReply</code> wrapping a
+   * <code>DestinationException</code> might be sent back if a target
+   * destination can't be identified.
    */
   public void reactToClientRequest(int key, AbstractJmsRequest request)
   {
@@ -558,10 +559,8 @@ public class ProxyImpl implements java.io.Serializable {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
         MomTracing.dbgProxy.log(BasicLevel.WARN, mE);
 
-      // If the context has not been lost, sending the exception to
-      // the client:
-      if (! (mE instanceof ProxyException))
-        doReply(new MomExceptionReply(request.getRequestId(), mE));
+      // Sending the exception to the client:
+      doReply(new MomExceptionReply(request.getRequestId(), mE));
     }
   }
 
@@ -724,10 +723,10 @@ public class ProxyImpl implements java.io.Serializable {
    * Method implementing the JMS proxy reaction to a
    * <code>ConsumerSubRequest</code> requesting to subscribe to a topic.
    *
-   * @exception RequestException  If activating an already active durable
+   * @exception StateException  If activating an already active durable
    *              subscription.
    */
-  private void doReact(ConsumerSubRequest req) throws RequestException
+  private void doReact(ConsumerSubRequest req) throws StateException
   {
     AgentId topicId = AgentId.fromString(req.getTarget());
     String subName = req.getSubName();
@@ -779,9 +778,9 @@ public class ProxyImpl implements java.io.Serializable {
       cSub = (ClientSubscription) subsTable.get(subName);
 
       if (cSub.getActive())
-        throw new RequestException("The durable subscription "
-                                   + subName 
-                                   + " has already been activated.");
+        throw new StateException("The durable subscription "
+                                 + subName 
+                                 + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
       boolean updatedTopic = ! topicId.equals(cSub.getTopicId());
@@ -838,17 +837,17 @@ public class ProxyImpl implements java.io.Serializable {
    * <p>
    * Sets the listener for the subscription, launches a delivery sequence.
    *
-   * @exception RequestException  If the subscription does not exist.
+   * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerSetListRequest req) throws RequestException
+  private void doReact(ConsumerSetListRequest req) throws DestinationException
   {
     // Getting the subscription:
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
-      throw new RequestException("Can't set a listener on the non existing"
-                                 + " subscription: " + subName);
+      throw new DestinationException("Can't set a listener on the non existing"
+                                     + " subscription: " + subName);
 
     sub.setListener(req.getRequestId());
 
@@ -866,9 +865,10 @@ public class ProxyImpl implements java.io.Serializable {
    * <code>ConsumerUnsetListRequest</code> notifying that a consumer listener
    * is unset.
    *
-   * @exception RequestException  If the subscription does not exist.
+   * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerUnsetListRequest req) throws RequestException
+  private void doReact(ConsumerUnsetListRequest req)
+               throws DestinationException
   {
     // If the listener was listening to a queue, cancelling any pending reply:
     if (req.getQueueMode())
@@ -879,8 +879,8 @@ public class ProxyImpl implements java.io.Serializable {
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
       if (sub == null)
-        throw new RequestException("Can't unset a listener on the non existing"
-                                   + " subscription: " + subName);
+        throw new DestinationException("Can't unset a listener on the non "
+                                       + "existing subscription: " + subName);
 
       sub.unsetListener();
     }
@@ -893,17 +893,17 @@ public class ProxyImpl implements java.io.Serializable {
    * <code>ConsumerCloseSubRequest</code> requesting to deactivate a durable
    * subscription.
    *
-   * @exception RequestException  If the subscription does not exist. 
+   * @exception DestinationException  If the subscription does not exist. 
    */
-  private void doReact(ConsumerCloseSubRequest req) throws RequestException
+  private void doReact(ConsumerCloseSubRequest req) throws DestinationException
   {
     // Getting the subscription:
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
-      throw new RequestException("Can't desactivate non existing"
-                                 + " subscription: " + subName);
+      throw new DestinationException("Can't desactivate non existing"
+                                     + " subscription: " + subName);
 
     // De-activating the subscription:
     activeCtx.removeSubName(subName);
@@ -956,16 +956,16 @@ public class ProxyImpl implements java.io.Serializable {
    * <p>
    * This method registers the request and launches a delivery sequence. 
    *
-   * @exception RequestException  If the subscription does not exist. 
+   * @exception DestinationException  If the subscription does not exist. 
    */
-  private void doReact(ConsumerReceiveRequest req) throws RequestException
+  private void doReact(ConsumerReceiveRequest req) throws DestinationException
   {
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
     if (sub == null)
-      throw new RequestException("Can't request a message from the unknown"
-                                 + " subscription: " + subName);
+      throw new DestinationException("Can't request a message from the unknown"
+                                     + " subscription: " + subName);
 
     // Getting a message from the subscription.
     sub.setReceiver(req.getRequestId(), req.getTimeToLive());
@@ -1139,10 +1139,10 @@ public class ProxyImpl implements java.io.Serializable {
    * <code>XACnxPrepare</code> request holding messages and acknowledgements
    * produced in an XA transaction.
    *
-   * @exception RequestException  If the proxy has already received a prepare
-   *                              order for the same transaction.
+   * @exception StateException  If the proxy has already received a prepare
+   *                            order for the same transaction.
    */
-  private void doReact(XACnxPrepare req) throws RequestException
+  private void doReact(XACnxPrepare req) throws StateException
   {
     try {
       Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
@@ -1150,7 +1150,7 @@ public class ProxyImpl implements java.io.Serializable {
       doReply(new ServerReply(req));
     }
     catch (Exception exc) {
-      throw new RequestException(exc.getMessage());
+      throw new StateException(exc.getMessage());
     }
   }
 
@@ -1162,16 +1162,16 @@ public class ProxyImpl implements java.io.Serializable {
    * This method actually processes the objects sent at the prepare phase,
    * and acknowledges the request.
    * 
-   * @exception RequestException  If commiting an unknown transaction.
+   * @exception StateException  If commiting an unknown transaction.
    */
-  private void doReact(XACnxCommit req) throws RequestException
+  private void doReact(XACnxCommit req) throws StateException
   {
     Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
 
     XACnxPrepare prepare = activeCtx.getTxPrepare(xid);
 
     if (prepare == null)
-      throw new RequestException("Unknown transaction identifier.");
+      throw new StateException("Unknown transaction identifier.");
 
     Vector sendings = prepare.getSendings();
     Vector acks = prepare.getAcks();
@@ -1255,10 +1255,10 @@ public class ProxyImpl implements java.io.Serializable {
    * Returns the identifiers of the recovered transactions, puts the prepared
    * data into the active context for future commit or rollback.
    *
-   * @exception RequestException  If a recovered transaction branch is already
-   *                              present in the context.
+   * @exception StateException  If a recovered transaction branch is already
+   *                            present in the context.
    */
-  private void doReact(XACnxRecoverRequest req) throws RequestException
+  private void doReact(XACnxRecoverRequest req) throws StateException
   {
     Vector bqs = new Vector();
     Vector fis = new Vector();
@@ -1277,8 +1277,8 @@ public class ProxyImpl implements java.io.Serializable {
                                       recoveredTransactions.remove(xid));
         }
         catch (Exception exc) {
-          throw new RequestException("Recovered transaction branch has already"
-                                     + " been prepared by the RM.");
+          throw new StateException("Recovered transaction branch has already"
+                                   + " been prepared by the RM.");
         }
       }
     }
@@ -1433,7 +1433,7 @@ public class ProxyImpl implements java.io.Serializable {
         activeCtx.addPendingDelivery(jRep);
     }
     // The context is lost: denying the message:
-    catch (ProxyException pE) {
+    catch (StateException pE) {
       if (rep.getMessage() != null) {
         String msgId = rep.getMessage().getIdentifier();
 
@@ -1462,7 +1462,7 @@ public class ProxyImpl implements java.io.Serializable {
                                rep.getMessages()));
     }
     // The context is lost; nothing to do.
-    catch (ProxyException pE) {}
+    catch (StateException pE) {}
   }
 
   /**
@@ -1476,7 +1476,7 @@ public class ProxyImpl implements java.io.Serializable {
       doReply(new ServerReply(rep.getCorrelationId()));
     }
     // The context is lost; nothing to do.
-    catch (ProxyException pE) {}
+    catch (StateException pE) {}
   }
 
   /**
@@ -1523,7 +1523,7 @@ public class ProxyImpl implements java.io.Serializable {
               activeCtx.addPendingDelivery(consM);
           }
           // The context is lost: nothing to do.
-          catch (ProxyException pE) {}
+          catch (StateException pE) {}
         }
       }
     }
@@ -1557,7 +1557,7 @@ public class ProxyImpl implements java.io.Serializable {
             activeCtx.removeSubName(name);
             doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
           }
-          catch (ProxyException pExc) {}
+          catch (StateException pExc) {}
         }
         return;
       }
@@ -1567,7 +1567,7 @@ public class ProxyImpl implements java.io.Serializable {
       setCtx(rep.getClientContext());
       doReply(new MomExceptionReply(rep.getCorrelationId(), exc));
     }
-    catch (ProxyException pExc) {}
+    catch (StateException pExc) {}
   }
 
   /** 
@@ -1620,7 +1620,7 @@ public class ProxyImpl implements java.io.Serializable {
           activeCtx.removeSubName(name);
           doReply(new MomExceptionReply(sub.getSubRequestId(), exc));
         }
-        catch (ProxyException pExc) {}
+        catch (StateException pExc) {}
       }
       return;
     }
@@ -1655,10 +1655,10 @@ public class ProxyImpl implements java.io.Serializable {
    *
    * @param key  Key of the activated context.
    *
-   * @exception ProxyException  If the context has actually been closed or
+   * @exception StateException  If the context has actually been closed or
    *              lost.
    */
-  private void setCtx(int key) throws ProxyException
+  private void setCtx(int key) throws StateException
   {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "ProxyImpl.setCtx(" + key + ')');
@@ -1676,7 +1676,7 @@ public class ProxyImpl implements java.io.Serializable {
     if (activeCtx == null) {
       setActiveCtxId(-1);
       activeCtx = null;
-      throw new ProxyException("Context " + key + " is closed or broken.");
+      throw new StateException("Context " + key + " is closed or broken.");
     }
   }
 
@@ -1833,7 +1833,7 @@ public class ProxyImpl implements java.io.Serializable {
       try {
         setCtx(key);
 
-        doReply(new MomExceptionReply(new ProxyException("Client proxy is "
+        doReply(new MomExceptionReply(new StateException("Client proxy is "
                                                          + "deleted.")));
 
         // Denying the non acknowledged messages:
@@ -1857,7 +1857,7 @@ public class ProxyImpl implements java.io.Serializable {
                                     + destId.toString());
         }
       }
-      catch (ProxyException pE) {}
+      catch (StateException pE) {}
     }
 
     // Removing all proxy's subscriptions:
