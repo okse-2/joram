@@ -1,0 +1,616 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
+ *
+ * The contents of this file are subject to the Joram Public License,
+ * as defined by the file JORAM_LICENSE.TXT 
+ * 
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License on the Objectweb web site
+ * (www.objectweb.org). 
+ * 
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific terms governing rights and limitations under the License. 
+ * 
+ * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
+ * fr.dyade.aaa.ip, fr.dyade.aaa.joram, fr.dyade.aaa.mom, and
+ * fr.dyade.aaa.util, released May 24, 2000.
+ * 
+ * The Initial Developer of the Original Code is Dyade. The Original Code and
+ * portions created by Dyade are Copyright Bull and Copyright INRIA.
+ * All Rights Reserved.
+ *
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s):
+ */
+/*
+  Subset of SQL 92 grammar for message selectors.
+  Author: Frederic Maistre, INRIA, February 2002.
+*/
+
+/* ----------------------Preliminary Declarations Section--------------------*/
+   
+/* Import the class java_cup.runtime.*  */
+import java_cup.runtime.*;
+   
+/* Parser code to change the way the parser reports errors (include
+   line and column number of the error). */
+parser code {:
+    
+  /* Change the method report_error so it will display the line and
+     column of where the error occurred in the input as well as the
+     reason for the error which is passed into the method in the
+     String 'message'. */
+  public void report_error(String message, Object info) {
+ 
+    /* Create a StringBuffer called 'm' with the string 'Error' in it. */
+    StringBuffer m = new StringBuffer("Error");
+ 
+    /* Check if the information passed to the method is the same
+       type as the type java_cup.runtime.Symbol. */
+    if (info instanceof java_cup.runtime.Symbol) {
+      /* Declare a java_cup.runtime.Symbol object 's' with the
+         information in the object info that is being typecasted
+         as a java_cup.runtime.Symbol object. */
+      java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+      /* Check if the line number in the input is greater or
+         equal to zero. */
+      if (s.left >= 0) {                
+        /* Add to the end of the StringBuffer error message
+           the line number of the error in the input. */
+        m.append(" in line "+(s.left+1));   
+        /* Check if the column number in the input is greater
+           or equal to zero. */
+        if (s.right >= 0)                    
+          /* Add to the end of the StringBuffer error message
+             the column number of the error in the input. */
+          m.append(", column "+(s.right+1));
+      }
+    }
+   
+    /* Add to the end of the StringBuffer error message created in
+       this method the message that was passed into this method. */
+    m.append(" : "+message);
+   
+    /* Print the contents of the StringBuffer 'm', which contains
+       an error message, out on a line. */
+    System.err.println(m);
+  }
+   
+  /* Change the method report_fatal_error so when it reports a fatal
+     error it will display the line and column number of where the
+     fatal error occurred in the input as well as the reason for the
+     fatal error which is passed into the method in the object
+     'message' and then exit.*/
+  public void report_fatal_error(String message, Object info) {
+    report_error(message, info);
+    System.exit(1);
+  }
+
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+/* Terminals (tokens returned by the scanner). */
+
+terminal PLUS, MINUS, UMINUS, TIMES, DIVIDE, LPAREN, RPAREN;
+terminal COMMA, GT, GE, LT, LE, EQ, NEQ, AND, OR, NOT;
+terminal LIKE, BETWEEN, NOTBETWEEN, IN, ESCAPE, IS, NULL;
+terminal Double DOUBLE;
+terminal Boolean BOOLEAN;
+terminal String ID, STRING;
+
+   
+/* Non terminals used in the grammar section. */ 
+
+non terminal Boolean cond_expr, comp_expr;
+non terminal String strings;
+non terminal Object expr, lit_expr;
+   
+
+/* -------------Precedence and Associatively of Terminals Section----------- */
+   
+/*
+  Precedence of non terminals could be defined here.  If you do define
+  precedence here you won't need to worry about precedence in the
+  Grammar Section, i.e. that TIMES should have a higher precedence
+  than PLUS.
+  
+  The precedence defined here would look something like this where the
+  lower line always will have higher precedence than the line before it.
+*/
+  
+  precedence left OR;
+  precedence left AND;
+  precedence left NOT;
+  precedence left PLUS, MINUS; 
+  precedence left TIMES, DIVIDE; 
+  precedence left UMINUS;
+  precedence left RPAREN, LPAREN;
+
+
+/* ----------------------------Grammar Section-------------------- */
+
+  cond_expr ::= cond_expr:cond1 OR cond_expr:cond2
+                {:
+                  if (cond1 != null && cond2 != null)
+                    RESULT = new Boolean(cond1.booleanValue()
+                                         || cond2.booleanValue());
+
+                  else if (cond1 == null && cond2 != null)
+                    RESULT = cond2;
+
+                  else if (cond1 != null && cond2 == null)
+                    RESULT = cond1;
+
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                cond_expr:cond1 AND cond_expr:cond2
+                {:
+                  if (cond1 != null && cond2 != null)
+                    RESULT = new Boolean(cond1.booleanValue()
+                                         && cond2.booleanValue());
+
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                NOT cond_expr:cond
+                {:
+                  if (cond != null)
+                    RESULT = new Boolean(! cond.booleanValue());
+
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                comp_expr:comp
+                {:
+                  RESULT = comp;
+                :}
+                ;
+
+  comp_expr ::= LPAREN cond_expr:cond RPAREN
+                {:
+                  RESULT = cond;
+                :}
+                |
+                expr:e1 GT expr:e2
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         > ((Double) e2).doubleValue());
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                expr:e1 GE expr:e2 
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         >= ((Double) e2).doubleValue());
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                | 
+                expr:e1 LT expr:e2 
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         < ((Double) e2).doubleValue());
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                | 
+                expr:e1 LE expr:e2 
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         <= ((Double) e2).doubleValue());
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                | 
+                expr:e1 EQ expr:e2 
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         == ((Double) e2).doubleValue());
+
+                  else if (e1 instanceof Boolean && e2 instanceof Boolean)
+                    RESULT = new Boolean(((Boolean) e1).equals((Boolean) e2));
+
+                  else if (e1 instanceof String && e2 instanceof String)
+                    RESULT = new Boolean(((String) e1).equals((String) e2));
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                | 
+                expr:e1 NEQ expr:e2 
+                {:
+                  if (e1 == null || e2 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Boolean(((Double) e1).doubleValue()
+                                         != ((Double) e2).doubleValue());
+
+                  else if (e1 instanceof Boolean && e2 instanceof Boolean)
+                    RESULT = new Boolean(!
+                                         ((Boolean) e1).equals((Boolean) e2));
+
+                  else if (e1 instanceof String && e2 instanceof String)
+                    RESULT = new Boolean(! ((String) e1).equals((String) e2));
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                | 
+                expr:e1 BETWEEN expr:e2 AND expr:e3
+                {:
+                  if (e1 == null || e2 == null || e3 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double
+                           && e3 instanceof Double)
+                    RESULT = new Boolean((((Double) e1).doubleValue()
+                                          >= ((Double) e2).doubleValue())
+                                         && (((Double) e1).doubleValue()
+                                             <= ((Double) e3).doubleValue()));
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                expr:e1 NOTBETWEEN expr:e2 AND expr:e3
+                {:
+                  if (e1 == null || e2 == null || e3 == null)
+                    RESULT = null;
+
+                  else if (e1 instanceof Double && e2 instanceof Double 
+                           && e3 instanceof Double)
+                    RESULT = new Boolean((((Double) e1).doubleValue()
+                                          < ((Double) e2).doubleValue())
+                                         || (((Double) e1).doubleValue()
+                                             > ((Double) e3).doubleValue()));
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id IN LPAREN strings:sts RPAREN
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
+                    RESULT =
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
+                                              != -1);
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id NOT IN LPAREN strings:sts RPAREN
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
+                    RESULT =
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
+                                              == -1);
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id LIKE STRING:st
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  if (Interpreter.interpret(id, message, syntaxType)
+                      instanceof String) {
+                    StringBuffer stBuff =
+                      new StringBuffer(st.substring(1, st.length() - 1));
+                    stBuff.insert(0, '^');
+
+                    for (int i = 0; i < stBuff.length(); i++) {
+                      if (stBuff.charAt(i) == '_')
+                        stBuff.setCharAt(i, '.');
+                      else if (stBuff.charAt(i) == '%') {
+                        stBuff.setCharAt(i, '.');
+                        stBuff.insert(i + 1, '*');
+                        i++ ;
+                      }
+                    }
+                    stBuff.append('$');
+
+                    st = stBuff.toString(); 
+                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
+
+                    RESULT =
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
+                  }
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id NOT LIKE STRING:st
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
+                    StringBuffer stBuff =
+                      new StringBuffer(st.substring(1, st.length() - 1));
+                    stBuff.insert(0, '^');
+
+                    for (int i = 0; i < stBuff.length(); i++) {
+                      if (stBuff.charAt(i) == '_')
+                        stBuff.setCharAt(i, '.');
+                      else if (stBuff.charAt(i) == '%') {
+                        stBuff.setCharAt(i, '.');
+                        stBuff.insert(i + 1, '*');
+                        i++ ;
+                      }
+                    }
+                    stBuff.append('$');
+
+                    st = stBuff.toString(); 
+                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
+                    RESULT =
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
+                  }
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id LIKE STRING:st1 ESCAPE STRING:st2
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
+                    StringBuffer stBuff =
+                      new StringBuffer(st1.substring(1, st1.length() - 1));
+                    stBuff.insert(0, '^');
+                    char esc = st2.charAt(1);
+
+                    for (int i = 0; i < stBuff.length(); i++) {
+                      if (stBuff.charAt(i) == esc)
+                        i++ ;
+                      else if (stBuff.charAt(i) == '_')
+                        stBuff.setCharAt(i, '.');
+                      else if (stBuff.charAt(i) == '%') {
+                        stBuff.setCharAt(i, '.');
+                        stBuff.insert(i + 1, '*');
+                        i++ ;
+                      }
+                    }
+                    stBuff.append('$');
+                    st1 = stBuff.toString(); 
+                    org.apache.regexp.RE regExp =
+                      new org.apache.regexp.RE(st1);
+
+                    RESULT =
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
+                  }
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id NOT LIKE STRING:st1 ESCAPE STRING:st2
+                {:
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
+
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String) {
+                    StringBuffer stBuff =
+                      new StringBuffer(st1.substring(1, st1.length() - 1));
+                    stBuff.insert(0, '^');
+                    char esc = st2.charAt(1);
+
+                    for (int i = 0; i < stBuff.length(); i++) {
+                      if (stBuff.charAt(i) == esc)
+                        i++ ;
+                      else if (stBuff.charAt(i) == '_')
+                        stBuff.setCharAt(i, '.');
+                      else if (stBuff.charAt(i) == '%') {
+                        stBuff.setCharAt(i, '.');
+                        stBuff.insert(i + 1, '*');
+                        i++ ;
+                      }
+                    }
+                    stBuff.append('$');
+                    st1 = stBuff.toString(); 
+                    org.apache.regexp.RE regExp =
+                      new org.apache.regexp.RE(st1);
+
+                    RESULT =
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
+                  }
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
+                :}
+                |
+                ID:id IS NULL
+                {:
+                  RESULT = new Boolean(Intrepreter.interpret(id, message,
+                                                             syntaxType)
+                                       == null);
+                :}
+                |
+                ID:id IS NOT NULL
+                {:
+                  RESULT = new Boolean(Intrepreter.interpret(id, message,
+                                                             syntaxType)
+                                       != null);
+                :}
+                |
+                expr:e
+                {:
+                  if (e instanceof Boolean)
+                    RESULT = (Boolean) e;
+                  else
+                    RESULT = null;
+                :}
+                ; 
+
+  strings   ::= strings:sts COMMA STRING:st
+                {:
+                  RESULT = sts + st.substring(1, st.length() - 1);
+                :}
+                |
+                STRING:st
+                {:
+                  RESULT = st.substring(1, st.length() - 1);
+                :}
+                ; 
+
+  expr      ::= expr:e1 PLUS expr:e2
+                {:
+                  if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Double(((Double) e1).doubleValue()
+                                        + ((Double) e2).doubleValue());
+                  else
+                    RESULT = null;
+                :}
+                |
+                expr:e1 MINUS expr:e2
+                {:
+                  if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Double(((Double) e1).doubleValue()
+                                        - ((Double) e2).doubleValue());
+                  else
+                    RESULT = null;
+                :}
+                |
+                expr:e1 TIMES expr:e2
+                {:
+                  if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Double(((Double) e1).doubleValue()
+                                        * ((Double) e2).doubleValue());
+                  else
+                    RESULT = null;
+                :}
+                |
+                expr:e1 DIVIDE expr:e2
+                {:
+                  if (e1 instanceof Double && e2 instanceof Double)
+                    RESULT = new Double(((Double) e1).doubleValue()
+                                        / ((Double) e2).doubleValue());
+                  else
+                    RESULT = null;
+                :}
+                |
+                PLUS expr:e
+                {:
+                  if (e instanceof Double)
+                    RESULT = (Double) e;
+                  else
+                    RESULT = null;
+                :}
+                |
+                MINUS expr:e
+                {:
+                  if (e instanceof Double)
+                    RESULT = (Double) e;
+                  else
+                    RESULT = null;
+                :}
+                %prec UMINUS
+                |
+                lit_expr:lit
+                {:
+                  RESULT = lit;
+                :}
+                ;
+                
+  lit_expr  ::= LPAREN expr:e RPAREN
+                {:
+                  RESULT = e;
+                :}
+                |
+                ID:id
+                {:
+                  RESULT = Interpreter.interpret(id, message, syntaxType);
+                :}
+                |
+                DOUBLE:db
+                {:
+                  RESULT = db;
+                :}
+                |
+                STRING:st
+                {:
+                  RESULT = st.substring(1, st.length() - 1);
+                :}
+                |
+                BOOLEAN:bool
+                {:
+                  RESULT = bool;
+                :}
+                ;
