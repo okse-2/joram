@@ -20,22 +20,13 @@
 	<li>To install JORAM properly, check the <a
 	href="../current/doc/install/index.html">installation
 	    guide</a> (<a
-	    href="../current/doc/install.pdf">PDF</a> /  <a
-	    href="../current/doc/install.ps">PostScript </a>).</li>
+	    href="../current/doc/install.pdf">PDF</a>) .</li>
 	<li>To have a first go with JORAM, run the <a
 	href="../current/doc/samples/index.html">samples</a>  (<a
-	    href="../current/doc/samples.pdf">PDF</a> /  <a
-	    href="../current/doc/samples.ps">PostScript </a>).</li>
+	    href="../current/doc/samples.pdf">PDF</a>).</li>
 	<li>JORAM and JMS cookbook: <a
 	href="../current/doc/tutorial/index.html">tutorial</a>  (<a
-	    href="../current/doc/tutorial.pdf">PDF</a> / <a
-	    href="../current/doc/tutorial.ps">PostScript </a>).</li>
-	<li>JMS applications: have a look at our <a
-	href="../current/doc/demos/index.html">demos</a>  (<a
-	    href="../current/doc/demos.pdf">PDF</a> / <a
-	    href="../current/doc/demos.ps">PostScript </a>).</li>
-      </ol>
-
+	    href="../current/doc/tutorial.pdf">PDF</a>).</li>
 <!--
       The documentation is now made with <a
       href="http://www.docbook.org">DocBook</a> and available in CVS
