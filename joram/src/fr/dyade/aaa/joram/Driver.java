@@ -96,6 +96,9 @@ public abstract class Driver extends fr.dyade.aaa.util.Daemon
         // Catching an IOException:
         catch (IOException exc) {
           if (! cnx.closing) {
+
+            stopping = true;
+
             IllegalStateException jmsExc =
               new IllegalStateException("The connection is broken,"
                                         + " the driver stops.");
@@ -124,7 +127,6 @@ public abstract class Driver extends fr.dyade.aaa.util.Daemon
             }
 
             // Closing the connection:
-            stopping = true;
             if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
               JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                          this + ": closes the connection.");
