@@ -13,10 +13,10 @@
   <body>
 
     <s1 name="JORAM documentation">
-      <p>If available, the documents related to the used release will be
+      <p>If available, the documents related to a given release will be
       identified by the same tag. Example, "Installing the 3.6 release" is
       what should be read for installing JORAM 3.6.</p>
-      <p>It may happen that for a given release, no document match. This means
+      <p>It may happen that for a given release, no document matches. This means
       that the document written for the previous release is still up-to-date.
       Example, "Installing the 3.4 release" is what should be read for
       installing JORAM 3.5.</p>
