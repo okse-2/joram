@@ -111,16 +111,6 @@ public class NamingContextImpl implements Context {
       throw exc;
     } else if (reply instanceof LookupReply) {
       Object obj = ((LookupReply)reply).getObject();
-      if (obj instanceof Reference) {
-        try {
-          obj = javax.naming.spi.NamingManager.getObjectInstance(
-            obj, null, null, null);
-        } catch (Exception e) {
-          NamingException ne = new NamingException(e.getMessage());
-          ne.setRootCause(e);
-          throw ne;
-        }
-      }
       return obj;
     } else {
       return new NamingContextImpl(
@@ -190,6 +180,8 @@ public class NamingContextImpl implements Context {
       throw exc;
     } else {
       ListBindingsReply lbr = (ListBindingsReply)reply;
+
+      // 1- resolve contexts
       Binding[] bindings = lbr.getContexts();
       for (int i = 0; i < bindings.length; i++) {
         CompositeName ctxName = (CompositeName)contextPath.clone();
@@ -198,6 +190,9 @@ public class NamingContextImpl implements Context {
           new NamingConnection(connection.getHostName(),
                                connection.getPort()), ctxName));
       }
+
+      // 2- resolve references
+      lbr.resolveReferences();
       return lbr.getEnumeration();
     }
   }

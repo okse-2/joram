@@ -78,7 +78,7 @@ public class NamingContext implements Serializable {
         ObjectRecord or = (ObjectRecord)r;
         res[i] = new NameClassPair(
           or.getName(),
-          or.getObject().getClass().getName(),
+          getClassName(or.getObject()),
           true);
       } else if (r instanceof ContextRecord) {
         res[i] = new NameClassPair(
@@ -95,10 +95,10 @@ public class NamingContext implements Serializable {
     for (int i = 0; i < records.size(); i++) {
       Record r = (Record)records.elementAt(i);
       if (r instanceof ObjectRecord) {
-        ObjectRecord or = (ObjectRecord)r;
+        ObjectRecord or = (ObjectRecord)r;        
         res[i] = new Binding(
           or.getName(),
-          or.getObject().getClass().getName(),
+          getClassName(or.getObject()),
           or.getObject(),
           true);
       } else if (r instanceof ContextRecord) {
@@ -110,6 +110,15 @@ public class NamingContext implements Serializable {
       }
     }
     return res;
+  }
+
+  private static String getClassName(Object obj) {
+    if (obj instanceof Reference) {
+      Reference ref = (Reference)obj;
+      return ref.getClassName();
+    } else {
+      return obj.getClass().getName();
+    }
   }
 
   public String toString() {

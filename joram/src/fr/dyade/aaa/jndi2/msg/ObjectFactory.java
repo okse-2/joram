@@ -28,31 +28,27 @@
 package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
+import java.io.*;
 
-public class LookupReply extends JndiReply {
-  
-  private Object obj;
+public class ObjectFactory implements javax.naming.spi.ObjectFactory {
+  public final static String ADDRESS_TYPE = "";
 
-  public LookupReply(Object obj) {
-    this.obj = obj;
-  }
-
-  public final Object getObject() throws NamingException {
-    return resolveObject(obj);
-  }
-
-  public final static Object resolveObject(Object obj) throws NamingException {
+  public Object getObjectInstance(Object obj, Name name, Context ctx,
+                                  java.util.Hashtable env) throws Exception {
     if (obj instanceof Reference) {
-      try {
-        return javax.naming.spi.NamingManager.getObjectInstance(
-          obj, null, null, null);
-      } catch (Exception e) {
-        NamingException ne = new NamingException(e.getMessage());
-        ne.setRootCause(e);
-        throw ne;
+      Reference ref = (Reference)obj;
+      RefAddr addr = ref.get(ADDRESS_TYPE);
+      if (addr instanceof BinaryRefAddr) {
+        BinaryRefAddr binRefAddr = (BinaryRefAddr)addr;
+        byte[] bytes = (byte[])binRefAddr.getContent();
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        return ois.readObject();
+      } else {
+        throw new Exception("Binary address expected");
       }
     } else {
-      return obj;
+      throw new Exception("Reference expected");
     }
   }
 }
