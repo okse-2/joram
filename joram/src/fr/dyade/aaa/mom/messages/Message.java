@@ -674,7 +674,7 @@ public class Message implements Cloneable, Serializable
    */
   public Object getObject() throws Exception
   {
-    if (body_bytes == null || type != MessageType.OBJECT)
+    if (body_bytes == null)
       return null;
     ByteArrayInputStream bais = new ByteArrayInputStream(body_bytes);
     ObjectInputStream ois = new ObjectInputStream(bais);
@@ -698,18 +698,12 @@ public class Message implements Cloneable, Serializable
   /** Returns the stream of bytes body of the message. */
   public byte[] getStream()
   {
-    if (type != MessageType.STREAM)
-      return null;
-
     return body_bytes;
   }
 
   /** Returns the array of bytes body of the message. */
   public byte[] getBytes()
   {
-    if (type != MessageType.BYTES)
-      return null;
-
     return body_bytes;
   }
 

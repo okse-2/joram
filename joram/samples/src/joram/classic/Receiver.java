@@ -55,6 +55,9 @@ public class Receiver
       msg = qrec.receive();
       if (msg instanceof TextMessage)
         System.out.println("Msg received: " + ((TextMessage) msg).getText());
+      else if (msg instanceof ObjectMessage)
+        System.out.println("Msg received: "
+                           + ((ObjectMessage) msg).getObject());
       else
         System.out.println("Msg received: " + msg);
     }
