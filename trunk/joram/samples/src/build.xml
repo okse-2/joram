@@ -22,6 +22,13 @@
     <property name="project.class.path" refid="project.class.path"/>
   </target>
 
+  <!-- Clean samples - delete generated files -->
+  <target name="clean" 
+          description="--> delete generated files">
+    <delete dir="${obj.dir}"/>
+    <delete dir="${build.dir}"/>
+  </target>
+
   <!-- Prepares the compilation phase -->
   <target name="prepare" depends="init">
     <delete quiet="true" dir="${obj.dir}"/>
@@ -57,7 +64,8 @@
     <copy file="${conf.dir}/jndi.properties"
           todir="${obj.dir}"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"/>
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
   </target>
 
   <!-- Initializes the distributed configuration -->
@@ -71,9 +79,9 @@
     <copy file="${conf.dir}/jndi.properties"
           tofile="${obj.dir}/jndi.properties"/>
     <copy file="${conf.dir}/distributed_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"/>
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
   </target>
-
 
   <!-- Starts a server -->
   <target name="server" depends="init">
@@ -86,21 +94,23 @@
     </java>
   </target>
 
+  <!-- Start a server in NullTransaction mode -->
+  <target name="single_server" depends="simple_init"
+          description="--> Start a single server in non-persistent mode">
+    <antcall target="server">
+      <param name="transaction" value="NullTransaction"/>
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
 
-  <!-- Sets the classic configuration up -->
-  <target name="classic_conf" depends="simple_init"
-    description="--> Start a centralized Server configuration">
-    <parallel>
-      <antcall target="server">
-        <param name="transaction" value="NullTransaction"/>
-        <param name="sid" value="0"/>
-      </antcall>
-      <java classname="classic.ClassicAdmin"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-      </java>
-    </parallel>
+  <!-- Setup the classic configuration -->
+  <target name="classic_admin" depends="simple_init"
+          description="--> Setup a classic administration (for a centralized architecture)">
+    <java classname="classic.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
   </target>
 
   <!-- Runs the classic sender client -->
@@ -144,20 +154,14 @@
   </target>
 
 
-  <!-- Sets the chat configuration up -->
-  <target name="chat_conf" depends="simple_init"
-    description="--> Setup chat configuration">
-    <parallel>
-      <antcall target="server">
-        <param name="transaction" value="ATransaction"/>
-        <param name="sid" value="0"/>
-      </antcall>
-      <java classname="chat.ChatAdmin"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-      </java>
-    </parallel>
+  <!-- Setup the chat administration -->
+  <target name="chat_admin" depends="simple_init"
+          description="--> Setup chat administration">
+    <java classname="chat.ChatAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
   </target>
 
   <!-- Runs a chat client -->
@@ -179,20 +183,14 @@
   </target>
 
   
-  <!-- Sets the dotcom configuration up -->
-  <target name="dotcom_conf" depends="simple_init"
-    description="--> Setup dotcom configuration">
-    <parallel>
-      <antcall target="server">
-        <param name="transaction" value="ATransaction"/>
-        <param name="sid" value="0"/>
-      </antcall>
+  <!-- Setup the dotcom administration -->
+  <target name="dotcom_admin" depends="simple_init"
+          description="--> Setup dotcom administration">
       <java classname="dotcom.DotcomAdmin"
           failonerror="no" fork="yes"
           dir="${run.dir}">
         <classpath path="${project.class.path}"/>
       </java>
-    </parallel>
   </target>
 
   <!-- Runs the dotcom servers -->
@@ -226,21 +224,23 @@
   </target>
 
 
-  <!-- Sets a distributed architecture up -->
+  <!-- Setup a distributed architecture -->
   <target name="server0" depends="distributed_init"
-    description="--> Setup distributed architecture">
+          description="--> Start a server for a distributed architecture (w/ id 0)">
     <antcall target="server">
       <param name="transaction" value="ATransaction"/>
       <param name="sid" value="0"/>
     </antcall>
   </target>
-  <target name="server1" depends="distributed_init">
+  <target name="server1" depends="distributed_init"
+          description="--> Start a server for a distributed architecture (w/ id 1)">
     <antcall target="server">
       <param name="transaction" value="ATransaction"/>
       <param name="sid" value="1"/>
     </antcall>
   </target>
-  <target name="server2" depends="distributed_init">
+  <target name="server2" depends="distributed_init"
+          description="--> Start a server for a distributed architecture (w/ id 2)">
     <antcall target="server">
       <param name="transaction" value="ATransaction"/>
       <param name="sid" value="2"/>
