@@ -23,7 +23,7 @@
 
 PACKAGES = fr
 
-SHIP_LIBRARIES = a3rt.jar
+SHIP_LIBRARIES = a3rt.jar a3ocl.jar a3jms.jar
 
 build_all: all test ship_all scripts doc_protected doc_private
 ship_all: ship_dtd $(SHIP_LIBRARIES:%.jar=ship_%)
@@ -49,7 +49,7 @@ a3ocl.jar_LIBRARIES = \
 	a3dt.jar \
 	a3config.jar
 
-ogc.jar_LIBRARIES = \
+a3ogc.jar_LIBRARIES = \
 	a3model.jar \
 	a3editors.jar \
 	a3sconf.jar \
@@ -62,6 +62,27 @@ nwlogs.jar_LIBRARIES = \
 	a3ar.jar \
 	a3nwar.jar \
 	a3nwtest.jar
+
+olan.jar_LIBRARIES = \
+	a3util.jar \
+	a3agent.jar \
+	a3ip.jar \
+	a3task.jar \
+	a3ns.jar \
+	a3config.jar \
+	a3model.jar \
+	a3instru.jar \
+	a3sconf.jar \
+	a3generation.jar \
+	a3dt.jar \
+	a3manag.jar \
+	a3magent.jar \
+	a3editors.jar \
+	toolsUtil.jar \
+	a3gct.jar \
+	a3gbt.jar \
+	a3mbeans.jar \
+	a3vmc.jar
 
 # ships the H323 plug-in
 # builds a single jar file and a single shared library
@@ -104,7 +125,7 @@ ship_dtd:
 		>> $(SHIP)/OCLscript.dtd; \
 	cat fr/dyade/aaa/services/generation/OCLscript.dtd >> $(SHIP)/OCLscript.dtd
 
-DOC_LIBS = xerces.jar:swing.jar:swingall.jar:OB.jar:OBNaming.jar:jndi.jar:jms.jar
+DOC_LIBS = xerces.jar:OB.jar:OBNaming.jar:jndi.jar:jms.jar
 DYADE_DOC_DIR = /infosystem/www/htdocs/aaa/private/aaadoc
 doc_dyade:
 	cp -rp $(ROOTDIR)/doc_protected $(DYADE_DOC_DIR)/apidoc.new
@@ -128,8 +149,9 @@ ship_h323:
 
 $(SHIP_LIBRARIES:%.jar=ship_%): ship_%: $(SHIP)/%.jar
 $(SHIP)/a3rt.jar: $(a3rt.jar_LIBRARIES:%=$(LIBDIR)/%)
-$(SHIP)/ocl.jar: $(ocl.jar_LIBRARIES:%=$(LIBDIR)/%)
-$(SHIP)/ogc.jar: $(ogc.jar_LIBRARIES:%=$(LIBDIR)/%)
+$(SHIP)/a3jms.jar: $(a3jms.jar_LIBRARIES:%=$(LIBDIR)/%)
+$(SHIP)/a3ocl.jar: $(a3ocl.jar_LIBRARIES:%=$(LIBDIR)/%)
+$(SHIP)/a3ogc.jar: $(a3ogc.jar_LIBRARIES:%=$(LIBDIR)/%)
 $(SHIP)/nwlogs.jar: $(nwlogs.jar_LIBRARIES:%=$(LIBDIR)/%)
 $(SHIP_LIBRARIES:%= $(SHIP)/%):
 	-rm -fr $(SHIP)/tmp
