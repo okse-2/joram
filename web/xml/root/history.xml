@@ -103,8 +103,7 @@
 
       <subtitle>7th june 2002: JORAM 3.0.4 available (cvs tag: joram3_0_4-1)</subtitle>
       
-      <p><strong>JORAM 3.0.4 is now available for download</strong>.<br />
-      </p><p>
+      <p>
         This version is a maintenance version of JORAM, it includes
         corrections of bugs in XA and ASF classes. 
         The JORAM CVS repository has been branched after this release:
@@ -115,8 +114,7 @@
 
       <subtitle>26th March 2002: JORAM 3.0.1 available (cvs tag: joram3_0_1)</subtitle>
       
-      <p><strong>JORAM 3.0.1 is now available for download</strong>.<br />
-      </p><p>
+      <p>
 	This version corrects all bugs discovered by JORAM community
 	since the release of JORAM 3.0.0. These corrections were already available
 	in CVS repository.
@@ -131,9 +129,7 @@
 
       <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
       
-      <p><strong>JORAM 3.0.0 is now available for 
-	  download</strong>. 
-      </p><p>
+      <p>
 	Compared to JORAM previous versions, this new release is a complete
 	re-factoring of the code base. It gets rid of the
 	previous limitations and defects. The JMS specification is now fully
