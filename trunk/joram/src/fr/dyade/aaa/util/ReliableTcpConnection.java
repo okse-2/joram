@@ -57,9 +57,9 @@ public class ReliableTcpConnection {
 
   private Socket sock;
 
-  private ObjectOutputStream oos;
+  private NetOutputStream nos;
 
-  private ObjectInputStream ois;
+  private BufferedInputStream bis;
 
   private Object inputLock;
 
@@ -113,9 +113,7 @@ public class ReliableTcpConnection {
       this.sock = sock;
 
       synchronized (outputLock) {
-        oos = new ObjectOutputStream(
-          sock.getOutputStream());
-        oos.flush();
+        nos = new NetOutputStream(sock);
         
         synchronized (pendingMessages) {
           for (int i = 0; i < pendingMessages.size(); i++) {
@@ -127,9 +125,7 @@ public class ReliableTcpConnection {
       }
 
       synchronized (inputLock) {
-        ois = new ObjectInputStream(
-          new BufferedInputStream(
-            sock.getInputStream()));
+        bis = new BufferedInputStream(sock.getInputStream());
       }
 
       setStatus(CONNECT);
@@ -167,15 +163,47 @@ public class ReliableTcpConnection {
   
   private void doSend(long id, long ackId, Object obj) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection.doSend(" + 
-        id + ',' + obj + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpConnection.doSend(" + id + ',' + obj + ')');
     synchronized (outputLock) {
-      oos.writeLong(id);
-      oos.writeLong(ackId);
-      oos.writeObject(obj);
-      oos.reset();
+      nos.send(id, ackId, obj);
       unackCounter = 0;
+    }
+  }
+
+  static class NetOutputStream {
+    private ByteArrayOutputStream baos = null;
+    private ObjectOutputStream oos = null;
+    private OutputStream os = null;
+
+    static private final byte[] streamHeader = {
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
+    };
+
+    NetOutputStream(Socket sock) throws IOException {
+      baos = new ByteArrayOutputStream(1024);
+      oos = new ObjectOutputStream(baos);
+      baos.reset();
+      os = sock.getOutputStream();
+    }
+
+    void send(long id, long ackId, Object msg) throws IOException {
+      try {
+        baos.write(streamHeader, 0, 4);
+        oos.writeLong(id);
+        oos.writeLong(ackId);
+        oos.writeObject(msg);
+        oos.flush();
+
+        baos.writeTo(os);
+        os.flush();
+      } finally {
+        oos.reset();
+        baos.reset();
+      }
     }
   }
 
@@ -223,7 +251,9 @@ public class ReliableTcpConnection {
         long messageId;
         long ackId;
         Object obj;
+
         synchronized (inputLock) {
+          ObjectInputStream ois = new ObjectInputStream(bis);
           messageId = ois.readLong();
           ackId = ois.readLong();
           obj = ois.readObject();
@@ -266,10 +296,10 @@ public class ReliableTcpConnection {
     if (getStatus() == INIT) 
       return;
     try { 
-      ois.close();
+      if (bis != null) bis.close();
     } catch (IOException exc) {}
     try { 
-      oos.close();
+      sock.getOutputStream().close();
     } catch (IOException exc) {}
     try { 
       sock.close();
