@@ -14,6 +14,13 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>January, 16th 2002: Documentation update</subtitle>
+      <p>The <a
+	  href="http://www.objectweb.org/joram/current/doc/install/index.html">Installation guide</a> 
+	has been updated to take into account Ant support.</p>
+
+      <hr/>
+      
       <subtitle>January, 16th 2002: JORAM 2.2 (cvs tag:
       joram2_2)</subtitle>
 
