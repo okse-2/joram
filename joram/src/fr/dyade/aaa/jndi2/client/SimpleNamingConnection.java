@@ -103,6 +103,9 @@ public class SimpleNamingConnection
                        "SimpleNamingConnection.open()");
     try {
       socket = new Socket(hostName, port);
+      socket.setTcpNoDelay(true);
+      socket.setSoTimeout(0);
+      socket.setSoLinger(true, 1000);
       sender = new SerialOutputStream(socket.getOutputStream());
       receiver = new ObjectInputStream(socket.getInputStream());
     } catch (IOException exc) {
