@@ -37,17 +37,17 @@
 	  
           <tr> 
             <td align="right">Name: </td>
-            <td><input type="text" name="name" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
+            <td><input type="text" name="name" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
 	  </tr>
 	  
 	  <tr> 
             <td align="right">E-mail: </td>
-            <td><input type="text" name="email" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
+            <td><input type="text" name="email" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
           </tr>
 	  
           <tr> 
             <td align="right">Organization: </td>
-            <td><input type="text" name="organization" size="40"/><img src="../../images/ast.gif" heigth="9" width="9" alt=""/></td>
+            <td><input type="text" name="organization" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
           </tr>
 
 	  <tr>
@@ -676,8 +676,8 @@ EXHIBIT B.
 	  
           <tr> 
             <td colspan="2" align="center">
-              <input type="submit" value="Submit" />
-              <input type="reset" value="Reset" />
+              <input type="submit" name="" value="Submit" />
+              <input type="reset" name="" value="Reset" />
             </td>
           </tr>
         </table>
