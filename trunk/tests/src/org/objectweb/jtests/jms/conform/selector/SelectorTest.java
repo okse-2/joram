@@ -33,7 +33,7 @@ import javax.jms.*;
  * Test the message selector features of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorTest.java,v 1.4 2002-05-15 08:52:27 jmesnil Exp $
+ * @version $Id: SelectorTest.java,v 1.5 2002-05-15 09:25:46 jmesnil Exp $
  */
 public class SelectorTest extends PTPTestCase {
 
@@ -96,10 +96,10 @@ public class SelectorTest extends PTPTestCase {
     }
     
     /**
-     * Test the message selector using the filter example provided by the JMS specifications
+     * Test the message selector using the filter example provided by the JMS specifications.
      * <br />
      * <ul>
-     *  <li><code>"JMSType = 'car' AND color = 'blue' AND weight > 2500"</code></li>
+     *   <li><code>"JMSType = 'car' AND color = 'blue' AND weight > 2500"</code></li>
      * </ul>
      */
     public void testSelectorExampleFromSpecs() {
@@ -130,10 +130,10 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the ">" condition in message selector
+     * Test the ">" condition in message selector.
      * <br />
      * <ul>
-     *  <li><code>"weight > 2500"</code></li>
+     *   <li><code>"weight > 2500"</code> is <code>true</code> for 3000 and <code>false</code> for 1000</li>
      * </ul>
      */
     public void testGreaterThan() {
@@ -160,10 +160,10 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the "=" condition in message selector
+     * Test the "=" condition in message selector.
      * <br />
      * <ul>
-     *  <li><code>"weight > 2500"</code></li>
+     *   <li><code>"weight > 2500"</code>  is <code>true</code> for 2500 and <code>false</code> for 1000</li>
      * </ul>
      */
     public void testEquals() {
@@ -190,9 +190,42 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the BETWEEN condition
+     * Test the "<>" (not equal) condition in message selector.
      * <br />
-     * "age BETWEEN 15 and 19" is <code>true</code> for 17 and <code>false</code> for 20
+     * <ul>
+     *   <li><code>"weight <> 2500"</code>  is <code>true</code> for 1000 and <code>false</code> for 2500</li>
+     * </ul>
+     */
+    public void testNotEquals() {
+        try {
+            receiverConnection.stop();
+            receiver  = receiverSession.createReceiver(receiverQueue, "weight <> 2500");
+            receiverConnection.start();
+   
+            TextMessage dummyMessage = senderSession.createTextMessage();
+            dummyMessage.setLongProperty("weight", 2500);
+            dummyMessage.setText("testEquals:1");
+            sender.send(dummyMessage);
+     
+            TextMessage message = senderSession.createTextMessage();
+            message.setLongProperty("weight", 1000);
+            message.setText("testEquals:2");
+            sender.send(message);
+       
+            TextMessage msg = (TextMessage)receiver.receive(TestConfig.TIMEOUT);
+            assertEquals("testEquals:2", msg.getText());
+        } catch (JMSException e) {
+            fail(e);
+        }
+    }
+
+
+    /**
+     * Test the BETWEEN condition in message selector.
+     * <br />
+     * <ul>
+     *   <li>"age BETWEEN 15 and 19" is <code>true</code> for 17 and <code>false</code> for 20</li>
+     * </ul>
      */
     public void testBetween() {
         try {
@@ -223,9 +256,11 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the IN condition
+     * Test the IN condition in message selector.
      * <br />
-     * "Country IN ('UK', 'US', 'France')" is <code>true</code> for 'UK' and <code>false</code> for 'Peru'
+     * <ul>
+     *   <li>"Country IN ('UK', 'US', 'France')" is <code>true</code> for 'UK' and <code>false</code> for 'Peru'</li>
+     * </ul>
      */
     public void testIn() {
         try {
@@ -256,9 +291,11 @@ public class SelectorTest extends PTPTestCase {
     }
   
     /**
-     * Test the LIKE ... ESCAPE condition
+     * Test the LIKE ... ESCAPE condition in message selector
      * <br />
-     * "underscored LIKE '\_%' ESCAPE '\'" is <code>true</code> for '_foo' and <code>false</code> for 'bar'
+     * <ul>
+     *   <li>"underscored LIKE '\_%' ESCAPE '\'" is <code>true</code> for '_foo' and <code>false</code> for 'bar'</li>
+     * </ul>
      */
     public void testLikeEscape() {
         try {
@@ -289,9 +326,11 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the LIKE condition with '_' in the pattern
+     * Test the LIKE condition with '_' in the pattern.
      * <br />
-     * "word LIKE 'l_se'" is <code>true</code> for 'lose' and <code>false</code> for 'loose'
+     * <ul>
+     *   <li>"word LIKE 'l_se'" is <code>true</code> for 'lose' and <code>false</code> for 'loose'</li>
+     * </ul>
      */
     public void testLike_2() {
         try {
@@ -322,9 +361,11 @@ public class SelectorTest extends PTPTestCase {
     }
 
     /**
-     * Test the LIKE condition with '%' in the pattern
+     * Test the LIKE condition with '%' in the pattern.
      * <br />
-     * "phone LIKE '12%3'" is <code>true</code> for '12993' and <code>false</code> for '1234'
+     * <ul>
+     *   <li>"phone LIKE '12%3'" is <code>true</code> for '12993' and <code>false</code> for '1234'</li>
+     * </ul>
      */
     public void testLike_1() {
         try {
@@ -354,10 +395,10 @@ public class SelectorTest extends PTPTestCase {
     }
     
     /**
-     * Test the <code>NULL</code> value in message selector
+     * Test the <code>NULL</code> value in message selector.
      * <br />
      * <ul>
-     *  <li><code>"prop IS NULL"</code></li>
+     *   <li><code>"prop IS NULL"</code></li>
      * </ul>
      */
     public void testNull() {
