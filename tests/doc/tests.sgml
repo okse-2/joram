@@ -1,4 +1,5 @@
-<!DOCTYPE article SYSTEM "/usr/share/sgml/docbook/dtd/3.1/docbook.dtd"> 
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN">
 
 <article>
   <title>JMS Test Suite Documentation</title>
@@ -6,21 +7,23 @@
   <sect1>
     <title>Aim of the test suite</title>
     <para>At first, this test suite goal was to test(!) JMS compliance
-      for JORAM. It happended while JORAM was totally rewritten from
+      for JORAM. It happened while JORAM was totally rewritten from
       scratch. Thus we needed to test that the new code was still
       compliant to JMS specifications.</para>
     <para>Another goal of this test suite was for me to learn more about
-      JMS. As I was learning it, I thought interesting to know how
-    other JMS providers performed. So it was interesting to
-    be able to use other providers than JORAM for this suite.</para>
-    <para>Therefore, it became apparent that a JMS Test Suite
+      JMS. As I was learning it, I was interested by knowing how
+    other JMS providers performed. So I needed to be able to use other
+    providers than JORAM for this suite.</para> 
+    <para>Therefore, it became clear that a JMS Test Suite
     independent of any JMS providers was interesting. I knew that
     other JMS test suites existed but since they came from company
     selling JMS solutions I was quite doubtful about it. Working for
-    ObjectWeb, a consortiun aiming at creating Open Source middleware
-    software, I was my interest to make an objective test suite that
+      <ulink url="http://www.objectweb.org"> ObjectWeb</ulink> which
+    is consortiun aiming at creating Open Source middleware 
+      software, it was my interest to make an
+    <emphasis>unbiased</emphasis> test suite that 
     could help us to improve our code quality.</para>
-    <para>I don't deny it, at the beginning JORAM results were not
+    <para>I don't deny that, at the beginning, JORAM results were not
     very good. But the new version being written in parallel of this
     suite, results became better really fast.</para>
   </sect1>
@@ -31,15 +34,19 @@
       <para>The test suite is available only by CVS. To setup the CVS
 	software, see <ulink url="http://www/cvshome.org">CVS
       website</ulink></para> 
-      <para>To the CVS repository in anonymous mode, simply use the
+      <para>To access the CVS repository in anonymous mode, simply use the
       following commands (if you are using a GUI CVS client, configure
       it appropriately):
 	<simplelist>
-	  <member><command>cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM login</command></member>
+	  <member><command>cvs -d
+	  :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM
+	  login</command></member> 
 	  <member><command>password:</command></member>
-	  <member><command>cvs -d :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM co tests</command></member>
+	  <member><command>cvs -d
+	  :pserver:anonymous@cvs.objectweb.org:/cvs/JORAM co
+	  tests</command></member> 
 	</simplelist>
-	When prompted for a password for anonymous, simply press the
+	When prompted for a password, simply press the
 	<keycap>Enter</keycap> key.</para>
       <para>This will create a replica of the test suite source
 	tree in your account on your machine, with all files needed by
@@ -69,7 +76,9 @@
 	  <varname>org.objectweb.jtests.jms.admin</varname> package
 	  which defines an simple interface for JMS administration as
 	  well as a factory to get a provider-specific implementation of
-	  this interface.
+	  this interface and a
+	<varname>org.objectweb.jtests.jms.framework</varname> package
+	with classes extending JUnit to adapt it to JMS.
 	</para>
 	<para>There is also a
 	  <varname>org.objectweb.jtests.providers.admin</varname>
@@ -114,8 +123,8 @@
 	  needed. I use Ant 1.4.1 so I recommend to use this version. You
 	  will also need the optional targets library,
 	  <filename>jakarta-ant-1.4.1-optional.jar</filename> which
-	  defines <filename>junit</filename> target and is available
-	also on Ant website.</para>
+	  defines <filename>junit</filename> target and is also available
+	  on Ant website.</para>
 	<para>Once Ant environment is properly installed (see Ant
 	  documentation), you have to put both
 	  <filename>jakarta-ant-1.4.1-optional.jar</filename> you've
@@ -133,15 +142,13 @@
 	  All generated files will be put in the
 	  <filename>javadoc</filename> directory.</para>
 	<para>The javadoc documentation contains a description for each
-	  test methods of the JMS specifications aspects which is tested
+	  test methods of the JMS specifications features which is tested
 	  by it.  
 	</para>
       </sect3>
       <sect3>
 	<title>Compilation of the test suite</title>
-	<para>Once you have retrieved the source code of the suite, you
-	  have to compile it. In the <filename>tests</filename>
-	  directory simply type: 
+	<para>In the <filename>tests</filename> directory, simply type: 
 	  <simplelist>
 	    <member><command>ant compile</command></member>
 	  </simplelist>
@@ -154,36 +161,112 @@
 	  Each JMS providers has its own way to create JMS
 	  administrated objects (connection factories and destinations).
 	  To remove this dependance from the test suite, it uses a
-	  simple Admin interface to create these objects. The
+	  simple <varname>Admin</varname> interface to create these objects. The
 	  implementation of the interface is discovered at runtime by
 	  a property put in the
 	  <filename>config/provider.properties</filename> file which
-	  indicates which class implementing the Admin interface is to use.
-	</para>
-	<para>For the moment, there is only one provider
-	  implementation of this interface. Guess which provider?
-	  JORAM, of course! ;-).
+	  indicates which class implementing the <varname>Admin</varname> interface to use.
 	</para>
 	<para>To compile these provider specific classes, in the
 	  <filename>tests</filename> directory, type:
 	  <simplelist>
-	    <member><command>ant compile.providers</command></member>
+	    <member><command>ant compile.&lt;provider&gt;</command></member>
 	  </simplelist>
-	</para>
-	<para>Provider specific classes are not compiled with the test suite
-	  to avoid dependency of the suite to these providers. </para>
+	  <varname>&lt;provider&gt;</varname> being of one the providers which implements
+	  the Admin interface. </para>
+	<sect4>
+	  <title>Compile JORAM Admin</title>
+	  <para>To compile JORAM <varname>Admin</varname>
+	    implementation, type in the <filename>tests</filename> directory
+	    <simplelist>
+	      <member><command>ant compile.joram</command></member>
+	    </simplelist>
+	  </para>
+	</sect4>
+	<sect4>
+	  <title>Compile FioranoMQ Admin</title>
+	  <para>To compile FioranoMQ <varname>Admin</varname>
+	    implementation, you have first to install and propertly
+	    setup it (for more information see <ulink
+	      url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ web site</ulink>, 
+	    then add fioranoMQ libraries in the
+	  <filename>providers/fiorano</filename> directory and type in the <filename>tests</filename> directory:
+	    <simplelist>
+	      <member><command>ant compile.fiorano</command></member>
+	    </simplelist>
+	  </para>
+	  <para>Provider specific classes are not compiled with the test suite
+	    on purpose to avoid dependency of the suite to these providers. </para>
+	</sect4>
       </sect3>
       <sect3>
 	<title>Starting the tests</title>
-	<para>Before starting the test, provider specific setup has to
-	  be made to start their server. Since there are too many way to
-	  do so, I have deliberately not included this step in the suite
-	  process. I hope that other providers will contribute to this
-	  suite and that we could obtain a common way to start
-	  servers. But in the mean time, it has to be made by
-	  hand.</para>
-	<para>Since JORAM is my favorite JMS provider, I'll show you
-	how to set it up.</para>
+	<sect4>
+	  <title>Starting JMS provider</title>
+	  <para>Before starting the test, provider specific setup has to
+	    be made to start their server. Since there are too many ways to
+	    do so, I have deliberately not included this step in the suite
+	    process. I hope that other providers will contribute to this
+	    suite and that we could obtain a common way to start
+	    servers. But in the mean time, it has to be made by
+	    hand.</para>
+	  <sect5>
+	    <title>JORAM</title>
+	    <para>Since JORAM is my favorite JMS provider, I'll show you
+	      how to set it up. Go to the
+	      <filename>providers/joram</filename> directory and
+	      type:<simplelist>
+		<member><command>java -DTransaction=NullTransaction -jar
+		    mom.jar 0 s0</command></member>
+	      </simplelist>
+	      <varname>Transaction</varname> property is set to
+	      <varname>NullTransaction</varname> to stipulate we don't
+	      want persistence. <varname>0 s0</varname> is there to know
+	      which JORAM configuration is to be used (see
+	      <filename>a3servers.xml</filename> file).
+	    </para>
+	  </sect5>
+	  <sect5>
+	    <title>FioranoMQ</title>
+	    <para>Let say that FIORANO_HOME is the home directory of
+	      FioranoMQ, go to
+	      <filename>$FIORANO_HOME/scripts</filename> directory and
+	    type
+	      <simplelist>
+		<member><command>runkernel.sh</command></member>
+	      </simplelist></para>
+	  </sect5>
+	</sect4>
+	<sect4>
+	  <title>Three ways to test</title>
+	  <para>There are three ways to use the test suite. Once the
+	  JMS provider is started, you can type one of these three
+	  commands
+	    <simplelist>
+	      <member><command>ant batchtest</command></member>
+	      <member><command>ant junit.gui</command></member>
+	      <member><command>ant test -Dtest=&lt;test class name&gt;</command></member>
+	    </simplelist>
+	    The first one starts all the tests of the test suite. The
+	    second one starts JUnit graphic interface and let you
+	    chose which tests you want to run. The last one let you
+	    run one test case given the name of this case (for example
+	    <varname>org.objectweb.jtests.jms.message.MessageBodyTest</varname>)
+	    if you're only interested to test specific JMS features.
+	  </para>
+	</sect4>
+      </sect3>
+      <sect3>
+	<title>Test Suite Report</title>
+	<para>For all test case classes, an XML report is
+	  generated. Then thanks to the <varname>junitreport</varname>
+	  task, a Javadoc like report is generated in the
+	<filename>report/html</filename> directory which sums up the
+	tests with messages for failed ones.</para>
+	<para>This report generation is done automatically if you
+	started tests either by <command>ant batchtest</command> or
+	<command>ant test -Dtest=&lt;test class name&gt;</command>. 
+	</para>
       </sect3>
     </sect2>
   </sect1>
