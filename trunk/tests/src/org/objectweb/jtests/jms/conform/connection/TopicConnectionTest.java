@@ -29,7 +29,7 @@ import javax.jms.*;
 import junit.framework.*;
 
 /**
- * Test topic-specific connection features
+ * Test topic-specific connection features.
  *
  * Test setting of client ID which is relevant only for Durable Subscribtion
  */

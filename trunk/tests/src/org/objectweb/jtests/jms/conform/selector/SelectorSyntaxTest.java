@@ -35,7 +35,7 @@ import javax.naming.*;
  * Test the syntax of of message selector of JMS
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: SelectorSyntaxTest.java,v 1.2 2002-03-19 15:01:12 joram Exp $
+ * @version $Id: SelectorSyntaxTest.java,v 1.3 2002-04-08 13:48:33 joram Exp $
  */
 public class SelectorSyntaxTest extends JMSTestCase {
   
@@ -166,7 +166,7 @@ public class SelectorSyntaxTest extends JMSTestCase {
     }
   
     /**
-     * Create administrated objects and one session ready to use for tests.<br />
+     * Create administrated objects and one session ready to use for tests.
      * Start connections.
      */
     protected void setUp() {
@@ -186,7 +186,7 @@ public class SelectorSyntaxTest extends JMSTestCase {
     }
 
     /**
-     * Stop administrated objects and the session.<br />
+     * Stop administrated objects and the session.
      * Stop connections.
      */
     protected void tearDown() {
