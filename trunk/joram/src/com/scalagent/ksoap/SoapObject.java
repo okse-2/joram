@@ -95,6 +95,7 @@ public class SoapObject {
   }
 
   public void setProperty(int index, Object value) {
+    data.setSize(index+1);
     data.setElementAt(value,index);
   }
     

@@ -127,10 +127,9 @@ public class ConversionSoapHelper {
 
   static int getSetCnx(SoapObject sO) {
     int ret = -1;
-
     try {
       ret =  ((Integer) sO.getProperty("return")).intValue();
-      if (ret < 1)
+      if (ret < 0)
         ret = -1;
     } catch (Exception e) {ret = -1;}
     return ret;
