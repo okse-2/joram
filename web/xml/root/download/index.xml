@@ -19,16 +19,17 @@
       
       <p>The latest release packages are:</p>
       <ul>
-        <li><code>joram-4.0.0.tgz</code>, including JORAM client and MOM
-        libraries, the graphical tool library, and the JORAM
+        <li><code>joram-4.1.0.tgz</code>, including JORAM client and MOM
+        libraries, the graphical tool library, the J2ME kJORAM client library and the JORAM
         samples sources;</li>
-        <li><code>joram-4.0.0-src.tgz</code>, including JORAM client and MOM
-        sources, the graphical tool sources, and the JORAM samples
+        <li><code>joram-4.1.0-src.tgz</code>, including JORAM client and MOM
+        sources, the graphical tool sources, the J2ME kJORAM client sources and the JORAM samples
         sources;</li>
-        <li><code>kjoram-4.0.0.tgz</code>, including kJORAM client libraries
-        and kJORAM sample sources;</li>
-        <li><code>kjoram-4.0.0-src.tgz</code>, including kJORAM client
-        sources and kJORAM sample sources.</li>
+        <li><code>Joram-4.1-en.pdf</code> pdf file of all Joram documentation, including the installation and the users guides.</li>
+        <li><code>joram-4.1.0-RA.rar</code>, the resource adapter for a collocated JORAM server within any J2EE 1.4 compliant 
+				application server.</li>
+				<li><code>joram-4.1.0-remoteRA.rar</code>, the resource adapter for any J2EE 1.4 application server with a non collocated 
+				JORAM server (possibly running remotely).</li>
       </ul>
  
       <p>The license agreement is displayed before the download can start.
@@ -38,9 +39,8 @@
       <p>Note: all the packages are available as .tgz files. To unzip these
       files, just go where you want to install JORAM, and unzip it. You can
       use gunzip and tar tools on unix-like systems, or winzip utility on
-      Windows. After having installed the JORAM product, please see the
-      <a href="http://joram.objectweb.org/current/doc/joram4_0_INSTALL.pdf">
-      Installation Guide</a>.</p>
+      Windows. Please consult the <a href="http://joram.objectweb.org/current/doc/Joram-4.1-en.pdf">
+			JORAM documentation</a> for installation instructions and a tutorial.</p>
     </s2>
 
     <s2 name="JORAM CVS code base">
@@ -51,7 +51,7 @@
     <p>JORAM and kJORAM are available by checking out the
     <strong>joram</strong> module.</p>
 
-    <p>The latest stable release tag is <strong>JORAM_4_0_2</strong>. For 
+    <p>The latest stable release tag is <strong>JORAM_4_1_0</strong>. For 
     getting the current development release (potentially unstable), check
     out joram with no tag.</p>
     </s2>
