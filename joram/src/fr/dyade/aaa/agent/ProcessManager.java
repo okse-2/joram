@@ -47,7 +47,7 @@ import fr.dyade.aaa.util.*;
  */
 public class ProcessManager implements Serializable {
 
-public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.5 2001-05-14 16:26:41 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: ProcessManager.java,v 1.6 2001-08-31 08:13:59 tachkeni Exp $"; 
 
 
   /** the unique <code>ProcessManager</code> in the agent server */

@@ -34,8 +34,8 @@ import java.util.*;
  * @version 1.0, 12/10/97
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -129,7 +129,7 @@ final class AgentVector extends AgentObject {
 public final class AgentFactory extends Agent {
 
   /** RCS version number of this file: $$ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.5 2001-05-14 16:26:38 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -210,7 +210,7 @@ public final class AgentFactory extends Agent {
   /**
    * Commit changed happened during AgentFactory reaction.
    */
-  void save() throws IOException {
+  protected void save() throws IOException {
     // Save AgentFactory state.
     super.save();
     // Save fixed agent id. list.

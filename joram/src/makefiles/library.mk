@@ -47,7 +47,7 @@ _LIBRARY_ = $(@:$(LIBDIR)/%=%)
 _LIBRARY_CLASSES_ = $(subst @,,$(filter-out %@,$(subst @,@ @,\
 		      $($(_LIBRARY_)_CLASSES))))
 # take inner classes into account
-$(_LIBRARIES_:%= %):
+$(_LIBRARIES_:%= %): Makefile
 	@rm -f $@
 	cd $(OBJDIR);\
 	  jar cf0 $(@://$(DRIVE)%=$(DRIVE):%) \

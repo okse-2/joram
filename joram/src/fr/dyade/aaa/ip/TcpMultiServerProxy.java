@@ -49,7 +49,7 @@ import fr.dyade.aaa.agent.*;
  * @version	v1.0
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 2001-05-04 14:54:55 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.5 2001-08-31 08:14:02 tachkeni Exp $";
   /** Listening port, may be 0 */
   protected int listenPort = -1;
   /** Listening ServerSocket */
@@ -198,6 +198,8 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
     } 
     else {
       socket = (Socket) sockets.get(key);
+      sockets.remove(key);
+      key = null;
     }
 
     super.reinitialize();
@@ -236,7 +238,7 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
       if (newClient) {
         Channel.sendTo(getId(), new ConnectNot(key));
       }
-      else {
+      else {        
         // Gets the destination agent id from intput stream, then
         // sends it a ConnectNot.
         DataInputStream dis = new DataInputStream(sock.getInputStream());
@@ -247,11 +249,16 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
         else 
           Channel.sendTo(to, new ConnectNot(key, header));
       }
-    } 
-    else if (socket != null) {
+    } else if (socket != null) {
       // this is a connected client
       oos = setOutputFilters(socket.getOutputStream());
       ois = setInputFilters(socket.getInputStream());
+    } else {
+      // This is a connected client and the
+      // socket is null.
+      if (newClient) {
+        delete();
+      }
     }
   }
 
@@ -273,32 +280,24 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
     else {
       // this is a connected client
       close();
-      if (key != null) {
-        sockets.remove(key);
-        key = null;
-      }
     }
   }
 
   protected void close() {
-    if (ois != null) {
-      try {
-	ois.close();
-      } catch (IOException exc) {}
-      ois = null;
-    }
-    if (oos != null) {
-      try {
-	oos.close();
-      } catch (IOException exc) {}
-      oos = null;
-    }
-    if (socket != null) {
-      try {
-	socket.close();
-      } catch (IOException exc) {}
-      socket = null;
-    }
+    try {
+      oos.close();
+    } catch (Exception exc) {}
+    oos = null;
+
+    try {
+      ois.close();
+    } catch (Exception exc) {}
+    ois = null;
+
+    try {
+      socket.close();
+    } catch (Exception exc) {}
+    socket = null;
   }
 
   /**
@@ -332,8 +331,9 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
           
     if (listenPort < 0) {
       // it seems there is a recovery case when key may be null
+      // DF: key is always null. 
       if (key != null)
-	    sockets.remove(key);
+        sockets.remove(key);
       key = null;
       socket = null;
     }
@@ -397,18 +397,46 @@ public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.4 
             }
             else {
               // rejects connection
-              ((Socket) sockets.get(cnot.key)).close();
-              sockets.remove(cnot.key);
+              rejectConnection(cnot.key);
             }
           }
-	    }
-      } 
-      else {
+        }
+      } else if (not instanceof UnknownAgent) {
+        UnknownAgent ua = (UnknownAgent)not;
+        if (ua.not instanceof ConnectNot) {
+          ConnectNot cnot = (ConnectNot)ua.not;
+          rejectConnection(cnot.key);
+        } else {
+          super.react(from, not);
+        }
+      } else if (not instanceof UnknownNotification) {
+        UnknownNotification un = (UnknownNotification)not;
+        if (un.not instanceof ConnectNot) {
+          ConnectNot cnot = (ConnectNot)un.not;
+          rejectConnection(cnot.key);
+        } else {
+          super.react(from, not);
+        }
+      } else {
         super.react(from, not);
       }
     } catch (Exception exc) {
       stop();
       throw exc;
+    }
+  }
+
+  /**
+   * Rejects the connection identified by its 
+   * key in the socket table.
+   *
+   * @param key the key of the socket to close.
+   */
+  protected void rejectConnection(Integer key) throws IOException {
+    Socket socket = (Socket)sockets.get(key);
+    if (socket != null) {
+      socket.close();
+      sockets.remove(key);
     }
   }
 

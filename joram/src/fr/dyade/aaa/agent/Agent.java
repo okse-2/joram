@@ -66,7 +66,7 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.5 2001-05-14 16:26:37 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -105,6 +105,7 @@ public abstract class Agent implements Serializable {
     AgentFactory factory = null;
     try {
       factory = (AgentFactory) Agent.load(AgentId.factoryId);
+
       // Initializes factory
       factory.initialize(false);
 
@@ -232,7 +233,7 @@ public abstract class Agent implements Serializable {
     return ag;
   }
 
-  void save() throws IOException {
+  protected void save() throws IOException {
     AgentServer.transaction.save(this, id.toString());
     if (Debug.saveAgent)
 	  Debug.trace("Agent save " + this, false);

@@ -39,7 +39,7 @@ import java.lang.reflect.*;
  * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
-  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.2 2001-05-14 16:26:37 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: AdminProxy.java,v 1.3 2001-08-31 08:13:54 tachkeni Exp $"; 
 
   static AdminProxy proxy = null;
 
@@ -154,6 +154,7 @@ public class AdminProxy {
 	      new InputStreamReader(socket.getInputStream()));
 	    writer = new PrintWriter(socket.getOutputStream(), true);
 	  
+
 	    // Reads then parses the request
 	    doRequest(reader.readLine());
 
@@ -215,6 +216,11 @@ public class AdminProxy {
     static final String LIST_SERVICE = "services";
     static final String ADD_SERVICE = "add";
     static final String REMOVE_SERVICE = "remove";
+
+    // Server's administration commands
+    static final String LAUNCH_SERVER = "launch";
+
+    static final String PUT_FILE = "putf";
 
     public void doRequest(String request) {
       String cmd = null;
@@ -419,7 +425,7 @@ public class AdminProxy {
 	  try {
 	    sclass = st.nextToken();
 	  } catch (NoSuchElementException exc) {
-	    writer.println("Usage: add <sclass> [<args>]");
+	    writer.println("Usage: " + REMOVE_SERVICE + " <sclass> [<args>]");
 	  }
 	  try {
 	    ServiceManager.stop(sclass);
@@ -435,7 +441,54 @@ public class AdminProxy {
 	    writer.println("Can't unregister service: " + exc.getMessage());
 	    if (debug) exc.printStackTrace(writer);
 	  }
-	} else if (cmd.equals(NONE)) {
+	} else if (cmd.equals(LAUNCH_SERVER)) {
+          int sid = -1;
+          try {
+            sid = Integer.parseInt(st.nextToken());
+          } catch (Exception exc) {
+            writer.println("Usage: " + LAUNCH_SERVER + " <sid>");
+          }
+          
+          try {
+            writer.println(AdminProxy.startAgentServer((short) sid));
+          } catch (Exception exc) {
+            writer.println("Can't launch server: " + exc.getMessage());
+            if (debug) exc.printStackTrace(writer);
+          }
+	} else if (cmd.equals(PUT_FILE)) {
+          String sourceName = null;
+          long fileSize = 0;
+          int blockSize = 0;
+          String destinationName = null;
+
+          try {
+            if (((sourceName = st.nextToken ()) == null) || (sourceName.trim().length() == 0))
+	      throw new Exception("No source file name has been given");
+            fileSize = new Long (st.nextToken ()).intValue ();
+            blockSize = new Integer (st.nextToken ()).intValue ();
+            destinationName = st.nextToken ();
+            if ((destinationName == null) || (destinationName.trim().length() == 0))
+              destinationName = sourceName;
+            File f = new File (destinationName);
+            FileOutputStream fout = null;
+            DataInputStream din = null;
+            fout = new FileOutputStream (f);
+            din = new DataInputStream (socket.getInputStream());
+            for (long i = 0; i * blockSize < fileSize; i++) {
+              byte [] currentBlock = new byte [blockSize];
+              din.read (currentBlock, 0, (int) Math.min (blockSize, fileSize - (i * blockSize)));
+              fout.write (currentBlock, 0, (int) (Math.min (blockSize, fileSize - (i * blockSize))));
+              fout.flush ();
+              // send just a character to realize flow control
+              writer.print (".");
+              writer.flush ();
+            } 
+            fout.close();
+	  } catch (Exception exc) {
+	    // Report the error
+	    writer.println("Unable to read source file name : " +exc.getMessage());
+	    if (debug) exc.printStackTrace(writer);
+	  }
 	} else if (cmd.equals(NONE)) {
 	} else if (cmd.equals(HELP)) {
 	  writer.println(
@@ -443,7 +496,7 @@ public class AdminProxy {
 	    "\t" + HELP +
 	    "\n\t\tGives the summary of the options.\n" +
 	    "\t" + STOP_SERVER +
-	    "\n\t\tStops the Specified A3 server.\n" +
+	    "\n\t\tStops the server.\n" +
 	    "\t" + SET_VARIABLE + "variable value" +
 	    "\n\t\tSet the specified static variable with the given value.\n" +
 	    "\t" + GET_VARIABLE +
@@ -463,7 +516,9 @@ public class AdminProxy {
 	    "\t" + ADD_SERVICE + " classname arguments" +
 	    "\n\t\tRegisters and starts the specified Service.\n" +
 	    "\t" + REMOVE_SERVICE + " classname" +
-	    "\n\t\tStops then unregister the specified Service.\n");
+	    "\n\t\tStops then unregister the specified Service.\n" +
+	    "\t" + LAUNCH_SERVER + " sid" +
+	    "\n\t\tLaunch the specified A3 Server.\n");
 	} else {
 	  writer.println("unknown command:" + cmd);
 	}
@@ -473,5 +528,41 @@ public class AdminProxy {
       } finally {
       }
     }
+  }
+
+  /**
+   * Starts an agent server from its id.
+   *
+   * @param sid		id of agent server to start
+   */
+  static String startAgentServer(short sid) throws Exception {
+    String javapath = 
+      new File(new File(System.getProperty("java.home"), "bin"),
+               "java").getPath();
+    String classpath = System.getProperty("java.class.path");
+    String userdir = System.getProperty("user.dir");
+
+    if (! AgentServer.getHostname(sid).equals(AgentServer.getHostname(AgentServer.getServerId()))) {
+      throw new Exception("server #" + sid + " is not local.");
+    }
+
+    Vector argv = new Vector();
+    argv.addElement(javapath);
+    argv.addElement("-classpath");
+    argv.addElement(classpath);
+    if (AgentServer.isTransient(sid)) {
+      argv.addElement("-Xmx64m");
+    }
+    argv.addElement("fr.dyade.aaa.agent.AgentServer");
+    argv.addElement(Short.toString(sid));
+    argv.addElement(new File(userdir, "s" + sid).getPath());
+	  
+    String[] command = new String[argv.size()];
+    argv.copyInto(command);
+
+    Process p = Runtime.getRuntime().exec(command);
+    BufferedReader br =
+      new BufferedReader(new InputStreamReader(p.getInputStream()));
+    return br.readLine();
   }
 }

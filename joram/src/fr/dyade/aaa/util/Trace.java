@@ -362,4 +362,22 @@ public abstract class Trace {
     e.printStackTrace();
     }
   }
+
+  public synchronized static void traceThrowable(Throwable thr) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    thr.printStackTrace(ps);
+    ps.flush();
+    byte[] msg = baos.toByteArray();
+    OutputStream os = null;
+    if (traceOutputStream != null) {
+      os = traceOutputStream;
+    } else {
+      os = System.out;
+    }
+    try {
+      os.write(msg);
+      os.flush();
+    } catch (Exception e) { }
+  }
 }

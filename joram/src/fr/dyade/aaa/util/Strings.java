@@ -37,7 +37,7 @@ import java.io.*;
  * @version	v1.0
  */
 public class Strings {
-public static final String RCS_VERSION="@(#)$Id: Strings.java,v 1.4 2001-05-04 14:55:05 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: Strings.java,v 1.5 2001-08-31 08:14:08 tachkeni Exp $";
 
   /**
    * Provides a string representation of an object. Checks if there exists
@@ -262,21 +262,21 @@ public static final String RCS_VERSION="@(#)$Id: Strings.java,v 1.4 2001-05-04 1
 
     if (type.isPrimitive()) {
       if (type == Boolean.TYPE)
-	toString(output, (Boolean[]) obj);
+	toString(output, (boolean[]) obj);
       else if (type == Character.TYPE)
-	toString(output, (Character[]) obj);
+	toString(output, (char[]) obj);
       else if (type == Byte.TYPE)
-	toString(output, (Byte[]) obj);
+	toString(output, (byte[]) obj);
       else if (type == Short.TYPE)
-	toString(output, (Short[]) obj);
+	toString(output, (short[]) obj);
       else if (type == Integer.TYPE)
-	toString(output, (Integer[]) obj);
+	toString(output, (int[]) obj);
       else if (type == Long.TYPE)
-	toString(output, (Long[]) obj);
+	toString(output, (long[]) obj);
       else if (type == Float.TYPE)
-	toString(output, (Float[]) obj);
+	toString(output, (float[]) obj);
       else if (type == Double.TYPE)
-	toString(output, (Double[]) obj);
+	toString(output, (double[]) obj);
       return;
     }
 

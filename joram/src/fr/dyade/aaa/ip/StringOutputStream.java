@@ -37,7 +37,7 @@ import java.io.*;
   */
 public class StringOutputStream implements NotificationOutputStream {
 
-public static final String RCS_VERSION="@(#)$Id: StringOutputStream.java,v 1.4 2001-05-04 14:54:55 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: StringOutputStream.java,v 1.5 2001-08-31 08:14:02 tachkeni Exp $"; 
 
 
   BufferedWriter out;

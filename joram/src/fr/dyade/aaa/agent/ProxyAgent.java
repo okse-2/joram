@@ -28,8 +28,8 @@ import java.util.*;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.7 2001-05-14 16:26:41 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.8 2001-08-31 08:13:59 tachkeni Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -436,14 +436,14 @@ public abstract class ProxyAgent extends Agent {
         case DRIVER_IN:
           try {
             ois.close();
-          } catch (IOException e) {}
+          } catch (Exception e) {}
           ois = null;
           drvIn = null;
           break;
         case DRIVER_OUT:
           try {
             oos.close();
-          } catch (IOException e) {}
+          } catch (Exception e) {}
           oos = null;
           drvOut = null;
           break;

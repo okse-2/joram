@@ -216,7 +216,7 @@ public class Topic extends fr.dyade.aaa.mom.Destination
     // Getting all the subscriptions to the Theme
     Enumeration subs = theme.getAllSubscriptions();
 
-    fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+    Selector selector = new Selector();
 
     while (subs.hasMoreElements()) {
       fr.dyade.aaa.mom.TopicSubscription sub =
@@ -228,7 +228,7 @@ public class Topic extends fr.dyade.aaa.mom.Destination
 
       // Checking the noLocal and agentClient attributes and the selector.
       if ((!sub.getNoLocal() || !(from.equals(sub.getAgentClient())))
-        && selecObj.isAvailable(msg, sub.getSelector())) {
+        && selector.matches(msg, sub.getSelector())) {
 
         // Delivering the message
         NotifMessageFromTopic notMsgDeliv =

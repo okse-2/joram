@@ -153,10 +153,10 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
 
                 else {
                   topicMsg.message.setRefSessionItf(session);
-                  session.resetMessage(topicMsg.message);
                   (session.lastNotAckVector).addElement(topicMsg);
                 }
 
+                session.resetMessage(topicMsg.message);
                 consumer.messageListener.onMessage(topicMsg.message);
                 session.messagesToDeliver.pop();
               }

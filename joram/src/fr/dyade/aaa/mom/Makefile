@@ -21,8 +21,11 @@
 # All Rights Reserved.
 #
 
+PACKAGES = selectors
 
-LIBRARIES = a3mom.jar
+LIBRARIES = \
+	a3mom.jar
+	
 a3mom.jar_CLASSES = \
 	SessionItf \
 	AckQueueMessageMOMExtern \
@@ -136,6 +139,7 @@ a3mom.jar_CLASSES = \
 	MessageAckXARecover \
 	SynchronousReceptionRequestMsg
 
-LIBS = a3util.jar:a3agent.jar:a3ip.jar:jms.jar:joram.jar:jta-spec1_0_1.jar
+LIBS = a3util.jar:a3agent.jar:a3ip.jar:jms.jar:joram.jar:jta-spec1_0_1.jar:jakarta-regexp-1.2.jar
+
 
 include $(GENERAL_MK)

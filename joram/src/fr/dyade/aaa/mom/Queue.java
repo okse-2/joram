@@ -104,7 +104,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 
         // Checking the presence of requests in the requests vector.
         if(!requestVector.isEmpty()) {
-          fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+          Selector selector = new Selector();
 
           if(Debug.debug)
             if(Debug.queueSend)
@@ -118,7 +118,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
               ((System.currentTimeMillis() - agentRequest.getTimeOut()) < 0)) {
 
               // Checking with the Selector object.
-              if(selecObj.isAvailable(not.msg, agentRequest.getSelector())) {
+              if(selector.matches(not.msg, agentRequest.getSelector())) {
 
                 // Delivering the message. 
                 deliveryQueueMessage(agentRequest.getAgentIdentity(), 
@@ -140,20 +140,17 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 
       // Delivering an agreement to the client if the message is persistent.
       // --------> to be done in AgentClient !!
-      //if(not.msg.getJMSDeliveryMode() ==fr.dyade.aaa.mom.Message.PERSISTENT)
-        //deliveryAgreement(from, not);
+      if(not.msg.getJMSDeliveryMode() ==fr.dyade.aaa.mom.Message.PERSISTENT)
+        deliveryAgreement(from, not);
 
       // DEBUG
       if(Debug.debug) 
         if(Debug.queueSend)
-          Debug.printQueue("queue send",messagesVector);
+  
+        Debug.printQueue("queue send",messagesVector);
 
     } catch (MOMException exc) { 
       deliveryException (from, not, exc);
-      // DEBUG
-      if(Debug.debug) 
-        if(Debug.queueSend)
-          Debug.printQueue("send",messagesVector);
     } 
   } 
 
@@ -301,7 +298,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
   protected void notificationReadOnly(AgentId from, NotificationReadOnly not) throws Exception { 
     try {	
       Vector queueEnumeration = new Vector(messagesVector.size());
-      fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+      Selector selector = new Selector();
       int i =0;
 		
 			
@@ -318,7 +315,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 	if(checkMessage(msgAndAck.getMessage())) {
 						
 	  /* checking with the Selector object */
-	  if(selecObj.isAvailable(msgAndAck.getMessage(),not.selector))
+	  if(selector.matches(msgAndAck.getMessage(),not.selector))
 	    queueEnumeration.addElement(msgAndAck.getMessage());
 	  i++;
 	} else {
@@ -398,7 +395,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
    */
   protected int indexMsgAvailable(NotificationReceiveSync not) throws Exception {
     int i = 0;
-    fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+    Selector selector = new Selector();
     while(i < messagesVector.size()) {
       fr.dyade.aaa.mom.MessageAndAck msgAndAck = 
         (fr.dyade.aaa.mom.MessageAndAck) messagesVector.elementAt(i);
@@ -407,7 +404,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
         /* the selector makes testing if a mesage was delivered or not */
         /* because messages are not destroyed if selector is not OK */
         if((msgAndAck.getAgentIdentity() == null) && 
-          (selecObj.isAvailable(msgAndAck.getMessage(), not.selector))) {
+          (selector.matches(msgAndAck.getMessage(), not.selector))) {
           return i;
         } else
 	      i++;
@@ -472,7 +469,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 	/* marks the message as Redelivered */
 	msgAndAck.getMessage().setJMSRedelivered(true);
       if(!requestVector.isEmpty()) {
-      fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+      Selector selector = new Selector();
 
           int i = 0;
           while (i < requestVector.size()) {
@@ -482,7 +479,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
               ((System.currentTimeMillis() - agentRequest.getTimeOut()) < 0)) {
 
               // Checking with the Selector object.
-              if(selecObj.isAvailable(msgAndAck.msg, agentRequest.getSelector())) {
+              if(selector.matches(msgAndAck.msg, agentRequest.getSelector())) {
 
                 // Delivering the message. 
                 deliveryQueueMessage(agentRequest.getAgentIdentity(), 
@@ -508,7 +505,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
 	  /* marks the message as Redelivered */
 	  msgAndAck.getMessage().setJMSRedelivered(true);
       if(!requestVector.isEmpty()) {
-      fr.dyade.aaa.mom.Selector selecObj = new fr.dyade.aaa.mom.Selector();
+      Selector selector = new Selector();
 
           int i = 0;
           while (i < requestVector.size()) {
@@ -518,7 +515,7 @@ public class Queue extends fr.dyade.aaa.mom.Destination {
               ((System.currentTimeMillis() - agentRequest.getTimeOut()) < 0)) {
 
               // Checking with the Selector object.
-              if(selecObj.isAvailable(msgAndAck.msg, agentRequest.getSelector())) {
+              if(selector.matches(msgAndAck.msg, agentRequest.getSelector())) {
 
                 // Delivering the message. 
                 deliveryQueueMessage(agentRequest.getAgentIdentity(), 

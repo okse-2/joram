@@ -55,17 +55,27 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
     public  javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue) throws javax.jms.JMSException {
 	return this.createReceiver(queue, "");
     }
-  
-    /**	The InvalidException is at time never thrown so it could arrive that
-     *	the name of the Queue is invalid
-     *	@see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications
-     */
-    public  javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue, java.lang.String messageSelector) throws javax.jms.JMSException {
-	try {
-        
+ 
+ 
+  public javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue,
+    java.lang.String messageSelector) throws javax.jms.JMSException
+  {
+    try {
+
+      if (! messageSelector.equals("")) {
+        fr.dyade.aaa.mom.selectors.checkParser parser =
+          new fr.dyade.aaa.mom.selectors.checkParser(
+          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+        Object result = parser.parse().value;
+      }
+
         if (super.messageListener != null)
           throw new javax.jms.JMSException("Canno't create a receiver in a session that has a messageListener set");
 
+        
+        
 	    Object obj = new Object();
 	    long messageJMSMOMID = refConnection.getMessageMOMID();
 	    Long longMsgID = new Long(messageJMSMOMID);

@@ -24,14 +24,17 @@ CLASSES =
 endif
 _CLASSES_ = $(filter-out @% %@,$(subst @,@ @,$(CLASSES)))
 ifdef SOURCES
-_CLASSES_ += $(foreach s,$(SOURCES:$(_JAVA_SOURCE_)=$(_JAVA_CLASS_)),
+_CLASSES_ += $(foreach s,$(SOURCES:$(_JAVA_SOURCE_)=$(_JAVA_CLASS_)), \
 	$(subst S,$s,$(filter S,S$(filter $s,$(CLASSES)))))
 endif
 
+_JCUPCLASSES_ = $(JCUP)
+_JCUPSYMBOLS_ = $(JCUP:$(_JAVA_CLASS_)=$(_JCUP_SYMBOLS_))
+_JCUPPARSER_ = $(JCUP:$(_JAVA_CLASS_)=$(_JCUP_PARSER_))
 _SOURCES_ = $(_CLASSES_:$(_JAVA_CLASS_)=$(_JAVA_SOURCE_))
 _OBJECTS_ = $(_CLASSES_:$(_JAVA_CLASS_)=$(_JAVA_OBJECT_))
 
-all:: $(_OBJECTS_)
+all:: $(_CLASSES_) $(_JCUPCLASSES_)
 
 _OBJECT_LIBS_ = $(@:$(_JAVA_OBJECT_)=$(_JAVA_CLASS_))_LIBS
 _OBJECT_LIBS_ORIGIN_ =\
@@ -55,8 +58,38 @@ colldoc::
 	echo $(PACKAGE) >> $(OBJDIR)/doc_packages
 
 clean::
-	-rm -f $(OBJDIR)/$(RELPATH)/*.class
+	-rm -f $(OBJDIR)/$(RELPATH)/*.class $(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JAVA_SOURCE_)) $(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JCUP_PARSER_SOURCE_)) $(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JCUP_SYMBOLS_SOURCE_))
 
 $(_CLASSES_): $(_JAVA_CLASS_): $(_JAVA_OBJECT_)
+
+$(_JCUPCLASSES_): $(_JAVA_CLASS_): $(_JAVA_OBJECT_) $(_JCUP_PARSER_OBJECT_) $(_JCUP_SYMBOLS_OBJECT_)
+
+$(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JAVA_OBJECT_)): $(_JAVA_OBJECT_): $(_JFLEX_SOURCE_) $(_JCUP_SYMBOLS_OBJECT_)
+	$(JFLEX_COMMAND) $<
+	sed s/sym.EOF/$(<:$(_JFLEX_SOURCE_)=$(_JCUP_SYMBOLS_)).EOF/g $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_)) \
+	| sed s/class\ $(JCUP)/public\ class\ $(JCUP)/g \
+	| sed s/$(JCUP)\(/public\ $(JCUP)\ \(/g > $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_).bad)
+	mv $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_).bad) $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_))
+	$(JAVAC) -g -deprecation -classpath '$(_CLASSPATH_)' -d $(OBJDIR://$(DRIVE)%=$(DRIVE):%)/. \
+	$(JFLAGS) $(<:$(_JFLEX_SOURCE_)=$(_JAVA_SOURCE_))
+
+$(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JFLEX_SOURCE_)): $(_JFLEX_SOURCE_): 
+
+
+$(_JCUPPARSER_:$(_JAVA_CLASS_)=$(_JAVA_OBJECT_)): $(_JCUP_PARSER_OBJECT_): $(_JCUP_PARSER_SOURCE_)
+	$(JAVAC) -g -deprecation -classpath '$(_CLASSPATH_)' -d $(OBJDIR://$(DRIVE)%=$(DRIVE):%)/. \
+	$(JFLAGS) $(<:$(_JCUP_SOURCE_)=$(_JCUP_PARSER_SOURCE_))
+
+$(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JCUP_PARSER_SOURCE_)): $(_JCUP_PARSER_SOURCE_): $(_JCUP_SOURCE_)
+	$(JAVA) -classpath '$(_CLASSPATH_)' java_cup.Main -symbols $(<:$(_JCUP_SOURCE_)=$(_JCUP_SYMBOLS_)) -parser $(<:$(_JCUP_SOURCE_)=$(_JCUP_PARSER_)) < $<
+
+$(_JCUPSYMBOLS_:$(_JAVA_CLASS_)=$(_JAVA_OBJECT_)): $(_JCUP_SYMBOLS_OBJECT_): $(_JCUP_SYMBOLS_SOURCE_)
+	$(JAVAC) -g -deprecation -classpath '$(_CLASSPATH_)' -d $(OBJDIR://$(DRIVE)%=$(DRIVE):%)/$(RELPATH)/. \
+	$(JFLAGS) $(<:$(_JCUP_SOURCE_)=$(_JCUP_SYMBOLS_SOURCE_))
+
+$(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JCUP_SYMBOLS_SOURCE_)): $(_JCUP_SYMBOLS_SOURCE_): $(_JCUP_SOURCE_)
+	$(JAVA) -classpath '$(_CLASSPATH_)' java_cup.Main -symbols $(<:$(_JCUP_SOURCE_)=$(_JCUP_SYMBOLS_)) -parser $(<:$(_JCUP_SOURCE_)=$(_JCUP_PARSER_)) < $<
+
+$(_JCUPCLASSES_:$(_JAVA_CLASS_)=$(_JCUP_SOURCE_)): $(_JCUP_SOURCE_):
 
 .PHONY: $(_CLASSES_)

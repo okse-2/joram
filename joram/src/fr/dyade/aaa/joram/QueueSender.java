@@ -98,7 +98,7 @@ public class QueueSender extends fr.dyade.aaa.joram.MessageProducer implements j
 	    /*	reset the message to put the mode in readOnly and to
 	     *	destroy the transient attributes
 	     */
-	    refSession.resetMessage(message);
+	    //refSession.resetMessage(message);
 			
 	    long messageJMSMOMID = refConnection.getMessageMOMID();
 	    Long longMsgID = new Long(messageJMSMOMID);

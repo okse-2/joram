@@ -127,6 +127,7 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 	    } else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
 				/* exception sent back to the client */
 		fr.dyade.aaa.mom.ExceptionMessageMOMExtern msgExc = (fr.dyade.aaa.mom.ExceptionMessageMOMExtern) msgMOM;
+
 		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
 		except.setLinkedException(msgExc.exception);
 		throw(except);

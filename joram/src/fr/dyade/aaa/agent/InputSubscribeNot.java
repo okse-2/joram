@@ -29,7 +29,7 @@ package fr.dyade.aaa.agent;
  * Subscribe notification to input events.
  */
 public class InputSubscribeNot extends SubscribeNot {
-public static final String RCS_VERSION="@(#)$Id: InputSubscribeNot.java,v 1.5 2001-05-14 16:26:40 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: InputSubscribeNot.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
     
     /**
      * The type of input notification to listen to.

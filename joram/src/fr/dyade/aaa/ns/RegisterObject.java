@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class RegisterObject extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: RegisterObject.java,v 1.2 2001-05-04 14:55:03 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: RegisterObject.java,v 1.3 2001-08-31 08:14:06 tachkeni Exp $";
 
   /** object associated with name */
   private Object obj;

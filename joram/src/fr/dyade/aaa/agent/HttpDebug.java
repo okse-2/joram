@@ -42,7 +42,7 @@ import java.util.*;
  * output flow.
  */
 public class HttpDebug {
-  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.2 2001-05-14 16:26:40 tachkeni Exp $"; 
+  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.3 2001-08-31 08:13:57 tachkeni Exp $"; 
 
   static HttpDebug httpd = null;
 

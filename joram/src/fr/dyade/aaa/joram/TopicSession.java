@@ -65,9 +65,27 @@ public class TopicSession extends fr.dyade.aaa.joram.Session implements javax.jm
     public javax.jms.TopicSubscriber createSubscriber(javax.jms.Topic topic) throws javax.jms.JMSException {
 	return this.createSubscriber(topic, "", false);
     }
+
 	
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
-    public javax.jms.TopicSubscriber createSubscriber(javax.jms.Topic topic, java.lang.String messageSelector, boolean noLocal) throws javax.jms.JMSException {
+  public javax.jms.TopicSubscriber createSubscriber(javax.jms.Topic topic,
+    java.lang.String messageSelector, boolean noLocal) throws javax.jms.JMSException
+  {
+    try {
+      if (! messageSelector.equals("")) {
+        fr.dyade.aaa.mom.selectors.checkParser parser =
+          new fr.dyade.aaa.mom.selectors.checkParser(
+          new fr.dyade.aaa.mom.selectors.Lexer(messageSelector));
+
+        // If syntax is wrong, throws a javax.jms.InvalidSelectorException.
+        Object result = parser.parse().value;
+      }
+    } catch (javax.jms.InvalidSelectorException jE) {
+      throw (jE);
+    } catch (Exception e) {
+      javax.jms.JMSException jE = new javax.jms.JMSException("Internal error");
+      jE.setLinkedException(e);
+      throw (jE);
+    }
 
       if (super.messageListener != null)
         throw new javax.jms.JMSException("Canno't create a subscriber in a session that has a messageListener set");

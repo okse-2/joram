@@ -80,8 +80,8 @@ import fr.dyade.aaa.util.*;
  * @author  Andre Freyssinet
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.5 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.5 2001-05-14 16:26:39 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.

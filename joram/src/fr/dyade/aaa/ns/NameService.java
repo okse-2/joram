@@ -98,7 +98,7 @@ import fr.dyade.aaa.ns.SimpleReport.Status;
  */
 public class NameService extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.2 2001-05-04 14:55:02 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: NameService.java,v 1.3 2001-08-31 08:14:06 tachkeni Exp $";
 
   /** initializes service only once */
   private static boolean initialized = false;

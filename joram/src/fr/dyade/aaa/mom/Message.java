@@ -344,14 +344,12 @@ public class Message implements javax.jms.Message, java.io.Serializable {
 	}
 
 	/** cf JMS Specifications 
-	 *	For this time no property can be added 
-	 *	return always false
 	 */
-	public boolean propertyExists(java.lang.String name) throws javax.jms.JMSException {
-		if(propertiesTable!=null)
-			return true;
-		else
-			return false;
+	public boolean propertyExists(java.lang.String name) {
+	  if (propertiesTable != null && propertiesTable.get(name) != null)
+	    return true;
+
+	  return false;
 	}
 
 	/** cf JMS Specifications */
@@ -769,4 +767,41 @@ public class Message implements javax.jms.Message, java.io.Serializable {
 		if(propertiesTable==null)
 			propertiesTable = new Hashtable();
 	}
+
+
+    public Object getProp(String name)
+    {
+      if (name.startsWith("JMS")) {
+        if (name.equals("JMSDeliveryMode"))
+          return new Double((new Integer(deliveryMode)).doubleValue());
+        else if (name.equals("JMSPriority"))
+          return new Double((new Integer(JMSPriority)).doubleValue());
+        else if (name.equals("JMSMessageID"))
+          return JMSMessageID;
+        else if (name.equals("JMSTimestamp"))
+          return new Double((new Long(JMSTimestamp)).doubleValue());
+        else if (name.equals("JMSCorrelationID"))
+          return JMSCorrelationID;
+        else if (name.equals("JMSType"))
+          return JMSType;
+      }
+      else if (propertyExists(name)) {
+        Object prop = propertiesTable.get(name);  
+        if (prop instanceof Short)
+          return new Double(((Short) prop).doubleValue());
+        else if (prop instanceof Integer)
+          return new Double(((Integer) prop).doubleValue());
+        else if (prop instanceof Long)
+          return new Double(((Long) prop).doubleValue());
+        else if (prop instanceof Float)
+          return new Double(((Float) prop).doubleValue());
+        else if (prop instanceof Double)
+          return (Double) prop;
+        else if (prop instanceof String)
+          return (String) prop;
+        else if (prop instanceof Boolean)
+          return (Boolean) prop;
+      }
+      return null;
+    }
 }	

@@ -281,7 +281,7 @@ public class A3CMLHandler extends DefaultHandler {
 				 atts.getValue(ATT_VALUE));
 	}
       } else {
-	throw new SAXException("unknow element \"" + name + "\"");
+	throw new SAXException("unknown element \"" + name + "\"");
       }
     }
   }
@@ -335,7 +335,7 @@ public class A3CMLHandler extends DefaultHandler {
 	    if (d != null) {
 	      d.addServer((A3CMLPServer) server);
 	    } else {
-	      throw new SAXException("Unknow domain \"" + network.domain +
+	      throw new SAXException("Unknown domain \"" + network.domain +
 				     "\" for server \"" + server.name + "\".");
 	    }
 	  }
@@ -353,7 +353,7 @@ public class A3CMLHandler extends DefaultHandler {
 	}
       } else if (name.equals(ELT_PROPERTY)) {
       } else {
-	throw new SAXException("unknow element \"" + name + "\"");
+	throw new SAXException("unknown element \"" + name + "\"");
       }
     }
   }
@@ -380,14 +380,14 @@ public class A3CMLHandler extends DefaultHandler {
   boolean isTransient(short sid) throws UnknownServerException {
     A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
     if (server == null)
-      throw new UnknownServerException("Unknow server id. #" + sid);
+      throw new UnknownServerException("Unknown server id. #" + sid);
 
     if (server instanceof A3CMLPServer) {
       return false;
     } else if (server instanceof A3CMLTServer) {
       return true;
     } else {
-      throw new UnknownServerException("Unknow type for server id. # " + sid);
+      throw new UnknownServerException("Unknown type for server id. # " + sid);
     }
   }
 
@@ -408,7 +408,7 @@ public class A3CMLHandler extends DefaultHandler {
 			String classname) throws UnknownServerException, UnknownServiceException {
     A3CMLServer server = (A3CMLServer) servers.get(new Short(sid));
     if (server == null)
-      throw new UnknownServerException("Unknow server id. #" + sid);
+      throw new UnknownServerException("Unknown server id. #" + sid);
 
     if (server.services != null) {
       for (int i = server.services.size() -1; i >=0; i--) {
