@@ -32,6 +32,10 @@ import javax.jms.JMSException;
 public class XAQueueConnection extends QueueConnection
                                implements javax.jms.XAQueueConnection
 {
+  /** Resource manager instance. */
+  private XAResourceMngr rm;
+
+
   /**
    * Creates an <code>XAQueueConnection</code> instance.
    *
@@ -45,6 +49,7 @@ public class XAQueueConnection extends QueueConnection
                            ConnectionItf connectionImpl) throws JMSException
   {
     super(factoryParameters, connectionImpl);
+    rm = new XAResourceMngr(this);
   }
 
   
@@ -75,7 +80,7 @@ public class XAQueueConnection extends QueueConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XAQueueSession(this);
+    return new XAQueueSession(this, rm);
   }
 
   /** 
@@ -105,6 +110,6 @@ public class XAQueueConnection extends QueueConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XASession(this);
+    return new XASession(this, rm);
   }
 }

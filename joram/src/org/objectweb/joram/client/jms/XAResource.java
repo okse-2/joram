@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -24,239 +25,169 @@
 package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
-import javax.transaction.xa.*;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.Xid;
+
 
 /**
- * Implements the <code>javax.transaction.xa.XAResource</code> interface.
- * <p>
- * An <code>XAResource</code> instance actually represents an
- * <code>XASession</code> to a transaction manager. It gets the TM orders
- * and in a way forwards them to the session.
+ * A <code>XAResource</code> instance is used by a <code>XASession</code> 
+ * instance as a delegate to a Transaction Manager.
  */
 public class XAResource implements javax.transaction.xa.XAResource
 {
-  /** Suspended transaction state: the resource is ready for resuming. */
-  public static final int SUSPENDED = 1;
-  /** Successful transaction state: the resource is ready for preparing. */
-  public static final int SUCCESS = 2;
-  /**
-   * Failed transaction state: the resource failed while preparing and is
-   * waiting for rolling back.
-   */
-  public static final int ROLLBACK_ONLY = 3;
-  /**
-   * Prepared transaction state: the resource succeeded to prepare and is
-   * waiting for commiting.
-   */
-  public static final int PREPARED = 4;
-
-
-  /** The XA session represented to the TM by the resource. */
-  private XASession sess;
-  /**
-   * <code>true</code> if the resource is enlisted in an active transaction.
-   */
+  /** <code>true</code> if the resource is enlisted in a transaction. */
   private boolean enlisted = false;
-  /**
-   * The identifier of the transaction the resource is currently enlisted in.
-   */
-  private javax.transaction.xa.Xid currentXid = null;
+  /** The current transaction identifier. */
+  private Xid currentXid = null;
 
+  /** The XA connection acting as resource manager. */
+  XAResourceMngr rm;
+
+  /** The session producing and consuming messages. */
+  Session sess;
  
 
   /**
-   * Constructs an XA resource representing a given XA session.
-   *
-   * @param sess  The XA session the resource will represent to the TM.
+   * Constructs an XA resource representing a given session.
    */
-  public XAResource(XASession sess)
+  public XAResource(XAResourceMngr rm, Session sess)
   {
+    this.rm = rm;
     this.sess = sess;
   }
 
 
   /**
-   * JTA API method: starts or resumes a transaction.
+   * Enlists this resource in a given transaction.
    *
-   * @exception XAException  If the resource is not involved in the
-   *              transaction, or if its state is invalid, or if the
-   *              given flag is incorrect.
+   * @exception XAException  If the resource is already enlisted in a
+   *                         transaction, or if the RM fails to enlist the
+   *                         resource.
    */
-  public void start(Xid xid, int flags) throws XAException
+  public void start(Xid xid, int flag) throws XAException
   {
     if (enlisted)
-      throw new XAException("The resource is already enlisted in an active"
-                            + " transaction.");
+      throw new XAException("Resource already enlisted.");
 
-    // No flags means that the resource is enlisted in a new transaction.
-    if (flags == TMNOFLAGS)
-      sess.getInvolvedIn(xid);
-    // Resume flag means that the resource is enlisted in a known transaction.
-    else if (flags == TMRESUME) {
-      if (sess.getTransactionStatus(xid) != SUSPENDED)
-        throw new XAException("Can't resume a non suspended transaction.");
-
-      sess.resumeTransaction(xid);
-    }
-    else
-      throw new XAException("Invalid flag for enlisting the resource.");
+    rm.start(xid, flag);
 
     enlisted = true;
     currentXid = xid;
   }
 
-
   /**
-   * JTA API method: stops or suspends a transaction.
+   * Delists this resource.
    *
-   * @exception XAException  If the resource is not involved in the
-   *              transaction, or if its state is invalid, or if the
-   *              given flag is incorrect.
+   * @exception XAException  If the resource is not enlisted in the specified
+   *                         transaction, or if the RM fails to delist the
+   *                         resource.
    */
-  public void end(Xid xid, int flags) throws XAException
+  public void end(Xid xid, int flag) throws XAException
   {
     if (! enlisted || ! xid.equals(currentXid))
-      throw new XAException("The resource is not enlisted in the specified"
+      throw new XAException("Resource is not enlisted in specified"
                             + " transaction.");
 
-    if (flags == TMSUSPEND)
-      sess.setTransactionStatus(xid, SUSPENDED);
-    else if (flags == TMFAIL)
-      sess.setTransactionStatus(xid, ROLLBACK_ONLY);
-    else if (flags == TMSUCCESS)
-      sess.setTransactionStatus(xid, SUCCESS);
-    else
-      throw new XAException("Invalid flag for delisting the resource.");
+    rm.end(xid, flag, sess);
 
-    sess.saveTransaction(xid);
     enlisted = false;
     currentXid = null;
   }
 
-
   /**
-   * JTA API method: prepares the resource for commit.
+   * Prepares the resource.
    *
-   * @exception XAException  If the resource is not involved in the
-   *              transaction, or if its state is invalid, or if the prepare
-   *              failed because of Joram server.
+   * @exception XAException  If the RM fails to prepare the resource.
    */
   public int prepare(Xid xid) throws XAException
   {
-    if (sess.getTransactionStatus(xid) != SUCCESS)
-      throw new XAException("The transaction state does not allow to prepare"
-                            + " the resource.");
-
-    try {
-      sess.prepareTransaction(xid);
-      sess.setTransactionStatus(xid, PREPARED);
-      return XA_OK;
-    }
-    catch (Exception e) {
-      sess.setTransactionStatus(xid, ROLLBACK_ONLY);
-      throw new XAException("Exception while preparing the resource: "
-                            + e.getMessage());
-    }
+    rm.prepare(xid);
+    return XA_OK;
   }
-      
 
   /**
-   * JTA API method: commits the resource.
+   * Commits the resource.
    *
-   * @exception XAException  If the resource is not involved in the
-   *              transaction, or if its state is invalid, or if the commit
-   *              failed because of Joram server.
+   * @exception XAException  If the RM fails to commit the resource.
    */
   public void commit(Xid xid, boolean onePhase) throws XAException
   {
-    if (onePhase) {
-      try {
-        prepare(xid);
-      }
-      catch (Exception e) {
-        throw new XAException("Exception in one-phase commit: "
-                              + e.getMessage());
-      }
-    }
-    if (sess.getTransactionStatus(xid) != PREPARED)
-      throw new XAException("The transaction state does not allow to"
-                            + " commit the resource.");
-    try {
-      sess.commitTransaction(xid);
-      sess.removeTransaction(xid);
-    }
-    catch (Exception e2) {
-      sess.setTransactionStatus(xid, ROLLBACK_ONLY);
-      throw new XAException("Exception while committing the resource: "
-                            + e2.getMessage());
-    }
+    if (onePhase)
+      rm.prepare(xid);
+
+    rm.commit(xid);
   }
-
-
-  /** 
-   * JTA API method: gets the array of the ids of the prepared transactions
-   * the resource is involved in.
-   *
-   * @exception XAException  Actually never thrown.
-   */
-  public Xid[] recover(int flag) throws XAException
-  {
-    if (flag == TMSTARTRSCAN || flag == TMENDRSCAN)
-      throw new XAException("Non supported flags.");
-
-    return sess.getPreparedTransactions();
-  }
-
 
   /**
-   * JTA API method: rolls back the transaction.
+   * Rolls the resource back.
    *
-   * @exception XAException  If the resource is not involved in the
-   *              transaction.
+   * @exception XAException  If the RM fails to roll the resource back.
    */
   public void rollback(Xid xid) throws XAException
   {
     if (enlisted && currentXid.equals(xid)) {
-      sess.saveTransaction(xid);
+      rm.end(xid, javax.transaction.xa.XAResource.TMFAIL, sess);
       enlisted = false;
       currentXid = null;
     }
 
-    try {
-      sess.rollbackTransaction(xid);
-    }
-    catch (Exception e) {}
-
-    sess.removeTransaction(xid);
+    rm.rollback(xid);
   }
 
+  /** 
+   * Recovers the prepared transactions identifiers.
+   *
+   * @exception XAException  If the RM fails to recover.
+   */
+  public Xid[] recover(int flag) throws XAException
+  {
+    return rm.recover(flag);
+  }
 
-  /** Non implemented JTA API method. */
+  /** 
+   * Not implemented as transactions are not heuristically completed.
+   *
+   * @exception XAException  Always thrown.
+   */
   public void forget(Xid xid) throws XAException
   {
     throw new XAException("Non implemented method.");
   }
 
-  /** Non implemented JTA API method. */
+  /**
+   * Returns <code>false</code> as timeout feaure is not supported.
+   *
+   * @exception XAException  Never thrown.
+   */
   public boolean setTransactionTimeout(int seconds) throws XAException
   {
-    throw new XAException("Non implemented method.");
+    return false;
   }
 
-  /** Non implemented JTA API method. */
+  /**
+   * Returns 0 as timeout feaure is not supported.
+   *
+   * @exception XAException  Never thrown.
+   */
   public int getTransactionTimeout() throws XAException
   {
-    throw new XAException("Non implemented method.");
+    return 0;
   }
 
   /** 
-   * JTA API method.
+   * Checks wether this resource shares the same resource manager
+   * (XAConnection) with an other resource.
    *
-   * @exception XAException  Actually never thrown.
+   * @exception XAException  Never thrown.
    */
-  public boolean isSameRM(javax.transaction.xa.XAResource xares)
+  public boolean isSameRM(javax.transaction.xa.XAResource o)
                throws XAException
   {
-    return xares.equals(this);
+    if (! (o instanceof org.objectweb.joram.client.jms.XAResource))
+      return false;
+
+    XAResource other = (org.objectweb.joram.client.jms.XAResource) o;
+
+    return this.rm.equals(other.rm);
   }
 }

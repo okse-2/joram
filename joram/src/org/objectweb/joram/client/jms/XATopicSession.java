@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -38,12 +39,13 @@ public class XATopicSession extends XASession
    * Constructs an <code>XATopicSession</code> instance.
    *
    * @param cnx  The connection the session belongs to.
+   * @param rm   The resource manager.
    *
    * @exception JMSException  Actually never thrown.
    */
-  XATopicSession(XATopicConnection cnx) throws JMSException
+  XATopicSession(XATopicConnection cnx, XAResourceMngr rm) throws JMSException
   {
-    super(cnx, new TopicSession(cnx, true, 0));
+    super(cnx, new TopicSession(cnx, true, 0), rm);
   }
 
   

@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -37,12 +38,13 @@ public class XAQueueSession extends XASession
    * Constructs an <code>XAQueueSession</code> instance.
    *
    * @param cnx  The connection the session belongs to.
+   * @param rm   The resource manager.
    *
    * @exception JMSException  Actually never thrown.
    */
-  XAQueueSession(XAQueueConnection cnx) throws JMSException
+  XAQueueSession(XAQueueConnection cnx, XAResourceMngr rm) throws JMSException
   {
-    super(cnx, new QueueSession(cnx, true, 0));
+    super(cnx, new QueueSession(cnx, true, 0), rm);
   }
 
   

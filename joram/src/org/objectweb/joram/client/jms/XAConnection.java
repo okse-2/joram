@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - Bull SA
  * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
@@ -26,32 +27,42 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
+
 /**
- * Implements the <code>javax.jms.XAConnection</code> interface.
+ * Connection used within global transactions; an instance of this class
+ * acts as a resource manager.
  */
 public class XAConnection extends Connection implements javax.jms.XAConnection
 {
+  /** Resource manager instance. */
+  private XAResourceMngr rm;
+
+
   /**
-   * Creates an <code>Connection</code> instance.
+   * Creates a <code>XAConnection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param connectionImpl  The actual connection to wrap.
+   * @param connectionImpl     The actual connection to wrap.
    *
-   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception JMSSecurityException   If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
   public XAConnection(FactoryParameters factoryParameters,
-                      ConnectionItf connectionImpl) throws JMSException
+                      ConnectionItf connectionImpl)
+         throws JMSException
   {
     super(factoryParameters, connectionImpl);
+    rm = new XAResourceMngr(this);
   }
 
 
   /** 
-   * API method.
+   * Creates a non-XA session.
    *
    * @exception IllegalStateException  If the connection is closed.
-   * @exception JMSException  In case of an invalid acknowledge mode.
+   * @exception JMSException           In case of an invalid acknowledge mode.
    */
   public javax.jms.Session
          createSession(boolean transacted, int acknowledgeMode)
@@ -65,7 +76,7 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
   }
 
   /** 
-   * API method.
+   * Creates a XA session.
    *
    * @exception IllegalStateException  If the connection is closed.
    */
@@ -74,6 +85,6 @@ public class XAConnection extends Connection implements javax.jms.XAConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XASession(this);
+    return new XASession(this, rm);
   }
 }

@@ -32,6 +32,10 @@ import javax.jms.JMSException;
 public class XATopicConnection extends TopicConnection
                                implements javax.jms.XATopicConnection
 {
+  /** Resource manager instance. */
+  private XAResourceMngr rm;
+
+
   /**
    * Creates an <code>XATopicConnection</code> instance.
    *
@@ -45,6 +49,7 @@ public class XATopicConnection extends TopicConnection
                            ConnectionItf connectionImpl) throws JMSException
   {
     super(factoryParameters, connectionImpl);
+    rm = new XAResourceMngr(this);
   }
 
   /**
@@ -74,7 +79,7 @@ public class XATopicConnection extends TopicConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XATopicSession(this);
+    return new XATopicSession(this, rm);
   }
 
   /** 
@@ -104,6 +109,6 @@ public class XATopicConnection extends TopicConnection
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed"
                                       + " connection.");
-    return new XASession(this);
+    return new XASession(this, rm);
   }
 }
