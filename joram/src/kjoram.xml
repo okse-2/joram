@@ -54,6 +54,7 @@
   <target name="compile" depends="prepare"
       description="--> Compiles kJoram sources.">
     <javac target="1.1"
+           bootclasspath="${lib.dir}/midpapi.zip"
            srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
            debug="on"
