@@ -29,7 +29,7 @@ package fr.dyade.aaa.agent;
  * Subscribe notification to status events.
  */
 public class StatusSubscribeNot extends SubscribeNot {
-public static final String RCS_VERSION="@(#)$Id: StatusSubscribeNot.java,v 1.6 2001-08-31 08:14:00 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: StatusSubscribeNot.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
     /**
      * The name of the status to listen to.
      */

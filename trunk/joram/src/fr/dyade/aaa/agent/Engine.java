@@ -24,6 +24,10 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -76,12 +80,10 @@ import fr.dyade.aaa.util.*;
  * <li>if <code>recoveryPolicy</code> is set to <code>RP_EXIT</code> the engine
  * stops the agent server.
  * </ul>
- *
- * @author  Andre Freyssinet
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
@@ -167,6 +169,8 @@ abstract class Engine implements Runnable, MessageConsumer {
       return new TransactionEngine();
   }
 
+  protected Monitor logmon = null;
+
   /**
    * Initializes a new <code>Engine</code> object (can only be used by
    * subclasses).
@@ -174,8 +178,10 @@ abstract class Engine implements Runnable, MessageConsumer {
   protected Engine() {
     name = "Engine#" + AgentServer.getServerId();
 
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + " created.", false);
+    // Get the logging monitor from current server MonologMonitorFactory
+    logmon = Debug.getMonitor(Debug.A3Engine +
+                              ".#" + AgentServer.getServerId());
+    logmon.log(BasicLevel.DEBUG, getName() + " created.");
 
     qin = new MessageQueue();
 
@@ -220,10 +226,9 @@ abstract class Engine implements Runnable, MessageConsumer {
     thread = new Thread(this, name);
     thread.setDaemon(false);
 
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + " starting.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + " starting.");
 
-    String rp = Debug.properties.getProperty("Engine.recoveryPolicy");
+    String rp = AgentServer.getProperty("Engine.recoveryPolicy");
     if (rp != null) {
       for (int i = rpStrings.length; i-- > 0;) {
 	if (rp.equals(rpStrings[i])) {
@@ -236,8 +241,7 @@ abstract class Engine implements Runnable, MessageConsumer {
     canStop = true;
     thread.start();
 
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + " started.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + " started.");
   }
   
   /**
@@ -248,8 +252,7 @@ abstract class Engine implements Runnable, MessageConsumer {
   public void stop() {
     isRunning = false;
 
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + " stopped", false);
+    logmon.log(BasicLevel.DEBUG, getName() + " stopped.");
 
     if (thread == null)
       // The session is idle.
@@ -300,68 +303,49 @@ abstract class Engine implements Runnable, MessageConsumer {
 	try {
 	  agent = Agent.load(msg.to);
 	} catch (UnknownAgentException exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  The destination agent don't exists, send an error
-	    // notification to sending agent.
-	    Debug.trace(getName() + ": UnknownAgent[" + msg.to + "].react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
+          //  The destination agent don't exists, send an error
+          // notification to sending agent.
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ": Unknown agent, " + msg.to + ".react(" +
+                     msg.from + ", " + msg.not + ")");
 	  agent = null;
-	  Channel.channel.sendTo(AgentId.nullId,
+	  Channel.channel.sendTo(AgentId.localId,
 				 msg.from,
 				 new UnknownAgent(msg.to, msg.not));
 	} catch (Exception exc) {
-	  if ((Debug.engineLoop) || (Debug.error))
-	    //  Can't load agent then send an error notification
-	    // to sending agent.
-	    Debug.trace(getName() + ": BadAgent[" + msg.to + "].react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
+          //  Can't load agent then send an error notification
+          // to sending agent.
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ": Can't load agent, " + msg.to + ".react(" +
+                     msg.from + ", " + msg.not + ")",
+                     exc);
 	  agent = null;
-	  switch (recoveryPolicy) {
-	  case RP_EXC_NOT:
-	  default:
-	    Channel.channel.sendTo(AgentId.nullId,
-				   msg.from,
-				   new ExceptionNotification(msg.to,
-							     msg.not,
-							     exc));
-	    break;
-	  case RP_EXIT:
-	    AgentServer.stop();
-	    break main_loop;
-	  }
+          AgentServer.stop();
+          break main_loop;
 	}
 
 	if (agent != null) {
-	  if (Debug.engineLoop)
-	    Debug.trace(getName() + ": " + agent + ".react(" +
-			msg.from + ", " + msg.not + ")",
-			false);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": " + agent + ".react(" +
+                       msg.from + ", " + msg.not + ")");
 	  try {
 	    if(AgentServer.MONITOR_AGENT) {
 	      if(agent.monitored) {
 	        agent.notifyInputListeners(msg.not);
 	      }
 	    }
-	    try {
-	      agent.react(msg.from, msg.not);
-	    } catch (Error err) {
-	      Debug.trace(getName() + ": Error in " +
-			  agent + ".react(" + msg.from + ", " + msg.not + ")",
-			  err);
-	      throw new Exception(err.toString());
-	    }
+            agent.react(msg.from, msg.not);
 	    if(AgentServer.MONITOR_AGENT) {
 	      if(agent.monitored) {
 		agent.onReactionEnd();
 	      }
 	    }
-	  } catch (Exception exc) {
-	    if ((Debug.engineLoop) || (Debug.error))
-	      Debug.trace(getName() + ": Exception in " +
-			  agent + ".react(" + msg.from + ", " + msg.not + ")",
-			  exc);
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ": Uncaught exception during react, " +
+                       agent + ".react(" + msg.from + ", " + msg.not + ")",
+                       exc);
 	    switch (recoveryPolicy) {
 	    case RP_EXC_NOT:
 	    default:
@@ -383,13 +367,14 @@ abstract class Engine implements Runnable, MessageConsumer {
     } catch (Throwable exc) {
       //  There is an unrecoverable exception during the transaction
       // we must exit from server.
-      Debug.trace(getName() + ": Fatal error", exc);
+      logmon.log(BasicLevel.FATAL,
+                 getName() + ": Fatal error",
+                 exc);
       canStop = false;
       AgentServer.stop();
+    } finally {
+      logmon.log(BasicLevel.DEBUG, getName() + ": Stopped.");
     }
-
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + ": Stopped.", false);
   }
 
   /**
@@ -405,7 +390,7 @@ abstract class Engine implements Runnable, MessageConsumer {
   /**
    * Returns a string representation of this engine. 
    *
-   * @return	A string representation of this agent. 
+   * @return	A string representation of this engine.
    */
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
@@ -515,14 +500,21 @@ final class TransactionEngine extends Engine {
   void abort(Exception exc) throws Exception {
     AgentServer.transaction.begin();
     // Reload the state of agent.
-    agent = Agent.reload(msg.to);
+    try {
+      agent = Agent.reload(msg.to);
+    } catch (Exception exc2) {
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", can't reload Agent" + msg.to, exc2);
+      throw new Exception("Can't reload Agent" + msg.to);
+    }
+
     // Remove the failed notification.
     qin.pop();
     msg.delete();
     // Clean the Channel queue of all pushed notifications.
     Channel.clean();
     // Send an error notification to client agent.
-    Channel.channel.sendTo(AgentId.nullId,
+    Channel.channel.sendTo(AgentId.localId,
 			   msg.from,
 			   new ExceptionNotification(msg.to, msg.not, exc));
     Channel.dispatch();
@@ -578,7 +570,7 @@ final class TransientEngine extends Engine {
     // Clean the Channel queue of all pushed notifications.
     Channel.clean();
     // Send an error notification to client agent.
-    Channel.channel.sendTo(AgentId.nullId,
+    Channel.channel.sendTo(AgentId.localId,
 			   msg.from,
 			   new ExceptionNotification(msg.to, msg.not, exc));
     Channel.dispatch();

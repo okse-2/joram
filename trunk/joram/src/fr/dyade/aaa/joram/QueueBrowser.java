@@ -126,6 +126,6 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
 	
 	/** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
 	public void close()  throws javax.jms.JMSException {
-		System.gc();
+	  System.gc();
 	}
 }

@@ -26,12 +26,8 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
 
 import fr.dyade.aaa.util.*;
 
@@ -137,12 +133,15 @@ import fr.dyade.aaa.util.*;
  *
  * @author  Andre Freyssinet
  */
-public class AgentServer {
-public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-31 08:13:56 tachkeni Exp $"; 
+public final class AgentServer {
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
   public final static short NULL_ID = -1;
 
   private static short serverId;
+
+  private static Monitor logmon = null;
 
   public final static short getServerId() {
     return serverId;
@@ -179,8 +178,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
   /** Set the property pair (key, value). */
   public static Object setProperty(String key,
 				   String value) {
-    // AF: since jdk1.2 we can use Properties.setProperty.
-    return properties.put(key, value);
+    return properties.setProperty(key, value);
   }
   
   /**
@@ -252,15 +250,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
   }
 
   /**
-   * Gets the characteristics of the current server.
-   *
-   * @return	the server's descriptor.
-   */
-  final static ServerDesc getServerDesc() {
-    return getServerDesc(getServerId());
-  }
-
-  /**
    * Gets the number of server known on the current server.
    *
    * @return	the number of server.
@@ -275,14 +264,26 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
    * @param id	agent server id.
    * @return	the server's descriptor.
    */
-  final static ServerDesc getServerDesc(short sid) {
+  final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
     try {
+      if (servers[sid] == null)
+        throw new UnknownServerException("Unknow server id. #" + sid);
       return servers[sid];
     } catch (ArrayIndexOutOfBoundsException exc) {
-      return null;
+      throw new UnknownServerException("Unknow server id. #" + sid);
     } catch (NullPointerException exc) {
-      return null;
+      throw new UnknownServerException("Bad server configuration");
     }
+  }
+
+  /**
+   * Gets the message consumer for the corresponding server.
+   *
+   * @param id	agent server id.
+   * @return	the corresponding message consumer.
+   */
+  final static MessageConsumer getConsumer(short sid) throws UnknownServerException {
+    return getServerDesc(sid).domain;
   }
 
   /**
@@ -292,11 +293,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
    * @return		server host name as declared in configuration file
    */
   public final static String getHostname(short sid) throws UnknownServerException {
-    try {
-      return getServerDesc(sid).hostname;
-    } catch (NullPointerException exc) {
-      throw new UnknownServerException("Unknow server id. #" + sid);
-    }
+    return getServerDesc(sid).hostname;
   }
 
   /**
@@ -306,7 +303,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
    * @return		server host name as declared in configuration file
    */
   final static ServiceDesc[] getServices() {
-    return getServerDesc(getServerId()).services;
+    return servers[getServerId()].services;
   }
 
 //   /**
@@ -504,9 +501,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
     // Creates the local MessageConsumer: the Engine.
     engine = Engine.newInstance(false);
     consumersTempHT.put("local", engine);
-
-    if (Debug.config)
-      Debug.trace("from root: " + root, false);
     
     // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements();
@@ -572,16 +566,11 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
     while (toExplore.size() > 0) {
       A3CMLDomain domain = (A3CMLDomain) toExplore.remove(0);
       A3CMLPServer gateway = (A3CMLPServer) a3configHdl.servers.get(new Short(domain.gateway));
-      if (Debug.config)
-	Debug.trace("Gateway = " + domain.gateway, false);
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
 	   s.hasMoreElements();) {
 	A3CMLPServer server = (A3CMLPServer) s.nextElement();
-	if (server.visited) {
-	  if (Debug.config)
-	    Debug.trace("\t ## " + server, false);
-	} else {
+	if (! server.visited) {
 	  server.visited = true;
 	  if (domain.gateway == rootid) {
 	    server.gateway = -1;
@@ -590,9 +579,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	    server.gateway = domain.gateway;
 	    server.domain = gateway.domain;
 	  }
-
-	  if (Debug.config)
-	    Debug.trace("\t -> " + server, false);
 
 	  // If the server is a router then add the accessible domains
 	  // to the list.
@@ -610,8 +596,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 		toExplore.add(d2);
 	      } else if (d2 != domain) {
 		// More than one route to this domain.
-		if (Debug.config)
-		  Debug.trace("more than one route to: " + domain, false);
 		throw new Exception("more than one route to: " + domain);
 	      } else {
 		if (server.gateway == -1) {
@@ -655,12 +639,7 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	    }
 	    servers[server.sid].services = services;
 	  }
-	  if (Debug.config)
-	    Debug.trace(serverP + " -> (" + 
-			serverP.gateway + ", " +
-			serverP.domain + ")", false);
 	} else {
-	  Debug.trace(serverP + " inaccessible", false);
 	  throw new Exception(serverP + " inaccessible");
 	}
       } else if (server instanceof A3CMLTServer) {
@@ -669,15 +648,10 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	  servers[server.sid].isTransient = true;
 	  servers[server.sid].gateway = -1;
 	  servers[server.sid].domain = (MessageConsumer) consumersTempHT.get("transient");
-
-	  if (Debug.config)
-	    Debug.trace(serverT + " -> (-1, transient)", false);
 	} else {
 	  servers[server.sid].isTransient = true;
 	  A3CMLServer router = (A3CMLServer) a3configHdl.servers.get(new Short(serverT.gateway));
 	  if (! (router instanceof A3CMLPServer)) {
-	    Debug.trace("transient " + router +
-			" can't route transient " + serverT, false);
 	    throw new Exception("transient " + router +
 			" can't route transient " + serverT);
 	  }
@@ -685,22 +659,11 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	    if (((A3CMLPServer) router).gateway == -1) {
 	      servers[server.sid].gateway = router.sid;
 	      servers[server.sid].domain = (MessageConsumer) consumersTempHT.get(((A3CMLPServer) router).domain);
-
-	      if (Debug.config)
-		Debug.trace(serverT + " -> (" +
-			    router.sid + ", " +
-			    ((A3CMLPServer) router).domain + ")", false);
 	    } else {
 	      servers[server.sid].gateway = ((A3CMLPServer) router).gateway;
 	      servers[server.sid].domain = (MessageConsumer) consumersTempHT.get(((A3CMLPServer) router).domain);
-	      
-	      if (Debug.config)
-		Debug.trace(serverT + " -> (" +
-			    ((A3CMLPServer) router).gateway + ", " +
-			    ((A3CMLPServer) router).domain + ")", false);
 	    }
 	  } else {
-	    Debug.trace(serverT + "/" + router + " inaccessible", false);
 	    throw new Exception(serverT + "/" + router + " inaccessible");
 	  }
 	}
@@ -718,23 +681,34 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
   }
 
   /**
-   * Initializes this agent server. The <code>start</code> function is then
-   * called to start this agent server execution. Between the <code>init</code>
-   * and </code>start</code> calls, agents may be created and deployed, and
-   * notifications may be sent using the <code>Channel</code>
-   * <code>sendTo</code> function.
+   * Parses agent server arguments, then initializes this agent server. The
+   * <code>start</code> function is then called to start this agent server
+   * execution. Between the <code>init</code> and </code>start</code> calls,
+   * agents may be created and deployed, and notifications may be sent using
+   * the <code>Channel</code> <code>sendTo</code> function.
    *
-   * @param sid		this agent server id
-   * @param path	persistency directory
+   * @param args	lauching arguments, the first one is the server id
+   *			and the second one the persistency directory.
+   * @return		number of arguments consumed in args
    *
    * @exception Exception
    *	unspecialized exception
    */
-  static void
-  init(short sid, String path) throws Exception {
-    serverId = sid;
+  public static int
+  init(String args[]) throws Exception {
+    if (args.length < 2)
+      throw new Exception("usage: java <main> sid storage");
+    try {
+      serverId = (short) Integer.parseInt(args[0]);
+    } catch (NumberFormatException exc) {
+      throw new Exception("usage: java <main> sid storage");
+    }
+   
+    String path = args[1];
 
     Debug.init(serverId);
+    logmon = Debug.getMonitor(Debug.A3Debug + ".AgentServer" +
+                              ".#" + AgentServer.getServerId());
     properties = new Properties(System.getProperties());
 
     // Read and parse the configuration file.
@@ -748,26 +722,24 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
     try {
       a3configHdl = A3CMLHandler.getConfig(serverId);
     } catch (Exception exc) {
-      Debug.trace("Problem during configuration parsing", exc);
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId +
+                 ", problem during configuration parsing", exc);
       throw new Exception("Problem during configuration parsing");
     }
 
     if (a3configHdl == null) {
-      if (serverId != 0) {
-	Debug.trace("Can't start server #" + serverId +
-		    ", no configuration.", false);
-	throw new Exception("Can't start server #" + serverId +
-			    "\nno configuration.");
-      }
-      Debug.trace("Warning: Start server #0 without configuration.", false);
-      isTransient = false;
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId +
+                 ", can't initialize (no configuration)");
+      throw new Exception("Can't initialize server (no configuration)");
     } else {
       try {
 	isTransient = a3configHdl.isTransient(serverId);
       } catch (Exception exc) {
-	Debug.trace("Can't start server #" + serverId, exc);
-	throw new Exception("Can't start server #" + serverId + "\n" +
-			    exc.getMessage());
+	logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't initialize", exc);
+	throw new Exception("Can't initialize server");
       }
       if (a3configHdl.properties != null)
 	properties.putAll(a3configHdl.properties);
@@ -789,28 +761,33 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	}
       }
     } catch (IOException exc) {
-      Debug.trace("Can't start transaction manager", exc);
-      throw new Exception("Can't start transaction manager, " +
-			  exc.getMessage());
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId +
+                 ", can't start transaction manager", exc);
+      throw new Exception("Can't start transaction manager");
     }
 
     try {
       // Configure the agent server.
       configure();
     } catch (Exception exc) {
-      Debug.trace("Can't configure server #" + serverId, exc);
-      throw new Exception("Can't configure server #" + serverId +"\n" +
-			  exc.getMessage());
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't configure", exc);
+      throw new Exception("Can't configure server");
     }
 
     try {
       // Initialize AgentId class's variables.
       AgentId.init();
     } catch (ClassNotFoundException exc) {
-      Debug.trace("Can't initialize AgentId", exc);
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't initialize AgentId",
+                 exc);
       throw new Exception("Can't initialize AgentId, bad classpath");
     } catch (IOException exc) {
-      Debug.trace("Can't initialize AgentId", exc);
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't initialize AgentId",
+                 exc);
       throw new Exception("Can't initialize AgentId, storage problems");
     }
 
@@ -819,7 +796,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
       String[] list = transaction.getList("@");
       for (int i=0; i<list.length; i++) {
 	Message msg = Message.load(list[i]);
-	// TODO: Verify that we Deliver each message to the right consumer.
 	if (msg.update.getFromId() == serverId) {
 	  // The update has been locally generated, the message is ready to
 	  // deliver to its consumer (Engine or Network component). So we have
@@ -834,11 +810,13 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	}
       }
     } catch (ClassNotFoundException exc) {
-      Debug.trace("Can't restore message queues", exc);
-      throw new Exception("Can't restore message queues, bad classpath");
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't restore messages", exc);
+      throw new Exception("Can't restore messages, bad classpath");
     } catch (IOException exc) {
-      Debug.trace("Can't restore message queues", exc);
-      throw new Exception("Can't restore message queues, storage problems");
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't restore messages", exc);
+      throw new Exception("Can't restore messages, storage problems");
     }
 
     // initialize channel before initializing fixed agents
@@ -849,8 +827,9 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
       // fixed agents.
       Agent.init();
     } catch (Exception exc) {
-      Debug.trace("Can't initialize Agent", exc);
-      throw new Exception("Can't initialize Agent," + exc.getMessage());
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't initialize agents", exc);
+      throw new Exception("Can't initialize agents");
     }
 
     try {
@@ -879,45 +858,24 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
       // May be we can launch services in AgentServer.start()
       ServiceManager.start();
     } catch (Exception exc) {
-      Debug.trace("Can't initialize services", exc);
-      throw new Exception("Can't initialize services," + exc.getMessage());
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId + ", can't initialize services",
+                 exc);
+      throw new Exception("Can't initialize services");
     }
 
     // May be ProcessManager should become a service.
     try {
       ProcessManager.init();
     } catch (Exception exc) {
-      Debug.trace("Can't initialize ProcessManager", exc);
+      logmon.log(BasicLevel.FATAL,
+                 "AgentServer#" + serverId +
+                 ", can't initialize ProcessManager", exc);
       throw new Exception("Can't initialize ProcessManager");
     }
 
-    Debug.trace("start AgentServer#" + serverId + ": " +
-		getServerDesc(serverId) +
-		" at " + new Date(), false);
-  }
-
-  /**
-   * Parses agent server arguments and initializes agent server.
-   *
-   * @param args	lauching arguments
-   * @return		number of arguments consumed in args
-   *
-   * @exception Exception
-   *	unspecialized exception
-   */
-  public static int
-  init(String args[]) throws Exception {
-    short sid;
-    if (args.length < 2)
-      throw new Exception("usage: java <main> sid storage");
-    try {
-      sid = (short) Integer.parseInt(args[0]);
-    } catch (NumberFormatException exc) {
-      throw new Exception("usage: java <main> sid storage");
-    }
-   
-    String path = args[1];
-    init(sid, path);
+    logmon.log(BasicLevel.WARN,
+               "AgentServer#" + serverId + ", initialized at " + new Date());
 
     // Commit all changes.
     transaction.begin();
@@ -934,8 +892,6 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
   public static void
   start() throws Exception {
     boolean ok = true;
-    StringBuffer strBuf = new StringBuffer();
-    strBuf.append("Problem during MessageConsumer starting: ");
 
     // Now we can start all message consumers.
     for (int i=0; i<consumers.length; i++) {
@@ -943,15 +899,20 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
 	consumers[i].start();
       } catch (IOException exc) {
 	ok = false;
-	Debug.trace("Problem during MessageConsumer starting: " +
-		    consumers[i].getName(), exc);
-	strBuf.append("\n\t" + i + ":" + consumers[i].getName());
+	logmon.log(BasicLevel.FATAL,
+                   "AgentServer#" + serverId + 
+                   ", problem during " + consumers[i].getName() + " starting",
+                   exc);
       }
     }
-    // The server is running.
-    Debug.trace("AgentServer#" + serverId + " started", false);
 
-    if (! ok) throw new Exception(strBuf.toString());
+    // The server is running.
+    if (ok) {
+      logmon.log(BasicLevel.WARN,
+                 "AgentServer#" + serverId + ", started at " + new Date());
+    } else {
+      throw new Exception("Problem during MessageConsumer starting");
+    }
 
     // Commit all changes.
     transaction.begin();
@@ -971,9 +932,52 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
     }
     // Stop all services.
     ServiceManager.stop();
+
+    // Wait for all message consumers and services before stop the TM !!
+
     // Stop the transaction manager.
     if (transaction != null) transaction.stop();
-    Debug.trace("AgentServer#" + serverId + " stopped", false);
+    logmon.log(BasicLevel.WARN,
+                 "AgentServer#" + serverId + ", stopped at " + new Date());
+
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      Thread t = new Thread() {
+        public void run() {
+          int i = 0;
+          ThreadGroup tg = Thread.currentThread().getThreadGroup();
+          while (tg.getParent() != null)
+            tg = tg.getParent();
+
+          try {
+            sleep(10000L);
+          } catch (InterruptedException e) {}
+
+          while (true) {
+            int nbt = tg.activeCount();
+            Thread[] tab = new Thread[nbt];
+            tg.enumerate(tab);
+            
+            for (int j=0; j<nbt; j++) {
+              if (tab[j] == this) continue;
+              logmon.log(BasicLevel.DEBUG,
+                         "[" + i + "-" +
+                         tab[j].getThreadGroup().getName() + "." +
+                         tab[j].getName() + ":" +
+                         (tab[j].isAlive()?"alive":"-") + "/" +
+                         (tab[j].isDaemon()?"daemon":"-") + "," +
+                         tab[j]);
+            }
+            try {
+              sleep(60000L);
+              i += 1;
+            } catch (InterruptedException e) {}
+          }
+        }
+      };
+      t.setName("TFD");
+      t.setDaemon(true);
+      t.start();
+    }
   }
 
   /**
@@ -990,11 +994,21 @@ public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.6 2001-08-
   public static void main (String args[]) throws Exception {
     try {
       init(args);
+    } catch (Throwable exc) {
+      System.out.println("AgentServer#" + getServerId() +
+                         "initialisation failed: " + exc.toString());
+      System.exit(1);
+    }
+    try {
       start();
+      // Be careful, the output below is needed by some tools (AdminProxy for
+      // example.
       System.out.println("AgentServer#" + getServerId() + " started.");
     } catch (Exception exc) {
       System.out.println("AgentServer#" + getServerId() + " failed: " +
                          exc.toString());
+      // AF: TODO ?
+//    AgentServer.stop();
       System.exit(1);
     }
   }

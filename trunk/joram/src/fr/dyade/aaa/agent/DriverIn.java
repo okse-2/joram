@@ -25,16 +25,21 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 /**
  * Input driver.
  */
 class DriverIn extends Driver {
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
 
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverIn.java,v 1.7 2001-08-31 08:13:56 tachkeni Exp $";
+  /** Proxy this <code>DriverIn<code> belongs to. */
+  private ProxyAgent proxy;
 
-  /** id of agent to forward notifications to */
-  protected AgentId proxy;
+  /** Id of proxy this <code>DriverIn</code> belongs to. */
+  protected AgentId proxyId;
 
   /** stream to read notifications from */
   protected NotificationInputStream in;
@@ -49,79 +54,63 @@ class DriverIn extends Driver {
   int nbFlowControl = 0;
 
   /**
-   * Identifies the <code>DriverIn</code> in a
-   * multi-connections context.
+   * Identifies this <code>DriverIn</code> among the drivers of a multi
+   * connections proxy.
+   * If <code>key</code> equals 0, this driver does not belong to a multi
+   * connections proxy.
    */
-  private int key;
-  /** True for multi-connections context. */
-  private boolean multiConn = false;
- 
- 
+  private int key = 0;
+
   /**
    * Constructor.
    *
    * @param id		identifier local to the driver creator
-   * @param proxy	id of agent to forward notifications to
+   * @param proxy	proxy agent to forward notifications to
    * @param in		stream to read notifications from
-   * @param maxNotSent	max number of notifications between <code>FlowControl</code>s
+   * @param maxNotSent	max number of notifications between
+   *			<code>FlowControl</code>s
    */
-  DriverIn(int id, AgentId proxy, NotificationInputStream in, int maxNotSent) {
+  DriverIn(int id,
+           ProxyAgent proxy,
+           NotificationInputStream in,
+           int maxNotSent) {
     super(id);
     this.maxNotSent = maxNotSent;
     this.proxy = proxy;
+    this.proxyId = proxy.getId();
     this.in = in;
+    this.name = proxy.getName() + ".DriverIn#" + id;
+    // Get the logging monitor using proxy topic
+    String classname = getClass().getName();
+    logmon = Debug.getMonitor(proxy.getLogTopic()+ '.' +
+      classname.substring(classname.lastIndexOf('.') +1));
   }
 
   /**
-   * Constructor called by a <code>ProxyAgent</code>
-   * managing multiple connections.
-
-   * @param id  identifier local to the driver creator
-   * @param proxy  id of agent to forward notifications to
-   * @param in  stream to read notifications from
-   * @param maxNotSent  max number of notifications between <code>FlowControl</code>s
-   * @param key key identifying the connection.
+   * Constructor called by a <code>ProxyAgent</code> managing multiple
+   * connections.
+   * @param id          identifier local to the driver creator
+   * @param proxy       proxy agent to forward notifications to
+   * @param in          stream to read notifications from
+   * @param maxNotSent  max number of notifications between
+   *			<code>FlowControl</code>s
+   * @param key 	key identifying the connection.
    */
-  DriverIn(int id, AgentId proxy, NotificationInputStream in, 
-    int maxNotSent, int key)
-  {
+  DriverIn(int id,
+           ProxyAgent proxy,
+           NotificationInputStream in, 
+           int maxNotSent,
+           int key) {
     this(id, proxy, in, maxNotSent);
     this.key = key;
-    this.multiConn = true;
   }
 
   /**
-   * Constructor with default <code>id</code>.
-   *
-   * @param proxy	id of agent to forward notifications to
-   * @param in		stream to read notifications from
-   * @param maxNotSent	max number of notifications between <code>FlowControl</code>s
+   * Returns name of driver.
    */
-  DriverIn(AgentId proxy, NotificationInputStream in, int maxNotSent) {
-    this(0, proxy, in, maxNotSent);
+  public String getName() {
+    return name;
   }
-
-  /**
-   * Constructor with default <code>maxNotSent</code>.
-   *
-   * @param id		identifier local to the driver creator
-   * @param proxy	id of agent to forward notifications to
-   * @param in		stream to read notifications from
-   */
-  DriverIn(int id, AgentId proxy, NotificationInputStream in) {
-    this(id, proxy, in, 100);
-  }
-
-  /**
-   * Constructor with default <code>id</code> and <code>maxNotSent</code>.
-   *
-   * @param proxy	id of agent to forward notifications to
-   * @param in		stream to read notifications from
-   */
-  DriverIn(AgentId proxy, NotificationInputStream in) {
-    this(proxy, in, 100);
-  }
-
 
   /**
    * Provides a string image for this object.
@@ -130,7 +119,6 @@ class DriverIn extends Driver {
    */
   public String toString() {
     return "(" + super.toString() +
-      ",multi-connections=" + multiConn +
       ",key=" + key +
       ",nbNotSent=" + nbNotSent +
       ",maxNotSent=" + maxNotSent +
@@ -140,12 +128,18 @@ class DriverIn extends Driver {
 
   synchronized void sendFlowControl() throws IOException {
     nbFlowControl += 1;
-    if (Debug.driversControl)
-      Debug.trace("in driver sendFlowControl#" + nbFlowControl, false);
-    if (multiConn)
-      sendTo(proxy, new FlowControlNot(id, key));
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", sendFlowControl#" + nbFlowControl);
+    // Single connection context:
+    if (key == 0)
+      sendTo(proxyId, new FlowControlNot(id));
+
+    // In a multi-connections context, flagging the FlowControlNot
+    // notification with the key so that it is known which 
+    // DriverIn to control.
     else
-      sendTo(proxy, new FlowControlNot(id));
+      sendTo(proxyId, new FlowControlNot(id, key));
     while (nbFlowControl > 1) {
       try { wait(); } catch (InterruptedException e) {}
     }
@@ -154,8 +148,9 @@ class DriverIn extends Driver {
 
   synchronized void recvFlowControl(FlowControlNot not) {
     nbFlowControl -= 1;
-    if (Debug.driversControl)
-      Debug.trace("in driver recvFlowControl#" + nbFlowControl, false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", recvFlowControl#" + nbFlowControl);
     notify();
   }
 
@@ -171,8 +166,8 @@ class DriverIn extends Driver {
           try {
             sendFlowControl();
           } catch (IOException exc) {
-            if (Debug.error)
-              Debug.trace("in driver read sendFlowControl", exc);
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during sendFlowControl", exc);
             break mainLoop;
           }
           nbNotSent = 0;
@@ -182,45 +177,21 @@ class DriverIn extends Driver {
         // End of input flow.
         break mainLoop;
       } catch (Exception exc) {
-        if ((Debug.debug) && (Debug.drivers))
-          Debug.trace("error in " + in + ".readNotification", exc);
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", error in readNotification", exc);
         break mainLoop;
       }
       canStop = false;
 
       if (m != null) {
-        if ((Debug.debug) && (Debug.driversData))
-          Debug.trace("in driver read " + m, false);
-        try {
-          if (multiConn) {
-	    // In a multi-connections context, wrapping the Notification
-	    // in a ProxyNotification.
-            react(new ProxyNotification(m, key));
-          } else {
-            react(m);
-	  }
-          nbNotSent += 1;
-        } catch (IOException exc) {
-          if (Debug.error)
-            Debug.trace("in driver read " + m, exc);
-          break mainLoop;
-        }
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", read " + m);
+
+        proxy.getDriverInNotification(key, m);
+        nbNotSent += 1;
       }
     }
   }
-
-
-  /**
-   * Reacts to a notification from the input stream.
-   *
-   * Base class behaviour forwards the notification to the proxy agent.
-   *
-   * @param not		notification to react to
-   */
-  void react(Notification not) throws IOException {
-    sendTo(proxy, not);
-  }
-
 
   /**
    * Finalizes the driver.
@@ -231,22 +202,21 @@ class DriverIn extends Driver {
   protected void end() {
     // report end to proxy
     try {
-      if (! multiConn) 
-        // Single connection context.
-        sendTo(proxy, new DriverDone(id));  
+      // Single connection context
+      if (key == 0)
+        sendTo(proxyId, new DriverDone(id));  
 
+      // In a multi-connections context, flagging the DriverDone
+      // notification with the key so that it is known which 
+      // DriverIn to close.
       else
-        // In a multi-connections context, flagging the DriverDone
-        // notification with the key so that it is known which 
-        // DriverIn to close.
-        sendTo(proxy, new DriverDone(id, key));
-
+        sendTo(proxyId, new DriverDone(id, key));
+      
     } catch (IOException exc) {
-      if (Debug.error)
-        Debug.trace("error in reporting end of DriverIn", exc);
+      logmon.log(BasicLevel.ERROR,
+                 getName() + ", error in reporting end", exc);
     }
   }
-
 
   /**
    * Close the OutputStream.
@@ -257,5 +227,4 @@ class DriverIn extends Driver {
     } catch (Exception exc) {}
     in = null;
   }
-
 }

@@ -27,6 +27,10 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+import org.objectweb.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.util.Daemon;
+
 /**
  * A <code>TransientNetworkProxy</code> component is responsible for handling
  * communications with all transient agent servers associated with the local
@@ -43,12 +47,12 @@ import java.util.Vector;
  * configuration file read by the local agent server indicates one or more
  * transient server handled by this one.
  *
- * @author	Freyssinet Andre
- *
  * @see		TransientNetworkServer
  * @see		AgentServer
  */
 class TransientNetworkProxy implements MessageConsumer {
+  /** The domain name. */
+  String name;
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;
   /** The listen port. */
@@ -57,6 +61,8 @@ class TransientNetworkProxy implements MessageConsumer {
   short[] servers = null;
   /** The <code>MessageQueue</code> associated with this network component */
   MessageQueue qout = null;
+
+  protected org.objectweb.monolog.api.Monitor logmon = null;
 
   /**
    * Creates and initializes a new <code>TransientNetworkProxy</code>
@@ -71,6 +77,11 @@ class TransientNetworkProxy implements MessageConsumer {
     // Sorts the array of server ids into ascending numerical order.
     java.util.Arrays.sort(servers);
     qout = new MessageQueue();
+
+    name = "AgentServer#" + AgentServer.getServerId() + ".transient";
+    // Get the logging monitor from current server MonologMonitorFactory
+    logmon = Debug.getMonitor(Debug.A3Network + '.' + name);
+    logmon.log(BasicLevel.DEBUG, name + ", initialized");
   }
 
   /**
@@ -79,7 +90,7 @@ class TransientNetworkProxy implements MessageConsumer {
    * @return this <code>MessageConsumer</code>'s name.
    */
   public final String getName() {
-    return "transient";
+    return name;
   }
 
   /**
@@ -157,18 +168,17 @@ class TransientNetworkProxy implements MessageConsumer {
   /**
    * Causes this component to begin execution.
    */
-  public final void start() throws IOException {
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " starting.", false);
+  public final void start() throws Exception {
+    logmon.log(BasicLevel.DEBUG, getName() + ", starting");
 
     try {
       if (isRunning())
 	throw new IOException("Consumer already running.");
 
       // Creates a manager.
-      manager = new Manager(getName());
+      manager = new Manager(getName(), logmon);
       // Creates a listener.
-      listener = new Listener(getName());
+      listener = new Listener(getName(), logmon);
       // For all transient servers, creates a monitor driver.
       monitors = new Monitor[servers.length];
       for (int i=0; i<monitors.length; i++) {
@@ -178,27 +188,26 @@ class TransientNetworkProxy implements MessageConsumer {
       }
       listener.start();
       manager.start();
+    } catch (UnknownServerException exc) {
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
+      throw exc;
     } catch (IOException exc) {
-      Debug.trace(getName(), exc);
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
     }
-
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " started.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
   /**
    * Forces the component to stop executing.
    */
   public final void stop() {
-    if (Debug.debug && Debug.A3Server)
-      Debug.trace(getName() + " stopped", false);
-
     if (listener != null) listener.stop();
     if (manager != null) manager.stop();
     for (int i=0; i<monitors.length; i++) {
       if (monitors[i]!= null) monitors[i].stop();
     }
+    logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
   /**
@@ -208,8 +217,8 @@ class TransientNetworkProxy implements MessageConsumer {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((listener != null) && listener.isRunning &&
-	(manager != null) && manager.isRunning)
+    if ((listener != null) && listener.isRunning() &&
+	(manager != null) && manager.isRunning())
       return true;
     else
       return false;
@@ -229,37 +238,40 @@ class TransientNetworkProxy implements MessageConsumer {
    * local persistent agent server.
    */
   class Manager extends Daemon {
-    Manager(String name) {
+    Manager(String name, org.objectweb.monolog.api.Monitor logmon) {
       super(name + ".manager");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {}
+    public void shutdown() {}
 
     public void run() {
       Monitor monitor = null;
       Message msg = null;
       
       try {
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(this.getName() + " waiting message", false);
-
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", waiting message");
 	  try {
 	    msg = qout.get();
 	  } catch (InterruptedException exc) {
-	    if (Debug.debug && Debug.A3Server)
-	      Debug.trace(this.getName() + " interrupted", false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", interrupted");
 	    continue;
 	  }
 	  canStop = false;
 
 	  // Send the message
 	  try {
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(this.getName() + " try to send message -> " +
-			  msg, false);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", try to send message -> " + msg);
 
 	    monitor = getMonitor(msg.to.to);
 	    monitor.send(msg);
@@ -267,14 +279,12 @@ class TransientNetworkProxy implements MessageConsumer {
 	    // The server is unknown.
 	    // TODO: May be we have to post an error notification to
 	    // sender.
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName() + ": server #" + msg.to.to + "unknown",
-			  false);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", server #" + msg.to.to + "unknown");
 	  } catch (IOException exc) {
 	    // The server is unreachable.
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName() + ": server #" + msg.to.to + "unreachable",
-			  exc);
+	    this.logmon.log(BasicLevel.WARN,
+                            this.getName() + ", server #" + msg.to.to + "unreachable", exc);
 	    monitor.stop();
 	  }
 
@@ -287,17 +297,16 @@ class TransientNetworkProxy implements MessageConsumer {
 	    AgentServer.transaction.commit();
 	    AgentServer.transaction.release();
 	  } catch (IOException exc) {
-	    Debug.trace(this.getName() + ": Unrecoverable exception", exc);
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", unrecoverable exception", exc);
 	    //  There is an unrecoverable exception during the transaction
 	    // we must exit from server.
 	    AgentServer.stop();
 	  }
 	}
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped.", false);
-
-	isRunning = false;
+	this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
+	running = false;
 	thread = null;
       }
     }
@@ -314,11 +323,13 @@ class TransientNetworkProxy implements MessageConsumer {
   class Listener extends Daemon {
     ServerSocket listen = null;
 
-    Listener(String name) {
+    Listener(String name, org.objectweb.monolog.api.Monitor logmon) {
       super(name + ".listener");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       try {
 	listen.close();
       } catch (IOException exc) {}
@@ -331,9 +342,20 @@ class TransientNetworkProxy implements MessageConsumer {
     public void run() {
       // creates a server socket listening on configured port
       try {
-	listen = new ServerSocket(port);
+        for (int i=0; ; i++) {
+          try {
+            listen = new ServerSocket(port);
+            break;
+          } catch (BindException exc) {
+            if (i > 20) throw exc;
+            try {
+              Thread.currentThread().sleep(i * 250);
+            } catch (InterruptedException e) {}
+          }
+        }
       } catch (IOException exc) {
-	Debug.trace(this.getName(), exc);
+	this.logmon.log(BasicLevel.ERROR,
+                             this.getName() + ", error in initialization", exc);
 	AgentServer.stop();
       }
 
@@ -345,14 +367,14 @@ class TransientNetworkProxy implements MessageConsumer {
 	/** Output stream to transient agent server. */
 	ObjectOutputStream oos = null;
 
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 	  // waits for a transient server to connect
 	  try {
 	    sock = listen.accept();
 	  } catch (IOException exc) {
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName(), exc);
+	     this.logmon.log(BasicLevel.WARN,
+                             this.getName() + ", error during connection", exc);
 	    continue;
 	  }
 	  canStop = false;
@@ -360,8 +382,8 @@ class TransientNetworkProxy implements MessageConsumer {
 	  try {
 	    Monitor monitor = null;
 
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName() + " connected.", false);
+	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
 
 	    // sets the input and output flows
 	    oos = new ObjectOutputStream(sock.getOutputStream());
@@ -374,8 +396,8 @@ class TransientNetworkProxy implements MessageConsumer {
 	    try {
 	      monitor = getMonitor(msg.sid);
 	    } catch (ArrayIndexOutOfBoundsException exc) {
-	      Debug.trace(this.getName() + ": unknown server #" + msg.sid,
-			  false);
+	      this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", server #" + msg.sid + "unknown");
 	      // Throws an exception in order to close the connection
 	      throw new Exception("unknown server #" + msg.sid);
 	    }
@@ -383,11 +405,12 @@ class TransientNetworkProxy implements MessageConsumer {
 	    // sets the input and output streams with the server
 	    monitor.start(sock, ois, oos);
 
-	    if (Debug.debug && Debug.network)
-	      Debug.trace(this.getName() + ": handle server #" + msg.sid,
-			  false);
+	    if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", handle server #" + msg.sid);
 	  } catch (Exception exc) {
-	    Debug.trace(this.getName() + ": error in connecting", exc);
+	    this.logmon.log(BasicLevel.WARN,
+                            this.getName() + ": error in connecting", exc);
 	    // close the streams and socket
 	    try {
 	      oos.close();
@@ -405,10 +428,8 @@ class TransientNetworkProxy implements MessageConsumer {
 	  }
 	}
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped.", false);
-
-	isRunning = false;
+	this.logmon.log(BasicLevel.DEBUG, this.getName() + ", ends");
+	running = false;
 	thread = null;
       }
     }
@@ -490,8 +511,7 @@ class TransientNetworkProxy implements MessageConsumer {
       this.ois = ois;
       this.oos = oos;
 
-      if (Debug.debug && Debug.network)
-	Debug.trace(this.getName() + " started.", false);
+      logmon.log(BasicLevel.DEBUG, getName() + ", started");
 
       // Send messages in sendList out.
       for (int i=0; i<sendList.size(); i++) {
@@ -500,8 +520,9 @@ class TransientNetworkProxy implements MessageConsumer {
 	  send(msg);
 	} catch (IOException exc) {
 	  // The server is unreachable.
-	  if (Debug.debug && Debug.network)
-	    Debug.trace(this.getName() + " unreachable", exc);
+	  logmon.log(BasicLevel.WARN,
+                     getName() +
+                     ", server #" + msg.to.to + "unreachable", exc);
 	  close();
 	  return;
 	}
@@ -514,7 +535,8 @@ class TransientNetworkProxy implements MessageConsumer {
 	  AgentServer.transaction.commit();
 	  AgentServer.transaction.release();
 	} catch (IOException exc) {
-	  Debug.trace(this.getName() + " unrecoverable exception", exc);
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ", unrecoverable exception", exc);
 	  //  There is an unrecoverable exception during the transaction
 	  // we must exit from server.
 	  canStop = false;
@@ -534,9 +556,6 @@ class TransientNetworkProxy implements MessageConsumer {
      */
     synchronized void stop() {
       isRunning = false;
-      
-      if (Debug.debug && Debug.A3Server)
-	Debug.trace(this.getName() + " stopped.", false);
 
       if (thread == null)
 	// The session is idle.
@@ -546,6 +565,7 @@ class TransientNetworkProxy implements MessageConsumer {
 	thread.interrupt();
 	close();
       }
+      logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
     }
 
     /**
@@ -593,27 +613,41 @@ class TransientNetworkProxy implements MessageConsumer {
 	  } catch (ClassNotFoundException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
-	    Debug.trace(this.getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (InvalidClassException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
-	    Debug.trace(this.getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (StreamCorruptedException exc) {
-	    Debug.trace(this.getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    break;
 	  } catch (OptionalDataException exc) {
-	    Debug.trace(this.getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
+	    break;
+	  } catch (EOFException exc) {
+	    logmon.log(BasicLevel.WARN,
+                       this.getName() + ", connection closed", exc);
+	    break;
+	  } catch (SocketException exc) {
+	    logmon.log(BasicLevel.WARN,
+                       this.getName() + ", connection closed", exc);
 	    break;
 	  } catch (IOException exc) {
-	    Debug.trace(this.getName(), exc);
+            if (isRunning)
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ", error during waiting message", exc);
 	    break;
 	  }
 	  canStop = false;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(this.getName() + ": receives message " + msg, false);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", receives message " + msg);
 
 	  // delivers it to the rigth consumer
 	  AgentServer.transaction.begin();
@@ -628,11 +662,9 @@ class TransientNetworkProxy implements MessageConsumer {
 	}
       } catch (Exception exc) {
 	// TODO:
-	Debug.trace(this.getName() + " exited", exc);
+	logmon.log(BasicLevel.ERROR, getName() + ", exited", exc);
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped", false);
-
+	logmon.log(BasicLevel.DEBUG, getName() + ", ends");
 	close();
 	isRunning = false;
 	thread = null;

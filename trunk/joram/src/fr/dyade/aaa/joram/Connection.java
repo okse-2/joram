@@ -194,7 +194,7 @@ public abstract class Connection implements javax.jms.Connection {
           Session session = (Session) sessions.get(key);
           if (session.listener != null) 
             session.listener.stop();
-          sessions.remove(key);
+	  sessions.remove(key);
         }
       driver.stop();
       try {
@@ -210,7 +210,7 @@ public abstract class Connection implements javax.jms.Connection {
       messageJMSMOMTable.clear();
       waitThreadTable.clear();
       subscriptionListenerTable.clear();
-    System.gc();
+      System.gc();
     isClosed = true;
     }
 	} catch (Exception exc) {

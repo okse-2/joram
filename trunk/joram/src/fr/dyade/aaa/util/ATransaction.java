@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.5 2001-08-31 08:14:06 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.6 2002-01-16 12:46:47 joram Exp $";
 
   // State of the transaction monitor.
   private int phase;

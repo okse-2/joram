@@ -32,7 +32,7 @@ import java.io.*;
  * triggered the reaction of an agent.
  */
 public class InputReport implements MonitoringReport {
-public static final String RCS_VERSION="@(#)$Id: InputReport.java,v 1.6 2001-08-31 08:13:57 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: InputReport.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
     /**
      * The input notification.
      */

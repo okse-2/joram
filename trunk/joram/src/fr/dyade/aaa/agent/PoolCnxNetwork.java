@@ -26,43 +26,20 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
+/**
+ *  <code>PoolCnxNetwork</code> is an implementation of
+ * <code>StreamNetwork</code> class for stream sockets that manages
+ * multiple connection.
+ */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.4 2001-08-31 08:13:58 tachkeni Exp $";
-
-  static final class StatusMessage implements Serializable {
-    transient byte status;
-    transient int stamp;
-
-    StatusMessage(byte status) {
-      super();
-      this.status = status;
-    }
-
-    static byte AckStatus = 0;
-    static byte NAckStatus = -1;
-
-    static StatusMessage Ack = new StatusMessage(AckStatus);
-    static StatusMessage NAck = new StatusMessage(NAckStatus);
-
-    public final String toString() {
-      return "StatusMessage(" + status + ", " + stamp + ")";
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out)
-      throws IOException {
-      out.writeByte(status);
-      out.writeInt(stamp);
-    }
-
-    private void readObject(java.io.ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
-      status = in.readByte();
-      stamp = in.readInt();
-    }
-  }
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.5 2002-01-16 12:46:47 joram Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -88,12 +65,10 @@ class PoolCnxNetwork extends StreamNetwork {
   /**
    * Causes this network component to begin execution.
    */
-  public void start() throws IOException {
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " starting.", false);
-
+  public void start() throws Exception {
+    logmon.log(BasicLevel.DEBUG, getName() + ", starting");
     try {
-      nbMaxCnx = AgentServer.getInteger(name + ".nbMaxCnx").intValue();
+      nbMaxCnx = AgentServer.getInteger(getName() + ".nbMaxCnx").intValue();
     } catch (Exception exc) {
       try {
 	nbMaxCnx = AgentServer.getInteger("fr.dyade.aaa.agent.PoolCnxNetwork.nbMaxCnx").intValue();
@@ -115,20 +90,18 @@ class PoolCnxNetwork extends StreamNetwork {
 	  sessions[i] = new NetSession(getName(),
 				       AgentServer.getServerDesc(servers[i]));
       }
-      wakeOnConnection = new WakeOnConnection(getName());
-      dispatcher = new Dispatcher(getName());
-      watchDog = new WatchDog(getName());
+      wakeOnConnection = new WakeOnConnection(getName(), logmon);
+      dispatcher = new Dispatcher(getName(), logmon);
+      watchDog = new WatchDog(getName(), logmon);
 
       wakeOnConnection.start();
       dispatcher.start();
       watchDog.start();
-    } catch (IOException exc) {
-      Debug.trace(getName(), exc);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
     }
-
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " started.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
   /**
@@ -142,16 +115,14 @@ class PoolCnxNetwork extends StreamNetwork {
    * Forces the network component to stop executing.
    */
   public void stop() {
-    if (Debug.debug && Debug.network)
-      Debug.trace(getName() + " stopped.", false);
-
     if (wakeOnConnection != null) wakeOnConnection.stop();
     if (dispatcher != null) dispatcher.stop();
-    if (watchDog != null) watchDog.wakeup();
+    if (watchDog != null) watchDog.stop();
     for (int i=0; i<sessions.length; i++) {
       // May be we can take in account only "active" sessions.
       if (sessions[i]!= null) sessions[i].stop();
     }
+    logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
   /**
@@ -161,9 +132,9 @@ class PoolCnxNetwork extends StreamNetwork {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((wakeOnConnection == null) || wakeOnConnection.isRunning ||
-	(dispatcher == null) || dispatcher.isRunning ||
-	(watchDog == null) || watchDog.isRunning)
+    if ((wakeOnConnection == null) || wakeOnConnection.isRunning() ||
+	(dispatcher == null) || dispatcher.isRunning() ||
+	(watchDog == null) || watchDog.isRunning())
       return false;
 
     return true;
@@ -205,7 +176,7 @@ class PoolCnxNetwork extends StreamNetwork {
      * @see start
      * @see stop
      */
-    private volatile boolean isRunning;
+    private volatile boolean isRunning = false;
     /**
      * True if the sessions can be stopped, false otherwise. A session can
      * be stopped if it is waiting.
@@ -215,6 +186,8 @@ class PoolCnxNetwork extends StreamNetwork {
     private Thread thread = null;
     /** The session's name. */
     private String name = null;
+
+    StatusMessage Ack = new StatusMessage(StatusMessage.AckStatus);
 
     /**
      *  True if a "local" connection is in progress, a local connection
@@ -244,8 +217,8 @@ class PoolCnxNetwork extends StreamNetwork {
       this.server = server;
       this.name = name + ".netSession#" + server.sid;
 
-      if (Debug.debug && Debug.A3Server)
-	Debug.trace(getName() + " created.", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", created");
       
       isRunning = false;
       canStop = false;
@@ -264,8 +237,8 @@ class PoolCnxNetwork extends StreamNetwork {
     }
 
     void start() {
-      if (Debug.debug && Debug.network)
-	Debug.trace(getName() + " started.", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", started");
 
       long currentTimeMillis = System.currentTimeMillis();
 
@@ -286,8 +259,8 @@ class PoolCnxNetwork extends StreamNetwork {
     void start(Socket sock,
 	       ObjectInputStream ois,
 	       ObjectOutputStream oos) {
-      if (Debug.debug && Debug.network)
-	Debug.trace(getName() + " remotely started.", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", remotely started");
 
       if (remoteStart(sock, ois, oos)) startEnd();
     }
@@ -318,9 +291,8 @@ class PoolCnxNetwork extends StreamNetwork {
 	  //  The connection is already established, or a "local" connection
 	  // is in progress (remoteStart method is synchronized).
 	  //  In all cases refuses the connection request.
-	  if (Debug.debug && Debug.network)
-	    Debug.trace(getName() + " connection refused.", false);
-
+          if (logmon.isLoggable(BasicLevel.WARN))
+            logmon.log(BasicLevel.WARN, getName() + ", connection refused");
 	  return false;
 	}
 
@@ -349,16 +321,17 @@ class PoolCnxNetwork extends StreamNetwork {
 
 	StatusMessage statusMsg = (StatusMessage) ois.readObject();
 
-	if (Debug.debug && Debug.message)
-	  Debug.trace(getName() + " receive:" + statusMsg, false);
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", receive: " + statusMsg);
 
 	// AF: Normally the remote server never reply with a Nack, it closes
 	// the connection directly, so we catch a ConnectException.
 	if (statusMsg.status == StatusMessage.NAckStatus)
 	  throw new ConnectException("Nack status received");
       } catch (Exception exc) {
-	if (Debug.debug && Debug.network)
-	  Debug.trace(getName() + ": connection refused.", exc);
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", connection refused.", exc);
 	// TODO: Try it later, may be a a connection is in progress...
 	try {
 	  oos.close();
@@ -415,10 +388,11 @@ class PoolCnxNetwork extends StreamNetwork {
 	  throw new ConnectException("Already connected");
 
 	// Accept this connection.
-	if (Debug.debug && Debug.message)
-	  Debug.trace(getName() + " send:" + StatusMessage.Ack, false);
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                         getName() + ", send:" + Ack);
 
-	oos.writeObject(StatusMessage.Ack);
+	oos.writeObject(Ack);
 	oos.flush();
 	oos.reset();
 
@@ -430,8 +404,9 @@ class PoolCnxNetwork extends StreamNetwork {
 	return true;
       } catch (Exception exc) {
 	// May be a a connection is in progress, try it later...
-	if (Debug.debug && Debug.network)
-	  Debug.trace(getName() + ": connection refused", exc);
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN,
+                         getName() + ", connection refused", exc);
 
 	// Close the connection (# NACK).
 	try {
@@ -483,8 +458,9 @@ class PoolCnxNetwork extends StreamNetwork {
       canStop = true;
       thread.start();
 
-      if (Debug.debug && Debug.network)
-	Debug.trace(getName() + ": connection started", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                         getName() + ", connection started");
 
       // Try to send all waiting messages.
       for (int i=0; i<sendList.size(); i++) {
@@ -498,8 +474,8 @@ class PoolCnxNetwork extends StreamNetwork {
     synchronized void stop() {
       isRunning = false;
       
-      if (Debug.debug && Debug.network)
-	Debug.trace(getName() + " stopped.", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", stopped.");
 
       if (thread == null)
 	// The session is idle.
@@ -509,8 +485,8 @@ class PoolCnxNetwork extends StreamNetwork {
     }
 
     synchronized void close() {
-      if (Debug.debug && Debug.network)
-	Debug.trace(getName() + ": close", false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", closed.");
 
       try {
 	ois.close();
@@ -531,8 +507,9 @@ class PoolCnxNetwork extends StreamNetwork {
      * overall synchronization of the connection -method start- can dead-lock).
      */
     final void send(Message msg) {
-      if (Debug.debug && Debug.message)
-	Debug.trace(getName() + ": send message #" + msg.update.stamp, false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", send message #" + msg.update.stamp);
 
       sendList.addElement(msg);
       if (sock == null) {
@@ -544,27 +521,28 @@ class PoolCnxNetwork extends StreamNetwork {
       }
     }
 
-    // Shoul be synchronized !!
+    // Should be synchronized !!
     final private void ack(int stamp) throws IOException {
-      if (Debug.debug && Debug.message)
-	Debug.trace(getName() + ": ack message #" + stamp, false);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", ack message #" + stamp);
 
-      StatusMessage.Ack.stamp = stamp;
-      transmit(StatusMessage.Ack);
+      Ack.stamp = stamp;
+      transmit(Ack);
     }
 
     synchronized void transmit(Serializable msg) {
       last = current++;
       try {
-	if (oos != null) {
-	  oos.writeObject(msg);
-	  oos.flush();
-	  oos.reset();
-	}
+        oos.writeObject(msg);
+        oos.flush();
+        oos.reset();
       } catch (IOException exc) {
-	if (Debug.debug && Debug.message)
-	  Debug.trace(getName() + ": Exception in sending message", exc);
+        logmon.log(BasicLevel.ERROR,
+                   getName() + ", exception in sending message", exc);
 	close();
+      } catch (NullPointerException exc) {
+        // The stream is closed, exits !
       }
     }
 
@@ -575,36 +553,44 @@ class PoolCnxNetwork extends StreamNetwork {
 	while (isRunning) {
 	  canStop = true;
 
-	  if (Debug.debug && Debug.message)
-	    Debug.trace(getName() + ": waiting message", false);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", waiting message");
 
 	  try {
 	    obj = ois.readObject();
 	  } catch (ClassNotFoundException exc) {
 	    // TODO: In order to process it we have to return an error,
 	    // but in that case me must identify the bad message...
-	    Debug.trace(getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (InvalidClassException exc) {
 	    // TODO: In order to process it we have to return an error,
-	    // but in that case me must identify the bad message...
-	    Debug.trace(getName(), exc);
+	    // but in that case me must identify the bad message..
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    continue;
 	  } catch (StreamCorruptedException exc) {
-	    Debug.trace(getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    break;
 	  } catch (OptionalDataException exc) {
-	    Debug.trace(getName(), exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during waiting message", exc);
 	    break;
-	  }
+	  } catch (NullPointerException exc) {
+            // The stream is closed, exits !
+            break;
+          }
 
 	  canStop = false;
 
 	  if (obj instanceof StatusMessage) {
 	    StatusMessage ack = (StatusMessage) obj;
 
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(getName() + ": ack received #" + ack.stamp, false);
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ", ack received #" + ack.stamp);
 
 	    for (int i=0; i<sendList.size(); i++) {
 	      Message tmpMsg = (Message) sendList.elementAt(i);
@@ -617,8 +603,9 @@ class PoolCnxNetwork extends StreamNetwork {
 		AgentServer.transaction.commit();
 		AgentServer.transaction.release();
 
-		if (Debug.debug && Debug.message)
-		  Debug.trace(getName() + ": ack ok #" + ack.stamp, false);
+                if (logmon.isLoggable(BasicLevel.DEBUG))
+                  logmon.log(BasicLevel.DEBUG,
+                             getName() + ", ack ok #" + ack.stamp);
 
 		break;
 	      }
@@ -630,16 +617,22 @@ class PoolCnxNetwork extends StreamNetwork {
 	    deliver((Message) obj);
 	    ack(stamp);
 	  } else {
-	    if (Debug.debug && Debug.message)
-	      Debug.trace(getName() + ": receives " + obj, false);
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, getName() + ", receives " + obj);
 	  }
 	}
+      } catch (EOFException exc) {
+        if (isRunning)
+          logmon.log(BasicLevel.WARN,
+                     this.getName() + ", connection closed", exc);
+      } catch (SocketException exc) {
+        if (isRunning)
+          logmon.log(BasicLevel.WARN,
+                     this.getName() + ", connection closed", exc);
       } catch (Exception exc) {
-	Debug.trace(getName() + ": exited", exc);
+	logmon.log(BasicLevel.ERROR, getName() + ", exited", exc);
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(getName() + ": stopped", false);
-
+	logmon.log(BasicLevel.DEBUG, getName() + ", ends");
 	isRunning = false;
 	close();
 	thread = null;
@@ -650,11 +643,12 @@ class PoolCnxNetwork extends StreamNetwork {
   final class WakeOnConnection extends Daemon {
     ServerSocket listen = null;
 
-    WakeOnConnection(String name) {
+    WakeOnConnection(String name, Monitor logmon) {
       super(name + ".wakeOnConnection");
+      this.logmon = logmon;
     }
 
-    void shutdown() {
+    public void shutdown() {
       try {
 	listen.close();
       } catch (Exception exc) {}
@@ -678,19 +672,22 @@ class PoolCnxNetwork extends StreamNetwork {
       try {
 	listen = createServerSocket();
 
-	while (isRunning) {
+	while (running) {
 	  try {
 	    canStop = true;
 
 	    // Get the connection
 	    try {
-	      if (Debug.debug && Debug.network)
-		Debug.trace(this.getName() + ": wait connection", false);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", waiting connection");
 
 	      sock = listen.accept();
 	    } catch (IOException exc) {
-	      if (Debug.debug && Debug.network)
-		Debug.trace(this.getName(), exc);
+              if (running)
+                this.logmon.log(BasicLevel.ERROR,
+                                this.getName() +
+                                ", error during waiting connection", exc);
 	      continue;
 	    }
 	    canStop = false;
@@ -704,15 +701,15 @@ class PoolCnxNetwork extends StreamNetwork {
 	    msg = ois.readObject();
 
 	    if (msg instanceof Boot) {
-	      if (Debug.debug && Debug.network)
-		Debug.trace(this.getName() + ": connection setup from #" +
-			    ((Boot)msg).sid, false);
-
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", connection setup from #" +
+                           ((Boot)msg).sid);
 	      getSession(((Boot)msg).sid).start(sock, ois, oos);
 	    } else {
-	      if (Debug.debug && Debug.network)
-		Debug.trace(this.getName() + ": bad connection setup", false);
-
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", bad connection setup");
 	      try {
 		oos.close();
 	      } catch (Exception exc2) {}
@@ -724,37 +721,36 @@ class PoolCnxNetwork extends StreamNetwork {
 	      } catch (Exception exc2) {}
 	    }
 	  } catch (Exception exc) {
-	    if (Debug.debug)
-	      Debug.trace(this.getName() + ": bad connection setup", exc);
+	    this.logmon.log(BasicLevel.ERROR, ", bad connection setup", exc);
 	  }
 	}
       } catch (IOException exc) {
-	Debug.trace(this.getName() + " exited.", exc);
+	this.logmon.log(BasicLevel.ERROR, ", exited", exc);
       } finally {
-	if (Debug.debug && Debug.A3Server)
-	  Debug.trace(this.getName() + " stopped", false);
-	isRunning = false;
+	this.logmon.log(BasicLevel.DEBUG, ", ends");
+	running = false;
 	thread = null;
       }
     }
   }
 
   final class Dispatcher extends Daemon {
-    Dispatcher(String name) {
+    Dispatcher(String name, Monitor logmon) {
       super(name + ".dispatcher");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
 
-    void shutdown() {}
+    public void shutdown() {}
 
     public void run() {
       Message msg = null;
       
-      while (isRunning) {
+      while (running) {
 	canStop = true;
 
-	if (Debug.debug && Debug.message)
-	  Debug.trace(thread.getName() + ": waiting message", false);
-
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
 	try {
 	  msg = qout.get();
 	} catch (InterruptedException exc) {
@@ -773,11 +769,14 @@ class PoolCnxNetwork extends StreamNetwork {
    /** Use to synchronize thread */
     private Object lock;
 
-    WatchDog(String name) {
+    WatchDog(String name, Monitor logmon) {
       super(name + ".watchdog");
       lock = new Object();
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
     }
-    void shutdown() {
+
+    public void shutdown() {
       wakeup();
     }
 
@@ -793,19 +792,22 @@ class PoolCnxNetwork extends StreamNetwork {
       long currentTimeMillis;
       
       synchronized (lock) {
-	while (isRunning) {
+	while (running) {
 	  try {
 	    lock.wait(WDActivationPeriod);
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", activated");
 	  } catch (InterruptedException exc) {
 	    continue;
 	  }
 
-	  if (! isRunning) break;
+	  if (! running) break;
 
 	  for (int sid=0; sid<sessions.length; sid++) {
 	    if ((sessions[sid] != null) &&
 		(sessions[sid].sendList.size() > 0) &&
-		(! sessions[sid].server.active)) {
+		(! sessions[sid].isRunning)) {
 	      sessions[sid].start();
 	    }
 	  }

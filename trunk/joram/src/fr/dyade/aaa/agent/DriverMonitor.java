@@ -24,17 +24,14 @@
 package fr.dyade.aaa.agent;
 
 /** 
- * A <code>DriverMonitor</code> is created by a 
- * <code>ProxyAgent</code> managing multi-connections
- * <br>
- * It holds the elements composing a connection set.
- *
- * @author  Frederic Maistre
- *
- * @see  ProxyAgent
+ * The <code>DriverMonitor</code> class is used by <code>ProxyAgent</code>
+ * instances managing multi-connections for holding the elements composing a
+ * connection set.
  */
-public class DriverMonitor
-{
+public class DriverMonitor {
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverMonitor.java,v 1.2 2002-01-16 12:46:47 joram Exp $";
+
   /** The DriverIn of this connection set. */
   DriverIn drvIn;
   /** The DriverOut of this connection set. */
@@ -51,10 +48,12 @@ public class DriverMonitor
   /**
    * Constructor.
    */
-  public DriverMonitor(DriverIn drvIn, DriverOut drvOut, 
-    fr.dyade.aaa.util.Queue qout, NotificationInputStream ois,
-    NotificationOutputStream oos, DriverConnect drvCnx) 
-  {
+  public DriverMonitor(DriverIn drvIn,
+                       DriverOut drvOut, 
+                       fr.dyade.aaa.util.Queue qout,
+                       NotificationInputStream ois,
+                       NotificationOutputStream oos,
+                       DriverConnect drvCnx)  {
     this.drvIn = drvIn;
     this.drvOut = drvOut;
     this.qout = qout;
@@ -63,25 +62,18 @@ public class DriverMonitor
     this.drvCnx = drvCnx;
   }
 
-  
   /** Method returning the qout object. */ 
-  public fr.dyade.aaa.util.Queue getQout()
-  {
+  public fr.dyade.aaa.util.Queue getQout() {
     return qout;
   }
 
-
   /** Method returning the ois object. */ 
-  public NotificationInputStream getOis()
-  {
+  public NotificationInputStream getOis() {
     return ois;
   }
 
-
   /** Method returning the oos object. */ 
-  public NotificationOutputStream getOos()
-  {
+  public NotificationOutputStream getOos() {
     return oos;
   }
-
 }

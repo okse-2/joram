@@ -28,6 +28,11 @@ import java.net.*;
 import java.text.*;
 import java.util.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
+import fr.dyade.aaa.util.Daemon;
+
 /**
  * A <code>HttpDebug</code> service provides an HTTP interface to
  * access to debugging functions in running agent servers.
@@ -42,7 +47,8 @@ import java.util.*;
  * output flow.
  */
 public class HttpDebug {
-  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.3 2001-08-31 08:13:57 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: HttpDebug.java,v 1.4 2002-01-16 12:46:47 joram Exp $"; 
 
   static HttpDebug httpd = null;
 
@@ -51,6 +57,8 @@ public class HttpDebug {
   ServerSocket listen = null;
 
   DebugMonitor dmon = null;
+
+  static Monitor xlogmon = null;
 
   /**
    * Initializes the package as a well known service.
@@ -66,6 +74,10 @@ public class HttpDebug {
 	port = Integer.parseInt(args);
       } catch (NumberFormatException exc) {}
     }
+
+    // Get the logging monitor from current server MonologMonitorFactory
+    xlogmon = Debug.getMonitor(Debug.A3Service + ".HttpDebug");
+
     if (httpd == null)
       httpd = new HttpDebug(port);
     start();
@@ -160,6 +172,8 @@ public class HttpDebug {
      */
     protected HttpDebugMonitor(String name) {
       super(name);
+      // Get the logging monitor from HttpDebug (overload Daemon setup)
+      logmon = HttpDebug.xlogmon;
     }
 
     /**
@@ -174,16 +188,18 @@ public class HttpDebug {
 
     public void run() {
       try {
-	while (isRunning) {
+	while (running) {
 	  canStop = true;
 	  try {
 	    socket = listen.accept();
 	    canStop = false;
 	  } catch (IOException exc) {
-	    Debug.trace("HttpDebug", exc);
+	    if (running)
+              logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during accept", exc);
 	  }
 
-	  if (! isRunning) break;
+	  if (! running) break;
 
 	  try {
 	    // Get the streams
@@ -196,7 +212,8 @@ public class HttpDebug {
 
 	    writer.flush();
 	  } catch (Exception exc) {
-	    Debug.trace("HttpDebug", exc);
+	    logmon.log(BasicLevel.ERROR,
+                       getName() + ", error during connection", exc);
 	  } finally {
 	    // Closes the connection
 	    try {
@@ -214,7 +231,7 @@ public class HttpDebug {
 	  }
 	}
       } finally {
-	isRunning = false;
+	running = false;
 	thread = null;
 	// Close any ressources no longer needed, eventually stop the
 	// enclosing component.
@@ -222,7 +239,7 @@ public class HttpDebug {
       }
     }
 
-    void shutdown() {
+    public void shutdown() {
       try {
 	listen.close();
       } catch (Exception exc) {}
@@ -411,8 +428,8 @@ public class HttpDebug {
 	  footer();
 	}
       } catch(IOException exc) {
-	if (Debug.debug)
-	  Debug.trace("HttpDebug: " + cmd, exc);
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", error in \"" + cmd + "\"", exc);
       } finally {
       }
     }
@@ -493,13 +510,12 @@ public class HttpDebug {
       if (serverId == AgentServer.getServerId())
 	return base;
 
-      ServerDesc desc = AgentServer.getServerDesc(serverId);
       try {
+        ServerDesc desc = AgentServer.getServerDesc(serverId);
 	int port = Integer.parseInt(
 	  AgentServer.getServiceArgs(desc.sid,
 				     "fr.dyade.aaa.agent.HttpDebug"));
 	return new String("http://" + desc.hostname + ":" + port);
-	
       } catch (Exception exc) {}
       return null;
     }
@@ -635,7 +651,7 @@ public class HttpDebug {
 	  if (sub == 1) {
 	    try {
 	      cons.start();
-	    } catch (IOException exc) {
+	    } catch (Exception exc) {
 	      buf.append("<TR><TD COLSPAN=\"3\"><PRE WIDTH=\"80\">");
 	      buf.append(exc.toString()).append(" during starting.\n");
 	      buf.append("</PRE></TD></TR>");
@@ -1068,6 +1084,10 @@ public class HttpDebug {
 
     public DebugMonitor() {
       super("DebugMonitor");
+
+      // Get the logging monitor from HttpDebug (overload Daemon setup)
+      logmon = HttpDebug.xlogmon;
+
       try {
 	server = new ServerSocket(0);
 	listen = server.getLocalPort();
@@ -1119,6 +1139,6 @@ public class HttpDebug {
 //       }
     }
    
-    void shutdown() {}
+    public void shutdown() {}
   }
 }

@@ -40,7 +40,7 @@ a3agent.jar_CLASSES = \
 	UnknownAgent \
 	UnknownNotification \
 	ExceptionNotification \
-	Daemon \
+	TransactionError \
 	Engine \
 	Engine@TransactionEngine \
 	Engine@TransientEngine \
@@ -72,7 +72,7 @@ a3agent.jar_CLASSES = \
 	DriverIn \
 	DriverOut \
 	ProxyAgent \
-	ProxyNotification \
+	DriverNotification \
 	DriverConnect \
 	DriverMonitor \
 	AgentDriver \
@@ -127,7 +127,7 @@ a3agent.jar_CLASSES = \
 # To make the SSLNetwork component you need jsse, jnet and jcert libraries.
 #	SSLNetwork \
 
-LIBS = a3util.jar:xerces.jar
+LIBS = a3util.jar:xerces.jar:owlogapi.jar:owlogwrpl4j.jar:log4j.jar
 
 SSLNetwork_LIBS = $LIBS:jsse.jar:jnet.jar:jcert.jar
 

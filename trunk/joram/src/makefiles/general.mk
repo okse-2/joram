@@ -34,10 +34,6 @@ JVERSION := $(shell $(JAVA) -version 2>&1 |\
 	(read version; expr "$$version" : 'java version "\(.*\)"'))
 JREVISION := $(word 2,$(subst ., ,$(JVERSION)))
 endif
-ifndef JFLEX_COMMAND
-JFLEX_COMMAND = jflex
-endif
-
 ifdef PACKAGE
 RELPATH := $(subst .,/,$(PACKAGE))
 else

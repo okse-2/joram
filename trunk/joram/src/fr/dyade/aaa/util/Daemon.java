@@ -1,27 +1,10 @@
 /*
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
- *
- * The contents of this file are subject to the Joram Public License,
- * as defined by the file JORAM_LICENSE.TXT 
- * 
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License on the Objectweb web site
- * (www.objectweb.org). 
- * 
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific terms governing rights and limitations under the License. 
- * 
- * The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
- * fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
- * released May 24, 2000. 
- * 
- * The Initial Developer of the Original Code is Dyade. The Original Code and
- * portions created by Dyade are Copyright Bull and Copyright INRIA.
- * All Rights Reserved.
+ * Copyright (C) 2001 SCALAGENT
  */
 package fr.dyade.aaa.util;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
 
 import fr.dyade.aaa.agent.*;
 
@@ -59,18 +42,29 @@ import fr.dyade.aaa.agent.*;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.3 2002-01-16 12:46:47 joram Exp $";
+
+  /**
+   * Tests if this daemon is alive.
+   * @return	true if this daemon is alive; false otherwise.
+   */
+  public boolean isRunning() {
+    return running;
+  }
+
   /**
    * Boolean variable used to stop the daemon properly. The dameon tests
    * this variable between each request, and stops if it is false.
    * @see start
    * @see stop
    */
-  protected volatile boolean isRunning;
+  protected volatile boolean running;
   /**
    * Boolean variable used to stop the daemon properly. If this
    * variable is true then the daemon is waiting and it can interupted,
    * else it handles a request and it will exit after (it tests the
-   * <code>{@link #isRunning isRunning}</code> variable between
+   * <code>{@link #running running}</code> variable between
    * each reaction)
    */
   protected volatile boolean canStop;
@@ -99,7 +93,7 @@ public abstract class Daemon implements Runnable {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append(getName())
-      .append(" [").append(isRunning).append("/")
+      .append(" [").append(running).append("/")
       .append(canStop).append("]");
 
     if (thread != null) strbuf.append(" -> ").append(thread.isAlive());
@@ -107,43 +101,57 @@ public abstract class Daemon implements Runnable {
     return strbuf.toString();
   }
 
+  protected Monitor logmon = null;
+
+  /**
+   * Allocates a new Daemon object.
+   *
+   * @param name	the name of the new Daemon
+   */
   protected Daemon(String name) {
     this.name = name;
 
-    //if (Debug.debug && Debug.A3Server)
-    //  Debug.trace(getName() + " created.", false);
+    // Get the logging monitor from current server MonologMonitorFactory
+    logmon = Debug.getMonitor(Debug.A3Daemon + '.' + name);
+    logmon.log(BasicLevel.DEBUG, getName() + ", created.");
 
-    isRunning = false;
+    running = false;
     canStop = false;
     thread = null;
   }
 
-  public void setDaemon(boolean daemon)
-  {
+  public void setDaemon(boolean daemon) {
     this.daemon = daemon;
   }
 
+  /**
+   * Causes this daemon to begin execution. A new thread is created to
+   * execute the run method.
+   */
   public void start() {
-    if (isRunning) return;
+    if (running) return;
 
     thread = new Thread(this, getName());
     thread.setDaemon(daemon);
 
-    isRunning = true;
+    running = true;
     canStop = true;
     thread.start();
 
-    //if (Debug.debug && Debug.A3Server)
-    //  Debug.trace(getName() + " started.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", started.");
   }
 
   public abstract void shutdown();
 
+  /**
+   * Forces the daemon to stop executing. This method notifies thread that
+   * it should stop running, if the thread is waiting it is first interupted
+   * then the shutdown method is called to close all ressources.
+   */
   public void stop() {
-    isRunning = false;
+    running = false;
 
-    //if (Debug.debug && Debug.A3Server)
-    //  Debug.trace(getName() + " stopped.", false);
+    logmon.log(BasicLevel.DEBUG, getName() + ", stopped.");
 
     if (thread == null)
       // The session is idle.

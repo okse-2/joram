@@ -26,19 +26,25 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import fr.dyade.aaa.util.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 /**
  * Internal class to catch the end of the thread running the driver.
  */
 class ThreadFinalizer implements Runnable {
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+
   /** driver to start */
   Driver driver;
 
   /**
-   * Constructor.
+   * Allocates a new daemon for specified driver.
    *
    * @param driver	driver to start
    */
-  public ThreadFinalizer(Driver driver) {
+  ThreadFinalizer(Driver driver) {
     this.driver = driver;
   }
 
@@ -48,19 +54,19 @@ class ThreadFinalizer implements Runnable {
    */
   public void run() {
     try {
-      if (Debug.drivers)
-	Debug.trace("start driver " + driver.id, false);
+      driver.logmon.log(BasicLevel.DEBUG,
+                        driver.getName() + " start");
       driver.run();
     } catch (ThreadDeath death) {
       // the thread has been killed, prints no error message
       throw death;
     } catch (Throwable exc) {
-      if (Debug.error)
-	Debug.trace("error in driver " + driver.id, exc);
+      driver.logmon.log(BasicLevel.ERROR,
+                        driver.getName() + " failed", exc);
     } finally {
       driver.reset();
-      if (Debug.drivers)
-	Debug.trace("end driver " + driver.id, false);
+      driver.logmon.log(BasicLevel.DEBUG,
+                        driver.getName() + "end");
       driver.end();
     }
   }
@@ -98,8 +104,8 @@ class ThreadFinalizer implements Runnable {
  * @version	v1.1
  */
 public abstract class Driver {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.7 2001-08-31 08:13:56 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.8 2002-01-16 12:46:47 joram Exp $"; 
 
   /** separate thread running the driver */
   protected Thread thread;
@@ -109,8 +115,11 @@ public abstract class Driver {
    * Boolean variable used to stop the driver properly. If this variable is
    * true then it indicates that the driver is stopping.
    */ 
-    volatile boolean isRunning = false;
-    volatile boolean canStop = false;
+  volatile boolean isRunning = false;
+  volatile boolean canStop = false;
+
+  protected Monitor logmon = null;
+  protected String name = null;
 
   /**
    * Constructor.
@@ -121,6 +130,12 @@ public abstract class Driver {
     thread = null;
     this.id = id;
     isRunning = true;
+
+    // Get the logging monitor from current server MonologMonitorFactory
+    // It should be overloaded in subclass in order to specialize traces.
+    String classname = getClass().getName();
+    logmon = Debug.getMonitor(Debug.A3Proxy + '.' +
+      classname.substring(classname.lastIndexOf('.') +1));
   }
 
   /**
@@ -132,13 +147,24 @@ public abstract class Driver {
   }
 
   /**
+   * Returns name of driver, actually classname and driver id. It should
+   * be overloaded in subclass to take in account the proxy name.
+   */
+  public String getName() {
+    return getClass().getName() + '#' + id;
+  }
+
+  /**
    * Provides a string image for this object.
    *
    * @return	printable image of this object
    */
   public String toString() {
     return "(" + getClass().getName() +
-      ",id=" + id + ")";
+      ",name=" + getName() +
+      ",id=" + id + ")" +
+      ",isRunning=" + isRunning +
+      ",canStop=" + canStop;
   }
 
   /**
@@ -165,8 +191,7 @@ public abstract class Driver {
    * Starts the driver execution.
    */
   public void start() {
-    thread = new Thread(new ThreadFinalizer(this),
-			getClass().getName() + '#' + id);
+    thread = new Thread(new ThreadFinalizer(this), getName());
     thread.setDaemon(true);
     thread.start();
   }

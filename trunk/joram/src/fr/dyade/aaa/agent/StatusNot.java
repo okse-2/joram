@@ -31,7 +31,7 @@ import java.io.Serializable;
  * This is the <code>GetStatusNot</code> reply.
  */
 public class StatusNot extends Notification {
-public static final String RCS_VERSION="@(#)$Id: StatusNot.java,v 1.6 2001-08-31 08:14:00 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: StatusNot.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
     /*
      * The status report.
      */

@@ -20,8 +20,8 @@
 # portions created by Dyade are Copyright Bull and Copyright INRIA.
 # All Rights Reserved.
 #
-
 LIBRARIES = a3util.jar
+
 a3util.jar_CLASSES = \
 	Strings \
 	Transaction \
@@ -44,7 +44,9 @@ a3util.jar_CLASSES = \
 	EnumerationType \
 	ConditionnalString \
 	SimplePropertiesReader \
-        AdminClientProxy
+        AdminClientProxy \
+	ClientDebug
 
+LIBS = xerces.jar:owlogapi.jar:owlogwrpl4j.jar:log4j.jar
 
 include $(GENERAL_MK)

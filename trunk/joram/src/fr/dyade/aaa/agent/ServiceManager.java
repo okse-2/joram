@@ -26,6 +26,10 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -34,15 +38,15 @@ import fr.dyade.aaa.util.*;
  * The <code>ServiceManager</code> object is initialized in <code>init</code>,
  * called from <code>AgentServer.init</code>. This classes reuses the
  * persistency service provided by <code>Transaction</code>.
- *
- * @author	Freyssinet Andre
  */
 public class ServiceManager implements Serializable {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.4 2001-09-11 10:58:51 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServiceManager.java,v 1.5 2002-01-16 12:46:47 joram Exp $"; 
 
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
+
+  static Monitor xlogmon = null;
   
   /**
    * Initializes the <code>ServiceManager</code> object. Synchronize the
@@ -51,6 +55,9 @@ public class ServiceManager implements Serializable {
    * @exception Exception	unspecialized exception
    */
   static void init() throws Exception {
+    // Get the logging monitor from current server MonologMonitorFactory
+    xlogmon = Debug.getMonitor(Debug.A3Service);
+
     manager = ServiceManager.load();
     if (manager == null) {
       manager = new ServiceManager();
@@ -132,8 +139,10 @@ public class ServiceManager implements Serializable {
       try {
 	start(desc);
       } catch (Exception exc) {
-	if (Debug.error)
-	  Debug.trace("cannot start service: " + desc.getClassName(), exc);
+        xlogmon.log(BasicLevel.ERROR,
+                   "AgentServer#" + AgentServer.getServerId() +
+                   ".ServiceManager, cannot start service:" +
+                   desc.getClassName(), exc);
       }
     }
   }
@@ -174,8 +183,10 @@ public class ServiceManager implements Serializable {
       try {
 	if (desc.running) stop(desc);
       } catch (Throwable exc) {
-	if (Debug.A3Server)
-	  Debug.trace("cannot stop service " + desc.getClassName(), exc);
+        xlogmon.log(BasicLevel.WARN,
+                   "AgentServer#" + AgentServer.getServerId() +
+                   ".ServiceManager, cannot stop service " +
+                   desc.getClassName(), exc);
       }
     }
   }
@@ -213,7 +224,9 @@ public class ServiceManager implements Serializable {
     try {
       services = (ServiceDesc[]) values.toArray(services);
     } catch (ArrayStoreException exc) {
-      if (Debug.error) Debug.trace("Can't get services.", exc);
+      xlogmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".ServiceManager, can't get services.", exc);
     }
     return services;
   }

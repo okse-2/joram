@@ -21,14 +21,15 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
-
 package fr.dyade.aaa.ip;
 
 import java.io.*;
 import java.net.*;
-import fr.dyade.aaa.agent.*;
 
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
+import fr.dyade.aaa.agent.*;
 
 /**
  * This class provides access to UDP communications. It receives packets from
@@ -36,14 +37,10 @@ import fr.dyade.aaa.agent.*;
  * be handled by the <code>doReact</code> abstract function. It forwards
  * <code>UdpPacket</code> notifications received from other agents as packets
  * onto the UDP socket.
- *
- * @author	Lacourte Serge
- * @version	v1.1
  */
 public abstract class UdpProxy extends ProxyAgent {
-
-public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.5 2001-08-31 08:14:02 tachkeni Exp $"; 
-
+  /** RCS version number of this file: $Revision: 1.6 $ */
+  public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
 
   /** default max buffer size for reading datagrams */
   protected static final int BUF_SIZE = 8192;
@@ -149,7 +146,7 @@ public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.5 2001-08-31 
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof UdpPacket) {
       try {
-	if (from.isNullId()) {
+	if (from.equals(getId())) {
 	  // incoming datagram
 	  doReact((UdpPacket) not);
 	} else {
@@ -159,9 +156,10 @@ public static final String RCS_VERSION="@(#)$Id: UdpProxy.java,v 1.5 2001-08-31 
 	    packet.data, packet.data.length, packet.address, packet.port));
 	}
       } catch (Exception exc) {
-	Debug.trace("UdpProxy: Exception in " +
-		    this + ".react(" + from + "," + not + ")",
-		    exc);
+        logmon.log(BasicLevel.ERROR,
+                   getName() + ", exception in " +
+                   this + ".react(" + from + "," + not + ")",
+                   exc);
 	stop();
       }
     } else {

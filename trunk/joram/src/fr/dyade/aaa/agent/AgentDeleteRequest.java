@@ -21,11 +21,9 @@
  * portions created by Dyade are Copyright Bull and Copyright INRIA.
  * All Rights Reserved.
  */
-
 package fr.dyade.aaa.agent;
 
 public class AgentDeleteRequest extends Notification {
-
-public static final String RCS_VERSION="@(#)$Id: AgentDeleteRequest.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $"; 
-
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentDeleteRequest.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 }

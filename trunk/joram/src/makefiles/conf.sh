@@ -5,13 +5,19 @@
 # gnu make is called.
 #
 
+alias pushc="pushd \`pwd | sed 'sS/srcS/classesS'\`"
+
+# alias java="/jdk1.3/bin/java"
+# alias javac="/jdk1.3/bin/javac"
+# alias jar="/jdk1.3/bin/jar"
+
 #
 # target system type definitions
 #
 
 # target system type, UNIX or WINDOWS
-# export TARGET_SYSTEM=UNIX
-export TARGET_SYSTEM=WINDOWS
+export TARGET_SYSTEM=UNIX
+#export TARGET_SYSTEM=WINDOWS
 
 # separator used in java path option
 if [ -z "$PATH_SEP" ]
@@ -35,7 +41,7 @@ fi
 # //d notation, not the d: notation.
 # The value of this variable must be the output of the pwd command
 # executed in that directory. It is case sensitive.
-export ROOTDIR=//D/Users/Lacourte/cvs
+export ROOTDIR=~/dev/joram-2.2
 
 # directory for Java source files
 export SRCDIR=${ROOTDIR}/src
@@ -53,15 +59,16 @@ export SHIP=${ROOTDIR}/ship
 # provides standard variables and rules definitions
 export GENERAL_MK=${SRCDIR}/makefiles/general.mk
 
-
 #
 # Java definitions
 #
 
+#export PATH=/jdk1.3/bin:${PATH}
+
 # where java finds the language classes
-export JDKHOME=C:/java/jdk1.2.2
-export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
-export JAVAC=C:/java/jikes/jikes
+#export JDKHOME=C:/jdk1.3
+#export JAVAPATH=${JDKHOME}/jre/lib/rt.jar
+#export JAVAC=C:/jikes/bin/jikes
 # export JAVAC="${JDKHOME}/bin/javac \
 #     -bootclasspath \"${ROOTDIR}/lib/OB.jar;${JAVAPATH}\""
 

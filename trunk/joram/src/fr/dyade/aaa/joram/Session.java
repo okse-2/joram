@@ -331,7 +331,7 @@ public abstract class Session implements javax.jms.Session, fr.dyade.aaa.mom.Ses
     if (listener!= null)
       listener.stop();
     refConnection.sessions.remove(new Long(sessionID));
-	System.gc();
+    System.gc();
     }
 	
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */

@@ -26,6 +26,10 @@ package fr.dyade.aaa.agent;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -58,15 +62,14 @@ import fr.dyade.aaa.util.*;
  *     ag.deploy();
  * </pre></blockquote>
  * <p>
- *
- * @author  André Freyssinet
  * 
  * @see Notification
  * @see Engine
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $"; 
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.7 2002-01-16 12:46:47 joram Exp $"; 
 
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
@@ -79,6 +82,8 @@ public abstract class Agent implements Serializable {
   /** Number of agents pinned in memory. */
   static int nbFixedAgents;
 
+  static Monitor xlogmon = null;
+
   /**
    * Before any agent may be used, the environment, including the hash table,
    * must be initialized with its static init method.
@@ -89,6 +94,10 @@ public abstract class Agent implements Serializable {
    */
   static void init() throws Exception {
     agents = new Hashtable();
+
+    // Get the logging monitor from current server MonologMonitorFactory
+    xlogmon = Debug.getMonitor(Debug.A3Agent +
+                               ".#" + AgentServer.getServerId());
 
     // Initialize 
     if ((AgentServer.isTransient()) ||
@@ -115,13 +124,16 @@ public abstract class Agent implements Serializable {
 	AgentId id = (AgentId) e.nextElement();
 	try {
 	  Agent ag = Agent.load(id);
+          nbFixedAgents += 1;
 	} catch (UnknownAgentException exc) {
-	  Debug.trace("Can't restore fixed agent#" + id, exc);
+          xlogmon.log(BasicLevel.ERROR,
+                      "AgentServer#" + AgentServer.getServerId() +
+                      ".Agent, can't restore fixed agent#" + id, exc);
 	  factory.removeFixedAgentId(id);
 	}
       }
       factory.save();
-    } catch (UnknownAgentException e) {
+    } catch (UnknownAgentException exc) {
       // Creates factory and all "system" agents...
       factory = new AgentFactory();
       agents.put(factory.getId(), factory);
@@ -129,7 +141,13 @@ public abstract class Agent implements Serializable {
       AgentAdmin admin = new AgentAdmin();
       factory.createAgent(admin);
       factory.save();
+      xlogmon.log(BasicLevel.WARN,
+                  "AgentServer#" + AgentServer.getServerId() +
+                  ".Agent, factory created");
     }
+    xlogmon.log(BasicLevel.DEBUG,
+                "AgentServer#" + AgentServer.getServerId() +
+                ".Agent, initialized");
   }
 
   /**
@@ -137,12 +155,15 @@ public abstract class Agent implements Serializable {
    * from memory all the agents which have not been accessed for a time.
    */
   static void garbage() {
+    xlogmon.log(BasicLevel.WARN, "AgentServer#" + AgentServer.getServerId() +
+                ".Agent, garbaged");
     long deadline = now - NbMaxAgents;
     for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
       Agent ag = (Agent) e.nextElement();
       if ((ag.last <= deadline) && (!ag.fixed)) {
-	if (Debug.garbageAgent)
-	  Debug.trace("Agent garbage " + ag, false);
+        if (xlogmon.isLoggable(BasicLevel.DEBUG))
+	  xlogmon.log(BasicLevel.DEBUG,
+                      "Agent" + ag.id + " [" + ag.name + "] garbaged");
 	agents.remove(ag.id);
       }
     }
@@ -186,14 +207,23 @@ public abstract class Agent implements Serializable {
 	garbage();
       
       if ((ag = (Agent) AgentServer.transaction.load(id.toString())) != null) {
+        ag.deployed = true;
 	agents.put(ag.id, ag);
-	if (Debug.loadAgent)
-	  Debug.trace("Agent load " + ag, false);
-	// initializes agent
-	ag.initialize(false);
+        if (xlogmon.isLoggable(BasicLevel.DEBUG))
+	  xlogmon.log(BasicLevel.DEBUG,
+                      "Agent" + ag.id + " [" + ag.name + "] loaded");
+
+        try {
+          ag.initialize(false); // initializes agent
+        } catch (Throwable exc) {
+          // AF: May be we have to delete the agent or not to allow
+          // reaction on it.
+          xlogmon.log(BasicLevel.ERROR,
+                      "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
+                      exc);
+        }
+        if (ag.logmon == null) ag.logmon = xlogmon;
       } else {
-	if (Debug.loadAgent)
-	  Debug.trace("Agent can't load " + id, false);
 	throw new UnknownAgentException();
       }
     }
@@ -220,13 +250,23 @@ public abstract class Agent implements Serializable {
     throws IOException, ClassNotFoundException, Exception {
     Agent ag = (Agent) AgentServer.transaction.load(id.toString());
     if (ag  != null) {
+      ag.deployed = true;
       agents.put(ag.id, ag);
-      if (Debug.loadAgent)
-	Debug.trace("Agent reload " + ag, false);
-      ag.initialize(false);	// initializes agent
+      if (xlogmon.isLoggable(BasicLevel.DEBUG))
+        xlogmon.log(BasicLevel.DEBUG,
+                    "Agent" + ag.id + " [" + ag.name + "] reloaded");
+
+      try {
+        ag.initialize(false); // initializes agent
+      } catch (Throwable exc) {
+        // AF: May be we have to delete the agent or not to allow
+        // reaction on it.
+        xlogmon.log(BasicLevel.ERROR,
+                    "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
+                    exc);
+      }
+      if (ag.logmon == null) ag.logmon = xlogmon;
     } else {
-      if (Debug.loadAgent)
-	Debug.trace("Agent can't load " + id, false);
       throw new UnknownAgentException();
     }
     ag.last = now;
@@ -235,11 +275,11 @@ public abstract class Agent implements Serializable {
 
   protected void save() throws IOException {
     AgentServer.transaction.save(this, id.toString());
-    if (Debug.saveAgent)
-	  Debug.trace("Agent save " + this, false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "Agent" + id + " [" + name + "] saved");
   }
 
-  /* ***** ***** ***** ***** ***** ***** ***** ***** */
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
 
@@ -256,7 +296,18 @@ public abstract class Agent implements Serializable {
    * member variable. If <code>true</code> agent is pinned in memory.
    */
   protected transient boolean fixed;
- 
+  
+  protected transient Monitor logmon = null;
+
+  /**
+   * Returns default log topic for agents. Its method should be overridden
+   * in subclass in order to permit fine configuration of logging system.
+   * By default it returns <code>Debug.A3Agent</code>.
+   */
+  protected String getLogTopic() {
+    return Debug.A3Agent;
+  }
+
   private static String nullName = "";
 
   /**
@@ -403,66 +454,18 @@ public abstract class Agent implements Serializable {
    * @see #deploy()
    */
   public Agent(short to, String name, boolean fixed) {
-    id = new AgentId(to);
-    if (name == null)
-      this.name = nullName;
-    else
-      this.name = name;
-    this.fixed = fixed;
+    AgentId id = null;
+
+    try {
+      id = new AgentId(to);
+    } catch (IOException exc) {
+      xlogmon.log(BasicLevel.ERROR,
+                  "AgentServer#" + AgentServer.getServerId() +
+                  ".Agent, can't allocate new AgentId", exc);
+      // TODO: throw an exception...
+    }
+    initState(name, fixed, id);
   }
-
-  // Methods used for promotion of Agents.
-//   protected void setFields(Hashtable values) throws Exception {
-//     Class c = getClass();
-//     for (Enumeration e = values.keys() ; e.hasMoreElements() ;) {
-//       String name = (String) e.nextElement();
-//       Field field = c.getField(name);
-//       field.set(this, values.get(name));
-//     }
-//   }
-
-//   protected Hashtable getFields() throws Exception {
-//     Class c = getClass();
-//     Field[] fields = c.getFields();
-//     Hashtable values = new Hashtable(fields.length);
-
-//     for (int i=0; i<fields.length; i++) {
-//       String n;
-//       Object v;
-
-//       try {
-// 	n = fields[i].getName();
-// 	v = fields[i].get(this);
-//       } catch (IllegalAccessException exc) {
-// 	continue;
-//       }
-//       values.put(n, v);
-//     }
-//     return values;
-//   }
-
-//   protected void promote(String cname, AgentId reply) throws Exception {
-//     Class c = Class.forName(cname);
-//     Agent ag = (Agent) c.newInstance();
-//     ag.setFields(getFields());
-//     ag.deploy(reply);
-//   }
-
-//   protected void promote(short to, String cname, AgentId reply) throws Exception {
-//     Class c = Class.forName(cname);
-
-//     Class[] constrType = new Class[1];
-//     constrType[0] = Short.class;
-
-//     Constructor constr = c.getDeclaredConstructor(constrType);
-
-//     Object[]constrPar = new Object[3];
-//     constrPar[0] = new Short(to);
-
-//     Agent ag = (Agent) constr.newInstance(constrPar);
-//     ag.setFields(getFields());
-//     ag.deploy(reply);
-//   }
 
   /**
    * Constructor used to build "system" agents like <code>AgentFactory</code>.
@@ -474,12 +477,18 @@ public abstract class Agent implements Serializable {
    * @param stamp well known stamp
    */
   Agent(String name, boolean fixed, AgentId id) {
-    this.id = id;
+    initState(name, fixed, id);
+  }
+
+  private void initState(String name, boolean fixed, AgentId id) {
     if (name == null)
       this.name = nullName;
     else
       this.name = name;
     this.fixed = fixed;
+    this.id = id;
+    // Get the logging monitor from current server MonologMonitorFactory
+    this.logmon = Debug.getMonitor(getLogTopic());
   }
 
   /**
@@ -502,24 +511,24 @@ public abstract class Agent implements Serializable {
    */
   public Agent(String name, boolean fixed, int stamp) {
     if (stamp < AgentId.MinWKSIdStamp ||
-	stamp > AgentId.MaxWKSIdStamp)
+	stamp > AgentId.MaxWKSIdStamp) {
+      xlogmon.log(BasicLevel.ERROR,
+                  "AgentServer#" + AgentServer.getServerId() +
+                  ".Agent, well known service stamp out of range: " +
+                  stamp);
       throw new IllegalArgumentException(
-	"well known service stamp out of range: " + stamp);
-
-    this.id = new AgentId(AgentServer.getServerId(),
-			  AgentServer.getServerId(),
-			  stamp);
-    if (name == null)
-      this.name = nullName;
-    else
-      this.name = name;
-    this.fixed = fixed;
+	"Well known service stamp out of range: " + stamp);
+    }
+    AgentId id = new AgentId(AgentServer.getServerId(),
+                             AgentServer.getServerId(),
+                             stamp);
+    initState(name, fixed, id);
   }
 
   /**
    * Determines if the currently <code>Agent</code> has already been deployed.
    */
-  private boolean deployed = false;
+  boolean deployed = false;
 
   /**
    * Returns if the currently <code>Agent</code> has already been deployed.
@@ -562,13 +571,37 @@ public abstract class Agent implements Serializable {
    *	unspecialized exception
    */
   public final void deploy(AgentId reply) throws IOException {
-    if (deployed)
-      throw new IOException("Already exist");
+    if ((id == null) || id.isNullId()) {
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".Agent, can't deploy agent [" + name + "]: id is null");
+      throw new IOException("Can't deploy agent [" + name + "]: id is null");
+    }
+    if (deployed) {
+      logmon.log(BasicLevel.ERROR,
+                 "AgentServer#" + AgentServer.getServerId() +
+                 ".Agent, can't deploy agent [" + name +
+                 "]: already deployed");
+      throw new IOException("Can't deploy agent [" + name +
+                            "]: already deployed");
+    }
+
     //  If we use sendTo agent's method the from field is the agent id, and
     // on reception the from node (from.to) can be false.
     Channel.sendTo(new AgentId(id.to, id.to, AgentId.FactoryIdStamp),
 		   new AgentCreateRequest(this, reply));
     deployed = true;
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "Agent" + id + " [" + name + "] deployed");
+  }
+
+  public String getName() {
+    if (name == null) {
+      return getClass().getName() + id.toString();
+    } else {
+      return name;
+    }
   }
 
   /**
@@ -578,10 +611,10 @@ public abstract class Agent implements Serializable {
    * @return	A string representation of this agent. 
    */
   public String toString() {
-    return "(" + getClass().getName() + ", " +
-                 name + ", " +
-                 id.toString() + ", " +
-		 fixed + ")";
+    return "(" + super.toString() +
+                 ",name=" + name +
+                 ",id=" + id.toString() +
+		 ",fixed=" + fixed + ")";
   }
 
   /**
@@ -626,8 +659,12 @@ public abstract class Agent implements Serializable {
    *	unspecialized exception
    */
   protected void initialize(boolean firstTime) throws Exception {
-    if (Debug.agentInit)
-      Debug.trace("initialize agent " + id, false);
+    // Get the logging monitor from current server MonologMonitorFactory
+    this.logmon = Debug.getMonitor(getLogTopic());
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "Agent" + id + " [" + name +
+                 (firstTime?"] , first initialized":"] , initialized"));
   }
 
   /**
@@ -793,25 +830,16 @@ public abstract class Agent implements Serializable {
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof SetField) {
-      try {
-	setField((SetField) not);
-	if (((SetField) not).reply!= null ) 
-	  // we must send a reply to the agent identified by 
-	  // reply
-	  sendTo(((SetField) not).reply, new SetFieldAck());
-
-      } catch (Exception exc) {
-	sendTo(from, new ExceptionNotification(getId(), not, exc));
-      }
+      setField((SetField) not);
+      if (((SetField) not).reply!= null ) 
+        sendTo(((SetField) not).reply, new SetFieldAck());
     } else if (not instanceof DupRequest) {
       AgentId newId = dup((DupRequest) not, null);
       sendTo(from, new DupReply(newId));
     } else if (not instanceof DeleteNot) {
-        delete();
-        if (((DeleteNot) not).reply!= null ) 
-	  // we must send a reply to the agent identified by 
-	  // reply
-	  sendTo(((DeleteNot) not).reply, new DeleteAck());
+      delete();
+      if (((DeleteNot) not).reply!= null ) 
+        sendTo(((DeleteNot) not).reply, new DeleteAck());
     } else if (not instanceof SubscribeNot) {	
 	doReact(from,(SubscribeNot)not);
     } else if (not instanceof GetStatusNot) {
@@ -820,15 +848,12 @@ public abstract class Agent implements Serializable {
       if (AgentServer.MONITOR_AGENT) {
 	doReact((UnknownAgent)not);
       }
-      if (Debug.agentError)
- 	Debug.trace("Agent: " + id + ".react(" + not + ")", false);
     } else if (not instanceof UnknownNotification) {
-      if (Debug.agentError)
- 	Debug.trace("Agent: " + id + ".react(" + not + ")", false);
     } else if (not instanceof ExceptionNotification) {
-      if (Debug.agentError)
- 	Debug.trace("Agent: " + id + ".react(" + not + ")", false);
     } else {
+      logmon.log(BasicLevel.WARN,
+                 "Agent" + id + " [" + name +
+                 "] react to unknown notification [" + not + "] from " + from);
       sendTo(from, new UnknownNotification(id, not));
     }
   }
@@ -997,18 +1022,14 @@ public abstract class Agent implements Serializable {
     if(AgentServer.MONITOR_AGENT) {
       if(not instanceof InputSubscribeNot) {        
 	doReact(from,(InputSubscribeNot)not);     
-      }
-      else if(not instanceof OutputSubscribeNot) {
+      } else if(not instanceof OutputSubscribeNot) {
 	doReact(from,(OutputSubscribeNot)not);      
-      }
-      else if(not instanceof StatusSubscribeNot) {
+      } else if(not instanceof StatusSubscribeNot) {
         doReact(from,(StatusSubscribeNot)not);      
-      }
-      else if(not.action == SubscribeNot.REMOVE) {
+      } else if(not.action == SubscribeNot.REMOVE) {
         removeForAllEvents(from);
       }
-    }
-    else {
+    } else {
       Exception exc = new IllegalStateException("The agent server " +
 						AgentServer.getServerId() + 
 						" is not monitored (AgentServer.MONITOR_AGENT=false).");
@@ -1050,10 +1071,9 @@ public abstract class Agent implements Serializable {
     if ((tmp[0] >= 'a') && (tmp[0] <= 'z')){
       // upcase the first letter of the attribute name.
       tmp[0] = (byte) (tmp[0] - ('a'-'A'));      
-      methName=new String ("get"+new String(tmp));
-    } 
-    else { 
-      methName = new String ("get"+statusName);
+      methName = new String ("get" + new String(tmp));
+    } else { 
+      methName = new String ("get" + statusName);
     }
     
     Class agClass = getClass();
@@ -1062,25 +1082,30 @@ public abstract class Agent implements Serializable {
       // Get the status value that must be Serializable.
       Serializable report = (Serializable)setMeth.invoke(this,new Object[0]);
       return report;
-    } 
-    catch(Exception exc){
+    }  catch (Exception exc) {
       // do nothing as the status value cannot be reached.
-      Debug.trace("Agent " + name + ": getStatus(" + statusName + ") raised " + exc,false);
+      logmon.log(BasicLevel.ERROR,
+                 "Agent" + id + " [" + name +
+                 "] getStatus(" + statusName + ") raised ", exc);
     }
     return null;
   }
-    
+  
   private void subscribe(int action,String key,AgentId id) {
-      switch(action) {
-      case SubscribeNot.ADD:
-	  Debug.trace("Agent " + name + ": " + " add listener for " + key,false);
-	  addListener(key,id);
-	  break;
-      case SubscribeNot.REMOVE:
-	  Debug.trace("Agent " + name + ": " + " remove listener for " + key,false);
-	  removeListener(key,id);
-	  break;
-      }
+    switch(action) {
+    case SubscribeNot.ADD:
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "Agent" + id + " [" + name + "] add listener for " + key);
+      addListener(key,id);
+      break;
+    case SubscribeNot.REMOVE:
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   "Agent" + id + " [" + name + "] remove listener for " + key);
+      removeListener(key,id);
+      break;
+    }
   }
 
 

@@ -522,7 +522,7 @@ public class CommonClientAAA implements java.io.Serializable
     }
 	
     /** treatment of the requests of the extern client */
-    protected void reactToProxyNotification(ProxyNotification pNot) throws MOMException {
+    protected void reactToProxyNotification(DriverNotification pNot) throws MOMException {
     NotificationInputMessage not = (NotificationInputMessage) pNot.getNotification();
     int drvKey = pNot.getDriverKey();
 	try {

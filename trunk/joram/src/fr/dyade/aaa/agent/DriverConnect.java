@@ -23,23 +23,29 @@
  */
 package fr.dyade.aaa.agent;
 
-class DriverConnect extends Driver
-{
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
+/** 
+ * The <code>DriverConnect</code> class is used by <code>ProxyAgent</code>
+ * instances for managing their connection steps.
+ */
+class DriverConnect extends Driver {
   protected ProxyAgent proxy = null;
   protected boolean blockingCnx;
   protected boolean multipleCnx;
 
-  DriverConnect(ProxyAgent proxy,
-    boolean blockingCnx, boolean multipleCnx)
-  {
+  DriverConnect(ProxyAgent proxy, boolean blockingCnx, boolean multipleCnx) {
     this.proxy = proxy;
     this.blockingCnx = blockingCnx;
     this.multipleCnx = multipleCnx;
+    this.name = proxy.getName() + ".DriverConnect";
+    // Get the proxy logging monitor
+    logmon = proxy.logmon;
   }
 
 
-  public void start()
-  {
+  public void start() {
     if (! blockingCnx)
       run();
     else
@@ -47,13 +53,12 @@ class DriverConnect extends Driver
   }
 
   public void run() {
-    if (Debug.drivers)
-      Debug.trace("cnx driver start", false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", started");
     do {
       proxy.createDrivers();
     } while (multipleCnx);
   }
 
   public void close() {}
-
 }

@@ -34,7 +34,7 @@ package fr.dyade.aaa.util;
  */
 public class Ubyte {
 
-public static final String RCS_VERSION="@(#)$Id: Ubyte.java,v 1.5 2001-08-31 08:14:09 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: Ubyte.java,v 1.6 2002-01-16 12:46:47 joram Exp $"; 
 
 
   /**

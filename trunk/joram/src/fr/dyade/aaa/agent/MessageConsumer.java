@@ -31,7 +31,7 @@ import java.io.IOException;
  * @see		Engine, Network.
  */
 public interface MessageConsumer {
-  public static final String RCS_VERSION="@(#)$Id: MessageConsumer.java,v 1.3 2001-08-31 08:13:58 tachkeni Exp $";
+  public static final String RCS_VERSION="@(#)$Id: MessageConsumer.java,v 1.4 2002-01-16 12:46:47 joram Exp $";
 
   /**
    * Returns this <code>MessageConsumer</code>'s name.
@@ -80,7 +80,7 @@ public interface MessageConsumer {
    *
    * @see stop
    */
-  void start() throws IOException;
+  void start() throws Exception;
 
   /**
    * Forces the component to stop executing.

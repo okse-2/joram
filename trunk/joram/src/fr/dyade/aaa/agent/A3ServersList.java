@@ -27,7 +27,7 @@ import java.util.Vector;
 
 public final class A3ServersList extends Notification {
 
-public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.6 2001-08-31 08:13:54 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
  /**
   * A3Node contains informations about an agent server.
@@ -38,10 +38,10 @@ public static final String RCS_VERSION="@(#)$Id: A3ServersList.java,v 1.6 2001-0
     ServerDesc server = null;
     Vector servers = new Vector();
     for (int i=0; i<AgentServer.getServerNb(); i++) {
-      server = AgentServer.getServerDesc((short) i);
-      if (server != null) {
+      try {
+        server = AgentServer.getServerDesc((short) i);
 	servers.addElement(new A3Node(server));
-      }
+      } catch (UnknownServerException exc) {}
     }
     nodes = new A3Node[servers.size()];
     nodes = (A3Node []) servers.toArray(nodes);

@@ -31,14 +31,20 @@ import java.net.*;
  * class for stream sockets.
  */
 abstract class StreamNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.4 2001-08-31 08:14:00 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.5 2002-01-16 12:46:47 joram Exp $";
 
   /** Creates a new Network component */
   StreamNetwork() {
     super();
   }
-  
+
+  /**
+   * Numbers of attempt to connect to a server's socket before aborting.
+   */
+  final static int CnxRetry1 = 5;
+  final static int CnxRetry2 = 20;
+
   /**
    *  This method creates and returns a socket connected to a ServerSocket at
    * the specified network address and port. It may be overloaded in subclass,
@@ -60,7 +66,16 @@ abstract class StreamNetwork extends Network {
   Socket createSocket(InetAddress host, int port) throws IOException {
     if (host == null)
       throw new UnknownHostException();
-    return new Socket(host, port);
+    for (int i=0; ; i++) {
+      try {
+        return new Socket(host, port);
+      } catch (IOException exc) {
+        if (i > CnxRetry1) throw exc;
+        try {
+          Thread.currentThread().sleep(i * 250);
+        } catch (InterruptedException e) {}
+      }
+    }
   }
 
   /**
@@ -75,7 +90,16 @@ abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket() throws IOException {
-    return new ServerSocket(port);
+    for (int i=0; ; i++) {
+      try {
+        return new ServerSocket(port);
+      } catch (BindException exc) {
+        if (i > CnxRetry2) throw exc;
+        try {
+          Thread.currentThread().sleep(i * 250);
+        } catch (InterruptedException e) {}
+      }
+    }
   }
 
   /**

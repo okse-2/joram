@@ -24,6 +24,10 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+
+import org.objectweb.monolog.api.BasicLevel;
+import org.objectweb.monolog.api.Monitor;
+
 import fr.dyade.aaa.util.*;
 
 /**
@@ -33,12 +37,10 @@ import fr.dyade.aaa.util.*;
  * Notifications are then routed to a message queue where they are
  * stored in chronological order. The Channel object is responsible for
  * localizing the target agent.
- *
- * @author  Andre Freyssinet
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.7 2001-08-31 08:13:56 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
 
   static Channel channel = null;
 
@@ -55,11 +57,17 @@ abstract public class Channel {
     return channel;
   }
 
+  protected Monitor logmon = null;
+
   /**
    * Constructs a new <code>Channel</code> object (can only be used by
    * subclasses).
    */
   protected Channel() {
+    // Get the logging monitor from current server MonologMonitorFactory
+    logmon = Debug.getMonitor(Debug.A3Engine);
+    logmon.log(BasicLevel.DEBUG, toString() + " created.");
+
     this.mq = new Queue();
   }
 
@@ -85,11 +93,11 @@ abstract public class Channel {
    *	error when accessing the local persistent storage
    */
   public final static void sendTo(AgentId to,
-				  Notification not) throws IOException {
+				  Notification not) {
     if (Thread.currentThread() == AgentServer.engine.thread) {
       // Be careful, does not use this method in the engine thread, sometime
       // engine.agent is null and it throws a NullPointerException.
-      channel.sendTo(AgentServer.engine.agent.getId(), to, not);
+      channel.push(AgentServer.engine.agent.getId(), to, not);
     } else {
       //  Be careful, the destination node use the from.to field
       // to get the from node id.
@@ -108,10 +116,24 @@ abstract public class Channel {
   synchronized final void sendTo(AgentId from,
 				 AgentId to,
 				 Notification not) {
-    if (Debug.channelSend)
-      Debug.trace("Channel.SendTo(" + from + ", " + to + ", " + not + ")",
-		  false);
+    if (Thread.currentThread() == AgentServer.engine.thread) {
+      // Be careful, does not use this method in the engine thread, sometime
+      // engine.agent is null and it throws a NullPointerException.
+      push(from, to, not);
+    } else {
+      //  Be careful, the destination node use the from.to field
+      // to get the from node id.
+      directSendTo(from, to, not);
+    }
 
+  }
+
+  synchronized final void push(AgentId from,
+                               AgentId to,
+                               Notification not) {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 toString() + ".SendTo(" + from + ", " + to + ", " + not + ")");
     if ((to == null) || to.isNullId())
       return;
     
@@ -156,7 +178,14 @@ abstract public class Channel {
    * @param msg		The message to deliver.
    */
   static final void post(Message msg) throws IOException {
-    AgentServer.servers[msg.to.to].domain.post(msg);
+    try {
+      AgentServer.getConsumer(msg.to.getTo()).post(msg);
+    } catch (UnknownServerException exc) {
+      channel.logmon.log(BasicLevel.ERROR,
+                         channel.toString() + ", can't post message: " + msg,
+                         exc);
+      // TODO: Post an ErrorNotification
+    }
   }
 
   /**
@@ -220,7 +249,7 @@ abstract public class Channel {
   abstract void
   directSendTo(AgentId from,
 	       AgentId to,
-	       Notification not) throws IOException;
+	       Notification not);
 
   /**
    * Cleans the Channel queue of all pushed notifications.
@@ -234,6 +263,9 @@ abstract public class Channel {
 }
 
 final class TransactionChannel extends Channel {
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
    * must only be used by <a href="Channel.html#newInstance()">static channel
@@ -254,43 +286,54 @@ final class TransactionChannel extends Channel {
    */
   void directSendTo(AgentId from,
 		    AgentId to,
-		    Notification not) throws IOException {
-    MessageConsumer consumer;
-    Message msg;
+		    Notification not) {
+    MessageConsumer consumer = null;
+    Message msg = null;
 
-    if (Debug.channelSend)
-      Debug.trace("Channel.directSendTo(" + from + ", " + to + ", " + not + ")",
-		  false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 toString() + ".directSendTo(" + from + ", " + to + ", " + not + ")");
 
     if ((to == null) || to.isNullId())
       return;
 
-    consumer = AgentServer.getServerDesc(to.to).domain;
     msg = new Message(from, to, not);
-
-    AgentServer.transaction.begin();
     try {
-      consumer.post(msg);
-      consumer.save();
-    } catch (IOException exc) {
-      exc.printStackTrace(System.err);
-      consumer.invalidate();
-      AgentServer.transaction.rollback();
-      // Restore the matrix clock state from disk.
-      try {
-	consumer.restore();
-      } catch (Exception exc2) {
-	// Should never happened (IOException or ClassNotFoundException).
-	Debug.trace("Channel: Can't rollback from " + exc, exc2);
-	throw new RuntimeException("Channel: Can't rollback.");
-      }
-      AgentServer.transaction.release();
-      throw exc;
+      consumer = AgentServer.getConsumer(to.to);
+    } catch (UnknownServerException exc) {
+      channel.logmon.log(BasicLevel.ERROR,
+                         channel.toString() + ", can't post message: " + msg,
+                         exc);
+      // TODO: Post an ErrorNotification ?
+      return;
     }
-    AgentServer.transaction.commit();
-    // then commit and validate the message.
-    consumer.validate();
-    AgentServer.transaction.release();
+
+    try {
+      AgentServer.transaction.begin();
+      try {
+        consumer.post(msg);
+        consumer.save();
+      } catch (IOException exc2) {
+        logmon.log(BasicLevel.FATAL,
+                   toString() + ", can't post message: " + msg,
+                   exc2);
+        consumer.invalidate();
+        AgentServer.transaction.rollback();
+        // Restore the matrix clock state from disk.
+	consumer.restore();
+        AgentServer.transaction.release();
+        throw exc2;
+      }
+      AgentServer.transaction.commit();
+      // then commit and validate the message.
+      consumer.validate();
+      AgentServer.transaction.release();
+    } catch (Exception exc) {
+      // Should never happened (IOException or ClassNotFoundException).
+      logmon.log(BasicLevel.FATAL,
+                 toString() + ", Transaction problem.", exc);
+      throw new TransactionError(toString() + ", " + exc.getMessage());
+    }
   }
 
   /**
@@ -307,6 +350,9 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.8 2002-01-16 12:46:47 joram Exp $";
+
   /**
    * Constructs a new <code>TransientChannel</code> object. this method
    * must only be used by <a href="Channel.html#newInstance()">static channel
@@ -327,20 +373,36 @@ final class TransientChannel extends Channel {
    */
   void directSendTo(AgentId from,
 		    AgentId to,
-		    Notification not) throws IOException {
+		    Notification not) {
     MessageConsumer consumer = null;
     Message msg = null;
 
-    if (Debug.channelSend)
-      Debug.trace("Channel.directSendTo(" + from + ", " + to + ", " + not + ")",
-		  false);
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 toString() + ".directSendTo(" + from + ", " + to + ", " + not + ")");
 
     if ((to == null) || to.isNullId())
       return;
  
-    consumer = AgentServer.getServerDesc(to.to).domain;
-    msg = new Message(from, to, not);
-    consumer.post(msg);
+    try {
+      msg = new Message(from, to, not);
+      consumer = AgentServer.getConsumer(to.to);
+    } catch (UnknownServerException exc) {
+      channel.logmon.log(BasicLevel.ERROR,
+                         channel.toString() + ", can't post message: " + msg,
+                         exc);
+      // TODO: Post an ErrorNotification
+    }
+
+    try {
+      consumer.post(msg);
+      consumer.save();
+    } catch (IOException exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "Channel: Can't post message to #" + to.getTo(), exc);
+      consumer.invalidate();
+      throw new TransactionError(toString() + ", " + exc.getMessage());
+    }
     consumer.validate();
   }
 

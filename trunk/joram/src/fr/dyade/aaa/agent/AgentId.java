@@ -38,8 +38,8 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 class AgentIdStamp implements Serializable {
-  /** RCS version number of this file: $Revision: 1.6 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.6 2001-08-31 08:13:55 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.7 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentId.java,v 1.7 2002-01-16 12:46:47 joram Exp $";
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
@@ -114,15 +114,10 @@ class AgentIdStamp implements Serializable {
    *
    * @param to	The target agent server
    */
-  synchronized int newStamp(short to) {
-    try {
-      int current = (to == AgentServer.getServerId())?(++local):(++remote);
-      save();
-      return current;
-    } catch (IOException exc) {
-      Debug.trace("Problem during stamp allocation", exc);
-      return 0;
-    }
+  synchronized int newStamp(short to) throws IOException {
+    int current = (to == AgentServer.getServerId())?(++local):(++remote);
+    save();
+    return current;
   }
 }
 
@@ -231,6 +226,10 @@ public final class AgentId implements Serializable, Cloneable {
   public static int NameServiceStamp = 4;
   /** Reserved stamp for scheduler service <code>AgentId</code>. */
   public static int SchedulerServiceStamp = 5;
+  /** Reserved stamp for fileTransfert service <code>AgentId</code>. */
+  public static int FileTransfertStamp = 6;
+  /** Reserved stamp for JNDI service <code>AgentId</code>. */
+  public static int JndiServiceStamp = 7;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
@@ -300,7 +299,7 @@ public final class AgentId implements Serializable, Cloneable {
    *
    * @param to 	The identification of the agent server hosting the agent.
    */ 
-  AgentId(short to) {
+  AgentId(short to) throws IOException {
     this(AgentServer.getServerId(), to, AgentIdStamp.stamp.newStamp(to));
   }
 

@@ -57,7 +57,7 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
   public void run()
   {
   try {
-    while (isRunning) {
+    while (running) {
       canStop = true;
       Object key;
 
@@ -166,7 +166,7 @@ class SessionListener extends fr.dyade.aaa.util.Daemon
       }
     } catch (Exception e) {
     } finally {
-      isRunning = false;
+      running = false;
     }
   }
 
