@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -82,6 +82,36 @@ public abstract class ConnectionFactory
                   throws JMSException;
 
   /**
+   * Default login name for connection, default value is "anonymous".
+   * This value can be adjusted through the <tt>JoramDfltLogin</tt> property.
+   */
+  final static String dfltLogin = "anonymous";
+  /**
+   * Default login password for connection, default value is "anonymous".
+   * This value can be adjusted through the <tt>JoramDfltPassword</tt>
+   * property.
+   */
+  final static String dfltPassword = "anonymous";
+
+  /**
+   * Returns default login name for connection.
+   * Default value "anonymous" can be adjusted by setting the
+   * <tt>JoramDfltLogin</tt> property.
+   */
+  public static String getDefaultLogin() {
+    return System.getProperty("JoramDfltLogin", dfltLogin);
+  }
+
+  /**
+   * Returns the default login password for connection.
+   * Default value "anonymous" can be adjusted by setting the
+   * <tt>JoramDfltPassword</tt> property.
+   */
+  public static String getDefaultPassword() {
+    return System.getProperty("JoramDfltPassword", dfltPassword);
+  }
+
+  /**
    * API method.
    *
    * @exception JMSSecurityException  If the default identification is
@@ -90,7 +120,7 @@ public abstract class ConnectionFactory
    */
   public javax.jms.Connection createConnection() throws JMSException
   {
-    return createConnection("anonymous", "anonymous");
+    return createConnection(getDefaultLogin(), getDefaultPassword());
   }
 
 
