@@ -14,6 +14,20 @@
 
     <s1 name="Recent news">
 
+      <subtitle>19th March 2002: JORAM 3.0.1 available (cvs tag: joram3_0_1)</subtitle>
+      
+      <p><em>JORAM 3.0.1 is now available for <a
+	  href="http://www.objectweb.org/joram/download/">
+	  download</a></em>. <a href="http://www.objectweb.org/joram/doc/">Documentation</a> has also been
+	updated..<br />
+      </p><p>
+	This version corrects all bugs discovered by JORAM community
+	since the release of JORAM 3.0.0. which were already available
+	in CVS repository.
+      </p>
+
+      <hr /> 
+
       <subtitle>20th March 2002: JMS Test Suite released</subtitle>
 
       <p>A JMS Test Suite has been released under LGPL.<br />
@@ -21,30 +35,9 @@
 	pure JMS without any dependency to JORAM.</p>
       <p>All code is available from JORAM <a
 	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">cvs repository</a>. See the test suite
-	<a href="http://www.objectweb.org/joram/current/doc/tests/index.html">documentation</a> for more information.</p>
-
-      <hr/>
-
-      <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
-      
-      <p><em>JORAM 3.0.0 is now available for <a
-	  href="http://www.objectweb.org/joram/download/">
-	  download</a></em>. <a href="http://www.objectweb.org/joram/doc/">Documentation</a> has also been
-	updated and new samples are provided.<br />
-      </p><p>
-	Compared to JORAM previous versions, this new release is a complete
-	re-factoring of the code base. It gets rid of the
-	previous limitations and defects. The JMS specification is now fully
-	implemented, JORAM provides authentication and security
-	features, and introduces a distributed implementation of the Topic
-	destination. Its clean and sound code basis guarantees fast
-	and easy future developements and enhancements.<br/>
-	A suite of tests based on JUnit will be very soon proposed for
-	download.
-      </p><p>
-	Please do not hesitate to keep us informed of any inconsistancy or
-	problem you may encounter with the new distribution and documentation.<br />
-	We sincerely hope you will enjoy this new version.   
+	<a
+	href="http://www.objectweb.org/joram/current/doc/tests/index.html">documentation</a>
+	for more information.
       </p>
     </s1>
 
