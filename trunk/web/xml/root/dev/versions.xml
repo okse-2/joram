@@ -16,6 +16,13 @@
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Corrected bugs (latest: February 16, 2004)"> 
       <ul>
+        <li>Improper connection close, found by
+        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00067.html">
+        Christian Neudorfer</a>. Due to a static timer, it was not possible
+        to open a new connection after having closed one in a same process. 
+        Bug is corrected, the impacted classe is 
+        <code>org.objectweb.joram.client.jms.Connection</code>.
+        </li>
         <li>SOAP connections failures never detected, found by
         <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00060.html">
         Christian Neudorfer</a>. Despite the setting of the connection pending
