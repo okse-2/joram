@@ -65,7 +65,7 @@ public class XAQueueConnectionFactory
        createXAQueueConnection(String name, String password)
        throws JMSException
   {
-    return new XAQueueConnection(serverAddr, port, name, password, timer);
+    return new XAQueueConnection(this, serverAddr, port, name, password);
   }
 
   /**
@@ -80,5 +80,8 @@ public class XAQueueConnectionFactory
   {
     return createXAQueueConnection("anonymous", "anonymous");
   }
+
+  /** Overrides this method for keeping the txTimer parameter to 0. */
+  public void setTxTimer(int timer)
+  {}
 }
- 

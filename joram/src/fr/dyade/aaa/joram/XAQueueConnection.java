@@ -39,19 +39,20 @@ public class XAQueueConnection extends QueueConnection
    * Constructs an <code>XAQueueConnection</code> instance and opens a TCP
    * connection with a given agent server.
    *
+   * @param cf  The factory this connection is created by.
    * @param serverAddr  Address of the server to connect to.
    * @param port  Port the server is listening to.
    * @param name  User's name.
    * @param password  User's password.
-   * @param timer  Time in seconds allowed for (re-)connecting.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  XAQueueConnection(java.net.InetAddress serverAddr, int port, String name,
-                    String password, int timer) throws javax.jms.JMSException
+  XAQueueConnection(XAQueueConnectionFactory cf,
+                    java.net.InetAddress serverAddr, int port, String name,
+                    String password) throws javax.jms.JMSException
   {
-    super(serverAddr, port, name, password, timer);
+    super(cf, serverAddr, port, name, password);
   }
 
   /** 

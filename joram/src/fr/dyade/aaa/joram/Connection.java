@@ -65,8 +65,6 @@ public abstract class Connection implements javax.jms.Connection
   private ObjectInputStream ois = null;
   /** Connection listening daemon. */
   private Driver driver = null;
-  /** Time in seconds allowed for connecting. */
-  private int timer;
   /** Client's agent proxy identifier. */
   private String proxyId;
   /** Connection key. */
@@ -90,6 +88,8 @@ public abstract class Connection implements javax.jms.Connection
   /** Buffer of deleted destinations. */
   private Vector deleteds;
 
+  /** The factory the connection "belongs" to. */
+  ConnectionFactory factory;
   /** <code>true</code> if the connection is started. */
   boolean started = false;
   /** <code>true</code> if the connection is closed. */
@@ -117,22 +117,23 @@ public abstract class Connection implements javax.jms.Connection
   /**
    * Opens a connection.
    *
+   * @param cf  The factory this connection is created by.
    * @param serverAddr  Address of the server to connect to.
    * @param port  Port the server is listening to.
    * @param name  User's name.
    * @param password  User's password.
-   * @param timer  Time in seconds during which (re-)connecting is attempted.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  Connection(InetAddress serverAddr, int port, String name, String password,
-             int timer) throws JMSException
+  Connection(ConnectionFactory cf, InetAddress serverAddr, int port,
+             String name, String password) throws JMSException
   {
     this.serverAddr = serverAddr;
     this.serverPort = port;
     this.userName = name;
-    this.timer = timer;
+
+    factory = cf;
 
     sessions = new Vector();
     requestsTable = new Hashtable();
@@ -455,7 +456,7 @@ public abstract class Connection implements javax.jms.Connection
   {
     // Setting the timer values:
     long startTime = System.currentTimeMillis();
-    long endTime = startTime + timer * 1000;
+    long endTime = startTime + factory.cnxTimer * 1000;
     long currentTime;
     long nextSleep = 2000;
     int attemptsC = 0;

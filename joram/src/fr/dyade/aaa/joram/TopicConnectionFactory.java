@@ -64,7 +64,7 @@ public class TopicConnectionFactory extends ConnectionFactory
        createTopicConnection(String name, String password)
        throws JMSException
   {
-    return new TopicConnection(serverAddr, port, name, password, timer);
+    return new TopicConnection(this, serverAddr, port, name, password);
   }
 
   /**

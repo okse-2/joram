@@ -55,8 +55,11 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory,
   protected int port; 
   /** Url for connecting to the server. */
   protected JoramUrl serverUrl;
-  /** Time in seconds allowed to connections for connecting. */
-  protected int timer = 60;
+
+  /** Timer in seconds allowed to connections for connecting. */
+  protected int cnxTimer = 60;
+  /** Timer in seconds allowed to transactions for finishing. */
+  protected int txTimer = 0;
 
  
   /**
@@ -89,15 +92,26 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory,
   }
 
   /**
-   * Resets the timer value.
+   * Sets the connecting timer.
    *
    * @param timer  Time in seconds for connecting.
    */
-  public void resetTimer(int timer)
+  public void setCnxTimer(int timer)
   {
     if (timer >= 0)
-      this.timer = timer;
+      this.cnxTimer = timer;
   } 
+
+  /**
+   * Sets the transaction timer.
+   *
+   * @param timer  Maximum time in seconds for a transaction to finish.
+   */
+  public void setTxTimer(int timer)
+  {
+    if (timer >= 0)
+      this.txTimer = timer;
+  }
 
   /** Sets the naming reference of this connection factory. */
   public Reference getReference() throws NamingException
@@ -106,6 +120,10 @@ public abstract class ConnectionFactory implements javax.jms.ConnectionFactory,
                                   "fr.dyade.aaa.joram.ObjectFactory",
                                   null);
     ref.add(new StringRefAddr("cFactory.url", serverUrl.toString()));
+    ref.add(new StringRefAddr("cFactory.cnxT",
+                              (new Integer(cnxTimer)).toString()));
+    ref.add(new StringRefAddr("cFactory.txT",
+                              (new Integer(txTimer)).toString()));
     return ref;
   }
 
