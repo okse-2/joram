@@ -106,7 +106,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
    * Returns the connection this temporary queue belongs to,
    * <code>null</code> if not known.
    */
-  Connection getCnx()
+  public Connection getCnx()
   {
     return cnx;
   }
