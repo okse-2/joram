@@ -60,10 +60,13 @@
             Dua</ulink>)
         </para>
       </listitem>
+      <listitem>
+        <para><ulink url="http://www.swiftmq.com/">SwiftMQ
+            3.2.0</ulink> (provided by <ulink
+            url="mailto:am@iit.de">Andreas Mueller</ulink>)
+        </para>
+      </listitem>
     </itemizedlist>
-    <para><ulink url="http://www.iit.de/">SwiftMQ</ulink> will be
-      supported soon when version 3.2.0 is released.  
-    </para>
   </sect1>
   <sect1>
     <title>Installing the test suite</title>
@@ -241,6 +244,33 @@
         </para>
       </sect3>
       <sect3>
+        <title>AshnaMQ</title>
+        <para>To compile AshnaMQ, first you have to add the
+          <filename>AshnaClient.jar</filename> file in the
+          <filename>providers/ashnasoft</filename> directory (this file
+          can be found in the <filename>lib</filename> directory of
+          your installation of AshnaMQ). Then, type in the
+          <filename>tests</filename> directory: 
+          <simplelist>
+            <member><command>ant compile.ashnasoft</command></member>
+          </simplelist>  </para>
+      </sect3>
+      <sect3>
+        <title>FioranoMQ</title>
+        <para>To compile FioranoMQ <varname>Admin</varname>
+          implementation, you have first to install and properly
+          setup it (for more information see <ulink
+            url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ web site</ulink>, 
+          then add fioranoMQ libraries in the
+          <filename>providers/fiorano</filename> directory and type in the <filename>tests</filename> directory:
+          <simplelist>
+            <member><command>ant compile.fiorano</command></member>
+          </simplelist>
+        </para>
+        <para>Provider specific classes are not compiled with the test suite
+          on purpose to avoid dependency of the suite to these providers. </para>
+      </sect3>
+      <sect3>
         <title>Pramati</title> 
         <para>First install
           Pramati Message Server and copy the following jars to the
@@ -273,31 +303,15 @@
         </para>
       </sect3>
       <sect3>
-        <title>AshnaMQ</title>
-        <para>To compile AshnaMQ, first you have to add the
-          <filename>AshnaClient.jar</filename> file in the
-          <filename>providers/ashnasoft</filename> directory (this file
-          can be found in the <filename>lib</filename> directory of
-          your installation of AshnaMQ). Then, type in the
-          <filename>tests</filename> directory: 
+        <title>SwiftMQ</title>
+        <para>First install SwiftMQ and copy all the jar files from
+          SwiftMQ's <filename>jars</filename> directory into
+          <filename>providers/swiftmq</filename> and type in
+          the <filename>tests</filename> directory:  
           <simplelist>
-            <member><command>ant compile.ashnasoft</command></member>
-          </simplelist>  </para>
-      </sect3>
-      <sect3>
-        <title>FioranoMQ</title>
-        <para>To compile FioranoMQ <varname>Admin</varname>
-          implementation, you have first to install and properly
-          setup it (for more information see <ulink
-            url="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ web site</ulink>, 
-          then add fioranoMQ libraries in the
-          <filename>providers/fiorano</filename> directory and type in the <filename>tests</filename> directory:
-          <simplelist>
-            <member><command>ant compile.fiorano</command></member>
+            <member><command>ant compile.swiftmq</command></member>
           </simplelist>
         </para>
-        <para>Provider specific classes are not compiled with the test suite
-          on purpose to avoid dependency of the suite to these providers. </para>
       </sect3>
     </sect2>
   </sect1>
@@ -329,12 +343,6 @@
         </para>
       </sect3>
       <sect3>
-        <title>Pramati</title>
-        <para>Please refer to Pramati Message Server's <ulink
-            url="http://www.pramati.com/docstore/1230006/help/index1.htm">documentation</ulink>
-        </para>
-      </sect3>
-      <sect3>
         <title>AshnaMQ</title>
         <para>Let say that ASMQ_HOME is the home directory of
           AshnaMQ, go to
@@ -353,6 +361,22 @@
           type
           <simplelist>
             <member><command>runkernel.sh</command></member>
+          </simplelist></para>
+      </sect3>
+      <sect3>
+        <title>Pramati</title>
+        <para>Please refer to Pramati Message Server's <ulink
+            url="http://www.pramati.com/docstore/1230006/help/index1.htm">documentation</ulink>
+        </para>
+      </sect3>
+      <sect3>
+        <title>SwiftMQ</title>
+        <para>Let say that SWIFTMQ_HOME is the home directory of
+          SwiftMQ, go to
+          <filename>$SWIFTMQ_HOME/scripts&lt;platform&gt;</filename> directory and
+          type
+          <simplelist>
+            <member><command>smqr1</command></member>
           </simplelist></para>
       </sect3>
     </sect2>
