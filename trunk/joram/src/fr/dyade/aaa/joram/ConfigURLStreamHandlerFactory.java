@@ -32,7 +32,7 @@ public class ConfigURLStreamHandlerFactory implements URLStreamHandlerFactory {
     public static final String Joram = "joram";
 
     public URLStreamHandler createURLStreamHandler(String protocol) {
-	if(protocol.equals(protocol))
+      if(protocol.equals(Joram))
 	    return new ConfigURLStreamHandler();
 	else
 	    return null;
