@@ -44,9 +44,9 @@ public class ArchiAdmin
     ictx = new InitialContext();
 
     // Connecting to the servers as the default administrator:
-    Admin admin0 = new Admin("pukapuka", 16010, "root", "root", 120);
-    Admin admin1 = new Admin("pukapuka", 16011, "root", "root", 120);
-    Admin admin2 = new Admin("pukapuka", 16012, "root", "root", 120);
+    Admin admin0 = new Admin("localhost", 16010, "root", "root", 120);
+    Admin admin1 = new Admin("localhost", 16011, "root", "root", 120);
+    Admin admin2 = new Admin("localhost", 16012, "root", "root", 120);
 
     // Updating the administrator id:
     admin0.addAdminId("admin", "pass");
@@ -57,9 +57,9 @@ public class ArchiAdmin
     admin0.close();
     admin1.close();
     admin2.close();
-    admin0 = new Admin("pukapuka", 16010, "admin", "pass", 120);
-    admin1 = new Admin("pukapuka", 16011, "admin", "pass", 120);
-    admin2 = new Admin("pukapuka", 16012, "admin", "pass", 120);
+    admin0 = new Admin("localhost", 16010, "admin", "pass", 120);
+    admin1 = new Admin("localhost", 16011, "admin", "pass", 120);
+    admin2 = new Admin("localhost", 16012, "admin", "pass", 120);
 
     // Removing the default identification:
     admin0.delAdminId("root");
