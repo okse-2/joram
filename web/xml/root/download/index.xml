@@ -53,22 +53,22 @@
 	  <tr>
 	    <td align="right" valign="top">Release: </td>
 	    <td>
-	      <input type="radio" name="file" value="joram-2.2.tar.gz" checked="checked"/>JORAM 2.2 jars (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.2.zip"/>JORAM 2.2 jars (zip)<br/>
+	      <input type="radio" name="file" value="joram-3.0.0.tgz" checked="checked"/>JORAM 3.0.0 jars (tgz)<br/>
+	      <input type="radio" name="file" value="joram-3.0.0.zip"/>JORAM 3.0.0 jars (zip)<br/>
 	      
-	      <input type="radio" name="file" value="joram-2.2-src.tar.gz"/>JORAM 2.2 sources (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.2-src.zip"/>JORAM 2.2 sources (zip)
+	      <input type="radio" name="file" value="joram-3.0.0-src.tgz"/>JORAM 3.0.0 sources (tgz)<br/>
+	      <input type="radio" name="file" value="joram-3.0.0-src.zip"/>JORAM 3.0.0 sources (zip)
 	    </td>
 	  </tr>
 	  
 	  <tr>
 	    <td align="right" valign="top">&#160;</td>
 	    <td>
-	      <input type="radio" name="file" value="joram-2.1.1.tar.gz"/>JORAM 2.1.1 jars (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.1.1.zip"/>JORAM 2.1.1 jars (zip)<br/>
+	      <input type="radio" name="file" value="joram-2.2.tar.gz"/>JORAM 2.2 jars (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.2.zip"/>JORAM 2.2 jars (zip)<br/>
 	      
-	      <input type="radio" name="file" value="joram-2.1.1-src.tar.gz"/>JORAM 2.1.1 sources (tar.gz)<br/>
-	      <input type="radio" name="file" value="joram-2.1.1-src.zip"/>JORAM 2.1.1 sources (zip)
+	      <input type="radio" name="file" value="joram-2.2-src.tar.gz"/>JORAM 2.2 sources (tar.gz)<br/>
+	      <input type="radio" name="file" value="joram-2.2-src.zip"/>JORAM 2.2 sources (zip)
 	    </td>
 	  </tr>
 	  
