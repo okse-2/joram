@@ -34,7 +34,7 @@ import javax.jms.*;
  * Test the <code>javax.jms.TemporaryTopic</code> features.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TemporaryTopicTest.java,v 1.2 2002-03-21 10:36:19 joram Exp $
+ * @version $Id: TemporaryTopicTest.java,v 1.3 2002-04-02 12:14:41 joram Exp $
  */
 public class TemporaryTopicTest extends PubSubTestCase {
 
@@ -52,8 +52,8 @@ public class TemporaryTopicTest extends PubSubTestCase {
 	    // we create a temporary topic to receive messages
 	    tempTopic = subscriberSession.createTemporaryTopic();
 	    // we recreate the sender because it has been 
-	    // already created with a Destination as parameter
-	    publisher = publisherSession.createPublisher(null);
+	    // already created with another Destination as parameter
+	    publisher = publisherSession.createPublisher(tempTopic);
 	    // we create a temporary subscriber on the temporary topic
 	    tempSubscriber = subscriberSession.createSubscriber(tempTopic);
 	    subscriberConnection.start();
@@ -61,13 +61,12 @@ public class TemporaryTopicTest extends PubSubTestCase {
 
 	    TextMessage message = publisherSession.createTextMessage();
 	    message.setText("testTemporaryTopic");
-	    publisher.publish(tempTopic, message);
+	    publisher.publish(message);
 
 	    Message m = tempSubscriber.receive();
 	    assertTrue(m instanceof TextMessage);
 	    TextMessage msg = (TextMessage)m;
-	    assertEquals("testTemporaryTopic", msg.getText());
-	    
+	    assertEquals("testTemporaryTopic", msg.getText());	    
 	} catch (JMSException e) {
 	    fail(e);
 	}
