@@ -69,7 +69,7 @@
 	
 	<p>JORAM also implements the <em>ASF</em> interfaces and methods for performing JMS
 	  operations through an application server, and is integrated
-	  to <a href="http://www.objecweb.org/jonas">JOnAS</a> EJB
+	  to <a href="http://www.objectweb.org/jonas">JOnAS</a> EJB
 	  platform.</p>
       </s2>
       
