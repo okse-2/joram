@@ -233,6 +233,18 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
+    int index = 0;
+    ReceiveRequest request;
+    while (index < requests.size()) {
+      request = (ReceiveRequest) requests.get(index);
+
+      // Request expired: removing it
+      if (! request.isValid())
+        requests.remove(index);
+      else
+        index++;
+    }
+
     Channel.sendTo(from, new Monit_GetNumberRep(not, requests.size()));
   }
 
