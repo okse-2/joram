@@ -55,38 +55,18 @@
       <ul>
         <li><a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">
         JavaCup</a> is a Java parser generator used in the message
-        selection feature. It is covered by the
-        <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">
-        CUP Parser Generator Copyright Notice, License, and Disclaimer</a>.
+        selection feature.</li>
+        <li><a href="http://kxml.enhydra.org">kXML</a> is Enhydra's XML parser
+        for J2ME used by kJORAM for communicating with the JORAM platform.
         </li>
-      </ul>
-
-      <ul>
-        <li><a href="http://kxml.enhydra.org">kXML</a> is an XML parser
-        for J2ME used by kJORAM for communicating with the JORAM platform. It
-        is covered by the <a href="http://kxml.enhydra.org/software/license">
-        Enhydra Public License</a>.</li>
-      </ul>
-
-      <ul>
         <li><a href="http://jakarta.apache.org/regexp/">Regexp</a> is
-        a regular expression parser used in the message selection feature. 
-        It is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
-        Apache license</a>.</li>
-      </ul>
-
-      <ul>
-        <li><a href="http://ws.apache.org/soap/">SOAP</a> is an
-        implementation of the SOAP protocol used by the SOAP proxy.
-        It is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
-        Apache license</a>.</li>
-      </ul>
-
-      <ul>
-        <li><a href="http://xml.apache.org/">Xerces</a> is an XML
-        parser used for platform configuration. It is
-        is covered by the <a href="http://xml.apache.org/dist/LICENSE.txt">
-        Apache license</a>.</li>
+        Apache's regular expression parser used in JORAM message selection
+        feature.</li>
+        <li><a href="http://ws.apache.org/soap/">SOAP</a> is Apache's
+        implementation of the SOAP protocol used by JORAM SOAP proxy.
+        </li>
+        <li><a href="http://xml.apache.org/">Xerces</a> is Apache's XML
+        parser used for JORAM platform configuration.</li>
       </ul>
       
     </s1>
