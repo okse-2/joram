@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
+    <author email="joram-team@objectweb.org">JORAM team</author>
     <title>Download</title>
     <filename>index.xml</filename>
     <pathtoroot>..</pathtoroot>
@@ -12,38 +12,39 @@
 
   <body>
 
-    <s1 name="Download JORAM free JMS implementation">
+    <s1 name="Download JORAM free JMS Implementation">
 
       <p>To download a JORAM release, fill the form below. Please read the
       following license agreement carefully before clicking on the "Submit"
-      button. To get the current development release, you have to use <connect
-      href="../../resources/cvs.xml">CVS</connect>.</p>
+      button. To get the current development release, you have to use <a
+      href="http://www.objectweb.org/resources/cvs.html">CVS</a>.</p>
 
       <p>You are granted access, revision and deletion rights to personal
-      information gathered through this form (see the ObjectWeb <connect
-      href="../../privacy.xml">privacy policy</connect> for more
+      information gathered through this form (see the ObjectWeb <a
+      href="http://www.objectweb.org/privacy.html">privacy policy</a> for more
       informations). Those are only collected for statistical purposes.</p>
 
-      <form method="post" action="../../cgi-bin/joram/download.cgi">
+      <form method="post" action="../cgi-bin/download.cgi">
 	
 	<input type="hidden" name="to" value="joram-download@objectweb.org"/>
+	<input type="hidden" name="site" value="http://joram.objectweb.org/download/"/>	
 <!--	<input type="hidden" name="to" value="mathieu.peltier@inrialpes.fr"/>  --> 
 	
         <table border="0">
 	  
           <tr> 
             <td align="right">Name: </td>
-            <td><input type="text" name="name" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
+            <td><input type="text" name="name" value="" size="40"/><img src="../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
 	  </tr>
 	  
 	  <tr> 
             <td align="right">E-mail: </td>
-            <td><input type="text" name="email" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
+            <td><input type="text" name="email" value="" size="40"/><img src="../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
           </tr>
 	  
           <tr> 
             <td align="right">Organization: </td>
-            <td><input type="text" name="organization" value="" size="40"/><img src="../../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
+            <td><input type="text" name="organization" value="" size="40"/><img src="../images/ast.gif" height="9" width="9" border="0" alt=""/></td>
           </tr>
 
 	  <tr>
@@ -75,17 +76,7 @@
 	  </tr>
 	  
 	  <tr>
-	    <td colspan="2">Please select a download site close to your site:</td>
-	  </tr>
-	  
-	  <tr>
-	    <td align="right">Download site: </td>
-	    <td><select name="site" size="2">
-		<option
-	    value="http://www.objectweb.org/joram/download/" selected="selected">HTTP download from France</option>
-		<option value="http://www.us.objectweb.org/joram/download/">HTTP download from United States</option>
-	      </select>
-	    </td>
+	    <td colspan="2">Downloads from the U.S. mirror site are temporarily no more available. Sorry for the inconvenience.</td>
 	  </tr>
 	  
 	  <tr>
