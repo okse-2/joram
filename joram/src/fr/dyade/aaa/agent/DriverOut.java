@@ -31,8 +31,8 @@ import fr.dyade.aaa.util.*;
 
 class DriverOut extends Driver {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.2 2000-08-01 09:13:27 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.3 2000-08-28 15:36:13 tachkeni Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;
@@ -71,7 +71,7 @@ class DriverOut extends Driver {
     Notification m;
     mainLoop:
     while (true) {
-      m = (Notification) mq.get();
+	m = (Notification) mq.get();
       if (Debug.driversData)
 	Debug.trace("out driver write " + m, false);
       try {
@@ -109,4 +109,8 @@ class DriverOut extends Driver {
 	Debug.trace("error in reporting end of DriverOut", exc);
     }
   }
+    /** remove all elements of queue */
+    protected void clean() {
+	mq.removeAllElements();
+    }
 }
