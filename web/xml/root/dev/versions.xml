@@ -14,6 +14,19 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
+      <s2 name="Modifications (latest: January 26, 2004)">
+      <ul>
+        <li>New flow control mechanism. In order not to overload a JORAM server
+        with incoming messages, it is possible to set a maximum authorized
+        flow (in messages / second). This setting is done in the configuration
+        file, at the <code>ConnectionFactory</code> service level. For
+        example, for limitating the flow to 50 messages per second:
+        <code>&lt;service class="fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory"
+        args="16010 root root 50"/&gt;</code>. The updated classes are
+        <code>fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory</code> and
+        <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.</li>
+      </ul>
+      </s2>
       <s2 name="Corrected bugs (latest: January 9, 2004)">
       <ul>
         <li>Expired message monitored as pending messages.
