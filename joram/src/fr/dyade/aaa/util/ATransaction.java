@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Andre Freyssinet (ScalAgent DT)
+ * Contributor(s): Alexander Fedorowicz
  */
 package fr.dyade.aaa.util;
 
@@ -28,7 +31,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
-public final class ATransaction implements Transaction, Runnable {
+public class ATransaction implements Transaction, Runnable {
   // State of the transaction monitor.
   private int phase;
 
@@ -42,15 +45,18 @@ public final class ATransaction implements Transaction, Runnable {
   static private final int GARBAGE = 5;	  // A garbage phase start
   static private final int FINALIZE = 6;  // During last garbage.
 
-  final static int CLEANUP_THRESHOLD_COMMIT = 300;
-  final static int CLEANUP_THRESHOLD_OPERATION = 1500;
-  final static int CLEANUP_THRESHOLD_SIZE = 2000000;
+  final static int Kb = 1024;
+  final static int Mb = Kb * Kb;
 
-  int commitCount = 0; // Number of commited transaction in clog.
-  int operationCount = 0; // Number of operations reported to clog.
-  int cumulativeSize = 0; // Byte amount in clog.
+  final static int CLEANUP_THRESHOLD_COMMIT = 9600;
+  final static int CLEANUP_THRESHOLD_OPERATION = 36000;
+  final static int CLEANUP_THRESHOLD_SIZE = 8 * Mb;
 
-  class Context {
+  private int commitCount = 0; // Number of commited transaction in clog.
+  private int operationCount = 0; // Number of operations reported to clog.
+  private int cumulativeSize = 0; // Byte amount in clog.
+
+  private class Context {
     Hashtable log = null;
     ByteArrayOutputStream bos = null;
     ObjectOutputStream oos = null;
@@ -96,12 +102,8 @@ public final class ATransaction implements Transaction, Runnable {
   static private final String LOG = "log";
   static private final String PLOG = "plog";
   private File lockFile = null;
-  private File logFilePN = null;
-  private File plogFilePN = null;
-  private RandomAccessFile logFile = null; 
-  protected FileDescriptor logFD = null;
-  
-  static protected final String LOG_FILE_MODE = "rw";
+  protected File logFilePN = null;
+  protected File plogFilePN = null;
 
   // State of the garbage.
   private boolean garbage;
@@ -114,7 +116,7 @@ public final class ATransaction implements Transaction, Runnable {
 
   public ATransaction() {}
 
-  public void init(String path) throws IOException {
+  public final void init(String path) throws IOException {
     phase = INIT;
 
     logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
@@ -130,7 +132,7 @@ public final class ATransaction implements Transaction, Runnable {
 
     // Saves the transaction classname in order to prevent use of a
     // different one after restart (see AgentServer.init).
-    DataOutputStream dos = null;
+    DataOutputStream ldos = null;
     try {
       lockFile = new File(dir, LOCK);
       if (! lockFile.createNewFile()) {
@@ -144,12 +146,12 @@ public final class ATransaction implements Transaction, Runnable {
       lockFile.deleteOnExit();
       File tfc = new File(dir, "TFC");
       if (! tfc.exists()) {
-        dos = new DataOutputStream(new FileOutputStream(tfc));
-        dos.writeUTF(getClass().getName());
-        dos.flush();
+        ldos = new DataOutputStream(new FileOutputStream(tfc));
+        ldos.writeUTF(getClass().getName());
+        ldos.flush();
       }
     } finally {
-      if (dos != null) dos.close();
+      if (ldos != null) ldos.close();
     }
 
     logFilePN = new File(dir, LOG);
@@ -172,8 +174,10 @@ public final class ATransaction implements Transaction, Runnable {
     clog = new Hashtable(CLEANUP_THRESHOLD_OPERATION / 2);
     plog = new Hashtable(CLEANUP_THRESHOLD_OPERATION / 2);
     
-    logFile = new RandomAccessFile(logFilePN, LOG_FILE_MODE);
-    logFD = logFile.getFD();
+    baos = new ByteArrayOutputStream(10 * Kb);
+    dos = new DataOutputStream(baos);
+
+    newLogFile();
 
     lock = new Object();
     garbage = false;
@@ -187,7 +191,7 @@ public final class ATransaction implements Transaction, Runnable {
     setPhase(FREE);
   }
 
-  private void restart(Hashtable log, File logFilePN) throws IOException {
+  private final void restart(Hashtable log, File logFilePN) throws IOException {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "ATransaction, restart");
 
@@ -236,16 +240,16 @@ public final class ATransaction implements Transaction, Runnable {
       logmon.log(BasicLevel.INFO, "ATransaction, started");
   }
 
-  public File getDir() {
+  public final File getDir() {
     return dir;
   }
 
-  private void setPhase(int newPhase) {
+  private final void setPhase(int newPhase) {
     phase = newPhase;
   }
 
 
-  public synchronized void begin() throws IOException {
+  public final synchronized void begin() throws IOException {
     while (phase != FREE) {
       try {
 	wait();
@@ -257,15 +261,15 @@ public final class ATransaction implements Transaction, Runnable {
   }
 
   // Be careful: only used in Server 
-  public String[] getList(String prefix) {
+  public final String[] getList(String prefix) {
     return dir.list(new StartWithFilter(prefix));
   }
 
-  public void save(Serializable obj, String name) throws IOException {
+  public final void save(Serializable obj, String name) throws IOException {
     save(obj, null, name);
   }
 
-  public void save(Serializable obj,
+  public final void save(Serializable obj,
                    String dirName, String name) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "ATransaction, save(" + dirName + ", " + name + ")");
@@ -293,7 +297,7 @@ public final class ATransaction implements Transaction, Runnable {
    *  Save an object state already serialized. The byte array keeped in log is
    * a copy, so the original one may be modified.
    */
-  public void saveByteArray(byte[] buf, String name) throws IOException {
+  public final void saveByteArray(byte[] buf, String name) throws IOException {
     saveByteArray(buf, null, name);
   }
 
@@ -301,7 +305,7 @@ public final class ATransaction implements Transaction, Runnable {
    *  Save an object state already serialized. The byte array keeped in log is
    * a copy, so the original one may be modified.
    */
-  public void saveByteArray(byte[] buf,
+  public final void saveByteArray(byte[] buf,
                             String dirName, String name) throws IOException {
     Context ctx = (Context) perThreadContext.get();
     saveInLog(buf,
@@ -309,7 +313,7 @@ public final class ATransaction implements Transaction, Runnable {
               ((Context) perThreadContext.get()).log, true);
   }
 
-  private void saveInLog(byte[] buf,
+  private final void saveInLog(byte[] buf,
                          String dirName, String name,
                          Hashtable log,
                          boolean copy) throws IOException {
@@ -349,7 +353,7 @@ public final class ATransaction implements Transaction, Runnable {
 //     return null;
 //   }
 
-  private byte[] getFromLog(Hashtable log, Object key) throws IOException {
+  private final byte[] getFromLog(Hashtable log, Object key) throws IOException {
     // Searchs in the log a new value for the object.
     Operation op = (Operation) log.get(key);
     if (op != null) {
@@ -363,7 +367,7 @@ public final class ATransaction implements Transaction, Runnable {
     return null;
   }
 
-  private byte[] getFromLog(String dirName, String name) throws IOException {
+  private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
     byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
@@ -376,11 +380,11 @@ public final class ATransaction implements Transaction, Runnable {
     return null;  
   }
 
-  public Object load(String name) throws IOException, ClassNotFoundException {
+  public final Object load(String name) throws IOException, ClassNotFoundException {
     return load(null, name);
   }
 
-  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "ATransaction, load(" + dirName + ", " + name + ")");
 
@@ -413,11 +417,11 @@ public final class ATransaction implements Transaction, Runnable {
     }
   }
 
-  public byte[] loadByteArray(String name) throws IOException {
+  public final byte[] loadByteArray(String name) throws IOException {
     return loadByteArray(null, name);
   }
 
-  public byte[] loadByteArray(String dirName, String name) throws IOException {
+  public final byte[] loadByteArray(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
     try {
       byte[] buf = getFromLog(dirName, name);
@@ -446,11 +450,11 @@ public final class ATransaction implements Transaction, Runnable {
     }
   }
 
-  public void delete(String name) {
+  public final void delete(String name) {
     delete(null, name);
   }
   
-  public void delete(String dirName, String name) {
+  public final void delete(String dirName, String name) {
     Object key = OperationKey.newKey(dirName, name);
 
     Hashtable log = ((Context) perThreadContext.get()).log;
@@ -459,9 +463,12 @@ public final class ATransaction implements Transaction, Runnable {
     if (op != null) op.free();
   }
 
-  private byte[] emptyUTFString = {0, 0};
+  static private final byte[] emptyUTFString = {0, 0};
 
-  public synchronized void commit() throws IOException {
+  static private ByteArrayOutputStream baos = null;
+  static private DataOutputStream dos = null;
+
+  public final synchronized void commit() throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
 
@@ -470,33 +477,40 @@ public final class ATransaction implements Transaction, Runnable {
     
     commitCount += 1; // AF: Monitoring
     Hashtable log = ((Context) perThreadContext.get()).log;
-    Operation op = null;
-    for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-      op = (Operation) e.nextElement();
+    if (! log.isEmpty()) {
+      Operation op = null;
+      for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
+        op = (Operation) e.nextElement();
 
-      operationCount += 1; // AF: Monitoring
-      // Save the log to disk
-      logFile.writeByte(op.type);
-      if (op.dirName != null) {
-        logFile.writeUTF(op.dirName);
-      } else {
-        logFile.write(emptyUTFString);
-      }
-      logFile.writeUTF(op.name);
-      if (op.type == Operation.SAVE) {
-	logFile.writeInt(op.value.length);
-	logFile.write(op.value);
-	cumulativeSize += op.value.length; // AF: Monitoring
-      }
+        operationCount += 1; // AF: Monitoring
+        // Save the log to disk
+        dos.write(op.type);
+        if (op.dirName != null) {
+          dos.writeUTF(op.dirName);
+        } else {
+          dos.write(emptyUTFString);
+        }
+        dos.writeUTF(op.name);
+        if (op.type == Operation.SAVE) {
+          dos.writeInt(op.value.length);
+          dos.write(op.value);
+          cumulativeSize += op.value.length; // AF: Monitoring
+        }
 
-      // Reports all committed operation in clog
-      op = (Operation) clog.put(OperationKey.newKey(op.dirName, op.name), op);
-      if (op != null) op.free();
+        // Reports all committed operation in clog
+        op = (Operation) clog.put(OperationKey.newKey(op.dirName, op.name), op);
+        if (op != null) op.free();
+      }
+      dos.writeByte(Operation.COMMIT);
+      dos.flush();
+      logFile.write(baos.toByteArray());
+//     baos.writeTo(logFile);
+      baos.reset();
+
+      syncLogFile();
+
+      log.clear();
     }
-    logFile.writeByte(Operation.COMMIT);
-    syncLogFile();
-
-    log.clear();
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "ATransaction, committed");
@@ -504,11 +518,19 @@ public final class ATransaction implements Transaction, Runnable {
     setPhase(COMMIT);
   }
 
+  protected RandomAccessFile logFile = null; 
+  protected FileDescriptor logFD = null;
+
+  protected void newLogFile() throws IOException {
+    logFile = new RandomAccessFile(logFilePN, "rw");
+    logFD = logFile.getFD();
+  }
+
   protected void syncLogFile() throws IOException {
     logFD.sync();
   }
 
-  public synchronized void rollback() throws IOException {
+  public final synchronized void rollback() throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not rollback.");
 
@@ -519,7 +541,7 @@ public final class ATransaction implements Transaction, Runnable {
     ((Context) perThreadContext.get()).log.clear();
   }
 
-  public synchronized void release() throws IOException {
+  public final synchronized void release() throws IOException {
     if ((phase != COMMIT) && (phase != ROLLBACK))
       throw new IllegalStateException("Can not release transaction.");
 
@@ -536,7 +558,7 @@ public final class ATransaction implements Transaction, Runnable {
     }
   }
 
-  private synchronized void _release() {
+  private final synchronized void _release() {
     // Change the transaction state.
     setPhase(FREE);
     // wake-up an eventually user's thread in begin
@@ -546,7 +568,7 @@ public final class ATransaction implements Transaction, Runnable {
   /**
    * Reports all logged operations on disk.
    */
-  private void commit(Hashtable log) throws IOException {
+  private final void commit(Hashtable log) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
 		 "ATransaction, Commit(" + log + ")");
@@ -727,8 +749,7 @@ public final class ATransaction implements Transaction, Runnable {
     logFile.close();
 	
     logFilePN.renameTo(plogFilePN);
-    logFile = new RandomAccessFile(logFilePN, LOG_FILE_MODE);
-    logFD = logFile.getFD();
+    newLogFile();
 
     _release();
 	  
@@ -745,7 +766,7 @@ final class Operation implements Serializable {
   static final int SAVE = 1;
   static final int DELETE = 2;
   static final int COMMIT = 3;
-  static final int KEY = 4;
+  static final int END = 127;
  
   int type;
   String dirName;
@@ -813,7 +834,7 @@ final class Operation implements Serializable {
   }
 }
 
-class OperationKey {
+final class OperationKey {
   static Object newKey(String dirName, String name) {
     if (dirName == null) {
       return name;
