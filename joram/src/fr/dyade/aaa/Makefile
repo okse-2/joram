@@ -25,6 +25,6 @@
 PACKAGES = \
 	util agent ip proxy config task ns \
 	model beans services tools \
-	ar nw mom joram
+	ar nw mom joram jndi
 
 include $(GENERAL_MK)

@@ -55,23 +55,13 @@ public class QueueConnectionFactory extends ConnectionFactory implements javax.j
     public QueueConnectionFactory(String stringURL) {
 	super(stringURL);
     }
-
-    
-    /**
-     * Constructs a new QueueConnectionFactory.
-     */
-    public QueueConnectionFactory(URL url) {
-	super(url);
-    }
-
-    
+        
     /**
      * Create a queue connection with default user identity.
      */
     public javax.jms.QueueConnection createQueueConnection() throws JMSException {
 	return new QueueConnection(agentClient, addrProxy, portProxy, login, passwd);
     }
-
 
     /**
      * Create a queue connection with specified user identity.
@@ -92,9 +82,9 @@ public class QueueConnectionFactory extends ConnectionFactory implements javax.j
 		    System.out.println("->QueueConnectionFactory : createNewQueue (Protocol=" + url.getProtocol() +
 				       ", Host=" + url.getHost() +
 				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
+				       ", AgentId=" + url.getAgentId() + ")");
 
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( url.getProtocol().equals("joram") ) {
 		sock = new Socket(addrProxy, portProxy);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);
@@ -141,13 +131,73 @@ public class QueueConnectionFactory extends ConnectionFactory implements javax.j
 	}
     }
 
+    /** Create New specific Queue 
+     * your Class className must extends fr.dyade.aaa.mom.Queue
+     * @see #delete(javax.jms.Queue)
+     */
+    public javax.jms.Queue createNewSpecificQueue (String className) throws javax.jms.JMSException {
+	try {
+	    if (Debug.debug)
+		if (Debug.admin)
+		    System.out.println("->QueueConnectionFactory : createNewSpecificQueue (Protocol=" + url.getProtocol() +
+				       ", Host=" + url.getHost() +
+				       ", Port=" + url.getPort() +
+				       ", AgentId=" + url.getAgentId() + ")");
+
+	    if ( url.getProtocol().equals("joram") ) {
+		sock = new Socket(addrProxy, portProxy);
+		if ( sock != null ) {
+		    sock.setTcpNoDelay(true);
+		    sock.setSoTimeout(0);
+		    sock.setSoLinger(true,1000);
+		
+		    /* send the name of the agentClient */
+		    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+		    dos.writeUTF(agentClient);
+		    dos.flush();
+		    /* creation of the objectinputStream and ObjectOutputStream */
+		    oos = new ObjectOutputStream(sock.getOutputStream());
+		    ois = new ObjectInputStream(sock.getInputStream());
+	    
+		    fr.dyade.aaa.mom.MessageMOMExtern msgMOM = new fr.dyade.aaa.mom.MessageAdminCreateSpecific(1, agentClient,className);
+		    if (oos != null) {
+			oos.writeObject(msgMOM);
+			oos.flush();
+			oos.reset();
+		    }
+		    if (ois != null) {
+			fr.dyade.aaa.mom.MessageAdminCreateSpecific msg = (fr.dyade.aaa.mom.MessageAdminCreateSpecific) ois.readObject();
+			if (Debug.debug)
+			    if (Debug.admin)
+				System.out.println("<-QueueConnectionFactory : createNewSpecificQueue  msg=" + msg.toString());
+			oos.close();
+			ois.close();
+			sock.close();
+			return new fr.dyade.aaa.joram.Queue(url.getProtocol() +
+							    "://" + url.getHost() +
+							    ":" + url.getPort() +
+							    "/" + msg.getID());
+		    } 
+		}
+	    }
+	    oos.close();
+	    ois.close();
+	    sock.close();
+	    return null;
+	} catch (Exception exc) {
+	    javax.jms.JMSException except = new javax.jms.JMSException("Exception=QueueConnectionFactory : createNewSpecificQueue");
+	    except.setLinkedException(exc);
+	    throw(except);
+	}
+    }
+
     /** delete Queue */
     public void delete(javax.jms.Queue queue) throws javax.jms.JMSException {
 	try {
 	    if (Debug.debug)
 		if (Debug.admin)
 		    System.out.println("->QueueConnectionFactory : delete  Queue" + queue.getQueueName());
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( url.getProtocol().equals("joram") ) {
 		sock = new Socket(addrProxy, portProxy);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);

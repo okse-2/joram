@@ -26,8 +26,8 @@ package fr.dyade.aaa.util;
 
 public final class QuickSort {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: QuickSort.java,v 1.2 2000-08-01 09:14:07 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: QuickSort.java,v 1.3 2000-10-05 15:21:08 tachkeni Exp $";
 
   public static void sort(Comparable v[], int low, int up) {
     int i, last;

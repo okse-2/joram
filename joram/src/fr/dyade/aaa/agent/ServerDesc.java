@@ -35,8 +35,8 @@ import fr.dyade.aaa.util.Strings;
  */
 public final class ServerDesc implements Serializable {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.2 2000-08-01 09:13:30 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerDesc.java,v 1.3 2000-10-05 15:15:23 tachkeni Exp $";
 
   /**
    * Server unique identifier.
@@ -51,9 +51,9 @@ public final class ServerDesc implements Serializable {
    */
   public String hostname;
   /**
-   * Host address.
+   * Host address, use getAddr() method instead.
    */
-  public transient InetAddress addr = null;
+  private transient InetAddress addr = null;
   /**
    * Server port.
    */

@@ -39,14 +39,14 @@ import org.w3c.dom.Document;
 import fr.dyade.aaa.util.Strings;
 
 /**
- * The <code>A3Config</code> class allow to parse the A3 configuration
- * file.
+ * The <code>A3Config</code> class allow to handle the A3 Configuration
+ * from the XML file.
  *
- * @author  Andr* Freyssinet
+ * @author  Andre Freyssinet
  * @version 1.0, 01/09/99
  */
 public class A3Config {
-public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 09:13:25 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.3 2000-10-05 15:15:18 tachkeni Exp $";
   final static boolean DEBUG = true;
   static public boolean trace = false;
 
@@ -60,6 +60,9 @@ public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 
 
   final static String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
 
+  /**
+   * Main method. Can be used in order to print a configuration.
+   */
   public static void main(String args[]) throws Exception {
     Parser parser = ParserFactory.makeParser(DEFAULT_PARSER_NAME);
     HandlerBase a3configHdl = new A3CMLHandler();
@@ -73,16 +76,35 @@ public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 
     }
   }
 
+  /**
+   * Tests if the corresponding server is transient.
+   *
+   * @param id	agent server id
+   * @return	true if the server is transient, false otherwise.
+   */
   public final boolean isTransient(short sid) {
     if (sid >= MIN_TRANSIENT_ID)
       return true;
     return false;
   }
 
+  /**
+   * Gets the <code>AgentId</code> of proxy for the corresponding
+   * transient server.
+   *
+   * @param id	agent server id.
+   * @return	the <code>AgentId</code> of proxy.
+   */
   final AgentId transientProxyId(short sid) {
     return transientServers[sid - MIN_TRANSIENT_ID].proxyId;
   }
 
+  /**
+   * Gets the caracteristics of the corresponding server.
+   *
+   * @param id	agent server id.
+   * @return	the server's descriptor.
+   */
   public final ServerDesc getServerDesc(short sid) {
     if (isTransient(sid))
       return transientServers[sid - MIN_TRANSIENT_ID];
@@ -91,15 +113,22 @@ public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 
   }
 
   /**
-    * Get the host name of an agent server.
-    *
-    * @param id		agent server id
-    * @return		server host name as declared in configuration file
-    */
+   * Get the host name of an agent server.
+   *
+   * @param id		agent server id
+   * @return		server host name as declared in configuration file
+   */
   final public String getHostname(short sid) {
     return getServerDesc(sid).hostname;
   }
 
+  /**
+   * Get the argument strings for a particular service.
+   *
+   * @param id		agent server id
+   * @param className	the service class name
+   * @return		the arguments as declared in configuration file
+   */
   public final
   String getServiceArgs(short sid,
 			String className) throws Exception {
@@ -133,6 +162,14 @@ public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 
 			className + "\" not found on family server#" + sid);
   }
 
+  /**
+   * Get the argument strings for a particular service running on a server
+   * identified by its host.
+   *
+   * @param hostname	hostname
+   * @param className	the service class name
+   * @return		the arguments as declared in configuration file
+   */
   public final
   String getServiceArgs(String hostname,
 			String className) throws Exception {
@@ -205,12 +242,16 @@ public static final String RCS_VERSION="@(#)$Id: A3Config.java,v 1.2 2000-08-01 
   }
 }
 
+/**
+ * XML SAX Handler for A3 configuration file.
+ */
 class A3CMLHandler extends HandlerBase {
   static final String ELT_CONFIG = "config";
   static final String ELT_HOST = "host";
   static final String ELT_SERVER = "server";
   static final String ELT_TRANSIENT = "transient";
   static final String ELT_SERVICE = "service";
+  static final String ELT_PROPERTY = "property";
   static final String ATT_HOSTNAME = "hostname";
   static final String ATT_ID = "id";
   static final String ATT_NAME = "name";
@@ -219,6 +260,7 @@ class A3CMLHandler extends HandlerBase {
   static final String ATT_SERVER = "server";
   static final String ATT_CLASS = "class";
   static final String ATT_ARGS = "args";
+  static final String ATT_VALUE = "value";
 
   String hostname = null;
   ServerDesc server = null;
@@ -228,6 +270,9 @@ class A3CMLHandler extends HandlerBase {
   Vector transients = null;
   Vector services = null;
 
+  /**
+   * Receive notification of the beginning of the document. 
+   */
   public void startDocument() throws SAXException {
     if ((A3Config.DEBUG) && (A3Config.trace))
       System.out.println("startDocument");
@@ -316,6 +361,9 @@ class A3CMLHandler extends HandlerBase {
 			   atts.getValue(ATT_ARGS));
   }
 
+  /**
+   * Receive notification of the start of an element.
+   */
   public void startElement(java.lang.String name,
 			   AttributeList atts) throws SAXException {
     if ((A3Config.DEBUG) && (A3Config.trace))
@@ -329,11 +377,21 @@ class A3CMLHandler extends HandlerBase {
       server = newTransient(atts);
     } else if (name.equals(ELT_SERVICE)) {
       service = newService(atts);
+    } else if (name.equals(ELT_PROPERTY)) {
+      if ((server ==  null) ||				// Global property
+	  (server.sid == Server.getServerId())) {	// Server property
+	Server.setProperty(atts.getValue(ATT_NAME),
+			   atts.getValue(ATT_VALUE));
+      }
     } else {
       throw new SAXException("unknow element \"" + name + "\"");
     }
   }
 
+
+  /**
+   * Receive notification of the end of an element.
+   */
   public void endElement(java.lang.String name) throws SAXException {
     if ((A3Config.DEBUG) && (A3Config.trace))
       System.out.println("endElement:" + name);
@@ -356,11 +414,15 @@ class A3CMLHandler extends HandlerBase {
       server = null;
     }  else if (name.equals(ELT_SERVICE)) {
       services.addElement(service);
+    } else if (name.equals(ELT_PROPERTY)) {
     } else {
       throw new SAXException("unknow element \"" + name + "\"");
     }
   }
 
+  /**
+   * Receive notification of the end of the document.
+   */
   public void endDocument() throws SAXException {
     if ((A3Config.DEBUG) && (A3Config.trace))
       System.out.println("endDocument");

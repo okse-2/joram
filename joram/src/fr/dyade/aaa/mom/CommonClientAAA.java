@@ -542,6 +542,8 @@ public class CommonClientAAA implements java.io.Serializable {
 		notificationXARollback((MessageXARollback) not.msgMOMExtern);
 	    } else if (not.msgMOMExtern instanceof MessageXARecover) {
 		notificationXARecover((MessageXARecover) not.msgMOMExtern);
+	    } else if (not.msgMOMExtern instanceof MessageAdminCreateSpecific) {
+		adminCreatespecific((MessageAdminCreateSpecific) not.msgMOMExtern);
 	    } else {
 		/* would never past but costs nothing to treat */
 		deliverAlienException(new MOMException("Subclass of NotificationInputMessage Unknown",MOMException.DEFAULT_MOM_ERROR));
@@ -558,7 +560,7 @@ public class CommonClientAAA implements java.io.Serializable {
 	    /* canceling previous actions due to an ack of tha Topic which didn't exist */
 	    if(exc instanceof MOMException) {
 		MOMException excMOM = (MOMException) exc;
-				/* spreading of the exception */
+		/* spreading of the exception */
 		if(excMOM.getErrorCode()==MOMException.TOPIC_MESSAGEID_NO_EXIST)
 		    throw(excMOM);
 	    }
@@ -656,6 +658,32 @@ public class CommonClientAAA implements java.io.Serializable {
 	    if (Debug.admin)
 		System.out.println("->CommonClientAAA : adminDeleteQueue " + msg.toString());
 	agentClient.sendNotification(AgentId.fromString(msg.getQueueName()),new NotificationAdminDeleteDestination());
+    }
+
+    /** Creation of specific Agent with the admin tools */
+    protected void adminCreatespecific(MessageAdminCreateSpecific msg) throws Exception {
+	if (Debug.debug)
+	    if (Debug.admin)
+		System.out.println("->CommonClientAAA : adminCreatespecific " + msg.toString());
+
+	/* creation of the specific object */
+	Object agent = null;
+	try {
+	    Class c = Class.forName(msg.getClassName());
+	    agent = c.newInstance();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    throw(e);
+	}
+	AgentId id = ((Agent) agent).getId();
+
+	((Agent) agent).deploy();
+	/* send id to creator (admin) */
+	msg.setID(id.toString());
+	if (Debug.debug)
+	    if (Debug.admin)
+		System.out.println("->CommonClientAAA : adminCreatespecific "+ id.toString() + " deployed");
+	agentClient.sendMessageMOMExtern(msg);
     }
 
     /** notification for sending  messages to a Queue/Topic */

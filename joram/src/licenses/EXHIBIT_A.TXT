@@ -10,8 +10,8 @@ WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 the specific terms governing rights and limitations under the License. 
 
 The Original Code is Joram, including the java packages fr.dyade.aaa.agent,
-fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, and fr.dyade.aaa.joram,
-released May 24, 2000. 
+fr.dyade.aaa.util, fr.dyade.aaa.ip, fr.dyade.aaa.mom, fr.dyade.aaa.ns,
+fr.dyade.aaa.jndi and fr.dyade.aaa.joram, released September 11, 2000.
 
 The Initial Developer of the Original Code is Dyade. The Original Code and
 portions created by Dyade are Copyright Bull and Copyright INRIA.

@@ -30,7 +30,7 @@ import fr.dyade.aaa.util.*;
 /**
  * An element of the matrix clock.
  * @version	1.1, 11/19/97
- * @author	Andr* Freyssinet
+ * @author	Andre Freyssinet
  */
 class MatClockElt {
   /**
@@ -50,37 +50,40 @@ class MatClockElt {
 /**
  * Matrix clock realization. 
  * @version	1.1, 02/04/98
- * @author	Andr* Freyssinet
+ * @author	Andre Freyssinet
  */
 class MatrixClock implements Serializable {
 
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.2 2000-08-01 09:13:28 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
 
   private transient int size;
   private transient int status[];
+
   private transient MatClockElt matClock[][];
 
   public String toString() {
-    String strBuf;
+    StringBuffer strBuf = new StringBuffer();
 
-    strBuf = "MatrixClock#" + Server.serverId + " = [";
-    for (int i=0; i<size; i++)
-      strBuf += "(" + status[i] + ")";
-    strBuf += "] + [";
+    strBuf.append("(");
     for (int i=0; i<size; i++) {
-      for (int j=0; j<size; j++) {
-	strBuf += "(" + matClock[i][j].stamp + ", " +
-	  matClock[i][j].node + ", " +
-	  matClock[i][j].status + ")";
-      }
+      strBuf.append(status[i]).append(" ");
     }
-    strBuf += "]";
+    strBuf.append(")\n\n");
+    for (int i=0; i<size; i++) {
+      strBuf.append("(");
+      for (int j=0; j<size; j++) {
+	strBuf.append("(").append(matClock[i][j].stamp).append(", ");
+	strBuf.append(matClock[i][j].node).append(", ");
+	strBuf.append(matClock[i][j].status).append(")");
+      }
+      strBuf.append(")\n");
+    }
 
-    return strBuf;
+    return strBuf.toString();
   }
 
   private void writeObject(java.io.ObjectOutputStream out)
@@ -125,7 +128,7 @@ class MatrixClock implements Serializable {
   }
   
   /**
-   *  Saves the object state on persistent storage.
+   * Saves the object state on persistent storage.
    */
   void save() throws IOException {
     Server.transaction.save(this, "MatrixClock");
@@ -133,6 +136,8 @@ class MatrixClock implements Serializable {
 
   /**
    * Restores the object state from the persistent storage.
+   *
+   * @return	The restored matrix clock.
    */
   static MatrixClock
   load() throws IOException, ClassNotFoundException {
@@ -168,18 +173,33 @@ class MatrixClock implements Serializable {
     matClock = newMatClock;
   }
 
+  /** The message can be delivered. */
   static final int DELIVER = 0;
+  /** There is other message in the causal ordering before this.*/
   static final int WAIT_TO_DELIVER = 1;
+  /** The message has already been delivered. */
   static final int ALREADY_DELIVERED = 2;
 
   /**
-   * Test if a received message with the specified clock must be delivered.
-   * If result is true the matrix clock is updated.
-   * @param from     	The identification of sender server.
+   *  Test if a received message with the specified clock must be
+   * delivered. If the message is ready to be delivered, the method returns
+   * <code>DELIVER</code> and the matrix clock is updated. If the message has
+   * already been delivered, the method returns <code>ALREADY_DELIVERED</code>,
+   * and if other messages are waited before this message the method returns
+   * <code>WAIT_TO_DELIVER</code>. In the last two case the matrix clock
+   * remains unchanged.
+   *
    * @param update	The message matrix clock (list of update).
+   * @return		<code>DELIVER</code>, <code>ALREADY_DELIVERED</code>,
+   * 			or <code>WAIT_TO_DELIVER</code> code.
    */
-  synchronized int testRecvUpdate(short from, Update update) {
-    Update ptr = update;
+  synchronized int testRecvUpdate(Update update) {
+    // History: Field from is no longer need, we can use the first
+    // element of the update to know the source server.
+    short from = update.l;
+
+// AF: I think that now (use of 1st element of update), "from" is always
+// the server id. of incoming message.
 
     // Get real from serverId.
     if (Server.isTransient(from))
@@ -188,24 +208,27 @@ class MatrixClock implements Serializable {
     if (Debug.dumpMatrixClock)
       Debug.trace("testRecvUpdate(" + from + ", " + update + ") <" + this + '>', false);
 
+// AF: Actually this code is useless.
+
     // Update the matrix size if necessary.
+    Update ptr = update;
     do {
       if (ptr.l >= size) grow(ptr.l);
       if (ptr.c >= size) grow(ptr.c);
       ptr = ptr.next;
     } while (ptr != null);
 
-    // Le premier element de l'Update est toujours HM[from, to]
+    // The 1st element of update is always: HM[from, to]
     ptr = update;
     if ((matClock[from][Server.serverId].stamp +1) < ptr.stamp) {
-      // Il y a d'autres messages en provenance du meme site en attente.
+      // There is other messages from the same node to deliver before this one.
       if (Debug.dumpMatrixClock)
 	Debug.trace("testRecvUpdate return WAIT_TO_DELIVER", false);
 
       return WAIT_TO_DELIVER;
     } else if ((matClock[from][Server.serverId].stamp +1) == ptr.stamp) {
-      //  Tous les messages a destination du site connus par le message
-      // sont ils arrives?
+      // Verify that all messages to be delivered to this node and known by
+      // by this one are already be delivered.
       ptr = ptr.next;
       while (ptr != null) {
 	if ((ptr.c == Server.serverId) && (ptr.stamp > matClock[ptr.l][ptr.c].stamp))
@@ -213,9 +236,9 @@ class MatrixClock implements Serializable {
 	ptr = ptr.next;
       }
     } else {
-      // We have already receive this message, we should send a
-      // new acknowledge. Don't put this message in waiting list it's
-      // a bug!
+      // We have already receive this message, we should send a new
+      // acknowledge. Be careful: don't put this message in waiting list
+      // it's a bug!
       if (Debug.dumpMatrixClock)
 	Debug.trace("testRecvUpdate return ALREADY_DELIVERED", false);
 
@@ -223,13 +246,13 @@ class MatrixClock implements Serializable {
     }
 
     if (ptr != null) {
-      // mettre le message en attente.
+      // The message can not be delivered.
       if (Debug.dumpMatrixClock)
 	Debug.trace("testRecvUpdate return WAIT_TO_DELIVER", false);
 
       return WAIT_TO_DELIVER;
     } else {
-      // On delivre le message, donc on met l'horloge matricielle a jour.
+      // The message is ready to be delivered, so updates the matrix clock.
       ptr = update;
       do {
 	if (matClock[ptr.l][ptr.c].stamp < ptr.stamp) {
@@ -250,10 +273,14 @@ class MatrixClock implements Serializable {
   /**
    * Computes the matrix clock of a send message. The server's
    * matrix clock is updated.
+   *
    * @param to	The identification of receiver.	
-   * @return		The message matrix clock (list of update).
+   * @return	The message matrix clock (list of update).
    */
   synchronized Update getSendUpdate(short to) {
+// AF: Actually this code is useless.
+
+    // Update the matrix size if necessary.
     if (to >= size) grow(to);
 
     if (Debug.dumpMatrixClock)
@@ -284,21 +311,56 @@ class MatrixClock implements Serializable {
     return update;
   }
 
+  /**
+   * Returns the number of messages sent by local node to this one.<p>
+   * <hr>
+   * Used for a temporary Netwall fixes in order to detect a partial
+   * configuration reinstallation.
+   *
+   * @param to	The id. of remote server.
+   * @return	The number of messages.
+   */ 
   synchronized Update getNetU1(short to) {
     if (to >= size) grow(to);
     return new Update(Server.serverId, to,
 		      matClock[Server.serverId][to].stamp);
   }
 
+  /**
+   * Returns the number of messages received by local node from this one.<p>
+   * <hr>
+   * Used for a temporary Netwall fixes in order to detect a partial
+   * configuration reinstallation.
+   *
+   * @param to	The id. of remote server.
+   * @return	The number of messages.
+   */ 
  synchronized Update getNetU2(short to) {
     if (to >= size) grow(to);
     return new Update(to, Server.serverId,
 		      matClock[to][Server.serverId].stamp);
   }
 
-  synchronized boolean testNU(Update u1, Update u2) {
+  /**
+   * Verify the coherency of local matrix clock with the one of remote
+   * server. If one of the servers has been restarted after a complete
+   * installation, the other one must have a bigger history: the number
+   * of messages known as "received" by a node is bigger than the number
+   * of messages known as "sent" by the other.<p>
+   * In such a case we must refudes the connection.<p>
+   * <hr>
+   * Used for a temporary Netwall fixes in order to detect a partial
+   * configuration reinstallation.
+   *
+   * @param u1	MC_From[from, local].stamp.
+   * @param u2	MC_From[local, from].stamp.
+   * @return	true if the matrix clocks of two nodes are coherent.
+   */ 
+ synchronized boolean testNU(Update u1, Update u2) {
+// AF: Actually this code is useless.
     if (u1.l >= size) grow(u1.l);
     if (u2.c >= size) grow(u2.c);
+
     return ((u1.stamp < matClock[u1.l][Server.serverId].stamp) ||
 	    (u2.stamp > matClock[Server.serverId][u2.c].stamp));
   }

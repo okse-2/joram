@@ -38,25 +38,11 @@ import java.util.*;
  */ 
  
 public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jms.QueueSession { 
-    /** synchronised thread (send AckMessage before stop thread) 
-     *  only use in AUTO_ACKNOWLEDGE */
-    private volatile Object objThreadDeliver;
-    /** stop thread */
-    private boolean stopThreadDeliver;
   
     public QueueSession(boolean transacted, int acknowledgeMode, long sessionIDNew, Connection refConnectionNew) {
 	super(transacted, acknowledgeMode, sessionIDNew, refConnectionNew);
-    
-	/* creation of the Thread to acknowledge message automatically
-	 *	in synchonous reception (Queue)
-	 */
-	if(acknowledgeMode==fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-	    threadDeliver = new java.lang.Thread(this);
-	    threadDeliver.setDaemon(true);
-	    threadDeliver.start();
-	}
     }
-  
+    
     /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
     public  javax.jms.Queue createQueue(java.lang.String queueName) throws javax.jms.JMSException {
 	throw (new fr.dyade.aaa.joram.JMSAAAException("Not yet available",JMSAAAException.NOT_YET_AVAILABLE));
@@ -79,7 +65,6 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
 	    Object obj = new Object();
 	    long messageJMSMOMID = refConnection.getMessageMOMID();
 	    Long longMsgID = new Long(messageJMSMOMID);
-      
 	    fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern msgCreation = new fr.dyade.aaa.mom.CreationWorkerQueueMOMExtern(messageJMSMOMID, (fr.dyade.aaa.mom.QueueNaming) queue);
 	    /*	synchronization because it could arrive that the notify was
 	     *	called before the wait 
@@ -284,71 +269,15 @@ public class QueueSession extends fr.dyade.aaa.joram.Session implements javax.jm
   
     /**overwrite the methode from MessageConsumer  */
     public void close()  throws javax.jms.JMSException {
-	if(this.acknowledgeMode==fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-	    /* destroy the objects in the messageConsumerTable */
-	    messageConsumerTable.clear();
-	    if(threadDeliver!=null) {
-		try {
-		    synchronized(objThreadDeliver) {
-			if(!autoMessageToAckVector.isEmpty())
-			    objThreadDeliver.wait();
-		    }
-		} catch (Exception e) {
-		    System.out.println("QueueSession : close()");
-		    e.printStackTrace();
-		}
-		stopThreadDeliver = true;
-	    }
-	    super.close();
-	}
+	  messageConsumerTable.clear();
+      super.close() ;
     }
-	
-    /** used for synchronous receptions */
-    public void run() {
-	boolean isReadyToDeliver = true;
-	if(this.acknowledgeMode==fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-	    objThreadDeliver = new Object();
-	    stopThreadDeliver = false;
-	    while(true) {
-		try {
-		    if (refConnection.socket == null) {
-			break;
-		    }
-	  
-		    if (stopThreadDeliver) {
-			break;
-		    }
 
-		    if(!autoMessageToAckVector.isEmpty()) {
-			/* extract the first element */
-			fr.dyade.aaa.mom.AckQueueMessageMOMExtern msgAck = (fr.dyade.aaa.mom.AckQueueMessageMOMExtern) autoMessageToAckVector.firstElement();
-			this.sendToConnection(msgAck);    
-			try {
-			    /* wake up the Thread */
-			    synchronized(objThreadDeliver) {
-				/* discard the first element */
-				autoMessageToAckVector.removeElementAt(0);
-				/* ready to ask a new message */
-				isReadyToDeliver = true;
-				objThreadDeliver.notify();
-			    }
-			} catch (Exception e) {
-			    System.out.println("QueueSession : run()");
-			    e.printStackTrace();
-			}
-		    }
-	  
-		    if(isReadyToDeliver && !explicitRequestVector.isEmpty()) {
-			this.sendToConnection((fr.dyade.aaa.mom.MessageMOMExtern)(explicitRequestVector.firstElement()));
-			explicitRequestVector.removeElementAt(0);
-			isReadyToDeliver = false;
-		    }
-	  
-		} catch (javax.jms.JMSException exc) {}	
-	    }
-	}
-    }
-  
+
+    /** QueueSession as a thread is never started */
+    public void run() {}
+
+	
     /** prepares the messages to acknowledge so as to decrease the overhead 
      */
     protected Vector preparesHandlyAck(String messageID, long messageJMSMOMID) throws javax.jms.JMSException{

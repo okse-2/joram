@@ -28,5 +28,5 @@ package fr.dyade.aaa.agent;
  * This interface must be implemented by all the monitoring reports.
  */
 public interface MonitoringReport extends java.io.Serializable {
-public static final String RCS_VERSION="@(#)$Id: MonitoringReport.java,v 1.2 2000-08-01 09:13:28 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: MonitoringReport.java,v 1.3 2000-10-05 15:15:21 tachkeni Exp $";
 }

@@ -51,19 +51,19 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 	this.messageListener = null;
     }
 	
-    /** @see <a href="http://java.sun.com/products/jms/index.html"> JMS_Specifications */
+    /** @see <a href="http://java.sun.com/products/jms/index.html"></a>JMS_Specifications */
     public javax.jms.Queue getQueue() throws javax.jms.JMSException {
 	if(queue==null)
 	    throw (new fr.dyade.aaa.joram.JMSAAAException("Queue name Unknown",JMSAAAException.DEFAULT_JMSAAA_ERROR));
 	else
 	    return queue;
     }
-	
+    
     /** overwrite the methode from MessageConsumer */
     public javax.jms.Message receive()  throws javax.jms.JMSException {
 	return this.receive((long) -1);
     }
-	
+    
     /** overwrite the methode from MessageConsumer */
     public javax.jms.Message receive(long timeOut)  throws javax.jms.JMSException {
 	try {
@@ -73,48 +73,42 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 			
 	    /* construction of the MessageJMSMOM */
 	    fr.dyade.aaa.mom.ReceptionMessageMOMExtern msgRec = new fr.dyade.aaa.mom.ReceptionMessageMOMExtern(messageJMSMOMID, queue, selector, timeOut, refSession.acknowledgeMode, new Long(refSession.sessionID).toString());
-			
+	    
 	    /*	synchronization because it could arrive that the notify was
 	     *	called before the wait 
 	     */
 	    synchronized(obj) {
-		/* the processus of the client waits the response */
+    	  /* the processus of the client waits the response */
 		refConnection.waitThreadTable.put(longMsgID,obj);
-		if(refSession.transacted || refSession.acknowledgeMode!=fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
-		    /* send the request to the agentClient */
-		    refSession.sendToConnection(msgRec);
-		} else {
-		    /* add the request to the explicitRequestVector in autoAckMode */
-		    refSession.explicitRequestVector.addElement(msgRec);
-		}
-				
+		refSession.sendToConnection(msgRec);
+		
 		if(Debug.debug)
 		    if(Debug.connectReceive)
 			System.out.println("after the sendConnection, before sleep");
 		
 		obj.wait();
 	    }
-			
+	    
 	    /* the clients wakes up */
 	    fr.dyade.aaa.mom.MessageMOMExtern msgMOM;
-		
+	    
 	    /* tests if the key exists 
 	     * dissociates the message null (on receiveNoWait) and internal error
 	     */
 	    if(!refConnection.messageJMSMOMTable.containsKey(longMsgID))
 		throw (new fr.dyade.aaa.joram.JMSAAAException("No back Message received ",JMSAAAException.ERROR_NO_MESSAGE_AVAILABLE));
-	
+	    
 	    /* get the the message back or the exception*/
 	    msgMOM = (fr.dyade.aaa.mom.MessageMOMExtern) refConnection.messageJMSMOMTable.remove(longMsgID);
 	    if(msgMOM instanceof fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) {
-				/* return the message */
+		/* return the message */
 		fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern msgDeliver = (fr.dyade.aaa.mom.MessageQueueDeliverMOMExtern) msgMOM;
-				
+		
 		if(!refSession.transacted) {
 		    if(refSession.acknowledgeMode==fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE) {
 			/* prepares the acknowledge in case of autoacknowledge */
 			fr.dyade.aaa.mom.AckQueueMessageMOMExtern msgAck =  new fr.dyade.aaa.mom.AckQueueMessageMOMExtern(refConnection.getMessageMOMID(), queue, msgDeliver.message.getJMSMessageID(), fr.dyade.aaa.mom.CommonClientAAA.AUTO_ACKNOWLEDGE, new Long(refSession.sessionID).toString());
-			refSession.autoMessageToAckVector.addElement(msgAck);
+			refSession.sendToConnection(msgAck);
 		    } else {
 			refSession.lastNotAckVector.addElement(msgDeliver);
 			/* add the reference to the session to acknowledge handly */
@@ -125,12 +119,12 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 			refSession.transactedMessageToAckVector.addElement(msgDeliver);
 		    }
 		}
-				
-				/*	reset the message to put the mode in readOnly and to
-				 *	prepare the transient attributes dor the reading
-				 */
+		
+		/* reset the message to put the mode in readOnly and to
+		 * prepare the transient attributes dor the reading
+		 */
 		refSession.resetMessage(msgDeliver.message);
-								
+		
 		return msgDeliver.message;
 	    } else if(msgMOM instanceof fr.dyade.aaa.mom.ExceptionMessageMOMExtern) {
 				/* exception sent back to the client */
@@ -139,8 +133,8 @@ public class QueueReceiver extends fr.dyade.aaa.joram.MessageConsumer implements
 		except.setLinkedException(msgExc.exception);
 		throw(except);
 	    } else {
-				/* unknown message */
-				/* should never arrived */
+		/* unknown message */
+		/* should never arrived */
 		fr.dyade.aaa.joram.JMSAAAException except = new fr.dyade.aaa.joram.JMSAAAException("MOM Internal Error : ",JMSAAAException.MOM_INTERNAL_ERROR);
 		throw(except);
 	    }

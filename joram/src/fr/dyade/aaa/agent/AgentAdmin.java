@@ -28,8 +28,8 @@ package fr.dyade.aaa.agent;
  * <code>Agent</code> used for remote administration of each A3 server.
  */
 public final class AgentAdmin extends Agent {
-  /** RCS version number of this file: $Revision: 1.2 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.2 2000-08-01 09:13:25 tachkeni Exp $";
+  /** RCS version number of this file: $Revision: 1.3 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.3 2000-10-05 15:15:19 tachkeni Exp $";
 
   /**
    * the Proxy needed for Administred Server

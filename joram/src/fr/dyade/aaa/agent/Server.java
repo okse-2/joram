@@ -39,7 +39,7 @@ import fr.dyade.aaa.util.*;
  */
 public class Server {
 
-public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09:13:30 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.3 2000-10-05 15:15:23 tachkeni Exp $"; 
 
   static short serverId;
   public final static short NULL_ID = -1;
@@ -71,6 +71,52 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
   static ServiceDesc[] services = null;
 
   static A3Config a3config = null;
+
+  /** server properties, publicly accessible (see get/set operation) */
+  static Properties properties = null;
+
+  /** Set the property pair (key, value). */
+  public static Object setProperty(String key,
+				   String value) {
+    // AF: since jdk1.2 we can use Properties.setProperty.
+    return properties.put(key, value);
+  }
+  
+  /**
+   * Searches for the property with the specified key in the server property
+   * list.
+   *
+   * @param key	   the hashtable key.
+   * @param value  a default value.
+   * @return	   the value with the specified key value.
+   */
+  public static String getProperty(String key) {
+    return properties.getProperty(key);
+  }
+
+  public static String getProperty(String key,
+			    String value) {
+    return properties.getProperty(key, value);
+  }
+
+  /**
+   * Determines the integer value of the server property with the
+   * specified name.
+   *
+   * @param key property name.
+   * @return 	the Integer value of the property.
+   *
+   * @see java.lang.Integer.getInteger
+   */
+  public static Integer getInteger(String key) {
+    try {
+      return Integer.decode(properties.getProperty(key));
+    } catch (Exception exc) {
+      return null;
+    }
+  }
+
+     
 
   /**
    * Compile server with or without Administration features.
@@ -358,6 +404,7 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
     serverId = sid;
 
     Debug.init(serverId);
+    properties = new Properties(System.getProperties());
 
     // Get configuration and verify server id. validity
     // AF: For backward compability, try to read ".cfg" if needed.
@@ -379,7 +426,7 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
     if (isTransient(serverId)) {
       transaction = new SimpleTransaction(path);
     } else {
-      String tname = System.getProperty("Transaction", "JTransaction");
+      String tname = getProperty("Transaction", "JTransaction");
       if (tname.equals("NullTransaction"))
 	transaction = new NullTransaction(path);
       else if (tname.equals("FSTransaction"))
@@ -404,11 +451,11 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
       qout = new MessageQueue();
     }
 
-    try {
-      network = new Network(mclock);
-    } catch (Exception exc) {
-      exc.printStackTrace(System.err);
-      network = null;
+    String nname = getProperty("Network", "SingleCnxNetwork");
+    if (nname.equals("PoolCnxNetwork")) {
+      network = new PoolCnxNetwork(mclock);
+    } else {
+      network = new SingleCnxNetwork(mclock);
     }
 
     // then restores all messages.
@@ -422,12 +469,7 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
 	  // It's an already delivered message.
 	  qin.insert(msg);
 	} else {
-	  if (network != null) {
-	    // It's a waiting message.
-	    network.recvList.addElement(msg);
-	  } else {
-	    // TODO: We are in the 4th dimension...
-	  }
+	  network.addRecvMessage(msg);
 	}
       } else {
 	// The destination server is "remote".
@@ -447,7 +489,7 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
 
     isRunning = true;
 
-    if (network != null) network.start(qin, qout);
+    network.start(qin, qout);
 
     ProcessManager.init();
 
@@ -515,7 +557,6 @@ public static final String RCS_VERSION="@(#)$Id: Server.java,v 1.2 2000-08-01 09
   public static void stop() {
     isRunning = false;
     engine.stop();
-    if (network != null)
-      network.stop();
+    network.stop();
   }
 }

@@ -49,46 +49,24 @@ public class Queue extends fr.dyade.aaa.mom.QueueNaming implements javax.naming.
     /** port */
     int port;
     /** Joram URL */
-    URL url;
-    
+    CURL url;
+    // The static table of all Queue (jndi)
+    private static Hashtable qList = new Hashtable();
+
     /** contructor : Queue("joram://host:port/#x.y.z"); */
     public Queue(String stringURL) {
 	super(null);
 	try {
-	    url = new URL(stringURL);
+	    url = new CURL(stringURL);
 	    if (Debug.debug)
 		if (Debug.queue)
 		    System.out.println("Queue (Protocol=" + url.getProtocol() +
 				       ", Host=" + url.getHost() +
 				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
+				       ", AgentId=" + url.getAgentId() + ")");
 	    
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-		agentQueue ="#" + url.getRef();
-		host = url.getHost();
-		port = url.getPort();
-		dest = agentQueue;
-	    }
-	} catch (Exception e) {
-	    System.out.println("Queue Exception");
-	    e.printStackTrace();
-	}
-    }
-
-    /* constructor of the Queue with Joram URL*/
-    public Queue(java.net.URL url) {
-	super(null);
-	try {
-	    if (Debug.debug)
-		if (Debug.queue)
-		    System.out.println("Queue (Protocol=" + url.getProtocol() +
-				       ", Host=" + url.getHost() +
-				       ", Port=" + url.getPort() +
-				       ", AgentId=#" + url.getRef() + ")");
-	    
-	    if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-		this.url = url;
-		agentQueue ="#" + url.getRef();
+	    if ( url.getProtocol().equals("joram") ) {
+		agentQueue = url.getAgentId();
 		host = url.getHost();
 		port = url.getPort();
 		dest = agentQueue;
@@ -111,6 +89,14 @@ public class Queue extends fr.dyade.aaa.mom.QueueNaming implements javax.naming.
 					  null);
 	ref.add(new javax.naming.StringRefAddr("queue.joramURL", url.toString()));
 	return ref;
+    }
+
+    // use for jndi
+    public void setQueueList(String s) {
+	qList.put(s,this);
+    }
+    public static Queue getQueue(String s) {
+	return (Queue) qList.get(s);
     }
 
     public String toString() {

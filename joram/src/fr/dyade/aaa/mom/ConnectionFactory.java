@@ -43,12 +43,11 @@ import fr.dyade.aaa.agent.*;
 public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
   /** Well known port for this agent to listen to */
   static final int WKNPort = 16010;
-  
+
   /* Constructor for the ConnectionFactory */
   public ConnectionFactory(int port) {
     super(port);
     super.newClient = false;
-    java.net.URL.setURLStreamHandlerFactory(new fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory());
   }
 
     /* Constructor for the agentClient */
@@ -65,8 +64,8 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy {
    * @param firstTime	<code>true</code> when agent server starts anew
    */
   public static void init(String args, boolean firstTime) throws Exception {
-    if (! firstTime)
-      return;
+      if (! firstTime)
+        return;
 
     // gets the optional port number
     int listenPort = WKNPort;

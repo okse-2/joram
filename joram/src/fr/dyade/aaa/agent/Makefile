@@ -73,11 +73,13 @@ a3agent.jar_CLASSES = \
 	ProxyAgent \
 	ProxyAgent@DriverConnect \
 	AgentDriver \
+	Boot\
 	Network \
-	Network@Boot \
-	Network@WatchDog \
-	Network@NetServerIn \
-	Network@NetServerOut \
+	StreamNetwork \
+	SingleCnxNetwork \
+	SingleCnxNetwork@NetServerIn \
+	SingleCnxNetwork@NetServerOut \
+	SingleCnxNetwork@WatchDog \
 	Server \
 	AgentServer \
 	ProcessEnd \
@@ -118,6 +120,12 @@ a3agent.jar_CLASSES = \
 	StatusReport \
 	Role \
 	GetStatusNot \
+	PoolCnxNetwork \
+	PoolCnxNetwork@StatusMessage \
+	PoolCnxNetwork@NetSession \
+	PoolCnxNetwork@WakeOnConnection \
+	PoolCnxNetwork@NetServerOut2 \
+	PoolCnxNetwork@WatchDog2 \
 	StatusNot \
 	HttpDriver
 

@@ -62,7 +62,8 @@ public class XATopicConnection extends XAConnection implements javax.jms.XATopic
      */
     public javax.jms.TopicSession createTopicSession(boolean transacted,
 						     int acknowledgeMode) throws JMSException {
-	throw new JMSException("Not implemented");
+      long sessionID = getNextSessionID();
+	  return new TopicSession(false, Session.AUTO_ACKNOWLEDGE, sessionID, this);
     }
 
     /**

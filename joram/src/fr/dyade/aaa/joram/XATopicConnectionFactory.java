@@ -51,14 +51,6 @@ public class XATopicConnectionFactory extends XAConnectionFactory implements jav
     }
 
     /**
-     * Creates a new XATopicConnectionFactory
-     * @param proxyAgentURL the URL of the JMS proxy agent
-     */
-    public XATopicConnectionFactory(URL proxyAgentURL) {
-	super(proxyAgentURL);
-    }
-
-    /**
      * Constructs a new XATopicConnectionFactory.
      */
     public XATopicConnectionFactory(String agentClient, InetAddress addrProxy, int portProxy) {
@@ -113,9 +105,9 @@ public class XATopicConnectionFactory extends XAConnectionFactory implements jav
 		    System.out.println("->XATopicConnectionFactory : createNewTopic (Protocol=" + proxyAgentURL.getProtocol() +
 				       ", Host=" + proxyAgentURL.getHost() +
 				       ", Port=" + proxyAgentURL.getPort() +
-				       ", AgentId=#" + proxyAgentURL.getRef() + ")");
+				       ", AgentId=" + proxyAgentURL.getAgentId() + ")");
 	    
-	    if ( proxyAgentURL.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
 		sock = new Socket(proxyAddress, proxyPort);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);
@@ -168,7 +160,7 @@ public class XATopicConnectionFactory extends XAConnectionFactory implements jav
 	    if (Debug.debug)
 		if (Debug.admin)
 		    System.out.println("->XATopicConnectionFactory : delete  Topic" + topic.getTopicName());
-	    if ( proxyAgentURL.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
+	    if ( proxyAgentURL.getProtocol().equals("joram") ) {
 		sock = new Socket(proxyAddress, proxyPort);
 		if ( sock != null ) {
 		    sock.setTcpNoDelay(true);

@@ -50,7 +50,7 @@ import java.net.*;
  */
 public class TransientManager extends Agent {
 
-public static final String RCS_VERSION="@(#)$Id: TransientManager.java,v 1.2 2000-08-01 09:13:31 tachkeni Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: TransientManager.java,v 1.3 2000-10-05 15:15:24 tachkeni Exp $"; 
 
 
   static final int CONNECTOR_ID = -1;

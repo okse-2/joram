@@ -38,7 +38,7 @@ import fr.dyade.aaa.agent.*;
  * @see		UdpInput
  */
 public class UdpPacket extends Notification {
-public static final String RCS_VERSION="@(#)$Id: UdpPacket.java,v 1.2 2000-08-01 09:13:51 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: UdpPacket.java,v 1.3 2000-10-05 15:15:38 tachkeni Exp $";
 
   /** source or target address of packet */
   public InetAddress address;

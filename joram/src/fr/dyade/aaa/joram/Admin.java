@@ -61,7 +61,7 @@ public class Admin {
   private int port;
 
   /** Joram URL */
-  private URL url;
+  private CURL url;
 	
   /** the security reference */	 
   private String login = "anonymous"; 
@@ -79,29 +79,22 @@ public class Admin {
    */
   public Admin (String stringURL) throws JMSException {
     try {
-      try {
-	url = new URL(stringURL);
-      } catch (Exception e) {
-	if (e instanceof MalformedURLException) {
-	  URL.setURLStreamHandlerFactory(new fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory());
-	  url = new URL(stringURL);
+ 	url = new CURL(stringURL);
+	if (Debug.debug)
+	    if (Debug.admin)
+		System.out.println("->Admin : (Protocol=" + url.getProtocol() +
+				   ", Host=" + url.getHost() +
+				   ", Port=" + url.getPort() + ")");
+	
+	if ( url.getProtocol().equals("joram") ) {
+	    this.addr = java.net.InetAddress.getByName(url.getHost());
+	    this.port = url.getPort();
 	}
-      }
-      if (Debug.debug)
-	if (Debug.admin)
-	  System.out.println("->Admin : (Protocol=" + url.getProtocol() +
-			     ", Host=" + url.getHost() +
-			     ", Port=" + url.getPort() + ")");
-      
-      if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-	this.addr = java.net.InetAddress.getByName(url.getHost());
-	this.port = url.getPort();
-      }
     } catch (Exception exc) {
-      System.out.println("Admin error");
+	System.out.println("Admin error");
     }
   }
-  
+    
   /** constructor with default args 
    * host=localhost, port=16010
    */
@@ -109,26 +102,6 @@ public class Admin {
     this("joram://"+ InetAddress.getLocalHost().getHostName()+":16010/");
   }
   
-  /** constructor with Joram URL */
-  public Admin (URL url) throws JMSException {
-    try {
-      if (Debug.debug)
-	if (Debug.admin)
-	  System.out.println("->Admin : (Protocol=" + url.getProtocol() +
-			     ", Host=" + url.getHost() +
-			     ", Port=" + url.getPort() + ")");
-      
-      if ( url.getProtocol().equals(fr.dyade.aaa.joram.ConfigURLStreamHandlerFactory.Joram) ) {
-	this.url = url;
-	this.addr = java.net.InetAddress.getByName(url.getHost());
-	this.port = url.getPort();
-      }
-    } catch (Exception exc) {
-      System.out.println("Admin error");
-    }
-  }
-  
-
   /** create Topic agent client 
    * @see #delete(fr.dyade.aaa.joram.ConnectionFactory)
    */

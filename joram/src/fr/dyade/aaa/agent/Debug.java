@@ -52,7 +52,7 @@ import java.lang.reflect.*;
  * Currently only boolean variables may be dynamically set this way.
  */
 public final class Debug {
-public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.2 2000-08-01 09:13:26 tachkeni Exp $";
+public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2000-10-05 15:15:20 tachkeni Exp $";
 
   /** directory holding the debug files */
   public static File directory = null;
@@ -171,6 +171,7 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.2 2000-08-01 09:
 
     if (new Boolean(properties.getProperty("Debug.Network", "false"))
 	.booleanValue()) {
+      network = true;
       bootNetwork = true;
       recvMessage = true;
       sendMessage = true;
@@ -277,6 +278,7 @@ public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.2 2000-08-01 09:
    */
   static boolean error = true;
 
+  static boolean network = false;
   static boolean recvMessage = false;
   static boolean sendMessage = false;
 
