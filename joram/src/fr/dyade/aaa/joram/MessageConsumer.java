@@ -416,28 +416,27 @@ public class MessageConsumer implements javax.jms.MessageConsumer
 
     // Unsetting the listener, if any:
     try {
-    if (messageListener != null) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unsetting listener.");
+      if (messageListener != null) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unsetting listener.");
 
-      if (queueMode) {
-        ConsumerUnsetListRequest unsetLR =
-          new ConsumerUnsetListRequest(pendingReq.getRequestId(), true);
-        sess.cnx.syncRequest(unsetLR);
+        if (queueMode) {
+          ConsumerUnsetListRequest unsetLR =
+            new ConsumerUnsetListRequest(pendingReq.getRequestId(), true);
+          sess.cnx.syncRequest(unsetLR);
+        }
       }
-    }
 
-    if (durableSubscriber)
-      sess.cnx.syncRequest(new ConsumerCloseSubRequest(targetName));
-    else if (! queueMode)
-      sess.cnx.syncRequest(new ConsumerUnsubRequest(targetName));
-
+      if (durableSubscriber)
+        sess.cnx.syncRequest(new ConsumerCloseSubRequest(targetName));
+      else if (! queueMode)
+        sess.cnx.syncRequest(new ConsumerUnsubRequest(targetName));
     }
     // A JMSException might be caught if the connection is broken.
     catch (JMSException jE) {}
 
     // In the case of a pending "receive" request, replying by a null to it:
-    if (receiving) {
+    if (lock != null && receiving) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Replying to the"
                                    + " pending receive "
