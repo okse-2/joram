@@ -22,12 +22,12 @@
 		</s2>
 		<s2 name="Bug fixes">
 		 <ul>
-        <li>Corrects mistakes in <code>ra.xml</code> and <code>ra-remote.xml</code> files.
+        <li>Corrects mistakes in <code>ra.xml</code> and <code>ra-remote.xml</code> files.</li>
 					<ul>
 						<li>Removes empty (and useless) &lt;icon&gt; &lt;/icon&gt; tags.</li>
 						<li>Remove spaces and eof lines in the &lt;xxx-class&gt; tags and &lt;xxx-interface&gt; tags.</li>
 					</ul>
-				<li>Fix bug (NullPointerException) in  OutboundConnectionFactory.java, cxManager can be null.
+				<li>Fix bug (NullPointerException) in  OutboundConnectionFactory.java, cxManager can be null.</li>
 				<li>Throws a <code>StateException in setCtx(int key) if key &lt;0</code> (ProxyImpl.java).</li>
 		 </ul>
 		</s2>

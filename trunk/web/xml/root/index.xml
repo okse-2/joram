@@ -13,6 +13,8 @@
   <body>
 
     <s1 name="Latest News">
+			<subtitle>November 9, 2004: JORAM 4.1.2 maintenance release is available</subtitle>
+			<p>Joram 4.1.2 is a maintenance release with bug fixes and performance improvments. This version is embedded in the last JOnAS build (4.2.0)</p>
 		  <subtitle>October 13, 2004: JORAM 4.1.1 maintenance release is available</subtitle>
 			<p>Joram 4.1.1 is a maintenance release with bug fixes and updates of the underlying network communication system.</p>
 			<subtitle>September 14, 2004: JORAM 4.1 is available</subtitle>
