@@ -32,7 +32,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 
 public final class ATransaction implements Transaction, Runnable {
-  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.9 2002-10-21 08:41:14 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: ATransaction.java,v 1.10 2002-12-11 11:27:00 maistrfr Exp $";
 
   public static final String EMPTY_STRING = new String();
 
@@ -472,7 +472,10 @@ public final class ATransaction implements Transaction, Runnable {
     // according to the transaction log but
     // it doesn't matter because directories
     // are lazily created.
-    if (dir.list().length == 0) {
+    String[] children = dir.list();
+    // children may be null if dir doesn't exist any more.
+    if (children != null && 
+        children.length == 0) {
       dir.delete();
       if (dir.getAbsolutePath().length() > 
           this.dir.getAbsolutePath().length()) {

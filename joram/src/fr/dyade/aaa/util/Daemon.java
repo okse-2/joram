@@ -57,8 +57,8 @@ import org.objectweb.util.monolog.api.Logger;
  * </pre></blockquote>
  */
 public abstract class Daemon implements Runnable {
-  /** RCS version number of this file: $Revision: 1.8 $ */
-  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.8 2002-10-21 08:41:14 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.9 $ */
+  public static final String RCS_VERSION="@(#)$Id: Daemon.java,v 1.9 2002-12-11 11:27:00 maistrfr Exp $";
 
   /**
    * Tests if this daemon is alive.
@@ -89,6 +89,8 @@ public abstract class Daemon implements Runnable {
   private String name;
   /** The <code>daemon</code>'s nature. */
   private boolean daemon = false;
+  /** The <code>priority</code> that is assigned to the daemon. */
+  protected int priority = Thread.NORM_PRIORITY;
 
   /**
    * Returns this <code>daemon</code>'s name.
@@ -156,6 +158,16 @@ public abstract class Daemon implements Runnable {
     this.daemon = daemon;
   }
 
+  public void setPriority(int newPriority) {
+    if ((newPriority > Thread.MAX_PRIORITY) ||
+        (newPriority < Thread.MIN_PRIORITY)) {
+      throw new IllegalArgumentException();
+    }
+    if (running && (thread != null) && thread.isAlive())
+      thread.setPriority(newPriority);
+    priority = newPriority;
+  }
+
   /**
    * Causes this daemon to begin execution. A new thread is created to
    * execute the run method.
@@ -171,7 +183,8 @@ public abstract class Daemon implements Runnable {
 
     thread = new Thread(this, getName());
     thread.setDaemon(daemon);
-
+    if (priority != Thread.NORM_PRIORITY)
+      thread.setPriority(priority);
     running = true;
     canStop = true;
     thread.start();
@@ -193,6 +206,13 @@ public abstract class Daemon implements Runnable {
    * in general.
    */
   protected abstract void shutdown();
+
+  /**
+   * Interrupts this daemon.
+   */
+  public void interrupt() {
+    thread.interrupt();
+  }
 
   final protected void finish() {
     running = false;

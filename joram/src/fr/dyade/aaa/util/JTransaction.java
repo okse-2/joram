@@ -27,7 +27,7 @@ import java.io.*;
 import java.util.*;
 
 public class JTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.10 2002-10-21 08:41:14 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: JTransaction.java,v 1.11 2002-12-11 11:27:01 maistrfr Exp $";
 
   public static final String EMPTY_STRING = new String();
 
@@ -246,7 +246,10 @@ public class JTransaction implements Transaction {
    * they are empty.
    */
   private void deleteDir(File dir) {
-    if (dir.list().length == 0) {
+    String[] children = dir.list();
+    // children may be null if dir doesn't exist any more.
+    if (children != null && 
+        children.length == 0) {
       dir.delete();
       if (dir.getAbsolutePath().length() > 
           this.dir.getAbsolutePath().length()) {

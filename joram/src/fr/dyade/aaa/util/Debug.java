@@ -37,8 +37,8 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.3 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.3 2002-10-21 08:41:14 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.4 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.4 2002-12-11 11:27:01 maistrfr Exp $";
 
   /** Property name for monolog logger factory implementation class */
   public final static String LOGGER_FACTORY_PROPERTY = "LOGGER_FACTORY";

@@ -29,7 +29,7 @@ import java.util.*;
 
 public class StartWithFilter implements FilenameFilter {
 
-public static final String RCS_VERSION="@(#)$Id: StartWithFilter.java,v 1.9 2002-10-21 08:41:14 maistrfr Exp $"; 
+public static final String RCS_VERSION="@(#)$Id: StartWithFilter.java,v 1.10 2002-12-11 11:27:01 maistrfr Exp $"; 
 
   private String prefix;
 
