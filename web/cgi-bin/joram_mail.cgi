@@ -27,7 +27,7 @@ print "\n\n";
 
 print "<HTML>\n";
 print "<HEAD>\n";
-print "<TITLE>JOnAS download</TITLE>";
+print "<TITLE>JORAM download</TITLE>";
 print "<STYLE type=\"text/css\">";
 print "A:active {color: #EF5F00; background: transparent; text-decoration: underline;}";
 print "A:link {background: transparent; text-decoration: underline;}";
