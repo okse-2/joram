@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * See JMS specifications, §4.4 Session
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TopicSessionTest.java,v 1.1 2002-03-19 15:19:06 joram Exp $
+ * @version $Id: TopicSessionTest.java,v 1.2 2002-03-20 10:37:52 joram Exp $
  */
 public class TopicSessionTest extends PubSubTestCase {
 
@@ -113,6 +113,7 @@ public class TopicSessionTest extends PubSubTestCase {
       subscriberSession = subscriberConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
       subscriber = subscriberSession.createDurableSubscriber(subscriberTopic, "topic");
       subscriberConnection.start();
+
       TextMessage m = (TextMessage)subscriber.receiveNoWait();
       assertTrue(m != null);
       assertEquals("test", m.getText());
