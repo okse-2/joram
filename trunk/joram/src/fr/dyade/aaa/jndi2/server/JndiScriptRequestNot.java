@@ -25,34 +25,32 @@
  * Initial developer(s): Sofiane Chibani
  * Contributor(s): David Feliot, Nicolas Tachker
  */
-package fr.dyade.aaa.jndi2.msg;
+package fr.dyade.aaa.jndi2.server;
 
-import javax.naming.*;
+import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.agent.Notification;
 
-public class LookupReply extends JndiReply {
-  
-  private Object obj;
+public class JndiScriptRequestNot extends Notification {
 
-  public LookupReply(Object obj) {
-    this.obj = obj;
+  private JndiRequest[] requests;
+
+  private boolean reply;
+
+  public JndiScriptRequestNot(JndiRequest[] requests) {
+    this(requests, false);
   }
 
-  public final Object getObject() throws NamingException {
-    return resolveObject(obj);
+  public JndiScriptRequestNot(JndiRequest[] requests,
+                              boolean reply) {
+    this.requests = requests;
+    this.reply = reply;
   }
 
-  public final static Object resolveObject(Object obj) throws NamingException {
-    if (obj instanceof Reference) {
-      try {
-        return javax.naming.spi.NamingManager.getObjectInstance(
-          obj, null, null, null);
-      } catch (Exception e) {
-        NamingException ne = new NamingException(e.getMessage());
-        ne.setRootCause(e);
-        throw ne;
-      }
-    } else {
-      return obj;
-    }
+  public final JndiRequest[] getRequests() {
+    return requests;
   }
-}
+
+  public final boolean reply() {
+    return reply;
+  }
+} 

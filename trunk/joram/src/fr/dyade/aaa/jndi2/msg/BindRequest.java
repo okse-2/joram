@@ -28,6 +28,7 @@
 package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
+import java.io.*;
 
 public class BindRequest extends JndiRequest {
 
@@ -35,13 +36,23 @@ public class BindRequest extends JndiRequest {
 
   private boolean rebind;
 
-  public BindRequest(CompositeName name, Object obj) {
+  public BindRequest(CompositeName name, Object obj) 
+    throws NamingException {
     this(name, obj, false);
   }
 
-  public BindRequest(CompositeName name, Object obj, boolean rebind) {
+  public BindRequest(CompositeName name, Object obj, boolean rebind) 
+    throws NamingException {
     super(name);
-    this.obj = obj;
+    if (obj == null ||
+        obj instanceof byte[] ||
+        obj instanceof Reference) {
+      this.obj = obj;
+    } else if (obj instanceof  Referenceable) {
+      this.obj = ((Referenceable)obj).getReference();
+    } else {
+      this.obj = toReference(obj);
+    }
     this.rebind = rebind;
   }
 
@@ -52,5 +63,22 @@ public class BindRequest extends JndiRequest {
   public final boolean isRebind() {
     return rebind;
   }
-
+  
+  private static Reference toReference(Object obj) throws NamingException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();    
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(obj);
+      byte[] bytes = baos.toByteArray();
+      Reference ref = new Reference(
+        obj.getClass().getName(),
+        new BinaryRefAddr(ObjectFactory.ADDRESS_TYPE, bytes),
+        "fr.dyade.aaa.jndi2.msg.ObjectFactory", null);
+      return ref;
+    } catch (Exception exc) {
+      NamingException ne = new NamingException();
+      ne.setRootCause(exc);
+      throw ne;
+    }    
+  }
 }

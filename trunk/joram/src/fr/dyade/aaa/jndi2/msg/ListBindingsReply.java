@@ -57,6 +57,14 @@ public class ListBindingsReply extends JndiReply {
     return res;
   }
 
+  public void resolveReferences() throws NamingException {
+    for (int i = 0; i < bindings.length; i++) {
+      bindings[i].setObject(
+        LookupReply.resolveObject(
+          bindings[i].getObject()));      
+    }
+  }
+
   private static class NamingEnumerationImpl 
       implements NamingEnumeration {
     private Binding[] bindings;

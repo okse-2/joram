@@ -73,11 +73,32 @@ public class JndiServer extends ServerAgent {
       a.deploy();          
     }
   }
+  
+  /**
+   * Returns the default JndiServer id on the local agent server.
+   *
+   * @return the <code>AgentId</code> of the JndiServer
+   */
+  public static AgentId getDefault() {
+    return getDefault(AgentServer.getServerId());
+  }
+
+  /**
+   * Returns the default JndiServer id on the given agent server.
+   *
+   * @param serverId the id of the agent server
+   * @return the <code>AgentId</code> of the JndiServer
+   */
+  public static AgentId getDefault(short serverId) {
+    return new AgentId(serverId, serverId, AgentId.LocalJndiServiceStamp);
+  }
 
   private transient ServerImpl impl;
   private transient Transaction transaction;
 
-  public JndiServer() {}
+  public JndiServer() {
+    super(null, AgentId.LocalJndiServiceStamp);
+  }
 
   public void initialize(boolean firstTime) throws Exception {
     this.transaction = AgentServer.getTransaction();
@@ -95,10 +116,36 @@ public class JndiServer extends ServerAgent {
   public static void stopService() {
     // Do nothing
   }
+
+  public void react(AgentId from, Notification not) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer.react(" + 
+                       from + ',' + not + ')');
+    if (not instanceof JndiScriptRequestNot) {
+      doReact(from, (JndiScriptRequestNot)not);
+    } else {
+      super.react(from, not);
+    }
+  }
+
+  private void doReact(AgentId from, JndiScriptRequestNot not) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "JndiServer.doReact(" + from +
+                       ",(JndiScriptRequestNot)" + not + ')');
+    JndiRequest[] requests = not.getRequests();
+    JndiReply[] replies = new JndiReply[requests.length];
+    for (int i = 0; i < requests.length; i++) {
+      replies[i] = invoke(requests[i]);
+    }
+    if (not.reply()) {
+      sendTo(from, new JndiScriptReplyNot(replies));
+    }
+  }
   
   public void doRequest(Monitor monitor) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "\n\n JndiServer.doRequest(" + 
+      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer.doRequest(" + 
                        monitor.getId() + ')');
     Socket socket = monitor.getSocket();
     SerialOutputStream sender = new SerialOutputStream(socket.getOutputStream());
@@ -121,73 +168,72 @@ public class JndiServer extends ServerAgent {
                          monitor.getId() + ')');
         break Loop;
       }
-
-      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, 
-                         " -> request = " + request + " (" + 
-                         monitor.getId() + ')');
-      
-      // Start a transaction
-      transaction.begin();
-      
       if (Trace.logger.isLoggable(BasicLevel.DEBUG))
         Trace.logger.log(BasicLevel.DEBUG, " -> begins (" + 
                          monitor.getId() + ')');
-
-      Object obj = null;
-      try {        
-        if (request instanceof BindRequest) {
-          bind((BindRequest)request);
-        } else if (request instanceof LookupRequest) {
-          obj = lookup((LookupRequest)request);
-        } else if (request instanceof UnbindRequest) {
-          unbind((UnbindRequest)request);
-        } else if (request instanceof ListBindingsRequest) {
-          obj = listBindings((ListBindingsRequest)request);
-        } else if (request instanceof ListRequest) {
-          obj = list((ListRequest)request);
-        } else if (request instanceof CreateSubcontextRequest) {
-          createSubcontext((CreateSubcontextRequest)request);
-        } else if (request instanceof DestroySubcontextRequest) {
-          destroySubcontext((DestroySubcontextRequest)request);
-        } else throw new NamingException("Unknown operation");    
-
-        // Commit
-        transaction.commit();
-        transaction.release();
-
-        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, " -> commit (" + 
-                         monitor.getId() + ')');
-
-      } catch (NamingException exc) {        
-        // Rollback
-        transaction.rollback();
-        transaction.release();
-        
+      // Start a transaction
+      transaction.begin();
+      JndiReply reply = invoke(request);
+      if (reply instanceof JndiError) {
         if (Trace.logger.isLoggable(BasicLevel.DEBUG))
           Trace.logger.log(BasicLevel.DEBUG, " -> rollback (" + 
                            monitor.getId() + ')');
-        
-        sender.writeObject(new JndiError(exc));
-        continue Loop;
-      }
-      
-      if (request instanceof LookupRequest) {
+        // Rollback
+        transaction.rollback();
+        transaction.release();
+      } else {
+        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+          Trace.logger.log(BasicLevel.DEBUG, " -> commit (" + 
+                           monitor.getId() + ')');
+        // Commit
+        transaction.commit();
+        transaction.release();
+      } 
+      sender.writeObject(reply);
+    }
+  }
+
+  private JndiReply invoke(JndiRequest request) {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "JndiServer.invoke(" + request + ')');
+    try {
+      if (request instanceof BindRequest) {
+        bind((BindRequest)request);
+        return new JndiReply();
+      } else if (request instanceof LookupRequest) {
+        Object obj = lookup((LookupRequest)request);
         if (obj instanceof ObjectRecord) {
           ObjectRecord or = (ObjectRecord)obj;
-          sender.writeObject(new LookupReply(or.getObject()));
+          return new LookupReply(or.getObject());
         } else {
           // This is a context record
-          sender.writeObject(new JndiReply());
+          return new JndiReply();
         }
+      } else if (request instanceof UnbindRequest) {
+        unbind((UnbindRequest)request);
+        return new JndiReply();
       } else if (request instanceof ListBindingsRequest) {
-        sender.writeObject(new ListBindingsReply((Binding[])obj));
+        Object obj = listBindings((ListBindingsRequest)request);
+        return new ListBindingsReply((Binding[])obj);
       } else if (request instanceof ListRequest) {
-        sender.writeObject(new ListReply((NameClassPair[])obj));
+        Object obj = list((ListRequest)request);
+        return new ListReply((NameClassPair[])obj);
+      } else if (request instanceof CreateSubcontextRequest) {
+        createSubcontext((CreateSubcontextRequest)request);
+        return new JndiReply();
+      } else if (request instanceof DestroySubcontextRequest) {
+        destroySubcontext((DestroySubcontextRequest)request);
+        return new JndiReply();
       } else {
-        sender.writeObject(new JndiReply());
-      }      
+        return new JndiError(new NamingException("Unknown operation"));
+      }
+    } catch (NamingException nexc) {
+      return new JndiError(nexc);
+    } catch (IOException ioexc) {
+      NamingException nexc2 = new NamingException();
+      nexc2.setRootCause(ioexc);
+      return new JndiError(nexc2);
     }
   }
 
