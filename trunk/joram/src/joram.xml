@@ -219,7 +219,7 @@
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter for JOnAS -->
-  <target name="ship.jonasadapter" depends="build.joram"
+  <target name="ship.jonasadapter" depends="ship.joram"
           description="--> Ships a JORAM JCA adapter for JOnAS">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
