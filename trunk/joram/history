@@ -1,6 +1,10 @@
 +==============================================================================
 | 2005/03/22 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
+ Adds jmxri.jar in classpath for samples/bin scripts.
++==============================================================================
+| 2005/03/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
  Fix in HttpNetwork allowing the usage of a (non HTTP 1.1) proxy.
 +==============================================================================
 | 2005/03/21 | David Feliot - ScalAgent Distributed Technologies
