@@ -49,7 +49,7 @@ import java.util.Enumeration;
  * with an empty body or not.
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageTypeTest.java,v 1.4 2002-04-16 10:02:53 joram Exp $
+ * @version $Id: MessageTypeTest.java,v 1.5 2002-06-19 15:32:44 jmesnil Exp $
  */
 public class MessageTypeTest extends PTPTestCase {
 
@@ -115,6 +115,40 @@ public class MessageTypeTest extends PTPTestCase {
        assertEquals(3.14159, msg.getDouble("pi"), 0);
      } catch (JMSException e) {
        fail(e);
+     }
+   }
+
+   /**
+    * Test that the if the name parameter of the set methods of a <code>MapMessage</code> is <code>null</code>, 
+    * the method must throw the error <code>java.lang.IllegalArgumentException</code>.
+    * <br />
+    * @since JMS 1.1
+    */
+    public void testNullInSetMethodsForMapMessage() {
+     try {
+       MapMessage message = senderSession.createMapMessage();
+       message.setBoolean(null, true);
+       fail("Should throw an IllegalArgumentException");
+     } catch (IllegalArgumentException e) {
+     } catch (JMSException e) {
+         fail("Should throw an IllegalArgumentException, not a" +e);
+     }
+   }
+
+   /**
+    * Test that the if the name parameter of the set methods of a <code>MapMessage</code> is an empty String,
+    * the method must throw the error <code>java.lang.IllegalArgumentException</code>.
+    * <br />
+    * @since JMS 1.1
+    */
+    public void testEmptyStringInSetMethodsForMapMessage() {
+     try {
+       MapMessage message = senderSession.createMapMessage();
+       message.setBoolean("", true);
+       fail("Should throw an IllegalArgumentException");
+     } catch (IllegalArgumentException e) {
+     } catch (JMSException e) {
+         fail("Should throw an IllegalArgumentException, not a" +e);
      }
    }
 
