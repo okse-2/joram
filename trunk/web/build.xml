@@ -64,13 +64,6 @@
 	 	     includes="**/*.html"
 		     excludes="${release-files}"/>
     </dependset> 
-
-    <!-- copy css stylesheet into ${common.html.dest} -->
-    <copy todir="${common.html.dest}">
-      <fileset dir="${stylesheets.dir}">
-	<include name="*.css"/>
-      </fileset>
-    </copy>
     
     <!-- copy HTML files into ${html.dest} -->
     <copy todir="${html.dest}">
@@ -141,6 +134,14 @@
 	  description="Copy common images into ${common.images.dest}"
 	  if="install.common">
 
+    <!-- copy css stylesheet into ${common.html.dest} -->
+    <copy todir="${common.html.dest}">
+      <fileset dir="${stylesheets.dir}">
+	<include name="*.css"/>
+      </fileset>
+    </copy>
+
+    <!-- copy common images -->
     <copy todir="${common.images.dest}">
       <fileset dir="${common.images.src}" />
     </copy>
