@@ -147,6 +147,45 @@ public class Topic extends Destination implements javax.jms.Topic
   {
     return create(serverId, "org.objectweb.joram.mom.dest.Topic", prop);
   }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a topic on a given
+   * server with a given name.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the topic.
+   * @param name      The topic name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Topic create(int serverId, String name)
+                throws ConnectException, AdminException
+  {
+    return create(serverId, name, "org.objectweb.joram.mom.dest.Topic", null);
+  }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a topic on the
+   * local server.
+   * <p>
+   * The request fails if the destination deployement fails server side.
+   *
+   * @param name      The topic name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Topic create(String name)
+                throws ConnectException, AdminException
+  {
+    return create(AdminModule.getLocalServer(),
+                  name,
+                  "org.objectweb.joram.mom.dest.Topic",
+                  null);
+  }
  
   /**
    * Admin method creating and deploying a topic on a given server.
@@ -162,7 +201,7 @@ public class Topic extends Destination implements javax.jms.Topic
   public static Topic create(int serverId)
                 throws ConnectException, AdminException
   {
-    return create(serverId, null);
+    return create(serverId, null, "org.objectweb.joram.mom.dest.Topic", null);
   }
 
   /**
@@ -175,7 +214,7 @@ public class Topic extends Destination implements javax.jms.Topic
    */
   public static Topic create() throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer(), null);
+    return create(AdminModule.getLocalServer());
   }
 
   /**

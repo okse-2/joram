@@ -58,4 +58,31 @@ public class XAQueueSession extends XASession
   {
     return (QueueSession) sess;
   }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.QueueSender createSender(Queue queue)
+         throws JMSException
+  {
+    return ((QueueSession) sess).createSender(queue);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.QueueReceiver createReceiver(Queue queue, String selector)
+         throws JMSException
+  {
+    return ((QueueSession) sess).createReceiver(queue, selector);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.QueueReceiver createReceiver(Queue queue)
+         throws JMSException
+  {
+    return ((QueueSession) sess).createReceiver(queue);
+  }
 }

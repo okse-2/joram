@@ -147,6 +147,45 @@ public class Queue extends Destination implements javax.jms.Queue
   {
     return create(serverId, "org.objectweb.joram.mom.dest.Queue", prop);
   }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a queue on a given
+   * server with a given name.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployement fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the queue.
+   * @param name      The queue name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(int serverId, String name)
+                throws ConnectException, AdminException
+  {
+    return create(serverId, name, "org.objectweb.joram.mom.dest.Queue", null);
+  }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a queue on the
+   * local server.
+   * <p>
+   * The request fails if the destination deployement fails server side.
+   *
+   * @param name      The queue name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(String name)
+                throws ConnectException, AdminException
+  {
+    return create(AdminModule.getLocalServer(),
+                  name,
+                  "org.objectweb.joram.mom.dest.Queue",
+                  null);
+  }
  
   /**
    * Admin method creating and deploying a queue on a given server.
@@ -162,7 +201,7 @@ public class Queue extends Destination implements javax.jms.Queue
   public static Queue create(int serverId)
                 throws ConnectException, AdminException
   {
-    return create(serverId, null);
+    return create(serverId, null, "org.objectweb.joram.mom.dest.Queue", null);
   }
 
   /**
@@ -175,7 +214,7 @@ public class Queue extends Destination implements javax.jms.Queue
    */
   public static Queue create() throws ConnectException, AdminException
   {
-    return create(AdminModule.getLocalServer(), null);
+    return create(AdminModule.getLocalServer());
   }
 
   /**

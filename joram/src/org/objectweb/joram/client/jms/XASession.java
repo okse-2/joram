@@ -153,6 +153,88 @@ public class XASession extends Session implements javax.jms.XASession
   }
 
   /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.QueueBrowser
+         createBrowser(javax.jms.Queue queue, String selector)
+         throws JMSException
+  {
+    return sess.createBrowser(queue, selector);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue)
+         throws JMSException
+  {
+    return sess.createBrowser(queue);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.MessageProducer createProducer(javax.jms.Destination dest)
+         throws JMSException
+  {
+    return sess.createProducer(dest);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.MessageConsumer
+         createConsumer(javax.jms.Destination dest,
+                        String selector,
+                        boolean noLocal)
+         throws JMSException
+  {
+    return sess.createConsumer(dest, selector, noLocal);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.MessageConsumer
+         createConsumer(javax.jms.Destination dest, String selector)
+         throws JMSException
+  {
+    return sess.createConsumer(dest, selector);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest)
+         throws JMSException
+  {
+    return sess.createConsumer(dest);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.TopicSubscriber
+         createDurableSubscriber(javax.jms.Topic topic,
+                                 String name,
+                                 String selector,
+                                 boolean noLocal)
+         throws JMSException
+  {
+    return sess.createDurableSubscriber(topic, name, selector, noLocal);
+  }
+
+  /**
+   * Delegates the call to the wrapped JMS session.
+   */
+  public javax.jms.TopicSubscriber
+         createDurableSubscriber(javax.jms.Topic topic, String name)
+         throws JMSException
+  {
+    return sess.createDurableSubscriber(topic, name);
+  }
+
+  /**
    * API method inherited from session, but intercepted here for
    * forbidding its use in the XA context (as defined by the API).
    *
