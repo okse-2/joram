@@ -16,6 +16,15 @@
       the latest tagged version with small corrections and updates.</p>
       <s2 name="Modifications (latest: May 2003, 7th)">
       <ul>
+      <li>Bug in bytes and stream messages: sequentially modifying and sending
+      an instance of one of those messages resulted in always sending the same
+      original message. The impacted classes are <code>BytesMessage</code> and
+      <code>StreamMessage</code> in the <code>fr.dyade.aaa.joram</code>
+      package.</li>
+      <li>Modification of the <code>Message</code> class in the
+      <code>fr.dyade.aaa.mom.messages</code> package: text and map bodies are
+      not serialized anymore for opening Joram to the ability to route non
+      Java clients' messages.</li>
       <li>Following
       <a href="http://www.objectweb.org/wws/arc/joram/2003-05/msg00014.html">
       Huey-Siang Kam's</a> feedback, a bug in Joram's administration has been
