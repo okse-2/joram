@@ -5,13 +5,13 @@
   <!-- JORAM shipment target -->
   <target name="ship.joram"
           description="builds and ships Joram">
-    <ant dir="." antfile="joram.xml" target="ship.joram"/>
+    <ant dir="." antfile="joram.xml" target="ship"/>
   </target>
 
   <!-- kJORAM shipment target -->
   <target name="ship.kjoram"
           description="builds and ships kJoram">
-    <ant dir="." antfile="kjoram.xml" target="ship.kjoram"/>
+    <ant dir="." antfile="kjoram.xml" target="ship"/>
   </target>
 
   <!-- Javadoc target -->
