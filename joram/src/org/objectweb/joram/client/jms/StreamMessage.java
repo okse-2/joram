@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -416,6 +416,7 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
    * @exception MessageNotReadableException  If the message body is write-only.
    * @exception MessageFormatException       If reading the expected type is
    *                                         not possible.
+   *            MessageEOFException          Unexpected end of bytes array.
    */
   public byte readByte() throws JMSException
   {
@@ -426,7 +427,12 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       return inputStream.readByte();
     }
     catch (Exception e) {
-      throw new MessageFormatException("Can't read the expected type: " + e);
+      JMSException je = null;
+      if (e instanceof EOFException)
+        je = new MessageEOFException("Unexpected end of bytes array : " + e);
+      else
+        je = new MessageFormatException("Can't read the expected type: " + e);
+      throw je;
     }
   }
  

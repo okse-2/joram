@@ -208,10 +208,10 @@ public class Message implements javax.jms.Message
   {
     if (replyTo == null)
       momMsg.setReplyTo(null, true);
-
-    momMsg.setReplyTo(
-      ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
-      ((org.objectweb.joram.client.jms.Destination) replyTo).isQueue());
+    else
+      momMsg.setReplyTo(
+        ((org.objectweb.joram.client.jms.Destination) replyTo).getName(), 
+        ((org.objectweb.joram.client.jms.Destination) replyTo).isQueue());
 
     if (replyTo instanceof TemporaryQueue || replyTo instanceof TemporaryTopic)
       momMsg.setOptionalHeader("JMSTempReplyTo", new Boolean(true));
@@ -854,7 +854,7 @@ public class Message implements javax.jms.Message
           ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage)
                                           jmsMsg).readByte());
       }
-      catch (MessageEOFException mE) {}
+      catch (Exception mE) {}
     }
     else if (jmsMsg instanceof javax.jms.MapMessage) {
       msg = new MapMessage();
@@ -876,6 +876,8 @@ public class Message implements javax.jms.Message
     msg.setJMSType(jmsMsg.getJMSType());
 
     Enumeration names = jmsMsg.getPropertyNames();
+    if (names == null) 
+      return msg;
     String name;
     while (names.hasMoreElements()) {
       name = (String) names.nextElement();

@@ -20,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): David Feliot (ScalAgent DT)
+ *                 Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -80,18 +81,18 @@ public class Connection implements javax.jms.Connection
   /** <code>true</code> if the connection is closed. */
   boolean closed = false;
   /** Vector of the connection's sessions. */
-  Vector sessions;
+  public Vector sessions;
   /** Vector of the connection's consumers. */
   Vector cconsumers;
   /** 
    * Table holding requests related objects, either locks of synchronous
    * requests, or asynchronous consumers.
    */
-  Hashtable requestsTable;
+  public Hashtable requestsTable;
   /**
    * Table holding the server replies to synchronous requests.
    */
-  Hashtable repliesTable;
+  public Hashtable repliesTable;
 
   /**
    * The date of the last request

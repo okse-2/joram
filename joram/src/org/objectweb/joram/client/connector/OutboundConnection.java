@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -37,8 +37,7 @@ public class OutboundConnection implements javax.jms.Connection
   /** The managed connection this "handle" belongs to. */
   ManagedConnectionImpl managedCx;
   /** The physical connection this "handle" handles. */
-  XAConnection xac;
-
+  org.objectweb.joram.client.jms.XAConnection xac;
   /** <code>true</code> if this "handle" is valid. */
   boolean valid = true;
 
@@ -52,7 +51,7 @@ public class OutboundConnection implements javax.jms.Connection
   OutboundConnection(ManagedConnectionImpl managedCx, XAConnection xac)
   {
     this.managedCx = managedCx;
-    this.xac = xac;
+    this.xac = (org.objectweb.joram.client.jms.XAConnection) xac;
   }
 
   /**
@@ -218,7 +217,27 @@ public class OutboundConnection implements javax.jms.Connection
     managedCx.closeHandle(this);
   }
 
-  
+  /**
+   * close all session.
+   */
+  public void cleanup() {
+    // Closing the sessions:
+    Session session;
+    while (xac.sessions != null && 
+           ! xac.sessions.isEmpty()) {
+      session = (Session) xac.sessions.elementAt(0);
+      try {
+        session.close();
+      }
+      // Catching a JMSException if the connection is broken:
+      catch (JMSException jE) {}
+    } 
+    if (xac.requestsTable != null)
+      xac.requestsTable.clear();
+    if (xac.repliesTable != null)
+      xac.repliesTable.clear();
+  }
+
   public String toString()
   {
     return "OutboundConnection[" + xac.toString() + "]";

@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -298,6 +298,8 @@ public class BytesMessage extends Message implements javax.jms.BytesMessage
         outputStream.writeChar(((Character) value).charValue());
       else if (value instanceof Integer)
         outputStream.writeInt(((Integer) value).intValue());
+      else if (value instanceof Short)
+        outputStream.writeInt(((Short) value).shortValue());
       else if (value instanceof Long)
         outputStream.writeLong(((Long) value).longValue());
       else if (value instanceof Float)
