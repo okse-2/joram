@@ -60,7 +60,8 @@ public class XASessRollback extends AbstractJmsRequest
    */
   public XASessRollback(String id)
   {
-    super(id);
+    super(null);
+    this.id = id;
   }
 
   /**
