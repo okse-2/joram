@@ -57,6 +57,7 @@
     <!-- Deletes generated jar files -->
     <delete file="${lib.dir}/mom.jar" />
     <delete file="${lib.dir}/joram.jar" />
+    <delete file="${lib.dir}/joramgui.jar" />
   </target>
 
   <!-- Prepares compilation phase -->
@@ -88,6 +89,20 @@
 
       <!-- Excludes tests and CVS directories -->
       <exclude name="fr/dyade/aaa/**/CVS/**/*.java"/>
+    </javac>
+  </target>
+
+  <target name="compile.gui" depends="prepare"
+      description="--> Compiles the graphical admin tool sources.">
+    <javac srcdir="${src.dir}:${obj.dir}"
+           destdir="${obj.dir}"
+           debug="on"
+           deprecation="${deprecation}"
+           optimize="false"
+           nowarn="${nowarn}"
+           verbose="${verbose}">
+      <classpath refid="project.class.path"/>
+      <include name="org/objectweb/joram/client/tools/admin/*.java"/>
     </javac>
   </target>
 
@@ -145,11 +160,28 @@
     </jar>
   </target>
 
+  <target name="build.gui" depends="init,compile.gui"
+      description="--> Builds the graphical admin tool jar.">
+    <jar jarfile="${build.dir}/joramgui.jar">
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/client/tools/admin/*.class"/>
+      </fileset>
+      <fileset dir="${src.dir}">
+        <include name="org/objectweb/joram/client/tools/admin/icons/*.png"/>
+      </fileset>
+    </jar>
+  </target>
+
   <!-- SHIPMENT -->
   <target name="ship.joram" depends="build.joram"
       description="--> Creates a Joram shipment.">
     <copy file="${build.dir}/joram.jar" todir="${lib.dir}"/>
     <copy file="${build.dir}/mom.jar" todir="${lib.dir}"/>
+  </target>
+
+  <target name="ship.gui" depends="build.gui"
+      description="--> Creates a shipment of the graphical admin tool.">
+    <copy file="${build.dir}/joramgui.jar" todir="${lib.dir}"/>
   </target>
 
   <!-- JAVADOC --> 
