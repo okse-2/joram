@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -27,40 +26,46 @@
  */
 package fr.dyade.aaa.mom.comm;
 
-import fr.dyade.aaa.agent.AgentId;
-
-
 /**
- * A <code>ClusterRequest</code> instance is used by a client agent
- * for notifying a topic of the identifier of an other topic to set a
- * cluster with.
+ * An <code>AdminReply</code> is used by a destination agent for replying to
+ * a client administration request.
  */
-public class ClusterRequest extends AdminRequest
+public class AdminReply extends AbstractNotification
 {
-  /** The identifier of the topic the target topic must set a cluster with. */
-  private AgentId topicId;
+  /** Field identifying the original request. */
+  private String requestId;
+  /** <code>true</code> if the request succeeded. */
+  private boolean success;
+  /** Info related to the processing of the request. */
+  private String info;
 
 
   /**
-   * Constructs a <code>ClusterRequest</code> instance.
-   *
-   * @param id  Identifier of the request, may be null.
-   * @param topicId  The identifier of the topic the target topic must
-   *          set a cluster with.
+   * Constructs an <code>AdminReply</code>.
    */
-  public ClusterRequest(String id, AgentId topicId)
+  public AdminReply(AdminRequest request, boolean success, String info)
   {
-    super(id);
-    this.topicId = topicId;
+    requestId = request.getId();
+    this.success = success;
+    this.info = info;
   }
 
 
-  /**
-   * Returns the identifier of the topic the target topic must set a
-   * cluster with. 
-   */
-  public AgentId getTopicId()
+  /** Returns the request identifier. */
+  public String getRequestId()
   {
-    return topicId;
+    return requestId;
   }
-} 
+
+  /** Returns <code>true</code> if the request was successful. */
+  public boolean getSuccess()
+  {
+    return success;
+  }
+
+  /** Returns the info related to the processing of the request. */
+  public String getInfo()
+  {
+    return info;
+  }
+}

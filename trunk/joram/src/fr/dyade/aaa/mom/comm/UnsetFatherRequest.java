@@ -28,18 +28,18 @@
 package fr.dyade.aaa.mom.comm;
 
 /**
- * An <code>UnsetFatherRequest</code> instance is used by a <b>client</b>
+ * An <code>UnsetFatherRequest</code> instance is used by a client agent
  * for notifying a topic it does not belong anymore to a hierarchy.
  */
-public class UnsetFatherRequest extends AbstractRequest
+public class UnsetFatherRequest extends AdminRequest
 {
   /**
    * Constructs an <code>UnsetFatherRequest</code> instance.
    *
-   * @param requestId  See superclass.
+   * @param id  Identifier of the request, may be null.
    */
-  public UnsetFatherRequest(String requestId)
+  public UnsetFatherRequest(String id)
   {
-    super(0, requestId);
+    super(id);
   }
 } 

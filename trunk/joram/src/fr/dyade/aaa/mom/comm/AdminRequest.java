@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
  * The contents of this file are subject to the Joram Public License,
  * as defined by the file JORAM_LICENSE.TXT 
@@ -27,40 +26,30 @@
  */
 package fr.dyade.aaa.mom.comm;
 
-import fr.dyade.aaa.agent.AgentId;
-
-
 /**
- * A <code>ClusterRequest</code> instance is used by a client agent
- * for notifying a topic of the identifier of an other topic to set a
- * cluster with.
+ * An <code>AdminRequest</code> is used by a client agent for sending an
+ * administration request to a destination agent.
  */
-public class ClusterRequest extends AdminRequest
+public abstract class AdminRequest extends AbstractNotification
 {
-  /** The identifier of the topic the target topic must set a cluster with. */
-  private AgentId topicId;
+  /** Field used for identifying the request. */
+  private String id;
 
 
   /**
-   * Constructs a <code>ClusterRequest</code> instance.
+   * Constructs an <code>AdminRequest</code>.
    *
    * @param id  Identifier of the request, may be null.
-   * @param topicId  The identifier of the topic the target topic must
-   *          set a cluster with.
    */
-  public ClusterRequest(String id, AgentId topicId)
+  public AdminRequest(String id)
   {
-    super(id);
-    this.topicId = topicId;
+    this.id = id;
   }
 
 
-  /**
-   * Returns the identifier of the topic the target topic must set a
-   * cluster with. 
-   */
-  public AgentId getTopicId()
+  /** Returns the request identifier, null if not used. */
+  public String getId()
   {
-    return topicId;
+    return id;
   }
-} 
+}

@@ -30,6 +30,7 @@ package fr.dyade.aaa.joram.admin;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 
+
 /**
  * The <code>AdminItf</code> interface defines the set of methods needed
  * for administering a JORAM platform.
@@ -37,7 +38,8 @@ import java.net.UnknownHostException;
 public interface AdminItf
 {
   /**
-   * Opens a connection with the Joram server given a
+   * Opens a connection dedicated to administering with the Joram server
+   * which parameters are wrapped by a given
    * <code>TopicConnectionFactory</code>.
    *
    * @param cnxFact  The TopicConnectionFactory to use for connecting.
@@ -48,8 +50,9 @@ public interface AdminItf
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(fr.dyade.aaa.joram.TopicConnectionFactory cnxFact,
-                      String name, String password)
+  public void connect(javax.jms.TopicConnectionFactory cnxFact,
+                      String name,
+                      String password)
               throws ConnectException, AdminException;
 
   /**
@@ -68,8 +71,11 @@ public interface AdminItf
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(String hostName, int port, String name,
-                      String password, int cnxTimer)
+  public void connect(String hostName, 
+                      int port,
+                      String name,
+                      String password,
+                      int cnxTimer)
               throws UnknownHostException, ConnectException, AdminException;
 
   /**

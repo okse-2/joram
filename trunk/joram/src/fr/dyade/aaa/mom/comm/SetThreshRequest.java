@@ -27,11 +27,12 @@
  */
 package fr.dyade.aaa.mom.comm;
 
+
 /**
- * A <code>SetThreshRequest</code> instance is used by an <b>admin</b> agent
+ * A <code>SetThreshRequest</code> instance is used by a client agent
  * for notifying a queue of its threshold value.
  */
-public class SetThreshRequest extends AbstractRequest
+public class SetThreshRequest extends AdminRequest
 {
   /**
    * The threshold value, negative or zero for no threshold, <code>null</code>
@@ -43,15 +44,16 @@ public class SetThreshRequest extends AbstractRequest
   /**
    * Constructs a <code>SetThresholdRequest</code> instance.
    *
-   * @param requestId  See superclass.
+   * @param id  Identifier of the request, may be null.
    * @param threshold  Threshold value, negative or zero for no threshold,
    *          <code>null</code> for unsetting the previous value.
    */
-  public SetThreshRequest(String requestId, Integer threshold)
+  public SetThreshRequest(String id, Integer threshold)
   {
-    super(0, requestId);
+    super(id);
     this.threshold = threshold;
   }
+
 
   /**
    * Returns the threshold value, negative or zero for no threshold, 

@@ -30,18 +30,18 @@ package fr.dyade.aaa.mom.comm;
 import fr.dyade.aaa.agent.AgentId;
 
 /**
- * An <code>UnclusterRequest</code> instance is used by a <b>client</b> agent
+ * An <code>UnclusterRequest</code> instance is used by a client agent
  * for notifying a topic to leave the cluster it is part of.
  */
-public class UnclusterRequest extends AbstractRequest
+public class UnclusterRequest extends AdminRequest
 {
   /**
    * Constructs an <code>UnclusterRequest</code> instance.
    *
-   * @param requestId  See superclass.
+   * @param id  Identifier of the request, may be null.
    */
-  public UnclusterRequest(String requestId)
+  public UnclusterRequest(String id)
   {
-    super(0, requestId);
+    super(id);
   }
 } 

@@ -57,6 +57,12 @@ public abstract class AbstractNotification
     connectionKey = key;
   }
 
+  /**
+   * Constructs an <code>AbstractNotification</code>.
+   */
+  public AbstractNotification()
+  {}
+
 
   /** Returns the connection key, 0 if no external client is involved. */
   public int getConnectionKey()
