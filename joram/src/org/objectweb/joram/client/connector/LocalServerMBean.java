@@ -27,34 +27,30 @@ package org.objectweb.joram.client.connector;
  * The <code>LocalServerMBean<code> interface defines the administration
  * methods provided by the <code>LocalServer</code> class.
  */
-public interface LocalServerMBean {
-  public String getPlatformConfiguration();
-  
-  public java.util.List getPlatformServersIds();
-  
-  public String getLocalServerId();
-  
-  public String getRelease();
-  
-  public String getRunningMode();
-  
-  public String getHost();
-  
-  public String getPort();
-  
-  public java.util.List getLocalQueuesNames();
-  
-  public java.util.List getLocalTopicsNames();
-  
-  public java.util.List getLocalUsersNames();
-  
-  
-  public void createLocalQueue(String jndiName) throws Exception;
-  
-  public void createLocalTopic(String jndiName) throws Exception;
-  
-  public String getobjectName();
-  public boolean iseventProvider();
-  public boolean isstateManageable();
-  public boolean isstatisticsProvider();
+public interface LocalServerMBean
+{
+    public String getPlatformConfiguration();
+
+    public java.util.List getPlatformServersIds();
+
+    public String getLocalServerId();
+
+    public String getRelease();
+
+    public String getRunningMode();
+
+    public String getHost();
+
+    public String getPort();
+
+    public java.util.List getLocalQueuesNames();
+
+    public java.util.List getLocalTopicsNames();
+
+    public java.util.List getLocalUsersNames();
+
+
+    public void createLocalQueue(String jndiName) throws Exception;
+
+    public void createLocalTopic(String jndiName) throws Exception;
 }

@@ -893,7 +893,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                          + "name=JORAMlocalServer,"
                                          + "J2EEServer="
                                          + serverName);
-          ((LocalServer) bean).setObjectName(jmsResourceON.toString());
           mbs.registerMBean(bean, jmsResourceON);
         }
       }
