@@ -94,7 +94,7 @@
   <target name="single_server" depends="simple_init"
           description="--> Start a single server in non-persistent mode">
     <antcall target="server">
-      <param name="transaction" value="NullTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="sid" value="0"/>
     </antcall>
   </target>
@@ -224,21 +224,21 @@
   <target name="server0" depends="distributed_init"
           description="--> Start a server for a distributed architecture (w/ id 0)">
     <antcall target="server">
-      <param name="transaction" value="ATransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="0"/>
     </antcall>
   </target>
   <target name="server1" depends="distributed_init"
           description="--> Start a server for a distributed architecture (w/ id 1)">
     <antcall target="server">
-      <param name="transaction" value="ATransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="1"/>
     </antcall>
   </target>
   <target name="server2" depends="distributed_init"
           description="--> Start a server for a distributed architecture (w/ id 2)">
     <antcall target="server">
-      <param name="transaction" value="ATransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="2"/>
     </antcall>
   </target>
