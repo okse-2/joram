@@ -11,79 +11,83 @@
   </properties>
 
   <body>
-
     <s1 name="JORAM History">
-	<subtitle>December 22,2004: JORAM 4.1.4 maintenance release is available</subtitle>
-	<p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvments.</p>
-	<subtitle>November 9, 2004: JORAM 4.1.2 maintenance release is available</subtitle>
-	<p>Joram 4.1.2 is a maintenance release with bug fixes and performance improvments. This version is embedded in the last JOnAS build (4.2.0)</p>
-	<subtitle>October 13, 2004: JORAM 4.1.1 maintenance release is available</subtitle>
-	<p>Joram 4.1.1 is a maintenance release with bug fixes and updates of the underlying network communication system.</p>
-			<subtitle>September 14, 2004: JORAM 4.1 is available</subtitle>
-			<p>Joram 4.1 is finally available for download. It provides the following new features as well
-			 as fixes and improvements : </p>
-			 <ul>
-			 <li>The Joram 4.1 JCA 1.5 RA, handles:
-			 <ul>
-			 <li>Inbound (asynchronous message flow) and Outbound (synchronous message flow) communications</li>
-			 <li>Support of distributed (XA) and local transactions.</li>
-			 <li>Automatic recovery of indoubt Xids via XAResource.recover().</li> 
-			 <li>Deployment as a Resource Adapter to an external JORAM server.</li>
-			 <li>Deployment in collocated mode : a JORAM server is started and stopped at RA deployment and undeployment.
-			 </li>
-			 </ul>
-			 </li>
-			 <li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
-			  exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
-				as will be the future High-Availability Joram server to be released in the next version. </li>
-			 </ul>
-			 <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
-			 concerning JMS in this TCK.</p>
-			 <p>The new packages are available in the <a href="download/index.html">download area</a>. The CVS tag is 
-			 joram4_1_0 (<a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a>).</p>
-			 <p>The documentation has also been deeply updated with a new all-in-one manual.</p>
-			 
-			<subtitle>October 20-21: JORAM Training Session, Grenoble, France</subtitle>
-			<p>A two-day training session on JORAM is scheduled and will be delivered in french language.
-			 The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-		  <p>This training session is targeted at architects and system designers that intend to integrate 
-			the JORAM component within a global distributed solution. It includes a significant part of 
-			experimentations and case studies based on real-world application scenarios.</p>
-			<p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
-			of the JORAM component. We offer to share our expertise through a training session that provides
-			 the key knowledge to use and deploy a JORAM system that fits your requirements.
-			This two-day session details the design principles of JORAM and describes the best practices 
-			to take advantage of its advanced properties in complex networked environments.</p>
-			<p>Detailed information about this training session is available online 
-			<a href="http://www.scalagent.com/pages/fr/datasheet/040820-JORAM-formation.pdf">(PDF, in french only)</a></p>
-      
-			<subtitle>July 1st, 2004: Report of the 1st JORAM Users' Day</subtitle>
-  	  <p>The first JORAM Users' Day has been held last June 17 th in Paris.
-			 This event was the first successful attempt within the ObjectWeb community 
-			 to have direct exchanges between users and designers/developers of an 
-			 ObjectWeb component.</p>
-			 <p>The Report as well as some of the presentations are available online at
-			  the ScalAgent Distributed Technologies web site : </p>
-			 <ul>
-			 <li>Report as <a href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</a>
-			  or <a href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</a></li>
-			 <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
-			 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</a>
-			 </li>
-       <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
-			 Next Generation Open Source by J.P. Laisné (President of the 
-			 Objectweb consortium)(PDF in french)</a>
-			 </li>
+      <subtitle>December 22,2004: JORAM 4.1.4 maintenance release is available</subtitle>
+      <p>Joram 4.1.4 is a maintenance release with bug fixes and configuration improvments.</p>
+
+      <subtitle>December 2004: New suite of professional services on JORAM</subtitle>
+      <p>Please check the <a href="support.html">Joram Support pages</a> or <a href="http://www.scalagent.com">ScalAgent website</a>.</p>
+
+      <subtitle>November 9, 2004: JORAM 4.1.2 maintenance release is available</subtitle>
+      <p>Joram 4.1.2 is a maintenance release with bug fixes and performance improvments. This version is embedded in the last JOnAS build (4.2.0)</p>
+
+      <subtitle>October 13, 2004: JORAM 4.1.1 maintenance release is available</subtitle>
+      <p>Joram 4.1.1 is a maintenance release with bug fixes and updates of the underlying network communication system.</p>
+
+      <subtitle>September 14, 2004: JORAM 4.1 is available</subtitle>
+      <p>Joram 4.1 is finally available for download. It provides the following new features as well
+	 as fixes and improvements : </p>
+      <ul>
+	<li>The Joram 4.1 JCA 1.5 RA, handles:
+	  <ul>
+	    <li>Inbound (asynchronous message flow) and Outbound (synchronous message flow) communications</li>
+	    <li>Support of distributed (XA) and local transactions.</li>
+	    <li>Automatic recovery of indoubt Xids via XAResource.recover().</li> 
+	    <li>Deployment as a Resource Adapter to an external JORAM server.</li>
+	    <li>Deployment in collocated mode : a JORAM server is started and stopped at RA deployment and undeployment.</li>
+	  </ul>
+	</li>
+	<li>The clustered queue feature provides a load-balancing mechanism. It is made up of several queues
+	exchanging messages depending on their load. This new feature is sponsored by France Telecom R&amp;D,
+	as will be the future High-Availability Joram server to be released in the next version. </li>
+      </ul>
+      <p>JORAM 4.1 is used by JOnAS to undergo the J2EE 1.4 certification, and has already passed all tests 
+	concerning JMS in this TCK.</p>
+      <p>The new packages are available in the <a href="download/index.html">download area</a>. The CVS tag is 
+	joram4_1_0 (<a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a>).</p>
+      <p>The documentation has also been deeply updated with a new all-in-one manual.</p>
+
+      <subtitle>October 20-21: JORAM Training Session, Grenoble, France</subtitle>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
+	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate 
+	the JORAM component within a global distributed solution. It includes a significant part of 
+	experimentations and case studies based on real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
+	of the JORAM component. We offer to share our expertise through a training session that provides
+	 the key knowledge to use and deploy a JORAM system that fits your requirements.
+	This two-day session details the design principles of JORAM and describes the best practices 
+	to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online 
+	<a href="http://www.scalagent.com/pages/fr/datasheet/040820-JORAM-formation.pdf">(PDF, in french only)</a></p>
+
+      <subtitle>July 1st, 2004: Report of the 1st JORAM Users' Day</subtitle>
+      <p>The first JORAM Users' Day has been held last June 17 th in Paris.
+	 This event was the first successful attempt within the ObjectWeb community 
+	 to have direct exchanges between users and designers/developers of an 
+	 ObjectWeb component.</p>
+      <p>The Report as well as some of the presentations are available online at
+	  the ScalAgent Distributed Technologies web site : </p>
+      <ul>
+	<li>Report as <a href="http://www.scalagent.com/pages/en/products/joram-userday040617-report.htm">HTML</a>
+	  or <a href="http://www.scalagent.com/pages/en/datasheet/040617-JORAM-Day-report.pdf">PDF</a></li>
+	<li><a href="http://www.scalagent.com/pages/en/datasheet/040617-JoramDay-Intro-UK.pdf">
+	 Introduction by Roland Balter (ScalAgent Distributed Technologies)(PDF)</a>
+	 </li>
+	<li><a href="http://www.scalagent.com/pages/en/datasheet/040617-ObjectWeb-Joram.pdf">
+	Next Generation Open Source by J.P. Laisné (President of the 
+	 Objectweb consortium)(PDF in french)</a>
+	 </li>
        <li><a href="http://www.scalagent.com/pages/en/datasheet/040617-EPFL-joram_day.pdf">
-			 JMSGroups: Towards JMS-Compliant Group Communication by A. Kupsys 
-			 (EPFL Switzerland) (PDF)</a>
-			 </li>
-			 </ul>
-			 <p>The discussion about JORAM is open especially for those who have not been
-			 able to join the Users' Day. Any contribution is welcome on the main
-			 JORAM mailing list.</p>
-			 
-			<subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
+	 JMSGroups: Towards JMS-Compliant Group Communication by A. Kupsys 
+	 (EPFL Switzerland) (PDF)</a>
+	 </li>
+      </ul>
+      <p>The discussion about JORAM is open especially for those who have not been
+	 able to join the Users' Day. Any contribution is welcome on the main
+	 JORAM mailing list.</p>		 
+
+      <subtitle>May 3, 2004: JORAM users' day announcement</subtitle>
       <p>ObjectWeb and the JORAM core development team are setting up
       a JORAM Users' Day on June 17th in Paris (place to be defined later).</p>
       <p>This day is intended to be the first attempt of direct exchanges
@@ -123,12 +127,10 @@
         This feature allows JORAM client applications to actually communicate
         with foreign JMS destinations totally transparently.</li>
       </ul>
-
       <p><strong>Administration methods</strong> have been largely 
       modified for simplifying the evolution of management following
       the new JORAM releases. Old admin and monitoring classes
       have been kept but this will be temporary.</p>
-
       <p>This new version also introduces a <strong>new sources
       tree</strong>, which may be quickly described as follows:</p>
       <ul>
@@ -179,19 +181,19 @@
       <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
       <p>JORAM is now released under the <strong>LGPL</strong> licence.</p>
 
-     <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
-     <p>JORAM 3.3 is now available as a packaged version.
+      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
+      <p>JORAM 3.3 is now available as a packaged version.
      As a reminder, it provides a new administration implementation. In CVS it
      is now tagged joram3_3_1. Compared to joram3_3_0, it is a maintenance
      version, correcting a few bugs.
      </p>
-     <p>JORAM 3.4 is available only in the CVS distribution. This
+      <p>JORAM 3.4 is available only in the CVS distribution. This
      release tagged joram3_4_0 supports the SOAP protocol as a link between
      a Joram client and a Joram platform. It rearchitectures the JMS proxy
      server side, and the JMS connection client side, for supporting multiple 
      protocols (currently TCP and SOAP).</p>
 
-     <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
+      <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
       available in the CVS distribution.</subtitle>
       <p>This new version provides a totally refactored <strong>administration</strong> 
       protocol. Administration is now based on JMS communication and is much
