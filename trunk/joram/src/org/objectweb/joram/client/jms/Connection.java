@@ -564,7 +564,9 @@ public class Connection implements javax.jms.Connection
    * Method sending a synchronous request to the server and waiting for an
    * answer.
    *
-   * @exception IllegalStateException  If the connection is closed or broken.
+   * @exception IllegalStateException  If the connection is closed or broken,
+   *                                   if the server state does not allow to
+   *                                   process the request.
    * @exception JMSSecurityException  When sending a request to a destination
    *              not accessible because of security.
    * @exception InvalidDestinationException  When sending a request to a
@@ -649,6 +651,8 @@ public class Connection implements javax.jms.Connection
         throw new JMSSecurityException(mE.getMessage());
       else if (mE instanceof DestinationException)
         throw new InvalidDestinationException(mE.getMessage());
+      else if (mE instanceof StateException)
+        throw new IllegalStateException(mE.getMessage());
       else
         throw new JMSException(mE.getMessage());
     }
