@@ -2,7 +2,16 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN">
 
 <article>
-  <title>JMS Test Suite Documentation</title>
+  <articleinfo>
+    <author>
+      <firstname>Jeff</firstname>
+      <surname>Mesnil</surname>
+      <affiliation>
+	<address><email>jmesnil@inrialpes.fr</email></address>
+      </affiliation>
+    </author>
+    <title>JMS Test Suite Documentation</title>
+  </articleinfo>
 
   <sect1>
     <title>Aim of the test suite</title>
@@ -26,6 +35,15 @@
     <para>I don't deny that, at the beginning, JORAM results were not
     very good. But the new version being written in parallel of this
     suite, results became better really fast.</para>
+  </sect1>
+  <sect1>
+    <title>Supported JMS providers</title>
+    <para>At the present time, the supported JMS providers are</para>
+    <simplelist>
+      <member>JORAM 3.0.1</member>
+      <member>FioranoMQ 5.21 (provided by me, not by Fiorano)</member>
+    </simplelist>
+    <para>SwiftMQ will be supported soon when version 3.2.0 is released.</para>
   </sect1>
   <sect1>
     <title>Installing the test suite</title>
