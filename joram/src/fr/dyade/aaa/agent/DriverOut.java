@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * Output driver.
  */
 class DriverOut extends Driver {
-  /** RCS version number of this file: $Revision: 1.13 $ */
-  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.13 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.14 $ */
+  public static final String RCS_VERSION="@(#)$Id: DriverOut.java,v 1.14 2002-12-11 11:22:12 maistrfr Exp $";
 
   /** id of associated proxy agent */
   protected AgentId proxy;

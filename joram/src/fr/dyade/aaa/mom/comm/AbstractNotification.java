@@ -32,7 +32,7 @@ package fr.dyade.aaa.mom.comm;
  * notifications exchanged between a client agent and a MOM destination agent.
  */
 public abstract class AbstractNotification
-                    extends fr.dyade.aaa.agent.Notification
+                      extends fr.dyade.aaa.agent.Notification
 {
   /**
    * In the case where the client agent is a proxy agent representing, server

@@ -68,6 +68,7 @@ public class JmsOutputStream implements NotificationOutputStream
   {
     if (not instanceof OutputNotification) {
       Object obj = ((OutputNotification) not).getObj();
+
       if (obj instanceof AbstractJmsReply)
         out.writeObject((AbstractJmsReply) obj);
       else

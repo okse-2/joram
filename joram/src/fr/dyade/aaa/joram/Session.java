@@ -43,8 +43,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class Session implements javax.jms.Session
 {
-  /** Task actually terminating pending transactions. */
-  private TimerTask transactask = null;
+  /** Task for closing the session if it becomes pending. */
+  private TimerTask closingTask = null;
+  /** <code>true</code> if the session's transaction is scheduled. */
+  private boolean scheduled = false;
+
+  /** Timer for replying to expired consumers' requests. */
+  private fr.dyade.aaa.util.Timer consumersTimer = null;
 
   /** The message listener of the session, if any. */
   protected javax.jms.MessageListener messageListener = null;
@@ -131,6 +136,11 @@ public class Session implements javax.jms.Session
     repliesIn = new fr.dyade.aaa.util.Queue();
     sendings = new Hashtable();
     deliveries = new Hashtable();
+
+    // If the session is transacted and the transactions limited by a timer,
+    // a closing task might be useful.
+    if (transacted && cnx.factoryConfiguration.txTimer != 0)
+      closingTask = new SessionCloseTask();
 
     cnx.sessions.add(this);
 
@@ -466,6 +476,16 @@ public class Session implements javax.jms.Session
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed session.");
 
+    // Checks if the topic to retrieve is the administration topic:
+    if (topicName.equals("#AdminTopic")) {
+      try {
+        GetAdminTopicReply reply =  
+          (GetAdminTopicReply) cnx.syncRequest(new GetAdminTopicRequest());
+        if (reply.getId() != null)
+          return new Topic(reply.getId());
+      }
+      catch (Exception exc) {}
+    }
     return new Topic(topicName);
   }
 
@@ -595,6 +615,9 @@ public class Session implements javax.jms.Session
    */
   public void commit() throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
     if (! transacted)
       throw new IllegalStateException("Can't commit a non transacted"
                                       + " session.");
@@ -603,9 +626,10 @@ public class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
-    if (transactask != null) {
-      transactask.cancel();
-      transactask = null;
+    // If the transaction was scheduled: cancelling.
+    if (scheduled) {
+      closingTask.cancel();
+      scheduled = false;
     }
 
     // Sending client messages:
@@ -647,6 +671,9 @@ public class Session implements javax.jms.Session
    */
   public void rollback() throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
     if (! transacted)
       throw new IllegalStateException("Can't rollback a non transacted"
                                       + " session.");
@@ -655,9 +682,10 @@ public class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
 
-    if (transactask != null) {
-      transactask.cancel();
-      transactask = null;
+    // If the transaction was scheduled: cancelling.
+    if (scheduled) {
+      closingTask.cancel();
+      scheduled = false;
     }
 
     // Denying the received messages:
@@ -728,6 +756,10 @@ public class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
                                  + ": closing..."); 
 
+    // Finishing the timer, if any:
+    if (consumersTimer != null)
+      consumersTimer.cancel();
+
     // Emptying the current pending deliveries:
     try {
       repliesIn.stop();
@@ -759,6 +791,17 @@ public class Session implements javax.jms.Session
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed."); 
   }
 
+  /** Schedules a consumer task to the session's timer. */
+  synchronized void schedule(TimerTask task, long timer)
+  {
+    if (consumersTimer == null)
+      consumersTimer = new fr.dyade.aaa.util.Timer();
+
+    try {
+      consumersTimer.schedule(task, timer);
+    }
+    catch (Exception exc) {}
+  }
   
   /**
    * Starts the asynchronous deliveries in the session.
@@ -850,11 +893,9 @@ public class Session implements javax.jms.Session
    */
   void prepareSend(Destination dest, fr.dyade.aaa.mom.messages.Message msg)
   {
-    boolean rearmTimer = false;
-    if (transactask != null) {
-      transactask.cancel();
-      rearmTimer = true;
-    }
+    // If the transaction was scheduled, cancelling:
+    if (scheduled)
+      closingTask.cancel();
 
     ProducerMessages pM = (ProducerMessages) sendings.get(dest.getName());
     if (pM == null) {
@@ -863,14 +904,9 @@ public class Session implements javax.jms.Session
     }
     pM.addMessage(msg);
 
-    try {
-      if (rearmTimer) {
-        transactask = new TxTimerTask(this);
-        cnx.transactimer.schedule(transactask,
-                                  cnx.factoryConfiguration.txTimer * 1000);
-      }
-    }
-    catch (Exception e) {}
+    // If the transaction was scheduled, re-scheduling it:
+    if (scheduled)
+      cnx.schedule(closingTask);
   }
 
   /** 
@@ -885,8 +921,9 @@ public class Session implements javax.jms.Session
    */
   void prepareAck(String name, String id, boolean queueMode)
   {
-    if (transactask != null) 
-      transactask.cancel();
+    // If the transaction was scheduled, cancelling:
+    if (scheduled)
+      closingTask.cancel();
 
     MessageAcks acks = (MessageAcks) deliveries.get(name);
     if (acks == null) {
@@ -895,14 +932,11 @@ public class Session implements javax.jms.Session
     }
     acks.addId(id);
 
-    try {
-      if (cnx.transactimer != null) {
-        transactask = new TxTimerTask(this);
-        cnx.transactimer.schedule(transactask,
-                                  cnx.factoryConfiguration.txTimer * 1000);
-      }
+    // If the transaction must be scheduled, scheduling it:
+    if (closingTask != null) {
+      scheduled = true;
+      cnx.schedule(closingTask);
     }
-    catch (Exception e) {}
   }
 
   /**
@@ -1002,6 +1036,26 @@ public class Session implements javax.jms.Session
                                              reply.getQueueMode(), true));
       }
       catch (JMSException jE) {}
+    }
+  }
+
+  /**
+   * The <code>SessionCloseTask</code> class is used by non-XA transacted
+   * sessions for taking care of closing them if they tend to be pending,
+   * and if a transaction timer has been set.
+   */
+  private class SessionCloseTask extends TimerTask
+  {
+    /** Method called when the timer expires, actually closing the session. */
+    public void run()
+    {
+      try {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN, "Session closed "
+                                     + "because of pending transaction");
+        close();
+      }
+      catch (Exception e) {}
     }
   }
 }

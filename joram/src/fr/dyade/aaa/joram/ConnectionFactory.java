@@ -28,7 +28,6 @@
 package fr.dyade.aaa.joram;
 
 import java.net.*;
-import java.util.Hashtable;
 
 import javax.jms.JMSException;
 import javax.naming.*;
@@ -38,51 +37,49 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
  */
-public class ConnectionFactory implements javax.jms.ConnectionFactory,
-                                          javax.naming.Referenceable,
-                                          java.io.Serializable
+public class ConnectionFactory
+             extends fr.dyade.aaa.joram.admin.AdministeredObject
+             implements javax.jms.ConnectionFactory
 {
-  /**
-   * Class table holding the <code>ConnectionFactory</code> instances, needed
-   * by the naming service.
-   * <p>
-   * <b>Key:</b> cf's class name + url<br>
-   * <b>Object:</b> cf's instance
-   */
-  protected static Hashtable instancesTable = new Hashtable();
-
   /** Object containing the factory's configuration parameters. */
   protected FactoryConfiguration config;
 
 
   /**
    * Constructs a <code>ConnectionFactory</code> instance wrapping a given
-   * agent server url.
+   * server's parameters.
    *
-   * @param url  Url of the agent server.
-   * @exception ConnectException  If the url is incorrect.
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is unknown.
    */
-  public ConnectionFactory(String url) throws ConnectException
+  public ConnectionFactory(String host, int port) throws UnknownHostException
   {
-    config = new FactoryConfiguration();
-    
-    try {
-      config.serverUrl = new JoramUrl(url);
-      config.serverAddr = InetAddress.getByName(config.serverUrl.getHost());
-    }
-    catch (MalformedURLException mE) {
-      throw new ConnectException("Incorrect server url: " + url);
-    }
-    catch (UnknownHostException uE) {
-      throw new ConnectException("Unknown host in server url: " + url);
-    }
-    config.port = config.serverUrl.getPort();
+    super((new JoramUrl(host, port, null)).toString());
 
-    // Registering the instance in the table:
-    instancesTable.put(this.getClass().getName() + "/" + url, this);
+    config = new FactoryConfiguration();
+
+    config.serverAddr = InetAddress.getByName(host);
+    config.port = port;
+    config.serverUrl = new JoramUrl(host, port, null);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created."); 
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+  }
+
+  /**
+   * Constructs a <code>ConnectionFactory</code> instance wrapping a given
+   * server's url.
+   *
+   * @param url  The server's url.
+   *
+   * @exception MalformedURLException  If the url is incorrect.
+   * @exception UnknownHostException  If the host is unknown.
+   */
+  public ConnectionFactory(String url) throws Exception
+  {
+    this((new JoramUrl(url)).getHost(), (new JoramUrl(url)).getPort());
   }
 
   /** Returns a string view of the connection factory. */
@@ -138,23 +135,15 @@ public class ConnectionFactory implements javax.jms.ConnectionFactory,
       config.txTimer = timer;
   }
 
-  /** Sets the naming reference of this connection factory. */
+  /** Sets the naming reference of a connection factory. */
   public Reference getReference() throws NamingException
   {
-    Reference ref = new Reference(this.getClass().getName(),
-                                  "fr.dyade.aaa.joram.ObjectFactory",
-                                  null);
+    Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.url", config.serverUrl.toString()));
     ref.add(new StringRefAddr("cFactory.cnxT",
                               (new Integer(config.cnxTimer)).toString()));
     ref.add(new StringRefAddr("cFactory.txT",
                               (new Integer(config.txTimer)).toString()));
     return ref;
-  }
-
-  /** Returns this connection factory to the name service. */
-  public static Object getInstance(String url)
-  {
-    return instancesTable.get(url);
   }
 }

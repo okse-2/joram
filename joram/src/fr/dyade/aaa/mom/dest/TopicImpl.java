@@ -39,22 +39,33 @@ import java.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * The <code>TopicImpl</code> class provides the MOM topic behaviour,
+ * The <code>TopicImpl</code> class implements the MOM topic behaviour,
  * basically distributing the received messages to subscribers.
+ * <p>
+ * A Topic might be part of a hierarchy; if it is the case, and if the topic
+ * is not on top of that hierarchy, it will have a father to forward messages
+ * to.
+ * <p>
+ * A topic might also be part of a cluster; if it is the case, it will have
+ * friends to forward messages to.
+ * <p>
+ * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
 public class TopicImpl extends DestinationImpl
 {
   /**
    * Table of subscriptions.
    * <p>
-   * <b>Key:</b> Identifier of subscribing agents<br>
-   * <b>Object:</b> Vector of <code>SubscribeRequest</code> instances
+   * <b>Key:</b> subscriber identifier<br>
+   * <b>Object:</b> vector of <code>SubscribeRequest</code> instances
    */
   private Hashtable subsTable;
+
   /** Identifier of this topic's father, if any. */
-  private AgentId fatherId = null;
-  /** Vector of cluster fellows. */
-  private Vector friends;
+  protected AgentId fatherId = null;
+  /** Vector of cluster fellows, if any. */
+  protected Vector friends = null;
+
 
   /**
    * Constructs a <code>TopicImpl</code> instance.
@@ -67,157 +78,602 @@ public class TopicImpl extends DestinationImpl
     super(topicId, adminId);
 
     subsTable = new Hashtable();
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  /** Returns a string view of this queue implementation. */
+  /** Returns a string view of this TopicImpl instance. */
   public String toString()
   {
     return "TopicImpl:" + destId.toString();
   }
 
-
   /**
-   * Distributes the requests to the appropriate topic reactions.
-   * <p>
-   * Accepted requests are:
-   * <ul>
-   * <li><code>ClientMessages</code> notifications,</li>
-   * <li><code>SubscribeRequest</code> notifications,</li>
-   * <li><code>UnsubscribeRequest</code> notifications,</li>
-   * <li><code>SetSubTopicRequest</code> notifications,</li>
-   * <li><code>ClusterRequest</code> notifications,</li>
-   * <li><code>UnclusterRequest</code> notifications,</li>
-   * <li><code>ClusterMessages</code> notifications.</li>
-   * </ul>
-   * <p>
-   * An <code>ExceptionReply</code> notification is sent back in the case of an
-   * error while processing a request.
+   * Distributes the received notifications to the appropriate reactions.
+   *
+   * @exception UnknownNotificationException  If a received notification is
+   *              unexpected by the topic.
    */
-  public void doReact(AgentId from, AbstractRequest request)
+  public void react(AgentId from, Notification not)
+              throws UnknownNotificationException
   {
+    String reqId = null;
+    if (not instanceof AbstractRequest)
+      reqId = ((AbstractRequest) not).getRequestId();
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
-                                    + ": got " + request.getClass().getName()
-                                    + " with id: " + request.getRequestId()
+                                    + ": got " + not.getClass().getName()
+                                    + " with id: " + reqId
                                     + " from: " + from.toString());
     try {
-      if (request instanceof ClientMessages)
-        doReact(from, (ClientMessages) request);
-      else if (request instanceof SubscribeRequest)
-        doReact(from, (SubscribeRequest) request);
-      else if (request instanceof UnsubscribeRequest)
-        doReact(from, (UnsubscribeRequest) request);
-      else if (request instanceof SetSubTopicRequest)
-        doReact(from, (SetSubTopicRequest) request);
-      else if (request instanceof ClusterRequest)
-        doReact(from, (ClusterRequest) request);
-      else if (request instanceof UnclusterRequest)
-        doReact(from, (UnclusterRequest) request);
-      else if (request instanceof ClusterMessages)
-        doReact(from, (ClusterMessages) request);
+      if (not instanceof ClusterRequest)
+        doReact(from, (ClusterRequest) not);
+      else if (not instanceof ClusterTest)
+        doReact(from, (ClusterTest) not);
+      else if (not instanceof ClusterAck)
+        doReact(from, (ClusterAck) not);
+      else if (not instanceof ClusterNot)
+        doReact(from, (ClusterNot) not);
+      else if (not instanceof UnclusterRequest)
+        doReact(from, (UnclusterRequest) not);
+      else if (not instanceof UnclusterNot)
+        doReact(from, (UnclusterNot) not);
+      else if (not instanceof SetFatherRequest)
+        doReact(from, (SetFatherRequest) not);
+      else if (not instanceof FatherTest)
+        doReact(from, (FatherTest) not);
+      else if (not instanceof FatherAck)
+        doReact(from, (FatherAck) not);
+      else if (not instanceof UnsetFatherRequest)
+        doReact(from, (UnsetFatherRequest) not);
+      else if (not instanceof SubscribeRequest)
+        doReact(from, (SubscribeRequest) not);
+      else if (not instanceof UnsubscribeRequest)
+        doReact(from, (UnsubscribeRequest) not);
+      else if (not instanceof TopicForwardNot)
+        doReact(from, (TopicForwardNot) not);
       else
-        super.doReact(from, (AbstractRequest) request);
+        super.react(from, not);
     }
-    catch (MomException mE) {
+    // MOM Exceptions are sent to the requester.
+    catch (MomException exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, mE);
+        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
 
-      ExceptionReply eR = new ExceptionReply(request, mE);
-      Channel.sendTo(from, eR);
+      AbstractRequest req = (AbstractRequest) not;
+      Channel.sendTo(from, new ExceptionReply(req, exc));
     }
+  }
+
+  /**
+   * Method implementing the reaction to a <code>ClusterRequest</code>
+   * instance requesting to add a topic to the cluster, or to set a
+   * cluster with a given topic.
+   *
+   * @exception AccessException  If the requester is not an administrator.
+   * @exception RequestException  If this topic is part of a hierarchy, or
+   *              if the joining topic is already part of the cluster.
+   */
+  protected void doReact(AgentId from, ClusterRequest req)
+                 throws MomException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    if (fatherId != null)
+      throw new RequestException("Topic part of a hierarchy");
+
+    AgentId newFriendId = req.getTopicId();
+
+    if (friends == null)
+     friends = new Vector();
+
+    if (friends.contains(newFriendId) || destId.equals(newFriendId))
+      throw new RequestException("Joining topic already part of cluster");
+
+    ClusterTest not = new ClusterTest(req, from);
+    Channel.sendTo(newFriendId, not);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>ClusterTest</code>
+   * notification sent by a fellow topic for testing if this topic might be
+   * part of a cluster.
+   */
+  protected void doReact(AgentId from, ClusterTest not)
+  {
+    // The topic is already part of a cluster: can't join an other cluster.
+    if (friends != null && ! friends.isEmpty())
+      Channel.sendTo(from, new ClusterAck(not, false,
+                                          "Topic [" + destId
+                                          + "] can't join cluster of topic"
+                                          + " [" + from + "] as it is"
+                                          + " already part of a cluster"));
+    // The topic is already part of a hierarchy: can't join a cluster.
+    else if (fatherId != null)
+      Channel.sendTo(from, new ClusterAck(not, false,
+                                          "Topic [" + destId
+                                          + "] can't join cluster of topic"
+                                          + " [" + from + "] as it is"
+                                          + " already part of a hierarchy"));
+    // The topic is free: joining the cluster.
+    else {
+      friends = new Vector();
+      friends.add(from);
+      Channel.sendTo(from, new ClusterAck(not, true,
+                                          "Topic [" + destId
+                                          + "] ok for joining cluster of"
+                                          + " topic [" + from + "]"));
+
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                      + destId.toString() + " joins cluster"
+                                      + "cluster of topic " + from.toString());
+    }
+  }
+
+  /**
+   * Method implementing the reaction to a <code>ClusterAck</code>
+   * notification sent by a topic requested to join the cluster.
+   */ 
+  protected void doReact(AgentId from, ClusterAck ack)
+  { 
+    // Forwarding the notification to the original requester.
+    Channel.sendTo(ack.requester, ack);
+
+    // The topic does not accept to join the cluster: doing nothing.
+    if (! ack.ok)
+      return;
+  
+    AgentId fellowId;
+    ClusterNot fellowNot;
+    ClusterNot newFriendNot = new ClusterNot(from);
+    for (int i = 0; i < friends.size(); i++) {
+      fellowId = (AgentId) friends.get(i);
+      fellowNot = new ClusterNot(fellowId);
+      // Notifying the joining topic of the current fellow.
+      Channel.sendTo(from, fellowNot);
+      // Notifying the current fellow of the joining topic.
+      Channel.sendTo(fellowId, newFriendNot);
+    }
+    friends.add(from);
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                    + from.toString() + " added in "
+                                    + "cluster.");
+  }
+
+  /**
+   * Method implementing the reaction to a <code>ClusterNot</code>
+   * notification sent by a fellow topic for notifying this topic
+   * of a new cluster fellow.
+   */
+  protected void doReact(AgentId from, ClusterNot not)
+  {
+    friends.add(not.topicId);
+      
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                    + not.topicId.toString()
+                                    + " set as a fellow.");
+  }
+ 
+  /**
+   * Method implementing the reaction to an <code>UnclusterRequest</code>
+   * instance requesting this topic to leave the cluster it is part of.
+   *
+   * @exception AccessException  If the requester is not an administrator.
+   * @exception RequestException  If the topic is not part of a cluster.
+   */
+  protected void doReact(AgentId from, UnclusterRequest request)
+                 throws MomException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    if (friends == null || friends.isEmpty())
+      throw new RequestException("Topic not part of any cluster");
+
+    UnclusterNot not = new UnclusterNot();
+    AgentId fellowId;
+    // Notifying each fellow of the leave.
+    while (! friends.isEmpty()) {
+      fellowId = (AgentId) friends.remove(0);
+      Channel.sendTo(fellowId, not);
+    }
+    friends = null;
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Fellows notified of"
+                                    + " topic leave.");
+  }
+ 
+  /**
+   * Method implementing the reaction to an <code>UnclusterNot</code>
+   * notification sent by a topic leaving the cluster.
+   */
+  protected void doReact(AgentId from, UnclusterNot not)
+  {
+    friends.remove(from);
+
+    if (friends.isEmpty())
+      friends = null;
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                    + from.toString() + " removed from"
+                                    + " fellows.");
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetFatherRequest</code>
+   * instance notifying this topic it is part of a hierarchy as a son.
+   *
+   * @exception AccessException  If the requester is not an administrator.
+   * @exception RequestException  If the topic is already part of a hierarchy,
+   *              or of a cluster.
+   */
+  protected void doReact(AgentId from, SetFatherRequest request)
+                 throws MomException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    if (fatherId != null)
+      throw new RequestException("Topic already part of a hierarchy");
+
+    if (friends != null)
+      throw new RequestException("Topic already part of a cluster");
+
+    Channel.sendTo(request.getFatherId(), new FatherTest(request, from));
+  }
+
+  /**
+   * Method reacting to a <code>FatherTest</code> notification checking if it
+   * can be a father to a topic.
+   */ 
+  protected void doReact(AgentId from, FatherTest not)
+  {
+    if (friends != null && ! friends.isEmpty())
+      Channel.sendTo(from, new FatherAck(not, false,
+                                         "Topic [" + destId
+                                         + "] can't accept topic [" + from
+                                         + "] as a son as it is part of a"
+                                         + " cluster"));
+    else
+      Channel.sendTo(from, new FatherAck(not, true,
+                                         "Topic [" + destId
+                                         + "] accepts topic [" + from
+                                         + "] as a son"));
+  }
+
+  /**
+   * Method reacting to a <code>FatherAck</code> notification coming from
+   * the topic this topic requested as a father.
+   */ 
+  protected void doReact(AgentId from, FatherAck not)
+  {
+    // Forwarding the notification to the original requester.
+    Channel.sendTo(not.requester, not);
+
+    // The topic does not accept to join the hierarchy: doing nothing.
+    if (! not.ok)
+      return;
+  
+
+    // The topic accepts to be a father: setting it.
+    fatherId = from;
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                    + from.toString()
+                                    + " set as a father.");
+  }
+
+  /**
+   * Method implementing the reaction to an <code>UnsetFatherRequest</code>
+   * instance notifying this topic to leave its father.
+   *
+   * @exception AccessException  If the requester is not an administrator.
+   * @exception RequestException  If the topic is not a son.
+   */
+  protected void doReact(AgentId from, UnsetFatherRequest request)
+                 throws MomException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    if (fatherId == null)
+      throw new RequestException("Topic is not a son");
+
+    fatherId = null;
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Father unset.");
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SubscribeRequest</code>
+   * instance, requesting to set a new subscription.
+   *
+   * @exception AccessException  If the sender is not a READER.
+   */
+  protected void doReact(AgentId from, SubscribeRequest not)
+                 throws AccessException
+  {
+    if (! isReader(from))
+      throw new AccessException("READ right not granted");
+
+    Vector clientSubs;
+    SubscribeRequest currSub;
+    boolean added = false;
+
+    // If the sender already has subscriptions, adding the new one, or
+    // replacing the one that has the same name:
+    if (subsTable.containsKey(from)) {
+      clientSubs = (Vector) subsTable.get(from);
+      for (int i = 0; i < clientSubs.size(); i++) {
+        currSub = (SubscribeRequest) clientSubs.get(i);
+        if ((currSub.getName()).equals(not.getName())) {
+          clientSubs.setElementAt(not, i);
+          added = true;
+          break;
+        }
+      }	
+      if (! added)
+        clientSubs.add(not);
+    }
+    // Else, creating its entry and adding the new subscription:
+    else {
+      clientSubs = new Vector();
+      clientSubs.add(not);
+      subsTable.put(from, clientSubs);
+    }
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription "
+                                    + not.getName() + " of client " + from
+                                    + " stored.");
+  }
+
+  /**
+   * Method implementing the reaction to an <code>UnsubscribeRequest</code>
+   * instance, requesting to remove one or many client subscriptions.
+   *
+   * @exception RequestException  If the subscription to remove does not exist.
+   */
+  protected void doReact(AgentId from, UnsubscribeRequest not)
+                 throws RequestException
+  {
+    // Getting the name of the subscription to remove:
+    String subName = not.getName();
+    // Getting the subscriptions of the requester:
+    Vector clientSubs = (Vector) subsTable.get(from);
+
+    // If the requester has subscriptions: 
+    if (clientSubs != null) {
+      // If it requests to remove all its subscriptions, removing them:
+      if (subName == null) {
+        subsTable.remove(from);
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "All subscriptions" 
+                                        + " of client " + from + " removed.");
+        return;
+      }
+      // Else, removing the identified subscription:
+      else {
+        int i = 0;
+        SubscribeRequest sub;
+        while (i < clientSubs.size()) {
+          sub = (SubscribeRequest) clientSubs.get(i);
+          if (subName.equals(sub.getName())) {
+            clientSubs.remove(i);
+
+            if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription " 
+                                            + subName + " removed.");
+
+            // If no more subs are available for this requester, removing
+            // its entry:
+            if (clientSubs.isEmpty())
+              subsTable.remove(from);
+
+            return;
+          }
+          else
+            i++;
+        }
+      }
+    }
+    throw new RequestException("Subscription [" + subName
+                               + "] does not exist");
+  } 
+
+  /**
+   * Method implementing the reaction to a <code>TopicForwardNot</code>
+   * instance, carrying messages forwarded by a cluster fellow or a
+   * hierarchical son.
+   */
+  protected void doReact(AgentId from, TopicForwardNot not)
+  {
+    // If the forward comes from a son, forwarding it to the father, if any.
+    if (not.toFather && fatherId != null)
+      Channel.sendTo(fatherId, not);
+    
+    // Processing the received messages. 
+    processMessages(not.messages);
+  }
+
+
+  /**
+   * The <code>DestinationImpl</code> class calls this method for passing
+   * notifications which have been partly processed, so that they are
+   * specifically processed by the <code>TopicImpl</code> class.
+   */
+  protected void specialProcess(Notification not)
+  {
+    if (not instanceof SetRightRequest)
+      doProcess((SetRightRequest) not);
+    else if (not instanceof ClientMessages)
+      doProcess((ClientMessages) not);
+    else if (not instanceof UnknownAgent)
+      doProcess((UnknownAgent) not);
+    else if (not instanceof DeleteNot)
+      doProcess((DeleteNot) not);
   }
   
   /**
-   * Method implementing the topic reaction to a <code>ClientMessages</code>
-   * instance holding messages sent by a client agent.
+   * Method specifically processing a <code>SetRightRequest</code> instance.
    * <p>
-   * The method may forward the notification to the topic father if any,
-   * to the cluster fellow topics as <code>ClusterMessages</code> instances if
-   * needed. It may finaly send <code>TopicMsgsReply</code> instances to the
-   * valid subscribers.
-   * <p>
-   * If the sender is not a writer on the topic, the messages are sent to the
-   * DMQ.
-   *
-   * @exception AccessException  If the sender is not a writer.
+   * When a reader is removed, deleting this reader's subscriptions if any,
+   * and sending <code>ExceptionReply</code> notifications to the client.
    */
-  private void doReact(AgentId from, ClientMessages not) throws AccessException
+  protected void doProcess(SetRightRequest not)
   {
-    Vector messages = not.getMessages();
-    if (messages.isEmpty())
+    // If the request does not unset a reader, doing nothing.
+    if (not.getRight() != -READ)
       return;
 
-    // If sender is not a writer, sending the messages to the DMQ, and
-    // throwing an exception:
-    if (! super.isWriter(from)) {
-      for (int i = 0; i < messages.size(); i++) {
-        try {
-          ((Message) messages.get(i)).notWritable = true;
-        }
-        // Invalid message: removing it.
-        catch (ClassCastException cE) {
-          messages.remove(i);
-          i--;
-        }
-      }
-      sendToDMQ(messages, not.getDMQId());
-      throw new AccessException("The needed WRITE right is not granted"
-                                + " on topic " + destId);
+    AgentId user = not.getClient();
+
+    if (! subsTable.containsKey(user))
+      return;
+
+    Vector subs = (Vector) subsTable.remove(user);
+
+    SubscribeRequest sub;
+    ExceptionReply reply;
+    while (! subs.isEmpty()) {
+      sub = (SubscribeRequest) subs.remove(0);
+      reply = new ExceptionReply(sub.getConnectionKey(), sub.getName(),
+                                 new AccessException("READ right removed"));
+      Channel.sendTo(user, reply);
     }
+  }
 
-    // Forwarding the messages to the father, if any:
-    if (fatherId != null)
-      Channel.sendTo(fatherId, not);
+  /**
+   * Method specifically processing a <code>ClientMessages</code> instance.
+   * <p>
+   * This method may forward the messages to the topic father if any, or
+   * to the cluster fellows if any.It may finally send
+   * <code>TopicMsgsReply</code> instances to the valid subscribers.
+   */
+  protected void doProcess(ClientMessages not)
+  {
+    // Forwarding the messages to the father or the cluster fellows, if any:
+    forwardMessages(not.getMessages());
+    
+    // Processing the messages:
+    processMessages(not.getMessages());
+  }
 
-    // Forwarding the messages to the cluster fellows, if any:
+  /**
+   * Method specifically processing an <code>UnknownAgent</code> instance.
+   * <p>
+   * This method notifies the administrator of the failing cluster or
+   * hierarchy building request, if needed, or removes the subscriptions of
+   * the deleted client, if any, or sets the father identifier to null if it
+   * comes from a deleted father.
+   */
+  protected void doProcess(UnknownAgent uA)
+  {
+    AgentId agId = uA.agent;
+    Notification not = uA.not;
+
+    // Deleted topic was requested to join the cluster: notifying the
+    // requester:
+    if (not instanceof ClusterTest) {
+      ClusterTest cT = (ClusterTest) not;
+      String info = "Topic [" + agId + "] can't join cluster "
+                    + "as it does not exist";
+      Channel.sendTo(cT.requester, new ClusterAck(cT, false, info));
+    }
+    // Deleted topic was requested as a father: notifying the requester:
+    else if (not instanceof FatherTest) {
+      FatherTest fT = (FatherTest) not;
+      String info = "Topic [" + agId + "] can't join hierarchy "
+                    + "as it does not exist";
+      Channel.sendTo(fT.requester, new FatherAck(fT, false, info));
+    }
+    else {
+      // Removing the deleted client's subscriptions, if any.
+      subsTable.remove(agId);
+      // Removing the father identifier, if needed.
+      if (fatherId != null && agId.equals(fatherId))
+        fatherId = null;
+    }
+  }
+
+  /**
+   * Method specifically processing a
+   * <code>fr.dyade.aaa.agent.DeleteNot</code> instance.
+   * <p>
+   * <code>UnknownAgent</code> notifications are sent for each
+   * subscription, and <code>UnclusterNot</code> notifications to the cluster
+   * fellows.
+   */
+  protected void doProcess(DeleteNot not)
+  {
+    AgentId clientId;
+    Vector subs;
+    SubscribeRequest sub;
+
+    // For each subscriber...
+    Enumeration keys = subsTable.keys();
+    while (keys.hasMoreElements()) {
+      clientId = (AgentId) keys.nextElement();
+      subs = (Vector) subsTable.remove(clientId);
+
+      while (! subs.isEmpty()) {
+        sub = (SubscribeRequest) subs.remove(0);
+        Channel.sendTo(clientId, new UnknownAgent(destId, sub));
+      }
+    }
+    subsTable = null;
+
+    // For each cluster fellow if any...
     if (friends != null) {
+      AgentId topicId;
+      while (! friends.isEmpty()) {
+        topicId = (AgentId) friends.remove(0);
+        Channel.sendTo(topicId, new UnclusterNot());
+      }
+    }
+  }
+
+  /**
+   * Actually forwards a vector of messages to the father or the cluster
+   * fellows, if any.
+   */
+  protected void forwardMessages(Vector messages)
+  {
+    if (friends != null && ! friends.isEmpty()) {
       AgentId topicId;
       for (int i = 0; i < friends.size(); i++) {
         topicId = (AgentId) friends.get(i);
+        Channel.sendTo(topicId, new TopicForwardNot(messages, false));
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages forwarded"
-                                        + " to fellow topic " + topicId);
-
-        Channel.sendTo(topicId, new ClusterMessages(from, not));
-      }
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+                                        + "forwarded to fellow "
+                                        + topicId.toString());
+      } 
     }
+    else if (fatherId != null) {
+      Channel.sendTo(fatherId, new TopicForwardNot(messages, true));
 
-    // Processing the messages:
-    processMessages(from, messages);
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+                                      + "forwarded to father "
+                                      + fatherId.toString());
+    }
   }
 
-  /**
-   * Method implementing the topic reaction to a <code>ClusterMessages</code>
-   * instance holding messages sent by a topic part of the same cluster.
-   * <p>
-   * The method may send <code>TopicMsgsReply</code> notifications to the
-   * valid subscribers.
-   *
-   * @exception AccessException  If the sender is not a WRITER.
-   */
-  private void doReact(AgentId from, ClusterMessages not)
-               throws AccessException
-  {
-    // If sender is not a writer, throwing an exception:
-    if (! super.isWriter(from))
-      throw new AccessException("The needed WRITE right is not granted"
-                                + " on topic " + destId);
-
-    // Processing the messages:
-    processMessages(not.getFrom(), not.getMessages());
-  }
-
-  
   /**
    * Actually processes the distribution of the received messages to the
    * valid subscriptions by sending <code>TopicMsgsReply</code> to the
    * valid subscribers.
    */
-  private void processMessages(AgentId from, Vector messages)
+  protected void processMessages(Vector messages)
   {
     AgentId client;
     Vector clientSubs;
@@ -250,357 +706,22 @@ public class TopicImpl extends DestinationImpl
           }
           // If the current message replies to subscriptions, adding it in
           // the reply: 
-          if (! subNames.isEmpty())
+          if (! subNames.isEmpty()) {
             rep.addMessage(msg, subNames);
+
+           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+             MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+                                           + msg.getIdentifier() + " added"
+                                           + " for delivery to "
+                                           + client.toString());
+          }
         }
-        catch (ClassCastException cE) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-            MomTracing.dbgDestination.log(BasicLevel.WARN, "Invalid message: "
-                                          + cE);
-        }
+        // Invalid message class: going on.
+        catch (ClassCastException cE) {}
       }
       // If the reply is not empty, sending it:
-      if (! rep.isEmpty()) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Vector of messages"
-                                        + " sent to subscriber " + client);
+      if (! rep.isEmpty())
         Channel.sendTo(client, rep);
-      }
     }
-  }
-
-  /**
-   * Method implementing the topic reaction to a <code>SubscribeRequest</code>
-   * instance, requesting to set a new subscription.
-   *
-   * @exception AccessException  If the sender is not a READER.
-   */
-  private void doReact(AgentId from, SubscribeRequest not)
-             throws AccessException
-  {
-    if (! super.isReader(from))
-      throw new AccessException("The needed READ right is not granted"
-                                + " on topic " + destId);
-
-    Vector clientSubs;
-    SubscribeRequest currSub;
-    boolean added = false;
-
-    // If the sender already has subscriptions, adding the new one, or
-    // replacing the one that has the same name:
-    if (subsTable.containsKey(from)) {
-      clientSubs = (Vector) subsTable.get(from);
-      for (int i = 0; i < clientSubs.size(); i++) {
-        currSub = (SubscribeRequest) clientSubs.get(i);
-        if ((currSub.getName()).equals(not.getName())) {
-          clientSubs.setElementAt(not, i);
-          added = true;
-          break;
-        }
-      }	
-      if (! added)
-        clientSubs.add(not);
-    }
-    // Else, creating its entry and adding the new subscription:
-    else {
-      clientSubs = new Vector();
-      clientSubs.add(not);
-      subsTable.put(from, clientSubs);
-    }
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription "
-                                    + not.getName() + " of client " + from
-                                    + " stored.");
-  }
-
-  /**
-   * Method implementing the topic reaction to an
-   * <code>UnsubscribeRequest</code> instance, requesting to remove one
-   * or many client subscriptions.
-   *
-   * @exception RequestException  If the subscription to remove does not exist.
-   */
-  private void doReact(AgentId from,
-                       UnsubscribeRequest not) throws RequestException
-  {
-    // Getting the name of the subscription to remove:
-    String subName = not.getName();
-    // Getting the subscriptions of the requester:
-    Vector clientSubs = (Vector) subsTable.get(from);
-
-    // If the requester has subscriptions: 
-    if (clientSubs != null) {
-      // If it requests to remove all its subscriptions, removing them:
-      if (subName == null) {
-        subsTable.remove(from);
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "All subscriptions" 
-                                        + " of client " + from + " removed.");
-        return;
-      }
-      // Else, removing the identified subscription:
-      else {
-        int i = 0;
-        SubscribeRequest sub;
-        while (i < clientSubs.size()) {
-          sub = (SubscribeRequest) clientSubs.get(i);
-          if (subName.equals(sub.getName())) {
-            clientSubs.remove(i);
-
-            if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Subscription " 
-                                            + subName + " removed.");
-
-              // If no more subs are available for this requester, removing
-              // its entry:
-              if (clientSubs.isEmpty())
-                subsTable.remove(from);
-
-            return;
-          }
-          else
-            i++;
-        }
-      }
-    }
-    throw new RequestException("Can't remove non existing subscription "
-                               + subName);
-  } 
-
-  /**
-   * Method implementing the topic reaction to a
-   * <code>SetSubTopicRequest</code> instance holding the identifiers of a
-   * topics hierarchy.
-   *
-   * @exception AccessException  If the requester is not an ADMIN.
-   */
-  private void doReact(AgentId from, SetSubTopicRequest not)
-               throws MomException
-  {
-    AgentId fatherId = not.getTopicId();
-    AgentId sonId = not.getSubTopicId();
-
-    if (! destId.equals(fatherId))
-      this.fatherId = fatherId;
-    else if (isAdministrator(from))
-      setUserRight(sonId, WRITE);
-    else
-      throw new AccessException("The needed ADMIN right is not granted"
-                                + " on topic " + destId);
-  }
-
-  /**
-   * Method implementing the topic reaction to a <code>ClusterRequest</code>
-   * instance, requesting the topic to be part of a cluster.
-   *
-   * @exception AccessException  If the requester is not an ADMIN.
-   * @exception RequestException  If the topic is not part of the new cluster,
-   *              or if the topic is already part of a cluster.
-   */  
-  private void doReact(AgentId from, ClusterRequest not) throws MomException
-  {
-    if (! isAdministrator(from))
-      throw new AccessException("The needed ADMIN right is not granted"
-                                + " on topic " + destId);
-    if (friends != null && ! friends.isEmpty())
-      throw new RequestException("Invalid cluster request as topic " + destId
-                                 + " is already part of a cluster.");
-
-    Vector topics = not.getTopics();
-    int index = topics.indexOf(super.destId);
-
-    if (index == -1)
-      throw new RequestException("Invalid cluster request as this topic "
-                                 + " is not part of the cluster to form.");
-
-    AgentId topicId;
-    if (friends == null)
-      friends = new Vector();
-
-    // Adding each new friend to the list of fellows and granting them
-    // the WRITE permission:
-    for (int i = 0; i < topics.size(); i++) {
-      topicId = (AgentId) topics.get(i);
-
-      if (i != index) {
-        friends.add(topicId);
-        setUserRight(topicId, 2);
-      }
-    }
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Cluster " + topics
-                                    + " registered.");
-  }
-
-  /**
-   * Method implementing the topic reaction to an
-   * <code>UnclusterRequest</code> instance, cancelling the cluster the
-   * topic is part of.
-   *
-   * @exception AccessException  If the requester is not an ADMIN.
-   * @exception RequestException  If the topic is not part of a cluster.
-   */  
-  private void doReact(AgentId from, UnclusterRequest not) throws MomException
-  {
-    if (! isAdministrator(from))
-      throw new AccessException("The needed ADMIN right is not granted"
-                                + " on topic " + destId);
-    if (friends == null || friends.isEmpty())
-      throw new RequestException("Can't unclusterize this topic as it is "
-                                 + "not part of a cluster.");
-
-    AgentId topicId;
-
-    // Removing the cluster fellows:
-    while (! friends.isEmpty()) {
-      topicId = (AgentId) friends.remove(0);
-      setUserRight(topicId, -2);
-    }
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Cluster quitted.");
-  }
-
-  /**
-   * Method implementing the topic reaction to an <code>ExceptionReply</code>
-   * sent by a fellow topic which actually failed to join the cluster, or 
-   * which is deleted.
-   * <p>
-   * This method simply removes this topic from the vector of cluster's
-   * fellows.
-   */
-  public void removeTopic(AgentId from)
-  {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
-                                    + " notified of a corrupted cluster"
-                                    + " topic: " + from);
-    AgentId tId;
-
-    if (friends != null) {
-      for (int i = 0; i < friends.size(); i++) {
-        tId = (AgentId) friends.get(i);
-        if (tId.equals(from)) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-            MomTracing.dbgDestination.log(BasicLevel.WARN, "Topic removed"
-                                          + " from the cluster list.");
-          try {
-            setUserRight(tId, -2);
-          }
-          catch (RequestException rE) {}
-          friends.remove(i);
-          break;
-        }
-      }
-    }
-  }
-
-  /**
-   * Method implementing the topic reaction to a
-   * <code>fr.dyade.aaa.agent.UnknownAgent</code> notification received
-   * when trying to send messages to a deleted client.
-   * <p>
-   * This method simply removes the subscriptions of the deleted client, or
-   * its identifier if it is a topic part of the cluster, or sets the father
-   * identifier to null.
-   * <p>
-   * This case might also happen when sending a <code>ClientMessages</code>
-   * to a dead message queue. In that case, the invalid DMQ identifier is set
-   * to null.
-   */
-  public void removeDeadClient(UnknownAgent uA)
-  {
-    AgentId agId = uA.agent;
-    Notification not = uA.not;
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
-                                    + " notified of a dead client: "
-                                    + agId.toString());
-
-    Vector deadM = new Vector();
-
-    // If the dead client is in fact a dead message queue, updating its
-    // identifier to null:
-    if (dmqId != null && agId.equals(dmqId)) {
-      dmqId = null;
-      deadM.addAll(((ClientMessages) not).getMessages());
-    }
-    else if (DeadMQueueImpl.id != null && agId.equals(DeadMQueueImpl.id)) {
-      DeadMQueueImpl.id = null;
-      deadM.addAll(((ClientMessages) not).getMessages());
-    }
-    // Removing the deleted client's subscriptions.
-    else if (not instanceof TopicMsgsReply)
-      subsTable.remove(agId);
-    else if (not instanceof ClientMessages)
-      fatherId = null;
-    else if (not instanceof ClusterMessages && friends != null)
-      friends.remove(agId);
-
-    // Sending dead messages to the DMQ, if needed:
-    if (! deadM.isEmpty())
-      sendToDMQ(deadM, null);
-  }
-
-  /**
-   * Method implementing the topic reaction to a
-   * <code>fr.dyade.aaa.agent.DeleteNot</code> notification requesting it
-   * to be deleted.
-   * <p>
-   * The notification is ignored if the sender is not an admin of the topic.
-   * Otherwise, <code>ExceptionReply</code> replies are sent to the
-   * subscribers and the cluster fellows.
-   */
-  public void delete(AgentId from)
-  {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN, "--- " + this
-                                    + " notified to be deleted.");
-
-    // If the requester is not an admin, ignoring the notification:
-    if (! super.isAdministrator(from)) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, "Deletion request"
-                                      + " sent by invalid agent: " + from);
-      return;
-    }
-
-    // Building the exception to send to the subscribers: 
-    DestinationException exc = new DestinationException("Topic " + destId
-                                                        + " is deleted.");
-    AgentId clientId;
-    Vector subs;
-    ExceptionReply excRep;
-
-    // For each subscriber...
-    Enumeration keys = subsTable.keys();
-    while (keys.hasMoreElements()) {
-      clientId = (AgentId) keys.nextElement();
-      excRep = new ExceptionReply(exc);
-      Channel.sendTo(clientId, excRep);
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Client "
-                                      + clientId.toString() + " notified"
-                                      + " of the topic deletion.");
-    }
-    subsTable = null;
-
-    AgentId topicId;
-    // For each cluster fellow if any...
-    if (friends != null) {
-      while (! friends.isEmpty()) {
-        topicId = (AgentId) friends.remove(0);
-        excRep = new ExceptionReply(exc);
-        Channel.sendTo(topicId, excRep);
-            
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic " + topicId
-                                        + " notified of the topic deletion.");
-      }
-    }
-    deleted = true;
   }
 }

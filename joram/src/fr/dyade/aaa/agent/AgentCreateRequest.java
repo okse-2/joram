@@ -32,8 +32,11 @@ import java.io.*;
  * @version 1.0, 12/10/97
  */
 public class AgentCreateRequest extends Notification {
-  /** RCS version number of this file: $Revision: 1.10 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.11 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentCreateRequest.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $"; 
+
+
+  static final long serialVersionUID = -873215263839213534L;
 
   /** Id. of agent to reply to */
   public AgentId reply;

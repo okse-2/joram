@@ -27,8 +27,6 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.util.Hashtable;
-
 import javax.naming.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -36,21 +34,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.Destination</code> interface.
  */
-public abstract class Destination implements javax.jms.Destination,
-                                             javax.naming.Referenceable,
-                                             java.io.Serializable
+public abstract class Destination
+                      extends fr.dyade.aaa.joram.admin.AdministeredObject
+                      implements javax.jms.Destination
 {
-  /**
-   * Class table holding the <code>Destination</code> instances, needed by the
-   * naming service.
-   * <p>
-   * <b>Key:</b> destination's name<br>
-   * <b>Object:</b> destination's instance
-   */
-  protected static Hashtable instancesTable = new Hashtable();
-
-  /** Identifier of the destination agent. */
-  protected String agentId;
+  /** Identifier of the agent destination. */
+  private String agentId;
 
 
   /**
@@ -60,36 +49,26 @@ public abstract class Destination implements javax.jms.Destination,
    */ 
   public Destination(String agentId)
   {
+    super(agentId);
     this.agentId = agentId;
-
-    // Registering this instance in the table:
-    instancesTable.put(agentId, this);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
 
-  /** Sets the naming reference of this destination. */
-  public Reference getReference() throws NamingException
-  {
-    Reference ref = new Reference(this.getClass().getName(),
-                                  "fr.dyade.aaa.joram.ObjectFactory",
-                                  null);
-    ref.add(new StringRefAddr("dest.name", agentId));
-    return ref;
-  }
-
-  /** Returns a destination to the name service. */
-  public static Object getInstance(String name)
-  {
-    return instancesTable.get(name);
-  }
-
   /** Returns the name of the destination. */
   public String getName()
   {
     return agentId;
+  }
+
+  /** Sets the naming reference of a destination. */
+  public Reference getReference() throws NamingException
+  {
+    Reference ref = super.getReference();
+    ref.add(new StringRefAddr("dest.name", agentId));
+    return ref;
   }
 
   /**

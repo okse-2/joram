@@ -28,300 +28,659 @@
 package fr.dyade.aaa.joram.admin;
 
 import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 /**
- * The <code>AdminItf</code> interface defines the set of methods for
- * administering Joram server(s).
- * <p>
- * This class is a prototype written in the context of Joram's
- * administration refactoring.
+ * The <code>AdminItf</code> interface defines the set of methods needed
+ * for administering a JORAM platform.
  */
 public interface AdminItf
 {
   /**
-   * Connects an administration session with the Joram server running on
-   * a given host and listening to a given port.
+   * Opens a connection dedicated to administering with the Joram server
+   * running on a given host and listening to a given port.
    *
-   * @param hostName  The name or IP address of the host the server is running
-   *          on.
+   * @param host  The name or IP address of the host the server is running on.
    * @param port  The number of the port the server is listening to.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
    * @param cnxTimer  Timer in seconds during which connecting to the server
    *          is attempted.
-   * @exception ConnectException  If the connection to the server fails.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
   public void connect(String hostName, int port, String name,
                       String password, int cnxTimer)
-              throws ConnectException, AdminException;
+              throws UnknownHostException, ConnectException, AdminException;
 
   /**
-   * Connects an administration session with the Joram server running on
-   * the default "locahost" host and listening to the default 16010 port.
+   * Opens a connection dedicated to administering with the Joram server
+   * running on the default "locahost" host and listening to the default
+   * 16010 port.
    *
    * @param name  Administrator's name.
    * @param password  Administrator's password.
    * @param cnxTimer  Timer in seconds during which connecting to the server
    *          is attempted.
-   * @exception ConnectException  If the connection to the server fails.
+   *
+   * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
   public void connect(String name, String password, int cnxTimer)
               throws ConnectException, AdminException;
 
-  /** Disconnects an administration session from the Joram server. */
-  public void close();
+  /** Closes the administration connection. */
+  public void disconnect();
 
 
   /**
-   * Changes the administrator's password.
-   *
-   * @param newName  The administrator's new name.
-   * @param newPassword  The administrator's new password.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void updateAdminId(String newName, String newPassword)
-              throws ConnectException;
-
-  /**
-   * Creates and deploys a queue destination on a given server.
+   * Creates and deploys a queue destination on a given server, instanciates
+   * the corresponding <code>javax.jms.Queue</code> object.
    *
    * @param serverId  The identifier of the server where deploying the queue.
-   * @return  A <code>javax.jms.Queue</code> instance wrapping the physical
-   *          queue name.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public javax.jms.Queue createQueue(int serverId) throws ConnectException;
+  public javax.jms.Queue createQueue(int serverId)
+                         throws ConnectException, AdminException;
+
   /**
-   * Creates and deploy a topic destination on a given server.
+   * Creates and deploys a queue destination on the local server, instanciates
+   * the corresponding <code>javax.jms.Queue</code> object.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public javax.jms.Queue createQueue() throws ConnectException, AdminException;
+
+  /**
+   * Creates and deploys a topic destination on a given server, intanciates
+   * the corresponding <code>javax.jms.Topic</code> object.
    *
    * @param serverId  The identifier of the server where deploying the topic.
-   * @return  A <code>javax.jms.Topic</code> instance wrapping the physical
-   *          topic name.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public javax.jms.Topic createTopic(int serverId) throws ConnectException;
+  public javax.jms.Topic createTopic(int serverId)
+                         throws ConnectException, AdminException;
+
   /**
-   * Creates and deploys a dead message queue on a given server.
+   * Creates and deploys a topic destination on the local server, intanciates
+   * the corresponding <code>javax.jms.Topic</code> object.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public javax.jms.Topic createTopic() throws ConnectException, AdminException;
+
+  /**
+   * Creates and deploys a dead message queue on a given server, instanciates
+   * the corresponding <code>DeadMQueue</code> object.
    *
    * @param serverId  The identifier of the server where deploying the dmq.
-   * @return  A <code>DeadMQueue</code> instance wrapping the physical
-   *          dmq name.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public fr.dyade.aaa.joram.admin.DeadMQueue createDeadMQueue(int serverId)
-         throws ConnectException;
-  /**
-   * Removes a destination from the server hosting it.
    *
-   * @param destination  The <code>javax.jms.Destination</code> to remove.
-   * @exception ConnectException  If the connection with the server failed.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void deleteDestination(javax.jms.Destination destination)
-              throws ConnectException;
+  public DeadMQueue createDeadMQueue(int serverId)
+                    throws ConnectException, AdminException;
+
+  /**
+   * Creates and deploys a dead message queue on the local server, instanciates
+   * the corresponding <code>DeadMQueue</code> object.
+   *
+   * @param serverId  The identifier of the server where deploying the dmq.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public DeadMQueue createDeadMQueue() throws ConnectException, AdminException;
+
+  /**
+   * Removes a given destination from the platform.
+   *
+   * @param dest  The destination to remove.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void deleteDestination(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Adds a topic to a cluster.
+   *
+   * @param clusterTopic  Topic part of the cluster, or chosen as the 
+   *          initiator of the cluster.
+   * @param joiningTopic  Topic joining the cluster.
+   *
+   * @exception IllegalArgumentException  If one of the topics is not a valid 
+   *              JORAM topic.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setCluster(javax.jms.Topic clusterTopic,
+                         javax.jms.Topic joiningTopic)
+              throws ConnectException, AdminException;
+
+  /**
+   * Removes a topic from the cluster it is part of.
+   *
+   * @param topic  Topic leaving the cluster it is part of.
+   * 
+   * @exception IllegalArgumentException  If the topic is not a valid 
+   *              JORAM topic.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void leaveCluster(javax.jms.Topic topic)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given topic as the father of an other topic.
+   *
+   * @param father  Father.
+   * @param son  Son.
+   *
+   * @exception IllegalArgumentException  If one of the topics is not a valid 
+   *              JORAM topic.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setFather(javax.jms.Topic father, javax.jms.Topic son)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets the father of a given topic.
+   *
+   * @param topic  Topic which father is unset.
+   *
+   * @exception IllegalArgumentException  If the topic is not a valid 
+   *              JORAM topic.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetFather(javax.jms.Topic topic)
+              throws ConnectException, AdminException;
+
+  /**
+   * Creates a user for a given server and instanciates the corresponding
+   * <code>User</code> object.
+   *
+   * @param name  Name of the user.
+   * @param password  Password of the user.
+   * @param serverId  The identifier of the user's server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */ 
+  public User createUser(String name, String password, int serverId)
+              throws ConnectException, AdminException;
+
+  /**
+   * Creates a user for the local server and instanciates the corresponding
+   * <code>User</code> object.
+   *
+   * @param name  Name of the user.
+   * @param password  Password of the user.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */ 
+  public User createUser(String name, String password)
+              throws ConnectException, AdminException;
+
+  /**
+   * Updates a given user identification.
+   *
+   * @param user  The user to update.
+   * @param newName  The new name of the user.
+   * @param newPassword  The new password of the user.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void updateUser(User user, String newName, String newPassword)
+              throws ConnectException, AdminException;
+
+  /**
+   * Removes a given user.
+   *
+   * @param user  The user to remove.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void deleteUser(User user) throws ConnectException, AdminException;
+
+  /**
+   * Sets free reading access on a given destination.
+   *
+   * @param dest  The destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setFreeReading(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets free writing access on a given destination.
+   *
+   * @param dest  The destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setFreeWriting(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets free reading access on a given destination.
+   *
+   * @param dest  The destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetFreeReading(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets free writing access on a given destination.
+   *
+   * @param dest  The destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetFreeWriting(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given user as a reader on a given destination.
+   *
+   * @param user  User to be set as a reader.
+   * @param dest  Destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setReader(User user, javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given user as a writer on a given destination.
+   *
+   * @param user  User to be set as a writer.
+   * @param dest  Destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setWriter(User user, javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets a given user as a reader on a given destination.
+   *
+   * @param user  Reader to be unset.
+   * @param dest  Destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetReader(User user, javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets a given user as a writer on a given destination.
+   *
+   * @param user  Writer to be unset.
+   * @param dest  Destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetWriter(User user, javax.jms.Destination dest)
+              throws ConnectException, AdminException;
 
   /**
    * Sets a given dead message queue as the default DMQ for a given server.
    *
    * @param serverId  The identifier of the server.
-   * @param dmq  The dead message queue to be set as the default one.
-   * @exception ConnectException  If the connection with the server failed.
+   * @param dmq  The dmq to be set as the default one.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void setDefaultDMQ(int serverId,
-                            fr.dyade.aaa.joram.admin.DeadMQueue dmq)
-              throws ConnectException;
+  public void setDefaultDMQ(int serverId, DeadMQueue dmq)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given dead message queue as the default DMQ for the local server.
+   *
+   * @param dmq  The dmq to be set as the default one.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setDefaultDMQ(DeadMQueue dmq)
+              throws ConnectException, AdminException;
+
   /**
    * Sets a given dead message queue as the DMQ for a given destination.
    *
-   * @param destination  The destination.
+   * @param dest  The destination.
    * @param dmq  The dead message queue to be set.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void setDestinationDMQ(javax.jms.Destination destination,
-                                fr.dyade.aaa.joram.admin.DeadMQueue dmq)
-              throws ConnectException;
+  public void setDestinationDMQ(javax.jms.Destination dest, DeadMQueue dmq)
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given dead message queue as the DMQ for a given user.
+   *
+   * @param user  The user.
+   * @param dmq  The dead message queue to be set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setUserDMQ(User user, DeadMQueue dmq)
+              throws ConnectException, AdminException;
+
   /**
    * Unsets the default dead message queue of a given server.
    *
    * @param serverId  The identifier of the server.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void unsetDefaultDMQ(int serverId) throws ConnectException;
+  public void unsetDefaultDMQ(int serverId)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets the default dead message queue of the local server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetDefaultDMQ() throws ConnectException, AdminException;
+
   /**
    * Unsets the dead message queue of a given destination.
    *
-   * @param destination  The destination.
-   * @exception ConnectException  If the connection with the server failed.
+   * @param dest  The destination.
+   *
+   * @exception IllegalArgumentException  If the destination is not a valid 
+   *              JORAM destination.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void unsetDestinationDMQ(javax.jms.Destination destination)
-              throws ConnectException;
+  public void unsetDestinationDMQ(javax.jms.Destination dest)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets the dead message queue of a given user.
+   *
+   * @param user  The user.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetUserDMQ(User user) throws ConnectException, AdminException;
+
   /**
    * Sets a given value as the default threshold for a given server.
    *
    * @param serverId  The identifier of the server.
    * @param threshold  The threshold value to be set.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
   public void setDefaultThreshold(int serverId, int threshold)
-              throws ConnectException;
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given value as the default threshold for the local server.
+   *
+   * @param threshold  The threshold value to be set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setDefaultThreshold(int threshold)
+              throws ConnectException, AdminException;
+
   /**
    * Sets a given value as the threshold for a given queue.
    *
    * @param queue  The queue.
    * @param threshold  The threshold value to be set.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception IllegalArgumentException  If the queue is not a valid 
+   *              JORAM queue.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
   public void setQueueThreshold(javax.jms.Queue queue, int threshold)
-              throws ConnectException;
+              throws ConnectException, AdminException;
+
+  /**
+   * Sets a given value as the threshold for a given user.
+   *
+   * @param userName  The user.
+   * @param threshold  The threshold value to be set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setUserThreshold(User user, int threshold)
+              throws ConnectException, AdminException;
+
   /**
    * Unsets the default threshold of a given server.
    *
    * @param serverId  The identifier of the server.
-   * @exception ConnectException  If the connection with the server failed.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public void unsetDefaultThreshold(int serverId) throws ConnectException;
+  public void unsetDefaultThreshold(int serverId)
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets the default threshold of the local server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetDefaultThreshold() throws ConnectException, AdminException;
+
   /**
    * Unsets the threshold of a given queue.
    *
-   * @param threshold  The threshold value to be set.
-   * @exception ConnectException  If the connection with the server failed.
+   * @param queue  The queue.
+   *
+   * @exception IllegalArgumentException  If the queue is not a valid 
+   *              JORAM queue.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
   public void unsetQueueThreshold(javax.jms.Queue queue)
-              throws ConnectException;
+              throws ConnectException, AdminException;
+
+  /**
+   * Unsets the threshold of a given user.
+   *
+   * @param userName  The user.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void unsetUserThreshold(User user)
+              throws ConnectException, AdminException;
 
   /**
    * Creates a <code>javax.jms.ConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
+   * connecting to a given server.
    *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
    */ 
   public javax.jms.ConnectionFactory
-         createConnectionFactory(String hostName, int port);
-  /**
-   * Creates a <code>javax.jms.QueueConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
-   *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
-   */ 
-  public javax.jms.QueueConnectionFactory
-         createQueueConnectionFactory(String hostName, int port);
-  /**
-   * Creates a <code>javax.jms.TopicConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
-   *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
-   */ 
-  public javax.jms.TopicConnectionFactory
-         createTopicConnectionFactory(String hostName, int port);
-  /**
-   * Creates a <code>javax.jms.XAConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
-   *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
-   */ 
-  public javax.jms.XAConnectionFactory
-         createXAConnectionFactory(String hostName, int port);
-  /**
-   * Creates a <code>javax.jms.XAQueueConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
-   *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
-   */ 
-  public javax.jms.XAQueueConnectionFactory
-         createXAQueueConnectionFactory(String hostName, int port);
-  /**
-   * Creates a <code>javax.jms.XATopicConnectionFactory</code> instance for
-   * connecting to a given server listening to a given port.
-   *
-   * @param hostName  Name or IP address of the server to give access to.
-   * @param port  Port number through which accessing the server.
-   */ 
-  public javax.jms.XATopicConnectionFactory
-         createXATopicConnectionFactory(String hostName, int port);
- 
-  /**
-   * Sets a user for a given server; if the user already exists, simply
-   * instanciates a <code>fr.dyade.aaa.joram.admin.User</code> instance.
-   *
-   * @param serverId  The identifier of the user's server.
-   * @param name  Name of the user.
-   * @param password  Password of the user.
-   * @exception ConnectException  If the connection with the server failed.
-   */ 
-  public User setUser(int serverId, String name, String password)
-         throws ConnectException;
-  /**
-   * Updates a user identification.
-   *
-   * @param user  The user to update.
-   * @param newName  The new name of the user.
-   * @param newPassword  The new password of the user.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void updateUser(User user, String newName, String newPassword)
-              throws ConnectException;
-  /**
-   * Removes a user.
-   *
-   * @param user  The user to remove.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void deleteUser(User user) throws ConnectException;
+         createConnectionFactory(String host, int port)
+         throws UnknownHostException;
 
   /**
-   * Sets free reading access on a given destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void setFreeReading(javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.ConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.ConnectionFactory createConnectionFactory()
+         throws UnknownHostException;
+
   /**
-   * Unsets free reading access on a given destination. 
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void unsetFreeReading(javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.QueueConnectionFactory</code> instance for
+   * connecting to a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
+   */ 
+  public javax.jms.QueueConnectionFactory
+         createQueueConnectionFactory(String host, int port)
+         throws UnknownHostException;
+
   /**
-   * Sets free writing access on a given destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void setFreeWriting(javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.QueueConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.QueueConnectionFactory createQueueConnectionFactory()
+         throws UnknownHostException;
+
   /**
-   * Unsets free writing access on a given destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void unsetFreeWriting(javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.TopicConnectionFactory</code> instance for
+   * connecting to a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
+   */ 
+  public javax.jms.TopicConnectionFactory
+         createTopicConnectionFactory(String host, int port)
+         throws UnknownHostException;
+
   /**
-   * Sets a given user as a reader on a destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void setReader(User user, javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.TopicConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.TopicConnectionFactory createTopicConnectionFactory()
+         throws UnknownHostException;
+
   /**
-   * Unsets a given user as a reader on a destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void unsetReader(User user, javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.XAConnectionFactory</code> instance for
+   * connecting to a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
+   */ 
+  public javax.jms.XAConnectionFactory
+         createXAConnectionFactory(String host, int port)
+         throws UnknownHostException;
+
   /**
-   * Sets a given user as a writer on a destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void setWriter(User user, javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.XAConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.XAConnectionFactory createXAConnectionFactory()
+         throws UnknownHostException;
+
   /**
-   * Unsets a given user as a writer on a destination.
-   * @exception ConnectException  If the connection with the server failed.
-   */
-  public void unsetWriter(User user, javax.jms.Destination destination)
-              throws ConnectException;
+   * Creates a <code>javax.jms.XAQueueConnectionFactory</code> instance for
+   * connecting to a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
+   */ 
+  public javax.jms.XAQueueConnectionFactory
+         createXAQueueConnectionFactory(String host, int port)
+         throws UnknownHostException;
+
+  /**
+   * Creates a <code>javax.jms.XAQueueConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.XAQueueConnectionFactory createXAQueueConnectionFactory()
+         throws UnknownHostException;
+
+  /**
+   * Creates a <code>javax.jms.XATopicConnectionFactory</code> instance for
+   * connecting to a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is incorrect.
+   */ 
+  public javax.jms.XATopicConnectionFactory
+         createXATopicConnectionFactory(String host, int port)
+         throws UnknownHostException;
+
+  /**
+   * Creates a <code>javax.jms.XATopicConnectionFactory</code> instance for
+   * connecting to the local server.
+   *
+   * @exception UnknownHostException  In case of a problem with localhost.
+   */ 
+  public javax.jms.XATopicConnectionFactory createXATopicConnectionFactory()
+         throws UnknownHostException;
 }

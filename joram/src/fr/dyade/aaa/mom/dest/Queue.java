@@ -28,13 +28,10 @@
 package fr.dyade.aaa.mom.dest;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.comm.AbstractRequest;
-import fr.dyade.aaa.task.Condition;
 
 /**
- * A <code>Queue</code> agent is an agent behaving as a MOM queue.
- * <p>
- * Its behaviour is provided by a <code>QueueImpl</code> instance.
+ * A <code>Queue</code> agent is an agent which behaviour is provided
+ * by a <code>QueueImpl</code> instance.
  *
  * @see QueueImpl
  */
@@ -44,49 +41,46 @@ public class Queue extends Agent
    * The reference to the <code>QueueImpl</code> object providing this
    * agent with its behaviour.
    */
-  private QueueImpl queueImpl;
+  protected QueueImpl queueImpl;
 
   /**
    * Constructs a <code>Queue</code> agent. 
    *
-   * @param creator  The identifier of the agent creating the queue, and which
-   *          is its original admin.
+   * @param adminId  Identifier of the agent which will be the administrator
+   *          of the queue.
    */ 
-  public Queue(AgentId creator) 
+  public Queue(AgentId adminId) 
   {
-    queueImpl = new QueueImpl(this.getId(), creator);
+    queueImpl = new QueueImpl(this.getId(), adminId);
   }
+
+  /**
+   * Empty constructor used by subclasses.
+   */
+  protected Queue()
+  {}
 
 
   /**
-   * Overrides the <code>Agent.react(...)</code> method for providing
-   * queue agents with their specific behaviour.
-   * <p>
-   * Queue agents accept:
-   * <ul>
-   * <li><code>AbstractRequest</code> MOM requests,</li>
-   * <li><code>fr.dyade.aaa.task.Condition</code> Scheduler notifications,</li>
-   * <li><code>fr.dyade.aaa.agent.UnknownAgent</code> notifications,</li>
-   * <li><code>fr.dyade.aaa.agent.DeleteNot</code> notifications.</li>
-   * </ul>
-   * <p>
-   * Reactions to these notifications are implemented in the
+   * Reactions to notifications are implemented in the
    * <code>QueueImpl</code> class.
+   * <p>
+   * A <code>DeleteNot</code> notification is finally processed at the
+   * <code>Agent</code> level when its processing went successful in
+   * the <code>DestinationImpl</code> instance.
    *
-   * @exception Exception  Thrown at super class level.
+   * @exception Exception  See superclass.
    */
   public void react(AgentId from, Notification not) throws Exception
   {
-    if (not instanceof AbstractRequest)
-      queueImpl.doReact(from, (AbstractRequest) not);
-    else if (not instanceof Condition)
-      queueImpl.answerExpiredRequest((Condition) not);
-    else if (not instanceof UnknownAgent)
-      queueImpl.removeDeadClient((UnknownAgent) not);
-    else if (not instanceof DeleteNot) {
-      queueImpl.delete(from);
-      if (queueImpl.canBeDeleted())
+    try {
+      queueImpl.react(from, not);
+
+      if (not instanceof DeleteNot && queueImpl.canBeDeleted())
         super.react(from, not);
+    }
+    catch (UnknownNotificationException exc) {
+      super.react(from, not);
     }
   }
 }

@@ -31,8 +31,8 @@ import java.net.*;
  * class for stream sockets.
  */
 abstract class StreamNetwork extends CausalNetwork {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.9 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: StreamNetwork.java,v 1.10 2002-12-11 11:22:12 maistrfr Exp $";
 
   /** Creates a new Network component */
   StreamNetwork() {
@@ -42,7 +42,7 @@ abstract class StreamNetwork extends CausalNetwork {
   /**
    * Numbers of attempt to bind the server's socket before aborting.
    */
-  final static int CnxRetry = 20;
+  final static int CnxRetry = 3;
 
   /**
    *  This method creates and returns a socket connected to a ServerSocket at
@@ -86,7 +86,7 @@ abstract class StreamNetwork extends CausalNetwork {
       } catch (BindException exc) {
         if (i > CnxRetry) throw exc;
         try {
-          Thread.currentThread().sleep(i * 250);
+          Thread.currentThread().sleep(i * 200);
         } catch (InterruptedException e) {}
       }
     }

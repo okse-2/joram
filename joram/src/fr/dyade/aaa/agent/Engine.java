@@ -85,8 +85,8 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 abstract class Engine implements Runnable, MessageConsumer {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: Engine.java,v 1.13 2002-12-11 11:22:12 maistrfr Exp $";
 
   /**
    * Queue of messages to be delivered to local agents.
@@ -714,10 +714,12 @@ final class TransactionEngine extends Engine {
    */
   void commit() throws IOException {
     AgentServer.transaction.begin();
-    //  Suppress the processed notification from message queue,
-    // then deletes it.
+    // Suppress the processed notification from message queue ..
     qin.pop();
+    // .. then deletes it ..
     msg.delete();
+    // .. and frees it.
+    msg.free();
     // Push all new notifications in qin and qout, then saves changes.
     Channel.dispatch();
     // Saves the agent state then commit the transaction.
@@ -749,9 +751,12 @@ final class TransactionEngine extends Engine {
       throw new Exception("Can't reload Agent" + msg.to);
     }
 
-    // Remove the failed notification.
+    // Remove the failed notification ..
     qin.pop();
+    // .. then deletes it ..
     msg.delete();
+    // .. and frees it.
+    msg.free();
     // Clean the Channel queue of all pushed notifications.
     Channel.clean();
     // Send an error notification to client agent.
@@ -795,9 +800,10 @@ final class TransientEngine extends Engine {
    * Commit the agent reaction in case of rigth termination.
    */
   void commit() throws IOException {
-    // Suppress the processed notification from message queue,
-    // then deletes it.
+    // Suppress the processed notification from message queue ..
     qin.pop();
+    // .. then frees it.
+    msg.free();
     // Push all new notifications in qin and qout, then saves changes.
     Channel.dispatch();
     // The transaction has commited, then validate all messages.
@@ -808,8 +814,10 @@ final class TransientEngine extends Engine {
    * Abort the agent reaction in case of error during execution.
    */
   void abort(Exception exc) throws Exception {
-    // Remove the failed notification.
+    // Remove the failed notification ..
     qin.pop();
+    // .. then frees it.
+    msg.free();
     // Clean the Channel queue of all pushed notifications.
     Channel.clean();
     // Send an error notification to client agent.

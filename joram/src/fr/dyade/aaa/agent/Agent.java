@@ -69,8 +69,10 @@ import fr.dyade.aaa.util.*;
  * @see Channel
  */
 public abstract class Agent implements Serializable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: Agent.java,v 1.13 2002-12-11 11:22:12 maistrfr Exp $"; 
+
+  static final long serialVersionUID = 2955513886633164244L;
 
   protected void save() throws IOException {
     AgentServer.transaction.save(this, id.toString());

@@ -28,8 +28,8 @@
 package fr.dyade.aaa.mom.comm;
 
 /**
- * A <code>SetThreshRequest</code> instance is used by a <b>client</b> agent
- * for notifying a queue or a proxy of its threshold value.
+ * A <code>SetThreshRequest</code> instance is used by an <b>admin</b> agent
+ * for notifying a queue of its threshold value.
  */
 public class SetThreshRequest extends AbstractRequest
 {
@@ -41,23 +41,7 @@ public class SetThreshRequest extends AbstractRequest
 
 
   /**
-   * Constructs a <code>SetThresholdRequest</code> instance involved in an
-   * external client - MOM interaction.
-   *
-   * @param key  See superclass.
-   * @param requestId  See superclass.
-   * @param threshold  Threshold value, negative or zero for no threshold,
-   *          <code>null</code> for unsetting the previous value.
-   */
-  public SetThreshRequest(int key, String requestId, Integer threshold)
-  {
-    super(key, requestId);
-    this.threshold = threshold;
-  }
-
-  /**
-   * Constructs a <code>setThreshRequest</code> instance not involved in an
-   * external client - MOM interaction.
+   * Constructs a <code>SetThresholdRequest</code> instance.
    *
    * @param requestId  See superclass.
    * @param threshold  Threshold value, negative or zero for no threshold,
@@ -65,10 +49,10 @@ public class SetThreshRequest extends AbstractRequest
    */
   public SetThreshRequest(String requestId, Integer threshold)
   {
-    this(0, requestId, threshold);
+    super(0, requestId);
+    this.threshold = threshold;
   }
 
-  
   /**
    * Returns the threshold value, negative or zero for no threshold, 
    * <code>null</code> for unsetting the previous value.

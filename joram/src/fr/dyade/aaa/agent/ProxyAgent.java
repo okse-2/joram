@@ -34,8 +34,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.util.*;
 
 public abstract class ProxyAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.12 2002-10-21 08:41:13 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: ProxyAgent.java,v 1.13 2002-12-11 11:22:12 maistrfr Exp $"; 
 
   public static final int DRIVER_IN = 1;
   public static final int DRIVER_OUT = 2;
@@ -368,24 +368,23 @@ public abstract class ProxyAgent extends Agent {
     Enumeration keys = driversTable.keys();
     while (keys.hasMoreElements()) {
       Integer key = (Integer) keys.nextElement();
-      System.out.println("Closing " + key.intValue());
 
       DriverMonitor dMonitor = (DriverMonitor) driversTable.get(key);
       if (dMonitor != null) {
-        if (dMonitor.ois != null || dMonitor.oos != null) {
+        if (dMonitor.ois != null) {
           try {
            (dMonitor.ois).close();
           } catch (IOException exc) {}
+          dMonitor.ois = null;
+        }
+        if (dMonitor.oos != null) {
           try {
            (dMonitor.oos).close();
           } catch (IOException exc) {}
-  
-          stop(key.intValue());
-  
-          dMonitor.ois = null;
           dMonitor.oos = null;
           dMonitor.qout = null;
         }
+        stop(key.intValue());
       }
     }
     driversTable.clear();

@@ -27,8 +27,6 @@
  */
 package fr.dyade.aaa.mom.proxies;
 
-import fr.dyade.aaa.agent.AgentId;
-
 /**
  * An <code>InputNotification</code> instance is created by an input
  * stream filter for wrapping an external request object.

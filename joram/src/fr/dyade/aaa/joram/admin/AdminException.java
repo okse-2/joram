@@ -28,8 +28,8 @@
 package fr.dyade.aaa.joram.admin;
 
 /**
- * The <code>AdminException</code> class specializes exception to the
- * administration phase.
+ * An <code>AdminException</code> is an exception thrown in administration
+ * methods.
  */
 public class AdminException extends Exception
 {

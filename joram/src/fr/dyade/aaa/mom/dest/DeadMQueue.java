@@ -27,68 +27,22 @@
  */
 package fr.dyade.aaa.mom.dest;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.mom.comm.AbstractRequest;
-import fr.dyade.aaa.task.Condition;
 
 /**
- * A <code>DeadMQueue</code> agent is an agent behaving as a MOM dead message
- * queue.
- * <p>
- * Its behaviour is provided by a <code>DeadMQueueImpl</code> instance. A DMQ
- * purpose is to hold messages which for various reasons are considered as non
- * deliverables.
+ * A <code>DeadMQueue</code> agent is a queue which behaviour is provided
+ * by a <code>DeadMQueueImpl</code> instance.
  *
  * @see DeadMQueueImpl
  */
-public class DeadMQueue extends Agent
+public class DeadMQueue extends Queue
 {
-  /**
-   * The reference to the <code>DeadMQueueImpl</code> object providing this
-   * agent with its behaviour.
-   */
-  private DeadMQueueImpl queueImpl;
-
   /**
    * Constructs a <code>DeadMQueue</code> agent. 
    *
-   * @param creator  The identifier of the agent creating the queue, and which
-   *          is its original admin.
+   * @param adminId  See superclass.
    */ 
-  public DeadMQueue(AgentId creator) 
+  public DeadMQueue(fr.dyade.aaa.agent.AgentId adminId) 
   {
-    queueImpl = new DeadMQueueImpl(this.getId(), creator);
-  }
-
-  /**
-   * Overrides the <code>Agent.react(...)</code> method for providing
-   * dead message queue agents with their specific behaviour.
-   * <p>
-   * Dead message queue agents accept:
-   * <ul>
-   * <li><code>AbstractRequest</code> MOM requests,</li>
-   * <li><code>fr.dyade.aaa.task.Condition</code> Scheduler notifications,</li>
-   * <li><code>fr.dyade.aaa.agent.UnknownAgent</code> notifications,</li>
-   * <li><code>fr.dyade.aaa.agent.DeleteNot</code> notifications.</li>
-   * </ul>
-   * <p>
-   * Reactions to these notifications are implemented in the
-   * <code>DeadMQueueImpl</code> class.
-   *
-   * @exception Exception  Thrown at super class level.
-   */
-  public void react(AgentId from, Notification not) throws Exception
-  {
-    if (not instanceof AbstractRequest)
-      queueImpl.doReact(from, (AbstractRequest) not);
-    else if (not instanceof Condition)
-      queueImpl.answerExpiredRequest((Condition) not);
-    else if (not instanceof UnknownAgent)
-      queueImpl.removeDeadClient((UnknownAgent) not);
-    else if (not instanceof DeleteNot) {
-      queueImpl.delete(from);
-      if (queueImpl.canBeDeleted())
-        super.react(from, not);
-    }
+    queueImpl = new DeadMQueueImpl(this.getId(), adminId);
   }
 }

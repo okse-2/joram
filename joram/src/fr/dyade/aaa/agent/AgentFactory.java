@@ -34,8 +34,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * reflected the totally of Vector interface, then it should be public.
  */
 final class AgentVector extends AgentObject {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
 
   /**
    * Determines if the currently <code>AgentVector</code> has been modified
@@ -125,8 +125,8 @@ final class AgentVector extends AgentObject {
  * to remotely delete agents.
  */
 final class AgentFactory extends Agent {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentFactory.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
 
   /** Persistent vector containing id's of all fixed agents. */
   private transient AgentVector fixedAgentIdList;
@@ -256,16 +256,17 @@ final class AgentFactory extends Agent {
           reply.setContext(cnot.getContext());
 	  sendTo(cnot.reply, reply);          
         }
-      } catch (Exception exc) {
+      } catch (Throwable error) {
  	//  If there is an explicit reply request send it the
 	// ExceptionNotification to the requester else to the
 	// sender.
 	cnot.agentState = null;
         logmon.log(BasicLevel.ERROR,
                    "AgentFactory" + id + ", can't create Agent" + cnot.deploy,
-                   exc);
+                   error);
         ExceptionNotification excNot = 
-          new ExceptionNotification(getId(), cnot, exc);
+          new ExceptionNotification(
+            getId(), cnot, new AgentException(error));
         excNot.setContext(cnot.getContext());
 	if (cnot.reply != null) {
 	  sendTo(cnot.reply, excNot);

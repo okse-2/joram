@@ -39,8 +39,8 @@ import fr.dyade.aaa.util.*;
  * multiple connection.
  */
 class PoolCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.9 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: PoolCnxNetwork.java,v 1.10 2002-12-11 11:22:12 maistrfr Exp $";
 
   /** */
   WakeOnConnection wakeOnConnection = null; 
@@ -726,8 +726,11 @@ class PoolCnxNetwork extends StreamNetwork {
   final class WakeOnConnection extends Daemon {
     ServerSocket listen = null;
 
-    WakeOnConnection(String name, Logger logmon) {
+    WakeOnConnection(String name, Logger logmon) throws IOException {
       super(name + ".wakeOnConnection");
+      // creates a server socket listening on configured port
+      listen = createServerSocket();
+      // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
 
@@ -755,10 +758,7 @@ class PoolCnxNetwork extends StreamNetwork {
 
       Object msg = null;
 
-      // creates a server socket listening on configured port
       try {
-	listen = createServerSocket();
-
 	while (running) {
 	  try {
 	    canStop = true;
@@ -812,8 +812,6 @@ class PoolCnxNetwork extends StreamNetwork {
                             this.getName() + ", bad connection setup", exc);
 	  }
 	}
-      } catch (IOException exc) {
-	this.logmon.log(BasicLevel.ERROR, this.getName() + ", exited", exc);
       } finally {
         finish();
       }

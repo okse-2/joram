@@ -27,7 +27,7 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 import javax.jms.JMSException;
 
@@ -38,16 +38,34 @@ public class TopicConnectionFactory extends ConnectionFactory
                                     implements javax.jms.TopicConnectionFactory
 {
   /**
-   * Constructs a <code>TopicConnectionFactory</code> instance wrapping a 
-   * given agent server url.
+   * Constructs a <code>TopicConnectionFactory</code> instance wrapping a given
+   * server's parameters.
    *
-   * @param url  Url of the agent server.
-   * @exception ConnectException  If the url is incorrect.
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is unknown.
    */
-  public TopicConnectionFactory(String url) throws ConnectException
+  public TopicConnectionFactory(String host, int port)
+         throws UnknownHostException
+  {
+    super(host, port);
+  }
+
+  /**
+   * Constructs a <code>TopiconnectionFactory</code> instance wrapping a given
+   * server's url.
+   *
+   * @param url  The server's url.
+   *
+   * @exception MalformedURLException  If the url is incorrect.
+   * @exception UnknownHostException  If the host is unknown.
+   */
+  public TopicConnectionFactory(String url) throws Exception
   {
     super(url);
   }
+
   
   /** Returns a string view of the connection factory. */
   public String toString()

@@ -53,6 +53,19 @@ public class ExceptionReply extends AbstractReply
   }
 
   /**
+   * Constructs a <code>ExceptionReply</code> instance.
+   *
+   * @param key  See superclass.
+   * @param correlationId  See superclass.
+   * @param except  The exception to send back to the client.
+   */
+  public ExceptionReply(int key, String correlationId, MomException except)
+  {
+    super(key, correlationId);
+    this.except = except;
+  }
+
+  /**
    * Constructs a <code>ExceptionReply</code> instance with no reference to
    * a request.
    *

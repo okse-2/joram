@@ -33,7 +33,7 @@ package fr.dyade.aaa.joram.admin;
  */
 public class DeadMQueue extends fr.dyade.aaa.joram.Queue
 {
-  /** 
+  /**
    * Constructs a <code>DeadMQueue</code> instance.
    *
    * @param agentId  Identifier of the dead message queue agent.

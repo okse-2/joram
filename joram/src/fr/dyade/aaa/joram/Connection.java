@@ -84,6 +84,9 @@ public class Connection implements javax.jms.Connection
   /** Subscriptions counter. */
   private long subsC = 0;
 
+  /** Timer for closing pending sessions. */
+  private fr.dyade.aaa.util.Timer sessionsTimer = null;
+
   /** The factory's configuration object. */
   FactoryConfiguration factoryConfiguration;
   /** <code>true</code> if the connection is started. */
@@ -111,8 +114,6 @@ public class Connection implements javax.jms.Connection
    * <b>Object:</b> reply object
    */
   Hashtable repliesTable;
-  /** Timer for terminating pending transactions. */
-  fr.dyade.aaa.util.Timer transactimer = null;
 
   /**
    * Opens a connection.
@@ -135,9 +136,6 @@ public class Connection implements javax.jms.Connection
     requestsTable = new Hashtable();
     repliesTable = new Hashtable();
     
-    if (factoryConfiguration.txTimer != 0)
-      transactimer = new fr.dyade.aaa.util.Timer();
-
     try {
       // Opening the connection:
       connect(name, password);
@@ -154,6 +152,10 @@ public class Connection implements javax.jms.Connection
       CnxConnectRequest req = new CnxConnectRequest();
       CnxConnectReply rep = (CnxConnectReply) syncRequest(req);
       key = rep.getKey();
+
+      // Transactions will be scheduled; creating a timer.
+      if (cfConfig.txTimer != 0)
+        sessionsTimer = new fr.dyade.aaa.util.Timer();
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": opened."); 
@@ -443,8 +445,8 @@ public class Connection implements javax.jms.Connection
                                  + ": closing...");
 
     // Finishing the timer, if any:
-    if (transactimer != null)
-      transactimer.cancel();
+    if (sessionsTimer != null)
+      sessionsTimer.cancel();
 
     // Stopping the connection:
     try {
@@ -549,6 +551,18 @@ public class Connection implements javax.jms.Connection
     subsC++;
     return "c"  + key + "sub" + subsC;
   }
+
+  /** Schedules a session task to the connection's timer. */
+  synchronized void schedule(fr.dyade.aaa.util.TimerTask task)
+  {
+    if (sessionsTimer == null)
+      return;
+
+    try {
+      sessionsTimer.schedule(task, factoryConfiguration.txTimer * 1000);
+    }
+    catch (Exception exc) {}
+  }
   
   /**
    * Actually sends a synchronous request to the server and waits for its
@@ -607,7 +621,8 @@ public class Connection implements javax.jms.Connection
       jE.setLinkedException(e);
 
       // Unregistering the request:
-      requestsTable.remove(requestId);
+      if (requestsTable != null && requestId != null)
+        requestsTable.remove(requestId);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, jE);

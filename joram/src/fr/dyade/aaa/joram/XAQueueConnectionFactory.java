@@ -27,7 +27,7 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 import javax.jms.JMSException;
 
@@ -39,13 +39,30 @@ public class XAQueueConnectionFactory
              implements javax.jms.XAQueueConnectionFactory
 {
   /**
-   * Constructs an <code>XAQueueConnectionFactory</code> instance wrapping a 
-   * given agent server url.
+   * Constructs an <code>XAQueueConnectionFactory</code> instance wrapping a
+   * given server's parameters.
    *
-   * @param url  Url of the agent server.
-   * @exception ConnectException  If the url is incorrect.
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   *
+   * @exception UnknownHostException  If the host is unknown.
    */
-  public XAQueueConnectionFactory(String url) throws ConnectException
+  public XAQueueConnectionFactory(String host, int port)
+         throws UnknownHostException
+  {
+    super(host, port);
+  }
+
+  /**
+   * Constructs an <code>XAQueueConnectionFactory</code> instance wrapping a
+   * given server's url.
+   *
+   * @param url  The server's url.
+   *
+   * @exception MalformedURLException  If the url is incorrect.
+   * @exception UnknownHostException  If the host is unknown.
+   */
+  public XAQueueConnectionFactory(String url) throws Exception
   {
     super(url);
   }

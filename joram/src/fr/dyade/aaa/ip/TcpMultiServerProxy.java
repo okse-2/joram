@@ -49,7 +49,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Only true when the ProxyAgent is set as multiConn.
  */
 public abstract class TcpMultiServerProxy extends ProxyAgent {
-  public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.10 2002-10-21 08:41:13 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: TcpMultiServerProxy.java,v 1.11 2002-12-11 11:22:24 maistrfr Exp $";
 
   /** Listening port, may be 0 */
   protected int listenPort = -1;
@@ -184,9 +184,13 @@ public abstract class TcpMultiServerProxy extends ProxyAgent {
   protected void reinitialize() throws IOException {
     if (listenPort >= 0) {
       // this is a listen server correctly configured, initializes
-      // the listen socket
-      if (listenSocket == null)
-        listenSocket = new ServerSocket(listenPort);
+      // the listen socket      
+      if (listenSocket == null) {
+        listenSocket = getServerSocket();
+        if (listenSocket == null) {
+          listenSocket = new ServerSocket(listenPort);
+        }
+      }
     }
     else if (key == null) {
       // this is an old connected server
@@ -208,6 +212,14 @@ public abstract class TcpMultiServerProxy extends ProxyAgent {
     }
 
     super.reinitialize();
+  }
+
+  /**
+   * A service may redefine this method in order to
+   * create the socket at initialization time.
+   */
+  protected ServerSocket getServerSocket() {
+    return null;
   }
 
   /**

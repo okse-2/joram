@@ -40,8 +40,8 @@ import fr.dyade.aaa.util.*;
  * localizing the target agent.
  */
 abstract public class Channel {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
 
   static Channel channel = null;
 
@@ -147,7 +147,7 @@ abstract public class Channel {
     if ((to == null) || to.isNullId())
       return;
     
-    mq.push(new Message(from, to, not));
+    mq.push(Message.alloc(from, to, not));
   }
 
   /**
@@ -273,8 +273,8 @@ abstract public class Channel {
 }
 
 final class TransactionChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
 
   /**
    * Constructs a new <code>TransactionChannel</code> object. this method
@@ -307,7 +307,7 @@ final class TransactionChannel extends Channel {
     if ((to == null) || to.isNullId())
       return;
 
-    msg = new Message(from, to, not);
+    msg = Message.alloc(from, to, not);
     try {
       consumer = AgentServer.getConsumer(to.to);
     } catch (UnknownServerException exc) {
@@ -360,8 +360,8 @@ final class TransactionChannel extends Channel {
 }
 
 final class TransientChannel extends Channel {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.11 2002-10-21 08:41:13 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: Channel.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
 
   /**
    * Constructs a new <code>TransientChannel</code> object. this method
@@ -395,7 +395,7 @@ final class TransientChannel extends Channel {
       return;
  
     try {
-      msg = new Message(from, to, not);
+      msg = Message.alloc(from, to, not);
       consumer = AgentServer.getConsumer(to.to);
     } catch (UnknownServerException exc) {
       channel.logmon.log(BasicLevel.ERROR,

@@ -27,152 +27,102 @@
  */
 package fr.dyade.aaa.joram.admin;
 
-import fr.dyade.aaa.joram.*;
-import fr.dyade.aaa.mom.jms.*;
-
-import java.net.ConnectException;
+import javax.naming.*;
 
 /**
- * The <code>User</code> class is used by administrators for managing MOM
- * users.
+ * The <code>User</code> class allows administrators to manipulate users.
  */
-public class User
+public class User extends AdministeredObject
 {
-  /** The <code>Admin</code> instance the user belongs to. */
-  private Admin admin;
-  /** Name of the user. */
-  private String userName;
-  /** Name of the user's proxy. */
-  private String proxyName;
+  /** The name of the user. */
+  String name;
+  /** Identifier of the user's proxy agent. */
+  String proxyId;
 
-  /** <code>true</code> if the user has been removed. */
-  boolean removed;
+  /** Used by old admin class. */
+  AdminImpl adminImpl = null;
 
 
   /**
-   * Constructs a <code>User</code> instance.
+   * Constructs an <code>User</code> instance.
    *
-   * @param admin  The <code>Admin</code> instance the user belongs to.
-   * @param userName  Name of the user.
-   * @param proxyName  Name of the user's proxy.
+   * @param name  The name of the user.
+   * @param proxyId  Identifier of the user's proxy agent.
    */
-  User(Admin admin, String userName, String proxyName)
+  public User(String name, String proxyId)
   {
-    this.admin = admin;
-    this.userName = userName;
-    this.proxyName = proxyName;
-    removed = false;
+    super(proxyId);
+    this.name = name;
+    this.proxyId = proxyId;
   }
 
-  /**
-   * Updates the user identification.
-   *
-   * @param newName  User's new name.
-   * @param newPass  User's new password.
-   * @exception AdminException  If the admin session has been closed, or if
-   *              the user has been deleted, or if its new name is already
-   *              taken.
-   * @exception ConnectException  If the request/reply exchange fails.
-   */
-  public void modifyId(String newName, String newPass) throws Exception
+  
+  /** Returns a string view of this <code>User</code> instance. */
+  public String toString()
   {
-    if (removed)
-      throw new AdminException("Forbidden method call as user "
-                               + userName + " does not exist anymore.");
-
-    ModifyUserId modU = new ModifyUserId(userName, newName, newPass);
-    admin.sendRequest(modU);
-    admin.getReply();
-    userName = newName;
+    return "User[" + name + "]:" + proxyId;
   }
 
-  /**
-   * Sets a <code>DeadMQueue</code> instance as the DMQ of this user.
-   *
-   * @param dmq  The DeadMQueue instance.
-   *
-   * @exception ConnectException  If the connection with the server is lost.
-   * @exception AdminException  If the admin session has been closed.
-   */
-  public void setDMQ(DeadMQueue dmq) throws Exception
+
+  /** Sets the naming reference of this user. */
+  public Reference getReference() throws NamingException
   {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(proxyName, dmq.getQueueName(),
-                                             true);
-    admin.sendRequest(setDMQ);
-    admin.getReply();
+    Reference ref = super.getReference();
+    ref.add(new StringRefAddr("user.name", name));
+    ref.add(new StringRefAddr("user.id", proxyId));
+    return ref;
   }
 
-  /**
-   * Sets a threshold value of maximum authorized delivery attempts before
-   * logging a message to the DMQ, for this user.
-   *
-   * @param threshold  The number of authorized delivery attempts.
-   *
-   * @exception ConnectException  If the connection with the server is lost.
-   * @exception AdminException  If the admin session has been closed.
-   */
-  public void setThreshold(int threshold) throws Exception
+  /** Returns the identifier of the user's proxy. */
+  public String getProxyId()
   {
-    SetThreshold setT = new SetThreshold(proxyName, new Integer(threshold),
-                                         true);
-    admin.sendRequest(setT);
-    admin.getReply();
-  }
-
-  /**
-   * Sets a <code>DeadMQueue</code> instance as the DMQ of this user.
-   *
-   * @param dmq  The DeadMQueue instance.
-   *
-   * @exception ConnectException  If the connection with the server is lost.
-   * @exception AdminException  If the admin session has been closed.
-   */
-  public void unsetDMQ() throws Exception
-  {
-    SetDeadMQueue setDMQ = new SetDeadMQueue(proxyName, null, true);
-    admin.sendRequest(setDMQ);
-    admin.getReply();
-  }
-
-  /**
-   * Sets a threshold value of maximum authorized delivery attempts before
-   * logging a message to the DMQ, for this user.
-   *
-   * @param threshold  The number of authorized delivery attempts.
-   *
-   * @exception ConnectException  If the connection with the server is lost.
-   * @exception AdminException  If the admin session has been closed.
-   */
-  public void unsetThreshold() throws Exception
-  {
-    SetThreshold setT = new SetThreshold(proxyName, null, true);
-    admin.sendRequest(setT);
-    admin.getReply();
+    return proxyId;
   }
 
   /** 
-   * Deletes this user's proxy agent and removes its identification from
-   * the admin proxy table.
+   * Old administration method.
    *
-   * @exception AdminException  If the admin session has been closed, or if
-   *              the user has already been deleted.
-   * @exception ConnectException  If the request/reply exchange fails.
+   * @deprecated  This method is temporary kept but the methods of the new
+   *              <code>AdminItf</code> interface should be used instead.
    */
-  public void remove() throws Exception
+  public void setDMQ(DeadMQueue dmq)
+              throws java.net.ConnectException, AdminException
   {
-    if (removed)
-      throw new AdminException("Forbidden method call as user "
-                               + userName + " does not exist anymore.");
-
-    DeleteUser delU = new DeleteUser(userName);
-    admin.sendRequest(delU);
-    admin.getReply();
-    removed = true; 
+    adminImpl.setUserDMQ(this, dmq);
   }
 
-  /** Returns the name of this user's proxy agent. */
-  String getProxyName()
+  /** 
+   * Old administration method.
+   *
+   * @deprecated  This method is temporary kept but the methods of the new
+   *              <code>AdminItf</code> interface should be used instead.
+   */
+  public void unsetDMQ() throws java.net.ConnectException, AdminException
   {
-    return proxyName;
+    adminImpl.unsetUserDMQ(this);
+  }
+
+  /** 
+   * Old administration method.
+   *
+   * @deprecated  This method is temporary kept but the methods of the new
+   *              <code>AdminItf</code> interface should be used instead.
+   */
+  public void setThreshold(int thresh)
+              throws java.net.ConnectException, AdminException
+  {
+    adminImpl.setUserThreshold(this, thresh);
+  }
+
+  /** 
+   * Old administration method.
+   *
+   * @deprecated  This method is temporary kept but the methods of the new
+   *              <code>AdminItf</code> interface should be used instead.
+   */
+  public void unsetThreshold()
+              throws java.net.ConnectException, AdminException
+  {
+    adminImpl.unsetUserThreshold(this);
   }
 }
