@@ -134,6 +134,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                                    selector,
                                                    this,
                                                    1);
+
+      cnx.start();
     }
     catch (JMSSecurityException exc) {
       throw new SecurityException("Target destination not readble: "
