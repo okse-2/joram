@@ -14,6 +14,9 @@
 
     <s1 name="Downloading...">
       <s2 name="JORAM source and binary packages">
+      <p>The JORAM source and binary packages are available from the
+      ObjectWeb Forge file repository page.</p>
+      
       <p>The latest release packages are:</p>
       <ul>
         <li><code>joram-4.0.0.tgz</code>, including JORAM client and MOM
@@ -26,17 +29,31 @@
         and kJORAM sample sources;</li>
         <li><code>kjoram-4.0.0-src.tgz</code>, including kJORAM client
         sources and kJORAM sample sources.</li>
-     </ul>
-     <p>The download area is at
-     <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
-     ObjectWeb Forge</a>.</p>
-     </s2>
+      </ul>
+ 
+      <p>The license agreement is displayed before the download can start.
+      <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
+      Click here to start the download process</a>.</p>
+
+      <p>Note: all the packages are available as .tgz files. To unzip these
+      files, just go where you want to install JORAM, and unzip it. You can
+      use gunzip and tar tools on unix-like systems, or winzip utility on
+      Windows. After having installed the JORAM product, please see the
+      <a href="http://joram.objectweb.org/current/doc/joram4_0_INSTALL.pdf">
+      Installation Guide</a>.</p>
+    </s2>
 
     <s2 name="JORAM CVS code base">
-    <p>JORAM and kJORAM are available by checking out the
-    <strong>joram</strong> module from
+    <p>For getting the latest stable JORAM version, or for getting the current
+    development release, you have to use
     <a href="http://forge.objectweb.org/cvs/?group_id=4">CVS</a>.</p>
-    <p>The latest release tag is <strong>joram4_0_1</strong>.</p>
+
+    <p>JORAM and kJORAM are available by checking out the
+    <strong>joram</strong> module.</p>
+
+    <p>The latest stable release tag is <strong>joram4_0_1</strong>. For 
+    getting the current development release (potentially unstable), check
+    out joram with no tag.</p>
     </s2>
 
     </s1>
