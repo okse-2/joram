@@ -13,13 +13,13 @@
   <body>
 
     <s1 name="Latest News">
-      <subtitle>November 7, 2003: JORAM finaly includes a graphical
-      administration tool in its 3.7 release!</subtitle>
-      <p>Thanks to Alexander Fedorowicz, an active JORAM contributor,
-      the long expected graphical tool
-      for administering and monitoring the state of a JORAM platform is
-      finaly available.</p>
-      <p>This tool allows to administer and monitor a JORAM platform made of
+      <subtitle>November 7, 2003: The first major
+      contribution from JORAM ever growing community</subtitle>
+      <p>JORAM 3.7 includes the long expected graphical tool for
+      administering and monitoring the state of a JORAM platform.
+      Thanks to Alexander Fedorowicz, an active contributor, this tool is
+      made available to the whole JORAM community.</p>
+      <p>The tool allows to administer and monitor a JORAM platform made of
       one or many interconnected JORAM servers. It allows to create and delete
       destinations, users, and also to bind them to JORAM's naming server.</p>
       <p>Many thanks to Alexander for providing this useful tool often
