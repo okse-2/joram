@@ -48,6 +48,7 @@ a3mom.jar_CLASSES = \
 	MessageAdminDeleteQueue \
 	MessageAdminGetAgentClient \
 	MessageAdminDeleteAgentClient \
+	MessageAdminCleanDriver \
 	MessageTransactedVector \
 	MessageAckTransactedVector \
 	NotificationRollback \
