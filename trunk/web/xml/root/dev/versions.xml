@@ -14,7 +14,7 @@
 	   <s1 name="JORAM_4_1_1 (October 13, 2004)">
 		<p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_1.  
 		This release contains some minor features and bug fixes (see below the history file).</p>
-		<p> It is also available for <a href="../download/index/html">download</a> and the documentation has been slightly updated.</p>
+		<p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
 		<s2 name="New features and updates">
 		 <ul>
         <li>Allows to fix inFlow value through <code>ConnectionManager.inFlow</code> property.</li>
