@@ -48,6 +48,9 @@
     <delete dir="${obj.dir}"/>
     <delete dir="${build.dir}"/>
     <delete dir="${doc.dir}"/>
+    <!-- delete generated jar files -->
+    <delete file="${lib.dir}/mom.jar" />
+    <delete file="${lib.dir}/joram.jar" />
   </target>
 
   <!-- Prepare compilation phase -->
