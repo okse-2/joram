@@ -115,7 +115,10 @@ public class Session implements javax.jms.Session
     if (! transacted 
         && acknowledgeMode != javax.jms.Session.AUTO_ACKNOWLEDGE
         && acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE
-        && acknowledgeMode != javax.jms.Session.DUPS_OK_ACKNOWLEDGE)
+        && acknowledgeMode != javax.jms.Session.DUPS_OK_ACKNOWLEDGE
+        && !(cnx instanceof XAQueueConnection)
+        && !(cnx instanceof XATopicConnection)
+        && !(cnx instanceof XAConnection))
       throw new JMSException("Can't create a non transacted session with an"
                              + " invalid acknowledge mode.");
 
