@@ -133,8 +133,8 @@ import fr.dyade.aaa.agent.conf.*;
  * @author  Andre Freyssinet
  */
 public final class AgentServer {
-  /** RCS version number of this file: $Revision: 1.15 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.15 2003-06-23 13:37:51 fmaistre Exp $"; 
+  /** RCS version number of this file: $Revision: 1.16 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentServer.java,v 1.16 2003-06-26 09:15:06 fmaistre Exp $"; 
 
   public final static short NULL_ID = -1;
 
@@ -206,11 +206,17 @@ public final class AgentServer {
   }
 
   /**
-   * set the agent server configuration.
+   *  Set the agent server configuration. Be careful, this method cannot
+   * be called after initialization.
    *
    * @param a3config  A3CMLConfig
+   * @exception Exception	Server is already initialized.
    */
-  final static void setConfig(A3CMLConfig a3config) {
+  public final static void setConfig(A3CMLConfig a3config) throws Exception {
+    synchronized(status) {
+      if (status.value != Status.INSTALLED)
+        throw new Exception("cannot set config, bad status: " + status.value);
+    }
     AgentServer.a3config = a3config;
   }
   
