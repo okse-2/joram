@@ -115,6 +115,14 @@ public abstract class DestinationImpl implements java.io.Serializable
         doReact(from, (SetRightRequest) not);
       else if (not instanceof SetDMQRequest)
         doReact(from, (SetDMQRequest) not);
+      else if (not instanceof Monit_GetReaders)
+        doReact(from, (Monit_GetReaders) not);
+      else if (not instanceof Monit_GetWriters)
+        doReact(from, (Monit_GetWriters) not);
+      else if (not instanceof Monit_FreeAccess)
+        doReact(from, (Monit_FreeAccess) not);
+      else if (not instanceof Monit_GetDMQSettings)
+        doReact(from, (Monit_GetDMQSettings) not);
       else if (not instanceof ClientMessages)
         doReact(from, (ClientMessages) not);
       else if (not instanceof UnknownAgent)
@@ -236,6 +244,71 @@ public abstract class DestinationImpl implements java.io.Serializable
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetReaders</code>
+   * notification requesting the identifiers of the destination's readers.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetReaders not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from, new Monit_GetUsersRep(not, readers));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetWriters</code>
+   * notification requesting the identifiers of the destination's writers.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetWriters not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from, new Monit_GetUsersRep(not, writers));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_FreeAccess</code>
+   * notification requesting the free access status of this destination.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_FreeAccess not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from,
+                   new Monit_FreeAccessRep(not, freeReading, freeWriting));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetDMQSettings</code>
+   * notification requesting the destination's DMQ settings.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetDMQSettings not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    String id = null;
+    if (dmqId != null)
+      id = dmqId.toString();
+
+    Channel.sendTo(from, new Monit_GetDMQSettingsRep(not, id, null));
   }
 
   /**

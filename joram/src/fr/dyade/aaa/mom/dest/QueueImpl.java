@@ -99,6 +99,10 @@ public class QueueImpl extends DestinationImpl
     try {
       if (not instanceof SetThreshRequest)
         doReact(from, (SetThreshRequest) not);
+      else if (not instanceof Monit_GetPendingMessages)
+        doReact(from, (Monit_GetPendingMessages) not);
+      else if (not instanceof Monit_GetPendingRequests)
+        doReact(from, (Monit_GetPendingRequests) not);
       else if (not instanceof ReceiveRequest)
         doReact(from, (ReceiveRequest) not);
       else if (not instanceof BrowseRequest)
@@ -146,6 +150,56 @@ public class QueueImpl extends DestinationImpl
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Overrides this <code>DestinationImpl</code> method for sending back
+   * the threshold along with the DMQ id.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetDMQSettings not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    String id = null;
+    if (dmqId != null)
+      id = dmqId.toString();
+    Channel.sendTo(from, new Monit_GetDMQSettingsRep(not, id, threshold));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetPendingMessages</code> notification requesting the
+   * number of pending messages.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetPendingMessages not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from, new Monit_GetNumberRep(not, messages.size()));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetPendingRequests</code> notification requesting the
+   * number of pending requests.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetPendingRequests not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from, new Monit_GetNumberRep(not, requests.size()));
   }
 
   /**

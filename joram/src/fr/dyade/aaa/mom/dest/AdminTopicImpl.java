@@ -44,6 +44,7 @@ import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+
 /**
  * The <code>AdminTopicImpl</code> class implements the admin topic behaviour,
  * basically processing administration requests.
@@ -55,6 +56,13 @@ public class AdminTopicImpl extends TopicImpl
 
   /** Identifier of the server this topic is deployed on. */
   private int serverId;
+
+  /** Vector holding the local server's queues' identifiers. */
+  private Vector queues;
+  /** Vector holding the local server's dead message queues' identifiers. */
+  private Vector deadMQueues;
+  /** Vector holding the local server's topics' identifiers. */
+  private Vector topics;
 
   /**
    * Table holding the TCP users identifications.
@@ -87,6 +95,7 @@ public class AdminTopicImpl extends TopicImpl
   private AgentId adminProxId;
 
 
+
   /**
    * Constructs an <code>AdminTopicImpl</code> instance.
    *
@@ -96,6 +105,9 @@ public class AdminTopicImpl extends TopicImpl
   {
     super(topicId, topicId);
     serverId = (new Short(AgentServer.getServerId())).intValue();
+    queues = new Vector();
+    deadMQueues = new Vector();
+    topics = new Vector();
     usersTable = new Hashtable();
     soapTable = new Hashtable();
     proxiesTable = new Hashtable();
@@ -256,8 +268,95 @@ public class AdminTopicImpl extends TopicImpl
       return;
 
     AgentId replyTo = (AgentId) requestsTable.remove(requestId);
-    distributeReply(replyTo, requestId, new AdminReply(not.getSuccess(),
-                                                       not.getInfo()));
+    if (replyTo == null)
+      return;
+
+    AdminReply reply;
+
+    if (not instanceof Monit_GetUsersRep)
+      reply = doProcess((Monit_GetUsersRep) not);
+    else if (not instanceof Monit_FreeAccessRep)
+      reply = doProcess((Monit_FreeAccessRep) not);
+    else if (not instanceof Monit_GetDMQSettingsRep)
+      reply = doProcess((Monit_GetDMQSettingsRep) not);
+    else if (not instanceof Monit_GetFatherRep)
+      reply = doProcess((Monit_GetFatherRep) not);
+    else if (not instanceof Monit_GetClusterRep)
+      reply = doProcess((Monit_GetClusterRep) not);
+    else if (not instanceof Monit_GetNumberRep)
+      reply = doProcess((Monit_GetNumberRep) not);
+    else
+      reply = new AdminReply(not.getSuccess(), not.getInfo());
+    
+    distributeReply(replyTo, requestId, reply);
+  }
+
+  /**
+   * Processes a <code>Monit_GetUsersRep</code> notification holding a
+   * destination's readers' or writers' identifiers.
+   */
+  private AdminReply doProcess(Monit_GetUsersRep not)
+  {
+    Vector users = not.getUsers();
+
+    String name;
+    AgentId proxyId;
+    Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
+
+    for (Enumeration names = proxiesTable.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      proxyId = (AgentId) proxiesTable.get(name);
+
+      if (users.contains(proxyId))
+        reply.addUser(name, proxyId.toString());
+    }
+    return reply;
+  }
+
+  /**
+   * Processes a <code>Monit_FreeAccesRep</code> notification holding the
+   * free access status of a destination.
+   */
+  private AdminReply doProcess(Monit_FreeAccessRep not)
+  {
+    return new Monitor_GetFreeAccessRep(not.getFreeReading(),
+                                        not.getFreeWriting());
+  }
+
+  /**
+   * Processes a <code>Monit_GetDMQSettingsRep</code> notification holding the
+   * DMQ settings of a destination or proxy dead message queue.
+   */
+  private AdminReply doProcess(Monit_GetDMQSettingsRep not)
+  {
+    return new Monitor_GetDMQSettingsRep(not.getDMQId(), not.getThreshold());
+  }
+
+  /**
+   * Processes a <code>Monit_GetFatherRep</code> notification holding the
+   * identifier of a topic's hierarchical father.
+   */
+  private AdminReply doProcess(Monit_GetFatherRep not)
+  {
+    return new Monitor_GetFatherRep(not.getFatherId());
+  }
+
+  /**
+   * Processes a <code>Monit_GetClusterRep</code> notification holding the
+   * identifiers of a cluster's topics.
+   */
+  private AdminReply doProcess(Monit_GetClusterRep not)
+  {
+    return new Monitor_GetClusterRep(not.getTopics());
+  }
+
+  /**
+   * Processes a <code>Monit_GetNumberRep</code> notification holding an
+   * integer value sent by a destination.
+   */
+  private AdminReply doProcess(Monit_GetNumberRep not)
+  {
+    return new Monitor_GetNumberRep(not.getNumber());
   }
 
   /**
@@ -517,7 +616,9 @@ public class AdminTopicImpl extends TopicImpl
         }
         catch (Exception exc) {}
 
-        if (request instanceof CreateQueueRequest)
+        if (request instanceof StopServerRequest)
+          doProcess((StopServerRequest) request, replyTo, msgId);
+        else if (request instanceof CreateQueueRequest)
           doProcess((CreateQueueRequest) request, replyTo, msgId);
         else if (request instanceof CreateTopicRequest)
           doProcess((CreateTopicRequest) request, replyTo, msgId);
@@ -569,6 +670,28 @@ public class AdminTopicImpl extends TopicImpl
           doProcess((OldAddAdminId) request, replyTo, msgId);
         else if (request instanceof OldDelAdminId)
           doProcess((OldDelAdminId) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetDestinations)
+          doProcess((Monitor_GetDestinations) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetUsers)
+          doProcess((Monitor_GetUsers) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetReaders)
+          doProcess((Monitor_GetReaders) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetWriters)
+          doProcess((Monitor_GetWriters) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetFreeAccess)
+          doProcess((Monitor_GetFreeAccess) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetDMQSettings)
+          doProcess((Monitor_GetDMQSettings) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetFather)
+          doProcess((Monitor_GetFather) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetCluster)
+          doProcess((Monitor_GetCluster) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetPendingMessages)
+          doProcess((Monitor_GetPendingMessages) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetPendingRequests)
+          doProcess((Monitor_GetPendingRequests) request, replyTo, msgId);
+        else if (request instanceof Monitor_GetSubscriptions)
+          doProcess((Monitor_GetSubscriptions) request, replyTo, msgId);
       }
     }
     catch (MomException exc) {
@@ -603,6 +726,28 @@ public class AdminTopicImpl extends TopicImpl
   }
 
   /**
+   * Processes a <code>StopServerRequest</code> instance requesting to stop
+   * a given server.
+   */
+  private void doProcess(StopServerRequest request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    // If this server is not the target server, doing nothing:
+    if (request.getServerId() != serverId)
+      return;
+
+    distributeReply(replyTo, msgId, new AdminReply(true, "Server stopped"));
+
+    new Thread() {
+      public void run()
+      {
+        AgentServer.stop();
+      }
+    }.start();
+  }
+
+  /**
    * Processes a <code>CreateQueueRequest</code> instance requesting the
    * creation of a <code>Queue</code> or a <code>DeadMQueue</code>
    * destination.
@@ -630,6 +775,11 @@ public class AdminTopicImpl extends TopicImpl
     try {
       queue.deploy();
       AgentId qId = queue.getId();
+
+      if (dest.equals("queue"))
+        queues.add(qId);
+      else
+        deadMQueues.add(qId);
 
       String info = "Request [" + request.getClass().getName()
                     + "], processed by AdminTopic on server [" + serverId
@@ -666,6 +816,8 @@ public class AdminTopicImpl extends TopicImpl
     try {
       topic.deploy();
       AgentId tId = topic.getId();
+
+      topics.add(tId);
   
       String info = "Request [" + request.getClass().getName()
                     + "], processed by AdminTopic on server [" + serverId
@@ -1327,6 +1479,242 @@ public class AdminTopicImpl extends TopicImpl
     proxiesTable.remove(name);
 
     distributeReply(replyTo, msgId, new AdminReply(true, null));
+  }
+
+  /**
+   * Processes a <code>Monitor_GetDestinations</code> request by sending 
+   * registered destinations.
+   */
+  private void doProcess(Monitor_GetDestinations request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    if (request.getServerId() != serverId)
+      return;
+
+    Monitor_GetDestinationsRep reply = new Monitor_GetDestinationsRep();
+
+    int i;
+    for (i = 0; i < queues.size(); i ++)
+      reply.addQueue(((AgentId) queues.get(i)).toString());
+    for (i = 0; i < deadMQueues.size(); i ++)
+      reply.addDeadMQueue(((AgentId) deadMQueues.get(i)).toString());
+    for (i = 0; i < topics.size(); i ++)
+      reply.addTopic(((AgentId) topics.get(i)).toString());
+
+    distributeReply(replyTo, msgId, reply);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetUsers</code> request by sending the
+   * users table.
+   */
+  private void doProcess(Monitor_GetUsers request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    if (request.getServerId() != serverId)
+      return;
+
+    Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
+  
+    String name; 
+    for (Enumeration names = proxiesTable.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      reply.addUser(name, ((AgentId) proxiesTable.get(name)).toString());
+    }
+
+    distributeReply(replyTo, msgId, reply);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetReaders</code> request by forwarding it
+   * to its target destination, if local.
+   */
+  private void doProcess(Monitor_GetReaders request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_GetReaders(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetWriters</code> request by forwarding it
+   * to its target destination, if local.
+   */
+  private void doProcess(Monitor_GetWriters request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_GetWriters(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetFreeAccess</code> request by forwarding it
+   * to its target destination, if local.
+   */
+  private void doProcess(Monitor_GetFreeAccess request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_FreeAccess(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetDMQSettings</code> request either by
+   * processing it and sending back the default DMQ settings, or by
+   * forwarding it to its target destination or proxy.
+   */
+  private void doProcess(Monitor_GetDMQSettings request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    
+    if (request.getServerId() != -1 && request.getServerId() == serverId) {
+      Monitor_GetDMQSettingsRep reply;
+      String id = null;
+      if (DeadMQueueImpl.id != null)
+        id = DeadMQueueImpl.id.toString();
+      reply = new Monitor_GetDMQSettingsRep(id, DeadMQueueImpl.threshold);
+      distributeReply(replyTo, msgId, reply);
+    }
+    else {
+      AgentId target = AgentId.fromString(request.getTarget());
+
+      if (target.getTo() == serverId) {
+        Channel.sendTo(target, new Monit_GetDMQSettings(msgId));
+
+        if (replyTo != null)
+          requestsTable.put(msgId, replyTo);
+      }
+    }
+  }
+
+  /**
+   * Processes a <code>Monitor_GetFather</code> request by forwarding it to
+   * its target topic, if local.
+   */
+  private void doProcess(Monitor_GetFather request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId topicId = AgentId.fromString(request.getTopic());
+
+    // The destination is not local, doing nothing.
+    if (topicId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(topicId, new Monit_GetFather(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetCluster</code> request by forwarding it to
+   * its target topic, if local.
+   */
+  private void doProcess(Monitor_GetCluster request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId topicId = AgentId.fromString(request.getTopic());
+
+    // The destination is not local, doing nothing.
+    if (topicId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(topicId, new Monit_GetCluster(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetPendingMessages</code> request by
+   * forwarding it to its target queue, if local.
+   */
+  private void doProcess(Monitor_GetPendingMessages request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_GetPendingMessages(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetPendingRequests</code> request by
+   * forwarding it to its target queue, if local.
+   */
+  private void doProcess(Monitor_GetPendingRequests request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_GetPendingRequests(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
+  }
+
+  /**
+   * Processes a <code>Monitor_GetSubscriptions</code> request by
+   * forwarding it to its target queue, if local.
+   */
+  private void doProcess(Monitor_GetSubscriptions request,
+                         AgentId replyTo,
+                         String msgId)
+  {
+    AgentId destId = AgentId.fromString(request.getDest());
+
+    // The destination is not local, doing nothing.
+    if (destId.getTo() != serverId)
+      return;
+
+    Channel.sendTo(destId, new Monit_GetSubscriptions(msgId));
+
+    if (replyTo != null)
+      requestsTable.put(msgId, replyTo);
   }
     
  
