@@ -428,7 +428,8 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
     }
     catch (Exception e) {
       JMSException je = null;
-      if (e instanceof EOFException)
+      if (e instanceof EOFException ||
+          e instanceof IOException)
         je = new MessageEOFException("Unexpected end of bytes array : " + e);
       else
         je = new MessageFormatException("Can't read the expected type: " + e);
