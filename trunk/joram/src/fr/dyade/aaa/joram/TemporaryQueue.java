@@ -75,13 +75,9 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
       sess = (Session) cnx.sessions.get(i);
       for (int j = 0; j < sess.consumers.size(); j++) {
         cons = (MessageConsumer) sess.consumers.get(j);
-        if (agentId.equals(cons.destName)) {
-          JMSException jE = new JMSException("Subscribers still exist"
-                                             + " for this temp. queue.");
-
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-            JoramTracing.dbgClient.log(BasicLevel.WARN, jE);
-        }
+        if (agentId.equals(cons.destName))
+          throw new JMSException("Consumers still exist for this temp."
+                                 + " queue.");
       }
     }
     // Sending the request to the server:
