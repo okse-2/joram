@@ -59,19 +59,7 @@
          order to prevent a Joram platform to be overloaded by a heavily
          producing client.
       </p>
-      <p><em>Bugs</em> have also been corrected: check the
-         <a href="dev/versions.html">versions info</a> page.
-      </p> 
       <hr />
-
-      <subtitle>June 18th, 2002: JMS Test Suite tests for JMS 1.1 support!
-                </subtitle>
-      <p>The <em>JMS Test Suite</em> has its own
-         <a href="tests/index.html">page</a>.<br />
-	 The suite tests JMS features. All code of the test suite is
-	 pure JMS without any dependency to JORAM.
-     </p>
-     <hr />
 
      <subtitle>June 10th, 2002: JORAM now implements the new JMS 1.1
         specification!</subtitle>
@@ -117,10 +105,6 @@
       <p><em>A JMS Test Suite</em> has been released under LGPL.<br />
 	This suite tests JMS features. All code of the test suite is
 	pure JMS without any dependency to JORAM.</p>
-      <p>All code is available from JORAM <a
-	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">cvs repository</a>. See the test suite
-	<a href="http://www.objectweb.org/joram/current/doc/tests/index.html">documentation</a> for more information.</p>
-
       <hr/>
 
       <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
@@ -137,22 +121,14 @@
 	and easy future developements and enhancements.<br/>
 	A suite of tests based on JUnit will be very soon proposed for
 	download.
-      </p><p>
-	Please do not hesitate to keep us informed of any inconsistancy or
-	problem you may encounter with the new distribution and documentation.<br />
-	We sincerely hope you will enjoy this new version.   
       </p>
       
       <hr />
 
       <subtitle>16th January 2002: JORAM 2.2 (cvs tag:
 	joram2_2)</subtitle>
-      <p>This version adds support for <a
-	  href="http://jakarta.apache.org/ant/">Ant</a> build
-	system. Package are also available for download. Have a look <a
-	  href="http://cvs.objectweb.org/cgi-bin/cvsweb/?cvsroot=JORAM">JORAM CVS repository</a>
-	<br/>
-	Documentation will follow soon...
+      <p>This version adds support for Ant build
+	system.
       </p>
 
       <hr/>
@@ -211,8 +187,8 @@
       <ul>
 	<li><em>New feature:</em> JORAM now includes a <em>JNDI</em> "light" implementation (JNDI 1.1.2).</li>
 
-	<li><em>XA</em> classes have been successfully tested through <connect
-	href="../jonas/index.xml">JOnAS</connect> EJB implementation.</li>
+	<li><em>XA</em> classes have been successfully tested through 
+        JOnAS EJB implementation.</li>
 
 	<li>Persistence and lookup <em>bugs</em> fixed.</li>
       </ul>
