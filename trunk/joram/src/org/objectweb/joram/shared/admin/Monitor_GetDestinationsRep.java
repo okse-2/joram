@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 
@@ -38,6 +40,9 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply
   private Vector dmqs;
   /** Topics identifiers. */
   private Vector topics;
+
+  /** Destinations' names, if any. */
+  private Hashtable names;
 
 
 
@@ -65,6 +70,22 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply
     topics.add(id);
   }
 
+  /** Sets destinations' names, if any. */
+  public void setNames(Hashtable names)
+  {
+    if (names == null)
+      return;
+
+    this.names = new Hashtable();
+    Enumeration keys = names.keys();
+    Object key;
+    Object value;
+    while (keys.hasMoreElements()) {
+      key = keys.nextElement();
+      value = names.get(key);
+      this.names.put(value.toString(), key);
+    }
+  }
   
   /** Returns the queues identifiers. */
   public Vector getQueues()
@@ -82,5 +103,13 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply
   public Vector getTopics()
   {
     return topics;
+  }
+
+  /** Returns a destination name. */
+  public String getName(String id)
+  {
+    if (names == null)
+      return null;
+    return (String) names.get(id);
   }
 }
