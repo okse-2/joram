@@ -42,14 +42,13 @@ public class OutboundSubscriber extends OutboundConsumer
 
   /**
    * Constructs an <code>OutboundSubscriber</code> instance.
-   *
-   * @param topic     Topic instance to consume messages from.
-   * @param noLocal   NoLocal parameter.
-   * @param consumer  JMS consumer to wrap.
    */
-  OutboundSubscriber(Topic topic, boolean noLocal, MessageConsumer consumer)
+  OutboundSubscriber(Topic topic, 
+                     boolean noLocal,
+                     MessageConsumer consumer,
+                     OutboundSession session)
   {
-    super(consumer);
+    super(consumer, session);
     this.topic = topic;
     this.noLocal = noLocal;
   }
@@ -58,12 +57,14 @@ public class OutboundSubscriber extends OutboundConsumer
   /** Returns the consumer's topic. */
   public Topic getTopic() throws JMSException
   {
+    checkValidity();
     return topic;
   }
 
   /** Returns the noLocal parameter. */
   public boolean getNoLocal() throws JMSException
   {
+    checkValidity();
     return noLocal;
   }
 }

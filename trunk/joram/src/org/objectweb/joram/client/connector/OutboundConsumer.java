@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.connector;
 
+import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 
@@ -32,18 +33,25 @@ import javax.jms.MessageConsumer;
  */
 public class OutboundConsumer implements javax.jms.MessageConsumer
 {
+  /** The <code>OutboundSession</code> this consumer belongs to. */
+  protected OutboundSession session;
   /** Wrapped JMS consumer. */
   protected MessageConsumer consumer;
 
+  /** <code>false</code> if consumer is no more valid. */
+  boolean valid = true;
+  
 
   /**
    * Constructs an <code>OutboundConsumer</code> instance.
    *
    * @param consumer  JMS consumer to wrap.
+   * @param session   The OutboundSession this consumer belongs to.
    */
-  OutboundConsumer(MessageConsumer consumer)
+  OutboundConsumer(MessageConsumer consumer, OutboundSession session)
   {
     this.consumer = consumer;
+    this.session = session;
   }
 
 
@@ -54,6 +62,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
   public void setMessageListener(javax.jms.MessageListener messageListener)
               throws JMSException
   {
+    checkValidity();
     throw new JMSException("Component's consumer can't be asynchronous.");
   }
 
@@ -63,6 +72,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.MessageListener getMessageListener() throws JMSException
   {
+    checkValidity();
     throw new JMSException("Component's consumer can't be asynchronous.");
   }
 
@@ -71,6 +81,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public String getMessageSelector() throws JMSException
   {
+    checkValidity();
     return consumer.getMessageSelector();
   }
 
@@ -79,6 +90,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receive(long timeOut) throws JMSException
   {
+    checkValidity();
     return consumer.receive(timeOut);
   }
 
@@ -87,6 +99,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receive() throws JMSException
   {
+    checkValidity();
     return consumer.receive();
   }
 
@@ -95,6 +108,7 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public javax.jms.Message receiveNoWait() throws JMSException
   {
+    checkValidity();
     return consumer.receiveNoWait();
   }
 
@@ -103,6 +117,16 @@ public class OutboundConsumer implements javax.jms.MessageConsumer
    */
   public void close() throws JMSException
   {
+    valid = false;
     consumer.close();
+  }
+
+  /** Checks the validity of the subscriber instance. */
+  protected void checkValidity() throws IllegalStateException
+  {
+    session.checkValidity();
+
+    if (! valid)
+     throw new IllegalStateException("Invalid call on a closed producer.");
   }
 }

@@ -70,6 +70,9 @@ public class ManagedConnectionImpl
   /** Out stream for error logging and tracing. */
   private PrintWriter out = null;
 
+  /** <code>true</code> if the connection is valid. */
+  private boolean valid = false;
+
   /** Underlying JORAM server host name. */
   String hostName;
   /** Underlying JORAM server port number. */
@@ -118,6 +121,8 @@ public class ManagedConnectionImpl
 
     handles = new Vector();
     listeners = new Vector();
+
+    valid = true;
 
     ra.addProducer(this);
   }
@@ -309,10 +314,8 @@ public class ManagedConnectionImpl
   public synchronized void cleanup() throws ResourceException
   {
     OutboundConnection handle;
-    while (! handles.isEmpty()) {
+    while (! handles.isEmpty())
       handle = (OutboundConnection) handles.remove(0);
-      handle.valid = false;
-    }
   }
 
   /**
@@ -331,7 +334,7 @@ public class ManagedConnectionImpl
 
     ra.removeProducer(this);
 
-    cnx = null;
+    valid = false;
   }
 
   /**
@@ -387,7 +390,7 @@ public class ManagedConnectionImpl
       listener.connectionErrorOccurred(event);
     }
 
-    cnx = null;
+    valid = false;
   }
 
 
@@ -518,7 +521,7 @@ public class ManagedConnectionImpl
    */
   boolean isValid()
   {
-    return (cnx != null);
+    return valid;
   }
 
   /** Notifies of the closing of one of the connection handles. */

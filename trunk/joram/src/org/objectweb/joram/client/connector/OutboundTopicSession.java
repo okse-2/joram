@@ -38,12 +38,10 @@ public class OutboundTopicSession extends OutboundSession
 {
   /**
    * Constructs an <code>OutboundTopicSession</code> instance.
-   *
-   * @param sess  The JMS session (XA or not) to wrap.
    */
-  OutboundTopicSession(Session sess)
+  OutboundTopicSession(Session sess, OutboundConnection cnx)
   {
-    super(sess);
+    super(sess, cnx);
   }
 
 
@@ -53,7 +51,8 @@ public class OutboundTopicSession extends OutboundSession
   public javax.jms.TopicPublisher createPublisher(Topic topic)
          throws JMSException
   {
-    return new OutboundPublisher(sess.createProducer(topic));
+    checkValidity();
+    return new OutboundPublisher(sess.createProducer(topic), this);
   }
 
   /**
@@ -64,8 +63,9 @@ public class OutboundTopicSession extends OutboundSession
                                           boolean noLocal)
          throws JMSException
   {
+    checkValidity();
     MessageConsumer cons = sess.createConsumer(topic, selector, noLocal);
-    return new OutboundSubscriber(topic, noLocal, cons);
+    return new OutboundSubscriber(topic, noLocal, cons, this);
   }
 
   /**
@@ -74,8 +74,9 @@ public class OutboundTopicSession extends OutboundSession
   public TopicSubscriber createSubscriber(Topic topic, String selector)
          throws JMSException
   {
+    checkValidity();
     MessageConsumer cons = sess.createConsumer(topic, selector);
-    return new OutboundSubscriber(topic, false, cons);
+    return new OutboundSubscriber(topic, false, cons, this);
   }
 
   /**
@@ -83,6 +84,10 @@ public class OutboundTopicSession extends OutboundSession
    */
   public TopicSubscriber createSubscriber(Topic topic) throws JMSException
   {
-    return new OutboundSubscriber(topic, false, sess.createConsumer(topic));
+    checkValidity();
+    return new OutboundSubscriber(topic,
+                                  false,
+                                  sess.createConsumer(topic),
+                                  this);
   }
 }

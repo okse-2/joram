@@ -38,16 +38,18 @@ public class OutboundPublisher extends OutboundProducer
    * Constructs an <code>OutboundPublisher</code> instance.
    *
    * @param producer  The JMS producer to wrap.
+   * @param session   The OutboundSession the publisher belongs to.
    */
-  OutboundPublisher(MessageProducer producer)
+  OutboundPublisher(MessageProducer producer, OutboundSession session)
   {
-    super(producer);
+    super(producer, session);
   }
 
  
   /** Delegates the call to the wrapped producer. */
   public Topic getTopic() throws JMSException
   {
+    checkValidity();
     return (Topic) producer.getDestination();
   }
 
@@ -58,12 +60,14 @@ public class OutboundPublisher extends OutboundProducer
                       long timeToLive)
          throws JMSException
   {
+    checkValidity();
     producer.send(message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void publish(Message message) throws JMSException
   {
+    checkValidity();
     producer.send(message);
   }
 
@@ -75,12 +79,14 @@ public class OutboundPublisher extends OutboundProducer
                       long timeToLive)
          throws JMSException
   {
+    checkValidity();
     producer.send(topic, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void publish(Topic topic, Message message) throws JMSException
   {
+    checkValidity();
     producer.send(topic, message);
   }
 }

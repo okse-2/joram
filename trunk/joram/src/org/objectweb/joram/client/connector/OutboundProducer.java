@@ -22,6 +22,7 @@
 package org.objectweb.joram.client.connector;
 
 import javax.jms.Destination;
+import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
@@ -33,84 +34,102 @@ import javax.jms.MessageProducer;
  */
 public class OutboundProducer implements javax.jms.MessageProducer
 {
+  /** The <code>OutboundSession</code> this producer belongs to. */
+  protected OutboundSession session;
   /** The wrapped JMS producer. */
   protected MessageProducer producer;
+
+  /** <code>false</code> if producer is no more valid. */
+  boolean valid = true;
   
 
   /**
    * Constructs an <code>OutboundProducer</code> instance.
    *
    * @param producer  The JMS producer to wrap.
+   * @param session   The OutboundSession this producer belongs to.
    */
-  OutboundProducer(MessageProducer producer)
+  OutboundProducer(MessageProducer producer, OutboundSession session)
   {
     this.producer = producer;
+    this.session = session;
   }
 
 
   /** Delegates the call to the wrapped producer. */
   public void setDisableMessageID(boolean value) throws JMSException
   {
+    checkValidity();
     producer.setDisableMessageID(value);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void setDeliveryMode(int deliveryMode) throws JMSException
   {
+    checkValidity();
     producer.setDeliveryMode(deliveryMode);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void setPriority(int priority) throws JMSException
   {
+    checkValidity();
     producer.setPriority(priority);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void setTimeToLive(long timeToLive) throws JMSException
   {
+    checkValidity();
     producer.setTimeToLive(timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void setDisableMessageTimestamp(boolean value) throws JMSException
   {
+    checkValidity();
     producer.setDisableMessageTimestamp(value);
   }
 
   /** Delegates the call to the wrapped producer. */
   public Destination getDestination() throws JMSException
   {
+    checkValidity();
     return producer.getDestination();
   }
 
   /** Delegates the call to the wrapped producer. */
   public boolean getDisableMessageID() throws JMSException
   {
+    checkValidity();
     return producer.getDisableMessageID();
   }
 
   /** Delegates the call to the wrapped producer. */
   public int getDeliveryMode() throws JMSException
   {
+    checkValidity();
     return producer.getDeliveryMode();
   }
 
   /** Delegates the call to the wrapped producer. */
   public int getPriority() throws JMSException
   {
+    checkValidity();
     return producer.getPriority();
   }
 
   /** Delegates the call to the wrapped producer. */
   public long getTimeToLive() throws JMSException
   {
+    checkValidity();
     return producer.getTimeToLive();
   }
 
   /** Delegates the call to the wrapped producer. */
   public boolean getDisableMessageTimestamp() throws JMSException
   {
+    checkValidity();
     return producer.getDisableMessageTimestamp();
   }
 
@@ -118,6 +137,7 @@ public class OutboundProducer implements javax.jms.MessageProducer
   /** Delegates the call to the wrapped producer. */
   public void send(Message message) throws JMSException
   {
+    checkValidity();
     producer.send(message);
   }
 
@@ -128,6 +148,7 @@ public class OutboundProducer implements javax.jms.MessageProducer
                    long timeToLive)
               throws JMSException
   {
+    checkValidity();
     producer.send(message, deliveryMode, priority, timeToLive);
   }
 
@@ -145,12 +166,23 @@ public class OutboundProducer implements javax.jms.MessageProducer
                    long timeToLive)
               throws JMSException
   {
+    checkValidity();
     producer.send(dest, message, deliveryMode, priority, timeToLive);
   }
 
   /** Delegates the call to the wrapped producer. */
   public void close() throws JMSException
   {
+    valid = false;
     producer.close();
+  }
+
+  /** Checks the validity of the subscriber instance. */
+  protected void checkValidity() throws IllegalStateException
+  {
+    session.checkValidity();
+
+    if (! valid)
+      throw new IllegalStateException("Invalid call on a closed producer.");
   }
 }

@@ -36,12 +36,10 @@ public class OutboundQueueSession extends OutboundSession
 {
   /**
    * Constructs an <code>OutboundQueueSession</code> instance.
-   *
-   * @param sess  The JMS session (XA or not) to wrap.
    */
-  OutboundQueueSession(Session sess)
+  OutboundQueueSession(Session sess, OutboundConnection cnx)
   {
-    super(sess);
+    super(sess, cnx);
   }
 
 
@@ -51,7 +49,8 @@ public class OutboundQueueSession extends OutboundSession
   public javax.jms.QueueSender createSender(Queue queue)
          throws JMSException
   {
-    return new OutboundSender(sess.createProducer(queue));
+    checkValidity();
+    return new OutboundSender(sess.createProducer(queue), this);
   }
 
   /**
@@ -60,7 +59,10 @@ public class OutboundQueueSession extends OutboundSession
   public javax.jms.QueueReceiver createReceiver(Queue queue, String selector)
          throws JMSException
   {
-    return new OutboundReceiver(queue, sess.createConsumer(queue, selector));
+    checkValidity();
+    return new OutboundReceiver(queue,
+                                sess.createConsumer(queue, selector),
+                                this);
   }
 
   /**
@@ -69,6 +71,7 @@ public class OutboundQueueSession extends OutboundSession
   public javax.jms.QueueReceiver createReceiver(Queue queue)
          throws JMSException
   {
-    return new OutboundReceiver(queue, sess.createConsumer(queue));
+    checkValidity();
+    return new OutboundReceiver(queue, sess.createConsumer(queue), this);
   }
 }

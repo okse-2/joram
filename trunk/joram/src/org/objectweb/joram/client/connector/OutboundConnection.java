@@ -61,6 +61,9 @@ public class OutboundConnection implements javax.jms.Connection
    */
   public void setClientID(String clientID) throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -72,6 +75,9 @@ public class OutboundConnection implements javax.jms.Connection
   public void setExceptionListener(ExceptionListener listener)
               throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -92,7 +98,7 @@ public class OutboundConnection implements javax.jms.Connection
     if (managedCx.session == null)
       managedCx.session = xac.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-    return new OutboundSession(managedCx.session);
+    return new OutboundSession(managedCx.session, this);
   }
 
   /**
@@ -101,6 +107,9 @@ public class OutboundConnection implements javax.jms.Connection
    */
   public String getClientID() throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -125,6 +134,9 @@ public class OutboundConnection implements javax.jms.Connection
    */
   public ExceptionListener getExceptionListener() throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -149,6 +161,9 @@ public class OutboundConnection implements javax.jms.Connection
    */
   public void stop() throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -164,6 +179,9 @@ public class OutboundConnection implements javax.jms.Connection
                                   int maxMessages)
          throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -180,6 +198,9 @@ public class OutboundConnection implements javax.jms.Connection
                                          int maxMessages)
          throws JMSException
   {
+    if (! valid)
+      throw new javax.jms.IllegalStateException("Invalid connection handle.");
+
     throw new JMSException("Forbidden call on an application or component's "
                            + "session.");
   }
@@ -190,11 +211,9 @@ public class OutboundConnection implements javax.jms.Connection
    * @exception javax.jms.IllegalStateException  If the handle is invalid.
    * @exception javax.jms.JMSException           Generic exception.
    */
-  public void close() throws JMSException
+  public synchronized void close() throws JMSException
   {
-    if (! valid)
-      throw new javax.jms.IllegalStateException("Invalid connection handle.");
-
+    valid = false;
     managedCx.closeHandle(this);
   }
 }

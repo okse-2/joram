@@ -40,19 +40,20 @@ public class OutboundReceiver extends OutboundConsumer
 
   /**
    * Constructs an <code>OutboundReceiver</code> instance.
-   *
-   * @param consumer  JMS consumer to wrap.
    */
-  OutboundReceiver(Queue queue, MessageConsumer consumer)
+  OutboundReceiver(Queue queue,
+                   MessageConsumer consumer,
+                   OutboundSession session)
   {
-    super(consumer);
+    super(consumer, session);
     this.queue = queue;
   }
 
 
   /** Returns the consumer's queue. */
-  public Queue getQueue()
+  public Queue getQueue() throws JMSException
   {
+    checkValidity();
     return queue;
   }
 }

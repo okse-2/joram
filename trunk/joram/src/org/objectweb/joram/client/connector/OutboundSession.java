@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.connector;
 
+import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
@@ -33,18 +34,23 @@ import javax.jms.TopicSubscriber;
  */
 public class OutboundSession implements javax.jms.Session
 {
+  /** The <code>OutboundConnection</code> the session belongs to. */
+  protected OutboundConnection cnx;
   /** The wrapped JMS session. */
   protected Session sess;
+
+  /** <code>true</code> if this "handle" is valid. */
+  boolean valid = true;
+
 
 
   /**
    * Constructs an <code>OutboundSession</code> instance.
-   *
-   * @param sess  The JMS session (XA or not) to wrap.
    */
-  OutboundSession(Session sess)
+  OutboundSession(Session sess, OutboundConnection cnx)
   {
     this.sess = sess;
+    this.cnx = cnx;
   }
  
 
@@ -53,6 +59,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public int getAcknowledgeMode() throws JMSException
   {
+    checkValidity();
     return sess.getAcknowledgeMode();
   }
 
@@ -61,6 +68,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public boolean getTransacted() throws JMSException
   {
+    checkValidity();
     return sess.getTransacted();
   }
 
@@ -71,6 +79,7 @@ public class OutboundSession implements javax.jms.Session
   public void setMessageListener(javax.jms.MessageListener messageListener)
               throws JMSException
   {
+    checkValidity();
     throw new JMSException("Forbidden call on a component's session.");
   }
 
@@ -80,6 +89,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.MessageListener getMessageListener() throws JMSException
   {
+    checkValidity();
     throw new JMSException("Forbidden call on a component's session.");
   }
 
@@ -88,6 +98,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.Message createMessage() throws JMSException
   {
+    checkValidity();
     return sess.createMessage();
   }
 
@@ -96,6 +107,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.TextMessage createTextMessage() throws JMSException
   {
+    checkValidity();
     return sess.createTextMessage();
   }
 
@@ -105,6 +117,7 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.TextMessage createTextMessage(String text)
          throws JMSException
   {
+    checkValidity();
     return sess.createTextMessage(text);
   }
 
@@ -113,6 +126,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.BytesMessage createBytesMessage() throws JMSException
   {
+    checkValidity();
     return sess.createBytesMessage();
   }
 
@@ -121,6 +135,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.MapMessage createMapMessage() throws JMSException
   {
+    checkValidity();
     return sess.createMapMessage();
   }
 
@@ -129,6 +144,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.ObjectMessage createObjectMessage() throws JMSException
   {
+    checkValidity();
     return sess.createObjectMessage();
   }
 
@@ -138,6 +154,7 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj)
          throws JMSException
   {
+    checkValidity();
     return sess.createObjectMessage(obj);
   }
 
@@ -147,6 +164,7 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.StreamMessage createStreamMessage()
          throws JMSException
   {
+    checkValidity();
     return sess.createStreamMessage();
   }
 
@@ -157,6 +175,7 @@ public class OutboundSession implements javax.jms.Session
          createBrowser(javax.jms.Queue queue, String selector)
          throws JMSException
   {
+    checkValidity();
     return sess.createBrowser(queue, selector);
   }
 
@@ -166,6 +185,7 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue)
          throws JMSException
   {
+    checkValidity();
     return sess.createBrowser(queue);
   }
 
@@ -175,7 +195,8 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.MessageProducer createProducer(javax.jms.Destination dest)
          throws JMSException
   {
-    return new OutboundProducer(sess.createProducer(dest));
+    checkValidity();
+    return new OutboundProducer(sess.createProducer(dest), this);
   }
 
   /**
@@ -187,7 +208,9 @@ public class OutboundSession implements javax.jms.Session
                         boolean noLocal)
          throws JMSException
   {
-    return new OutboundConsumer(sess.createConsumer(dest, selector, noLocal));
+    checkValidity();
+    return new OutboundConsumer(sess.createConsumer(dest, selector, noLocal),
+                                this);
   }
 
   /**
@@ -197,7 +220,8 @@ public class OutboundSession implements javax.jms.Session
          createConsumer(javax.jms.Destination dest, String selector)
          throws JMSException
   {
-    return new OutboundConsumer(sess.createConsumer(dest, selector));
+    checkValidity();
+    return new OutboundConsumer(sess.createConsumer(dest, selector), this);
   }
 
   /**
@@ -206,7 +230,8 @@ public class OutboundSession implements javax.jms.Session
   public javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest)
          throws JMSException
   {
-    return new OutboundConsumer(sess.createConsumer(dest));
+    checkValidity();
+    return new OutboundConsumer(sess.createConsumer(dest), this);
   }
 
   /**
@@ -219,10 +244,12 @@ public class OutboundSession implements javax.jms.Session
                                  boolean noLocal)
          throws JMSException
   {
+    checkValidity();
+
     TopicSubscriber sub =
       sess.createDurableSubscriber(topic, name, selector, noLocal);
 
-    return new OutboundSubscriber(topic, noLocal, sub);
+    return new OutboundSubscriber(topic, noLocal, sub, this);
   }
 
   /**
@@ -232,8 +259,10 @@ public class OutboundSession implements javax.jms.Session
          createDurableSubscriber(javax.jms.Topic topic, String name)
          throws JMSException
   {
+    checkValidity();
+
     TopicSubscriber sub = sess.createDurableSubscriber(topic, name);
-    return new OutboundSubscriber(topic, false, sub);
+    return new OutboundSubscriber(topic, false, sub, this);
   }
 
   /**
@@ -241,6 +270,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.Queue createQueue(String queueName) throws JMSException
   {
+    checkValidity();
     return sess.createQueue(queueName);
   }
 
@@ -249,6 +279,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.Topic createTopic(String topicName) throws JMSException
   {
+    checkValidity();
     return sess.createTopic(topicName);
   }
 
@@ -257,6 +288,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException
   {
+    checkValidity();
     return sess.createTemporaryQueue();
   }
 
@@ -265,6 +297,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException
   {
+    checkValidity();
     return sess.createTemporaryTopic();
   }
 
@@ -278,6 +311,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public void commit() throws JMSException
   {
+    checkValidity();
     throw new JMSException("Forbidden call on a component's session.");
   }
 
@@ -287,6 +321,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public void rollback() throws JMSException
   {
+    checkValidity();
     throw new JMSException("Forbidden call on a component's session.");
   }
 
@@ -296,6 +331,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public void recover() throws JMSException
   {
+    checkValidity();
     throw new JMSException("Forbidden call on a component's session.");
   }
 
@@ -305,6 +341,7 @@ public class OutboundSession implements javax.jms.Session
    */
   public void unsubscribe(String name) throws JMSException
   {
+    checkValidity();
     sess.unsubscribe(name);
   }
 
@@ -313,5 +350,22 @@ public class OutboundSession implements javax.jms.Session
    * the component's connection.
    */
   public void close() throws JMSException
-  {}
+  {
+    valid = false;
+  }
+
+
+  /** Checks the validity of the session. */
+  void checkValidity() throws IllegalStateException
+  {
+    boolean validity;
+
+    if (! valid)
+      validity = false;
+    else
+      validity = cnx.valid;
+
+   if (! validity)
+     throw new IllegalStateException("Invalid state: session is closed.");
+  }
 }
