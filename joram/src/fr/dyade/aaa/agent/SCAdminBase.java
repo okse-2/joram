@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2003 SCALAGENT
+ * Copyright (C) 2002 - 2004 SCALAGENT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -72,6 +74,13 @@ public class SCAdminBase {
                                  File dir,
                                  String[] jvmargs) throws Exception {
     return scadmin.startAgentServer(sid, dir, jvmargs);
+  }
+
+  public String startAgentServer(short sid,
+                                 File dir,
+                                 String[] jvmargs,
+				 String[] servargs) throws Exception {
+    return scadmin.startAgentServer(sid, dir, jvmargs, servargs);
   }
 
   /**

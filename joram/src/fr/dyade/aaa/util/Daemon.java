@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * The present code contributor is ScalAgent Distributed Technologies.
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.util;
 
@@ -255,8 +256,10 @@ public abstract class Daemon implements Runnable {
     if (thread != null) {
       while (thread.isAlive()) {
         if (canStop) {
+
           if (thread.isAlive())
             thread.interrupt();
+
           shutdown();
         }
         try {
@@ -270,6 +273,9 @@ public abstract class Daemon implements Runnable {
     }
   }
 
+  /**
+   * Tests if the daemon's thread is the current one.
+   */
   public synchronized boolean isCurrentThread() {
     return ((thread != null) && (thread == Thread.currentThread()));
   }

@@ -1,7 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,16 +19,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT) David Feliot (ScalAgent DT)
+ * Initial developer(s): Frederic Maistre (Bull)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.proxies.soap;
 
+import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Queue;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.mom.notifications.*;
 
 import java.util.*;
 import java.lang.reflect.*;
@@ -41,6 +46,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  */
 public class SoapProxyService {
+
+  private Hashtable connections;
 
   /**
    * Service method: called by the SOAP client for instanciating the SOAP
@@ -57,6 +64,8 @@ public class SoapProxyService {
     AgentServer.init(args);
     AgentServer.start();
 
+    connections = new Hashtable();
+
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "SoapProxyService started.");
   }
@@ -65,29 +74,45 @@ public class SoapProxyService {
    * Service method: returns the identifier of a given user connection, 
    * or -1 if it is not a valid user of the SOAP proxy.
    *
-   * @param name  User's name.
-   * @param password  User's password.
-   * @param timeout  Duration in seconds during which a connection might
-   *          be inactive before considered as dead (0 for never).
-   *
+   * @param userName User's name.
+   * @param userPassword User's password.
+   * @param heartBeat
+   * @return connection identifier
    * @exception Exception  If the proxy is not deployed.
    */
-  public int setConnection(String name, String password, int timeout)
+  public int setConnection(String userName, 
+                           String userPassword, 
+                           int heartBeat)
     throws Exception
   {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SoapProxyService.setConnection(" + 
-        name + ',' + password + ',' + timeout + ')');
+        userName + ',' + 
+        userPassword + ',' + 
+        heartBeat + ')');
 
-    UserConnection userConnection = 
-      ConnectionManager.openConnection(
-        name, password, timeout, null);
-
+    GetProxyIdNot gpin = new GetProxyIdNot(
+      userName, userPassword);
+    AgentId proxyId;
+    gpin.invoke(new AgentId(AgentServer.getServerId(),
+                            AgentServer.getServerId(),
+                            AgentId.JoramAdminStamp));
+    proxyId = gpin.getProxyId();
     
-    return userConnection.getKey();
-  }
+    OpenConnectionNot ocn = new OpenConnectionNot(
+      false, heartBeat);	
+    ocn.invoke(proxyId);
 
+    ConnectionContext ctx = new ConnectionContext(
+      proxyId,
+      (Queue)ocn.getReplyQueue());
+    connections.put(new ConnectionKey(
+      userName, ocn.getKey()), ctx);
+    
+    return ocn.getKey();
+  }
+  
   /**
    * Service method: passes a hashtable containing an
    * <code>AbstractJmsRequest</code> client request or MOM messages to the
@@ -117,14 +142,17 @@ public class SoapProxyService {
                               + " passes request " + request + " with id "
                               + request.getRequestId() + " to proxy's cnx "
                               + cnxId);
-    UserConnection userConnection = 
-      ConnectionManager.getConnection(name, cnxId);
-    if (userConnection != null) {
-      userConnection.send(request);
+    ConnectionContext ctx = 
+      (ConnectionContext)connections.get(
+        new ConnectionKey(name, cnxId));
+    if (ctx == null) {
+      throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
-      throw new StateException(
-        "Connection " + name + 
-        ':' + cnxId + " closed.");
+      Channel.sendTo(ctx.proxyId,
+                     new RequestNot(cnxId, request));
+    }
+    if (request instanceof ProducerMessages) {
+      FlowControl.flowControl();
     }
   }
 
@@ -139,16 +167,60 @@ public class SoapProxyService {
    */
   public java.util.Hashtable getReply(String name, int cnxId) throws Exception
   {
-    UserConnection userConnection = 
-      ConnectionManager.getConnection(name, cnxId);
-    if (userConnection == null) {
-      throw new StateException(
-        "Connection " + name + 
-        ':' + cnxId + " closed.");
+    ConnectionKey ckey = new ConnectionKey(name, cnxId);
+    ConnectionContext ctx = 
+      (ConnectionContext)connections.get(ckey);
+    if (ctx == null) {
+      throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
-      AbstractJmsReply reply = 
-        userConnection.receive();
-      return reply.soapCode();
+      Object obj = ctx.replyQueue.get();
+      if (obj instanceof Exception) {
+        connections.remove(ckey);
+        throw (Exception)obj;
+      } else {
+        AbstractJmsReply reply = 
+          (AbstractJmsReply)obj;
+        ctx.replyQueue.pop();
+        if (reply instanceof CnxCloseReply) {
+          connections.remove(ckey);
+        }
+        return reply.soapCode();
+      }
+    }
+  }
+
+  static class ConnectionKey {
+    private String userName;
+    private int key;
+
+    public ConnectionKey(String userName,
+                         int key) {
+      this.userName = userName;
+      this.key = key;
+    }
+
+    public int hashCode() {
+      return userName.hashCode() + key;
+    }
+
+    public boolean equals(Object obj) {
+      if (obj instanceof ConnectionKey) {
+        ConnectionKey ck = (ConnectionKey)obj;
+        return (ck.userName.equals(userName) &&
+                ck.key == key);
+      }
+      return false;
+    }
+  }
+
+  static class ConnectionContext {
+    AgentId proxyId;    
+    Queue replyQueue;
+
+    ConnectionContext(AgentId proxyId,
+                      Queue replyQueue) {
+      this.proxyId = proxyId;
+      this.replyQueue = replyQueue;
     }
   }
 }

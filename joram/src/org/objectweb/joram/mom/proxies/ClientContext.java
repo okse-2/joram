@@ -1,6 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Initial developer(s): Frederic Maistre (Bull)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.proxies; 
 
@@ -30,7 +32,9 @@ import org.objectweb.joram.shared.client.XACnxPrepare;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.io.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
@@ -159,6 +163,11 @@ class ClientContext implements java.io.Serializable
   /** Cancels a "receive" request. */
   void cancelReceive(int cancelledRequestId)
   {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].cancelReceive(" + cancelledRequestId + ')');
     this.cancelledRequestId = cancelledRequestId;
   }
 
@@ -209,4 +218,20 @@ class ClientContext implements java.io.Serializable
       return new Hashtable().keys();
     return transactionsTable.keys();
   }
-}   
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    started = in.readBoolean();
+    cancelledRequestId = in.readInt();
+    activeSubs = (Vector)in.readObject();
+    repliesBuffer = (Vector)in.readObject();
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    out.writeBoolean(started);
+    out.writeInt(cancelledRequestId);
+    out.writeObject(activeSubs);
+    out.writeObject(repliesBuffer);
+  }
+}

@@ -40,12 +40,14 @@ public class SerialOutputStream {
     this.out.flush();
   }
 
-  /**
-    * Writes a <code>Notification</code> to the stream.
-    */
   public void writeObject(Object msg) throws IOException {
     out.writeObject(msg);
     out.reset();
+    out.flush();
+  }
+
+  public void writeInt(int i) throws IOException {
+    out.writeInt(i);
     out.flush();
   }
 

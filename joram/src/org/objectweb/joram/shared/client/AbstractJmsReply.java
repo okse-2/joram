@@ -82,4 +82,9 @@ public class AbstractJmsReply implements java.io.Serializable
     return new AbstractJmsReply(
       ((Integer) h.get("correlationId")).intValue());
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      "correlationId=" + correlationId + ')';
+  }
 }

@@ -17,16 +17,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
 import java.io.*;
-import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.util.EmptyQueueException;
 
 /**
  * Class <code>MessageQueue</code> represents a First-In-First-Out (FIFO)
@@ -34,43 +36,49 @@ import fr.dyade.aaa.util.*;
  * notification). It realizes the target end of the communication mechanism.
  * As messages  have a relatively short life span, then the FIFO list of
  * messages is kept in main memory. The list is backed by a persistent image
- * on the disk.<p><hr>
+ * on the disk for reliability needs.<p><hr>
  * Use of stamp information in Message in order to restore the queue from
  * persistent storage at initialization time, so there is no longer need 
  * to save <code>MessageQueue</code> object state.
  */
-public final class MessageQueue {
+final class MessageQueue {
   private Logger logmon = null;
   private String logmsg = null;
   private long cpt1, cpt2;
 
   /**
-   * The <code>Vector</code> into which <code>Message</code> objects are
-   * stored in memory.
+   * The buffer into which the <code>Message</code> objects are stored
+   * in memory.
    */
-  private Vector data;
-  /** last validated message: last <= data.size(); */
-  private int last;
+  private MessageVector data;
+  /**
+   * The number of validated message in the circular buffer.
+   */
+  private int validated;
 
-  MessageQueue() {
-    data = new Vector();
-    last = 0;
+  MessageQueue(String name, boolean persistent) {
     logmon = Debug.getLogger(getClass().getName());
-    logmsg = "MessageQueue.#" + hashCode() + ": ";
+    logmsg = name + ".MessageQueue: ";
+
+    data = new MessageVector(name, persistent);
+    validated = 0;
   }
 
   /**
    * Insert a message in the queue, it should only be used during
    * initialization for restoring the queue state.
    */
-  void insert(Message item) {
+  synchronized void insert(Message item) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "insert(" + item + ")");
+
     int i = 0;
-    for (; i<last; i++) {
-      Message msg = (Message) data.elementAt(i);
+    for (; i<validated; i++) {
+      Message msg = data.getMessageAt(i);
       if (item.getStamp() < msg.getStamp()) break;
     }
-    data.insertElementAt(item, i);
-    last += 1;
+    data.insertMessageAt(item, i);
+    validated += 1;
   }
 
   /**
@@ -81,37 +89,40 @@ public final class MessageQueue {
    * @param   item   the message to be pushed onto this queue.
    */
   synchronized void push(Message item) {
-    data.addElement(item);
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "push(" + item + ")");
+    data.addMessage(item);
   }
 
   /**
-   *  Removes the message at the top of this queue and returns that 
-   * message as the value of this function. It should only be used
-   * during a transaction.
+   *  Removes the message at the top of this queue. It should only
+   * be used during a transaction.
    *
    * @return     The message at the top of this queue.
    * @exception  EmptyQueueException if this queue is empty.
    */
   synchronized Message pop() throws EmptyQueueException {
-    Message item;
-    
-    if (last == 0)
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "pop()");
+
+    if (validated == 0)
       throw new EmptyQueueException();
     
-    item = (Message) data.elementAt(0);
-    data.removeElementAt(0);
-    last -= 1;
+    Message item = data.getMessageAt(0);
+    data.removeMessageAt(0);
+    validated -= 1;
 
     return item;
   }
 
-  
   /**
    * Atomicaly validates all messages pushed in queue during a reaction.
    * It must only be used during a transaction.
    */
   synchronized void validate() {
-    last = data.size();
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "validate()");
+    validated = data.size();
     notify();
   }
 
@@ -120,8 +131,10 @@ public final class MessageQueue {
    * It must be used during a transaction.
    */
   synchronized void invalidate() {
-    while (last != data.size())
-      data.removeElementAt(last);
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "invalidate()");
+    while (validated != data.size())
+      data.removeMessageAt(validated);
   }
 
   /**
@@ -134,34 +147,58 @@ public final class MessageQueue {
    *		current thread.
    */
   synchronized Message get() throws InterruptedException {
-    cpt1 += 1; cpt2 += last;
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get()");
+
+    cpt1 += 1; cpt2 += validated;
     if ((cpt1 & 0xFFFFL) == 0L) {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG,
-                   logmsg + (cpt2/cpt1) + '/' + last);
+        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
       }
     }
     
-    while (last == 0) {
+    while (validated == 0) {
       wait();
     }
-    return (Message) data.elementAt(0);
+    Message item = data.getMessageAt(0);
+ 
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+
+   return item;
   }
 
+  /**
+   * Looks at the message at the top of this queue without removing
+   * it from the queue. It should never be used during a transaction
+   * to avoid dead-lock problems. It waits until a message is available
+   * or the specified amount of time has elapsed.
+   *
+   * @param	timeout	the maximum time to wait in milliseconds.
+   * @return    	the message at the top of this queue. 
+   * @exception	InterruptedException if another thread has interrupted the
+   *		current thread.
+   * @exception	IllegalArgumentException if the value of timeout is negative.
+   */
   synchronized Message get(long timeout) throws InterruptedException {
-    cpt1 += 1; cpt2 += last;
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get(" + timeout + ")");
+
+    cpt1 += 1; cpt2 += validated;
     if ((cpt1 & 0xFFFFL) == 0L) {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG,
-                   logmsg + (cpt2/cpt1) + '/' + last);
+        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
       }
     }
     
-    if ((last == 0) && (timeout > 0)) wait(timeout);
-    if (last > 0)
-      return (Message) data.elementAt(0);
+    Message item = null;
+    if ((validated == 0) && (timeout > 0)) wait(timeout);
+    if (validated > 0) item = data.getMessageAt(0);
 
-    return null;
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+
+    return item;
   }
 
   /**
@@ -171,7 +208,6 @@ public final class MessageQueue {
    * @return the size of the MessageQueue
    */
   synchronized int size(){
-    // AF: May be the result should be last...
     return data.size();
   }
 
@@ -185,11 +221,12 @@ public final class MessageQueue {
   public final String toString() {
     StringBuffer strbuf = new StringBuffer();
 
-    strbuf.append("(");
-    for (int i=0; i<last; i++) {
-      strbuf.append((Message) data.elementAt(i));
+    strbuf.append('(').append(super.toString()).append(',');
+    strbuf.append(validated).append(',');
+    for (int i=0; i<data.size(); i++) {
+      strbuf.append(data.getMessageAt(i));
     }
-    strbuf.append(")");
+    strbuf.append(')');
     
     return strbuf.toString();
   }

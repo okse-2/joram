@@ -26,7 +26,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
 
-abstract class LogicalClock {
+abstract class LogicalClock implements Serializable {
   protected String name = null;
   /**
    * List of id. for all servers in the domain, this list is sorted and
@@ -36,10 +36,10 @@ abstract class LogicalClock {
    */
   protected short[] servers;
   /** Filename for servers storage */
-  protected String serversFN = null;
+  transient protected String serversFN = null;
 
   /** True if the timestamp is modified since last save. */
-  protected boolean modified = false;
+  transient protected boolean modified = false;
 
   /** The message can be delivered. */
   static final int DELIVER = 0;
@@ -48,7 +48,7 @@ abstract class LogicalClock {
   /** The message has already been delivered. */
   static final int ALREADY_DELIVERED = 2;
  
-  protected Logger logmon = null;
+  transient protected Logger logmon = null;
    
   /**
    * Creates a new logical clock. Be careful, the list of servers must be

@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Andre Freyssinet (ScalAgent DT)
+ * Original developer: ScalAgent Distributed Technologies
  * Contributor(s): Douglas S. Jackson
  */
 package fr.dyade.aaa.util;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 SCALAGENT 
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
-
 package fr.dyade.aaa.admin.script;
 
 import java.lang.*;
@@ -27,10 +28,8 @@ import fr.dyade.aaa.admin.cmd.*;
 import fr.dyade.aaa.agent.conf.*;
 
 /**
- * StartScript contain a StartAdminCmd vector and
- * a ServerDesc hashtable.
- * It use to start networks, servers persistents,
- * servers transients and services.
+ * StartScript contain a StartAdminCmd vector and a ServerDesc hashtable.
+ * It permits to start networks, servers and services.
  *
  * @see AgentAdmin
  * @see AgentServer
@@ -39,7 +38,6 @@ import fr.dyade.aaa.agent.conf.*;
  * @see ServerDesc
  */
 public class StartScript implements Serializable {
-
   /** vector of StartAdminCmd */
   private Vector commands = null;
   /** hashtable of server description */

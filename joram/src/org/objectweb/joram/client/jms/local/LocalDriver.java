@@ -30,8 +30,7 @@ import fr.dyade.aaa.util.Queue;
  * A <code>TcpDriver</code> gets server deliveries coming through 
  * a local connection.
  */
-class LocalDriver extends org.objectweb.joram.client.jms.Driver
-{
+public class LocalDriver extends org.objectweb.joram.client.jms.Driver {
   private LocalConnection localConnection;
 
   /**
@@ -40,8 +39,8 @@ class LocalDriver extends org.objectweb.joram.client.jms.Driver
    * @param cnx  The connection the driver belongs to.
    * @param ois  The connection's input stream.
    */
-  LocalDriver(org.objectweb.joram.client.jms.Connection cnx,
-              LocalConnection localConnection)
+  public LocalDriver(org.objectweb.joram.client.jms.Connection cnx,
+                     LocalConnection localConnection)
   {
     super(cnx);
     this.localConnection = localConnection;

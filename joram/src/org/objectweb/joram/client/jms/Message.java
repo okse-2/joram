@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -40,8 +40,7 @@ import javax.jms.MessageNotWriteableException;
  * A Joram message wraps a proprietary MOM message which is actually the
  * effective MOM transport facility for the JMS operations.
  */
-public class Message implements javax.jms.Message
-{
+public class Message implements javax.jms.Message {
   /** The wrapped MOM message. */
   protected org.objectweb.joram.shared.messages.Message momMsg;
   /**
@@ -172,7 +171,7 @@ public class Message implements javax.jms.Message
       momMsg.setDestination(
         ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
         ((org.objectweb.joram.client.jms.Destination) dest).isQueue());
-    
+
     if (dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)
       momMsg.setOptionalHeader("JMSTempDestination", new Boolean(true));
     else
@@ -412,8 +411,8 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getJMSType() 
-    throws JMSException {
+  public String getJMSType() throws JMSException
+  {
     Object value = momMsg.getOptionalHeader("JMSType");
     return ConversionHelper.toString(value);
   }
@@ -673,8 +672,8 @@ public class Message implements javax.jms.Message
    *
    * @exception JMSException  If the name is invalid.
    */
-  public String getStringProperty(String name) 
-    throws JMSException {
+  public String getStringProperty(String name) throws JMSException
+  {
     return ConversionHelper.toString(doGetProperty(name));
   }
 
@@ -828,37 +827,29 @@ public class Message implements javax.jms.Message
    * @exception JMSException  If an error occurs while building the message.
    */
   static Message convertJMSMessage(javax.jms.Message jmsMsg)
-         throws JMSException
-  {
+         throws JMSException {
     Message msg = null;
     if (jmsMsg instanceof javax.jms.TextMessage) {
       msg = new TextMessage();
-      ((javax.jms.TextMessage) msg).setText(((javax.jms.TextMessage)
-                                             jmsMsg).getText());
-    }
-    else if (jmsMsg instanceof javax.jms.ObjectMessage) {
+      ((javax.jms.TextMessage) msg).setText(((javax.jms.TextMessage) jmsMsg).getText());
+    } else if (jmsMsg instanceof javax.jms.ObjectMessage) {
       msg = new ObjectMessage();
-      ((javax.jms.ObjectMessage) msg).setObject(((javax.jms.ObjectMessage)
-                                                 jmsMsg).getObject());
-    }
-    else if (jmsMsg instanceof javax.jms.StreamMessage) {
+      ((javax.jms.ObjectMessage) msg).setObject(((javax.jms.ObjectMessage) jmsMsg).getObject());
+    } else if (jmsMsg instanceof javax.jms.StreamMessage) {
       msg = new StreamMessage();
       try {
         ((javax.jms.StreamMessage) jmsMsg).reset();
         while (true)
-          ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage)
-                                             jmsMsg).readObject());
+          ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage) jmsMsg).readObject());
       } catch (Exception mE) {}
-    }
-    else if (jmsMsg instanceof javax.jms.BytesMessage) {
+    } else if (jmsMsg instanceof javax.jms.BytesMessage) {
       msg = new BytesMessage();
       try {
         ((javax.jms.BytesMessage) jmsMsg).reset();
         while (true)
           ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage) jmsMsg).readByte());
       } catch (Exception mE) {}
-    }
-    else if (jmsMsg instanceof javax.jms.MapMessage) {
+    } else if (jmsMsg instanceof javax.jms.MapMessage) {
       msg = new MapMessage();
       Enumeration mapNames = ((javax.jms.MapMessage) jmsMsg).getMapNames();
       String mapName;
@@ -868,9 +859,9 @@ public class Message implements javax.jms.Message
                                                ((javax.jms.MapMessage)
                                                 jmsMsg).getObject(mapName));
       }
-    }
-    else
+    } else {
       msg = new Message();
+    }
 
     msg.setJMSCorrelationID(jmsMsg.getJMSCorrelationID());
     msg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
@@ -878,13 +869,14 @@ public class Message implements javax.jms.Message
     msg.setJMSMessageID(jmsMsg.getJMSMessageID());
 
     Enumeration names = jmsMsg.getPropertyNames();
-    if (names == null) 
-      return msg;
-    String name;
-    while (names.hasMoreElements()) {
-      name = (String) names.nextElement();
-      msg.setObjectProperty(name, jmsMsg.getObjectProperty(name));
+    if (names != null) {
+      String name;
+      while (names.hasMoreElements()) {
+        name = (String) names.nextElement();
+        msg.setObjectProperty(name, jmsMsg.getObjectProperty(name));
+      }
     }
+
     return msg;
   }
 

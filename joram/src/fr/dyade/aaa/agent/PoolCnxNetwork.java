@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -34,7 +37,7 @@ import fr.dyade.aaa.util.*;
  * <code>StreamNetwork</code> class for stream sockets that manages
  * multiple connection.
  */
-public class PoolCnxNetwork extends StreamNetwork {
+public class PoolCnxNetwork extends CausalNetwork {
   /** */
   WakeOnConnection wakeOnConnection = null; 
   /** */
@@ -350,13 +353,12 @@ public class PoolCnxNetwork extends StreamNetwork {
       ObjectOutputStream oos = null;
 
       try {
-	sock = createSocket(server.getAddr(), server.port);
-
+	sock = createSocket(server);
 	setSocketOption(sock);
 	// Be careful: The OOS should be initialized first in order to
 	// send the header waited by OIS at the other end.
-	oos = getOutputStream(sock);
-	ois = getInputStream(sock);
+	oos = new ObjectOutputStream(sock.getOutputStream());
+	ois = new ObjectInputStream(sock.getInputStream());
 
 	oos.writeObject(new Boot());
 	oos.flush();
@@ -790,8 +792,8 @@ public class PoolCnxNetwork extends StreamNetwork {
 	    setSocketOption(sock);
 	    // Be careful: The OOS should be initialized first in order to
 	    // send the header waited by OIS at the other end
-	    oos = getOutputStream(sock);
-	    ois = getInputStream(sock);
+	    oos = new ObjectOutputStream(sock.getOutputStream());
+	    ois = new ObjectInputStream(sock.getInputStream());
 
 	    msg = ois.readObject();
 
@@ -854,7 +856,6 @@ public class PoolCnxNetwork extends StreamNetwork {
           }
           canStop = false;
           if (! running) break;
-          if (msg == null) continue;
 
           // Send the message
           getSession(msg.getToId()).send(msg);

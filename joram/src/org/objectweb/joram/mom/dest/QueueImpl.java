@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -46,13 +46,11 @@ import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * The <code>QueueImpl</code> class implements the MOM queue behaviour,
  * basically storing messages and delivering them upon clients requests.
  */
-public class QueueImpl extends DestinationImpl
-{
+public class QueueImpl extends DestinationImpl {
   /**
    * Threshold above which messages are considered as undeliverable because
    * constantly denied; 0 stands for no threshold, <code>null</code> for value
@@ -79,7 +77,7 @@ public class QueueImpl extends DestinationImpl
   protected MessagePersistenceModule persistenceModule;
 
   /** <code>true</code> if the queue is currently receiving messages. */
-  private transient boolean receiving = false;
+  protected transient boolean receiving = false;
   /** Vector holding the messages before delivery. */
   protected transient Vector messages;
   /** Table holding the delivered messages before acknowledgement. */
@@ -174,13 +172,11 @@ public class QueueImpl extends DestinationImpl
 
     threshold = req.getThreshold();
     
-    String info = "Request ["
-                  + req.getClass().getName()
-                  + "], sent to Queue ["
-                  + destId
-                  + "], successful [true]: threshold ["
-                  + threshold
-                  + "] set";
+    String info = strbuf.append("Request [").append(req.getClass().getName())
+      .append("], sent to Queue [").append(destId)
+      .append("], successful [true]: threshold [")
+      .append(threshold).append("] set").toString();
+    strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(req, true, info));
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))

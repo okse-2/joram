@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -59,21 +60,19 @@ public class MessageConverterModule
   public static Message convert(javax.jms.Message jmsMessage)
                 throws MessageFormatException 
   {
-    if (jmsMessage == null)
-      return null;
+    if (jmsMessage == null) return null;
 
     Message msg = new Message();
 
     try {
-      // Building a Bytes message.
       if (jmsMessage instanceof BytesMessage) {
+        // Building a Bytes message.
         long length = ((BytesMessage) jmsMessage).getBodyLength();
         byte[] bytes = new byte[(new Long(length)).intValue()];
         ((BytesMessage) jmsMessage).readBytes(bytes);
         msg.setBytes(bytes);
-      }
-      // Building a Map message.
-      else if (jmsMessage instanceof MapMessage) {
+      } else if (jmsMessage instanceof MapMessage) {
+        // Building a Map message.
         String name;
         HashMap map = new HashMap();
         for (Enumeration names = ((MapMessage) jmsMessage).getMapNames();
@@ -82,23 +81,21 @@ public class MessageConverterModule
           map.put(name, ((MapMessage) jmsMessage).getObject(name));
         }
         msg.setMap(map);
-      }
-      // Building an Object message.
-      else if (jmsMessage instanceof ObjectMessage)
+      } else if (jmsMessage instanceof ObjectMessage) {
+        // Building an Object message.
         msg.setObject(((ObjectMessage) jmsMessage).getObject());
-      // Building a Text message.
-      else if (jmsMessage instanceof TextMessage)
+      } else if (jmsMessage instanceof TextMessage) {
+        // Building a Text message.
         msg.setText(((TextMessage) jmsMessage).getText());
-      // Building a Stream message.
-      else if (jmsMessage instanceof StreamMessage) {
+      } else if (jmsMessage instanceof StreamMessage) {
+        // Building a Stream message.
         int length = 0;
         try {
           while (true) {
             ((StreamMessage) jmsMessage).readByte();
             length++;
           }
-        }
-        catch (Exception exc) {}
+        } catch (Exception exc) {}
         byte[] bytes = new byte[length];
         ((StreamMessage) jmsMessage).readBytes(bytes);
         msg.setStream(bytes);

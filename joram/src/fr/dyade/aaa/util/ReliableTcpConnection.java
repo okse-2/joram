@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.util;
 
@@ -71,7 +73,7 @@ public class ReliableTcpConnection {
       DEFAULT_WINDOW_SIZE).intValue();
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(
-        BasicLevel.DEBUG, 
+        BasicLevel.INFO, 
         "ReliableTcpConnection.windowSize=" + 
         windowSize);
     inputCounter = -1;
@@ -119,7 +121,7 @@ public class ReliableTcpConnection {
           for (int i = 0; i < pendingMessages.size(); i++) {
             TcpMessage pendingMsg = 
               (TcpMessage)pendingMessages.elementAt(i);
-            doSend(pendingMsg.id, pendingMsg.object);
+            doSend(pendingMsg.id, inputCounter, pendingMsg.object);
           }
         }
       }
@@ -149,11 +151,10 @@ public class ReliableTcpConnection {
     if (getStatus() != CONNECT) 
       throw new IOException("Connection closed");
     try {      
-      synchronized (outputLock) {
-        TcpMessage msg = new TcpMessage(
-          outputCounter, request);
-        doSend(outputCounter, request);
-        addPendingMessage(msg);
+      synchronized (outputLock) {        
+        doSend(outputCounter, inputCounter, request);
+        addPendingMessage(new TcpMessage(
+          outputCounter, request));
         outputCounter++;
       }
     } catch (IOException exc) {
@@ -164,15 +165,17 @@ public class ReliableTcpConnection {
     }
   }
   
-  private void doSend(long id, Object obj) throws IOException {
+  private void doSend(long id, long ackId, Object obj) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(
         BasicLevel.DEBUG, "ReliableTcpConnection.doSend(" + 
         id + ',' + obj + ')');
     synchronized (outputLock) {
       oos.writeLong(id);
+      oos.writeLong(ackId);
       oos.writeObject(obj);
       oos.reset();
+      unackCounter = 0;
     }
   }
 
@@ -218,24 +221,25 @@ public class ReliableTcpConnection {
     while (true) {
       try {
         long messageId;
+        long ackId;
         Object obj;
         synchronized (inputLock) {
           messageId = ois.readLong();
+          ackId = ois.readLong();
           obj = ois.readObject();
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(
             BasicLevel.DEBUG, 
             " -> id = " + messageId);
-        if (obj == null) {
-          ackPendingMessages(messageId);
-          continue loop;
-        } else {
-          if (unackCounter < windowSize) {
-            unackCounter++;
-          } else {
-            doSend(messageId, null);
-            unackCounter = 0;
+        ackPendingMessages(ackId);
+        if (obj != null) {
+          synchronized (outputLock) {
+            if (unackCounter < windowSize) {
+              unackCounter++;
+            } else {
+              doSend(-1, inputCounter, null);
+            }
           }
           if (messageId > inputCounter) {
             inputCounter = messageId;
@@ -244,7 +248,7 @@ public class ReliableTcpConnection {
             logger.log(
               BasicLevel.DEBUG, " -> already received message: " + 
               messageId + " " + obj);
-        }
+        }        
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "", exc);

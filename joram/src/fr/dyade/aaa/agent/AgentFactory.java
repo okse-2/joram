@@ -99,7 +99,9 @@ final class AgentFactory extends Agent {
 	try {
 	  ois.close();
 	} catch (IOException exc) {}
-        
+
+        // Initialize the agent
+        ag.agentInitialize(true);
 // TODO: (ThreadEngine) Thread.currentThread() ...
         AgentServer.engine.createAgent(ag);
 

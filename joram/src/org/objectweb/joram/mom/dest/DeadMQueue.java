@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -28,7 +28,6 @@ import java.util.Properties;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 
-
 /**
  * A <code>DeadMQueue</code> agent is an agent hosting a MOM dead message
  * queue, and which behaviour is provided by a <code>DeadMQueueImpl</code>
@@ -36,8 +35,7 @@ import fr.dyade.aaa.agent.AgentServer;
  *
  * @see DeadMQueueImpl
  */
-public class DeadMQueue extends Queue
-{
+public class DeadMQueue extends Queue {
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -49,17 +47,16 @@ public class DeadMQueue extends Queue
    * @param adminId  Identifier of the agent which will be the administrator
    *          of the dead message queue.
    */ 
-  public DeadMQueue(AgentId adminId)
-  {
-    init(adminId);
+  public DeadMQueue(AgentId adminId) {
+    super(adminId);
   }
 
   /**
-   * Initializes the dead message queue.
+   * Creates the dead message queue.
    *
    * @param adminId  Identifier of the queue administrator.
    */
-  public void init(AgentId adminId) {
-    queueImpl = new DeadMQueueImpl(getId(), adminId);
+  public DestinationImpl createsImpl(AgentId adminId) {
+    return new DeadMQueueImpl(getId(), adminId);
   }
 }

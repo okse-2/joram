@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -26,37 +27,34 @@ import fr.dyade.aaa.agent.AgentId;
 
 import java.util.Properties;
 
-
 /**
  * A <code>BridgeQueue</code> agent is an agent hosting a bridge queue,
  * and which behaviour is provided by a <code>BridgeQueueImpl</code> instance.
  *
  * @see BridgeQueueImpl
  */
-public class BridgeQueue extends Queue
-{
+public class BridgeQueue extends Queue {
   /** The bridge queue's properties. */
   private transient Properties prop;
-
 
   /**
    * Constructs a <code>BridgeQueue</code> agent. 
    */ 
-  public BridgeQueue()
-  {
+  public BridgeQueue() {
     super(true);
   }
 
   /**
-   * Initializes the bridge queue.
+   * Creates the bridge queue.
    *
    * @param adminId  Identifier of the bridge queue administrator.
    *
    * @exception IllegalArgumentException  If the JMS properties are invalid.
    */
-  public void init(AgentId adminId) {
-    queueImpl = new BridgeQueueImpl(getId(), adminId);
-    ((BridgeQueueImpl) queueImpl).init(prop);
+  public DestinationImpl createsImpl(AgentId adminId) {
+    BridgeQueueImpl queueImpl = new BridgeQueueImpl(getId(), adminId);
+    queueImpl.init(prop);
+    return queueImpl;
   }
 
   /**

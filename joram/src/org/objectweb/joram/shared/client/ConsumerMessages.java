@@ -207,4 +207,12 @@ public class ConsumerMessages extends AbstractJmsReply
       req.setMessage(Message.soapDecode((Hashtable) h.get("singleMsg")));
     return req;
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",message=" + message +
+      ",messages=" + messages + 
+      ",comingFrom=" + comingFrom +
+      ",queueMode=" + queueMode + ')';
+  }
 }

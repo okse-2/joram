@@ -478,15 +478,20 @@ public class ServerImpl {
     CompositeName parentPath = (CompositeName)path.clone();
     String lastName = (String)parentPath.remove(parentPath.size() - 1);
     NamingContext parentNc = contextManager.getNamingContext(parentPath);
-
-    NamingContext nc = contextManager.getNamingContext(path);
-    if (nc.size() > 0) {
-      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, 
-                         " -> not empty: nc = " + nc);
-      throw new ContextNotEmptyException();
-    }
     
+    try {
+      NamingContext nc = contextManager.getNamingContext(path);
+      if (nc.size() > 0) {
+        if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+          Trace.logger.log(BasicLevel.DEBUG, 
+                           " -> not empty: nc = " + nc);
+        throw new ContextNotEmptyException();
+      }
+    } catch (MissingRecordException exc) {
+      // else do nothing (idempotency)
+      return;
+    }
+
     if (destroySubcontext(parentNc, lastName, path, serverId)) {
       if (updateListener != null) {
         updateListener.onUpdate(
@@ -534,18 +539,18 @@ public class ServerImpl {
   }
 
   /**
-   * Returns the naming contexts owned by the server
+   * Returns copies of the naming contexts owned by the server
    * which identifier is specified.
    *
    * @param serverId the identifier of the server that owns
    * the naming contexts to get.
    */
-  public NamingContextInfo[] getNamingContexts(Object serverId) 
+  public NamingContextInfo[] copyNamingContexts(Object serverId) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
     Trace.logger.log(BasicLevel.DEBUG, 
-                     "ServerImpl.getNamingContexts(" + serverId + ')');
-    return contextManager.getNamingContexts(serverId);
+                     "ServerImpl.copyNamingContexts(" + serverId + ')');
+    return contextManager.copyNamingContexts(serverId);
   }
 
   public NamingContext getNamingContext(NamingContextId ncid)
@@ -578,6 +583,16 @@ public class ServerImpl {
   public void resetNamingContext(NamingContext context)
     throws NamingException {
     contextManager.resetNamingContext(context);
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    contextManager.writeBag(out);
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    contextManager.readBag(in);
   }
 }
 

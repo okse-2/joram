@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,8 +37,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.Session</code> interface.
  */
-public class Session implements javax.jms.Session
-{
+public class Session implements javax.jms.Session {
   /** Task for closing the session if it becomes pending. */
   private TimerTask closingTask = null;
   /** <code>true</code> if the session's transaction is scheduled. */

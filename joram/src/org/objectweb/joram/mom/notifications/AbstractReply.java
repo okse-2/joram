@@ -60,4 +60,9 @@ public abstract class AbstractReply extends AbstractNotification
   {
     return correlationId;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ", correlationId=" + correlationId + ')';
+  }
 }

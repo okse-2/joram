@@ -118,7 +118,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
   long now = 0;
   /** Maximum number of memory loaded agents. */
-  int NbMaxAgents;
+  int NbMaxAgents = 100;
 
   /** Vector containing id's of all fixed agents. */
   Vector fixedAgentIdList = null;
@@ -189,14 +189,9 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @return		the corresponding <code>engine</code>'s instance.
    */
   static Engine newInstance() throws Exception {
-    String cname = System.getProperty("Engine");
-    if (cname == null) {
-      if (AgentServer.isTransient()) {
-        cname = "fr.dyade.aaa.agent.TransientEngine";
-      } else {
-        cname = "fr.dyade.aaa.agent.TransactionEngine";
-      }
-    }
+    String cname = "fr.dyade.aaa.agent.TransactionEngine";
+    cname = AgentServer.getProperty("Engine", cname);
+
     Class eclass = Class.forName(cname);
     return (Engine) eclass.newInstance();
   }
@@ -213,7 +208,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                   Notification not) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 toString() + ".push(" + from + ", " + to + ", " + not + ")");
+                 getName() + ", push(" + from + ", " + to + ", " + not + ")");
     if ((to == null) || to.isNullId())
       return;
     
@@ -275,7 +270,11 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
     logmon.log(BasicLevel.DEBUG,
                getName() + " created [" + getClass().getName() + "].");
 
-    qin = new MessageQueue();
+    NbMaxAgents = Integer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
+    qin = new MessageQueue(name, AgentServer.getTransaction().isPersistent());
+    if (! AgentServer.getTransaction().isPersistent()) {
+      NbMaxAgents = Integer.MAX_VALUE;
+    }
     mq = new Queue();
  
     isRunning = false;
@@ -286,9 +285,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
   void init() throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
-
-//     restore();
-
     agents = new Hashtable();
     try {
       // Creates or initializes AgentFactory, then loads and initializes
@@ -301,6 +297,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
         // Creates factory
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(factory);
+        factory.agentInitialize(true);
         logmon.log(BasicLevel.WARN, getName() + ", factory created");
       }
 
@@ -317,12 +314,10 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
 	}
       }
     } catch (IOException exc) {
-      logmon.log(BasicLevel.ERROR,
-                 getName() + ", can't initialize");
+      logmon.log(BasicLevel.ERROR, getName() + ", can't initialize");
       throw exc;
     }
-    logmon.log(BasicLevel.DEBUG,
-               getName() + ", initialized");
+    logmon.log(BasicLevel.DEBUG, getName() + ", initialized");
   }
 
   void terminate() {
@@ -356,8 +351,6 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
       // Subscribe the agent in pre-loading list.
       addFixedAgentId(agent.getId());
     }
-    // Initialize the agent
-    agent.agentInitialize(true);
     if (agent.logmon == null)
       agent.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
                                      ".#" + AgentServer.getServerId());
@@ -381,8 +374,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
       ag = load(from);
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   getName() +
-                   ", delete Agent" + ag.id + " [" + ag.name + "]");
+                   getName() + ", delete Agent" + ag.id + " [" + ag.name + "]");
       AgentServer.transaction.delete(ag.id.toString());
     } catch (UnknownAgentException exc) {
       logmon.log(BasicLevel.ERROR,
@@ -444,7 +436,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
    *
    * @param id	the <code>AgentId</code> of new fixed agent.
    */
-  void addFixedAgentId(AgentId id) throws IOException {
+  void addFixedAgentId(AgentId id) throws IOException {   
     fixedAgentIdList.addElement(id);
     AgentServer.transaction.save(fixedAgentIdList, getName() + ".fixed");
   }
@@ -655,7 +647,10 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
     return isRunning;
   }
 
-  boolean needToBeCommited = false;
+  protected boolean needToBeCommited = false;
+  protected long timeout = Long.MAX_VALUE;
+
+  protected void onTimeOut() {}
 
   /**
    * Main loop of agent server <code>Engine</code>.
@@ -669,14 +664,17 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
 
 	// Get a notification, then execute the right reaction.
 	try {
-	  msg = (Message) qin.get();
+	  msg = (Message) qin.get(timeout);
+          if (msg == null) {
+            onTimeOut();
+            continue;
+          }
 	} catch (InterruptedException exc) {
 	  continue;
 	}
 	
 	canStop = false;
 	if (! isRunning) break;
-        if (msg == null) continue;
 
 	try {
 	  agent = load(msg.to);
@@ -698,18 +696,8 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                      msg.from + ", " + msg.not + ")",
                      exc);
 	  agent = null;
-          {
-            // Stop the AgentServer
-            // Creates a thread to execute AgentServer.stop in order to
-            // allow AdminProxy service stopping and avoid deadlock.
-            Thread t = new Thread() {
-                public void run() {
-                  AgentServer.stop();
-                }
-              };
-            t.setDaemon(true);
-            t.start();
-          }
+          // Stop the AgentServer
+          AgentServer.stop(false);
           break main_loop;
 	}
 
@@ -735,15 +723,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
 	      continue;
 	    case RP_EXIT:
               // Stop the AgentServer
-              // Creates a thread to execute AgentServer.stop in order to
-              // allow AdminProxy service stopping and avoid deadlock.
-              Thread t = new Thread() {
-                  public void run() {
-                    AgentServer.stop();
-                  }
-                };
-              t.setDaemon(true);
-              t.start();
+              AgentServer.stop(false);
 	      break main_loop;
 	    }
 	  }
@@ -760,15 +740,7 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
                  exc);
       canStop = false;
       // Stop the AgentServer
-      // Creates a thread to execute AgentServer.stop in order to
-      // allow AdminProxy service stopping and avoid deadlock.
-      Thread t = new Thread() {
-          public void run() {
-            AgentServer.stop();
-          }
-        };
-      t.setDaemon(true);
-      t.start();
+      AgentServer.stop(false);
     } finally {
       terminate();
       logmon.log(BasicLevel.DEBUG, getName() + " stopped.");
@@ -807,200 +779,5 @@ abstract class Engine implements Runnable, MessageConsumer, EngineMBean {
       strbuf.append(msg.from);
     }
     return strbuf.toString();
-  }
-}
-
-final class TransactionEngine extends Engine {
-  /** Logical timestamp information for messages in "local" domain. */
-  private int stamp;
-
-  /** Buffer used to optimise */
-  private byte[] stampBuf = null;
-
-  /** True if the timestamp is modified since last save. */
-  private boolean modified = false;
-
-  TransactionEngine() throws Exception {
-    super();
-
-    NbMaxAgents = Integer.getInteger("NbMaxAgents", 100).intValue();
-
-    restore();
-    if (modified) save();
-  }
-
-  /**
-   * Saves logical clock information to persistent storage.
-   */
-  public void save() throws IOException {
-    if (modified) {
-      stampBuf[0] = (byte)((stamp >>> 24) & 0xFF);
-      stampBuf[1] = (byte)((stamp >>> 16) & 0xFF);
-      stampBuf[2] = (byte)((stamp >>>  8) & 0xFF);
-      stampBuf[3] = (byte)(stamp & 0xFF);
-      AgentServer.transaction.saveByteArray(stampBuf, getName());
-      modified = false;
-    }
-  }
-
-  /**
-   * Restores logical clock information from persistent storage.
-   */
-  public void restore() throws Exception {
-    stampBuf = AgentServer.transaction.loadByteArray(getName());
-    if (stampBuf == null) {
-      stamp = 0;
-      stampBuf = new byte[4];
-      modified = true;
-    } else {
-      stamp = ((stampBuf[0] & 0xFF) << 24) +
-        ((stampBuf[1] & 0xFF) << 16) +
-        ((stampBuf[2] & 0xFF) <<  8) +
-        (stampBuf[3] & 0xFF);
-      modified = false;
-    }
-  }
-
-  /**
-   *  Adds a message in "ready to deliver" list. This method allocates a
-   * new time stamp to the message ; be Careful, changing the stamp imply
-   * the filename change too.
-   */
-  public void post(Message msg) throws Exception {
-    if (msg.isPersistent()) {
-      modified = true;
-      msg.setUpdate(Update.alloc(AgentServer.getServerId(),
-                                 AgentServer.getServerId(),
-                                 ++stamp));
-      msg.save();
-    }
-    qin.push(msg);
-  }
-
-  /**
-   * Commit the agent reaction in case of rigth termination:<ul>
-   * <li>suppress the processed notification from message queue,
-   * then deletes it ;
-   * <li>push all new notifications in qin and qout, and saves them ;
-   * <li>saves the agent state ;
-   * <li>then commit the transaction to validate all changes.
-   * </ul>
-   */
-  void commit() throws Exception {
-    AgentServer.transaction.begin();
-    // Suppress the processed notification from message queue ..
-    qin.pop();
-    // .. then deletes it ..
-    msg.delete();
-    // .. and frees it.
-    msg.free();
-    // Post all notifications temporary keeped in mq in the rigth consumers,
-    // then saves changes.
-    dispatch();
-    // Saves the agent state then commit the transaction.
-    if (agent != null) agent.save();
-    AgentServer.transaction.commit();
-    // The transaction has commited, then validate all messages.
-    Channel.validate();
-    AgentServer.transaction.release();
-  }
-
-  /**
-   * Abort the agent reaction in case of error during execution. In case
-   * of unrecoverable error during the reaction we have to rollback:<ul>
-   * <li>reload the previous state of agent ;
-   * <li>remove the failed notification ;
-   * <li>clean the Channel queue of all pushed notifications ;
-   * <li>send an error notification to the sender ;
-   * <li>then commit the transaction to validate all changes.
-   * </ul>
-   */
-  void abort(Exception exc) throws Exception {
-    AgentServer.transaction.begin();
-    // Reload the state of agent.
-    try {
-      agent = reload(msg.to);
-    } catch (Exception exc2) {
-      logmon.log(BasicLevel.ERROR,
-                 getName() + ", can't reload Agent" + msg.to, exc2);
-      throw new Exception("Can't reload Agent" + msg.to);
-    }
-
-    // Remove the failed notification ..
-    qin.pop();
-    // .. then deletes it ..
-    msg.delete();
-    // .. and frees it.
-    msg.free();
-    // Clean the Channel queue of all pushed notifications.
-    clean();
-    // Send an error notification to client agent.
-    push(AgentId.localId,
-         msg.from,
-         new ExceptionNotification(msg.to, msg.not, exc));
-    dispatch();
-    AgentServer.transaction.commit();
-    // The transaction has commited, then validate all messages.
-    Channel.validate();
-    AgentServer.transaction.release();
-  }
-}
-
-final class TransientEngine extends Engine {
-  TransientEngine() {
-    super();
-    // in order to avoid swap-out.
-    NbMaxAgents = Integer.MAX_VALUE;
-  }
-
-  /**
-   * Saves logical clock information to persistent storage.
-   */
-  public void save() {}
-
-  /**
-   * Restores logical clock information from persistent storage.
-   */
-  public void restore() {}
-
-  /**
-   *  Adds a message in "ready to deliver" list. There is no need to allocate
-   * a time stamp to the message as there is no persistent storage.
-   */
-  public void post(Message msg) {
-    qin.push(msg);
-  }
-
-  /**
-   * Commit the agent reaction in case of rigth termination.
-   */
-  void commit() throws Exception {
-    // Suppress the processed notification from message queue ..
-    qin.pop();
-    // .. then frees it.
-    msg.free();
-    // Push all new notifications in qin and qout, then saves changes.
-    dispatch();
-    // The transaction has commited, then validate all messages.
-    Channel.validate();
-  }
-
-  /**
-   * Abort the agent reaction in case of error during execution.
-   */
-  void abort(Exception exc) throws Exception {
-    // Remove the failed notification ..
-    qin.pop();
-    // .. then frees it.
-    msg.free();
-    // Clean the Channel queue of all pushed notifications.
-    clean();
-    // Send an error notification to client agent.
-    push(AgentId.localId,
-         msg.from,
-         new ExceptionNotification(msg.to, msg.not, exc));
-    dispatch();
-    // The transaction has commited, then validate all messages.
-    Channel.validate();
   }
 }

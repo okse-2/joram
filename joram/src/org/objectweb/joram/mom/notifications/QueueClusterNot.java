@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2000 SCALAGENT 
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,27 +17,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s):
  */
+package org.objectweb.joram.mom.notifications;
 
-package fr.dyade.aaa.admin.cmd;
+import fr.dyade.aaa.agent.Notification;
 
-import java.io.*;
-import java.util.*;
+public class QueueClusterNot extends Notification {
 
-public class RemoveTransientCmd extends TransientCmd implements Serializable {
+  private float rateOfFlow;
 
- /**
-  * remove transient server
-  *
-  * @param name      transient server name
-  * @param hostname  host name
-  * @param gateway   gateway name
-  */
-  public RemoveTransientCmd(String name, String hostname, String gateway) {
-    super(name,hostname,gateway);
+  public QueueClusterNot(float rateOfFlow) {
+    this.rateOfFlow = rateOfFlow;
+  }
+
+  public void setRateOfFlow(float rateOfFlow) {
+    this.rateOfFlow = rateOfFlow;
+  }
+
+  public float getRateOfFlow() {
+    return rateOfFlow;
   }
 
   public String toString() {
-    return "RemoveTransientCmd" + super.toString();
+    return "(rateOfFlow=" + rateOfFlow + ")";
   }
 }

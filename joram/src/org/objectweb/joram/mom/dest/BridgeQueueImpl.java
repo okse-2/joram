@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -42,7 +43,6 @@ import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * The <code>BridgeQueueImpl</code> class implements a specific queue which
  * forwards the messages it receives to a foreign JMS destination, and 
@@ -52,8 +52,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * This queue is in fact a bridge linking JORAM and a foreign JMS server,
  * and which is accessible through the PTP communication mode.
  */
-public class BridgeQueueImpl extends QueueImpl
-{
+public class BridgeQueueImpl extends QueueImpl {
   /** The JMS module for accessing the foreign JMS destination. */
   private BridgeUnifiedModule jmsModule;
   /**
@@ -64,7 +63,6 @@ public class BridgeQueueImpl extends QueueImpl
    * <b>Value:</b> message
    */
   private Hashtable outTable;
-
 
   /**
    * Constructs a <code>BridgeQueueImpl</code> instance.

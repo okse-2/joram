@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
@@ -31,6 +31,7 @@ import java.io.*;
 import java.net.*;
 
 import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -46,17 +47,11 @@ public class TcpReader extends Daemon {
    */
   private TcpConnection tcpConnection;
 
-  /**
-   * The connection with the user's proxy.
-   */
-  private UserConnection userConnection;
-
-  private ReliableTcpConnection reliableTcp;
-    
-  /**
-   * The input stream to read
-   */
-  private ObjectInputStream in;
+  private IOControl ioctrl;
+  
+  private AgentId proxyId;
+  
+  private boolean closeConnection;
 
   /**
    * Creates a new reader.
@@ -66,15 +61,16 @@ public class TcpReader extends Daemon {
    * with the user's proxy
    * @param tcpConnection the TCP connection
    */
-  public TcpReader(UserConnection userConnection,
-                   TcpConnection tcpConnection) 
+  public TcpReader(IOControl ioctrl,
+		   AgentId proxyId,
+                   TcpConnection tcpConnection,
+                   boolean closeConnection) 
     throws IOException {
     super("tcpReader");
-    this.userConnection = userConnection;
+    this.ioctrl = ioctrl;
+    this.proxyId = proxyId;
     this.tcpConnection = tcpConnection;
-    reliableTcp = 
-      (ReliableTcpConnection)userConnection.
-      getContext();
+    this.closeConnection = closeConnection;
   }
 
   public void run() {
@@ -84,12 +80,18 @@ public class TcpReader extends Daemon {
         "TcpReader.run()");
     try {
       while (running) {
-        Object obj = reliableTcp.receive();
-        if (obj instanceof AbstractJmsRequest) {
-          receive((AbstractJmsRequest)obj);
-        } else {
-          throw new StreamCorruptedException(
-            "Invalid object read on stream.");
+        ProxyMessage msg = ioctrl.receive();
+
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG, "TcpReader reads msg: " + msg);
+
+        Channel.sendTo(
+          proxyId, 
+          new ProxyMessageNot(tcpConnection.getKey(), msg));        
+        
+        if (msg.getObject() instanceof ProducerMessages) {
+          FlowControl.flowControl();
         }
       }
     } catch (Throwable error) {
@@ -97,8 +99,10 @@ public class TcpReader extends Daemon {
         MomTracing.dbgProxy.log(
           BasicLevel.DEBUG, "", error);
     } finally {
-      if (userConnection.getTimeout() == 0) {
-        userConnection.close();
+      if (closeConnection) {
+ 	Channel.sendTo(proxyId, 
+                       new CloseConnectionNot(
+                         tcpConnection.getKey()));
       }
       new Thread(new Runnable() {
           public void run() {            
@@ -106,13 +110,6 @@ public class TcpReader extends Daemon {
           }
         }).start();
     }
-  }
-
-  private void receive(AbstractJmsRequest request) throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "TcpReader.receive(" + request + ')');
-    userConnection.send(request);
   }
 
   protected void shutdown() {
@@ -124,8 +121,8 @@ public class TcpReader extends Daemon {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
         "TcpReader.close()");
-    if (reliableTcp != null)
-      reliableTcp.close();
-    reliableTcp = null;
+    if (ioctrl != null)
+      ioctrl.close();
+    ioctrl = null;
   }
 }

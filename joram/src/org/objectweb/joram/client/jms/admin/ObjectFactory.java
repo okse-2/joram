@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (INRIA)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Frederic Maistre (INRIA)
  */
 package org.objectweb.joram.client.jms.admin;
@@ -58,13 +58,11 @@ import java.util.Enumeration;
 
 import javax.naming.*;
 
-
 /**
  * The <code>ObjectFactory</code> class is used by the naming service
  * for retrieving or re-constructing administered objects.
  */
-public class ObjectFactory implements javax.naming.spi.ObjectFactory
-{
+public class ObjectFactory implements javax.naming.spi.ObjectFactory {
   String localCF =
     "org.objectweb.joram.client.jms.local.LocalConnectionFactory";
   String localQCF =
@@ -110,8 +108,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context ctx,
-                                  java.util.Hashtable env) throws Exception
-  {
+                                  java.util.Hashtable env) throws Exception {
     Reference ref = (Reference) obj;
 
     String id = null;
@@ -120,8 +117,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
     try {
       id = (String) ref.get("adminObj.id").getContent();
       adminObj = AdministeredObject.getInstance(id);
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
 
     if (adminObj != null)
       return adminObj;
@@ -137,8 +133,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(tcpQCF)) {
+    } else if (ref.getClassName().equals(tcpQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -149,8 +144,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(tcpTCF)) {
+    } else if (ref.getClassName().equals(tcpTCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -161,8 +155,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(tcpXACF)) {
+    } else if (ref.getClassName().equals(tcpXACF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -171,8 +164,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(tcpXAQCF)) {
+    } else if (ref.getClassName().equals(tcpXAQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -181,8 +173,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(tcpXATCF)) {
+    } else if (ref.getClassName().equals(tcpXATCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -191,26 +182,19 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(localCF)) {
+    } else if (ref.getClassName().equals(localCF)) {
       return new LocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(localQCF)) {
+    } else if (ref.getClassName().equals(localQCF)) {
       return new QueueLocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(localTCF)) {
+    } else if (ref.getClassName().equals(localTCF)) {
       return new TopicLocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(localXACF)) {
+    } else if (ref.getClassName().equals(localXACF)) {
       return new XALocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(localXAQCF)) {
+    } else if (ref.getClassName().equals(localXAQCF)) {
       return new XAQueueLocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(localXATCF)) {
+    } else if (ref.getClassName().equals(localXATCF)) {
       return new XATopicLocalConnectionFactory();
-    }
-    else if (ref.getClassName().equals(soapCF)) {
+    } else if (ref.getClassName().equals(soapCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -226,8 +210,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(soapQCF)) {
+    } else if (ref.getClassName().equals(soapQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -243,8 +226,7 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(soapTCF)) {
+    } else if (ref.getClassName().equals(soapTCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
@@ -260,43 +242,34 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
-    }
-    else if (ref.getClassName().equals(queue)) {
+    } else if (ref.getClassName().equals(queue)) {
       String destName = (String) ref.get("dest.name").getContent();
       return new Queue(destName);
-    }
-    else if (ref.getClassName().equals(topic)) {
+    } else if (ref.getClassName().equals(topic)) {
       String destName = (String) ref.get("dest.name").getContent();
       return new Topic(destName);
-    }
-    else if (ref.getClassName().equals(tempQueue)) {
+    } else if (ref.getClassName().equals(tempQueue)) {
       String destName = (String) ref.get("dest.name").getContent();
       return new TemporaryQueue(destName, null);
-    }
-    else if (ref.getClassName().equals(tempTopic)) {
+    } else if (ref.getClassName().equals(tempTopic)) {
       String destName = (String) ref.get("dest.name").getContent();
       return new TemporaryTopic(destName, null);
-    }
-    else if (ref.getClassName().equals(deadMQueue)) {
+    } else if (ref.getClassName().equals(deadMQueue)) {
       String destName = (String) ref.get("dest.name").getContent();
       return new DeadMQueue(destName);
-    }
-    else if (ref.getClassName().equals(user)) {
+    } else if (ref.getClassName().equals(user)) {
       String userName = (String) ref.get("user.name").getContent();
       String userId = (String) ref.get("user.id").getContent();
       return new User(userName, userId);
-    }
-    else {
+    } else {
       String clazz = ref.getClassName();
       try {
         if ((clazz != null) && (clazz.length() > 0)) {
           Destination dest = (Destination) Class.forName(clazz).newInstance();
           if (dest instanceof ClusterDestination) {
-            boolean isQueue = 
-              new Boolean((String) ref.get("cluster.isQueue").getContent()).booleanValue();
             Hashtable h = new Hashtable();
             int i = 0;
-            if (isQueue) {
+            if (dest.isQueue()) {
               while (true) {
                 if (ref.get("cluster.key"+i) == null) break;
                 h.put((String) ref.get("cluster.key"+i).getContent(),

@@ -75,13 +75,10 @@ public class TcpServer {
     return listen;
   }
 
-  public void notifyRequest(Socket socket) {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(
-        BasicLevel.DEBUG, "TcpServer.notifyRequest()");
-    Channel.sendTo(serverId, new TcpRequestNot(socket));
+  public final AgentId getServerId() {
+    return serverId;
   }
-  
+
   public static class Monitor extends Daemon {
 
     private TcpServer tcpServer;
@@ -109,7 +106,7 @@ public class TcpServer {
 	  } catch (IOException exc) {
 	    if (running) {
               Trace.logger.log(
-                BasicLevel.ERROR,
+                BasicLevel.DEBUG,
                 this.getName() + 
                 ", error during accept", exc);
               try {
@@ -122,15 +119,26 @@ public class TcpServer {
           }
 
 	  if (! running) break loop;
-
-          if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+          
+          if (Trace.logger.isLoggable(BasicLevel.DEBUG)) {
             Trace.logger.log(
               BasicLevel.DEBUG,
               this.getName() + ", connection from " +
               socket.getInetAddress() + ':' +
               socket.getPort());
+          }
 
-          tcpServer.notifyRequest(socket);
+          try {
+            Channel.sendTo(
+              tcpServer.getServerId(), 
+              new TcpRequestNot(
+                new TcpRequestContext(socket)));
+          } catch (Exception exc) {
+            Trace.logger.log(
+              BasicLevel.ERROR,
+              this.getName() + 
+              ", error during send", exc);
+          }
         }
       } finally {
 	finish();
@@ -140,7 +148,7 @@ public class TcpServer {
     protected void close() {
       
     }
-
+    
     protected void shutdown() {
       close();
     }

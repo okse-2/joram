@@ -45,14 +45,8 @@ abstract public class Channel {
    * @return	the corresponding <code>Channel</code>'s instance.
    */
   static Channel newInstance() throws Exception {
-    String cname = System.getProperty("Channel");
-    if (cname == null) {
-      if (AgentServer.isTransient()) {
-        cname = "fr.dyade.aaa.agent.TransientChannel";
-      } else {
-        cname = "fr.dyade.aaa.agent.TransactionChannel";
-      }
-    }
+    String cname = System.getProperty("Channel",
+                                      "fr.dyade.aaa.agent.TransactionChannel");
     Class cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;
@@ -277,74 +271,6 @@ final class TransactionChannel extends Channel {
   public final String toString() {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("TransactionChannel#").append(AgentServer.getServerId());
-    return strbuf.toString();
-  }
-}
-
-final class TransientChannel extends Channel {
-  /**
-   * Constructs a new <code>TransientChannel</code> object. this method
-   * must only be used by <a href="Channel.html#newInstance()">static channel
-   * allocator</a>.
-   */
-  TransientChannel() {
-    super();
-  } 
-
-  /**
-   *  Sends an immediately validated notification to an agent. Normally
-   * used uniquely in <a href="#sendTo(AgentId, Notification)"><code>
-   * sendTo</code></a> method and in TransientProxy to forward messages.
-   *
-   * @param   from   source agent.
-   * @param   to     destination agent.
-   * @param   not    notification.
-   */
-  void directSendTo(AgentId from,
-		    AgentId to,
-		    Notification not) {
-    MessageConsumer consumer = null;
-    Message msg = null;
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 toString() + ".directSendTo(" + from + ", " + to + ", " + not + ")");
-
-    if ((to == null) || to.isNullId())
-      return;
- 
-    msg = Message.alloc(from, to, not);
-    try {
-      consumer = AgentServer.getConsumer(to.to);
-    } catch (UnknownServerException exc) {
-      channel.logmon.log(BasicLevel.ERROR,
-                         toString() + ", can't post message: " + msg,
-                         exc);
-      // TODO: Post an ErrorNotification
-    }
-
-    try {
-      consumer.post(msg);
-      consumer.save();
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 "Channel: Can't post message to #" + to.getTo(), exc);
-      consumer.invalidate();
-      throw new TransactionError(toString() + ", " + exc.getMessage());
-    }
-    consumer.validate();
-  }
-
-
-  /**
-   * Returns a string representation of this <code>TransientChannel</code>
-   * object.
-   *
-   * @return	A string representation of this object. 
-   */
-  public final String toString() {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append("TransientChannel#").append(AgentServer.getServerId());
     return strbuf.toString();
   }
 }

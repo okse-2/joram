@@ -39,8 +39,6 @@ public class A3CML {
   static final String ELT_DOMAIN = "domain";
   /** Syntaxic name for server element */
   static final String ELT_SERVER = "server";
-  /** Syntaxic name for transient element */
-  static final String ELT_TRANSIENT = "transient";
   /** Syntaxic name for network element */
   static final String ELT_NETWORK = "network";
   /** Syntaxic name for service element */
@@ -73,10 +71,6 @@ public class A3CML {
   static final String ELT_JVM_ARGS = "jvmArgs";
   /** Syntaxic name for sid attribute */
   static final String ATT_SID = "sid";
-//   /** Syntaxic name for natHost attribute */
-//   static final String ATT_NATHOST = "natHost";
-//   /** Syntaxic name for natPort attribute */
-//   static final String ATT_NATPORT = "natPort";
 
   static final String TAB = "  ";
   static final String TAB2 = TAB + TAB;
@@ -202,68 +196,6 @@ public class A3CML {
           }
         }
         out.write(TAB + "</" + ELT_SERVER + ">\n");
-      } else if (obj instanceof A3CMLTServer) {
-        A3CMLTServer server = (A3CMLTServer) obj;
-        out.write(TAB + "<" + ELT_TRANSIENT + " " + ATT_HOSTNAME + "=\"");
-        out.write(server.hostname);
-        out.write("\" " + ATT_ID + "=\"");
-        out.write(Short.toString(server.sid));
-        out.write("\" " + ATT_NAME + "=\"");
-        out.write(server.name);
-        out.write("\" " + ATT_SERVER + "=\"");
-        out.write(Short.toString(server.gateway));
-        out.write("\">\n");
-          
-        // jvm args
-        if (server.jvmArgs != null && server.jvmArgs.length() > 0) {
-          out.write(TAB2 + "<" + ELT_JVM_ARGS + " " + ATT_VALUE + "=\"");
-          out.write(server.jvmArgs);
-          out.write("\"/>\n");
-        }
-
-        // write all property
-        if (server.properties != null) {
-          for (Enumeration enum = server.properties.elements();
-               enum.hasMoreElements();) {
-            A3CMLProperty p = (A3CMLProperty) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_PROPERTY + " " + ATT_NAME + "=\"");
-            out.write(p.name);
-            out.write("\" " + ATT_VALUE + "=\"");
-            out.write(p.value);
-            out.write("\"/>\n");
-          }
-        }
-
-        // write all Nat
-        if (server.nat != null) {
-          for (Enumeration enum = server.nat.elements();
-               enum.hasMoreElements();) {
-            A3CMLNat n = (A3CMLNat) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_NAT + " " + ATT_SID + "=\"");
-            out.write(n.sid);
-            out.write("\" " + ATT_HOSTNAME + "=\"");
-            out.write(n.host);
-            out.write("\" " + ATT_PORT + "=\"");
-            out.write(n.port);
-            out.write("\"/>\n");
-          }
-        }
-
-        //service
-        if (server.services != null) {
-          for (Enumeration enum = server.services.elements();
-               enum.hasMoreElements();) {
-            A3CMLService service = (A3CMLService) enum.nextElement();
-            out.write(TAB2 + "<" + ELT_SERVICE + " " + ATT_CLASS + "=\"");
-            out.write(service.classname);
-            out.write("\" " + ATT_ARGS + "=\"");
-            if ((service.args != null) && (service.args.length() > 0)) {
-              out.write(service.args);
-            }
-            out.write("\"/>\n");
-          }
-        }
-        out.write(TAB + "</" + ELT_TRANSIENT + ">\n");
       }
       out.write("\n");
     }

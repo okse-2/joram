@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -40,13 +40,11 @@ import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
  * The <code>DestinationImpl</code> class implements the common behaviour of
  * MOM destinations.
  */
-public abstract class DestinationImpl implements java.io.Serializable
-{
+public abstract class DestinationImpl implements java.io.Serializable {
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
@@ -77,6 +75,12 @@ public abstract class DestinationImpl implements java.io.Serializable
   /** READ and WRITE access value. */
   public static int READWRITE = 3;
 
+  /**
+   * Transient <code>StringBuffer</code> used to build message, this buffer
+   * is created during agent <tt>AdminTopicinitialization</tt>, then reused
+   * during the topic life.
+   */
+  transient StringBuffer strbuf = null;
 
   /**
    * Constructs a <code>DestinationImpl</code>.
@@ -164,22 +168,24 @@ public abstract class DestinationImpl implements java.io.Serializable
     try {
       processSetRight(user,right);
       specialProcess(not);
-      info = "Request ["
-             + not.getClass().getName()
-             + "], sent to Destination ["
-             + destId
-             + "], successful [true]: user ["
-             + user
-             + "] set with right [" + right +"]";
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(destId)
+        .append("], successful [true]: user [")
+        .append(user)
+        .append("] set with right [" + right +"]").toString();
+      strbuf.setLength(0);
       Channel.sendTo(from, new AdminReply(not, true, info)); 
     }
     catch (RequestException exc) {
-      info = "Request ["
-             + not.getClass().getName()
-             + "], sent to Destination ["
-             + destId
-             + "], successful [false]: "
-             + exc.getMessage();
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(destId)
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
+      strbuf.setLength(0);
       Channel.sendTo(from, new AdminReply(not, false, info));
     }
 
@@ -250,13 +256,14 @@ public abstract class DestinationImpl implements java.io.Serializable
 
     dmqId = not.getDmqId();
     
-    String info = "Request ["
-                  + not.getClass().getName()
-                  + "], sent to Destination ["
-                  + destId
-                  + "], successful [true]: dmq ["
-                  + dmqId
-                  + "] set" ;
+    String info = strbuf.append("Request [")
+      .append(not.getClass().getName())
+      .append("], sent to Destination [")
+      .append(destId)
+      .append("], successful [true]: dmq [")
+      .append(dmqId)
+      .append("] set").toString();
+    strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(not, true, info));
     
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -397,10 +404,9 @@ public abstract class DestinationImpl implements java.io.Serializable
                                           "Admin of dest "
                                           + destId
                                           + " does not exist anymore.");
-    }
-    else if (not.agent.equals(dmqId))
+    } else if (not.agent.equals(dmqId)) {
       dmqId = null;
-    else {
+    } else {
       clients.remove(from);
       specialProcess(not);
     }
@@ -419,8 +425,7 @@ public abstract class DestinationImpl implements java.io.Serializable
         MomTracing.dbgDestination.log(BasicLevel.WARN, "Deletion request"
                                       + " received from non administrator"
                                       + " client " + from);
-    }
-    else {
+    } else {
       specialProcess(not);
       deletable = true;
     }
@@ -444,20 +449,22 @@ public abstract class DestinationImpl implements java.io.Serializable
         throw new RequestException("ADMIN right not granted");
       }
       obj = specialAdminProcess(not);
-      info = "Request ["
-        + not.getClass().getName()
-        + "], sent to Destination ["
-        + destId
-        + "], successful [true] ";
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(destId)
+        .append("], successful [true] ").toString();
+      strbuf.setLength(0);
       Channel.sendTo(from, 
                      new AdminReply(not, true, info, obj)); 
     } catch (RequestException exc) {
-      info = "Request ["
-        + not.getClass().getName()
-        + "], sent to Destination ["
-        + destId
-        + "], successful [false]: "
-        + exc.getMessage();
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(destId)
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
+      strbuf.setLength(0);
       Channel.sendTo(from, 
                      new AdminReply(not, false, info, obj));
     }
@@ -475,8 +482,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    *
    * @param client  AgentId of the client requesting a reading permission.
    */
-  protected boolean isReader(AgentId client)
-  {
+  protected boolean isReader(AgentId client) {
     if (isAdministrator(client) || freeReading)
       return true;
 
@@ -484,8 +490,8 @@ public abstract class DestinationImpl implements java.io.Serializable
     if (clientRight == null)
       return false;
     else
-      return clientRight.intValue() == READ
-             || clientRight.intValue() == READWRITE;
+      return ((clientRight.intValue() == READ) ||
+              (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -493,8 +499,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    *
    * @param client  AgentId of the client requesting a writing permission.
    */
-  protected boolean isWriter(AgentId client)
-  {
+  protected boolean isWriter(AgentId client) {
     if (isAdministrator(client) || freeWriting)
       return true;
 
@@ -502,8 +507,8 @@ public abstract class DestinationImpl implements java.io.Serializable
     if (clientRight == null)
       return false;
     else
-      return clientRight.intValue() == WRITE
-             || clientRight.intValue() == READWRITE;
+      return ((clientRight.intValue() == WRITE) ||
+              (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -511,8 +516,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    *
    * @param client  AgentId of the client requesting an admin permission.
    */
-  protected boolean isAdministrator(AgentId client)
-  {
+  protected boolean isAdministrator(AgentId client) {
     return client.equals(adminId);
   }
 
@@ -523,8 +527,7 @@ public abstract class DestinationImpl implements java.io.Serializable
    * @param dmqId  Identifier of the dead message queue to use,
    *          <code>null</code> if not provided.
    */
-  protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId)
-  {
+  protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId) {
     // Sending the dead messages to the provided DMQ:
     if (dmqId != null)
       Channel.sendTo(dmqId, deadMessages);

@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package classic;
 
@@ -41,8 +41,15 @@ public class ClassicAdmin
 
     AdminModule.connect("root", "root", 60);
 
-    Queue queue = (Queue) Queue.create(0);
-    Topic topic = (Topic) Topic.create(0);
+    Queue queue = (Queue) Queue.create();
+    Topic topic = (Topic) Topic.create();
+    
+    User user = User.create("anonymous", "anonymous");
+
+    queue.setFreeReading();
+    topic.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeWriting();
 
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
@@ -50,13 +57,6 @@ public class ClassicAdmin
       QueueTcpConnectionFactory.create("localhost", 16010);
     javax.jms.TopicConnectionFactory tcf =
       TopicTcpConnectionFactory.create("localhost", 16010);
-    
-    User user = User.create("anonymous", "anonymous", 0);
-
-    queue.setFreeReading();
-    topic.setFreeReading();
-    queue.setFreeWriting();
-    topic.setFreeWriting();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);

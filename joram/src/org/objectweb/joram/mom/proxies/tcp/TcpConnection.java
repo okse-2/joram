@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
@@ -32,7 +30,7 @@ import org.objectweb.joram.mom.MomTracing;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.ReliableTcpConnection;
+import fr.dyade.aaa.agent.AgentId;
 
 /**
  * Handles the TCP connection. Starts the
@@ -46,12 +44,13 @@ import fr.dyade.aaa.util.ReliableTcpConnection;
  */
 public class TcpConnection {
 
-  private ReliableTcpConnection reliableTcp;
-  
-  /**
-   * The connection with the user's proxy
-   */
-  private UserConnection userConnection;
+  private IOControl ioctrl;
+
+  private AgentId proxyId;
+
+  private int key;
+
+  private AckedQueue replyQueue;
 
   /**
    * The reader thread responsible for
@@ -71,22 +70,31 @@ public class TcpConnection {
    */
   private TcpProxyService proxyService;
 
+  private boolean closeConnection;
+
   /**
    * Creates a new TCP connection.
    *
    * @param sock the TCP connection socket
-   * @param userConnection the connection with
-   * the user's proxy
    * @param proxyService the TCP proxy service
    */
   public TcpConnection(
-    UserConnection userConnection,
-    TcpProxyService proxyService) {    
-    this.userConnection = userConnection;
-    this.proxyService = proxyService;    
-    reliableTcp = 
-      (ReliableTcpConnection)userConnection.
-      getContext();
+    IOControl ioctrl,
+    AgentId proxyId,
+    AckedQueue replyQueue,
+    int key,
+    TcpProxyService proxyService,
+    boolean closeConnection) {    
+    this.ioctrl = ioctrl;
+    this.proxyId = proxyId;
+    this.replyQueue = replyQueue;
+    this.key = key;
+    this.proxyService = proxyService;
+    this.closeConnection = closeConnection;
+  }
+
+  public final int getKey() {
+    return key;
   }
 
   /**
@@ -99,11 +107,14 @@ public class TcpConnection {
         "TcpConnection.start()");
     try {
       tcpWriter = new TcpWriter(
-        userConnection,
+	ioctrl,
+        replyQueue,
         this);
       tcpReader = new TcpReader(
-        userConnection,
-        this);
+        ioctrl,
+	proxyId,
+        this,
+        closeConnection);
       proxyService.registerConnection(this);
       tcpWriter.start();
       tcpReader.start();
@@ -123,15 +134,11 @@ public class TcpConnection {
       tcpWriter.stop();
     if (tcpReader != null)
       tcpReader.stop();
-    if (reliableTcp != null)
-      reliableTcp.close();
-    reliableTcp = null;
+    if (ioctrl != null)
+      ioctrl.close();
+    ioctrl = null;
     proxyService.unregisterConnection(
       TcpConnection.this);
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ",userConnection=" + userConnection + ')';
-  }
 }

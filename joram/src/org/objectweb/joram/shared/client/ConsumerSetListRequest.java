@@ -99,4 +99,10 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
     req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
     return req;
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",selector=" + selector + 
+      ",queueMode=" + queueMode + ')';
+  }
 }

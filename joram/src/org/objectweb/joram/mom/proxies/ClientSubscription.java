@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -44,8 +45,7 @@ import java.util.Vector;
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements java.io.Serializable
-{
+class ClientSubscription implements java.io.Serializable {
   /** The proxy's agent identifier. */
   private AgentId proxyId;
   /** <code>true</code> if the subscription is durable. */
@@ -220,11 +220,18 @@ class ClientSubscription implements java.io.Serializable
    * @param persistenceModule  Messages' persistence module.
    * @param messagesTable  Proxy's table where storing the messages.
    * @param persistedMessages  Proxy's persisted messages.
+   * @param denyDeliveredMessages Denies already delivered messages.
    */
   void reinitialize(MessagePersistenceModule persistenceModule,
                     Hashtable messagesTable,
-                    Vector persistedMessages)
+                    Vector persistedMessages,
+                    boolean denyDeliveredMessages)
   {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ClientSubscription[" + this + 
+                              "].reinitialize()");
+    
     this.persistenceModule = persistenceModule;
     this.messagesTable = messagesTable;
 
@@ -237,20 +244,36 @@ class ClientSubscription implements java.io.Serializable
       msgId = message.getIdentifier();
 
       if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG,
+            " -> contains message " + msgId);
         message.acksCounter++;
         message.durableAcksCounter++;
-
-        if (message.acksCounter == 1)
+        
+        if (message.acksCounter == 1) {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG,
+              " -> messagesTable.put(" + msgId + ')');
           messagesTable.put(msgId, message);
-        if (message.durableAcksCounter == 1)
-          persistenceModule.save(message);
+        }
+        if (message.durableAcksCounter == 1) {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG,
+              " -> persistenceModule.save(" + message + ')');
+          persistenceModule.save(message);          
+        }
       }
     }
 
-    // Denying all previously delivered messages:
-    deny(deliveredIds.keys());
-    deliveredIds.clear();
-  } 
+    if (denyDeliveredMessages) {
+      // Denying all previously delivered messages:
+      deny(deliveredIds.keys());
+      deliveredIds.clear();
+    }
+  }
 
   /** 
    * Reactivates the subscription.
@@ -614,7 +637,7 @@ class ClientSubscription implements java.io.Serializable
           messagesTable.remove(id);
         if (durable) {
           msg.durableAcksCounter--;
-          
+
           if (msg.durableAcksCounter == 0)
             persistenceModule.delete(msg);
         }

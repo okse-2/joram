@@ -31,7 +31,8 @@ import fr.dyade.aaa.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-public class ContextManager {
+public class ContextManager 
+    implements java.io.Serializable {
 
   private ContextTable contextIdTable;
 
@@ -92,6 +93,12 @@ public class ContextManager {
 
   private NamingContext getNamingContextFromName(CompositeName name) 
     throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "ContextManager.getNamingContextFromName(" + 
+        name + ')');
+
     // 1- Try to get the context directly from the cache
     NamingContext nc = contextNameTable.get(name);
     if (nc != null) return nc;
@@ -112,7 +119,13 @@ public class ContextManager {
   }
   
   public NamingContext getNamingContext(CompositeName name) 
-    throws NamingException {    
+    throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "ContextManager.getNamingContext(" + 
+        name + ')');
+
     NamingContext nc = getNamingContextFromName(name);
     if (nc != null) return nc;
 
@@ -176,7 +189,7 @@ public class ContextManager {
     storageManager.delete(ncid, name);
   }
 
-  public NamingContextInfo[] getNamingContexts(Object serverId) 
+  public NamingContextInfo[] copyNamingContexts(Object serverId) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
@@ -192,8 +205,9 @@ public class ContextManager {
         (CompositeName)nameEnum.nextElement();
       NamingContext nc = getNamingContext(ncid, false);      
       if (nc.getOwnerId().equals(serverId)) {
+        NamingContext ncCopy = (NamingContext)nc.clone();
         contexts.addElement(
-          new NamingContextInfo(nc, name));
+          new NamingContextInfo(ncCopy, name));
       }
     }
     
@@ -276,5 +290,19 @@ public class ContextManager {
   public void resetNamingContext(NamingContext context)
     throws NamingException {
     storageManager.storeNamingContext(context);
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    out.writeObject(contextIdTable);
+    out.writeObject(contextNameTable);
+    storageManager.writeBag(out);
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    contextIdTable = (ContextTable)in.readObject();
+    contextNameTable = (ContextTable)in.readObject();
+    storageManager.readBag(in);
   }
 }

@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 BULL
- * Copyright (C) 1996 - 2000 INRIA
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +17,7 @@
  * USA.
  *
  * Initial developer(s): Alexander Fedorowicz
- * Contributor(s): Andre Freyssinet (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.util;
 

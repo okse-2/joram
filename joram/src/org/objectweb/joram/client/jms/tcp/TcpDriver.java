@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.tcp;
@@ -30,7 +31,7 @@ import java.io.*;
 /**
  * A <code>TcpDriver</code> gets server deliveries coming through a TCP socket.
  */
-class TcpDriver extends org.objectweb.joram.client.jms.Driver
+public class TcpDriver extends org.objectweb.joram.client.jms.Driver
 {
   private ReliableTcpClient tcpClient;
 
@@ -40,7 +41,7 @@ class TcpDriver extends org.objectweb.joram.client.jms.Driver
    * @param cnx  The connection the driver belongs to.
    * @param ois  The connection's input stream.
    */
-  TcpDriver(org.objectweb.joram.client.jms.Connection cnx,
+  public TcpDriver(org.objectweb.joram.client.jms.Connection cnx,
             ReliableTcpClient tcpClient)
   {
     super(cnx);

@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.agent;
 
@@ -32,7 +35,7 @@ import fr.dyade.aaa.util.Arrays;
  *  <code>CausalNetwork</code> is a base implementation for network components
  * with a causal message ordering.
  */
-public abstract class CausalNetwork extends Network {
+public abstract class CausalNetwork extends StreamNetwork {
   /**
    * Creates a new network component. This simple constructor is required
    * by subclasses.
@@ -40,7 +43,7 @@ public abstract class CausalNetwork extends Network {
   public CausalNetwork() {}
 
 
-  public LogicalClock createsLogicalClock(String name, short[] servers) {
+  LogicalClock createsLogicalClock(String name, short[] servers) {
     return new MatrixClock(name, servers);
   }
 

@@ -113,8 +113,7 @@ public class NamingContextImpl implements Context {
       return obj;
     } else {
       return new NamingContextImpl(
-        new NamingConnection(connection.getHostName(),
-                             connection.getPort()), path);
+        connection.cloneConnection(), path);
     } 
   }
 
@@ -187,8 +186,7 @@ public class NamingContextImpl implements Context {
         CompositeName subCtxPath = (CompositeName)queryPath.clone();
         subCtxPath.add(bindings[i].getName());
         bindings[i].setObject(new NamingContextImpl(
-          new NamingConnection(connection.getHostName(),
-                               connection.getPort()), subCtxPath));
+          connection.cloneConnection(), subCtxPath));
       }
 
       // 2- resolve references
@@ -214,8 +212,7 @@ public class NamingContextImpl implements Context {
       throw exc;
     } else {
       return new NamingContextImpl(
-        new NamingConnection(connection.getHostName(),
-                             connection.getPort()), path);
+        connection.cloneConnection(), path);
     }
   }
 

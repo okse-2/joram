@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,6 +67,11 @@ public class A3CMLServer implements Serializable {
     if (properties == null)
       properties = new Hashtable();
     return (A3CMLProperty) properties.put(prop.name, prop);
+  }
+  
+  public A3CMLProperty getProperty(String name) {
+    if (properties == null) return null;
+    return (A3CMLProperty) properties.get(name);
   }
   
   public A3CMLProperty removeProperty(String name) {

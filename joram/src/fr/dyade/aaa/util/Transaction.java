@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Dyade
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.util;
 
@@ -29,6 +32,8 @@ public interface Transaction {
 
   File getDir();
   String[] getList(String prefix);
+
+  boolean isPersistent();
 
   void save(Serializable obj, String name) throws IOException;
   void saveByteArray(byte[] buf, String name) throws IOException;

@@ -387,14 +387,7 @@ public class HttpDebug {
 		// a list of servers has been requested
 		listServers(cmd.substring(CMD_SERVERS.length()), buf);
 		if (cmd.substring(CMD_SERVERS.length()).startsWith(CMD_STOP)) {
-                  Thread t = new Thread() {
-                      public void run() {
-                        AgentServer.stop();
-                      }
-                    };
-                  t.setName("HttpDebug_cmdStop");
-                  t.setDaemon(true);
-                  t.start();
+                  AgentServer.stop(false);
 		}
 	      } else if (cmd.startsWith(CMD_MSG_CONS)) {
 		// a list of consumers has been requested
@@ -520,12 +513,12 @@ public class HttpDebug {
 	int port = Integer.parseInt(
 	  AgentServer.getServiceArgs(desc.sid,
 				     "fr.dyade.aaa.agent.HttpDebug"));
-        if (desc.hostname.equals("localhost"))
+        if (desc.getHostname().equals("localhost"))
           return new String("http://" +
                             InetAddress.getLocalHost().getHostName() +
                             ":" + port);
         else
-          return new String("http://" + desc.hostname + ":" + port);
+          return new String("http://" + desc.getHostname() + ":" + port);
       } catch (Exception exc) {}
       return null;
     }
@@ -595,8 +588,8 @@ public class HttpDebug {
 	  buf.append("domain=<A href=\"" + base + CMD_MSG_CONS +
 		     "/" + desc.domain.getName() + "\">" +
 		     desc.domain.getName() + "</A>\n");
-	  buf.append("hostname=" + desc.hostname + "\n");
-	  buf.append("port=" + desc.port + "\n");
+	  buf.append("hostname=" + desc.getHostname() + "\n");
+	  buf.append("port=" + desc.getPort() + "\n");
 	  if (desc.active) {
 	    buf.append("active=" + desc.active + "\n");
 	  } else {

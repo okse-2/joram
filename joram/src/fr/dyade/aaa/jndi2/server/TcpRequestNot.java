@@ -35,13 +35,18 @@ import fr.dyade.aaa.agent.*;
  */
 public class TcpRequestNot extends Notification {
 
-  private transient Socket socket;
+  private RequestContext ctx;
 
-  public TcpRequestNot(Socket socket) {
-    this.socket = socket;
+  public TcpRequestNot(RequestContext ctx) {
+    this.ctx = ctx;
   }
 
-  public final Socket getSocket() {
-    return socket;
+  public final RequestContext getRequestContext() {
+    return ctx;
+  }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",ctx=" + ctx + ')';
   }
 }

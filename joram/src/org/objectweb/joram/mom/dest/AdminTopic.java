@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -19,12 +19,11 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
 import fr.dyade.aaa.agent.AgentId;
-
 
 /**
  * An <code>AdminTopic</code> agent is a MOM administration service, which
@@ -32,45 +31,28 @@ import fr.dyade.aaa.agent.AgentId;
  *
  * @see AdminTopicImpl
  */
-public class AdminTopic extends Topic
-{
+public class AdminTopic extends Topic {
   /**
    * Constructs an <code>AdminTopic</code> agent. 
    */ 
-  public AdminTopic()
-  {
+  public AdminTopic() {
     super("JoramAdminTopic", true, AgentId.JoramAdminStamp);
-    topicImpl = new AdminTopicImpl(getId());
+    init(null);
   }
 
-
   /**
-   * Initializes the <code>AdminTopic</code> service.
+   * Creates the <tt>TopicImpl</tt>.
    *
-   * @exception java.io.IOException  If the deployment of the topic fails.
+   * @param adminId  Identifier of the topic administrator.
    */
-  public static void init(String args, boolean firstTime)
-                     throws java.io.IOException
-  {
-    if (! firstTime)
-      return;
-
-    // First initialization: deploying the topic, initializing it.
-    AdminTopic adminTopic = new AdminTopic();
-    adminTopic.deploy();
+  public DestinationImpl createsImpl(AgentId adminId) {
+    return new AdminTopicImpl(getId());
   }
 
   /**
    * Gets the identifier of the default administration topic on a given server.
    */
-  public static AgentId getDefault(short serverId)
-  {
+  public static AgentId getDefault(short serverId) {
     return new AgentId(serverId, serverId, AgentId.JoramAdminStamp);
   }
-
-  /**
-   * Stops the <code>AdminTopic</code> service.
-   */
-  public static void stopService()
-  {}
 }

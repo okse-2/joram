@@ -53,4 +53,9 @@ public class QueueMsgReply extends AbstractReply
   {
     return message;
   }
+
+  public String toString() {
+    return '(' + super.toString() + 
+      ",message=" + message + ')';
+  }
 } 

@@ -77,4 +77,9 @@ public class BindRequest extends JndiRequest {
       throw ne;
     }    
   }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",rebind=" + rebind + ')';
+  }
 }

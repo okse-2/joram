@@ -302,7 +302,7 @@ public class NGNetwork extends FIFONetwork {
       SocketChannel channel = null;
       try {
         SocketAddress addr = new InetSocketAddress(server.getAddr(),
-                                                   server.port);
+                                                   server.getPort());
         channel = SocketChannel.open(addr);
 
         channel.socket().setSendBufferSize(SO_BUFSIZE);

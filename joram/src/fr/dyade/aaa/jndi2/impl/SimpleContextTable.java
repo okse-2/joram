@@ -25,7 +25,8 @@ package fr.dyade.aaa.jndi2.impl;
 import java.util.*;
 import java.lang.ref.*;
 
-public class SimpleContextTable implements ContextTable {
+public class SimpleContextTable 
+    implements ContextTable, java.io.Serializable {
 
   private Hashtable table;
 

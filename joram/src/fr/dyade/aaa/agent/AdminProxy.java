@@ -305,19 +305,11 @@ public class AdminProxy {
 
 	cmd = st.nextToken();
 	if (cmd.equals(STOP_SERVER)) {
-	  // Stop the AgentServer
-	  // Creates a thread to execute AgentServer.stop in order to
-	  // allow AdminProxy service stopping and avoid deadlock.
-	  Thread t = new Thread() {
-	    public void run() {
-	      AgentServer.stop();
-	    }
-	  };
-	  t.setDaemon(true);
-	  t.start();
+          // Stop the AgentServer
+	  AgentServer.stop(false);
           logmon.log(BasicLevel.WARN, getName() + ", bye.");
 	} else if (cmd.equals(CRASH_SERVER)) {
-          // Stop the AgentServer
+          // Kill the AgentServer
           logmon.log(BasicLevel.WARN, getName() + ", crash!");
 	  System.exit(0);
 	} else if (cmd.equals(GC)) {
