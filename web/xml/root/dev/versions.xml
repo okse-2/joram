@@ -23,8 +23,11 @@
         <code>com.scalagent.ksoap</code>.</li>
       </ul>
       </s2>
-      <s2 name="Modifications (latest: April 8, 2004)">
+      <s2 name="Modifications (latest: April 22, 2004)">
       <ul>
+        <li>Destinations' administrative names are now returned when calling
+        the <code>AdminModule.getDestinations</code> monitoring methods, and
+        wrapped into the corresponding <code>Destination</code> instances.</li>
         <li>Large update of the XA classes implementation for a better XA
         support (for example, recovery is now provided). Submissions occured
         in the <code>org.objectweb.joram.client.connector</code>,
