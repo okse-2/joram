@@ -55,7 +55,7 @@
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
+          tofile="${conf.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
 
@@ -64,7 +64,7 @@
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
     <copy file="${conf.dir}/distributed_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
+          tofile="${conf.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
 
