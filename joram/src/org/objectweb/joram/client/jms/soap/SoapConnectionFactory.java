@@ -109,13 +109,12 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
   {
     String host = (String) h.get("host");
     int port = ((Integer) h.get("port")).intValue();
-    int timer = ((Integer) h.get("soapCnxPendingTimer")).intValue();
+    int timer = ((Integer) h.get("cnxPendingTimer")).intValue() / 1000;
 
     SoapConnectionFactory ret = new SoapConnectionFactory(host, port, timer);
     FactoryParameters params = ret.getParameters();
     params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
     params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
-    params.cnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
 
     return ret;
   }
