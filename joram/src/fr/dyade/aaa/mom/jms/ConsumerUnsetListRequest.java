@@ -57,6 +57,23 @@ public class ConsumerUnsetListRequest extends AbstractJmsRequest
     this.queueMode = queueMode;
   }
 
+  /**
+   * Constructs a <code>ConsumerUnsetListRequest</code>.
+   */
+  public ConsumerUnsetListRequest()
+  {}
+
+  /** Sets the identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
 
   /**
    * Returns the identifier either of the last listener "receive" request
@@ -68,7 +85,7 @@ public class ConsumerUnsetListRequest extends AbstractJmsRequest
   }
 
   /** Returns <code>true</code> if the listener was listening to a queue. */
-  public boolean queueMode()
+  public boolean getQueueMode()
   {
     return queueMode;
   }

@@ -29,6 +29,8 @@ package fr.dyade.aaa.mom.jms;
 
 import fr.dyade.aaa.mom.excepts.MomException;
 
+import java.util.Vector;
+
 /**
  * A <code>MomExceptionReply</code> instance is used by a JMS client proxy
  * to send a <code>MomException</code> back to a JMS client.
@@ -56,4 +58,35 @@ public class MomExceptionReply extends AbstractJmsReply
   {
     return momExcept;
   }
+
+  /**
+   * Transforms this reply into a vector of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Vector soapCode()
+  {
+    Vector vec = new Vector();
+
+    vec.add("MomExceptionReply");
+
+    // Coding the reply fields:
+    vec.add(getCorrelationId());
+    vec.add(momExcept);
+
+    return vec;
+  }
+
+  /** 
+   * Transforms a vector of primitive values into a
+   * <code>MomExceptionReply</code> reply.
+   */
+  public static MomExceptionReply soapDecode(Vector vec)
+  {
+    vec.remove(0);
+
+    String correlationId = (String) vec.remove(0);
+    MomException momExcept = (MomException) vec.remove(0);
+
+    return new MomExceptionReply(correlationId, momExcept);
+  } 
 }

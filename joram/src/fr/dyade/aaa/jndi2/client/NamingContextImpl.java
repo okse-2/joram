@@ -23,7 +23,7 @@
  * All Rights Reserved.
  *
  * Initial developer(s): Sofiane Chibani
- * Contributor(s): David Feliot, Nicolas Tachker
+ * Contributor(s): David Feliot, Nicolas Tachker, Frederic Maistre
  */
 package fr.dyade.aaa.jndi2.client;
 
@@ -47,6 +47,12 @@ public class NamingContextImpl implements Context {
                            CompositeName contextPath) throws NamingException { 
     this.connection = connection;
     this.contextPath = contextPath;
+  }
+
+  /** Empty constructor, called by the subclass. */
+  protected NamingContextImpl()
+  {
+    contextPath = new CompositeName();
   }
 
   public void bind(Name name, Object obj) throws NamingException {

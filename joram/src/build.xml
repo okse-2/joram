@@ -27,13 +27,16 @@
     <path id="base.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
+        <include name="activation.jar"/>
         <include name="jakarta-regexp-1.2.jar"/>
         <include name="JCup.jar"/>
         <include name="jms.jar"/>
         <include name="jndi.jar"/>
         <include name="jta.jar"/>
         <include name="log4j.jar"/>
+        <include name="mail.jar"/>
 	<include name="ow_util_log_wrp_log4j.jar" />
+        <include name="soap.jar"/>
         <include name="xerces.jar"/>
       </fileset>
     </path>
@@ -91,8 +94,7 @@
   <!-- JARS BUILDING -->
   <target name="build.joram" depends="init,compile"
       description="--> Builds Joram server and client jars.">
-    <jar jarfile="${build.dir}/mom.jar"
-         manifest="${src.dir}/mom.mf">
+    <jar jarfile="${build.dir}/mom.jar">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/agent/*.class"/>
         <include name="fr/dyade/aaa/ip/*.class"/>
@@ -107,6 +109,8 @@
         <include name="fr/dyade/aaa/mom/jms/*.class"/>
         <include name="fr/dyade/aaa/mom/messages/*.class"/>
         <include name="fr/dyade/aaa/mom/proxies/*.class"/>
+        <include name="fr/dyade/aaa/mom/proxies/soap/*.class"/>
+        <include name="fr/dyade/aaa/mom/proxies/tcp/*.class"/>
         <include name="fr/dyade/aaa/mom/selectors/*.class"/>
         <include name="fr/dyade/aaa/ns/*.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
@@ -118,6 +122,8 @@
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/joram/*.class"/>
         <include name="fr/dyade/aaa/joram/admin/*.class"/>
+        <include name="fr/dyade/aaa/joram/soap/*.class"/>
+        <include name="fr/dyade/aaa/joram/tcp/*.class"/>
         <include name="fr/dyade/aaa/mom/admin/*.class"/>
         <include name="fr/dyade/aaa/mom/excepts/*.class"/>
         <include name="fr/dyade/aaa/mom/jms/*.class"/>
@@ -138,17 +144,6 @@
   <!-- JAVADOC --> 
   <target name="javadoc" depends="prepare"
       description="--> Generates the Javadoc.">
-  <!-- Path needed to create the javadoc  -->
-  <path id="doc.class.path">
-    <fileset dir="${lib.dir}">
-      <include name="jms.jar"/>
-      <include name="log4j.jar"/>
-      <include name="ow_util_log_wrp_log4j.jar" />
-      <include name="xerces.jar"/>
-      <include name="jndi.jar"/>
-    </fileset>
-    </path>
-    
     <javadoc packagenames="fr.dyade.aaa.*"
       sourcepath="${src.dir}"
       classpathref="project.class.path"

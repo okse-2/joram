@@ -55,6 +55,24 @@ public class ConsumerAckRequest extends AbstractJmsRequest
     this.queueMode = queueMode;
   }
 
+  /**
+   * Constructs a <code>ConsumerAckRequest</code> instance.
+   */
+  public ConsumerAckRequest()
+  {}
+
+  /** Sets the acknowledged message identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
   /** Returns the acknowledged message identifier. */
   public String getId()
   {

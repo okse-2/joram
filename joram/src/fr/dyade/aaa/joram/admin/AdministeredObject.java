@@ -32,6 +32,7 @@ import fr.dyade.aaa.joram.JoramTracing;
 import javax.naming.*;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * The <code>AdministeredObject</code> class is the parent class of all
@@ -82,5 +83,57 @@ public abstract class AdministeredObject implements java.io.Serializable,
     if (name == null)
       return null;
     return instancesTable.get(name);
+  }
+
+  /**
+   * Codes an <code>AdministeredObject</code> as a vector for travelling 
+   * through the SOAP protocol.
+   *
+   * @exception NamingException  If the object is not codable.
+   */
+  public abstract Vector code() throws NamingException;
+
+  /**
+   * Decodes a coded <code>AdministeredObject</code>.
+   *
+   * @exception NamingException  If the coded object is not an
+   *              AdministeredObject.
+   */
+  public static AdministeredObject decode(Vector vec) throws NamingException
+  {
+    String className = (String) vec.remove(0);
+
+    if (className.equals("TcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.TcpConnectionFactory.decode(vec);
+    else if (className.equals("QueueTcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.QueueTcpConnectionFactory.decode(vec);
+    else if (className.equals("TopicTcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.TopicTcpConnectionFactory.decode(vec);
+    else if (className.equals("XATcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.XATcpConnectionFactory.decode(vec);
+    else if (className.equals("XAQueueTcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.XAQueueTcpConnectionFactory.decode(vec);
+    else if (className.equals("XATopicTcpConnectionFactory"))
+      return fr.dyade.aaa.joram.tcp.XATopicTcpConnectionFactory.decode(vec);
+    else if (className.equals("SoapConnectionFactory"))
+      return fr.dyade.aaa.joram.soap.SoapConnectionFactory.decode(vec);
+    else if (className.equals("QueueSoapConnectionFactory"))
+      return fr.dyade.aaa.joram.soap.QueueSoapConnectionFactory.decode(vec);
+    else if (className.equals("TopicSoapConnectionFactory"))
+      return fr.dyade.aaa.joram.soap.TopicSoapConnectionFactory.decode(vec);
+    else if (className.equals("Queue"))
+      return fr.dyade.aaa.joram.Queue.decode(vec);
+    else if (className.equals("Topic"))
+      return fr.dyade.aaa.joram.Topic.decode(vec);
+    else if (className.equals("TemporaryQueue"))
+      return fr.dyade.aaa.joram.TemporaryQueue.decode(vec);
+    else if (className.equals("TemporaryTopic"))
+      return fr.dyade.aaa.joram.TemporaryTopic.decode(vec);
+    else if (className.equals("DeadMQueue"))
+      return fr.dyade.aaa.joram.admin.DeadMQueue.decode(vec);
+    else if (className.equals("User"))
+      return fr.dyade.aaa.joram.admin.User.decode(vec);
+    else
+      throw new NamingException("Coded object is not an AdministeredObject.");
   }
 }

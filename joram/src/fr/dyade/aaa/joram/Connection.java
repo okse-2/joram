@@ -31,8 +31,6 @@ import fr.dyade.aaa.mom.excepts.*;
 import fr.dyade.aaa.mom.jms.*;
 import fr.dyade.aaa.util.*;
 
-import java.io.*;
-import java.net.*;
 import java.util.*;
 
 import javax.jms.InvalidDestinationException;
@@ -42,29 +40,15 @@ import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
- * <p>
- * A connection object actually wraps a TCP connection to a given proxy agent.
  */
 public class Connection implements javax.jms.Connection
 { 
-  /** Server's address. */
-  private InetAddress serverAddr;
-  /** Server's listening port. */
-  private int serverPort;
-  /** Connection socket. */ 
-  private Socket socket = null;
-  /** Connection data output stream. */
-  private DataOutputStream dos = null;
-  /** Connection data input stream. */
-  private DataInputStream dis = null;
-  /** Connection object output stream. */
-  private ObjectOutputStream oos = null;
-  /** Connection object input stream. */
-  private ObjectInputStream ois = null;
-  /** Connection listening daemon. */
-  private Driver driver = null;
+  /** Actual connection linking the client and the JORAM platform. */
+  private ConnectionItf connectionImpl;
+  
   /** Client's agent proxy identifier. */
   private String proxyId;
   /** Connection key. */
@@ -87,8 +71,12 @@ public class Connection implements javax.jms.Connection
   /** Timer for closing pending sessions. */
   private fr.dyade.aaa.util.Timer sessionsTimer = null;
 
-  /** The factory's configuration object. */
-  FactoryConfiguration factoryConfiguration;
+  /** The factory's parameters. */
+  FactoryParameters factoryParameters;
+
+  /** Driver listening to asynchronous deliveries. */
+  Driver driver;
+
   /** <code>true</code> if the connection is started. */
   boolean started = false;
   /** <code>true</code> if the connection is closing. */
@@ -115,46 +103,40 @@ public class Connection implements javax.jms.Connection
    */
   Hashtable repliesTable;
 
+
   /**
-   * Opens a connection.
+   * Creates a <code>Connection</code> instance.
    *
-   * @param cfConfig  The factory's configuration object.
-   * @param name  User's name.
-   * @param password  User's password.
+   * @param factoryParameters  The factory parameters.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  Connection(FactoryConfiguration cfConfig, String name,
-             String password) throws JMSException
+  public Connection(FactoryParameters factoryParameters,
+                    ConnectionItf connectionImpl) throws JMSException
   {
-    this.factoryConfiguration = cfConfig;
-    this.serverAddr = cfConfig.serverAddr;
-    this.serverPort = cfConfig.port;
-
-    sessions = new Vector();
-    requestsTable = new Hashtable();
-    repliesTable = new Hashtable();
-    
     try {
-      // Opening the connection:
-      connect(name, password);
-  
-      // Creating and starting the listening daemon:
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
-                                   + ": starts the Driver.");
-      driver = new Driver(this, ois);
-      driver.setDaemon(true);
-      driver.start();
+      this.factoryParameters = factoryParameters;
 
-      // Requesting the connection key:
+      sessions = new Vector();
+      requestsTable = new Hashtable();
+      repliesTable = new Hashtable();
+    
+      this.connectionImpl = connectionImpl;
+
+      // Creating and starting the connection's driver:
+      driver = connectionImpl.createDriver(this);
+      driver.start();
+  
+      // Requesting the connection key and proxy identifier:
       CnxConnectRequest req = new CnxConnectRequest();
       CnxConnectReply rep = (CnxConnectReply) syncRequest(req);
+      proxyId = rep.getProxyId();
       key = rep.getKey();
 
       // Transactions will be scheduled; creating a timer.
-      if (cfConfig.txTimer != 0)
+      if (factoryParameters.txPendingTimer != 0)
         sessionsTimer = new fr.dyade.aaa.util.Timer();
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -189,6 +171,12 @@ public class Connection implements javax.jms.Connection
     return toString().equals(cnx.toString());
   }
 
+  /** Returns the connection's key. */
+  public int getKey()
+  {
+    return key;
+  }
+
   /**
    * API method.
    * 
@@ -196,7 +184,6 @@ public class Connection implements javax.jms.Connection
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target destination does
    *              not exist.
-   * @exception JMSSecurityException  If the user is not a READER on the dest.
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer
@@ -219,7 +206,6 @@ public class Connection implements javax.jms.Connection
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target topic does
    *              not exist.
-   * @exception JMSSecurityException  If the user is not a READER on the topic.
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer
@@ -475,35 +461,12 @@ public class Connection implements javax.jms.Connection
       }
     }
     
-    // Shutting the driver down if needed:
-    if (! driver.stopping) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
-                                   + ": stops the Driver.");
-      driver.stop();
-      driver = null;
-    }
+    // Closing the connection:
+    connectionImpl.close();
 
-    try {
-      dos.close();
-    }
-    catch (IOException iE) {}
-    try {
-      dis.close();
-    }
-    catch (IOException iE) {}
-    try {
-      oos.close();
-    }
-    catch (IOException iE) {}
-    try {
-      ois.close();
-    }
-    catch (IOException iE) {}
-    try {
-      socket.close();
-    }
-    catch (IOException iE) {}
+    // Shutting down the driver, if needed:
+    if (! driver.stopping)
+      driver.stop();
 
     requestsTable.clear();
     requestsTable = null;
@@ -559,13 +522,13 @@ public class Connection implements javax.jms.Connection
       return;
 
     try {
-      sessionsTimer.schedule(task, factoryConfiguration.txTimer * 1000);
+      sessionsTimer.schedule(task, factoryParameters.txPendingTimer * 1000);
     }
     catch (Exception exc) {}
   }
   
   /**
-   * Actually sends a synchronous request to the server and waits for its
+   * Method sending a synchronous request to the server and waiting for an
    * answer.
    *
    * @return The server reply.
@@ -584,7 +547,7 @@ public class Connection implements javax.jms.Connection
                                       + " connection.");
 
     if (request.getRequestId() == null)
-      request.setIdentifier(nextRequestId());
+      request.setRequestId(nextRequestId());
 
     String requestId = request.getRequestId();
 
@@ -597,24 +560,28 @@ public class Connection implements javax.jms.Connection
       Lock lock = new Lock();  
       requestsTable.put(requestId, lock);
       synchronized(lock) {
-        // Writing the request on the stream:
-        synchronized(this) {
-          oos.writeObject(request);
-          oos.reset();
+        connectionImpl.send(request);
+        while (true) {
+          try {
+            lock.wait();
+            break;
+          }
+          catch (InterruptedException iE) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+              JoramTracing.dbgClient.log(BasicLevel.WARN,
+                                         this
+                                         + ": caught InterruptedException");
+            continue;
+          }
         }
-        lock.wait();
         requestsTable.remove(requestId);
       }
     }
     // Catching an exception because of...
     catch (Exception e) {
       JMSException jE = null;
-      // ... a broken connection:
-      if (e instanceof IOException)
-        jE = new IllegalStateException("Connection is broken.");
-      // ... an interrupted exchange:
-      else if (e instanceof InterruptedException)
-        jE = new JMSException("Interrupted request.");
+      if (e instanceof JMSException)
+        throw (JMSException) e;
       else
         jE = new JMSException("Exception while getting a reply.");
 
@@ -667,32 +634,24 @@ public class Connection implements javax.jms.Connection
                                       + " connection.");
 
     if (request.getRequestId() == null)
-      request.setIdentifier(nextRequestId());
+      request.setRequestId(nextRequestId());
 
     try {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": sends request: "
                                    + request.getClass().getName()
                                    + " with id: " + request.getRequestId());
-      synchronized(this) {
-        oos.writeObject(request);
-        oos.reset();
-      }
+      connectionImpl.send(request);
     }
     // In the case of a broken connection:
-    catch (IOException iE) {
-      IllegalStateException isE =
-        new IllegalStateException("Can't send request as connection"
-                                  + " is broken.");
-      isE.setLinkedException(iE);
-
+    catch (IllegalStateException exc) {
       // Removes the potentially stored requester:
       if (request.getRequestId() != null)
         requestsTable.remove(request.getRequestId());
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, isE);
-      throw isE;
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, exc);
+      throw exc;
     }
   }
 
@@ -760,128 +719,6 @@ public class Connection implements javax.jms.Connection
     // Finally, if the requester disappeared, denying the delivery:
     else if (reply instanceof ConsumerMessages)
       denyDelivery((ConsumerMessages) reply);
-  }
-
-
-  /**
-   * Actually tries to open the TCP connection with the server.
-   *
-   * @param name  The user's name.
-   * @param password  The user's password.
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  private void connect(String name, String password) throws JMSException
-  {
-    // Setting the timer values:
-    long startTime = System.currentTimeMillis();
-    long endTime = startTime + factoryConfiguration.cnxTimer * 1000;
-    long currentTime;
-    long nextSleep = 2000;
-    int attemptsC = 0;
-
-    while (true) {
-      attemptsC++;
-
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Trying to connect"
-                                   + " to the server...");
-
-      try {
-        // Opening the connection with the server:
-        socket = new Socket(serverAddr, serverPort);
-
-        if (socket != null) {
-          socket.setTcpNoDelay(true);
-          socket.setSoTimeout(0);
-          socket.setSoLinger(true, 1000);
-
-          dos = new DataOutputStream(socket.getOutputStream());
-          dis = new DataInputStream(socket.getInputStream());
-   
-          // Sending the connection request to the server:    
-          dos.writeUTF("USER: " + name + " " + password);
-          String reply = (String) dis.readUTF();
-
-          // Processing the server's reply:
-          int status = Integer.parseInt(reply.substring(0,1));
-          int index = reply.indexOf("INFO: ");
-          String info = null;
-          if (index != -1)
-            info = reply.substring(index + 6);
- 
-          // If successfull, opening the connection with the client proxy: 
-          if (status == 0) {
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
-            proxyId = info;
-  
-            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "... connected!");
-
-            break;
-          }
-          // If unsuccessful because of an user id error, throwing a
-          // JMSSecurityException:
-          if (status == 1) 
-            throw new JMSSecurityException("Can't open the connection with the"
-                                           + " server "
-                                           + serverAddr.toString()
-                                           + " on port " + serverPort
-                                           + ": " + info);
-        }
-        // If socket can't be created, throwing an IO exception:
-        else
-          throw new IOException("Can't create the socket connected to server "
-                                + serverAddr.toString()
-                                + ", port " + serverPort);
-      }
-      catch (Exception e) {
-        // IOExceptions notify that the connection could not be opened,
-        // possibly because the server is not listening: trying again.
-        if (e instanceof IOException) {
-          currentTime = System.currentTimeMillis();
-          // Keep on trying as long as timer is ok:
-          if (currentTime < endTime) {
-
-            if (currentTime + nextSleep > endTime)
-              nextSleep = endTime - currentTime;
-
-            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sleeping for "
-                                         + nextSleep / 1000 + " and trying"
-                                         + " again to reconnect.");
-
-            // Sleeping for a while:
-            try {
-              Thread.sleep(nextSleep);
-            }
-            catch (InterruptedException iE) {}
-
-            // Trying again!
-            nextSleep = nextSleep * 2;
-            continue;
-          }
-          // If timer is over, throwing an IllegalStateException:
-          else {
-            long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-            IllegalStateException isE =
-              new IllegalStateException("Could not open the connection"
-                                        + " with server "
-                                        + serverAddr.toString()
-                                        + " on port " + serverPort
-                                        + " after " + attemptsC
-                                        + " attempts during "
-                                        + attemptsT + " secs: server is"
-                                        + " not listening" );
-            isE.setLinkedException(e);
-            throw isE;
-          }
-        }
-        else if (e instanceof JMSSecurityException)
-          throw (JMSSecurityException) e;
-      }
-    }
   }
 
   /** Actually denies a non deliverable delivery. */

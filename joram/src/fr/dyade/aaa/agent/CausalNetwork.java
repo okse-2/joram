@@ -32,8 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.Arrays;
 
 abstract class CausalNetwork extends Network {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: CausalNetwork.java,v 1.4 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: CausalNetwork.java,v 1.5 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** The matrix clock associated to this network component. */
   MatrixClock mclock;
@@ -110,9 +110,9 @@ abstract class CausalNetwork extends Network {
 
     // Sorts the array of server ids into ascending numerical order.
 // 1.2    java.util.Arrays.sort(servers);
-    Arrays.sort(servers);
+    Arrays.sort(this.servers);
     // then get the logical clock.
-    mclock = MatrixClock.load(this.name, servers);
+    mclock = MatrixClock.load(this.name, this.servers);
   }
 
   /**

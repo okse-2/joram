@@ -27,6 +27,8 @@
  */
 package fr.dyade.aaa.joram.admin;
 
+import java.util.Vector;
+
 import javax.naming.*;
 
 /**
@@ -124,5 +126,38 @@ public class User extends AdministeredObject
               throws java.net.ConnectException, AdminException
   {
     adminImpl.unsetUserThreshold(this);
+  }
+
+  /**
+   * Codes an <code>User</code> as a vector for travelling through the SOAP
+   * protocol.
+   *
+   * @exception NamingException  Never thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    Vector vec = new Vector();
+    vec.add("User");
+    vec.add(name);
+    vec.add(proxyId);
+    return vec;
+  }
+
+  /**
+   * Decodes a coded <code>User</code>.
+   *
+   * @exception NamingException  If incorrectly coded.
+   */
+  public static AdministeredObject decode(Vector vec) throws NamingException
+  {
+    try {
+      String name = (String) vec.remove(0);
+      String proxyId = (String) vec.remove(0);
+      return new User(name, proxyId);
+    }
+    catch (Exception exc) {
+      throw new NamingException("Vector " + vec.toString()
+                                + " incorrectly codes a User.");
+    }
   }
 }

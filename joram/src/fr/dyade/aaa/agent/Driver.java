@@ -33,8 +33,8 @@ import org.objectweb.util.monolog.api.Logger;
  * Internal class to catch the end of the thread running the driver.
  */
 class ThreadFinalizer implements Runnable {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** driver to start */
   Driver driver;
@@ -104,8 +104,8 @@ class ThreadFinalizer implements Runnable {
  * @version	v1.1
  */
 public abstract class Driver {
-  /** RCS version number of this file: $Revision: 1.12 $ */
-  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.12 2002-12-11 11:22:12 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.13 $ */
+  public static final String RCS_VERSION="@(#)$Id: Driver.java,v 1.13 2003-03-19 15:16:06 fmaistre Exp $"; 
 
   /** separate thread running the driver */
   protected Thread thread;

@@ -46,6 +46,17 @@ public abstract class AbstractJmsReply implements java.io.Serializable
     this.correlationId = correlationId;
   }
 
+  /**
+   * Constructs an <code>AbstractJmsReply</code>.
+   */
+  public AbstractJmsReply()
+  {}
+
+  /** Sets the reply identifier. */
+  public void setCorrelationId(String correlationId)
+  {
+    this.correlationId = correlationId;
+  }
 
   /** Returns this reply identifier. */
   public String getCorrelationId()

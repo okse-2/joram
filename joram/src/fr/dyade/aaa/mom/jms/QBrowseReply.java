@@ -27,6 +27,8 @@
  */
 package fr.dyade.aaa.mom.jms;
 
+import fr.dyade.aaa.mom.messages.Message;
+
 import java.util.Vector;
 
 /**
@@ -50,9 +52,63 @@ public class QBrowseReply extends AbstractJmsReply
     this.messages = destReply.getMessages();
   }
 
+  /**
+   * Constructs a <code>QBrowseReply</code> instance.
+   *
+   * @param correlationId  The identifier of the replied request.
+   * @param messages  The vector of browsed messages.
+   */
+  public QBrowseReply(String correlationId, Vector messages)
+  {
+    super(correlationId);
+    this.messages = messages;
+  }
+
   /** Returns the vector of messages carried by this reply. */
   public Vector getMessages()
   {
     return messages;
+  }
+
+  /**
+   * Transforms this reply into a vector of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Vector soapCode()
+  {
+    Vector vec = new Vector();
+
+    vec.add("QBrowseReply");
+
+    // Coding the reply fields:
+    vec.add(getCorrelationId());
+    
+    // Coding and adding the messages into a vector:
+    Vector msgs = new Vector();
+    while (! messages.isEmpty())
+      msgs.add(((Message) messages.remove(0)).soapCode());
+
+    vec.add(msgs);
+
+    return vec;
+  }
+
+  /** 
+   * Transforms a vector of primitive values into a
+   * <code>QBrowseReply</code> reply.
+   */
+  public static QBrowseReply soapDecode(Vector vec)
+  {
+    vec.remove(0);
+
+    String correlationId = (String) vec.remove(0);
+    Vector codedMsgs = (Vector) vec.remove(0);
+
+    Vector decodedMsgs = new Vector();
+    // Decoding the messages:
+    while (! codedMsgs.isEmpty())
+      decodedMsgs.add(Message.soapDecode((Vector) codedMsgs.remove(0)));
+
+    return new QBrowseReply(correlationId, decodedMsgs);
   }
 }

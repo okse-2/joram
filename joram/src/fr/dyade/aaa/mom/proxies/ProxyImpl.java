@@ -37,16 +37,28 @@ import fr.dyade.aaa.mom.messages.Message;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
- * A <code>JmsProxy</code> agent is a proxy for a JMS client or administrator.
+ * The <code>ProxyImpl</code> class implements the MOM proxy behaviour,
+ * basically forwarding client requests to MOM destinations and MOM
+ * destinations replies to clients.
  */ 
-public class JmsProxy extends ConnectionFactory
+public class ProxyImpl implements java.io.Serializable
 {
+  /** The reference of the agent hosting the proxy. */
+  private ProxyAgentItf proxyAgent;
+
   /** <code>true</code> if this proxy is an administrator's proxy. */
   private boolean admin = false;
+  /** <code>true</code> if the administrator did not connect yet. */
+  private boolean firstConnection = true;
+  /** Administrator's initial name. */
+  private String initialAdminName;
+  /** Administrator's initial password. */
+  private String initialAdminPass;
 
   /** Vector of the proxy's <code>CnxContext</code> instances. */
   private Vector connections;
@@ -82,13 +94,14 @@ public class JmsProxy extends ConnectionFactory
 
   
   /**
-   * Constructs a <code>JmsProxy</code> agent.
+   * Constructs a <code>ProxyImpl</code> instance.
+   *
+   * @param proxyAgent  The reference of the agent hosting the proxy.
    */
-  public JmsProxy()
+  public ProxyImpl(ProxyAgentItf proxyAgent)
   {
-    super();
-    super.multiConn = true;
-  
+    this.proxyAgent = proxyAgent;
+
     connections = new Vector();
     subsTable = new Hashtable();
     messagesTable = new Hashtable();
@@ -98,45 +111,38 @@ public class JmsProxy extends ConnectionFactory
   }
 
   /**
-   * Constructor called by a <code>ConnectionFactory</code> instance for
-   * building a proxy for an administrator client.
+   * Constructs a <code>ProxyImpl</code> instance for an administrator client.
    *
+   * @param proxyAgent  The reference of the agent hosting the proxy.
    * @param name  Name of the administrator.
    * @param pass  Password of the administrator.
-   * @param adminTopicId  Identifier of the AdminTopic the proxy should refer
-   *          to.
    */
-  JmsProxy(String name, String pass, AgentId adminTopicId)
+  public ProxyImpl(ProxyAgentItf proxyAgent, String name, String pass)
   {
-    this();
+    this(proxyAgent);
     admin = true;
-    AdminNotification adminNot = new AdminNotification(name, pass);
-    sendTo(adminTopicId, adminNot);
+    initialAdminName = name;
+    initialAdminPass = pass;
   }
 
   /** Returns a string view of this JMS proxy. */
   public String toString()
   {
-    return "JmsProxy:" + this.getId();
+    return "ProxyImpl:" + proxyAgent.getAgentId();
   }
 
   /**
-   * Specializes this <code>Agent</code> method called when (re)deploying 
-   * the proxy.
-   * <p>
-   * When re-initializing a proxy after a crash, cleans its pre-crash
+   * Re-initializes the proxy after a crash: cleans its pre-crash
    * connections state.
    */
-  public void initialize(boolean firstTime) throws Exception
+  public void reinitialize(ProxyAgentItf proxyAgent)
   {
-    super.initialize(firstTime);
-
-    if (firstTime)
-      return;
-
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
                               + " re-initializing...");
+
+    // Re setting the reference to the proxy agent.
+    this.proxyAgent = proxyAgent;
 
     // Browsing the pre-crash connections:
     int key;
@@ -161,24 +167,26 @@ public class JmsProxy extends ConnectionFactory
             sub.denyAll();
   
             if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
+              MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription "
                                       + subName + " de-activated.");
           }
           else {
             subsTable.remove(subName);
             sub.delete();
-            sendTo(sub.topicId, new UnsubscribeRequest(null, subName));
+            proxyAgent.sendNot(sub.topicId,
+                               new UnsubscribeRequest(null, subName));
   
             if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary"
-                                      + " subscription " + name + " deleted.");
+              MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                      "Temporary subscription "
+                                      + subName + " deleted.");
           }
         }
 
         // Deleting the temporary destinations:
         while (! cnx.tempDestinations.isEmpty()) {
           AgentId destId = (AgentId) cnx.tempDestinations.remove(0);
-          sendTo(destId, new DeleteNot());
+          proxyAgent.sendNot(destId, new DeleteNot());
     
           if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
@@ -198,96 +206,51 @@ public class JmsProxy extends ConnectionFactory
     }
   }
 
-  /**
-   * Creates a (chain of) filter(s) for transforming the specified InputStream
-   * into a <code>JmsInputStream</code>.
-   *
-   * @param in   An InputStream for this proxy.
-   * @return  A NotificationInputStream for this proxy.
-   */
-  protected NotificationInputStream setInputFilters(InputStream in)
-    throws StreamCorruptedException, IOException
-  {
-    return (new JmsInputStream(in));
-  }
 
   /**
-   * Creates a (chain of) filter(s) for transforming the specified
-   * OutputStream into a <code>JmsOutputStream</code>.
-   *
-   * @param out  An OutputStream for this proxy.
-   * @return  A NotificationOutputStream for this proxy.
-   */
-  protected NotificationOutputStream setOutputFilters(OutputStream out)
-    throws IOException
-  {
-    return (new JmsOutputStream(out));
-  }
-
-  /**
-   * This method overrides the <code>ProxyAgent</code> class
-   * <code>driverReact</code> method called by the drivers "in" when filtering
-   * a notification out of the input stream.
+   * Method reacting to clients requests.
    * <p>
-   * Some of the client requests are directly forwarded by the driver to their
-   * target destinations. Those requests are:
-   * <ul>
-   * <li><code>ProducerMessages</code></li>
-   * <li><code>ConsumerReceiveRequest</code></li>
-   * <li><code>ConsumerSetListRequest</code></li>
-   * <li><code>QBrowseRequest</code></li>
-   * </ul>
+   * Some of the client requests are directly processed, some others are
+   * sent to the proxy so that their processing occurs in a transaction.
    * <p>
    * A <code>MomExceptionReply</code> wrapping a <code>RequestException</code>
-   * might be sent back if the target destination of those requests can't be
-   * identified.
-   * <p>
-   * The other requests are sent to the proxy so that their handling occurs
-   * in a reaction.
+   * might be sent back if a target destination can't be identified.
    */
-  protected void driverReact(int key, Notification not)
+  public void reactToClientRequest(int key, AbstractJmsRequest request)
   {
-    if (not instanceof InputNotification) {
-      InputNotification iNot = (InputNotification) not;
-
-      if (iNot.getObj() instanceof AbstractJmsRequest) {
-        AbstractJmsRequest req = (AbstractJmsRequest) iNot.getObj();
-        try {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
-                                    + " got " + req.getClass().getName()
-                                    + " with id: " + req.getRequestId()
-                                    + " through cnx: " + key);
-          }
-
-          // Requests directly processed by the DriverIn:
-          if (req instanceof ProducerMessages)
-            driverDoFwd(key, (ProducerMessages) req);
-          else if (req instanceof ConsumerReceiveRequest)
-            driverDoFwd(key, (ConsumerReceiveRequest) req);
-          else if (req instanceof ConsumerSetListRequest)
-            driverDoFwd(key, (ConsumerSetListRequest) req);
-          else if (req instanceof QBrowseRequest)
-            driverDoFwd(key, (QBrowseRequest) req);
-          // Other requests are forwarded to the proxy:
-          else
-            sendTo(this.getId(), new DriverNotification(key, not));
-        }
-        // Catching an exception due to an invalid agent identifier to
-        // forward the request to:
-        catch (IllegalArgumentException iE) {
-          DestinationException dE =
-            new DestinationException("Proxy could not forward the request to"
-                                     + " incorrectly identified destination: "
-                                     + iE);
-
-          doReply(key, new MomExceptionReply(req.getRequestId(), dE));
-        }
+    try {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "--- " + this
+                                + " got " + request.getClass().getName()
+                                + " with id: " + request.getRequestId()
+                                + " through cnx: " + key);
       }
+
+      // Requests directly processed:
+      if (request instanceof ProducerMessages)
+        reactToClientRequest(key, (ProducerMessages) request);
+      else if (request instanceof ConsumerReceiveRequest)
+        reactToClientRequest(key, (ConsumerReceiveRequest) request);
+      else if (request instanceof ConsumerSetListRequest)
+        reactToClientRequest(key, (ConsumerSetListRequest) request);
+      else if (request instanceof QBrowseRequest)
+        reactToClientRequest(key, (QBrowseRequest) request);
+      // Other requests are forwarded to the proxy:
+      else
+        proxyAgent.sendNot(proxyAgent.getAgentId(),
+                           new RequestNotification(key, request));
+      }
+    // Catching an exception due to an invalid agent identifier to
+    // forward the request to:
+    catch (IllegalArgumentException iE) {
+      DestinationException dE =
+        new DestinationException("Proxy could not forward the request to"
+                                 + " incorrectly identified destination: "
+                                 + iE);
+
+      doReply(key, new MomExceptionReply(request.getRequestId(), dE));
     }
-    // This case can't happen as a proxy necessarily wraps the data read
-    // on the stream in an InputNotification!!
-    else {}
   }
 
   /**
@@ -296,7 +259,7 @@ public class JmsProxy extends ConnectionFactory
    * MOM request directly to a destination, and acknowledges them by sending
    * a <code>ServerReply</code> back.
    */
-  private void driverDoFwd(int key, ProducerMessages req)
+  private void reactToClientRequest(int key, ProducerMessages req)
   {
     ClientMessages not = new ClientMessages(key, req.getRequestId(),
                                             req.getMessages());
@@ -307,7 +270,7 @@ public class JmsProxy extends ConnectionFactory
     else
       not.setDMQId(DeadMQueueImpl.getId());
 
-    sendTo(AgentId.fromString(req.getTarget()), not);
+    proxyAgent.sendNot(AgentId.fromString(req.getTarget()), not);
     doReply(key, new ServerReply(req));
     // Flow control: gives the opportunity to other threads to consume the
     // messages.
@@ -319,17 +282,20 @@ public class JmsProxy extends ConnectionFactory
    * <code>ReceiveRequest</code> directly to the target queue, or wraps it
    * and sends it to the proxy if destinated to a subscription.
    */
-  private void driverDoFwd(int key, ConsumerReceiveRequest req)
+  private void reactToClientRequest(int key, ConsumerReceiveRequest req)
   {
     if (req.getQueueMode()) {
       AgentId to = AgentId.fromString(req.getTarget());
-      sendTo(to, new ReceiveRequest(key, req.getRequestId(),
-                                    req.getSelector(), req.getTimeToLive(),
-                                    false));
+      proxyAgent.sendNot(to,
+                         new ReceiveRequest(key,
+                                            req.getRequestId(),
+                                            req.getSelector(),
+                                            req.getTimeToLive(),
+                                            false));
     }
     else
-      sendTo(this.getId(),
-             new DriverNotification(key, new InputNotification(req)));
+      proxyAgent.sendNot(proxyAgent.getAgentId(),
+                         new RequestNotification(key, req));
   }
 
   /**
@@ -337,67 +303,54 @@ public class JmsProxy extends ConnectionFactory
    * <code>ReceiveRequest</code> directly to the target queue, or wraps it
    * and sends it to the proxy if destinated to a subscription.
    */
-  private void driverDoFwd(int key, ConsumerSetListRequest req)
+  private void reactToClientRequest(int key, ConsumerSetListRequest req)
   {
     if (req.getQueueMode()) {
       AgentId to = AgentId.fromString(req.getTarget());
       ReceiveRequest rr = new ReceiveRequest(key, req.getRequestId(),
                                              req.getSelector(), 0, false);
-      sendTo(to, rr);
+      proxyAgent.sendNot(to, rr);
     }
     else
-      sendTo(this.getId(),
-             new DriverNotification(key, new InputNotification(req)));
+     proxyAgent.sendNot(proxyAgent.getAgentId(),
+                        new RequestNotification(key, req));
   }
 
   /**
    * Actually forwards the client's <code>QBrowseRequest</code> request as
    * a <code>BrowseRequest</code> MOM request directly to a destination.
    */
-  private void driverDoFwd(int key, QBrowseRequest req)
+  private void reactToClientRequest(int key, QBrowseRequest req)
   {
-    sendTo(AgentId.fromString(req.getTarget()),
-           new BrowseRequest(key, req.getRequestId(), req.getSelector()));
+    proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
+                       new BrowseRequest(key,
+                                         req.getRequestId(),
+                                         req.getSelector()));
   }
 
   /**
-   * Overrides the <code>Agent</code> class <code>react</code> method for
-   * providing the JMS client proxy with its specific behaviour.
+   * Distributes the received notifications to the appropriate reactions.
    * <p>
    * A JMS proxy reacts to:
    * <ul>
-   * <li><code>fr.dyade.aaa.agent.DriverNotification</code> notifications,</li>
+   * <li><code>RequestNotification</code> notifications,</li>
    * <li><code>SyncReply</code> proxy synchronizing notifications,</li>
    * <li><code>SetDMQRequest</code> admin notifications,</li>
    * <li><code>SetThreshRequest</code> admin notifications,</li>
    * <li><code>AbstractReply</code> destination replies,</li>
    * <li><code>fr.dyade.aaa.agent.UnknownAgent</code>,</li>
-   * <li><code>fr.dyade.aaa.agent.DriverDone</code>,</li>
-   * <li><code>fr.dyade.aaa.agent.DeleteNot</code>.</li>
    * </ul>
-   * @exception Exception  Thrown at superclass level.
+   * @exception UnknownNotificationException  If the notification is not
+   *              expected.
    */ 
-  public void react(AgentId from, Notification not) throws Exception
+  public void react(AgentId from, Notification not)
+              throws UnknownNotificationException
   {
-    // Notification forwarded by a DriverIn or sent by the proxy to itself:
-    if (not instanceof DriverNotification) {
-      DriverNotification dNot = (DriverNotification) not;
+    if (not instanceof RequestNotification) {
+      int key = ((RequestNotification) not).id;
+      AbstractJmsRequest request = ((RequestNotification) not).request;
 
-      // Notification coming from a external client...
-      if (dNot.getNotification() instanceof InputNotification) {
-        InputNotification iNot = (InputNotification) dNot.getNotification();
-
-        // ...and containing a client request object:
-        if (iNot.getObj() instanceof AbstractJmsRequest)
-          doReact(dNot.getDriverKey(), (AbstractJmsRequest) iNot.getObj());
-
-        // As an input stream filter does not accept other objects than
-        // AbstractJmsRequest requests, this case can't happen!
-        else {}
-      }
-      // As a driver in necessarily wraps the incoming data into an
-      // InputNotification, this case can't happen!
-      else {}
+      doReact(key, request);
     }
     // Notifications setting the DMQ and threshold parameters:
     else if (not instanceof SetDMQRequest)
@@ -413,13 +366,9 @@ public class JmsProxy extends ConnectionFactory
     // Platform notifications:
     else if (not instanceof UnknownAgent)
       doReact((UnknownAgent) not);
-    else if (not instanceof DriverDone)
-      doReact(from, (DriverDone) not);
-    else if (not instanceof DeleteNot)
-      doReact(from, (DeleteNot) not);
-    // Notification possibly destinated to this proxy super-classes:
     else
-      super.react(from, not);
+      throw new UnknownNotificationException("Unexpected notification: " 
+                                             + not.getClass().getName());
   }
 
   
@@ -539,8 +488,12 @@ public class JmsProxy extends ConnectionFactory
    * <p>
    * It simply sends back a <code>ConnectReply</code> holding the active
    * connection's key.
+   *
+   * @exception DestinationException  If the local administration topic is not
+   *              available.
    */
   private void doReact(int key, CnxConnectRequest req)
+               throws DestinationException
   {
     currKey = key;
     cnx = new CnxContext(key);
@@ -550,7 +503,22 @@ public class JmsProxy extends ConnectionFactory
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Connection " + key
                               + " opened.");
 
-    doReply(new CnxConnectReply(req, key));
+     // If this is a first administrator connection, registering the proxy
+    // to the administration topic if it is available.
+    if (admin && firstConnection) {
+      if (AdminTopicImpl.ref == null) {
+        throw new DestinationException("Can't access the local AdminTopic"
+                                       + " on server "
+                                       + AgentServer.getServerId());
+      }
+      AdminNotification adminNot =
+        new AdminNotification(proxyAgent.getAgentId(), initialAdminName,
+                              initialAdminPass);
+      proxyAgent.sendNot(AdminTopicImpl.ref.getId(), adminNot);
+      firstConnection = false;
+    }
+
+    doReply(new CnxConnectReply(req, key, proxyAgent.getAgentId().toString()));
   }
 
   /**
@@ -624,27 +592,28 @@ public class JmsProxy extends ConnectionFactory
    */
   private void doReact(SessCreateTQRequest req) throws RequestException
   {
-    Queue queue = new Queue(this.getId());
+    Queue queue = new Queue(proxyAgent.getAgentId());
     AgentId qId = queue.getId();
 
     try {
       queue.deploy();
 
       // Setting free WRITE right on the queue:
-      sendTo(qId, new SetRightRequest(req.getRequestId(), null, 2));
+      proxyAgent.sendNot(qId, new SetRightRequest(req.getRequestId(), null, 2));
 
       // Adding the queue to the table of temporary destinations: 
       cnx.tempDestinations.add(qId);
 
-      sendTo(this.getId(),
-             new SyncReply(currKey,
-                           new SessCreateTDReply(req, qId.toString())));
+      proxyAgent.sendNot(proxyAgent.getAgentId(),
+                         new SyncReply(currKey,
+                                       new SessCreateTDReply(req,
+                                                             qId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary queue "
                                 + qId + " created.");
     }
-    catch (IOException iE) {
+    catch (java.io.IOException iE) {
       queue = null;
       throw new RequestException("Could not deploy temporary queue "
                                  + qId + ": " + iE);
@@ -665,27 +634,29 @@ public class JmsProxy extends ConnectionFactory
    */
   private void doReact(SessCreateTTRequest req) throws RequestException
   {
-    Topic topic = new Topic(this.getId());
+    Topic topic = new Topic(proxyAgent.getAgentId());
     AgentId tId = topic.getId();
 
     try {
       topic.deploy();
 
       // Setting free WRITE right on the topic:
-      sendTo(tId, new SetRightRequest(req.getRequestId(), null, 2));
+      proxyAgent.sendNot(tId,
+                         new SetRightRequest(req.getRequestId(), null, 2));
 
       // Adding the topic to the table of temporary destinations: 
       cnx.tempDestinations.add(tId);
 
-      sendTo(this.getId(),
-             new SyncReply(currKey,
-                           new SessCreateTDReply(req, tId.toString())));
+      proxyAgent.sendNot(proxyAgent.getAgentId(),
+                         new SyncReply(currKey,
+                                       new SessCreateTDReply(req,
+                                                             tId.toString())));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary topic"
                                 + tId + " created.");
     }
-    catch (IOException iE) {
+    catch (java.io.IOException iE) {
       topic = null;
       throw new RequestException("Could not deploy temporary topic "
                                  + tId + ": " + iE);
@@ -717,23 +688,27 @@ public class JmsProxy extends ConnectionFactory
         // If the selector changes, updating the subscription:
         if (sub.selector == null) {
           if (req.getSelector() != null)
-            sendTo(AgentId.fromString(req.getTarget()),
-                   new SubscribeRequest(req.getRequestId(), subName,
-                                        req.getSelector()));
+            proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
+                               new SubscribeRequest(req.getRequestId(),
+                                                    subName,
+                                                    req.getSelector()));
         }
         else if (! sub.selector.equals(req.getSelector()))
-          sendTo(AgentId.fromString(req.getTarget()),
-                 new SubscribeRequest(req.getRequestId(), subName,
-                                      req.getSelector()));
+          proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
+                             new SubscribeRequest(req.getRequestId(),
+                                                  subName,
+                                                  req.getSelector()));
       }
       // Else, unsubscribing to the previous topic and updating the
       // subscription:
       else {
-        sendTo(sub.topicId, new UnsubscribeRequest(req.getRequestId(),
-                                                   subName));
-        sendTo(AgentId.fromString(req.getTarget()),
-               new SubscribeRequest(req.getRequestId(), subName,
-                                    req.getSelector()));
+        proxyAgent.sendNot(sub.topicId,
+                           new UnsubscribeRequest(req.getRequestId(),
+                                                  subName));
+        proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
+                           new SubscribeRequest(req.getRequestId(),
+                                                subName,
+                                                req.getSelector()));
         sub.topicId = AgentId.fromString(req.getTarget());
       }
       sub.connectionKey = currKey;
@@ -745,9 +720,9 @@ public class JmsProxy extends ConnectionFactory
     // Else, in the case of a new subscription:
     else {
       // Subscribing to the topic.
-      sendTo(AgentId.fromString(req.getTarget()),
-             new SubscribeRequest(req.getRequestId(), subName,
-                                  req.getSelector()));
+      proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
+                         new SubscribeRequest(req.getRequestId(), subName,
+                                              req.getSelector()));
 
       // Registering the subscription:
       subsTable.put(subName, new ClientSubscription(currKey, req));
@@ -758,7 +733,8 @@ public class JmsProxy extends ConnectionFactory
                                 + " created.");
     }
     // Acknowledging the request:
-    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getAgentId(),
+                       new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -804,7 +780,7 @@ public class JmsProxy extends ConnectionFactory
   private void doReact(ConsumerUnsetListRequest req) throws RequestException
   {
     // If the listener was listening to a queue, cancelling any pending reply:
-    if (req.queueMode())
+    if (req.getQueueMode())
       cnx.cancelledRequestId = req.getId();
     // If the listener was listening to a topic, de-activating the
     // subscription:
@@ -883,14 +859,16 @@ public class JmsProxy extends ConnectionFactory
                               + subName);
 
     // Unsubscribing to the topic.
-    sendTo(sub.topicId, new UnsubscribeRequest(req.getRequestId(), subName));
+    proxyAgent.sendNot(sub.topicId,
+                       new UnsubscribeRequest(req.getRequestId(), subName));
 
     // Removing the subscription:
     cnx.activeSubs.remove(subName);
     sub.delete();
 
     // Acknowledging the request:
-    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getAgentId(),
+                       new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -957,7 +935,10 @@ public class JmsProxy extends ConnectionFactory
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
-      sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId,
+                         new AcknowledgeRequest(currKey,
+                                                req.getRequestId(),
+                                                ids));
       cnx.ackedIds(qId, ids);
     }
     else {
@@ -979,11 +960,13 @@ public class JmsProxy extends ConnectionFactory
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
       cnx.ackedIds(qId, ids);
-      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId,
+                         new DenyRequest(currKey, req.getRequestId(), ids));
 
       // Acknowledging the request unless forbidden:
-      if (! req.doNotAck())
-        sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+      if (! req.getDoNotAck())
+        proxyAgent.sendNot(proxyAgent.getAgentId(),
+                           new SyncReply(currKey, new ServerReply(req)));
     }
     else {
       String subName = req.getTarget();
@@ -1020,7 +1003,10 @@ public class JmsProxy extends ConnectionFactory
       String id = req.getId();
       Vector ids = new Vector();
       ids.add(id);
-      sendTo(qId, new AcknowledgeRequest(currKey, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId,
+                         new AcknowledgeRequest(currKey,
+                                                req.getRequestId(),
+                                                ids));
       cnx.ackedId(qId, id);
     }
     else {
@@ -1049,11 +1035,13 @@ public class JmsProxy extends ConnectionFactory
       Vector ids = new Vector();
       ids.add(id);
       cnx.ackedId(qId, id);
-      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId,
+                         new DenyRequest(currKey, req.getRequestId(), ids));
 
       // Acknowledging the request, unless forbidden:
-      if (! req.doNotAck())
-        sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+      if (! req.getDoNotAck())
+        proxyAgent.sendNot(proxyAgent.getAgentId(),
+                           new SyncReply(currKey, new ServerReply(req)));
     }
     else {
       String subName = req.getTarget();
@@ -1095,10 +1083,11 @@ public class JmsProxy extends ConnectionFactory
     cnx.tempDestinations.remove(tempId);
 
     // Sending the request to the destination:
-    sendTo(tempId, new DeleteNot());
+    proxyAgent.sendNot(tempId, new DeleteNot());
 
     // Acknowledging the request:
-    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getAgentId(),
+                       new SyncReply(currKey, new ServerReply(req)));
   }
 
   /**
@@ -1139,8 +1128,10 @@ public class JmsProxy extends ConnectionFactory
     ProducerMessages pM;
     while (! sendings.isEmpty()) {
       pM = (ProducerMessages) sendings.remove(0);
-      sendTo(AgentId.fromString(pM.getTarget()),
-             new ClientMessages(currKey, pM.getRequestId(), pM.getMessages()));
+      proxyAgent.sendNot(AgentId.fromString(pM.getTarget()),
+                         new ClientMessages(currKey,
+                                            pM.getRequestId(),
+                                            pM.getMessages()));
     }
 
     while (! acks.isEmpty())
@@ -1169,7 +1160,8 @@ public class JmsProxy extends ConnectionFactory
       qId = AgentId.fromString(queueName);
       ids = req.getQueueIds(queueName);
       cnx.ackedIds(qId, ids);
-      sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId,
+                         new DenyRequest(currKey, req.getRequestId(), ids));
     }
 
     String subName;
@@ -1210,7 +1202,8 @@ public class JmsProxy extends ConnectionFactory
         cnx.transactionsTable = null;
     }
 
-    sendTo(this.getId(), new SyncReply(currKey, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getAgentId(),
+                       new SyncReply(currKey, new ServerReply(req)));
   }
 
   
@@ -1301,7 +1294,8 @@ public class JmsProxy extends ConnectionFactory
 
           Vector ids = new Vector();
           ids.add(msgId);
-          sendTo(from, new DenyRequest(rep.getCorrelationId(), ids));
+          proxyAgent.sendNot(from,
+                             new DenyRequest(rep.getCorrelationId(), ids));
         }
         return;
       }
@@ -1311,6 +1305,7 @@ public class JmsProxy extends ConnectionFactory
       ConsumerMessages jRep = new ConsumerMessages(rep.getCorrelationId(),
                                                    rep.getMessage(),
                                                    from.toString(), true);
+
       if (jRep.getMessage() != null)
         cnx.addId(from, jRep.getMessage().getIdentifier());
 
@@ -1332,7 +1327,8 @@ public class JmsProxy extends ConnectionFactory
 
         Vector ids = new Vector();
         ids.add(msgId);
-        sendTo(from, new DenyRequest(rep.getCorrelationId(), ids));
+        proxyAgent.sendNot(from,
+                           new DenyRequest(rep.getCorrelationId(), ids));
       }
     }
   }
@@ -1387,7 +1383,6 @@ public class JmsProxy extends ConnectionFactory
           try {
             // Updating the active connection:
             setCnx(sub.connectionKey);
-
             if (cnx.started) {
               consM = sub.deliver();
               if (consM != null) 
@@ -1406,7 +1401,7 @@ public class JmsProxy extends ConnectionFactory
       id = (String) receivedKeys.nextElement();
       msg = (Message) messagesTable.get(id);
       // No acknowledgement expected for this message: removing it.
-      if (msg.acksCounter == 0)
+      if (msg != null && msg.acksCounter == 0)
         messagesTable.remove(id);
     }
   }
@@ -1518,150 +1513,6 @@ public class JmsProxy extends ConnectionFactory
   }
 
   /**
-   * Method implementing the JMS proxy reaction to a
-   * <code>fr.dyade.aaa.agent.DriverDone</code> notification notifying a
-   * closed or broken connection.
-   * <p>
-   * The method denies the non acknowledged messages delivered to this
-   * connection, and deletes its temporary subscriptions and destinations.
-   *
-   * @exception Exception  Thrown at super class level.
-   */
-  private void doReact(AgentId from, DriverDone not) throws Exception
-  {
-    int cKey = not.getDriverKey();
-
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
-                              + " notified of the closing connection: "
-                              + cKey);
-    try {
-      setCnx(cKey);
-
-      // Denying the non acknowledged messages:
-      cnx.deny();
-
-      // Removing or desactivating the subscriptions:
-      String subName = null;
-      ClientSubscription sub;
-      while (! cnx.activeSubs.isEmpty()) {
-        subName = (String) cnx.activeSubs.remove(0);
-        sub = (ClientSubscription) subsTable.get(subName);
-  
-        if (sub.durable) {
-          sub.active = false;
-          sub.requestId = null;
-          sub.denyAll();
-  
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
-                                    + subName + " de-activated.");
-        }
-        else {
-          subsTable.remove(subName);
-          sub.delete();
-          sendTo(sub.topicId, new UnsubscribeRequest(null, subName));
-  
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
-                                    + name + " deleted.");
-        }
-      }
-
-      // Deleting the temporary destinations:
-      while (! cnx.tempDestinations.isEmpty()) {
-        AgentId destId = (AgentId) cnx.tempDestinations.remove(0);
-        sendTo(destId, new DeleteNot());
-    
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
-                                  + " destination " + destId.toString());
-      }
-      
-      // Clearing the transactions table:
-      if (cnx.transactionsTable != null)
-        cnx.transactionsTable.clear();
-
-      connections.remove(cnx);
-      cnx = null;
-      currKey = 0;
-    }
-    catch (ProxyException pE) {}
-
-    super.react(from, not);
-  }
-
-
-  /**
-   * Method implementing the JMS proxy reaction to a
-   * <code>fr.dyade.aaa.agent.DeleteNot</code> notification notifying the
-   * proxy to be deleted.
-   *
-   * @exception Exception  Thrown at super class level.
-   */
-  private void doReact(AgentId from, DeleteNot not) throws Exception
-  {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
-                              + " notified to be deleted.");
-
-    // If sender is not the admin topic, ignoring the notification:
-    if (! from.equals(AdminTopicImpl.ref.getId())) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgProxy.log(BasicLevel.WARN, "Deletion request received"
-                                + " from invalid agent: " + from);
-      return;
-    }
-
-    // Notifying the connected clients:
-    int key;
-    while (! connections.isEmpty()) {
-      key = ((CnxContext) connections.remove(0)).key;
-      try {
-        setCnx(key);
-
-        doReply(new MomExceptionReply(null,
-                                      new ProxyException("Client proxy is "
-                                                         + "deleted.")));
-
-        // Denying the non acknowledged messages:
-        cnx.deny();
-
-        // Deleting the temporary destinations:
-        while (! cnx.tempDestinations.isEmpty()) {
-          AgentId destId = (AgentId) cnx.tempDestinations.remove(0);
-          sendTo(destId, new DeleteNot());
-  
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Sending DeleteNot to"
-                                    + " temporary destination "
-                                    + destId.toString());
-        }
-
-        // Removing all proxy's subscriptions:
-        Enumeration subNames = subsTable.keys();
-        String subName;
-        ClientSubscription sub;
-        Vector tIds = new Vector();
-        while (subNames.hasMoreElements()) {
-          subName = (String) subNames.nextElement();
-          sub = (ClientSubscription) subsTable.remove(subName);
-          if (! tIds.contains(sub.topicId)) {
-            tIds.add(sub.topicId);
-            sendTo(sub.topicId, new UnsubscribeRequest(null, null));
-          }
-        }
-        tIds.removeAllElements();
-        tIds = null;
-        messagesTable.clear();
-      }
-      catch (ProxyException pE) {}
-    }
-    super.react(from, not);
-  }
-   
- 
-  /**
    * Updates the reference to the active connection.
    *
    * @param key  Key of the activated connection.
@@ -1713,19 +1564,7 @@ public class JmsProxy extends ConnectionFactory
    */
   private void doReply(int key, AbstractJmsReply reply)
   {
-    OutputNotification oN = new OutputNotification(reply);
-
-    try { 
-      super.sendOut(key, oN);
-    }
-    // Closed or broken connection:
-    catch (Exception e) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgProxy.log(BasicLevel.WARN, "Connection " + key
-                                + " broken or closed: could not send reply: "
-                                + reply.getClass().getName() + " with id: "
-                                + reply.getCorrelationId());
-    }
+    proxyAgent.sendToClient(key, reply);
   }
 
   /**
@@ -1737,11 +1576,139 @@ public class JmsProxy extends ConnectionFactory
   private void sendToDMQ(Vector messages)
   {
     if (dmqId != null)
-      sendTo(dmqId, new ClientMessages(null, messages));
+      proxyAgent.sendNot(dmqId, new ClientMessages(null, messages));
     else if (DeadMQueueImpl.getId() != null)
-      sendTo(DeadMQueueImpl.getId(), new ClientMessages(null, messages));
+      proxyAgent.sendNot(DeadMQueueImpl.getId(),
+                         new ClientMessages(null, messages));
   }
 
+  
+  /**
+   * The method closes a given connection by denying the non acknowledged
+   * messages delivered to this connection, and deleting its temporary
+   * subscriptions and destinations.
+   */
+  public void closeConnection(int cKey)
+  {
+    try {
+      setCnx(cKey);
+
+      // Denying the non acknowledged messages:
+      cnx.deny();
+
+      // Removing or desactivating the subscriptions:
+      String subName = null;
+      ClientSubscription sub;
+      while (! cnx.activeSubs.isEmpty()) {
+        subName = (String) cnx.activeSubs.remove(0);
+        sub = (ClientSubscription) subsTable.get(subName);
+  
+        if (sub.durable) {
+          sub.active = false;
+          sub.requestId = null;
+          sub.denyAll();
+  
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
+                                    + subName + " de-activated.");
+        }
+        else {
+          subsTable.remove(subName);
+          sub.delete();
+          proxyAgent.sendNot(sub.topicId,
+                             new UnsubscribeRequest(null, subName));
+  
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
+                                    + subName + " deleted.");
+        }
+      }
+
+      // Deleting the temporary destinations:
+      while (! cnx.tempDestinations.isEmpty()) {
+        AgentId destId = (AgentId) cnx.tempDestinations.remove(0);
+        proxyAgent.sendNot(destId, new DeleteNot());
+    
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
+                                  + " destination " + destId.toString());
+      }
+      
+      // Clearing the transactions table:
+      if (cnx.transactionsTable != null)
+        cnx.transactionsTable.clear();
+
+      connections.remove(cnx);
+      cnx = null;
+      currKey = 0;
+    }
+    catch (ProxyException pE) {}
+  }
+
+
+  /**
+   * This method deletes the proxy by notifying its connected clients,
+   * denying the non acknowledged messages, deleting the temporary
+   * destinations, removing the subscriptions.
+   *
+   * @exception Exception  If the requester is not an administrator.
+   */
+  public void deleteProxy(AgentId from) throws Exception
+  {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
+                              + " notified to be deleted.");
+
+    if (! from.equals(AdminTopicImpl.ref.getId()))
+      throw new Exception();
+
+    // Notifying the connected clients:
+    int key;
+    while (! connections.isEmpty()) {
+      key = ((CnxContext) connections.remove(0)).key;
+      try {
+        setCnx(key);
+
+        doReply(new MomExceptionReply(null,
+                                      new ProxyException("Client proxy is "
+                                                         + "deleted.")));
+
+        // Denying the non acknowledged messages:
+        cnx.deny();
+
+        // Deleting the temporary destinations:
+        while (! cnx.tempDestinations.isEmpty()) {
+          AgentId destId = (AgentId) cnx.tempDestinations.remove(0);
+          proxyAgent.sendNot(destId, new DeleteNot());
+  
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Sending DeleteNot to"
+                                    + " temporary destination "
+                                    + destId.toString());
+        }
+
+        // Removing all proxy's subscriptions:
+        Enumeration subNames = subsTable.keys();
+        String subName;
+        ClientSubscription sub;
+        Vector tIds = new Vector();
+        while (subNames.hasMoreElements()) {
+          subName = (String) subNames.nextElement();
+          sub = (ClientSubscription) subsTable.remove(subName);
+          if (! tIds.contains(sub.topicId)) {
+            tIds.add(sub.topicId);
+            proxyAgent.sendNot(sub.topicId,
+                               new UnsubscribeRequest(null, null));
+          }
+        }
+        tIds.removeAllElements();
+        tIds = null;
+        messagesTable.clear();
+      }
+      catch (ProxyException pE) {}
+    }
+  }
+   
 
   /** 
    * The <code>CnxContext</code> class is used for managing objects related
@@ -1837,7 +1804,7 @@ public class JmsProxy extends ConnectionFactory
       Enumeration queues = qDeliveries.keys();
       while (queues.hasMoreElements()) {
         updateCurrentQueue((AgentId) queues.nextElement());
-        sendTo(qId, new DenyRequest(null, ids));
+        proxyAgent.sendNot(qId, new DenyRequest(null, ids));
       }
       qDeliveries.clear();
     }

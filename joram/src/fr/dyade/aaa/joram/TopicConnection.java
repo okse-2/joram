@@ -37,20 +37,18 @@ public class TopicConnection extends Connection
                              implements javax.jms.TopicConnection
 {
   /**
-   * Constructs a <code>TopicConnection</code> instance and opens a TCP
-   * connection with a given agent server.
+   * Creates a <code>TopicConnection</code> instance.
    *
-   * @param fConfig  The factory's configuration object.
-   * @param name  User's name.
-   * @param password  User's password.
+   * @param factoryParameters  The factory parameters.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  TopicConnection(FactoryConfiguration fConfig, String name,
-                  String password) throws JMSException
+  public TopicConnection(FactoryParameters factoryParameters,
+                         ConnectionItf connectionImpl) throws JMSException
   {
-    super(fConfig, name, password);
+    super(factoryParameters, connectionImpl);
   }
 
 
@@ -61,7 +59,6 @@ public class TopicConnection extends Connection
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target destination does
    *              not exist.
-   * @exception JMSSecurityException  If the user is not a READER on the dest.
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer
@@ -84,7 +81,6 @@ public class TopicConnection extends Connection
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target topic does
    *              not exist.
-   * @exception JMSSecurityException  If the user is not a READER on the topic.
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer

@@ -49,6 +49,17 @@ public class GetAdminTopicReply extends AbstractJmsReply
     this.id = id;
   }
 
+  /**
+   * Constructs a <code>GetAdminTopicReply</code> instance.
+   */
+  public GetAdminTopicReply()
+  {}
+
+  /** Sets the identifier of the admin topic. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
 
   /** Returns the identifier of the admin topic. */
   public String getId()

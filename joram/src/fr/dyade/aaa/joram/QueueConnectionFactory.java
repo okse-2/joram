@@ -27,63 +27,43 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.UnknownHostException;
-
 import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.QueueConnectionFactory</code> interface.
  */
-public class QueueConnectionFactory extends ConnectionFactory
-                                    implements javax.jms.QueueConnectionFactory
+public abstract class QueueConnectionFactory
+                      extends ConnectionFactory
+                      implements javax.jms.QueueConnectionFactory
 {
   /**
-   * Constructs a <code>QueueConnectionFactory</code> instance wrapping a given
-   * server's parameters.
+   * Constructs a <code>QueueConnectionFactory</code> dedicated to a given
+   * server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is unknown.
    */
   public QueueConnectionFactory(String host, int port)
-         throws UnknownHostException
   {
     super(host, port);
   }
 
-  /**
-   * Constructs a <code>QueueConnectionFactory</code> instance wrapping a given
-   * server's url.
-   *
-   * @param url  The server's url.
-   *
-   * @exception MalformedURLException  If the url is incorrect.
-   * @exception UnknownHostException  If the host is unknown.
-   */
-  public QueueConnectionFactory(String url) throws Exception
-  {
-    super(url);
-  }
 
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "QCF:" + config.serverAddr.toString();
+    return "QCF:" + params.getHost() + "-" + params.getPort();
   }
 
   /**
-   * API method.
+   * API method, implemented according to the communication protocol.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.QueueConnection
-         createQueueConnection(String name, String password)
-         throws JMSException
-  {
-    return new QueueConnection(config, name, password);
-  }
+  public abstract javax.jms.QueueConnection
+                  createQueueConnection(String name, String password)
+                  throws JMSException;
 
   /**
    * API method.

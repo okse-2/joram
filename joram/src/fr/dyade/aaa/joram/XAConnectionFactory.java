@@ -27,8 +27,6 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-
 import javax.jms.JMSException;
 import javax.naming.*;
 
@@ -37,65 +35,45 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.XAConnectionFactory</code> interface.
  */
-public class XAConnectionFactory
-             extends fr.dyade.aaa.joram.admin.AdministeredObject
-             implements javax.jms.XAConnectionFactory
+public abstract class XAConnectionFactory
+                extends fr.dyade.aaa.joram.admin.AdministeredObject
+                implements javax.jms.XAConnectionFactory
 {
-  /** Factory's configuration object. */
-  protected FactoryConfiguration config;
+  /** Factory's parameters object. */
+  protected FactoryParameters params;
 
   /**
-   * Constructs an <code>XAConnectionFactory</code> instance wrapping a given
-   * server's parameters.
+   * Constructs an <code>XAConnectionFactory</code> dedicated to a given
+   * server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is unknown.
    */
-  public XAConnectionFactory(String host, int port) throws UnknownHostException
+  public XAConnectionFactory(String host, int port)
   {
-    super((new JoramUrl(host, port, null)).toString());
+    super(host + ":" + port);
+    params = new FactoryParameters(host, port);
 
-    config = new FactoryConfiguration();
-
-    config.serverAddr = InetAddress.getByName(host);
-    config.port = port;
-    config.serverUrl = new JoramUrl(host, port, null);
-  }
-
-  /**
-   * Constructs an <code>XAConnectionFactory</code> instance wrapping a given
-   * server's url.
-   *
-   * @param url  The server's url.
-   *
-   * @exception MalformedURLException  If the url is incorrect.
-   * @exception UnknownHostException  If the host is unknown.
-   */
-  public XAConnectionFactory(String url) throws Exception
-  {
-    this((new JoramUrl(url)).getHost(), (new JoramUrl(url)).getPort());
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "XACF:" + config.serverAddr.toString();
+    return "XACF:" + params.getHost() + "-" + params.getPort();
   }
 
 
   /**
-   * API method.
+   * API method, implemented according to the communication protocol.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAConnection
-         createXAConnection(String name, String password) throws JMSException
-  {
-    return new XAConnection(config, name, password);
-  }
+  public abstract javax.jms.XAConnection
+                  createXAConnection(String name, String password)
+                  throws JMSException;
 
   /**
    * API method.
@@ -110,23 +88,23 @@ public class XAConnectionFactory
   }
 
   /**
-   * Sets the connecting timer.
-   *
-   * @param timer  Time in seconds for connecting.
+   * Returns the factory's configuration parameters.
    */
-  public void setCnxTimer(int timer)
+  public FactoryParameters getParameters()
   {
-    if (timer > 0)
-      config.cnxTimer = timer;
+    return params;
   } 
 
   /** Sets the naming reference of an XA connection factory. */
   public Reference getReference() throws NamingException
   {
     Reference ref = super.getReference();
-    ref.add(new StringRefAddr("cFactory.url", config.serverUrl.toString()));
-    ref.add(new StringRefAddr("cFactory.cnxT",
-                              (new Integer(config.cnxTimer)).toString()));
+    ref.add(new StringRefAddr("cFactory.host", params.getHost()));
+    ref.add(new StringRefAddr("cFactory.port",
+                              (new Integer(params.getPort())).toString()));
+    ref.add(
+      new StringRefAddr("cFactory.cnxT",
+                        (new Integer(params.connectingTimer)).toString()));
     return ref;
   }
 }

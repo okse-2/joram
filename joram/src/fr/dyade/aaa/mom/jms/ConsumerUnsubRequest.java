@@ -43,4 +43,10 @@ public class ConsumerUnsubRequest extends AbstractJmsRequest
   {
     super(subName);
   }
+
+  /**
+   * Constructs a <code>ConsumerUnsubRequest</code>.
+   */
+  public ConsumerUnsubRequest()
+  {}
 }

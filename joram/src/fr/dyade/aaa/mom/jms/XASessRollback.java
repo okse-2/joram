@@ -63,7 +63,19 @@ public class XASessRollback extends AbstractJmsRequest
     super(id);
   }
 
-  
+  /**
+   * Constructs an <code>XASessRollback</code> instance.
+   */
+  public XASessRollback()
+  {}
+
+ 
+  /** Sets the identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
+ 
   /** Returns the id of the resource and the rolling back transaction. */
   public String getId()
   {
@@ -141,5 +153,29 @@ public class XASessRollback extends AbstractJmsRequest
     if (subDenyings == null)
       return null;
     return (Vector) subDenyings.remove(sub);
+  }
+
+  /** Sets the queue denyings table. */
+  public void setQDenyings(Hashtable qDenyings)
+  {
+    this.qDenyings = qDenyings;
+  }
+
+  /** Sets the sub denyings table. */
+  public void setSubDenyings(Hashtable subDenyings)
+  {
+    this.subDenyings = subDenyings;
+  }
+
+  /** Returns the queue denyings table. */
+  public Hashtable getQDenyings()
+  {
+    return qDenyings;
+  }
+ 
+  /** Returns the sub denyings table. */
+  public Hashtable getSubDenyings()
+  {
+    return subDenyings;
   }
 }

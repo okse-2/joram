@@ -37,20 +37,18 @@ public class QueueConnection extends Connection
                              implements javax.jms.QueueConnection
 {
   /**
-   * Constructs a <code>QueueConnection</code> instance and opens a TCP
-   * connection with a given agent server.
+   * Creates a <code>QueueConnection</code> instance.
    *
-   * @param fConfig  The factory's configuration object.
-   * @param name  User's name.
-   * @param password  User's password.
+   * @param factoryParameters  The factory parameters.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  QueueConnection(FactoryConfiguration fConfig, String name,
-                  String password) throws JMSException
+  public QueueConnection(FactoryParameters factoryParameters,
+                         ConnectionItf connectionImpl) throws JMSException
   {
-    super(fConfig, name, password);
+    super(factoryParameters, connectionImpl);
   }
 
 
@@ -61,7 +59,6 @@ public class QueueConnection extends Connection
    * @exception InvalidSelectorException  If the selector syntax is wrong.
    * @exception InvalidDestinationException  If the target destination does
    *              not exist.
-   * @exception JMSSecurityException  If the user is not a READER on the dest.
    * @exception JMSException  If the method fails for any other reason.
    */
   public javax.jms.ConnectionConsumer

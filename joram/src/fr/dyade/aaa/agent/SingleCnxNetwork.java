@@ -38,16 +38,15 @@ import fr.dyade.aaa.util.*;
  * a time.
  */
 class SingleCnxNetwork extends StreamNetwork {
-  /** RCS version number of this file: $Revision: 1.9 $ */
-  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.9 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.10 $ */
+  public static final String RCS_VERSION="@(#)$Id: SingleCnxNetwork.java,v 1.10 2003-03-19 15:16:06 fmaistre Exp $";
 
+  /** FIFO list of all messages to be sent by the watch-dog thead */
   Vector sendList;
 
   final static boolean TempNetwallFix = false;
 
-  /**
-   * Creates a new network component.
-   */
+  /** Creates a new network component */
   SingleCnxNetwork() {
     super();
   }
@@ -59,9 +58,7 @@ class SingleCnxNetwork extends StreamNetwork {
   /** Watch-dog component */
   WatchDog watchDog = null;
 
-  /**
-   * Causes this network component to begin execution.
-   */
+  /** Causes this network component to begin execution */
   public void start() throws IOException {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
     try {

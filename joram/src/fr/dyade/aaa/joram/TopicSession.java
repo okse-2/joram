@@ -61,8 +61,6 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a WRITER on the
-   *              topic.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -76,8 +74,6 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              topic.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -95,8 +91,6 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              topic.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.

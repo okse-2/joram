@@ -84,6 +84,11 @@ public class A3CMLSaxWrapper
    * end element.
    */
   A3CMLService service = null;
+  /**
+   * Working attribute used during jvmArgs' definition between  start and
+   * end element.
+   */
+  String jvmArgs = null;
 
   /**
    * Parses the xml file named <code>cfgFileName</code> and calls handler 
@@ -236,6 +241,8 @@ public class A3CMLSaxWrapper
           System.getProperties().put(atts.getValue(A3CMLHandler.ATT_NAME),
                                      atts.getValue(A3CMLHandler.ATT_VALUE));
 	}
+      } else if (name.equals(A3CMLHandler.ELT_JVM_ARGS)) {
+        jvmArgs = atts.getValue(A3CMLHandler.ATT_VALUE);
       } else {
 	throw new SAXException("unknown element \"" + name + "\"");
       }
@@ -309,6 +316,10 @@ public class A3CMLSaxWrapper
 	  // Can never happen (see DTD).
 	}
       } else if (name.equals(A3CMLHandler.ELT_PROPERTY)) {
+      } else if (name.equals(A3CMLHandler.ELT_JVM_ARGS)) {
+        if (server != null && jvmArgs != null) {
+          server.jvmArgs = jvmArgs;
+        }
       } else {
 	throw new SAXException("unknown element \"" + name + "\"");
       }

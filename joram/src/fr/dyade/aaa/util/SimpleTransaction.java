@@ -26,8 +26,8 @@ package fr.dyade.aaa.util;
 import java.io.*;
 import java.util.*;
 
-public class SimpleTransaction implements Transaction {
-  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.11 2002-12-11 11:27:01 maistrfr Exp $"; 
+public final class SimpleTransaction implements Transaction {
+  public static final String RCS_VERSION="@(#)$Id: SimpleTransaction.java,v 1.12 2003-03-19 15:19:04 fmaistre Exp $"; 
 
   private File dir = null;
 
@@ -56,17 +56,25 @@ public class SimpleTransaction implements Transaction {
   }
     
   public void save(Serializable obj, String dirName, String name) throws IOException {
-    File file;
+    File temp, file;
     if (dirName == null) {
+      temp = new File(dir, "temp_" + name);
       file = new File(dir, name);
     } else {
       File parentDir = new File(dir, dirName);
       if (!parentDir.exists()) {
         parentDir.mkdirs();
       }
+      temp = new File(parentDir, "temp_" + name);
       file = new File(parentDir, name);
     }
 
+    if (temp.exists() && (! temp.delete()))
+      throw new IOException("Can't delete log file: " + temp.getPath());
+
+    if (file.exists())
+      file.renameTo(temp);
+	
     // Save the current state of the object.
     FileOutputStream fos = null;
     try {
@@ -75,9 +83,12 @@ public class SimpleTransaction implements Transaction {
       oos.writeObject(obj);
       oos.flush();
       fos.getFD().sync();
+      fos.close();
+      fos = null;
+      temp.delete();
+      temp = null;
     } finally {
-      if (fos != null)
-	fos.close();
+      if (fos != null) fos.close();
     }
   }
 
@@ -85,15 +96,23 @@ public class SimpleTransaction implements Transaction {
     return load(null, name);
   }
 
-  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     Object obj;
 
-    File file;
+    File temp, file;
     if (dirName == null) {
+      temp = new File(dir, "temp_" + name);
       file = new File(dir, name);
     } else {
       File parentDir = new File(dir, dirName);
+      temp = new File(parentDir, "temp_" + name);
       file = new File(parentDir, name);
+    }
+    if (temp.exists()) {
+      if (! file.delete())
+	throw new IOException("Can't delete corrupted file: " + file.getPath());
+      if (! temp.renameTo(file))
+	throw new IOException("Can't restore corrupted file: " + file.getPath());
     }
     if (file.canRead()) {
       FileInputStream fis = null;
@@ -116,7 +135,7 @@ public class SimpleTransaction implements Transaction {
   }
 
   public void delete(String dirName, String name) {
-    File file;
+    File temp, file;
     if (dirName == null) {
       file = new File(dir, name);
       if (! file.exists()) {
@@ -125,10 +144,14 @@ public class SimpleTransaction implements Transaction {
       } else {
         file.delete();
       }
+      temp = new File(dir, "temp_" + name);
+      if (temp.exists()) temp.delete();
     } else {
       File parentDir = new File(dir, dirName);
       file = new File(parentDir, name);
       file.delete();
+      temp = new File(parentDir, "temp_" + name);
+      if (temp.exists()) temp.delete();
       deleteDir(parentDir);
     } 
   }  
@@ -154,5 +177,5 @@ public class SimpleTransaction implements Transaction {
 
   public void release() throws IOException {}
 
-  public final void stop() {}
+  public void stop() {}
 }

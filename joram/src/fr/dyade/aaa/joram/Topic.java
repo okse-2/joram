@@ -29,8 +29,11 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.GetAdminTopicRequest;
 import fr.dyade.aaa.mom.jms.GetAdminTopicReply;
+
+import java.util.Vector;
  
 import javax.jms.JMSException;
+import javax.naming.NamingException;
 
 /**
  * Implements the <code>javax.jms.Topic</code> interface.
@@ -50,7 +53,7 @@ public class Topic extends Destination implements javax.jms.Topic
   /** Returns a String image of the topic. */
   public String toString()
   {
-    return "Topic:" + getName();
+    return "Topic:" + agentId;
   }
 
   /**
@@ -60,6 +63,37 @@ public class Topic extends Destination implements javax.jms.Topic
    */
   public String getTopicName() throws JMSException
   {
-    return getName();
+    return agentId;
+  }
+
+  /**
+   * Codes a <code>Topic</code> as a vector for travelling through the
+   * SOAP protocol.
+   *
+   * @exception NamingException  Never thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    Vector vec = new Vector();
+    vec.add("Topic");
+    vec.add(agentId);
+    return vec;
+  }
+
+  /**
+   * Decodes a coded <code>Topic</code>.
+   *
+   * @exception NamingException  If incorrectly coded.
+   */
+  public static fr.dyade.aaa.joram.admin.AdministeredObject decode(Vector vec)
+                throws NamingException
+  {
+    try {
+      return new Topic((String) vec.remove(0));
+    }
+    catch (Exception exc) {
+      throw new NamingException("Vector " + vec.toString()
+                                + " incorrectly codes a Topic.");
+    }
   }
 }

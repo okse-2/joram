@@ -139,7 +139,7 @@ public class Session implements javax.jms.Session
 
     // If the session is transacted and the transactions limited by a timer,
     // a closing task might be useful.
-    if (transacted && cnx.factoryConfiguration.txTimer != 0)
+    if (transacted && cnx.factoryParameters.txPendingTimer != 0)
       closingTask = new SessionCloseTask();
 
     cnx.sessions.add(this);
@@ -342,8 +342,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a WRITER on the
-   *              destination.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -360,8 +358,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              destination.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -380,8 +376,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              destination.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -399,8 +393,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              destination.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -417,8 +409,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              topic.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -437,8 +427,6 @@ public class Session implements javax.jms.Session
   /**
    * API method.
    *
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              topic.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -470,6 +458,7 @@ public class Session implements javax.jms.Session
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
+   * @exception JMSException  If the topic creation failed.
    */
   public javax.jms.Topic createTopic(String topicName) throws JMSException
   {
@@ -483,8 +472,12 @@ public class Session implements javax.jms.Session
           (GetAdminTopicReply) cnx.syncRequest(new GetAdminTopicRequest());
         if (reply.getId() != null)
           return new Topic(reply.getId());
+        else
+          throw new JMSException("AdminTopic could not be retrieved.");
       }
-      catch (Exception exc) {}
+      catch (Exception exc) {
+        throw new JMSException("AdminTopic could not be retrieved: " + exc);
+      }
     }
     return new Topic(topicName);
   }

@@ -36,6 +36,7 @@ public class A3CMLServer {
   public String name = null;
   public String hostname = null;
   public Vector services = null;
+  public String jvmArgs = null;
 
   A3CMLServer(String sid,
               String name,

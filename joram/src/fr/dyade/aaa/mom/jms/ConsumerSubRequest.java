@@ -64,6 +64,36 @@ public class ConsumerSubRequest extends AbstractJmsRequest
     this.durable = durable;
   }
 
+  /**
+   * Constructs a <code>ConsumerSubRequest</code>.
+   */
+  public ConsumerSubRequest()
+  {}
+
+  /** Sets the subscription name. */
+  public void setSubName(String subName)
+  {
+    this.subName = subName;
+  }
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
+  }
+
+  /** Sets the noLocal attribute. */
+  public void setNoLocal(boolean noLocal)
+  {
+    this.noLocal = noLocal;
+  }
+
+  /** Sets the durable attribute. */
+  public void setDurable(boolean durable)
+  {
+    this.durable = durable;
+  }
+
   /** Returns the name of the subscription. */
   public String getSubName()
   {

@@ -27,6 +27,10 @@
  */
 package fr.dyade.aaa.joram.admin;
 
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
 /**
  * The <code>DeadMQueue</code> class allows administrators to manipulate
  * dead message queues.
@@ -41,5 +45,35 @@ public class DeadMQueue extends fr.dyade.aaa.joram.Queue
   public DeadMQueue(String agentId)
   {
     super(agentId);
+  }
+
+  /**
+   * Codes a <code>DeadMQueue</code> as a vector for travelling through the
+   * SOAP protocol.
+   *
+   * @exception NamingException  Never thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    Vector vec = new Vector();
+    vec.add("DeadMQueue");
+    vec.add(agentId);
+    return vec;
+  }
+
+  /**
+   * Decodes a coded <code>DeadMQueue</code>.
+   *
+   * @exception NamingException  If incorrectly coded.
+   */
+  public static AdministeredObject decode(Vector vec) throws NamingException
+  {
+    try {
+      return new DeadMQueue((String) vec.remove(0));
+    }
+    catch (Exception exc) {
+      throw new NamingException("Vector " + vec.toString()
+                                + " incorrectly codes a DeadMQueue.");
+    }
   }
 }

@@ -29,8 +29,11 @@ package fr.dyade.aaa.joram;
 
 import fr.dyade.aaa.mom.jms.TempDestDeleteRequest;
 
+import java.util.Vector;
+
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -58,7 +61,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
   /** Returns a String image of the queue. */
   public String toString()
   {
-    return "TempQueue:" + getName();
+    return "TempQueue:" + agentId;
   }
 
   /**
@@ -84,13 +87,13 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
       sess = (Session) cnx.sessions.get(i);
       for (int j = 0; j < sess.consumers.size(); j++) {
         cons = (MessageConsumer) sess.consumers.get(j);
-        if (getName().equals(cons.targetName))
+        if (agentId.equals(cons.targetName))
           throw new JMSException("Consumers still exist for this temp."
                                  + " queue.");
       }
     }
     // Sending the request to the server:
-    cnx.syncRequest(new TempDestDeleteRequest(getName()));
+    cnx.syncRequest(new TempDestDeleteRequest(agentId));
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");
@@ -103,5 +106,36 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue
   Connection getCnx()
   {
     return cnx;
+  }
+
+  /**
+   * Codes a <code>TemporaryQueue</code> as a vector for travelling through the
+   * SOAP protocol.
+   *
+   * @exception NamingException  Never thrown.
+   */
+  public Vector code() throws NamingException
+  {
+    Vector vec = new Vector();
+    vec.add("TemporaryQueue");
+    vec.add(agentId);
+    return vec;
+  }
+
+  /**
+   * Decodes a coded <code>TemporaryQueue</code>.
+   *
+   * @exception NamingException  If incorrectly coded.
+   */
+  public static fr.dyade.aaa.joram.admin.AdministeredObject decode(Vector vec)
+                throws NamingException
+  {
+    try {
+      return new TemporaryQueue((String) vec.remove(0), null);
+    }
+    catch (Exception exc) {
+      throw new NamingException("Vector " + vec.toString()
+                                + " incorrectly codes a TemporaryQueue.");
+    }
   }
 }

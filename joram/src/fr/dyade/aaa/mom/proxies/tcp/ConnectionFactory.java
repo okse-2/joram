@@ -25,7 +25,7 @@
  * Initial developer(s): Andre Freyssinet (ScalAgent)
  * Contributor(s): Frederic Maistre (INRIA)
  */
-package fr.dyade.aaa.mom.proxies;
+package fr.dyade.aaa.mom.proxies.tcp;
 
 import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.mom.MomTracing;
@@ -41,8 +41,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * A <code>ConnectionFactory</code> proxy is started as a service in each
  * MOM agent server for allowing connections with external clients; this
- * class is also the super class of the MOM proxy agents directly connected
- * to their specific external clients and acting as their MOM representatives. 
+ * class is also the super class of the MOM TCP proxy agents directly
+ * connected to their specific external clients and acting as their MOM
+ * representatives. 
  * <p>
  * As stated above, each agent server holds a <code>ConnectionFactory</code>
  * service listening to a given port, on which connection requests from
@@ -79,6 +80,13 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
   /** Default port the <code>ConnectionFactory</code> service listens to. */
   static final int defaultPort = 16010;
 
+  /** Initial JMS administrator's name of the local server. */
+  private String initialAdminName;
+  /** Initial JMS administrator's password of the local server. */
+  private String initialAdminPass;
+  /** JMS administrator's proxy identifier. */
+  private AgentId adminProxyId;
+
   /**
    * Constructs a <code>ConnectionFactory</code> listening to a given port.
    * <p>
@@ -108,30 +116,47 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
     super.newClient = false;
   }
 
+  /**
+   * Constructs a <code>ConnectionFactory</code> listening to a given port
+   * and giving an administrator access.
+   *
+   * @param port  Port to listen to.
+   * @param name  Initial name of the administrator.
+   * @param pass  Initial password of the administrator.
+   * @param proxyId  Identifier of the administrator's proxy.
+   */
+  private ConnectionFactory(int port, String name, String pass,
+                            AgentId proxyId) throws Exception
+  {
+    this(port);
+    initialAdminName = name;
+    initialAdminPass = pass;
+    adminProxyId = proxyId;
+  }
+
   /** Returns a String images of a ConnectionFactory. */
   public String toString()
   {
     return "ConnectionFactory:" + this.getId();
   }
 
+  
   /**
-   * Initializes the <code>ConnectionFactory</code> as a service, creates
-   * and deploys a <code>fr.dyade.aaa.dest.AdminTopic</code> topic, and
+   * Initializes the <code>ConnectionFactory</code> as a service, and
    * if requested, creates and deploys a <code>JmsProxy</code> proxy for
    * an administrator client.
    *
    * @param args  Port parameter from the configuration file.
    * @param firstTime  <code>true</code> when the agent server starts.
    * @exception Exception  Thrown when processing the String argument
-   *              or in case of a problem when deploying the ConnectionFactory
-   *              or the admin topic.
+   *              or in case of a problem when deploying the ConnectionFactory.
    */
   public static void init(String args, boolean firstTime) throws Exception
   {
     try {
       int port;
-      String name = null;
-      String pass = null;
+      String initialAdminName = null;
+      String initialAdminPass = null;
 
       if (args != null) {
         StringTokenizer st = new StringTokenizer(args);
@@ -139,8 +164,8 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
         port = Integer.parseInt(st.nextToken());
       
         if (st.hasMoreTokens()) {
-          name = st.nextToken();
-          pass = st.nextToken();
+          initialAdminName = st.nextToken();
+          initialAdminPass = st.nextToken();
         }
       }
       else
@@ -153,15 +178,20 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
       if (! firstTime)
         return;
 
-      ConnectionFactory cF = new ConnectionFactory(port);
-      cF.deploy();
-      AdminTopic adminTopic = new AdminTopic();
-      adminTopic.deploy();
+      ConnectionFactory cF;
 
-      if (name != null) {
-        JmsProxy adminProxy = new JmsProxy(name, pass, adminTopic.getId());
+      // This service must give an access to an administrator:
+      if (initialAdminName != null) {
+        JmsProxy adminProxy = new JmsProxy(initialAdminName, initialAdminPass);
         adminProxy.deploy();
+        cF = new ConnectionFactory(port, initialAdminName, initialAdminPass,
+                                   adminProxy.getId());
       }
+      // No administrator access is given:
+      else
+        cF = new ConnectionFactory(port);
+
+      cF.deploy();
     }
     catch (NoSuchElementException exc) {
       throw new Exception("Could not parse arguments");
@@ -195,6 +225,12 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
         String readName = st.nextToken();
         String readPass = st.nextToken();
 
+        // If the requester is the administrator, returning the admin proxy id:
+        if (initialAdminName != null && initialAdminPass != null
+            && readName.equals(initialAdminName)
+            && readPass.equals(initialAdminPass))
+          return adminProxyId;
+
         return AdminTopicImpl.ref.getProxyId(readName, readPass);
       }
       else
@@ -202,6 +238,11 @@ public class ConnectionFactory extends fr.dyade.aaa.ip.TcpMultiServerProxy
     }
     catch (NoSuchElementException nE) {
       throw new Exception("Incorrect request read on stream: " + nE);
+    }
+    catch (NullPointerException exc) {
+      throw new Exception("Administration topic on server "
+                          + AgentServer.getServerId()
+                          + " not deployed.");
     }
   }
 

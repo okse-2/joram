@@ -25,7 +25,7 @@
  * Initial developer(s):Andre Freyssinet (ScalAgent)
  * Contributor(s):
  */
-package fr.dyade.aaa.mom.proxies;
+package fr.dyade.aaa.mom.proxies.tcp;
 
 import fr.dyade.aaa.agent.NotificationOutputStream;
 import fr.dyade.aaa.mom.jms.AbstractJmsReply;
@@ -33,22 +33,22 @@ import java.io.*;
 
 
 /** 
- * The <code>JmsOutputStream</code> class is used by the JMS proxy agents
+ * The <code>TcpOutputStream</code> class is used by the JMS tcp proxy agents
  * for extracting JMS reply objects from <code>OutputNotification</code>
  * notifications and writing them on the output stream.
  */
-public class JmsOutputStream implements NotificationOutputStream
+public class TcpOutputStream implements NotificationOutputStream
 {
   /** The output stream. */
   private ObjectOutputStream out;
 
   /**
-   * Constructs a <code>JMSOutputStream</code> instance for a given
+   * Constructs a <code>TcpOutputStream</code> instance for a given
    * <code>OutputStream</code>.
    *
    * @param out  The output stream.
    */
-  public JmsOutputStream(OutputStream out) throws IOException
+  public TcpOutputStream(OutputStream out) throws IOException
   {
     this.out = new ObjectOutputStream(out);
     this.out.flush();

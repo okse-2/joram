@@ -68,4 +68,48 @@ public class ProducerMessages extends AbstractJmsRequest
   {
     return messages;
   }
+
+
+  /**
+   * Transforms this request into a vector of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Vector soapCode()
+  {
+    Vector vec = new Vector();
+
+    // Coding the request fields: 
+    vec.add(getTarget());
+    vec.add(getRequestId());
+
+    // Coding and adding the messages into a vector:
+    Vector msgs = new Vector();
+    while (! messages.isEmpty())
+      msgs.add(((Message) messages.remove(0)).soapCode());
+
+    vec.add(msgs);
+
+    return vec;
+  }
+
+  /** 
+   * Transforms a vector of primitive values into a
+   * <code>ProducerMessages</code> request.
+   */
+  public static ProducerMessages soapDecode(Vector vec)
+  {
+    String target = (String) vec.remove(0);
+    String requestId = (String) vec.remove(0);
+    Vector msgs = (Vector) vec.remove(0);
+
+    // Building the request:
+    ProducerMessages request = new ProducerMessages(target);
+    request.setRequestId(requestId);
+
+    // Decoding the messages:
+    while (! msgs.isEmpty())
+      request.addMessage(Message.soapDecode((Vector) msgs.remove(0)));
+
+    return request;
+  } 
 }

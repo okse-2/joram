@@ -39,7 +39,7 @@ public abstract class Destination
                       implements javax.jms.Destination
 {
   /** Identifier of the agent destination. */
-  private String agentId;
+  protected String agentId;
 
 
   /**

@@ -25,23 +25,30 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package fr.dyade.aaa.joram;
+package fr.dyade.aaa.mom.proxies;
+
+import fr.dyade.aaa.mom.jms.AbstractJmsRequest;
 
 /**
- * A <code>FactoryConfiguration</code> instance holds a
- * <code>ConnectionFactory</code> or a <code>XAConnectionFactory</code>
- * configuration parameters.
+ * A <code>RequestNotification</code> is a notification used by a proxy for
+ * carrying a client request.
  */
-class FactoryConfiguration implements java.io.Serializable
+class RequestNotification extends fr.dyade.aaa.agent.Notification
 {
-  /** Address of the server. */
-  java.net.InetAddress serverAddr;  
-  /** Port on which the server is listening. */
-  int port; 
-  /** Url for connecting to the server. */
-  JoramUrl serverUrl;
-  /** Timer for opening a connection from the factory. */
-  int cnxTimer = 0;
-  /** Timer for pending transactions for the factory sessions. */
-  int txTimer = 0;
+  /** Identifier of the client the request comes from. */
+  int id;
+  /** Request sent by the client. */
+  AbstractJmsRequest request;
+
+  /**
+   * Constructs a <code>RequestNotification</code> instance.
+   *
+   * @param id  Identifier of the client the request comes from.
+   * @param request  Request sent by the client.
+   */
+  RequestNotification(int id, AbstractJmsRequest request)
+  {
+    this.id = id;
+    this.request = request;
+  }
 }

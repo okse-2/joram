@@ -29,8 +29,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <code>Agent</code> used for remote administration of each A3 server.
  */
 final class AgentAdmin extends Agent {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: AgentAdmin.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
 
   /**
    * Creates a local administration agent (there is no need to deploy it).

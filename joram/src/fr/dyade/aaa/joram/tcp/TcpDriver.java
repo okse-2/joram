@@ -25,33 +25,53 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package fr.dyade.aaa.mom.proxies;
+package fr.dyade.aaa.joram.tcp;
+
+import fr.dyade.aaa.mom.jms.AbstractJmsReply;
+
+import java.io.*;
+
 
 /**
- * <code>OutputNotification</code> notifications are used by proxy agents for
- * wrapping objects destinated to external clients.
+ * A <code>TcpDriver</code> gets server deliveries coming through a TCP socket.
  */
-public class OutputNotification extends fr.dyade.aaa.agent.Notification
+class TcpDriver extends fr.dyade.aaa.joram.Driver
 {
-  /** The reply object destinated to the external client. */
-  private Object obj;
+  /** The input stream to listen on. */
+  private ObjectInputStream ois;
 
   /**
-   * Constructs an <code>OutputNotification</code> wrapping a given reply
-   * object.
+   * Constructs a <code>TcpDriver</code> daemon.
    *
-   * @param obj  The object to write on the output stream.
+   * @param cnx  The connection the driver belongs to.
+   * @param ois  The connection's input stream.
    */
-  public OutputNotification(Object obj)
+  TcpDriver(fr.dyade.aaa.joram.Connection cnx, ObjectInputStream ois)
   {
-    this.obj = obj;
+    super(cnx);
+    this.ois = ois;
   }
 
+ 
   /**
-   * Returns the reply object wrapped by this <code>OutputNotification</code>.
+   * Returns an <code>AbstractJmsReply</code> delivered by the connected
+   * server.
+   *
+   * @exception IOException  If the connection failed.
+   * @exception ClassNotFoundException  If the reply is invalid.
    */
-  public Object getObj()
+  protected AbstractJmsReply getDelivery() throws Exception
   {
-    return obj;
+    return (AbstractJmsReply) ois.readObject();
+  } 
+
+  /** Shuts down the driver. */
+  public void shutdown()
+  {
+    try {
+      ois.close();
+    }
+    catch (Exception e) {}
+    close();
   }
 }

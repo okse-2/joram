@@ -33,14 +33,19 @@ import fr.dyade.aaa.joram.TopicConnectionFactory;
 import fr.dyade.aaa.joram.XAConnectionFactory;
 import fr.dyade.aaa.joram.XAQueueConnectionFactory;
 import fr.dyade.aaa.joram.XATopicConnectionFactory;
+import fr.dyade.aaa.joram.FactoryParameters;
 import fr.dyade.aaa.joram.Queue;
 import fr.dyade.aaa.joram.Topic;
 import fr.dyade.aaa.joram.TemporaryQueue;
 import fr.dyade.aaa.joram.TemporaryTopic;
+import fr.dyade.aaa.joram.tcp.TcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.QueueTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.TopicTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XATcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XAQueueTcpConnectionFactory;
+import fr.dyade.aaa.joram.tcp.XATopicTcpConnectionFactory;
 
 import javax.naming.*;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>ObjectFactory</code> class is used by the naming service
@@ -48,12 +53,14 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class ObjectFactory implements javax.naming.spi.ObjectFactory
 {
-  String cf_ClassName = "fr.dyade.aaa.joram.ConnectionFactory";
-  String qcf_ClassName = "fr.dyade.aaa.joram.QueueConnectionFactory";
-  String tcf_ClassName = "fr.dyade.aaa.joram.TopicConnectionFactory";
-  String xacf_ClassName = "fr.dyade.aaa.joram.XAConnectionFactory";
-  String xaqcf_ClassName = "fr.dyade.aaa.joram.XAQueueConnectionFactory";
-  String xatcf_ClassName = "fr.dyade.aaa.joram.XATopicConnectionFactory";
+  String tcp_cf_ClassName = "fr.dyade.aaa.joram.tcp.TcpConnectionFactory";
+  String tcp_qcf_ClassName = "fr.dyade.aaa.joram.tcp.QueueTcpConnectionFactory";
+  String tcp_tcf_ClassName = "fr.dyade.aaa.joram.tcp.TopicTcpConnectionFactory";
+  String tcp_xacf_ClassName = "fr.dyade.aaa.joram.tcp.XATcpConnectionFactory";
+  String tcp_xaqcf_ClassName =
+    "fr.dyade.aaa.joram.tcp.XAQueueTcpConnectionFactory";
+  String tcp_xatcf_ClassName =
+    "fr.dyade.aaa.joram.tcp.XATopicTcpConnectionFactory";
   String q_ClassName = "fr.dyade.aaa.joram.Queue";
   String t_ClassName = "fr.dyade.aaa.joram.Topic";
   String tq_ClassName = "fr.dyade.aaa.joram.TemporaryQueue";
@@ -81,52 +88,70 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory
     if (adminObj != null)
       return adminObj;
 
-    if (ref.getClassName().equals(cf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    if (ref.getClassName().equals(tcp_cf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
-      ConnectionFactory cnxFact = new ConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
-      cnxFact.setTxTimer((new Integer(txTimer)).intValue());
+      ConnectionFactory cnxFact =
+        new TcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
     }
-    else if (ref.getClassName().equals(qcf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    else if (ref.getClassName().equals(tcp_qcf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
-      QueueConnectionFactory cnxFact = new QueueConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
-      cnxFact.setTxTimer((new Integer(txTimer)).intValue());
+      QueueConnectionFactory cnxFact =
+        new QueueTcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
     }
-    else if (ref.getClassName().equals(tcf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    else if (ref.getClassName().equals(tcp_tcf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
-      TopicConnectionFactory cnxFact = new TopicConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
-      cnxFact.setTxTimer((new Integer(txTimer)).intValue());
+      TopicConnectionFactory cnxFact =
+        new TopicTcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
       return cnxFact;
     }
-    else if (ref.getClassName().equals(xacf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    else if (ref.getClassName().equals(tcp_xacf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      XAConnectionFactory cnxFact = new XAConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
+      XAConnectionFactory cnxFact =
+        new XATcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
     }
-    else if (ref.getClassName().equals(xaqcf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    else if (ref.getClassName().equals(tcp_xaqcf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      XAQueueConnectionFactory cnxFact = new XAQueueConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
+      XAQueueConnectionFactory cnxFact =
+        new XAQueueTcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
     }
-    else if (ref.getClassName().equals(xatcf_ClassName)) {
-      String url = (String) ref.get("cFactory.url").getContent();
+    else if (ref.getClassName().equals(tcp_xatcf_ClassName)) {
+      String host = (String) ref.get("cFactory.host").getContent();
+      String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      XATopicConnectionFactory cnxFact = new XATopicConnectionFactory(url);
-      cnxFact.setCnxTimer((new Integer(cnxTimer)).intValue());
+      XATopicConnectionFactory cnxFact =
+        new XATopicTcpConnectionFactory(host, (new Integer(port)).intValue());
+      FactoryParameters params = cnxFact.getParameters();
+      params.connectingTimer = (new Integer(cnxTimer)).intValue();
       return cnxFact;
     }
     else if (ref.getClassName().equals(q_ClassName)) {

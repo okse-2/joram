@@ -76,6 +76,30 @@ public class ConsumerDenyRequest extends AbstractJmsRequest
     this.doNotAck = doNotAck;
   }
 
+  /**
+   * Constructs a <code>ConsumerDenyRequest</code> instance.
+   */
+  public ConsumerDenyRequest()
+  {}
+
+  /** Sets the denied message identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Sets the server ack policy. */
+  public void setDoNotAck(boolean doNotAck)
+  {
+    this.doNotAck = doNotAck;
+  }
+
   /** Returns the denied message identifier. */
   public String getId()
   {
@@ -92,7 +116,7 @@ public class ConsumerDenyRequest extends AbstractJmsRequest
    * Returns <code>true</code> if the request must not be acked by the 
    * server.
    */
-  public boolean doNotAck()
+  public boolean getDoNotAck()
   {
     return doNotAck;
   }

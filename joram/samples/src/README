@@ -4,7 +4,7 @@ HOW TO RUN THE SAMPLES
 
 Type:
  $ ant -projecthelp
-to have a list of the available Ant targets for the samples.
+to have a list of the available ant targets for the samples.
 
 0. COMPILING THE SAMPLES
 Type:
@@ -199,3 +199,27 @@ Type:
 d. Running the failing client:
 Type:
  $ ant dmq_client
+
+
+8. RUNNING THE SOAP SAMPLE
+The SOAP sample is a simple message producer and consumer pair communicating
+through HTTP/SOAP connections instead of TCP connections. It requires a
+configured (check installation document) Tomcat servlet container.
+
+a. Starting a Tomcat instance:
+Under tomcat/bin type the "startup" command.
+
+b. Starting the server 0:
+ $ ant soap_server
+
+c. Launching server 1, embedded in Tomcat's JVM:
+ $ ant soap_start
+
+d. Running the admin:
+ $ ant soap_admin
+
+e. Running the consumer:
+ $ ant soap_consumer
+
+f. Running the producer:
+ $ ant soap_producer

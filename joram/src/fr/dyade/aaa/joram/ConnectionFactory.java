@@ -27,8 +27,6 @@
  */
 package fr.dyade.aaa.joram;
 
-import java.net.*;
-
 import javax.jms.JMSException;
 import javax.naming.*;
 
@@ -37,69 +35,46 @@ import org.objectweb.util.monolog.api.BasicLevel;
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
  */
-public class ConnectionFactory
-             extends fr.dyade.aaa.joram.admin.AdministeredObject
-             implements javax.jms.ConnectionFactory
+public abstract class ConnectionFactory
+                extends fr.dyade.aaa.joram.admin.AdministeredObject
+                implements javax.jms.ConnectionFactory
 {
-  /** Object containing the factory's configuration parameters. */
-  protected FactoryConfiguration config;
+  /** Object containing the factory's parameters. */
+  protected FactoryParameters params;
 
 
   /**
-   * Constructs a <code>ConnectionFactory</code> instance wrapping a given
-   * server's parameters.
+   * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
-   *
-   * @exception UnknownHostException  If the host is unknown.
    */
-  public ConnectionFactory(String host, int port) throws UnknownHostException
+  public ConnectionFactory(String host, int port)
   {
-    super((new JoramUrl(host, port, null)).toString());
-
-    config = new FactoryConfiguration();
-
-    config.serverAddr = InetAddress.getByName(host);
-    config.port = port;
-    config.serverUrl = new JoramUrl(host, port, null);
+    super(host + ":" + port);
+    params = new FactoryParameters(host, port);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  /**
-   * Constructs a <code>ConnectionFactory</code> instance wrapping a given
-   * server's url.
-   *
-   * @param url  The server's url.
-   *
-   * @exception MalformedURLException  If the url is incorrect.
-   * @exception UnknownHostException  If the host is unknown.
-   */
-  public ConnectionFactory(String url) throws Exception
-  {
-    this((new JoramUrl(url)).getHost(), (new JoramUrl(url)).getPort());
-  }
 
   /** Returns a string view of the connection factory. */
   public String toString()
   {
-    return "CF:" + config.serverAddr.toString() + "-" + config.port;
+    return "CF:" + params.getHost() + "-" + params.getPort();
   }
 
 
   /**
-   * API method.
+   * API method, implemented according to the communication protocol.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-         throws JMSException
-  {
-    return new Connection(config, name, password);
-  }
+  public abstract javax.jms.Connection
+                  createConnection(String name, String password)
+                  throws JMSException;
 
   /**
    * API method.
@@ -114,36 +89,26 @@ public class ConnectionFactory
   }
 
   /**
-   * Sets the connecting timer.
-   *
-   * @param timer  Time in seconds for connecting.
+   * Returns the factory's configuration parameters.
    */
-  public void setCnxTimer(int timer)
+  public FactoryParameters getParameters()
   {
-    if (timer >= 0)
-      config.cnxTimer = timer;
+    return params;
   } 
-
-  /**
-   * Sets the transaction timer.
-   *
-   * @param timer  Maximum time in seconds for a transaction to finish.
-   */
-  public void setTxTimer(int timer)
-  {
-    if (timer >= 0)
-      config.txTimer = timer;
-  }
 
   /** Sets the naming reference of a connection factory. */
   public Reference getReference() throws NamingException
   {
     Reference ref = super.getReference();
-    ref.add(new StringRefAddr("cFactory.url", config.serverUrl.toString()));
-    ref.add(new StringRefAddr("cFactory.cnxT",
-                              (new Integer(config.cnxTimer)).toString()));
-    ref.add(new StringRefAddr("cFactory.txT",
-                              (new Integer(config.txTimer)).toString()));
+    ref.add(new StringRefAddr("cFactory.host", params.getHost()));
+    ref.add(new StringRefAddr("cFactory.port",
+                              (new Integer(params.getPort())).toString()));
+    ref.add(
+      new StringRefAddr("cFactory.cnxT",
+                        (new Integer(params.connectingTimer)).toString()));
+    ref.add(
+      new StringRefAddr("cFactory.txT",
+                        (new Integer(params.txPendingTimer)).toString()));
     return ref;
   }
 }

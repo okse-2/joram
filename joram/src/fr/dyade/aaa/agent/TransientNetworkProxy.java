@@ -54,8 +54,8 @@ import fr.dyade.aaa.util.Arrays;
  * @see		AgentServer
  */
 final class TransientNetworkProxy extends Network {
-  /** RCS version number of this file: $Revision: 1.7 $ */
-  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.7 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.8 $ */
+  public static final String RCS_VERSION="@(#)$Id: TransientNetworkProxy.java,v 1.8 2003-03-19 15:16:06 fmaistre Exp $";
 
   /** The stamp. Be careful, the stamp is transient. */
   int stamp = 0;

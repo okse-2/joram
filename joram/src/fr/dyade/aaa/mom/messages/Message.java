@@ -44,37 +44,37 @@ import java.util.*;
 public class Message implements Cloneable, Serializable
 {
   /** The message type (SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES). */
-  private int type;
+  int type;
 
   /** The message identifier. */
-  private String id = null;
+  String id = null;
   /** The message priority (from 0 to 9, 9 being the highest). */
-  private int priority = 4;
+  int priority = 4;
   /** The message expiration time (0 for infinite time-to-live). */
-  private long expiration = 0;
+  long expiration = 0;
   /** The message time stamp. */
-  private long timestamp;
+  long timestamp;
   /** The message destination identifier. */
-  private String toId = null;
+  String toId = null;
   /** <code>true</code> if the message destination is a queue. */
-  private boolean toQueue;
+  boolean toQueue;
   /** The correlation identifier field. */
-  private String correlationId = null;
+  String correlationId = null;
   /** The reply to destination identifier. */
-  private String replyToId = null;
+  String replyToId = null;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  private boolean replyToQueue;
+  boolean replyToQueue;
 
   /**
    * Table holding header fields that may be required by particular
    * clients (such as JMS clients).
    */
-  private Hashtable optionalHeader = null;
+  Hashtable optionalHeader = null;
 
   /** The message body. */
-  private byte[] body = null;
+  byte[] body = null;
   /** <code>true</code> if the body is read-only. */
-  private boolean bodyRO = false;
+  boolean bodyRO = false;
 
   /**
    * The message properties table.
@@ -82,9 +82,9 @@ public class Message implements Cloneable, Serializable
    * <b>Key:</b> property name<br>
    * <b>Object:</b> property (native objects)
    */
-  private Hashtable properties = null;
+  Hashtable properties = null;
   /** <code>true</code> if the properties are read-only. */
-  private boolean propertiesRO = false;
+  boolean propertiesRO = false;
 
   /** The number of delivery attempts for this message. */
   public int deliveryCount = 0;
@@ -791,5 +791,104 @@ public class Message implements Cloneable, Serializable
     s.defaultWriteObject();
     bodyRO = true;
     propertiesRO = true;
+  }
+
+
+  /**
+   * Transforms this message into a vector of primitive values that can
+   * be vehiculated through the SOAP protocol.
+   */
+  public Vector soapCode()
+  {
+    Vector vec = new Vector();
+   
+    // Building a hashtable containg the fields values: 
+    Hashtable fieldsTb = new Hashtable();
+
+    fieldsTb.put("type", new Integer(type));
+    fieldsTb.put("id", id);
+    fieldsTb.put("priority", new Integer(priority));
+    fieldsTb.put("expiration", new Long(expiration));
+    fieldsTb.put("timestamp", new Long(timestamp));
+    fieldsTb.put("toId", toId);
+    fieldsTb.put("toQueue", new Boolean(toQueue));
+    if (correlationId != null)
+      fieldsTb.put("correlationId", correlationId);
+    if (replyToId != null) {
+      fieldsTb.put("replyToId", replyToId);
+      fieldsTb.put("replyToQueue", new Boolean(replyToQueue));
+    }
+    if (body != null)
+      fieldsTb.put("body", body);
+    fieldsTb.put("bodyRO", new Boolean(bodyRO));
+    fieldsTb.put("propertiesRO", new Boolean(propertiesRO));
+    fieldsTb.put("deliveryCount", new Integer(deliveryCount));
+    fieldsTb.put("denied", new Boolean(denied));
+    if (consId != null)
+      fieldsTb.put("consId", consId);
+    fieldsTb.put("acksCounter", new Integer(acksCounter));
+    fieldsTb.put("deletedDest", new Boolean(deletedDest));
+    fieldsTb.put("expired", new Boolean(expired));
+    fieldsTb.put("notWritable", new Boolean(notWritable));
+    fieldsTb.put("undeliverable", new Boolean(undeliverable));
+
+    vec.add(fieldsTb);
+
+    // Adding the hashtable of optional headers:
+    vec.add(optionalHeader);
+
+    // Adding the hashtable of properties:
+    vec.add(properties);
+
+    return vec;
+  }
+
+  /** 
+   * Transforms a vector of primitive values into a <code>Message</code>
+   * instance.
+   */
+  public static Message soapDecode(Vector vec) 
+  {
+    Hashtable fieldsTb = (Hashtable) vec.remove(0);
+    Hashtable optTb = (Hashtable) vec.remove(0);
+    Hashtable propsTb = (Hashtable) vec.remove(0);
+
+    Message msg = new Message();
+
+    try {
+      msg.type = ConversionHelper.toInt(fieldsTb.get("type"));
+      msg.id = (String) fieldsTb.get("id");
+      msg.priority = ConversionHelper.toInt(fieldsTb.get("priority"));
+      msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
+      msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
+      msg.toId = (String) fieldsTb.get("toId");
+      msg.toQueue = ConversionHelper.toBoolean(fieldsTb.get("toQueue"));
+      msg.correlationId = (String) fieldsTb.get("correlationId");
+      msg.replyToId = (String) fieldsTb.get("replyToId");
+      if (msg.replyToId != null) {
+        msg.replyToQueue =
+          ConversionHelper.toBoolean(fieldsTb.get("replyToQueue"));
+      }
+      msg.body = ConversionHelper.toBytes(fieldsTb.get("body"));
+      msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
+      msg.propertiesRO =
+        ConversionHelper.toBoolean(fieldsTb.get("propertiesRO"));
+      msg.deliveryCount = ConversionHelper.toInt(fieldsTb.get("deliveryCount"));
+      msg.denied = ConversionHelper.toBoolean(fieldsTb.get("denied"));
+      msg.consId = (String) fieldsTb.get("consId");
+      msg.acksCounter = ConversionHelper.toInt(fieldsTb.get("acksCounter"));
+      msg.deletedDest = ConversionHelper.toBoolean(fieldsTb.get("deletedDest"));
+      msg.expired = ConversionHelper.toBoolean(fieldsTb.get("expired"));
+      msg.notWritable = ConversionHelper.toBoolean(fieldsTb.get("notWritable"));
+      msg.undeliverable =
+        ConversionHelper.toBoolean(fieldsTb.get("undeliverable"));
+
+      msg.optionalHeader = optTb;
+      msg.properties = propsTb;
+    }
+    // Should never happen!
+    catch (MessageValueException exc) {}
+  
+    return msg;
   }
 }

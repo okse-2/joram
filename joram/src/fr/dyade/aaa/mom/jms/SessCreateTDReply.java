@@ -48,6 +48,18 @@ public class SessCreateTDReply extends AbstractJmsReply
     this.agentId = agentId;
   }
 
+  /**
+   * Constructs a <code>SessCreateTDReply</code> instance.
+   */
+  public SessCreateTDReply()
+  {}
+
+  /** Sets the destination identifier. */
+  public void setAgentId(String agentId)
+  {
+    this.agentId = agentId;
+  }
+
   /** Returns the temporary destination's agent identifier. */
   public String getAgentId()
   {

@@ -31,7 +31,7 @@ import java.io.IOException;
  * @see		Engine, Network.
  */
 public interface MessageConsumer {
-  public static final String RCS_VERSION="@(#)$Id: MessageConsumer.java,v 1.8 2002-12-11 11:22:12 maistrfr Exp $";
+  public static final String RCS_VERSION="@(#)$Id: MessageConsumer.java,v 1.9 2003-03-19 15:16:06 fmaistre Exp $";
 
   /**
    * Returns this <code>MessageConsumer</code>'s name.

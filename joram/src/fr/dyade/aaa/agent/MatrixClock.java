@@ -34,8 +34,8 @@ import fr.dyade.aaa.util.*;
  * An element of the matrix clock.
  */
 class MatClockElt {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $"; 
 
   /** Element value. */
   int stamp;
@@ -50,8 +50,8 @@ class MatClockElt {
  * Matrix clock realization. 
  */
 class MatrixClock implements Serializable {
-  /** RCS version number of this file: $Revision: 1.11 $ */
-  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.11 2002-12-11 11:22:12 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.12 $ */
+  public static final String RCS_VERSION="@(#)$Id: MatrixClock.java,v 1.12 2003-03-19 15:16:06 fmaistre Exp $";
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.

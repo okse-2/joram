@@ -48,6 +48,18 @@ public class QBrowseRequest extends AbstractJmsRequest
     this.selector = selector;
   }
 
+  /**
+   * Constructs a <code>QBrowseRequest</code> instance.
+   */
+  public QBrowseRequest()
+  {}
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
+  }
+
   /** Returns the selector for filtering the messages. */
   public String getSelector()
   {

@@ -37,20 +37,18 @@ public class XATopicConnection extends TopicConnection
                                implements javax.jms.XATopicConnection
 {
   /**
-   * Constructs an <code>XATopicConnection</code> instance and opens a TCP
-   * connection with a given agent server.
+   * Creates an <code>XATopicConnection</code> instance.
    *
-   * @param fConfig  The factory's configuration object.
-   * @param name  User's name.
-   * @param password  User's password.
+   * @param factoryParameters  The factory parameters.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  XATopicConnection(FactoryConfiguration fConfig, String name,
-                    String password) throws javax.jms.JMSException
+  public XATopicConnection(FactoryParameters factoryParameters,
+                           ConnectionItf connectionImpl) throws JMSException
   {
-    super(fConfig, name, password);
+    super(factoryParameters, connectionImpl);
   }
 
   /**

@@ -40,7 +40,7 @@ import fr.dyade.aaa.agent.*;
  */
 public class LookupObject extends SimpleCommand {
 
-public static final String RCS_VERSION="@(#)$Id: LookupObject.java,v 1.8 2002-12-11 11:26:41 maistrfr Exp $";
+public static final String RCS_VERSION="@(#)$Id: LookupObject.java,v 1.9 2003-03-19 15:18:40 fmaistre Exp $";
 
   /**
    * Creates a notification to be sent.

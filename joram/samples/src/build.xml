@@ -54,6 +54,9 @@
     <delete dir="${run.dir}"/>
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/tcp_jndi.properties"
+          tofile="${conf.dir}/jndi.properties"
+          overwrite="true"/>
     <copy file="${conf.dir}/centralized_a3servers.xml"
           tofile="${conf.dir}/a3servers.xml"
           overwrite="true"/>
@@ -63,7 +66,22 @@
   <target name="distributed_init" depends="init">
     <mkdir dir="${run.dir}"/>
     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/tcp_jndi.properties"
+          tofile="${conf.dir}/jndi.properties"
+          overwrite="true"/>
     <copy file="${conf.dir}/distributed_a3servers.xml"
+          tofile="${conf.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the soap configuration -->
+  <target name="soap_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/soap_jndi.properties"
+          tofile="${conf.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/soap_a3servers.xml"
           tofile="${conf.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
@@ -369,6 +387,52 @@
   <target name="dmq_client" depends="init"
     description="--> Starts a dead message queue client">
     <java classname="deadMQueue.DMQClient" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Starts the server side soap service -->
+  <target name="soap_start" depends="soap_init"
+   description=" Starts the server side soap service">
+    <java classname="fr.dyade.aaa.joram.soap.SoapServiceStarter"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="localhost 8080 1 S1"/>
+    </java>
+  </target>
+
+  <!-- Starts the server 1 of the soap configuration -->
+  <target name="soap_server" depends="soap_init"
+   description="--> Start server 0 of the SOAP configuration">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap tests dministrator -->
+  <target name="soap_admin" depends="init"
+    description="--> Starts the SOAP test administrator">
+    <java classname="soap.SoapAdmin" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap producer -->
+  <target name="soap_producer" depends="init"
+    description="--> Starts the SOAP tester">
+    <java classname="soap.SoapProducer" failonerror="no" fork="yes">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap consumer -->
+  <target name="soap_consumer" depends="init"
+    description="--> Starts the SOAP consumer">
+    <java classname="soap.SoapConsumer" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
   </target>

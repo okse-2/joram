@@ -53,12 +53,24 @@ public abstract class AbstractJmsRequest implements java.io.Serializable
     this.target = target;
   }
 
+  /**
+   * Constructs an <code>AbstractJmsRequest</code>.
+   */
+  public AbstractJmsRequest()
+  {}
+
+  /** Sets the target. */
+  public void setTarget(String target)
+  {
+    this.target = target;
+  }
+
   /** Sets the request identifier. */
-  public void setIdentifier(String requestId)
+  public void setRequestId(String requestId)
   {
     this.requestId = requestId;
   }
-
+  
   /** Returns the String identifier of this request target.  */
   public String getTarget()
   {

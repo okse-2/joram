@@ -31,12 +31,13 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
 /**
- * An <code>AdminNotification</code> is sent by a <code>JmsProxy</code>
- * dedicated to an administrator for registering itself to the local
- * <code>AdminTopic</code>.
+ * An <code>AdminNotification</code> is sent by an administrator's proxy for
+ * registering to the local <code>AdminTopic</code>.
  */
 public class AdminNotification extends Notification
 {
+  /** The proxy's <code>AgentId</code> identifier. */
+  private AgentId proxyId;
   /** The administrator's name. */
   private String name;
   /** The administrator's password. */
@@ -45,15 +46,23 @@ public class AdminNotification extends Notification
   /**
    * Constructs an <code>AdminNotification</code> instance.
    *
+   * @param proxyId  The proxy's identifier.
    * @param name  The name of the administrator.
    * @param pass  The password of the administrator.
    */
-  AdminNotification(String name, String pass)
+  AdminNotification(AgentId proxyId, String name, String pass)
   {
+    this.proxyId = proxyId;
     this.name = name;
     this.pass = pass;
   }
 
+  
+  /** Returns the <code>AgentId</code> of the proxy. */
+  public AgentId getProxyId()
+  {
+    return proxyId;
+  }
 
   /** Returns the name of the administrator. */
   public String getName()

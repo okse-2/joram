@@ -37,8 +37,8 @@ import org.objectweb.util.monolog.wrapper.common.Configurable;
  * This class handles the debug traces.
  */
 public class Debug {
-  /** RCS version number of this file: $Revision: 1.4 $ */
-  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.4 2002-12-11 11:27:01 maistrfr Exp $";
+  /** RCS version number of this file: $Revision: 1.5 $ */
+  public static final String RCS_VERSION="@(#)$Id: Debug.java,v 1.5 2003-03-19 15:19:04 fmaistre Exp $";
 
   /** Property name for monolog logger factory implementation class */
   public final static String LOGGER_FACTORY_PROPERTY = "LOGGER_FACTORY";
@@ -59,10 +59,31 @@ public class Debug {
   /** */
   protected static LoggerFactory factory;
 
+  public static void reinit() throws Exception{
+    initialize();
+  }
+
+  protected static void init(){
+    try{
+      initialize();
+    }catch(Exception exc){
+      try{
+        ((Configurable) factory).configure(null);
+        Logger[] loggers = factory.getLoggers();
+        for (int i=0; i<loggers.length; i++) {
+          loggers[i].setIntLevel(BasicLevel.ERROR);
+        }
+      } catch (Exception e) {
+        System.err.println("Unable to configure monolog wrapper");
+        System.exit(1);
+      }
+    }
+  }
+
   /**
    * Initializes the package.
    */
-  protected static void init() {
+  private static void initialize() throws Exception{
     String debugDir = System.getProperty(DEBUG_DIR_PROPERTY);
     String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
                                               DEFAULT_DEBUG_FILE);
@@ -88,37 +109,19 @@ public class Debug {
     // Instanciate the MonologLoggerFactory
     String loggerFactory = System.getProperty(LOGGER_FACTORY_PROPERTY,
                                               DEFAULT_LOGGER_FACTORY);
-    try {
-      factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
-    } catch (Exception exc) {
-      System.err.println("Unable to instantiate monolog wrapper");
-      System.exit(1);
-    }
+    factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
 
-    try {
-      Properties prop = new Properties();
-      prop.put(Configurable.LOG_CONFIGURATION_TYPE,
-               Configurable.PROPERTY);
-      prop.put(Configurable.LOG_CONFIGURATION_FILE,
-               debugFileName);
-      if (debugDir == null) {
-        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
-      } else {
-        prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
-      }
-      ((Configurable) factory).configure(prop);
-    } catch (Exception exc) {
-      try {
-        ((Configurable) factory).configure(null);
-        Logger[] loggers = factory.getLoggers();
-        for (int i=0; i<loggers.length; i++) {
-          loggers[i].setIntLevel(BasicLevel.ERROR);
-        }
-      } catch (Exception e) {
-        System.err.println("Unable to configure monolog wrapper");
-        System.exit(1);
-      }
+    Properties prop = new Properties();
+    prop.put(Configurable.LOG_CONFIGURATION_TYPE,
+             Configurable.PROPERTY);
+    prop.put(Configurable.LOG_CONFIGURATION_FILE,
+             debugFileName);
+    if (debugDir == null) {
+      prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
+    } else {
+      prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
     }
+    ((Configurable) factory).configure(prop);
   }
 
   public static Logger getLogger(String topic) {

@@ -60,8 +60,6 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    * @param selector  The selector for filtering messages.
    *
    * @exception InvalidSelectorException  If the selector syntax is invalid.
-   * @exception JMSSecurityException  If the client is not a READER on the
-   *              queue.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
@@ -126,6 +124,8 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception IllegalStateException  If the browser is closed, or if the
    *              connection is broken.
+   * @exception JMSSecurityException  If the client is not a READER on the
+   *              queue.
    * @exception JMSException  If the request fails for any other reason.
    */
   public Enumeration getEnumeration() throws JMSException

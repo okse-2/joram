@@ -20,8 +20,8 @@ import fr.dyade.aaa.agent.*;
  * port number.<p>
  */
 public abstract class ServerAgent extends Agent {
-  /** RCS version number of this file: $Revision: 1.1 $ */
-  public static final String RCS_VERSION="@(#)$Id: ServerAgent.java,v 1.1 2002-12-11 11:22:24 maistrfr Exp $"; 
+  /** RCS version number of this file: $Revision: 1.2 $ */
+  public static final String RCS_VERSION="@(#)$Id: ServerAgent.java,v 1.2 2003-03-19 15:17:15 fmaistre Exp $"; 
 
   /** The TCP listen port */
   protected int port = -1;
