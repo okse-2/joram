@@ -14,15 +14,6 @@
 
   <s1 name="Road map">
   
-    <subtitle>Joram 3.7 (November 2003)</subtitle>
-    <p>The main new feature that Joram 3.7 will provide is a graphical
-    administration tool. This tool allows to administer and monitor one or many
-    interconnected servers; create/delete destinations, users; set destinations
-    access rights; build connection factories; bind factories and destinations
-    to a JNDI server.</p>
-    <p>This new release will finaly allow a friendly and evolutive Joram
-    administration!</p>
-
     <subtitle>Joram 3.8 (December 2003)</subtitle>
     <p>It is planned for this release to provide a new client/server
     communication protocol. Today, in the case of collocated client and server,

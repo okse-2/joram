@@ -13,6 +13,27 @@
   <body>
 
     <s1 name="Latest News">
+      <subtitle>November 7, 2003: JORAM finaly includes a graphical
+      administration tool in its 3.7 release!</subtitle>
+      <p>Thanks to Alexander Fedorowicz, an active JORAM contributor,
+      the long expected graphical tool
+      for administering and monitoring the state of a JORAM platform is
+      finaly available.</p>
+      <p>This tool allows to administer and monitor a JORAM platform made of
+      one or many interconnected JORAM servers. It allows to create and delete
+      destinations, users, and also to bind them to JORAM's naming server.</p>
+      <p>Many thanks to Alexander for providing this useful tool often
+      requested on JORAM's mailing lists.</p>
+      <p>The tool sources are available in CVS and in the sources package. It
+      is provided as an independent library in the binary distribution. Check
+      the <a href="download/index.html">download area</a>.
+      </p>
+      <p>This latest release is also available through a CVS checkout, tag
+        <strong>joram3_7_0</strong>.</p>
+      <p>The installation, administration and samples guides have been updated.
+      An HTML user manual for the tool has been provided by Alexander, and
+      is reachable from the <a href="doc/index.html">documentation area</a>.
+      Enjoy!</p>
       <subtitle>August 7, 2003: JORAM 3.6 connects J2ME devices!</subtitle>
       <p>JORAM 3.6 follows the 3.4 release in addressing the opening of the
       JORAM platform to <strong>heterogenous</strong> client applications.
@@ -36,36 +57,18 @@
       </ul>
       <p>JORAM and kJORAM are also available through a CVS checkout, tag
         <strong>joram3_6_0</strong>.</p>
-      <p>The installation and samples guides have been updated to help you
-      having an easy and quick first go with kJORAM. Enjoy!</p>
-      <subtitle>June 24th, 2003: JORAM 3.5 is available under the
-                LGPL licence!</subtitle>
-      <p>JORAM 3.5 is available in the CVS repository (joram3_5_0 tag) as well
-      as packaged. This version is based on the 3.4 release and
-      includes the <strong>SOAP</strong> proxy. On top of that, it provides
-      a totally refactored <strong>message persistence</strong> management.
-      </p>
-      <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
-      <p>The details of all the modifications and bug corrections which occured
-      to the 3.4 release can be found in the
-      <a href="dev/versions.html">releases page</a>.</p>
-      <p><a href="doc/index.html">Documentation</a> has been updated.
-      Particularly, a comparison between the 3.4 and the 3.5 releases
-      performances may be found.</p>
-      <p>
-      JORAM is now released under the <strong>LGPL</strong> licence.</p>
     </s1>
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
       <subtitle>As a standalone software, JORAM has been downloaded more
-                than 14,000 times</subtitle>
+                than 15,000 times</subtitle>
 
       <table border="0">
 	<tr>
 	  <td><img src="images/joram.jpg" alt="JORAM logo" height="132"
                width="287" border="0" hspace="2"/></td>
-	  <td valign="middle"><p>Current packaged release: 3.6.0</p>
-	                      <p>Latest CVS tag: joram3_6_3</p></td>
+	  <td valign="middle"><p>Current packaged release: 3.7.0</p>
+	                      <p>Latest CVS tag: joram3_7_0</p></td>
 	</tr>
       </table>
       
@@ -106,6 +109,7 @@
           <li>Monitoring methods</li>
           <li>Client libraries allowing J2ME applications to
           access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>A graphical administration and monitoring tool</li>
         </ul>
       </s2>
 
