@@ -34,7 +34,7 @@ import javax.jms.*;
  * Test the <code>javax.jms.TemporaryTopic</code> features.
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TemporaryTopicTest.java,v 1.1 2002-03-19 16:33:53 joram Exp $
+ * @version $Id: TemporaryTopicTest.java,v 1.2 2002-03-21 10:36:19 joram Exp $
  */
 public class TemporaryTopicTest extends PubSubTestCase {
 
@@ -68,8 +68,6 @@ public class TemporaryTopicTest extends PubSubTestCase {
 	    TextMessage msg = (TextMessage)m;
 	    assertEquals("testTemporaryTopic", msg.getText());
 	    
-	    //XXX
-	    //tempTopic.delete();
 	} catch (JMSException e) {
 	    fail(e);
 	}
