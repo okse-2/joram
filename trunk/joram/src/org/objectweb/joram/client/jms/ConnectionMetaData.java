@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -39,7 +39,7 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData
   private static String jmsVersion = "1.1";
   private static int providerMajorVersion = 4;
   private static int providerMinorVersion = 0;
-  private static String providerVersion = "4.0";
+  private static String providerVersion = "4.0.5";
   private static Vector jmsxProperties = new Vector();
 
   static
