@@ -94,6 +94,7 @@
           <li>Message persistence and guarantee of delivery</li>
           <li>Hierarchical topics</li>
           <li>Message selection</li>
+          <li>Message prioritization</li>
         </ul>
         <p>JORAM also includes the following extra-features:</p>
         <ul>
