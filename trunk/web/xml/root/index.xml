@@ -57,6 +57,8 @@
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
    	
       <p><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></p>
+
+      <p>Current release: 2.2</p>
       
       <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of
       <em>JMS</em> (Java Message Service API released by Sun Microsystem,
