@@ -35,6 +35,9 @@ import java.util.Vector;
 /**
  * This class is the reference implementation of the <code>MonitorItf</code> 
  * interface.
+ *
+ * @deprecated  This class is temporarily kept but the methods of the new
+ *              <code>AdminModule</code> class should be used instead.
  */
 public class MonitorImpl implements MonitorItf
 {
