@@ -11,7 +11,8 @@
 
   <body>    
     <menu>
-      <a href="index.html">JORAM</a>
+      <legend>Project Links</legend>
+      <menuitem><a href="index.html">Home</a></menuitem>
       <menuitem><a href="download/index.html">Download</a></menuitem>
       <menuitem><a href="doc/index.html">Documentation</a></menuitem>
       <menuitem><a href="mailing.html">Mailing Lists</a></menuitem>
@@ -21,33 +22,26 @@
     </menu>
 
     <menu>
-      <connect href="dev/corner.xml">Developers' corner</connect>
+      <legend>Developers' Corner</legend>
+      <menuitem><a href="dev/corner.html">About</a></menuitem>
       <menuitem><connect href="dev/versions.xml">Releases info</connect></menuitem>
       <menuitem><connect href="dev/topics.xml">Hot topics</connect></menuitem>
       <menuitem><a href="http://forge.objectweb.org/cvs/?group_id=4">CVS repository</a></menuitem>
     </menu>
     
     <menu>
-      <a href="tests/index.html">Test Suite</a>
+      <legend>Test Suite</legend>
+      <menuitem><a href="tests/index.html">About</a></menuitem>
       <menuitem><a href="tests/download.html">Download</a></menuitem>
       <menuitem><a href="tests/doc.html">Documentation</a></menuitem>
       <menuitem><a href="tests/license.html">License</a></menuitem>
     </menu>
     
     <menu>
-      <legend>About JORAM</legend>
+      <legend>About</legend>
       <menuitem><a href="team.html">Team</a></menuitem>
       <menuitem><a href="mailing.html">Contacts</a></menuitem>
     </menu>
 
-    <menu>
-      <legend>ObjectWeb Resources</legend>
-      <menuitem><a href="http://www.objectweb.org/faq">FAQ</a></menuitem>
-      <menuitem><a href="http://www.objectweb.org/wws">Mailing Lists</a></menuitem>
-      <menuitem><a href="http://www.objectweb.org/resources/cvs.html">CVS Repositories</a></menuitem>
-      <menuitem><a href="http://www.objectweb.org/resources/search.html">Search</a></menuitem>
-      <menuitem><a href="http://forge.objectweb.org/">ObjectWeb Forge</a></menuitem>
-      <menuitem><a href="http://www.objectweb.org/mirrors.html">Mirror Sites</a></menuitem>
-    </menu>
   </body>
 </project>

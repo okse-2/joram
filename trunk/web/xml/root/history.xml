@@ -23,7 +23,6 @@
       </p>
       <p>The latest 3.4 update (joram3_4_3) has also been packaged.</p>
       <p>JORAM is now released under the <em>LGPL</em> licence.</p>
-      <hr />
 
      <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
      <p>JORAM 3.3 is now available as a packaged version.
@@ -36,7 +35,6 @@
      a Joram client and a Joram platform. It rearchitectures the JMS proxy
      server side, and the JMS connection client side, for supporting multiple 
      protocols (currently TCP and SOAP).</p>
-     <hr />
 
      <subtitle>December 11th, 2002: a new JORAM version tagged 3_3_0 is
       available in the CVS distribution.</subtitle>
@@ -50,7 +48,6 @@
       interface. Old administration codes should go on working even if they now
       use deprecated methods. 
       </p>
-      <hr />
 
      <subtitle>October 21st, 2002: JORAM 3.2 provides new features!</subtitle>
       <p>The main added values of Joram 3.2.0 are the new implementations of
@@ -70,7 +67,6 @@
          order to prevent a Joram platform to be overloaded by a heavily
          producing client.
       </p>
-      <hr />
 
      <subtitle>June 10th, 2002: JORAM now implements the new JMS 1.1
         specification!</subtitle>
@@ -85,7 +81,6 @@
         the previous Joram and JMS versions will work as is with
         these new versions.</p>
       
-      <hr />
 
       <subtitle>7th june 2002: JORAM 3.0.4 available (cvs tag: joram3_0_4-1)</subtitle>
       
@@ -98,7 +93,6 @@
         corresponding to JMS 1.0.2b is jms1_0_2b. 
       </p>
 
-      <hr /> 
 
       <subtitle>26th March 2002: JORAM 3.0.1 available (cvs tag: joram3_0_1)</subtitle>
       
@@ -109,14 +103,12 @@
 	in CVS repository.
       </p>
 
-      <hr /> 
 
       <subtitle>20th March 2002: JMS Test Suite released</subtitle>
 
       <p><em>A JMS Test Suite</em> has been released under LGPL.<br />
 	This suite tests JMS features. All code of the test suite is
 	pure JMS without any dependency to JORAM.</p>
-      <hr/>
 
       <subtitle>11th March 2002: JORAM 3.0.0 available (cvs tag: joram3_0_0)</subtitle>
       
@@ -134,7 +126,6 @@
 	download.
       </p>
       
-      <hr />
 
       <subtitle>16th January 2002: JORAM 2.2 (cvs tag:
 	joram2_2)</subtitle>
@@ -142,7 +133,6 @@
 	system.
       </p>
 
-      <hr/>
 
       <subtitle>14th September 2001: JORAM 2.1.1 (cvs tag: joram2_1_1)</subtitle>
     
@@ -150,7 +140,6 @@
       selectors are now authorized, syntax is systematically checked and Strings
       syntax has been enlarged to characters such as '/', ';', ...</p>
 
-      <hr/>
 
       <subtitle>31st August 2001: JORAM 2.1.0 (cvs tag: joram2_1_0)</subtitle>
 
@@ -161,7 +150,6 @@
 	  object's class in the agents server classpath.</li>
       </ul>
       
-      <hr/>
       
       <subtitle>15th May 2001: JORAM 2.0.1 (cvs tag: joram2_0_1)</subtitle>
       
@@ -169,7 +157,6 @@
 	management of closing sockets, and a better handling of stopping threads when
 	closing <code>Sessions</code>, <code>ConnectionConsumers</code> and <code>Connections</code>.</p>
       
-      <hr/>
       
       <subtitle>7th May 2001: JORAM 2.0.0 (cvs tag: joram2_0_0) fully implements the
 	Application Server Facilities (ASF)</subtitle>
@@ -183,7 +170,6 @@
 	  solved.</li>
       </ul>
       
-      <hr/>
       
       <subtitle>5th December 2000: JORAM included in JOnAS</subtitle>
       
@@ -191,7 +177,6 @@
 	1.1.0 allow using JMS from Enterprise Java Beans and have been successfully
 	tested on AIX, Linux, Solaris, NT and Windows 2000.</p>
       
-      <hr/>
       
       <subtitle>10th October 2000: JORAM is now tagged 1.1.0 (cvs tag: joram1_1_0)</subtitle>
       
@@ -204,7 +189,6 @@
 	<li>Persistence and lookup <em>bugs</em> fixed.</li>
       </ul>
       
-      <hr/>
       <subtitle>31st August 2000 : JORAM implements more</subtitle>
       
       <ul>
@@ -214,7 +198,6 @@
 	<li>External <em>JNDI</em> now usable.</li>
       </ul>
       
-      <hr/>
 
       <subtitle>26th May 2000 : JORAM first open source version available !</subtitle>
       
