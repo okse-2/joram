@@ -214,7 +214,7 @@
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter -->
-  <target name="ship.adapter" depends="ship.joram,ship.adapter.bin"
+  <target name="ship.adapter" depends="ship.joram"
           description="--> Ships a JORAM JCA adapter">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -238,7 +238,7 @@
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter for non collocated use -->
-  <target name="ship.remoteadapter" depends="ship.joram,ship.adapter.bin"
+  <target name="ship.remoteadapter" depends="ship.joram"
           description="--> Ships a JORAM JCA adapter for non collocated use">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -259,7 +259,7 @@
   </target>
 
   <!-- Ships a JORAM JCA 1.5 adapter for JOnAS joram_for_jonas_ra.rar -->
-  <target name="ship.jonasadapter" depends="ship.joram,ship.adapter.bin"
+  <target name="ship.jonasadapter" depends="ship.joram"
           description="--> Ships a JORAM JCA adapter for JOnAS">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
@@ -320,6 +320,24 @@
     <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
           tofile="${releases.dir}/joram-jonasadapter-${version}.rar"/>
     <delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/>
+    <antcall target="ship.adapter.bin" inheritAll="true"/>
+
+    <tar tarfile="${releases.dir}/joram-raconfig-${version}.tar"
+         longfile="gnu">
+      <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
+                  username="joram" group="joram">
+        <include name="bin/raconfig.bat"/>
+        <include name="bin/raconfig.sh"/>
+        <include name="lib/joram-raconfig.jar"/>
+        <include name="lib/ow_monolog.jar"/>
+        <include name="licences/LGPL_HEADER.TXT"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-raconfig-${version}.tgz"/>
+    <gzip src="${releases.dir}/joram-raconfig-${version}.tar"
+          zipfile="${releases.dir}/joram-raconfig-${version}.tgz"/>
+    <delete file="${releases.dir}/joram-raconfig-${version}.tar"/>
+
   </target>
 
   <target name="release.jar" depends="ship.joram,javadoc" if="version">
