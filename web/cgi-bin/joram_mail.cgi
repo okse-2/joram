@@ -24,8 +24,8 @@ $nexturl  = $in{'nexturl'};
 
 print "Content-type: text/html\n\n";
 print "\n\n";
-print "<HTML>\n";
 
+print "<HTML>\n";
 print "<HEAD>\n";
 print "<TITLE>JOnAS download</TITLE>";
 print "<STYLE type=\"text/css\">";
@@ -76,8 +76,8 @@ if ($MESSAGE eq "") {
 
   print "<H3>JORAM 2.2</H3>\n";
   print "<UL>\n";
-  print "<LI>JORAM 2.2 jars (<A HREF=\"../../../joram/download/objectweb-joram-2.2.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/objectweb-joram-2.2.zip\">zip</A>)</li>\n";
-  print "<LI>JORAM 2.2 sources (<A HREF=\"../../../joram/download/objectweb-joram-2.2-src.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/objectweb-joram-2.2-src.zip\">zip</A>)</li>\n";
+  print "<LI>JORAM 2.2 jars (<A HREF=\"../../../joram/download/joram-2.2-bin.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/joram-2.2-bin.zip\">zip</A>)</li>\n";
+  print "<LI>JORAM 2.2 sources (<A HREF=\"../../../joram/download/joram-2.2-src.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/joram-2.2-src.zip\">zip</A>)</li>\n";
   print "</UL>\n";
 
   print "<HR>\n";
@@ -86,8 +86,8 @@ if ($MESSAGE eq "") {
 
   print "<H3>JORAM 2.1.1</H3>\n";
   print "<UL>\n";
-  print "<LI>JORAM 2.1.1 jars (<A HREF=\"../../../joram/download/objectweb-joram-2.1.1.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/objectweb-joram-2.1.1.zip\">zip</A>)</li>\n";
-  print "<LI>JORAM 2.1.1 sources (<A HREF=\"../../../joram/download/objectweb-joram-2.1.1-src.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/objectweb-joram-2.1.1-src.zip\">zip</A>)</li>\n";
+  print "<LI>JORAM 2.1.1 jars (<A HREF=\"../../../joram/download/joram-2.1.1-bin.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/joram-2.1.1-bin.zip\">zip</A>)</li>\n";
+  print "<LI>JORAM 2.1.1 sources (<A HREF=\"../../../joram/download/joram-2.1.1-src.tar.gz\">tar.gz</A>, <A HREF=\"../../../joram/download/joram-2.1.1-src.zip\">zip</A>)</li>\n";
   print "</UL>\n";
 
   print "<HR>\n";
