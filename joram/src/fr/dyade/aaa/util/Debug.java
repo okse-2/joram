@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Original developer: ScalAgent Distributed Technologies
+ * Initial developer(s): Andre Freyssinet (ScalAgent DT)
  * Contributor(s): Douglas S. Jackson
  */
 package fr.dyade.aaa.util;
@@ -26,8 +26,6 @@ import java.util.*;
 
 import org.objectweb.util.monolog.api.*;
 
-import org.objectweb.util.monolog.wrapper.common.Configurable;
-
 /**
  * This class handles the debug traces.
  */
@@ -35,14 +33,6 @@ public class Debug {
   /** flag used to remove huge logging */
   public final static boolean debug = true;
 
-  /** */
-  public final static String DEBUG_CONFIGURE_PROPERTY = "fr.dyade.aaa.DEBUG_CONFIGURE";
-  /** */
-  public final static String DEFAULT_DEBUG_CONFIGURE = "true";
-  /** Property name for monolog logger factory implementation class */
-  public final static String LOGGER_FACTORY_PROPERTY = "LOGGER_FACTORY";
-  /** Default classname for monolog logger factory implementation */
-  public final static String DEFAULT_LOGGER_FACTORY = "org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory";
   /**
    * Property name for A3 debug configuration directory.
    * If not defined, the configuration file is searched from the search
@@ -57,6 +47,25 @@ public class Debug {
   /** */
   protected static LoggerFactory factory;
 
+  /**
+   * Name of the directory where the debug configuration
+   * file can be found.
+   */
+  private static String debugDir;
+
+  /**
+   * Name of the debug configuration file.
+   */
+  private static String debugFileName;
+
+  public static void setDebugDir(String debugDir) {
+    Debug.debugDir = debugDir;
+  }
+
+  public static void setDebugFileName(String debugFileName) {
+    Debug.debugFileName = debugFileName;
+  }
+
   public static void reinit() throws Exception {
     initialize();
   }
@@ -67,7 +76,7 @@ public class Debug {
     } catch(Exception exc){
       System.err.println("Monolog configuration file not found, use defaults");
       try {
-        ((Configurable) factory).configure(null);
+        ((MonologFactory) factory).configure(null);
         Logger[] loggers = factory.getLoggers();
         for (int i=0; i<loggers.length; i++) {
           loggers[i].setIntLevel(BasicLevel.ERROR);
@@ -80,6 +89,63 @@ public class Debug {
   }
 
   private static PrivateLogger logger = null;
+
+  /**
+   * Initializes the package.
+   */
+  private static void initialize() throws Exception {
+    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY);
+    String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
+                                              DEFAULT_DEBUG_FILE);
+    if (debugDir != null) {
+      File debugFile = new File(debugDir, debugFileName);
+      try {
+        if ((debugFile != null) &&
+            (debugFile.length() != 0) &&
+            debugFile.exists() &&
+            debugFile.isFile()) {
+          debugFileName = debugFile.getPath();
+        } else {
+          throw new IOException();
+        }
+      } catch (IOException exc) {
+        // debug configuration file seems not exist, search it from the
+        // search path used to load classes.
+        System.err.println("Unable to find \"" + debugFile.getPath() + "\".");
+        debugDir = null;
+      }
+    }
+
+    try {
+      System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
+                         debugFileName);
+      factory = org.objectweb.util.monolog.Monolog.init();
+    } catch(Throwable exc) {
+      System.err.println("Unable to instantiate monolog wrapper");
+      exc.printStackTrace();
+    }
+  }
+
+  public static Logger getLogger(String topic) {
+    if (factory == null) {
+      try {
+        init();
+      } catch (Exception exc) {
+        if (logger == null)
+          logger = new PrivateLogger();
+        return logger;
+      }
+    }
+    return factory.getLogger(topic);
+  }
+
+  /**
+   * Set the monolog Loggerfactory
+   * @param loggerFactory the monolog LoggerFactory
+   */
+  public static void setLoggerFactory(LoggerFactory loggerFactory) {
+    factory = loggerFactory;
+  }
 
   private static class PrivateLogger implements Logger {
     PrivateLogger() {}
@@ -285,86 +351,5 @@ public class Debug {
     public String toString() {
       return "Private ScalAgent D.T. default implementation";
     }
-  }
-
-  /**
-   * Initializes the package.
-   */
-  private static void initialize() throws Exception {
-    boolean doConfiguration =
-      System.getProperty(DEBUG_CONFIGURE_PROPERTY,
-                         DEFAULT_DEBUG_CONFIGURE).equals("true");
-    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY);
-    String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
-                                              DEFAULT_DEBUG_FILE);
-    if (doConfiguration && (debugDir != null)) {
-      File debugFile = new File(debugDir, debugFileName);
-      try {
-        if ((debugFile != null) &&
-            (debugFile.length() != 0) &&
-            debugFile.exists() &&
-            debugFile.isFile()) {
-          debugFileName = debugFile.getPath();
-        } else {
-          throw new IOException();
-        }
-      } catch (IOException exc) {
-        // debug configuration file seems not exist, search it from the
-        // search path used to load classes.
-        System.err.println("Unable to find \"" + debugFile.getPath() + "\".");
-        debugDir = null;
-      }
-    }
-
-    // Instanciate the MonologLoggerFactory
-    String loggerFactory = System.getProperty(LOGGER_FACTORY_PROPERTY,
-                                              DEFAULT_LOGGER_FACTORY);
-
-//     org.objectweb.util.monolog.wrapper.common.AbstractFactory.debug = true;
-
-    try {
-//       factory = (LoggerFactory) Class.forName(loggerFactory).newInstance();
-      System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
-                         debugFileName);
-      factory = org.objectweb.util.monolog.Monolog.init();
-    } catch(Throwable exc) {
-      System.err.println("Unable to instantiate monolog wrapper");
-      exc.printStackTrace();
-    }
-
-//     if (doConfiguration) {
-//       Properties prop = new Properties();
-//       prop.put(Configurable.LOG_CONFIGURATION_TYPE, Configurable.PROPERTY);
-//       prop.put(org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.JAVALOG_CONFIGURATION, org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.PROPERTY);
-//       prop.put(Configurable.LOG_CONFIGURATION_FILE, debugFileName);
-//       prop.put(org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory.JAVALOG_CONFIGURATION_FILE, debugFileName);
-//       if (debugDir == null) {
-//         prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "true");
-//       } else {
-//         prop.put(Configurable.LOG_CONFIGURATION_FILE_USE_CLASSPATH, "false");
-//       }
-//       ((Configurable) factory).configure(prop);
-//     }
-  }
-
-  public static Logger getLogger(String topic) {
-    if (factory == null) {
-      try {
-        init();
-      } catch (Exception exc) {
-        if (logger == null)
-          logger = new PrivateLogger();
-        return logger;
-      }
-    }
-    return factory.getLogger(topic);
-  }
-
-  /**
-   * Set the monolog Loggerfactory
-   * @param loggerFactory the monolog LoggerFactory
-   */
-  public static void setLoggerFactory(LoggerFactory loggerFactory) {
-    factory = loggerFactory;
   }
 }
