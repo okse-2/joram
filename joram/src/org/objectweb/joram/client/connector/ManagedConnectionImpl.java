@@ -87,7 +87,6 @@ public class ManagedConnectionImpl
    */
   Session session = null;
 
-
   /**
    * Creates a <code>ManagedConnectionImpl</code> instance wrapping a
    * physical connection to the underlying JORAM server.
@@ -372,7 +371,8 @@ public class ManagedConnectionImpl
     return mode.equals(other.mode)
            && hostName.equals(other.hostName)
            && serverPort == other.serverPort
-           && userName.equals(other.userName);
+           && userName.equals(other.userName)
+           && cnx.equals(other.cnx);
   }
 
   /** Notifies that the wrapped physical connection has been lost. */
