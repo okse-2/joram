@@ -4,15 +4,15 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Home page</title>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>Home Page</title>
     <filename>index.xml</filename>
     <pathtoroot>.</pathtoroot>
   </properties>
 
   <body>
 
-    <s1 name="Recent news">
+    <s1 name="Recent News">
       <subtitle>March 19th, 2003: new JORAM releases.</subtitle>
       <p>JORAM 3.3 is now available as a packaged version.
       As a reminder, it provides a new administration implementation. In CVS it
@@ -46,7 +46,6 @@
       the new JORAM tutorial and the samples for new administration code
       examples.
       </p>
-      <hr />
 
     </s1>
 
@@ -88,11 +87,11 @@
         <p>JORAM also implements the ASF interfaces and methods for
           performing JMS operations through an application server, and
           is integrated to <a
-            href="http://www.objectweb.org/jonas/">JOnAS</a> EJB 
+            href="http://jonas.objectweb.org/">JOnAS</a> EJB 
 	  platform.</p>
       </s2>
 
-      <s2 name="Getting involved">
+      <s2 name="Getting Involved">
 	
 	<p>Any input or personal view for improving and/or developing
 	JORAM is welcome. JORAM, as an <em>open source</em> project,

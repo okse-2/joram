@@ -4,15 +4,15 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
-    <title>How to get involved?</title>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>How to Get Involved?</title>
     <filename>contrib.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
 
-    <s1 name="Getting involved">
+    <s1 name="Getting Involved">
   
     <p>JORAM, as an open source project, welcomes and even expects
        <em>contributions</em>.</p>
@@ -20,7 +20,7 @@
     <p>Basically, any feature you need but you do not find implemented in
        JORAM may become a contribution topic. Simply send your ideas,
        documents and developments (if any) to the 
-       <a href="mailto:joram-team@objectweb.org">joram team</a> .</p>
+       <a href="mailto:joram-team@objectweb.org">JORAM team</a> .</p>
 
     <p>You may also wish to get involved in an already undertaken work. If not
        already done, you may have a look at the 

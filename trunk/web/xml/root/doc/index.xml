@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
+    <author email="joram-team@objectweb.org">JORAM team</author>
     <title>Documentation</title>
     <filename>index.xml</filename>
     <pathtoroot>..</pathtoroot>
@@ -12,7 +12,7 @@
 
   <body>
 
-    <s1 name="Available documentations">
+    <s1 name="Available Documentations">
       <p>The documentations available here are organized per releases. Please
       make sure you browse the documents related to the JORAM release you
       currently use.</p>
@@ -56,7 +56,7 @@
       </ul>
     </s1>
 
-    <s1 name="Running JORAM samples">
+    <s1 name="Running JORAM Samples">
       <ul>
         <li>Running the <a href="../current/doc/joram3_4_SAMPLES.pdf">
         3.4 release samples</a>.</li>
@@ -69,7 +69,7 @@
       </ul>
     </s1>
 
-    <s1 name="JORAM API documentation">
+    <s1 name="JORAM API Documentation">
       <ul>
         <li>Browsing the <a href="../current/javadoc/joram/index.html">
         3.4 release javadoc</a>.</li>

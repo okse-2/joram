@@ -4,14 +4,14 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
-    <title>Releases info</title>
+    <author email="joram-team@objectweb.org">JORAM team</author>
+    <title>Releases Info</title>
     <filename>versions.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
 
   <body>
-    <s1 name="joram CVS version, no tag">
+    <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
       <s2 name="Modifications (latest: May 2003, 20th)">
@@ -51,7 +51,7 @@
       <code>fr.dyade.aaa.jndi2.client</code> package.</li>
       </ul>
       </s2>
-      <s2 name="Corrected bugs (latest: May 2003, 14th)">
+      <s2 name="Corrected Bugs (latest: May 2003, 14th)">
       <ul>
       <li>Bug concerning expiring messages in queues, found by Lorenzo
       Scantamburlo: already delivered messages, but not yet acknowledged,
@@ -104,7 +104,7 @@
       </s2>
     </s1>
     <s1 name="joram3_4_0"> 
-      <s2 name="Support of SOAP as a client/server communication protocol">
+      <s2 name="Support of SOAP as a client/server Communication Protocol">
       <p>This version is only available in CVS with tag joram3_4_0. So far, 
       Joram provided a TCP link between its clients and servers. Now,
       it also provides a SOAP link, based on HTTP and XML.</p>
@@ -124,7 +124,7 @@
       container such as Apache's <a href="http://jakarta.apache.org/tomcat/">
       Tomcat</a>.</p>
       </s2>
-      <s2 name="Corrected bug">
+      <s2 name="Corrected Bug">
       <ul>
       <li><code>NullPointerException</code> occuring from time to time in
           the server's side proxy of a subscriber, found by
@@ -137,12 +137,12 @@
     </s1>
 
     <s1 name="joram3_3_1"> 
-      <s2 name="Maintenance release of joram3_3_0">
+      <s2 name="Maintenance Release of joram3_3_0">
       <p>This version comes as packages and is tagged joram3_3_1 in CVS. It
       is similar to the joram3_3_0 version except that it corrects a few bugs.
       </p>
       </s2>
-      <s2 name="Corrected bugs">
+      <s2 name="Corrected Bugs">
       <ul>
       <li>Non serializable ConnectionFactory objects, found by
       <a href="http://www.objectweb.org/wws/arc/joram/2003-02/msg00027.html">
@@ -157,7 +157,7 @@
       </s2>
     </s1>
     <s1 name="joram3_3_0">
-      <s2 name="New administration protocol">
+      <s2 name="New Administration Protocol">
       <p>This version of JORAM includes a totally refactored administration
       protocol. Administration is now based on JMS communication and is much
       more flexible than the past implementation. The new administration
@@ -165,7 +165,7 @@
       administration codes should go on working even if they now use
       deprecated methods. </p>
       </s2>
-      <s2 name="Corrected bugs">
+      <s2 name="Corrected Bugs">
       <ul>
       <li>Timeout in MessageConsumer.receive not compliant, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-11/msg00018.html">
@@ -188,7 +188,7 @@
     </s1>
 
     <s1 name="joram3_2_0">
-      <s2 name="New features">
+      <s2 name="New Features">
       <ul>
       <li>A dead message queue is a destination getting undeliverable messages.
           Messages might be considered undeliverable because they expired
@@ -205,7 +205,7 @@
       <p>In order to prevent a Joram platform to be overloaded by a heavily
          producing client, a flow control mechanism has been added.</p>
       </s2>
-      <s2 name="Corrected bugs">
+      <s2 name="Corrected Bugs">
       <ul>
       <li>Timeout in MessageConsumer.receive not compliant, found by
           <a href="http://www.objectweb.org/wws/arc/joram/2002-09/msg00003.html">

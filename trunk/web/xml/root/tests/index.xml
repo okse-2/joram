@@ -4,8 +4,8 @@
 
 <document>
   <properties>
-    <author email="test@objectweb.org">test</author>
-    <title>Test Suite home page</title>
+    <author email="test@objectweb.org">JORAM team</author>
+    <title>Test Suite Home Page</title>
     <filename>index.xml</filename>
     <pathtoroot>..</pathtoroot>
   </properties>
@@ -71,7 +71,7 @@
         that any provider can implement. For the moment, we provide
         implementations for:</p>
       <ul>
-        <li><a href="http://www.objectweb.org/joram/">JORAM</a></li>
+        <li><a href="../index.html">JORAM</a></li>
         <li><a href="http://www.ashnasoft.com/">AshnaMQ</a></li>
         <li><a
             href="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ</a></li>
@@ -94,7 +94,7 @@
           href="mailto:sympa@objectweb.org">sympa@objectweb.org</a>
         with in the message body: <code>subscribe test</code></p>
     </s1>
-    <s1 name="Getting involved">
+    <s1 name="Getting Involved">
       <p>Any input or personal view for improving and/or developing
         this test suite is welcome. This test suite, as an open source
         project, also welcomes external contributions.Interested?

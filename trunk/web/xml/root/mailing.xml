@@ -3,7 +3,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
+    <author email="joram-team@objectweb.org">JORAM team</author>
     <title>Mailing lists</title>
     <filename>mailing.xml</filename>
     <pathtoroot>.</pathtoroot>
@@ -11,7 +11,7 @@
 
   <body>
 
-    <s1 name="Mailing lists">
+    <s1 name="Mailing Lists">
 
     <p>For sending questions to the JORAM users and developers community,
     please post mails to the 
