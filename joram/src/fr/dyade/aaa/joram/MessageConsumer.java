@@ -237,7 +237,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": starts the"
                                      + " session daemon.");
         sess.daemon = new SessionDaemon(sess);
-        sess.daemon.setDaemon(true);
+        sess.daemon.setDaemon(false);
         sess.daemon.start();
       }
 

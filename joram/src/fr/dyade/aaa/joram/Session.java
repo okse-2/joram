@@ -793,7 +793,7 @@ public class Session implements javax.jms.Session
     // Starting the daemon if needed:
     if (! started && msgListeners > 0) {
       daemon = new SessionDaemon(this);
-      daemon.setDaemon(true);
+      daemon.setDaemon(false);
       daemon.start();
     }
     started = true;
