@@ -799,6 +799,7 @@ public class Admin
                                                    + " has been lost.");
         if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
           JoramTracing.dbgAdmin.log(BasicLevel.WARN, cE);
+	throw cE;
       }
       // If reconnected, trying again to send the request:
       sendRequest(request);
