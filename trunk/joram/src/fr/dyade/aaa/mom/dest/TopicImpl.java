@@ -130,6 +130,12 @@ public class TopicImpl extends DestinationImpl
         doReact(from, (FatherAck) not);
       else if (not instanceof UnsetFatherRequest)
         doReact(from, (UnsetFatherRequest) not);
+      else if (not instanceof Monit_GetSubscriptions)
+        doReact(from, (Monit_GetSubscriptions) not);
+      else if (not instanceof Monit_GetFather)
+        doReact(from, (Monit_GetFather) not);
+      else if (not instanceof Monit_GetCluster)
+        doReact(from, (Monit_GetCluster) not);
       else if (not instanceof SubscribeRequest)
         doReact(from, (SubscribeRequest) not);
       else if (not instanceof UnsubscribeRequest)
@@ -438,6 +444,72 @@ public class TopicImpl extends DestinationImpl
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetSubscriptions</code> notification requesting the
+   * number of subscriptions.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetSubscriptions not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    int number = 0;
+    if (subsTable != null) {
+      Vector subs;
+      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) {
+        subs = (Vector) subsTable.get(keys.nextElement());
+        number = number + subs.size();
+      }
+    }
+    Channel.sendTo(from, new Monit_GetNumberRep(not, number));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetFather</code>
+   * notification requesting the identifier of the hierarchical father.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetFather not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    String id = null;
+    if (fatherId != null)
+      id = fatherId.toString();
+
+    Channel.sendTo(from, new Monit_GetFatherRep(not, id));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetCluster</code>
+   * notification requesting the identifiers of the cluster's topics.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetCluster not)
+                 throws AccessException
+  {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Vector cluster = null;
+    if (friends != null) {
+      cluster = new Vector();
+      for (int i = 0; i < friends.size(); i++)
+        cluster.add(friends.get(i).toString());
+      cluster.add(destId.toString());
+    }
+
+    Channel.sendTo(from, new Monit_GetClusterRep(not, cluster));
   }
 
   /**
