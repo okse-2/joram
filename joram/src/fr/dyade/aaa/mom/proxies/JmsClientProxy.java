@@ -1192,88 +1192,82 @@ public class JmsClientProxy extends ConnectionFactory
    * Method implementing the JMS proxy reaction to an
    * <code>XASessRollback</code> request rolling back the operations performed
    * in a given transaction.
-   * <p>
-   * This method actually processes the objects sent at the prepare phase,
-   * and acknowledges the request.
    */
   private void doReact(XASessRollback req)
   {
     String id = req.getId();
 
-    if (cnx.transactionsTable == null) {
+    if (req instanceof XAQSessRollback) {
+      XAQSessRollback qReq = (XAQSessRollback) req;
 
-      if (req instanceof XAQSessRollback) {
-        XAQSessRollback qReq = (XAQSessRollback) req;
-
-        String destName;
-        AgentId qId;
-        Vector ids;
-        while (qReq.hasMoreDests()) {
-          destName = qReq.nextDest();
-          qId = AgentId.fromString(destName);
-          ids = qReq.getIds(destName);
-          cnx.ackedIds(qId, ids);
-          sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
-        }
+      String destName;
+      AgentId qId;
+      Vector ids;
+      while (qReq.hasMoreDests()) {
+        destName = qReq.nextDest();
+        qId = AgentId.fromString(destName);
+        ids = qReq.getIds(destName);
+        cnx.ackedIds(qId, ids);
+        sendTo(qId, new DenyRequest(currKey, req.getRequestId(), ids));
       }
-      else {
-        XATSessRollback tReq = (XATSessRollback) req;
+    }
+    else if (req instanceof XATSessRollback) {
+      XATSessRollback tReq = (XATSessRollback) req;
 
-        String subName;
-        ClientSubscription sub;
-        SubMessages sM;
-        while (tReq.hasMoreSubs()) {
-          subName = tReq.nextSub();
-          sub = (ClientSubscription) subsTable.get(subName);
+      String subName;
+      ClientSubscription sub;
+      SubMessages sM;
+      while (tReq.hasMoreSubs()) {
+        subName = tReq.nextSub();
+        sub = (ClientSubscription) subsTable.get(subName);
 
-          if (sub != null) {
-            sub.deny(tReq.getIds(subName));
+        if (sub != null) {
+          sub.deny(tReq.getIds(subName));
 
-            try {
-              setCnx(sub.connectionKey);
-   
-              // Launching a delivery sequence:
-              if (cnx.started) {
-                sM = sub.deliver();
-                if (sM != null)
-                  doReply(sM);
-              } 
-            }
-            catch (ProxyException pE) {}
+          try {
+            setCnx(sub.connectionKey);
+ 
+            // Launching a delivery sequence:
+            if (cnx.started) {
+              sM = sub.deliver();
+              if (sM != null)
+                doReply(sM);
+            } 
           }
+          catch (ProxyException pE) {}
+        }
+      }
+    }
+
+    if (cnx.transactionsTable != null) {
+      Vector acks;
+
+      Object obj = cnx.transactionsTable.remove(id);
+      if (obj instanceof XAQSessPrepare) {
+        XAQSessPrepare qPrep = (XAQSessPrepare) obj;
+        acks = qPrep.getAcks();
+        QSessAckRequest qAck;
+
+        while (! acks.isEmpty()) {
+          qAck = (QSessAckRequest) acks.remove(0);
+          doReact(new QSessDenyRequest(qAck.getTo(), qAck.getIds()));
+        }
+      }
+      else if (obj instanceof XATSessPrepare) {
+        XATSessPrepare tPrep = (XATSessPrepare) obj;
+        acks = tPrep.getAcks();
+        TSessAckRequest tAck;
+
+        while (! acks.isEmpty()) {
+          tAck = (TSessAckRequest) acks.remove(0);
+          doReact(new TSessDenyRequest(tAck.getSubName(), tAck.getIds()));
         }
       }
 
-      sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
-      return;
-    }
-    
-    Vector acks;
-
-    Object obj = cnx.transactionsTable.remove(id);
-    if (obj instanceof XAQSessPrepare) {
-      XAQSessPrepare qPrep = (XAQSessPrepare) obj;
-      acks = qPrep.getAcks();
-      QSessAckRequest qAck;
-
-      while (! acks.isEmpty()) {
-        qAck = (QSessAckRequest) acks.remove(0);
-        doReact(new QSessDenyRequest(qAck.getTo(), qAck.getIds()));
-      }
-    }
-    else if (obj instanceof XATSessPrepare) {
-      XATSessPrepare tPrep = (XATSessPrepare) obj;
-      acks = tPrep.getAcks();
-      TSessAckRequest tAck;
-
-      while (! acks.isEmpty()) {
-        tAck = (TSessAckRequest) acks.remove(0);
-        doReact(new TSessDenyRequest(tAck.getSubName(), tAck.getIds()));
-      }
+      if (cnx.transactionsTable.isEmpty())
+        cnx.transactionsTable = null;
     }
 
-    if (cnx.transactionsTable.isEmpty())
-      cnx.transactionsTable = null;
 
     sendTo(this.getId(), new ProxySyncAck(currKey, new ServerReply(req)));
   }
