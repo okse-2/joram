@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s):  Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.shared.selectors;
 
