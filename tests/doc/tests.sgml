@@ -63,10 +63,16 @@
     <title>Supported JMS providers</title>
     <sect2>
       <title>JMS 1.1 providers</title>
-      <para>At the present time, the only supported JMS 1.1 provider is</para>
+      <para>At the present time, the supported JMS 1.1 provider are</para>
       <itemizedlist>
         <listitem>
           <para><ulink url="http://www.objectweb.org/joram">JORAM 3.1</ulink></para>
+        </listitem>
+        <listitem>
+          <para><ulink url="http://www.swiftmq.com/">SwiftMQ
+              4.0.0</ulink> (provided by <ulink
+              url="mailto:am@iit.de">Andreas Mueller</ulink>)
+          </para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -93,12 +99,6 @@
               Application Server 3.0 or Message Server</ulink>
             (provided by <ulink url="mailto:rajdeep@pramati.com">Rajdeep
               Dua</ulink>)
-          </para>
-        </listitem>
-        <listitem>
-          <para><ulink url="http://www.swiftmq.com/">SwiftMQ
-              3.2.0</ulink> (provided by <ulink
-              url="mailto:am@iit.de">Andreas Mueller</ulink>)
           </para>
         </listitem>
       </itemizedlist>
