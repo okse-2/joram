@@ -142,6 +142,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   /** Name of the JORAM server to start. */
   private String serverName = "s0";
 
+  /** Names of the bound objects. */
+  private static Vector boundNames = new Vector();
+  /** Standard JMSResource MBean ObjectName. */
+  private static ObjectName jmsResourceON;
   /** Local MBean server. */
   private static MBeanServer mbs = null;
   /** Registered MBeans. */
@@ -354,7 +358,11 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     // Unregistering the MBeans...
     while (! mbeans.isEmpty())
-      unregister(mbeans.get(0));
+      unregister(mbeans.remove(0));
+
+    // Unbinds the bound objects...
+    while (! boundNames.isEmpty())
+      unbind((String) boundNames.remove(0));
 
     // Finishing the admin session.
     AdminModule.disconnect();
@@ -654,8 +662,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       mcf.setCollocated(new Boolean(false));
 
       Object factory = mcf.createConnectionFactory();
-      Context ctx = new InitialContext();
-      ctx.rebind(name, factory);
+      bind(name, factory);
       AdapterTracing.debugINFO("  - ConnectionFactory [" + name
                                + "] has been created and bound.");
     }
@@ -680,8 +687,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       mcf.setCollocated(new Boolean(false));
 
       Object factory = mcf.createConnectionFactory();
-      Context ctx = new InitialContext();
-      ctx.rebind(name, factory);
+      bind(name, factory);
       AdapterTracing.debugINFO("  - QueueConnectionFactory [" + name
                                + "] has been created and bound.");
     }
@@ -706,8 +712,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       mcf.setCollocated(new Boolean(false));
 
       Object factory = mcf.createConnectionFactory();
-      Context ctx = new InitialContext();
-      ctx.rebind(name, factory);
+      bind(name, factory);
       AdapterTracing.debugINFO("  - TopicConnectionFactory [" + name
                                + "] has been created and bound.");
     }
@@ -774,7 +779,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         queue.setFreeReading();
         queue.setFreeWriting();
         AdapterTracing.debugINFO("  - Queue [" + name + "] has been created.");
-        ctx.rebind(name, queue);
+        bind(name, queue);
         register(new LocalQueue(queue));
         return queue;
       }
@@ -805,7 +810,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         topic.setFreeReading();
         topic.setFreeWriting();
         AdapterTracing.debugINFO("  - Topic [" + name + "] has been created.");
-        ctx.rebind(name, topic);
+        bind(name, topic);
         register(new LocalTopic(topic));
         return topic;
       }
@@ -814,6 +819,26 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                  + "has been lost.");
       }
     }
+  }
+
+  /** Binds an object to the JNDI context. */
+  static void bind(String name, Object obj) throws NamingException
+  {
+    Context ctx = new InitialContext();
+    ctx.rebind(name, obj);
+    if (! boundNames.contains(name))
+      boundNames.add(name);
+  }
+
+  /** Unbinds an object from the JNDI context. */
+  static void unbind(String name)
+  {
+    try {
+      Context ctx = new InitialContext();
+      ctx.unbind(name);
+      boundNames.remove(name);
+    }
+    catch (Exception exc) {}
   }
 
   /** Registers an MBean to the MBean server. */
@@ -829,6 +854,25 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       ObjectName name = getObjectName(bean);
       mbs.registerMBean(bean, name);
       mbeans.add(bean);
+
+      // Registering a standard JMSResource MBean.
+      if (bean instanceof LocalServer) {
+        String defaultDomain = mbs.getDefaultDomain();
+        java.util.Set oNames =
+          mbs.queryNames(new ObjectName(defaultDomain
+                                        + ":j2eeType=J2EEServer,*"), null);
+        Iterator it = oNames.iterator();
+        if (it.hasNext()) {
+          ObjectName oName = (ObjectName) it.next();
+          String serverName = oName.getKeyProperty("name");
+          jmsResourceON = new ObjectName(defaultDomain
+                                         + ":j2eeType=JMSResource,"
+                                         + "name=JORAMlocalServer,"
+                                         + "J2EEServer="
+                                         + serverName);
+          mbs.registerMBean(bean, jmsResourceON);
+        }
+      }
     }
     catch (Exception exc) {
       AdapterTracing.debugWARN("  - Could not register MBean ["
@@ -845,6 +889,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       mbeans.remove(bean);
       ObjectName name = getObjectName(bean);
       mbs.unregisterMBean(name);
+
+      // Unregistering the standard JMSResource MBean.
+      if (bean instanceof LocalServer && jmsResourceON != null)
+        mbs.unregisterMBean(jmsResourceON);
     }
     catch (Exception exc) {
       AdapterTracing.debugWARN("  - Could not unregister MBean ["

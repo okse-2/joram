@@ -84,5 +84,6 @@ public class LocalQueue implements LocalQueueMBean
   {
     queue.delete();
     JoramAdapter.unregister(this);
+    JoramAdapter.unbind(queue.getAdminName());
   }
 }
