@@ -17,29 +17,29 @@
  
       <p>Currently, the JORAM project team is composed of:</p>
       <ul>
-				<li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-        <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-				<li>Andre Freyssinet (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-				<li>Serge Lacourte (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
-        <li>Nicolas Tachker (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
       </ul>
 
       <subtitle>Contributors</subtitle>
 
-      <p>We would also like to thank all the following people who have
-      contributed to JORAM:</p>
+      <p>Here is the list of all contributors to Joram, past and present :</p>
       <ul>
 				<li>Cyril Araud</li>
+				<li>Roland Balter (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+				<li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
 				<li>Laurent Chauvirey</li>
 				<li>Philippe Coq (<a href="http://www.bull.com/">Bull</a>)</li>
-  			<li>Alexander Fedorowicz</li>
 				<li>Xavier Etchevers</li>
+  			<li>Alexander Fedorowicz</li>
+        <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+				<li>Andre Freyssinet (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
 				<li>Marc Herrmann (<a href="http://www.cgey.com/">Cap Gemini</a>)</li>
 				<li>Douglas S. Jackson</li>
 				<li>Philippe Laumay (<a href="http://www.kelkoo.com/">Kelkoo</a>)</li>
-				<li>Frederic Maistre (<a href="http://www.renault.com/">Renault</a>)</li>
-				<li>Richard Mathis (<a href="http://www.inria.fr/">INRIA</a>)</li>
+				<li>Serge Lacourte (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+				<li>Frederic Maistre (Renault S.A.)</li>
+				<li>Richard Mathis</li>
 				<li>Jean-Frédéric Mesnil (Coframi)</li>
+        <li>Nicolas Tachker (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
   			<li>Tony Thompson</li>
 				<li>JC Waeny (<a href="http://www.dfjug.org">Brasilia Java Users Group</a>)</li>
       </ul>
