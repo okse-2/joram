@@ -14,8 +14,14 @@
     <s1 name="joram CVS Version, no tag">
       <p>Getting Joram through CVS without specifying a tag allows to get
       the latest tagged version with the latest corrections and updates.</p>
-      <s2 name="Corrected bugs (latest: December 18, 2003)">
+      <s2 name="Corrected bugs (latest: January 5, 2004)">
       <ul>
+        <li>Expired "receive" requests monitored as pending requests, as 
+        described
+        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00064.html">
+        here</a>. When monitoring a queue's requests, the expired requests are
+        removed and thus not listed as pending requests anymore. The updated
+        class is <code>fr.dyade.aaa.mom.dest.QueueImpl</code>.</li>
         <li>Automatic deny request sent to already deleted temporary queue, 
         found by
         <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00042.html">
