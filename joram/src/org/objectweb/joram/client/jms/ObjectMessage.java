@@ -36,8 +36,6 @@ import javax.jms.MessageNotWriteableException;
  */
 public class ObjectMessage extends Message implements javax.jms.ObjectMessage
 {
-  /** The wrapped object. */
-  private Serializable object = null;
   /**
    * The object still coded as a bytes array (decoding will occur during
    * the <code>getObject()</code> call.
@@ -80,7 +78,7 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   public void clearBody() throws JMSException
   {
     super.clearBody();
-    object = null;
+    codedObject = null;
     RObody = false;
   }
 
@@ -89,13 +87,21 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
    *
    * @exception MessageNotWriteableException  When trying to set an object if
    *              the message body is read-only.
+   * @exception MessageFormatException        If object serialization fails.
    */
   public void setObject(Serializable obj) throws JMSException
   {
     if (RObody)
       throw new MessageNotWriteableException("Can't set an object as the"
                                              + " message body is read-only.");
-    this.object = obj;
+    try {
+      momMsg.clearBody();
+      momMsg.setObject(obj);
+      codedObject = momMsg.getBytes();
+    }
+    catch (Exception exc) {
+      throw new MessageFormatException("Object serialization failed: " + exc);
+    }
   }
 
   /**
@@ -154,13 +160,10 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
   protected void prepare() throws Exception
   {
     super.prepare();
-    momMsg.clearBody();
-    momMsg.setObject(object);
   }
 
   public String toString() {
     return '(' + super.toString() +
-      ",object=" + object + 
       ",codedObject=" + codedObject + ')';
   }
 }
