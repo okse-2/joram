@@ -75,7 +75,7 @@ if ($MESSAGE eq "") {
   print "</ol>\n";
   print "<li>\n";
   print "</ul>";
-  print "<p><em>NOTE:The distribution does not contain the javax.jms.* package; you need to fetch that yourself</em>, (see the <em>Installation Guide</em>).</p>";
+ 
 
 } 
   else {
