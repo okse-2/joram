@@ -14,6 +14,26 @@
 
     <s1 name="JORAM History">
 
+      <subtitle>March, 11th 2002: JORAM 3.0 available</subtitle>
+      
+      <p><em>JORAM 3.0 is now available for download</em>. Documentation has also been
+	updated and new samples are provided.<br />
+	Compared to JORAM previous versions, this new release is a complete
+	re-factoring of the code base. It gets rid of the
+	previous limitations and defects. The JMS specification is now fully
+	implemented, JORAM provides authentication and security
+	features, and introduces a distributed implementation of the Topic
+	destination. Its clean and sound code basis guarantees fast
+	and easy future developements and enhancements.<br/>
+	A suite of tests based on JUnit will be very soon proposed for
+	download.<br />
+	Please do not hesitate to keep us informed of any inconsistancy or
+	problem you may encounter with the new distribution and documentation.<br />
+	We sincerely hope you will enjoy this new version.   
+      </p>
+      
+      <hr />
+
       <subtitle>March, 6th 2002: </subtitle>
       
       <p>The new version of JORAM will be commited in CVS. Since this
