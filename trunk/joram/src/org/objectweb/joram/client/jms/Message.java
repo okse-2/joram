@@ -843,22 +843,24 @@ public class Message implements javax.jms.Message
     }
     else if (jmsMsg instanceof javax.jms.StreamMessage) {
       msg = new StreamMessage();
-      ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage)
-                                         jmsMsg).readObject());
+      try {
+        ((javax.jms.StreamMessage) jmsMsg).reset();
+        while (true)
+          ((StreamMessage) msg).writeObject(((javax.jms.StreamMessage)
+                                             jmsMsg).readObject());
+      } catch (Exception mE) {}
     }
     else if (jmsMsg instanceof javax.jms.BytesMessage) {
       msg = new BytesMessage();
       try {
+        ((javax.jms.BytesMessage) jmsMsg).reset();
         while (true)
-          ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage)
-                                          jmsMsg).readByte());
-      }
-      catch (Exception mE) {}
+          ((BytesMessage) msg).writeByte(((javax.jms.BytesMessage) jmsMsg).readByte());
+      } catch (Exception mE) {}
     }
     else if (jmsMsg instanceof javax.jms.MapMessage) {
       msg = new MapMessage();
       Enumeration mapNames = ((javax.jms.MapMessage) jmsMsg).getMapNames();
-
       String mapName;
       while (mapNames.hasMoreElements()) {
         mapName = (String) mapNames.nextElement();

@@ -222,12 +222,9 @@ public class MapMessage extends Message implements javax.jms.MapMessage
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid null or empty value name.");
 
-    if (value == null)
-      return;
-
     if (value instanceof Boolean || value instanceof Character 
         || value instanceof Number || value instanceof String
-        || value instanceof byte[])
+        || value instanceof byte[] || value == null)
       map.put(name, value);
     else
       throw new MessageFormatException("Can't set non Java primitive type as"
@@ -408,7 +405,7 @@ public class MapMessage extends Message implements javax.jms.MapMessage
    */  
   public boolean itemExists(String name) throws JMSException
   {
-    return (map.get(name) != null);
+    return map.containsKey(name);
   }
 
   /**
