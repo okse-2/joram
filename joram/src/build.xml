@@ -83,7 +83,8 @@
   <target name="build.joram" depends="init,compile"
       description="--> Build JORAM jar files">
     <!-- Build mom jar file -->
-    <jar jarfile="${build.dir}/mom.jar">
+    <jar jarfile="${build.dir}/mom.jar"
+         manifest="${src.dir}/mom.mf">
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
@@ -123,8 +124,20 @@
     <copy file="${build.dir}/mom.jar" todir="${lib.dir}"/>
   </target>
  
-  <target name="javadoc" depends="init"
+  <target name="javadoc" depends="prepare"
       description="--> Generate Javadoc">
+  <!-- Path needed to create the javadoc  -->
+  <path id="doc.class.path">
+    <fileset dir="${lib.dir}">
+      <include name="jms.jar"/>
+      <include name="log4j.jar"/>
+      <include name="owlogapi.jar"/>
+      <include name="owlogwrpl4j.jar"/>
+      <include name="xerces.jar"/>
+      <include name="jndi.jar"/>
+    </fileset>
+    </path>
+    
     <javadoc packagenames="fr.dyade.aaa.*"
       sourcepath="${src.dir}"
       classpathref="project.class.path"
