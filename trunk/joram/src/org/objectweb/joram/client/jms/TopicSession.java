@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -64,6 +64,9 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   public javax.jms.TopicPublisher
          createPublisher(javax.jms.Topic topic) throws JMSException
   {
+    if (closed)
+      throw new IllegalStateException("Forbidden call on a closed session.");
+
     return new TopicPublisher(this, (Topic) topic);
   }
 
