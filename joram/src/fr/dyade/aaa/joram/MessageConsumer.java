@@ -226,19 +226,22 @@ public class MessageConsumer implements javax.jms.MessageConsumer
                                      + " session daemon.");
         sess.daemon.stop();
         sess.daemon = null;
+        sess.started = false;
       }
     }
     // Else, if setting a new listener:
     else if (this.messageListener == null && messageListener != null) {
       sess.msgListeners++;
 
-      if (sess.msgListeners == 1 && sess.started) {
+      if (sess.msgListeners == 1 &&
+          (sess.started || sess.cnx.started)) {
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": starts the"
                                      + " session daemon.");
         sess.daemon = new SessionDaemon(sess);
         sess.daemon.setDaemon(false);
         sess.daemon.start();
+        sess.started = true;
       }
 
       this.messageListener = messageListener;
