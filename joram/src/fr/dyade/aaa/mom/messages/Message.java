@@ -83,6 +83,8 @@ public class Message implements Cloneable, Serializable
   /** <code>true</code> if the properties are read-only. */
   boolean propertiesRO = false;
 
+  /** Arrival position of this message on its queue or proxy. */
+  public long order;
   /** The number of delivery attempts for this message. */
   public int deliveryCount = 0;
   /**
