@@ -25,6 +25,7 @@
 package org.objectweb.jtests.jms.conform.message;
 
 import org.objectweb.jtests.jms.framework.PTPTestCase;
+import org.objectweb.jtests.jms.framework.TestConfig;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import javax.jms.*;
@@ -48,7 +49,7 @@ import java.util.Enumeration;
  * with an empty body or not.
  * 
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: MessageTypeTest.java,v 1.3 2002-03-18 13:37:14 joram Exp $
+ * @version $Id: MessageTypeTest.java,v 1.4 2002-04-16 10:02:53 joram Exp $
  */
 public class MessageTypeTest extends PTPTestCase {
 
@@ -64,8 +65,8 @@ public class MessageTypeTest extends PTPTestCase {
        message.writeString("pi");
        message.writeDouble(3.14159);
        sender.send(message);
-
-       Message m = receiver.receive();
+       
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of StreamMessage.\n",
   		 m instanceof StreamMessage);
        StreamMessage msg = (StreamMessage)m;
@@ -87,7 +88,7 @@ public class MessageTypeTest extends PTPTestCase {
        StreamMessage message = senderSession.createStreamMessage();
        sender.send(message);
 
-       Message msg = receiver.receive();
+       Message msg = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of StreamMessage.\n",
   		 msg instanceof StreamMessage);
      } catch (JMSException e) {
@@ -105,7 +106,7 @@ public class MessageTypeTest extends PTPTestCase {
        message.setDouble("pi", 3.14159);
        sender.send(message);
 
-       Message m = receiver.receive();
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of MapMessage.\n",
   		 m instanceof MapMessage);
        MapMessage msg = (MapMessage)m;
@@ -150,7 +151,7 @@ public class MessageTypeTest extends PTPTestCase {
        message.setDouble("value",3.14159);
        sender.send(message);
 
-       Message m = receiver.receive();
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of MapMessage.\n",
     		 m instanceof MapMessage);
        MapMessage msg = (MapMessage)m;
@@ -172,7 +173,7 @@ public class MessageTypeTest extends PTPTestCase {
        MapMessage message = senderSession.createMapMessage();
        sender.send(message);
 
-       Message msg = receiver.receive();
+       Message msg = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of MapMessage.\n",
  		 msg instanceof MapMessage);
      } catch (JMSException e) {
@@ -196,7 +197,7 @@ public class MessageTypeTest extends PTPTestCase {
        message.setObject(vector);
        sender.send(message);
 
-       Message m = receiver.receive();
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of ObjectMessage.\n",
   		 m instanceof ObjectMessage);
        ObjectMessage msg = (ObjectMessage)m;
@@ -217,7 +218,7 @@ public class MessageTypeTest extends PTPTestCase {
        ObjectMessage message = senderSession.createObjectMessage();
        sender.send(message);
 
-       Message msg = receiver.receive();
+       Message msg = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of ObjectMessage.\n",
   		 msg instanceof ObjectMessage);
      } catch (JMSException e) {
@@ -239,7 +240,7 @@ public class MessageTypeTest extends PTPTestCase {
        message.writeDouble(3.14159);
        sender.send(message);
 
-       Message m = receiver.receive();
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of BytesMessage.\n",
   		 m instanceof BytesMessage);
        BytesMessage msg = (BytesMessage)m;
@@ -263,7 +264,7 @@ public class MessageTypeTest extends PTPTestCase {
        BytesMessage message = senderSession.createBytesMessage();
        sender.send(message);
 
-       Message msg = receiver.receive();
+       Message msg = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of BytesMessage.\n",
  		 msg instanceof BytesMessage);
      } catch (JMSException e) {
@@ -283,7 +284,7 @@ public class MessageTypeTest extends PTPTestCase {
        message.setText("testTextMessage_2");
        sender.send(message);
 
-       Message m = receiver.receiveNoWait();
+       Message m = receiver.receive(TestConfig.TIMEOUT);
        assertTrue("The message should be an instance of TextMessage.\n",
   		 m instanceof TextMessage);
        TextMessage msg = (TextMessage)m;
@@ -304,7 +305,7 @@ public class MessageTypeTest extends PTPTestCase {
       TextMessage message = senderSession.createTextMessage();
       sender.send(message);
 
-      Message msg = receiver.receive();
+      Message msg = receiver.receive(TestConfig.TIMEOUT);
       assertTrue("The message should be an instance of TextMessage.\n",
    		 msg instanceof TextMessage);
     } catch (JMSException e) {
