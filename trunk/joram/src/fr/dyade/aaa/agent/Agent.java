@@ -28,6 +28,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.management.MXWrapper;
 
 /**
  * The <code>Agent</code> class represents the basic component in our model.
@@ -64,7 +65,7 @@ import fr.dyade.aaa.util.*;
  * @see Engine
  * @see Channel
  */
-public abstract class Agent implements Serializable {
+public abstract class Agent implements AgentMBean, Serializable {
   static final long serialVersionUID = 2955513886633164244L;
 
   /**
@@ -84,6 +85,9 @@ public abstract class Agent implements Serializable {
     updated = false;
   }
 
+  /**
+   *
+   */
   protected final boolean needToBeCommited() {
     try {
       ((EngineThread) Thread.currentThread()).engine.needToBeCommited = true;
@@ -168,16 +172,12 @@ public abstract class Agent implements Serializable {
 
   private void writeObject(java.io.ObjectOutputStream out)
     throws IOException {
-//       out.writeShort(id.from);
-//       out.writeShort(id.to);
-//       out.writeInt(id.stamp);
       out.writeUTF(name);
       out.writeBoolean(fixed);
   }
 
   private void readObject(java.io.ObjectInputStream in)
     throws IOException, ClassNotFoundException {
-//       id = new AgentId(in.readShort(), in.readShort(), in.readInt());
       if ((name = in.readUTF()).equals(nullName))
 	name = nullName;
       fixed = in.readBoolean();
@@ -359,7 +359,7 @@ public abstract class Agent implements Serializable {
   /**
    * Determines if the current <code>Agent</code> has already been deployed.
    */
-  boolean deployed = false;
+  transient boolean deployed = false;
 
   /**
    * Returns if the currently <code>Agent</code> has already been deployed.
@@ -424,7 +424,12 @@ public abstract class Agent implements Serializable {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, this.toString() + " deployed");
   }
-
+ 
+  /**
+   * Returns this <code>Agent</code>'s name.
+   *
+   * @return this <code>Agent</code>'s name.
+   */
   public String getName() {
     if (name == null) {
       return getClass().getName() + id.toString();
@@ -498,6 +503,15 @@ public abstract class Agent implements Serializable {
     this.logmon = Debug.getLogger(getLogTopic());
     // Initializes the updated field to true:
     this.updated = true;
+
+    try {
+      MXWrapper.registerMBean(this,
+                              "AgentServer",
+                              "server=" + AgentServer.getName() + ",cons=Engine#" + getId().getTo() + ",agent=" + getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+    }
+
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  "Agent" + id + " [" + name +
@@ -629,5 +643,12 @@ public abstract class Agent implements Serializable {
    *
    * @param lastTime	true when last called by the factory on agent deletion.
    */
-  public void agentFinalize(boolean lastTime) { }
+  public void agentFinalize(boolean lastTime) {
+    try {
+      MXWrapper.unregisterMBean("AgentServer",
+                                "server=" + AgentServer.getName() + ",cons=Engine#" + getId().getTo() + ",agent=" + getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+    }
+  }
 }
