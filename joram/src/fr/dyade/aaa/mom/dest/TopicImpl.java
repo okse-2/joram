@@ -565,8 +565,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean
   protected void doReact(AgentId from, TopicForwardNot not)
   {
     // If the forward comes from a son, forwarding it to the father, if any.
-    if (not.toFather && fatherId != null)
+    if (not.toFather && fatherId != null) {
       Channel.sendTo(fatherId, not);
+      alreadySentLocally = fatherId.getTo() == AgentServer.getServerId();
+    }
     
     // Processing the received messages. 
     processMessages(not.messages);
