@@ -54,7 +54,10 @@ public class JoramTracing
    */
   static
   {
-    dbgAdmin = Debug.getLogger("fr.dyade.aaa.joram.Admin");
-    dbgClient = Debug.getLogger("fr.dyade.aaa.joram.Client");
+    try {
+      dbgAdmin = Debug.getLogger("fr.dyade.aaa.joram.Admin");
+      dbgClient = Debug.getLogger("fr.dyade.aaa.joram.Client");
+    }
+    catch (Exception exc) {}
   }
 }
