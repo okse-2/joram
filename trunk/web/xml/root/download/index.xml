@@ -39,8 +39,8 @@
       <p>Note: all the packages are available as .tgz files. To unzip these
       files, just go where you want to install JORAM, and unzip it. You can
       use gunzip and tar tools on unix-like systems, or winzip utility on
-      Windows. Please consult the <b>
-			JORAM documentation</b> for installation instructions and a tutorial.</p>
+      Windows. Please consult the <strong>
+			JORAM documentation</strong> for installation instructions and a tutorial.</p>
     </s2>
 
     <s2 name="JORAM CVS code base">
