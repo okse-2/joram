@@ -13,29 +13,7 @@
   <body>
     <s1 name="Current partners">
     <table>	
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.bull.com/">
-      <img src="images/partners/bull.jpg" alt="Bull logo" border="0"
-           height="67" width="210"/></a>
-      </td>
-      <td>
-      <p><a href="http://www.bull.com">Bull</a> is one of the main
-      contributors of the JORAM open source JMS
-      messaging platform. Bull is an international IT group that specialises
-      in designing, developing and implementing secure IT infrastructures.
-      Bull is dedicated to helping customers transform their processes and
-      infrastructures in order to take full advantage of information
-      technology to drive their market growth. To reach this objective, Bull
-      provides a complete offer that includes not only IT services, from
-      consulting to systems integration and outsourcing but also the design
-      and development of infrastructure solutions, with particular emphasis
-      on servers, storage and secure management software. Bull has gained
-      strong recognition in the major economic sectors, such as, the public
-      sector, finance, industry and telecommunications.</p>
-      </td>
-    </tr>
-    <tr>
+		<tr>
       <td align="center" valign="middle">
       <a href="http://www.scalagent.com/">
       <img src="images/partners/scalagent.jpg" alt="ScalAgent logo"
@@ -52,11 +30,53 @@
       </td>
     </tr>
     </table>
-
     </s1>
+		
+		<s1 name="Sponsors">
+		<table>
+		<tr>
+      <td align="center" valign="middle">
+      <a href="http://www.bull.com/">
+      <img src="images/partners/bull.jpg" alt="Bull logo" border="0"
+           height="67" width="210"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adpater included 
+			in Joram since version 4.1.</p>
+      </td>
+    </tr>	
+		<tr>
+      <td align="center" valign="middle">
+      <a href="http://www.rd.francetelecom.com/">
+      <img src="images/partners/logo-ftrd.gif" alt="France Telecom R&D logo" border="0"
+           height="67" width="210"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.rd.francetelecom.com">France Telecom R&D</a> is the main sponsor of the High Availability Joram Server. 
+			The sponsored version is partially released since version 4.1 and will be made entirely available under
+			 the LGPL licence with Joram version 4.2</p>
+      </td>
+    </tr>	
+    </table>		
+		</s1>
 
     <s1 name="Initial partners">
-    <table>	
+    <table>
+		<tr>
+      <td align="center" valign="middle">
+      <a href="http://www.bull.com/">
+      <img src="images/partners/bull.jpg" alt="Bull logo" border="0"
+           height="67" width="210"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.bull.com">Bull</a> was one of the contributors
+			 of the JORAM open source JMS messaging platform. Bull is an international IT group that specialises
+      in designing, developing and implementing secure IT infrastructures.
+      Bull is dedicated to helping customers transform their processes and
+      infrastructures in order to take full advantage of information
+      technology to drive their market growth.</p>
+      </td>
+    </tr>	
     <tr>
     <td align="center" valign="middle">
     <img src="images/partners/dyade.gif" alt="Dyade logo" width="270"
