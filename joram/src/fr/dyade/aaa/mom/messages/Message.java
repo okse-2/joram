@@ -44,23 +44,18 @@ public class Message implements Cloneable, Serializable
   /** The message priority (from 0 to 9, 9 being the highest). */
   private int priority = 4;
   /**
-   * The name of the destination the message is destinated to, or comes from.
+   * The description of the destination the message is destinated to, or comes
+   * from.
    */
-  private String destination = null;
-  /** <code>true</code> if the message is used in a PTP exchange. */
-  private boolean ptp;
+  private DestinationInfo destination = null;
   /** The message expiration time (0 for infinite time-to-live). */
   private long expiration = 0;
   /** The message time stamp. */
   private long timestamp = 0;
   /** The correlation identifier field. */
   private String correlationId = null;
-  /**
-   * The name of the destination to which a reply should be sent.
-   */
-  private String replyTo = null;
-  /** <code>true</code> if the reply should be sent to a queue. */
-  private boolean replyToQueue;
+  /** The description of the destination to which a reply should be sent. */
+  private DestinationInfo replyTo = null;
 
   /** Integer field for user specific needs. */
   public int userIntHeader = 0;
@@ -122,13 +117,11 @@ public class Message implements Cloneable, Serializable
   /**
    * Sets the message destination.
    *
-   * @param name  The destination name.
-   * @param isQueue  <code>true</code> if the destination is a queue.
+   * @param destination  The description of the destination.
    */
-  public void setDestination(String name, boolean isQueue)
+  public void setDestination(DestinationInfo destination)
   {
-    destination = name;
-    ptp = isQueue;
+    this.destination = destination;
   }
 
   /** Sets the message expiration. */
@@ -153,13 +146,11 @@ public class Message implements Cloneable, Serializable
   /**
    * Sets the destination to which the reply should be sent.
    *
-   * @param name  The destination name.
-   * @param isQueue  <code>true</code> if the destination is a queue.
+   * @param replyTo  The destination description.
    */
-  public void setReplyTo(String name, boolean isQueue)
+  public void setReplyTo(DestinationInfo replyTo)
   {
-    replyTo = name;
-    replyToQueue = isQueue;
+    this.replyTo = replyTo;
   }
 
   /** Returns the message identifier. */
@@ -175,15 +166,9 @@ public class Message implements Cloneable, Serializable
   }
   
   /** Returns the message destination. */
-  public String getDestination()
+  public DestinationInfo getDestination()
   {
     return destination;
-  }
-
-  /** Returns <code>true</code> if the destination is a queue. */
-  public boolean getPTP()
-  {
-    return ptp;
   }
 
   /** Returns the message expiration time. */
@@ -204,18 +189,12 @@ public class Message implements Cloneable, Serializable
     return correlationId;
   }
 
-  /** Returns the name of the destination the reply should be sent to. */
-  public String getReplyTo()
+  /** Returns the destination the reply should be sent to. */
+  public DestinationInfo getReplyTo()
   {
     return replyTo;
   }
 
-  /** Returns <code>true</code> if the reply should be sent to a queue. */
-  public boolean replyToQueue()
-  {
-    return replyToQueue;
-  }
- 
   /** Returns <code>true</code> if the message is valid. */
   public boolean isValid()
   {
