@@ -29,7 +29,7 @@ import java.util.Properties;
  * Class used to provide configurable options in a convenient way
  *
  * @author Jeff Mesnil (jmesnil@inrialpes.fr)
- * @version $Id: TestConfig.java,v 1.2 2002-04-16 11:35:39 joram Exp $
+ * @version $Id: TestConfig.java,v 1.3 2002-04-16 12:08:39 joram Exp $
  */
 public class TestConfig {
 
@@ -52,9 +52,8 @@ public class TestConfig {
 	    Properties props = new Properties();
 	    props.load(ClassLoader.getSystemResourceAsStream(PROP_FILE_NAME));
 	    props.list(System.out);
-	    tempTimeOut = Long.parseLong((props.getProperty(PROP_NAME)).trim());
+	    tempTimeOut = Long.parseLong(props.getProperty(PROP_NAME, "0"));
 	} catch (Exception e) {
-	    e.printStackTrace();
 	    tempTimeOut = 0;
  	} finally {
 	    TIMEOUT = tempTimeOut;
