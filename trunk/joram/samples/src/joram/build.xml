@@ -4,9 +4,9 @@
   <target name="init">
     <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
-    <property name="obj.dir" location="../classes"/>
-    <property name="lib.dir" location="../../lib"/>
-    <property name="run.dir" location="../run"/>
+    <property name="obj.dir" location="../../classes"/>
+    <property name="lib.dir" location="../../../lib"/>
+    <property name="run.dir" location="../../run"/>
     <property name="conf.dir" location="../../config"/>
     <!-- Project classpath needed for execution -->
     <path id="project.class.path">
@@ -14,7 +14,7 @@
       <fileset dir="${lib.dir}">
          <include name="*.jar"/>
       </fileset>
-      <pathelement path="${obj.dir}"/>
+      <pathelement path="${obj.dir}/joram"/>
       <pathelement path="${conf.dir}"/>
     </path>
     <property name="project.class.path" refid="project.class.path"/>
@@ -22,22 +22,23 @@
 
   <!-- Cleans samples - deletes generated files -->
   <target name="clean" depends="init"
-          description="--> delete generated files">
+          description="--> Deletes generated files">
     <delete dir="${obj.dir}"/>
+    <delete dir="${run.dir}"/>
   </target>
 
   <!-- Prepares the compilation phase -->
   <target name="prepare" depends="init">
     <delete quiet="true" dir="${obj.dir}"/>
     <delete quiet="true" dir="${run.dir}"/>
-    <mkdir dir="${obj.dir}"/>
+    <mkdir dir="${obj.dir}/joram"/>
   </target>
 
   <!-- Compiles -->
   <target name="compile" depends="prepare"
     description="--> Compile all samples">
     <javac srcdir="${src.dir}"
-           destdir="${obj.dir}"
+           destdir="${obj.dir}/joram"
            debug="${debug}"
            deprecation="${deprecation}"
            optimize="${optimize}"
@@ -99,7 +100,7 @@
 
   <!-- Start a server in NullTransaction mode -->
   <target name="single_server" depends="simple_init"
-          description="--> Start a single server in non-persistent mode">
+          description="--> Starts a single server in non-persistent mode">
     <antcall target="server">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="sid" value="0"/>
@@ -108,7 +109,7 @@
 
   <!-- Setup the classic configuration -->
   <target name="classic_admin" depends="init"
-          description="--> Setup a classic administration (for a centralized architecture)">
+          description="--> Runs a classic administration (for a centralized architecture)">
     <java classname="classic.ClassicAdmin"
       failonerror="no" fork="yes"
       dir="${run.dir}">
@@ -118,7 +119,7 @@
 
   <!-- Runs the classic sender client -->
   <target name="sender" depends="init"
-    description="--> Start a Sender client">
+    description="--> Starts a Sender client">
     <java classname="classic.Sender" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -126,7 +127,7 @@
 
   <!-- Runs the classic receiver client -->
   <target name="receiver" depends="init"
-    description="--> Start a Receiver client">
+    description="--> Starts a Receiver client">
     <java classname="classic.Receiver" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -134,7 +135,7 @@
 
   <!-- Runs the classic subscriber client -->
   <target name="subscriber" depends="init"
-    description="--> Start a Subscriber client">
+    description="--> Starts a Subscriber client">
     <java classname="classic.Subscriber" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -142,7 +143,7 @@
 
   <!-- Runs the classic publisher client -->
   <target name="publisher" depends="init"
-    description="--> Start a Publisher client">
+    description="--> Starts a Publisher client">
     <java classname="classic.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -150,7 +151,7 @@
 
   <!-- Runs the classic consumer client -->
   <target name="consumer" depends="init"
-    description="--> Start a Consumer client">
+    description="--> Starts a Consumer client">
     <java classname="classic.Consumer" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -158,7 +159,7 @@
 
   <!-- Runs the classic producer client -->
   <target name="producer" depends="init"
-    description="--> Start a Producer client">
+    description="--> Starts a Producer client">
     <java classname="classic.Producer" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -166,7 +167,7 @@
 
   <!-- Runs the classic browser client -->
   <target name="browser" depends="init"
-    description="--> Start a Browser client">
+    description="--> Starts a Browser client">
     <java classname="classic.Browser" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -175,7 +176,7 @@
 
   <!-- Setup the chat administration -->
   <target name="chat_admin" depends="init"
-          description="--> Setup chat administration">
+          description="--> Runs chat administration">
     <java classname="chat.ChatAdmin"
       failonerror="no" fork="yes"
       dir="${run.dir}">
@@ -185,7 +186,7 @@
 
   <!-- Runs a chat client -->
   <target name="chat1" depends="init"
-    description="--> Run chat client as user1">
+    description="--> Runs chat client as user1">
     <java classname="chat.SimpleChat" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
       <arg line="user1"/>
@@ -194,7 +195,7 @@
 
   <!-- Runs an other chat client -->
   <target name="chat2" depends="init"
-    description="--> Run chat client as user2">
+    description="--> Runs chat client as user2">
     <java classname="chat.SimpleChat" failonerror="no" fork="no">
       <classpath path="${project.class.path}"/>
       <arg line="user2"/>
@@ -204,7 +205,7 @@
   
   <!-- Setup the dotcom administration -->
   <target name="dotcom_admin" depends="init"
-          description="--> Setup dotcom administration">
+          description="--> Runs dotcom administration">
       <java classname="dotcom.DotcomAdmin"
           failonerror="no" fork="yes"
           dir="${run.dir}">
@@ -214,7 +215,7 @@
 
   <!-- Runs the dotcom servers -->
   <target name="webServers" depends="init"
-    description="--> Run all dotcom servers">
+    description="--> Runs all dotcom servers">
     <parallel>
       <java classname="dotcom.BillingServer" failonerror="no" fork="yes">
         <classpath path="${project.class.path}"/>
@@ -236,7 +237,7 @@
 
   <!-- Runs the dotcom client -->
   <target name="webClient" depends="init"
-    description="--> Run dotcom client">
+    description="--> Runs dotcom client">
     <java classname="dotcom.WebServer" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -245,21 +246,21 @@
 
   <!-- Setup a distributed architecture -->
   <target name="server0" depends="distributed_init"
-          description="--> Start a server for a distributed architecture (w/ id 0)">
+          description="--> Starts a server for a distributed architecture (w/ id 0)">
     <antcall target="server">
       <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="0"/>
     </antcall>
   </target>
   <target name="server1" depends="distributed_init"
-          description="--> Start a server for a distributed architecture (w/ id 1)">
+          description="--> Starts a server for a distributed architecture (w/ id 1)">
     <antcall target="server">
       <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="1"/>
     </antcall>
   </target>
   <target name="server2" depends="distributed_init"
-          description="--> Start a server for a distributed architecture (w/ id 2)">
+          description="--> Starts a server for a distributed architecture (w/ id 2)">
     <antcall target="server">
       <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
       <param name="sid" value="2"/>
@@ -268,7 +269,7 @@
 
   <!-- Runs the archi administration -->
   <target name="archi_admin" depends="init"
-    description="--> Run the distributed architecture administration">
+    description="--> Runs the distributed architecture administration">
     <java classname="archi.ArchiAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -276,7 +277,7 @@
 
   <!-- Runs the archi sender client -->
   <target name="archi_sender" depends="init"
-    description="--> Run the distributed architecture Sender client">
+    description="--> Runs the distributed architecture Sender client">
     <java classname="archi.Sender" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -284,7 +285,7 @@
 
   <!-- Runs the archi receiver client -->
   <target name="archi_receiver" depends="init"
-    description="--> Run the distributed architecture Receiver client">
+    description="--> Runs the distributed architecture Receiver client">
     <java classname="archi.Receiver" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -292,7 +293,7 @@
 
   <!-- Runs the archi durable subscriber client -->
   <target name="archi_sub" depends="init"
-    description="--> Run the distributed architecture Subscriber client">
+    description="--> Runs the distributed architecture Subscriber client">
     <java classname="archi.DSubscriber" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -300,7 +301,7 @@
 
   <!-- Runs the archi publisher client -->
   <target name="archi_pub" depends="init"
-    description="--> Run the distributed architecture Publisher client">
+    description="--> Runs the distributed architecture Publisher client">
     <java classname="archi.Publisher" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -309,7 +310,7 @@
   
   <!-- Runs the cluster administration -->
   <target name="cluster_admin" depends="init"
-    description="--> Run the cluster administration">
+    description="--> Runs the cluster administration">
     <java classname="cluster.ClusterAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -369,7 +370,7 @@
 
   <!-- Setup the dead message queue configuration -->
   <target name="dmq_admin" depends="init"
-    description="--> Sets up a dead message queue administration (for a centralized architecture)">
+    description="--> Runs a dead message queue administration (for a centralized architecture)">
     <java classname="deadMQueue.DMQAdmin" failonerror="no" fork="yes">
       <classpath path="${project.class.path}"/>
     </java>
@@ -393,7 +394,7 @@
 
   <!-- Starts the server side soap service -->
   <target name="soap_start" depends="soap_init"
-   description=" Starts the server side soap service">
+   description="--> Starts the server side soap service">
     <java classname="fr.dyade.aaa.joram.soap.SoapServiceStarter"
           failonerror="no" fork="yes"
           dir="${run.dir}">
@@ -404,7 +405,7 @@
 
   <!-- Starts the server 1 of the soap configuration -->
   <target name="soap_server" depends="soap_init"
-   description="--> Start server 0 of the SOAP configuration">
+   description="--> Starts server 0 of the SOAP configuration">
     <java classname="fr.dyade.aaa.agent.AgentServer"
           failonerror="no" fork="yes"
           dir="${run.dir}">

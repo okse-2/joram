@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<config>
+    <domain name="D1"/>
+    <server id="0" name="S0" hostname="localhost">
+      <network domain="D1" port="16301"/>
+      <service class="fr.dyade.aaa.ns.NameService"/>
+      <service class="fr.dyade.aaa.mom.dest.AdminTopic"/>
+      <service class="fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory"
+               args="16010 root root"/>
+      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+    </server>
+    <server id="1" name="S1" hostname="localhost">
+      <network domain="D1" port="16302"/>
+      <service class="fr.dyade.aaa.mom.dest.AdminTopic"/>
+      <service class="fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory"
+               args="16011"/>
+    </server>
+    <server id="2" name="S2" hostname="localhost">
+      <network domain="D1" port="16303"/>
+      <service class="fr.dyade.aaa.mom.dest.AdminTopic"/>
+      <service class="fr.dyade.aaa.mom.proxies.tcp.ConnectionFactory"
+               args="16012"/>
+    </server>
+</config>
