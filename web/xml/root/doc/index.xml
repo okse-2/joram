@@ -63,6 +63,13 @@
       </ul>
     </s1>
 
+    <s1 name="JORAM API documentation">
+      <ul>
+        <li>Browsing the <a href="../current/javadoc/joram/index.html">
+        3.4 release javadoc</a>.</li>
+      </ul>
+    </s1>
+
   </body>
 
 </document>
