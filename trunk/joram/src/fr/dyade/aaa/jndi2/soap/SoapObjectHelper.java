@@ -40,13 +40,15 @@ public class SoapObjectHelper
    *
    * @exception NamingException  If the object could not be coded.
    */
-  public static Hashtable soapCode(Object obj) throws NamingException
-  {
-    if (obj instanceof SoapObjectItf)
-      return ((SoapObjectItf) obj).code();
-
-    throw new NamingException("Object " + obj.getClass().getName()
-                              + " not codable into a SOAP Hashtable.");
+  public static Hashtable soapCode(Object obj) throws NamingException {
+    if (obj instanceof SoapObjectItf) {
+      Hashtable res = ((SoapObjectItf) obj).code();
+      res.put("className", obj.getClass().getName());
+      return res;
+    } else {
+      throw new NamingException("Object " + obj.getClass().getName()
+                                + " not codable into a SOAP Hashtable.");
+    }
   }
 
   /**
