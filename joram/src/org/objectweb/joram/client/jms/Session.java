@@ -903,6 +903,8 @@ public class Session implements javax.jms.Session {
     }
     // Catching an exception if the sendings or acknowledgement went wrong:
     catch (JMSException jE) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "", jE);
       TransactionRolledBackException tE = 
         new TransactionRolledBackException("A JMSException was thrown during"
                                            + " the commit.");
