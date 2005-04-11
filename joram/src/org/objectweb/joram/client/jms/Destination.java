@@ -108,12 +108,14 @@ public abstract class Destination
    */
   public Hashtable code() {
     Hashtable h = new Hashtable();
-    h.put("agentId",getName());
+    h.put("agentId", getName());
+    h.put("type", type);
     return h;
   }
   
   public void decode(Hashtable h) {
     agentId = (String) h.get("agentId");
+    type = (String) h.get("type");
   }
 
   /** Sets the naming reference of a destination. */
