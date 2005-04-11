@@ -183,9 +183,7 @@
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
-    <!-- copy file="${lib.dir}/xerces.jar" todir="${ship.dir}/lib"/ -->
-    <!-- copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/ -->
-    <!-- copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${lib.dir}/javagroups-all.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/midpapi.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
