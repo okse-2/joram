@@ -174,7 +174,9 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     
     // No limit to work 
     if (maxWorks <= 0) {
-      AdapterTracing.debugDEBUG("ServerSessionPool provides new ServerSession.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      "ServerSessionPool provides new ServerSession.");
       return new InboundSession(this,
                                 workManager,
                                 endpointFactory,
@@ -185,8 +187,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     try {
       synchronized (pool) {
         if (pool.isEmpty() && (serverSessions < maxWorks)) {
-          AdapterTracing.debugDEBUG("ServerSessionPool provides "
-                                    + "new ServerSession.");
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                          "ServerSessionPool provides "
+                                          + "new ServerSession.");
           serverSessions++;
           return new InboundSession(this,
                                     workManager,
@@ -195,8 +199,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                     transacted);
         }
         else if (pool.isEmpty()) {
-          AdapterTracing.debugDEBUG("ServerSessionPool waits for "
-                                    + "a free ServerSession.");
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                          "ServerSessionPool waits for "
+                                          + "a free ServerSession.");
           pool.wait();
         }
 

@@ -173,6 +173,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * request during more than 2 * cnxPendingTimer, the connection is
    * considered as dead and processed as required.
    */
+
   public int cnxPendingTimer = 0;
 
   /**
@@ -180,7 +181,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    */
   public JoramAdapter()
   {
-    AdapterTracing.debugINFO("JORAM adapter instanciated.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "JORAM adapter instanciated.");
 
     consumers = new Hashtable();
     producers = new Vector();
@@ -202,14 +205,18 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (stopped)
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
-    AdapterTracing.debugINFO("JORAM adapter starting deployment...");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "JORAM adapter starting deployment...");
 
     workManager = ctx.getWorkManager();
 
     // Collocated mode: starting the JORAM server. 
     if (collocated) {
 
-      AdapterTracing.debugINFO("  - Collocated JORAM server is starting...");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - Collocated JORAM server is starting...");
 
       if (persistentPlatform)
         System.setProperty("Transaction", "fr.dyade.aaa.util.NTransaction");   
@@ -227,7 +234,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         String[] args = {"" + serverId, serverName};
         AgentServer.init(args);
         AgentServer.start();
-        AdapterTracing.debugINFO("  - Collocated JORAM server has successfully started.");
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                        "  - Collocated JORAM server has successfully started.");
       }
       catch (Exception exc) {
         throw new ResourceAdapterInternalException("Could not start "
@@ -242,7 +251,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       serverId = (short)AdminModule.getLocalServerId();
     }
     catch (Exception exc) {
-      AdapterTracing.debugWARN("  - JORAM server not administerable: " + exc);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "  - JORAM server not administerable: " + exc);
     }
 
     // Administering as specified in the properties file.
@@ -259,7 +270,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       FileReader fileReader = new FileReader(file);
       BufferedReader reader = new BufferedReader(fileReader);
 
-      AdapterTracing.debugINFO("  - Reading the provided admin file: " + file);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - Reading the provided admin file: " + file);
 
       boolean end = false;
       String line;
@@ -306,7 +319,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                   createUser(name, password);
                 }
                 else
-                  AdapterTracing.debugDEBUG("  - Missing password for user [" + name + "]");
+                  if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                    AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                                  "  - Missing password for user [" + name + "]");
               }
               else if (firstToken.equalsIgnoreCase("CF")) {
                 if (tokenizer.hasMoreTokens()) {
@@ -333,20 +348,26 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         catch (IOException exc) {}
         // Error while creating the destination.
         catch (AdminException exc) {
-          AdapterTracing.debugERROR("  CREATION FAILED: " + exc);
+          AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
+                                        "Creation failed",exc);
         }
         // JNDI error.
         catch (NamingException exc) {
-          AdapterTracing.debugERROR("  BINDING FAILED: " + exc);
+          AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
+                                        "Binding failed",exc);
         }
       }
     }
     // No destination to deploy.
     catch (java.io.FileNotFoundException fnfe) { 
-      AdapterTracing.debugINFO("  - No administration task requested.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - No administration task requested.");
     }
-
-    AdapterTracing.debugINFO("Server port is " + serverPort);
+    
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "Server port is " + serverPort);
 
     // Registering MBeans...    
     register(new LocalServer(this));
@@ -365,7 +386,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     started = true;
 
-    AdapterTracing.debugINFO("JORAM adapter successfully deployed.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "JORAM adapter successfully deployed.");
   }
 
   /**	
@@ -374,7 +397,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    */
   public synchronized void stop()
   {
-    AdapterTracing.debugINFO("JORAM adapter stopping...");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "JORAM adapter stopping...");
 
     if (! started || stopped)
       return;
@@ -422,7 +447,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     stopped = true;
 
-    AdapterTracing.debugINFO("JORAM adapter successfully stopped.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                    "JORAM adapter successfully stopped.");
   }
 
   /**
@@ -441,7 +468,8 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
                                  ActivationSpec spec)
               throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " endpointActivation(" + endpointFactory + 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    this + " endpointActivation(" + endpointFactory + 
                                     ", " + spec + ")");
 
     if (! started)
@@ -459,7 +487,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       throw new ResourceException("Supplied ActivationSpec instance "
                                   + "associated to an other ResourceAdapter.");
 
-    AdapterTracing.debugDEBUG("Activating Endpoint on JORAM adapter.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "Activating Endpoint on JORAM adapter.");
 
     boolean durable =
       specImpl.getSubscriptionDurability() != null
@@ -567,7 +597,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (! started || stopped)
       return;
 
-    AdapterTracing.debugDEBUG("Deactivating Endpoint on JORAM adapter.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "Deactivating Endpoint on JORAM adapter.");
 
     ((InboundConsumer) consumers.remove(spec)).close();
   }
@@ -691,7 +723,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   {
     try {
       User.create(name, password);
-      AdapterTracing.debugINFO("  - User [" + name + "] has been created.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - User [" + name + "] has been created.");
     }
     catch (ConnectException exc) {
       throw new AdminException("createUser() failed: admin connection "
@@ -715,8 +749,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      AdapterTracing.debugINFO("  - ConnectionFactory [" + name
-                               + "] has been created and bound.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - ConnectionFactory [" + name
+                                      + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -740,8 +776,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      AdapterTracing.debugINFO("  - QueueConnectionFactory [" + name
-                               + "] has been created and bound.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - QueueConnectionFactory [" + name
+                                      + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -765,8 +803,10 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      AdapterTracing.debugINFO("  - TopicConnectionFactory [" + name
-                               + "] has been created and bound.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - TopicConnectionFactory [" + name
+                                      + "] has been created and bound.");
     }
     catch (NamingException exc) {
       throw exc;
@@ -842,7 +882,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         Queue queue = Queue.create(shortName); 
         queue.setFreeReading();
         queue.setFreeWriting();
-        AdapterTracing.debugINFO("  - Queue [" + shortName + "] has been created.");
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                        "  - Queue [" + shortName + "] has been created.");
         bind(name, queue);
         register(new LocalQueue(queue));
         return queue;
@@ -871,7 +913,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         Topic topic = Topic.create(shortName);
         topic.setFreeReading();
         topic.setFreeWriting();
-        AdapterTracing.debugINFO("  - Topic [" + shortName + "] has been created.");
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                        "  - Topic [" + shortName + "] has been created.");
         bind(name, topic);
         register(new LocalTopic(topic));
         return topic;
@@ -937,10 +981,12 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       }
     }
     catch (Exception exc) {
-      AdapterTracing.debugWARN("  - Could not register MBean ["
-                               + bean.getClass().getName()
-                               + "] to MBean server: "
-                               + exc);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "  - Could not register MBean ["
+                                      + bean.getClass().getName()
+                                      + "] to MBean server: "
+                                      + exc);
     }
   }
 
@@ -957,10 +1003,12 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         mbs.unregisterMBean(jmsResourceON);
     }
     catch (Exception exc) {
-      AdapterTracing.debugWARN("  - Could not unregister MBean ["
-                               + bean.getClass().getName()
-                               + "] from MBean server: "
-                               + exc);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "  - Could not unregister MBean ["
+                                      + bean.getClass().getName()
+                                      + "] from MBean server: "
+                                      + exc);
     }
   }
 

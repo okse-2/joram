@@ -76,7 +76,8 @@ class InboundSession implements javax.jms.ServerSession,
                  XAConnection cnx,
                  boolean transacted) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundSession(" + consumer +
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+                                    "InboundSession(" + consumer +
                                     "," + workManager +
                                     "," + endpointFactory +
                                     "," + cnx +
@@ -125,7 +126,9 @@ class InboundSession implements javax.jms.ServerSession,
   public void start() throws JMSException
   {
     try {
-      AdapterTracing.debugDEBUG("ServerSession submits Work instance.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      "ServerSession submits Work instance.");
       workManager.scheduleWork(this);
     }
     catch (Exception exc) {
@@ -141,7 +144,9 @@ class InboundSession implements javax.jms.ServerSession,
   /** Runs the wrapped session for processing the messages. */
   public void run()
   {
-    AdapterTracing.debugDEBUG("ServerSession runs wrapped Session.");
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "ServerSession runs wrapped Session.");
     session.run();
     consumer.releaseSession(this);
   }
@@ -153,7 +158,9 @@ class InboundSession implements javax.jms.ServerSession,
                                     this + " onMessage(" + message + ")");
 
     try {
-      AdapterTracing.debugDEBUG("ServerSession passes message to listener.");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                      "ServerSession passes message to listener.");
       MessageEndpoint endpoint = endpointFactory.createEndpoint(xaResource);
       ((javax.jms.MessageListener) endpoint).onMessage(message);
       endpoint.release();

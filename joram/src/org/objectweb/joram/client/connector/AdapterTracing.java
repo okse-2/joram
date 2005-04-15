@@ -34,38 +34,9 @@ import org.objectweb.util.monolog.api.Logger;
 public class AdapterTracing {
   public static Logger dbgAdapter = null;
   private static boolean initialized = false;
-
-  static
-  {
+  
+  static {
     dbgAdapter =
       Debug.getLogger("org.objectweb.joram.client.connector.Adapter");
-  }
-
-  /** Debugging method (INFO level). */
-  static void debugINFO(String message)
-  {
-    if (dbgAdapter.isLoggable(BasicLevel.INFO))
-      dbgAdapter.log(BasicLevel.INFO, message);
-  }
-
-  /** Debugging method (DEBUG level). */
-  static void debugDEBUG(String message)
-  {
-    if (dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      dbgAdapter.log(BasicLevel.DEBUG, message);
-  }
-
-  /** Debugging method (WARN level). */
-  static void debugWARN(String message)
-  {
-    if (dbgAdapter.isLoggable(BasicLevel.WARN))
-      dbgAdapter.log(BasicLevel.WARN, message);
-  }
-
-  /** Debugging method (ERROR level). */
-  static void debugERROR(String message)
-  {
-    if (dbgAdapter.isLoggable(BasicLevel.ERROR))
-      dbgAdapter.log(BasicLevel.ERROR, message);
   }
 }
