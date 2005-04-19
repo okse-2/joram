@@ -68,8 +68,8 @@ public class XAResourceMngr {
   /** The connection this manager belongs to. */
   Connection cnx;
 
-  /** Session. */
-  Session sess;
+  /** table of Session (key Xid). */
+  Hashtable sessionTable;
 
 
   /**
@@ -80,12 +80,12 @@ public class XAResourceMngr {
   public XAResourceMngr(Connection cnx) {
     this.cnx = cnx;
     transactions = new Hashtable();
+    sessionTable = new Hashtable();
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  " XAResourceMngr cnx = " + cnx);
   }
-
 
   /**
    * Notifies the RM that a transaction is starting.
@@ -102,7 +102,7 @@ public class XAResourceMngr {
                                  ", " + flag +
                                  ", " + sess +")");
 
-    this.sess = sess;
+    sessionTable.put(xid,sess);
 
     // New transaction.
     if (flag == XAResource.TMNOFLAGS) {
@@ -196,7 +196,18 @@ public class XAResourceMngr {
       xaC.addDeliveries(sess.deliveries);
     }
 
-    sess.setTransacted(false);
+    Session session = (Session) sessionTable.get(xid);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": end(...) session=" 
+                                 + session);
+
+    if (session != null) {
+      session.setTransacted(false);
+      sessionTable.remove(xid);
+    }
   }
 
   /** 
@@ -258,12 +269,11 @@ public class XAResourceMngr {
                                         sessAcks));
 
       setStatus(xid, PREPARED);
-    }
-    catch (JMSException exc) {
+
+    } catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw new XAException("Prepare request failed: " + exc);
-    }
-    catch (XAException exc) {
+    } catch (XAException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw exc;
     }
@@ -303,14 +313,14 @@ public class XAResourceMngr {
                                        xid.getGlobalTransactionId())); 
 
       transactions.remove(xid);
-      if (sess != null)
-        sess.setTransacted(false);
-    }
-    catch (JMSException exc) {
+      Session session = (Session) sessionTable.get(xid);
+      if (session != null)
+        session.setTransacted(false);
+
+    } catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw new XAException("Commit request failed: " + exc);
-    }
-    catch (XAException exc) {
+    } catch (XAException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw exc;
     }
@@ -367,14 +377,15 @@ public class XAResourceMngr {
       cnx.syncRequest(rollbackRequest);
 
       transactions.remove(xid);
-      if (sess != null)
-        sess.setTransacted(false);
-    }
-    catch (JMSException exc) {
+      Session session = (Session) sessionTable.get(xid);
+      if (session != null) {
+        session.setTransacted(false);
+        sessionTable.remove(xid);
+      }
+    } catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw new XAException("Rollback request failed: " + exc);
-    }
-    catch (XAException exc) {
+    } catch (XAException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw exc;
     }
