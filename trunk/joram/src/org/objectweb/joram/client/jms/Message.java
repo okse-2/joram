@@ -828,7 +828,13 @@ public class Message implements javax.jms.Message {
       String name;
       while (names.hasMoreElements()) {
         name = (String) names.nextElement();
-        msg.setObjectProperty(name, jmsMsg.getObjectProperty(name));
+        try {
+          msg.setObjectProperty(name, jmsMsg.getObjectProperty(name));
+        } catch (JMSException e) {
+          // Joram not support other Optional JMSX, just ignore.
+          if (! name.startsWith("JMSX"))
+            throw e;
+        }
       }
     }
 
