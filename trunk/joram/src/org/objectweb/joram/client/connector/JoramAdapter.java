@@ -38,6 +38,7 @@ import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -388,7 +389,9 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                    "JORAM adapter successfully deployed.");
+                                    "JORAM adapter " + 
+                                    ConnectionMetaData.providerVersion + 
+                                    " successfully deployed.");
   }
 
   /**	
