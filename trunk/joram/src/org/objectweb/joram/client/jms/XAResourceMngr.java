@@ -102,6 +102,7 @@ public class XAResourceMngr {
                                  ", " + flag +
                                  ", " + sess +")");
 
+    sess.setTransacted(true); // for XAResource.TMRESUME
     sessionTable.put(xid,sess);
 
     // New transaction.
