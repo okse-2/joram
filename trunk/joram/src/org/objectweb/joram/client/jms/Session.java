@@ -425,7 +425,7 @@ public class Session implements javax.jms.Session {
    * set transacted.
    * see connector ManagedConnectionImpl (Connector).
    */
-  public synchronized void setTransacted(boolean t) {
+  public void setTransacted(boolean t) {
     if (status != Status.CLOSE) {
       transacted = t;
     }
