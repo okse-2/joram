@@ -166,9 +166,9 @@ class MessageConsumerListener implements ReplyListener {
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
-        reply + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "MessageConsumerListener.replyReceived(" + 
+                                 reply + ')');
     if (status == Status.CLOSE) {
       throw new AbortedRequestException();
     } else {
@@ -178,13 +178,6 @@ class MessageConsumerListener implements ReplyListener {
         throw new AbortedRequestException();
       }
       if (consumer.queueMode) {
-        try {
-          subscribe();
-        } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgClient.log(
-              BasicLevel.ERROR, "", exc); 
-        }
         return true;
       } else {
         return false;
@@ -213,9 +206,14 @@ class MessageConsumerListener implements ReplyListener {
    */
   public void onMessage(Message msg) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + 
-        msg + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "MessageConsumerListener.onMessage(" + 
+                                 msg + ')');
+
+    if (consumer.queueMode) {
+      // Consume one message in advance.
+      subscribe();
+    }
 
     synchronized (this) {
       if (status == Status.RUN) {
@@ -226,21 +224,19 @@ class MessageConsumerListener implements ReplyListener {
     }
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, " -> consumer.onMessage(" + 
-        msg + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 " -> consumer.onMessage(" + msg + ')');
 
     try {
       listener.onMessage(msg);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, " -> consumer.onMessage(" + 
-          msg + ") returned");
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   " -> consumer.onMessage(" + 
+                                   msg + ") returned");
     } catch (RuntimeException re) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, "", re);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", re);
       JMSException exc = new JMSException(re.toString());
       exc.setLinkedException(re);
       throw exc;
