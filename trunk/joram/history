@@ -1,3 +1,17 @@
++==============================================================================
+| 2005/05/04 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in ClientSubscription: Avoid multiples denies.
++==============================================================================
+| 2005/05/03 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in MessageConsumerListener: Avoid messages buffering in queue mode.
++==============================================================================
+| 2005/04/22 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix bug in Message.convertJMSMessage :
+ not throw an JMSException if optional header (JMSX) are set in a non Joram
+ message, just ignore.
 ###############################################################################
 # 2005/04/22 | Joram 4.2.2 tag.
 ###############################################################################
