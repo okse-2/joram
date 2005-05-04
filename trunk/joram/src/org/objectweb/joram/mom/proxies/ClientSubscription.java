@@ -702,6 +702,15 @@ class ClientSubscription implements java.io.Serializable {
     while (denies.hasMoreElements()) {
       id = (String) denies.nextElement();
 
+      String deliveredMsgId = (String)deliveredIds.remove(id);
+      if (deliveredMsgId == null) {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                  this + ": cannot denies message: " + id);
+
+        continue denyLoop;
+      }
+
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
                                 this + ": denies message: " + id);
