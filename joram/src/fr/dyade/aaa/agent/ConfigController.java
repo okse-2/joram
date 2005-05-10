@@ -546,29 +546,33 @@ public class ConfigController {
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.removeDomain(" + domainName + ')');
     checkStatus(Status.CONFIG);
-    Vector serversToRemove = new Vector();
-    A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
-    for (int i = 0; i < domain.servers.size(); i++) {
-      A3CMLServer server = (A3CMLServer)domain.servers.elementAt(i);
-      if (server.networks.size() == 1) {
+    try {
+      Vector serversToRemove = new Vector();    
+      A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
+      for (int i = 0; i < domain.servers.size(); i++) {
+        A3CMLServer server = (A3CMLServer)domain.servers.elementAt(i);
+        if (server.networks.size() == 1) {
         serversToRemove.addElement(server);
-      } else {
-        removeNetwork(server.name, domainName);
+        } else {
+          removeNetwork(server.name, domainName);
+        }
       }
-    }
-
-    for (int i = 0; i < serversToRemove.size(); i++) {
-      A3CMLServer server = 
-        (A3CMLServer)serversToRemove.elementAt(i);
-      if (server.sid != AgentServer.getServerId()) {
-        removeServer(server.name);
-      } else {
-        // Remove the network
-        removeNetwork(server.name, domainName);
+      
+      for (int i = 0; i < serversToRemove.size(); i++) {
+        A3CMLServer server = 
+          (A3CMLServer)serversToRemove.elementAt(i);
+        if (server.sid != AgentServer.getServerId()) {
+          removeServer(server.name);
+        } else {
+          // Remove the network
+          removeNetwork(server.name, domainName);
+        }
       }
+      
+      a3cmlConfig.removeDomain(domainName);
+    } catch (fr.dyade.aaa.agent.conf.UnknownDomainException exc) {
+      // Do nothing (idempotency)
     }
-
-    a3cmlConfig.removeDomain(domainName);
   }
 
   public void removeNetwork(String serverName, 
