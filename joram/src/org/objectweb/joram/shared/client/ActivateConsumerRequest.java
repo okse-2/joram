@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,31 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): ScalAgent DT
+ * Contributor(s):
  */
-package org.objectweb.joram.mom.proxies;
+package org.objectweb.joram.shared.client;
 
-import fr.dyade.aaa.agent.Notification;
+public class ActivateConsumerRequest extends AbstractJmsRequest {
 
-import org.objectweb.joram.shared.client.*;
+  private boolean activate;
 
-public class SendReplyNot extends Notification {
-
-  private int key;
-
-  private int requestId;
-
-  public SendReplyNot(int key, int requestId) {
-    persistent = false;
-    this.key = key;
-    this.requestId = requestId;
+  public ActivateConsumerRequest(String targetName,
+                                 boolean activate) {
+    super(targetName);
+    this.activate = activate;
   }
 
-  public final int getKey() {
-    return key;
-  }
-
-  public final int getRequestId() {
-    return requestId;
+  public final boolean getActivate() {
+    return activate;
   }
 }

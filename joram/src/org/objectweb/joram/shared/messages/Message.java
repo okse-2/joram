@@ -24,6 +24,9 @@
 package org.objectweb.joram.shared.messages;
 
 import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.mom.util.MessagePersistenceModule;
+import org.objectweb.joram.shared.messages.MessageTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import java.io.*;
 import java.util.*;
@@ -36,8 +39,15 @@ import java.util.*;
  * hashtable, or bytes, even nothing. It is charaterized by properties and
  * "header" fields.
  */
-public class Message implements Cloneable, Serializable
-{
+public class Message
+  implements Cloneable, Serializable {
+
+  transient public boolean pin = true;
+  transient private String saveName = null;
+  transient public boolean toBeUpdated = false;
+  transient protected MessagePersistent messagePersistent = null;
+  transient public boolean noBody = false;
+
   /** The message type (SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES). */
   transient int type;
 
@@ -69,14 +79,9 @@ public class Message implements Cloneable, Serializable
    */
   transient Hashtable optionalHeader = null;
 
-  /** The bytes body. */
-  transient byte[] body_bytes = null;
-  /** The map body. */
-  transient HashMap body_map = null;
-  /** The text body. */
-  transient String body_text = null;
   /** <code>true</code> if the body is read-only. */
   transient boolean bodyRO = false;
+  transient protected MessageBody body = null;
 
   /** The message properties table. */
   transient Hashtable properties = null;
@@ -118,12 +123,96 @@ public class Message implements Cloneable, Serializable
   /**
    * Constructs a <code>Message</code> instance.
    */
-  public Message()
-  {
+  public Message() {
     this.type = MessageType.SIMPLE;
+    body = new MessageBody();
+
+    if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                    "Message <init>");
   }
 
+  public static Message create() {
+    if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                    "Message.create()");
+    Message message;
+    try {
+      String momMessageClass = 
+        System.getProperty("MomMessageClass", 
+                           "org.objectweb.joram.shared.messages.Message");
+      message =  (Message) Class.forName(momMessageClass).newInstance();
+    } catch (Exception exc) {
+      MessageTracing.dbgMessage.log(BasicLevel.ERROR,
+                                    "Message.create() : " +
+                                    "return new org.objectweb.joram.shared.messages.Message",
+                                    exc);
+      message =  new Message();
+    }
+      message.setPin(true);
+      return message;
+  }
+
+  public void setPin(boolean pin) {
+    this.pin = pin;
+  }
+
+  public boolean isPin() {
+    return pin;
+  }
+
+  public void setSaveName(String saveName) {
+    this.saveName = saveName;
+  }
+
+  public String getSaveName() {
+    return saveName;
+  }
+
+  protected MessageBody getMessageBody() {
+    return body;
+  }
+
+  public void setMessageBody(MessageBody body) {
+    this.body = body;
+  }
+
+  /** get bytes body. */
+  protected byte[] getBodyBytes() {
+    return getMessageBody().getBodyBytes();
+  }
   
+  /** get map body. */
+  protected HashMap getBodyMap() {
+    return getMessageBody().getBodyMap();
+  }
+  
+  /** get text body. */
+  protected String getBodyText() {
+    return getMessageBody().getBodyText();
+  }
+  
+  /** set bytes body. */
+  protected void setBodyBytes(byte[] bytes) {
+    MessageBody body = getMessageBody();
+    body.setType(type);
+    body.setBodyBytes(bytes);
+  }
+  
+  /** set map body. */
+  protected void setBodyMap(HashMap map) {
+    MessageBody body = getMessageBody();
+    body.setType(type);
+    body.setBodyMap(map);
+  }
+
+  /** set text body. */
+  protected void setBodyText(String text) {
+    MessageBody body = getMessageBody();
+    body.setType(type);
+    body.setBodyText(text);
+  }
+
   /** Sets the message identifier. */ 
   public void setIdentifier(String id)
   {
@@ -299,8 +388,7 @@ public class Message implements Cloneable, Serializable
   public void setBooleanProperty(String name, boolean value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Boolean(value));
+    setProperty(name, new Boolean(value));
   }
 
   /**
@@ -314,8 +402,7 @@ public class Message implements Cloneable, Serializable
   public void setByteProperty(String name, byte value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Byte(value));
+    setProperty(name, new Byte(value));
   }
 
   /**
@@ -329,8 +416,7 @@ public class Message implements Cloneable, Serializable
   public void setDoubleProperty(String name, double value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Double(value));
+    setProperty(name, new Double(value));
   }
 
   /**
@@ -344,8 +430,7 @@ public class Message implements Cloneable, Serializable
   public void setFloatProperty(String name, float value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Float(value));
+    setProperty(name, new Float(value));
   }
 
   /**
@@ -358,8 +443,7 @@ public class Message implements Cloneable, Serializable
    */
   public void setIntProperty(String name, int value) throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Integer(value));
+    setProperty(name, new Integer(value));
   }
 
   /**
@@ -373,32 +457,7 @@ public class Message implements Cloneable, Serializable
   public void setLongProperty(String name, long value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Long(value));
-  }
-
-  /**
-   * Sets a property value.
-   *
-   * @param name  The property name.
-   * @param value  The property value.
-   *
-   * @exception MessageROException  If the message properties are read-only.
-   * @exception MessageValueException  If the value is not a Java primitive
-   *              object.
-   */
-  public void setObjectProperty(String name, Object value)
-         throws MessageException
-  {
-    preparePropSetting(name);
-
-    if (value instanceof Boolean || value instanceof Number
-        || value instanceof String)
-      properties.put(name, value);
-
-    else
-      throw new MessageValueException("Can't set non primitive Java object"
-                                      + " as a property value.");
+    setProperty(name, new Long(value));
   }
 
   /**
@@ -412,8 +471,7 @@ public class Message implements Cloneable, Serializable
   public void setShortProperty(String name, short value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new Short(value));
+    setProperty(name, new Short(value));
   }
 
   /**
@@ -427,10 +485,59 @@ public class Message implements Cloneable, Serializable
   public void setStringProperty(String name, String value)
          throws MessageROException
   {
-    preparePropSetting(name);
-    properties.put(name, new String(value));
+    setProperty(name, value);
   }
 
+  /**
+   * Sets a property value.
+   *
+   * @param name  The property name.
+   * @param value  The property value.
+   *
+   * @exception MessageROException
+   * 	If the message properties are read-only.
+   * @exception MessageValueException
+   *	If the value is not a Java primitive object.
+   * @exception IllegalArgumentException
+   *	If the key name is illegal (null or empty string).
+   */
+  public void setObjectProperty(String name, Object value)
+         throws MessageException
+  {
+    if (value instanceof Boolean || value instanceof Number
+        || value instanceof String) {
+      setProperty(name, value);
+    } else {
+      throw new MessageValueException("Can't set non primitive Java object"
+                                      + " as a property value.");
+    }
+  }
+ 
+  /**
+   * Sets a property value.
+   *
+   * @param name  The property name.
+   * @param value  The property value.
+   *
+   * @exception MessageROException
+   * 	If the message properties are read-only.
+   * @exception IllegalArgumentException
+   *	If the key name is illegal (null or empty string).
+   */
+  private void setProperty(String name, Object value)
+         throws MessageROException
+  {
+    if (propertiesRO)
+      throw new MessageROException("Can't set property as the message "
+                                   + "properties are READ-ONLY.");
+
+    if (name == null || name.equals(""))
+      throw new IllegalArgumentException("Invalid property name: " + name);
+
+    if (properties == null) properties = new Hashtable();
+    properties.put(name, value);
+  }
+ 
   /**
    * Returns a property as a boolean value.
    *
@@ -438,9 +545,7 @@ public class Message implements Cloneable, Serializable
    */
   public boolean getBooleanProperty(String name) throws MessageValueException 
   {
-    if (properties == null)
-      return Boolean.valueOf(null).booleanValue();
-    return ConversionHelper.toBoolean(properties.get(name));
+    return ConversionHelper.toBoolean(getObjectProperty(name));
   }
   
   /**
@@ -449,9 +554,7 @@ public class Message implements Cloneable, Serializable
    */
   public byte getByteProperty(String name) throws MessageValueException 
   {
-    if (properties == null)
-      return Byte.valueOf(null).byteValue();
-    return ConversionHelper.toByte(properties.get(name));
+    return ConversionHelper.toByte(getObjectProperty(name));
   }
 
   /**
@@ -463,9 +566,7 @@ public class Message implements Cloneable, Serializable
    */
   public double getDoubleProperty(String name) throws MessageValueException
   {
-    if (properties == null)
-      return Double.valueOf(null).doubleValue();
-    return ConversionHelper.toDouble(properties.get(name));
+    return ConversionHelper.toDouble(getObjectProperty(name));
   }
 
   /**
@@ -477,9 +578,7 @@ public class Message implements Cloneable, Serializable
    */
   public float getFloatProperty(String name) throws MessageValueException
   {
-    if (properties == null)
-      return Float.valueOf(null).floatValue();
-    return ConversionHelper.toFloat(properties.get(name));
+    return ConversionHelper.toFloat(getObjectProperty(name));
   }
 
   /**
@@ -491,9 +590,7 @@ public class Message implements Cloneable, Serializable
    */
   public int getIntProperty(String name) throws MessageValueException
   {
-    if (properties == null)
-      return Integer.valueOf(null).intValue();
-    return ConversionHelper.toInt(properties.get(name));
+    return ConversionHelper.toInt(getObjectProperty(name));
   }
 
   /**
@@ -505,21 +602,7 @@ public class Message implements Cloneable, Serializable
    */
   public long getLongProperty(String name) throws MessageValueException
   {
-    if (properties == null)
-      return Long.valueOf(null).longValue();
-    return ConversionHelper.toLong(properties.get(name));
-  }
-
-  /**
-   * Returns a property as an object.
-   *
-   * @param name  The property name.
-   */
-  public Object getObjectProperty(String name)
-  {
-    if (properties == null)
-      return null;
-    return properties.get(name);
+    return ConversionHelper.toLong(getObjectProperty(name));
   }
 
   /**
@@ -531,9 +614,7 @@ public class Message implements Cloneable, Serializable
    */
   public short getShortProperty(String name) throws MessageValueException
   {
-    if (properties == null)
-      return Short.valueOf(null).shortValue();
-    return ConversionHelper.toShort(properties.get(name));
+    return ConversionHelper.toShort(getObjectProperty(name));
   }
 
   /**
@@ -543,10 +624,18 @@ public class Message implements Cloneable, Serializable
    */
   public String getStringProperty(String name)
   {
-    if (properties == null)
-      return null;
+    return ConversionHelper.toString(getObjectProperty(name));
+  }
 
-    return ConversionHelper.toString(properties.get(name));
+  /**
+   * Returns a property as an object.
+   *
+   * @param name  The property name.
+   */
+  public Object getObjectProperty(String name)
+  {
+    if (properties == null) return null;
+    return properties.get(name);
   }
   
   /**
@@ -590,23 +679,24 @@ public class Message implements Cloneable, Serializable
    * @exception IOException  In case of an error while setting the object.
    * @exception  MessageROException  If the message body is read-only.
    */
-  public void setObject(Object object) throws IOException, MessageROException
-  {
+  public void setObject(Object object) 
+    throws IOException, MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
+    type = MessageType.OBJECT;
+
     if (object == null)
-      body_bytes = null;
+      setBodyBytes(null);
     else {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ObjectOutputStream oos = new ObjectOutputStream(baos);
       oos.writeObject(object);
       oos.flush();
-      body_bytes = baos.toByteArray();
+      setBodyBytes(baos.toByteArray());
       oos.close();
       baos.close();
     }
-    type = MessageType.OBJECT;
   }
 
   /**
@@ -615,13 +705,13 @@ public class Message implements Cloneable, Serializable
    * @exception IOException  In case of an error while setting the map.
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setMap(HashMap map) throws Exception
-  {
+  public void setMap(HashMap map) 
+    throws Exception {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
-    body_map = map;
     type = MessageType.MAP;
+    setBodyMap(map);
   }
 
   /**
@@ -629,13 +719,13 @@ public class Message implements Cloneable, Serializable
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setText(String text) throws MessageROException
-  {
+  public void setText(String text) 
+    throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
-    body_text = text;
     type = MessageType.TEXT;
+    setBodyText(text);
   }
 
   /**
@@ -643,13 +733,13 @@ public class Message implements Cloneable, Serializable
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setStream(byte[] bytes) throws MessageROException
-  {
+  public void setStream(byte[] bytes) 
+    throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
-    body_bytes = bytes;
     type = MessageType.STREAM;
+    setBodyBytes(bytes);
   }
 
   /**
@@ -657,13 +747,13 @@ public class Message implements Cloneable, Serializable
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setBytes(byte[] bytes) throws MessageROException
-  {
+  public void setBytes(byte[] bytes) 
+    throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
-    body_bytes = bytes;
     type = MessageType.BYTES;
+    setBodyBytes(bytes);
   } 
 
   /**
@@ -672,11 +762,11 @@ public class Message implements Cloneable, Serializable
    * @exception IOException  In case of an error while getting the object.
    * @exception ClassNotFoundException  If the object class is unknown.
    */
-  public Object getObject() throws Exception
-  {
-    if (body_bytes == null)
+  public Object getObject() 
+    throws Exception {
+    if (getBodyBytes() == null)
       return null;
-    ByteArrayInputStream bais = new ByteArrayInputStream(body_bytes);
+    ByteArrayInputStream bais = new ByteArrayInputStream(getBodyBytes());
     ObjectInputStream ois = new ObjectInputStream(bais);
     return ois.readObject();
   }
@@ -684,37 +774,32 @@ public class Message implements Cloneable, Serializable
   /**
    * Returns the map body of the message.
    */ 
-  public Map getMap()
-  {
-    return body_map;
+  public Map getMap() {
+    return getBodyMap();
   }
 
   /** Gets the String body of the message. */
-  public String getText()
-  {
-    return body_text;
+  public String getText() {
+    return getBodyText();
   }
 
   /** Returns the stream of bytes body of the message. */
-  public byte[] getStream()
-  {
-    return body_bytes;
+  public byte[] getStream() {
+    return getBodyBytes();
   }
 
   /** Returns the array of bytes body of the message. */
-  public byte[] getBytes()
-  {
-    return body_bytes;
+  public byte[] getBytes() {
+    return getBodyBytes();
   }
 
   /** 
    * Method clearing the message body.
    */
-  public void clearBody()
-  {
-    body_bytes = null;
-    body_map = null;
-    body_text = null;
+  public void clearBody() {
+    setBodyBytes(null);
+    setBodyMap(null);
+    setBodyText(null);
     bodyRO = false;
   }
 
@@ -728,19 +813,15 @@ public class Message implements Cloneable, Serializable
   }
 
   /** Clones the message. */
-  public Object clone()
-  {
+  public Object clone() {
     try {
+      if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+        MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                      "Message.clone()");
       Message clone = (Message) super.clone();
-      if (body_map != null) {
-        clone.body_map = new HashMap();
-        if (body_map.keySet() != null) {
-          for (Iterator it = body_map.keySet().iterator(); it.hasNext(); ) {
-            Object key = it.next();
-            clone.body_map.put(key,body_map.get(key));
-          }
-        }
-      }
+      clone.setMessageBody(
+        (MessageBody) getMessageBody().clone());
+
       if (optionalHeader != null) {
         clone.optionalHeader = new Hashtable();
         for (Enumeration e = optionalHeader.keys(); e.hasMoreElements(); ) {
@@ -756,8 +837,7 @@ public class Message implements Cloneable, Serializable
         }
       }
       return clone;
-    }
-    catch (CloneNotSupportedException cE) {
+    } catch (CloneNotSupportedException cE) {
       return null;
     }
   }
@@ -775,6 +855,7 @@ public class Message implements Cloneable, Serializable
     fieldsTb.put("type", new Integer(type));
     fieldsTb.put("id", id);
     fieldsTb.put("persistent", new Boolean(persistent));
+    fieldsTb.put("nobody", new Boolean(noBody));
     fieldsTb.put("priority", new Integer(priority));
     fieldsTb.put("expiration", new Long(expiration));
     fieldsTb.put("timestamp", new Long(timestamp));
@@ -786,12 +867,12 @@ public class Message implements Cloneable, Serializable
       fieldsTb.put("replyToId", replyToId);
       fieldsTb.put("replyToType", replyToType);
     }
-    if (body_bytes != null)
-      fieldsTb.put("body_bytes", body_bytes);
-    else if (body_map != null)
-      fieldsTb.put("body_map", body_map);
-    else if (body_text != null)
-      fieldsTb.put("body_text", body_text);
+    if (getBodyBytes() != null)
+      fieldsTb.put("body_bytes", getBodyBytes());
+    else if (getBodyMap() != null)
+      fieldsTb.put("body_map", getBodyMap());
+    else if (getBodyText() != null)
+      fieldsTb.put("body_text", getBodyText());
     fieldsTb.put("bodyRO", new Boolean(bodyRO));
     fieldsTb.put("propertiesRO", new Boolean(propertiesRO));
     fieldsTb.put("deliveryCount", new Integer(deliveryCount));
@@ -824,12 +905,13 @@ public class Message implements Cloneable, Serializable
 
     Hashtable fieldsTb = (Hashtable) h.get("fieldsTb");
 
-    Message msg = new Message();
+    Message msg = Message.create();
 
     try {
       msg.type = ConversionHelper.toInt(fieldsTb.get("type"));
       msg.id = (String) fieldsTb.get("id");
       msg.persistent = ConversionHelper.toBoolean(fieldsTb.get("persistent"));
+      msg.noBody = ConversionHelper.toBoolean(fieldsTb.get("nobody"));
       msg.priority = ConversionHelper.toInt(fieldsTb.get("priority"));
       msg.expiration = ConversionHelper.toLong(fieldsTb.get("expiration"));
       msg.timestamp = ConversionHelper.toLong(fieldsTb.get("timestamp"));
@@ -840,9 +922,9 @@ public class Message implements Cloneable, Serializable
       if (msg.replyToId != null) {
         msg.replyToType = (String)fieldsTb.get("replyToType");
       }
-      msg.body_bytes = ConversionHelper.toBytes(fieldsTb.get("body_bytes"));
-      msg.body_map = (HashMap) fieldsTb.get("body_map");
-      msg.body_text = (String) fieldsTb.get("body_text");
+      msg.setBodyBytes(ConversionHelper.toBytes(fieldsTb.get("body_bytes")));
+      msg.setBodyMap((HashMap) fieldsTb.get("body_map"));
+      msg.setBodyText((String) fieldsTb.get("body_text"));
       msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
       msg.propertiesRO =
         ConversionHelper.toBoolean(fieldsTb.get("propertiesRO"));
@@ -859,35 +941,46 @@ public class Message implements Cloneable, Serializable
 
       msg.optionalHeader = (Hashtable) h.get("optionalHeader");
       msg.properties = (Hashtable) h.get("properties");
+      msg.pin = true;
     }
     // Should never happen!
     catch (MessageValueException exc) {}
   
     return msg;
   }
- 
-  /**
-   * Method actually preparing the setting of a new property.
-   *
-   * @param name  The property name.
-   *
-   * @exception MessageROException  If the message properties are read-only.
-   */
-  private void preparePropSetting(String name) throws MessageROException
-  {
-    if (propertiesRO) {
-      throw new MessageROException("Can't set property as the message "
-                                   + "properties are READ-ONLY.");
-    }
 
-    if (name == null || name.equals(""))
-      throw new IllegalArgumentException("Invalid property name: " + name);
+  public void save(String id) {
+    if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                    "Message.save(" + id + ')');
 
-    if (properties == null)
-      properties = new Hashtable();
+    if (! getPersistent()) 
+      return;
+
+    if (messagePersistent == null)
+      messagePersistent = new MessagePersistent(this);
+    messagePersistent.setPin(true);
+    setSaveName(MessagePersistenceModule.getSaveName(id,messagePersistent));
+    MessagePersistenceModule.save(id,messagePersistent);
+
+    if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                    "Message.save : saveName=" + saveName);
   }
 
-  private static void writeString(ObjectOutputStream os,
+  public void delete() {
+    if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                    "Message.delete()");
+
+    if (! getPersistent()) 
+      return;
+    if (messagePersistent == null)
+      messagePersistent = new MessagePersistent(this);
+    MessagePersistenceModule.delete(messagePersistent);
+  }
+  
+  private static void writeString(ObjectOutput os,
                                   String s) throws IOException {
     if (s == null) {
       os.writeInt(-1);
@@ -900,7 +993,7 @@ public class Message implements Cloneable, Serializable
     }
   }
 
-  private static String readString(ObjectInputStream is) throws IOException {
+  private static String readString(ObjectInput is) throws IOException {
     int length = is.readInt();
     if (length == -1) {
       return null;
@@ -913,16 +1006,95 @@ public class Message implements Cloneable, Serializable
     }
   }
 
+  final static byte BOOLEAN = 0;
+  final static byte BYTE = 1;
+  final static byte DOUBLE = 2;
+  final static byte FLOAT = 3;
+  final static byte INTEGER = 4;
+  final static byte LONG = 5;
+  final static byte SHORT = 6;
+  final static byte STRING = 7;
+
+  private static void writeProperties(ObjectOutput os,
+                                      Hashtable h) throws IOException {
+    if (h == null) {
+      os.writeInt(0);
+      return;
+    }
+
+    os.writeInt(h.size());
+    for (Enumeration e = h.keys() ; e.hasMoreElements() ;) {
+      String key = (String) e.nextElement();
+      writeString(os, key);
+      Object value = h.get(key);
+      if (value instanceof Boolean) {
+        os.writeByte(BOOLEAN);
+        os.writeBoolean(((Boolean) value).booleanValue());
+      } else if (value instanceof Byte) {
+        os.writeByte(BYTE);
+        os.writeByte(((Byte) value).byteValue());
+      } else if (value instanceof Double) {
+        os.writeByte(DOUBLE);
+        os.writeDouble(((Double) value).doubleValue());
+      } else if (value instanceof Float) {
+        os.writeByte(FLOAT);
+        os.writeFloat(((Float) value).floatValue());
+      } else if (value instanceof Integer) {
+        os.writeByte(INTEGER);
+        os.writeInt(((Integer) value).intValue());
+      } else if (value instanceof Long) {
+        os.writeByte(LONG);
+        os.writeLong(((Long) value).longValue());
+       } else if (value instanceof Short) {
+        os.writeByte(SHORT);
+        os.writeShort(((Short) value).shortValue());
+      } else if (value instanceof String) {
+        os.writeByte(STRING);
+        writeString(os, (String) value);
+      }
+     }
+  }
+
+  private static Hashtable readProperties(ObjectInput is) throws IOException, ClassNotFoundException {
+    int size = is.readInt();
+    if (size == 0) return null;
+
+    Hashtable h = new Hashtable(size);
+    
+    for (int i = 0; i < size; i++) {
+      String key = readString(is);
+      byte type = is.readByte();
+      if (type == BOOLEAN) {
+        h.put(key, new Boolean(is.readBoolean()));
+      } else if (type == BYTE) {
+        h.put(key, new Byte(is.readByte()));
+      } else if (type == DOUBLE) {
+        h.put(key, new Double(is.readDouble()));
+      } else if (type == FLOAT) {
+        h.put(key, new Float(is.readFloat()));
+      } else if (type == INTEGER) {
+        h.put(key, new Integer(is.readInt()));
+      } else if (type == LONG) {
+        h.put(key, new Long(is.readLong()));
+      } else if (type == SHORT) {
+        h.put(key, new Short(is.readShort()));
+      } else if (type == STRING) {
+        h.put(key, readString(is));
+      }
+    }
+    return h;
+  }
+
   /**
    * Specializes the serialization method for protecting the message's
    * properties and body as soon as it is sent.
    */
-  private void writeObject(ObjectOutputStream os) throws IOException
-  {
-//     os.defaultWriteObject();
-
+  private void writeObject(ObjectOutputStream os) 
+//   public void writeExternal(ObjectOutput os)
+    throws IOException {
     os.writeInt(type);
     os.writeBoolean(persistent);
+    os.writeBoolean(noBody);
     writeString(os, id);
     os.writeInt(priority);
     os.writeLong(expiration);
@@ -935,25 +1107,11 @@ public class Message implements Cloneable, Serializable
 
     os.writeObject(optionalHeader);
 
-    if (type == MessageType.SIMPLE) {
-    } else if (type == MessageType.TEXT) {
-      writeString(os, body_text);
-    } else if ((type == MessageType.OBJECT) ||
-               (type == MessageType.STREAM) ||
-               (type == MessageType.BYTES)) {
-      if (body_bytes == null) {
-        os.writeInt(-1);
-      } else {
-        os.writeInt(body_bytes.length);
-        os.write(body_bytes);
-      }
-    } else if (type == MessageType.MAP) {
-      os.writeObject(body_map);
-    }
+    os.writeObject(getMessageBody());
     os.writeBoolean(bodyRO);
 
-    os.writeObject(properties);
-    
+    writeProperties(os, properties);
+
     os.writeLong(order);
     os.writeInt(deliveryCount);
 
@@ -971,12 +1129,11 @@ public class Message implements Cloneable, Serializable
    * transient fields.
    */
   private void readObject(ObjectInputStream is)
-               throws IOException, ClassNotFoundException
-  {
-//     is.defaultReadObject();
-
+//   public void readExternal(ObjectInput is)
+    throws IOException, ClassNotFoundException {
     type = is.readInt();
     persistent = is.readBoolean();
+    noBody = is.readBoolean();
     id = readString(is);
     priority = is.readInt();
     expiration = is.readLong();
@@ -989,26 +1146,10 @@ public class Message implements Cloneable, Serializable
 
     optionalHeader = (Hashtable) is.readObject();
 
-    clearBody();
-    if (type == MessageType.SIMPLE) {
-    } else if (type == MessageType.TEXT) {
-      body_text = readString(is);
-    } else if ((type == MessageType.OBJECT) ||
-               (type == MessageType.STREAM) ||
-               (type == MessageType.BYTES)) {
-      int length = is.readInt();
-      if (length ==  -1) {
-        body_bytes = null;
-      } else {
-        body_bytes = new byte[length];
-        is.readFully(body_bytes);
-      }
-    } else if (type == MessageType.MAP) {
-      body_map = (HashMap) is.readObject();
-    }
+    body = (MessageBody) is.readObject();
     bodyRO = is.readBoolean();
 
-    properties = (Hashtable) is.readObject();
+    properties = readProperties(is);
     
     order = is.readLong();
     deliveryCount = is.readInt();
@@ -1022,18 +1163,30 @@ public class Message implements Cloneable, Serializable
     acksCounter = 0;
     durableAcksCounter = 0;
     propertiesRO = true;
+    pin = true;
   }
 
   public String toString() {
-    return '(' + super.toString() +
-      ",type=" + type +
-      ",id=" + id + 
-      ",body_map=" + body_map +
-      ",body_text=" + body_text +
-      ",toId=" + toId + 
-      ",toType=" + toType +
-      ",replyToId=" + replyToId + 
-      ",replyToType=" + replyToType +
-      ')';
+    StringBuffer buff = new StringBuffer();
+    buff.append('(');
+    buff.append(super.toString());
+    buff.append(",type=");
+    buff.append(type);
+    buff.append(",id=");
+    buff.append(id);
+    buff.append(",toId=");
+    buff.append(toId);
+    buff.append(",toType=");
+    buff.append(toType);
+    buff.append(",replyToId=");
+    buff.append(replyToId);
+    buff.append(",replyToType=");
+    buff.append(replyToType);
+    buff.append(",pin=");
+    buff.append(pin);
+    buff.append(",body=");
+    buff.append(getMessageBody());
+    buff.append(')');
+    return buff.toString();
   }
 }

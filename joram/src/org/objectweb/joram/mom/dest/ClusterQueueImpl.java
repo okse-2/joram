@@ -651,7 +651,7 @@ public class ClusterQueueImpl extends QueueImpl {
   }
 
   void deletePersistenceMessage(Message msg) {
-    persistenceModule.delete(msg);
+    msg.delete();
   }
 
   AgentId getDestId() {

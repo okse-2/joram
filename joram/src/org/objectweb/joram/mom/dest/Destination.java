@@ -44,6 +44,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public abstract class Destination extends Agent implements AdminDestinationItf
 {
+
   /**
    * The reference of the <code>DestinationImpl</code> instance providing this
    * this agent with its <tt>Destination</tt> behaviour.
@@ -88,6 +89,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    */
   public final void init(AgentId adminId) {
     destImpl = createsImpl(adminId);
+    destImpl.setAgent(this);
   }
 
   /**
@@ -153,5 +155,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf
     } catch (UnknownNotificationException exc) {
       super.react(from, not);
     }
+  }
+
+  protected void setNoSave() {
+    super.setNoSave();
   }
 }

@@ -64,15 +64,16 @@ public class ReliableTcpClient {
 
   private boolean reconnect;
 
-  public ReliableTcpClient(
-    FactoryParameters params, 
-    String name,
-    String password,
-    boolean reconnect) {
+  public ReliableTcpClient() {}
+
+  public void init(FactoryParameters params, 
+                   String name,
+                   String password,
+                   boolean reconnect) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
-        "ReliableTcpClient.<init>(" + 
+        "ReliableTcpClient.init(" + 
         params + ',' + name + ',' + password + ')');
     this.params = params;
     this.name = name;
@@ -148,6 +149,10 @@ public class ReliableTcpClient {
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", jmse); 
           // continue
+        } catch (Exception e) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", e); 
+          // continue
         }
       }
       long currentTime = System.currentTimeMillis();
@@ -199,15 +204,20 @@ public class ReliableTcpClient {
     }
   }
 
+  protected Socket createSocket(String hostName, int port) 
+    throws Exception {
+    return new Socket(hostName, port);
+  }
+
   private void doConnect(String hostName, int port) 
-    throws IOException, JMSException {
+    throws Exception, JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, "ReliableTcpClient[" + 
         name + ',' + key + "].doConnect(" + 
 	hostName + ',' + port + ')');
 
-    Socket socket = new Socket(hostName, port);    
+    Socket socket = createSocket(hostName, port);    
     socket.setTcpNoDelay(true);
     socket.setSoTimeout(0);
     socket.setSoLinger(true, 1000);

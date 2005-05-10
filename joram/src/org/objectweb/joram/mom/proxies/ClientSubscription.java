@@ -27,7 +27,6 @@ import fr.dyade.aaa.agent.Channel;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.dest.DeadMQueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.util.MessagePersistenceModule;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.Selector;
@@ -100,10 +99,11 @@ class ClientSubscription implements java.io.Serializable {
   /** Expiration time of the "receive" request, if any. */
   private transient long requestExpTime;
 
-  /** Messages persistence module. */
-  private transient MessagePersistenceModule persistenceModule;
   /** Proxy messages table. */
   private transient Hashtable messagesTable;
+
+  /** string proxy agent id */
+  private transient String proxyStringId;
 
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -119,7 +119,6 @@ class ClientSubscription implements java.io.Serializable {
    *          within the same proxy's context.
    * @param dmqId  Identifier of the proxy's dead message queue, if any.
    * @param threshold  Proxy's threshold value, if any.
-   * @param persistenceModule  Messages' persistence module.
    * @param messagesTable  Proxy's messages table.
    */
   ClientSubscription(AgentId proxyId,
@@ -132,7 +131,6 @@ class ClientSubscription implements java.io.Serializable {
                      boolean noLocal,
                      AgentId dmqId,
                      Integer threshold,
-                     MessagePersistenceModule persistenceModule,
                      Hashtable messagesTable)
   {
     this.proxyId = proxyId;
@@ -145,7 +143,6 @@ class ClientSubscription implements java.io.Serializable {
     this.noLocal = noLocal;
     this.dmqId = dmqId;
     this.threshold = threshold;
-    this.persistenceModule = persistenceModule;
     this.messagesTable = messagesTable;
 
     messageIds = new Vector();
@@ -157,6 +154,8 @@ class ClientSubscription implements java.io.Serializable {
     active = true;
     requestId = -1;
     toListener = false;
+
+    proxyStringId = proxyId.toString();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -224,13 +223,13 @@ class ClientSubscription implements java.io.Serializable {
   
   /**
    * Re-initializes the client subscription.
-   *
-   * @param persistenceModule  Messages' persistence module.
+   * 
+   * @param proxyStringId  string proxy id.
    * @param messagesTable  Proxy's table where storing the messages.
    * @param persistedMessages  Proxy's persisted messages.
    * @param denyDeliveredMessages Denies already delivered messages.
    */
-  void reinitialize(MessagePersistenceModule persistenceModule,
+  void reinitialize(String proxyStringId,
                     Hashtable messagesTable,
                     Vector persistedMessages,
                     boolean denyDeliveredMessages)
@@ -240,7 +239,7 @@ class ClientSubscription implements java.io.Serializable {
                               "ClientSubscription[" + this + 
                               "].reinitialize()");
     
-    this.persistenceModule = persistenceModule;
+    this.proxyStringId = proxyStringId;
     this.messagesTable = messagesTable;
 
     // Browsing the persisted messages.
@@ -269,8 +268,8 @@ class ClientSubscription implements java.io.Serializable {
           if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgProxy.log(
               BasicLevel.DEBUG,
-              " -> persistenceModule.save(" + message + ')');
-          persistenceModule.save(message);          
+              " -> save message " + message);
+          message.save(proxyStringId);          
         }
       }
     }
@@ -332,6 +331,10 @@ class ClientSubscription implements java.io.Serializable {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
                               this + ": deactivated.");
+  }
+
+  void setActive(boolean active) {
+    this.active = active;
   }
 
   /**
@@ -430,7 +433,7 @@ class ClientSubscription implements java.io.Serializable {
         if (durable) {
           message.durableAcksCounter++;
           if (message.durableAcksCounter == 1)
-            persistenceModule.save(message);
+            message.save(proxyStringId);
         }
 
         messageIds.add(msgId);
@@ -528,7 +531,7 @@ class ClientSubscription implements java.io.Serializable {
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
-              persistenceModule.delete(message);
+              message.delete();
 
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
@@ -586,7 +589,7 @@ class ClientSubscription implements java.io.Serializable {
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
-              persistenceModule.delete(message);
+              message.delete();
 
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
@@ -653,32 +656,32 @@ class ClientSubscription implements java.io.Serializable {
   /**
    * Acknowledges messages.
    */
-  void acknowledge(Enumeration acks)
-  {
-    String id;
-    Message msg;
+  void acknowledge(Enumeration acks) {
     while (acks.hasMoreElements()) {
-      id = (String) acks.nextElement();
+      String id = (String) acks.nextElement();
+      acknowledge(id);
+    }
+  }
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                this + ": acknowledges message: " + id);
-
-      deliveredIds.remove(id);
-      deniedMsgs.remove(id);
-      msg = (Message) messagesTable.get(id);
-
-      // Message may be null if it is not valid anymore
-      if (msg != null) {
-        msg.acksCounter--;
-        if (msg.acksCounter == 0)
-          messagesTable.remove(id);
-        if (durable) {
-          msg.durableAcksCounter--;
-
-          if (msg.durableAcksCounter == 0)
-            persistenceModule.delete(msg);
-        }
+  void acknowledge(String id) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                              this + ": acknowledges message: " + id);
+    
+    deliveredIds.remove(id);
+    deniedMsgs.remove(id);
+    Message msg = (Message) messagesTable.get(id);
+    
+    // Message may be null if it is not valid anymore
+    if (msg != null) {
+      msg.acksCounter--;
+      if (msg.acksCounter == 0)
+        messagesTable.remove(id);
+      if (durable) {
+        msg.durableAcksCounter--;
+        
+        if (msg.durableAcksCounter == 0)
+          msg.delete();
       }
     }
   }
@@ -710,21 +713,20 @@ class ClientSubscription implements java.io.Serializable {
 
         continue denyLoop;
       }
-
+      
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
                                 this + ": denies message: " + id);
-
-      deliveredIds.remove(id);
+      
       msg = (Message) messagesTable.get(id);
-
+      
       // Message may be null if it is not valid anymore
       if (msg == null) continue denyLoop;
-
+      
       Integer value = (Integer) deniedMsgs.get(id);
       if (value != null)
         deliveryAttempts = value.intValue() + 1;
-
+      
       // If maximum delivery attempts reached, the message is no more
       // deliverable to this sbscriber.
       if (isUndeliverable(deliveryAttempts)) {
@@ -734,15 +736,15 @@ class ClientSubscription implements java.io.Serializable {
         if (deadMessages == null)
           deadMessages = new ClientMessages();
         deadMessages.addMessage(msg);
-
+        
         msg.acksCounter--;
         if (msg.acksCounter == 0)
           messagesTable.remove(id);
-
+        
         if (durable) {
           msg.durableAcksCounter--;
           if (msg.durableAcksCounter == 0)
-            persistenceModule.delete(msg);
+            msg.delete();
         }
       }
       // Else, putting it back to the deliverables vector according to its
@@ -758,7 +760,7 @@ class ClientSubscription implements java.io.Serializable {
         while (i < messageIds.size()) {
           currentId = (String) messageIds.elementAt(i);
           Message currentMessage = (Message) messagesTable.get(currentId);
-
+            
           // Message may be null if it is not valid anymore
           if (currentMessage != null) {
             currentO = currentMessage.order;
@@ -808,7 +810,7 @@ class ClientSubscription implements java.io.Serializable {
         if (durable) {
           msg.durableAcksCounter--;
           if (msg.durableAcksCounter == 0)
-            persistenceModule.delete(msg);
+            msg.delete();
         }
       }
     }
@@ -893,7 +895,7 @@ class ClientSubscription implements java.io.Serializable {
       if (durable) {
         msg.durableAcksCounter--;
         if (msg.durableAcksCounter == 0)
-          persistenceModule.delete(msg);
+          msg.delete();
       }
     }
     return msg;

@@ -118,8 +118,6 @@ public class BridgeQueueImpl extends QueueImpl {
   {
     if (not instanceof BridgeDeliveryNot) {
       doReact((BridgeDeliveryNot) not);
-      // Commiting the message persistence orders.
-      persistenceModule.commit();
     }
     else if (not instanceof BridgeAckNot)
       doReact((BridgeAckNot) not);
@@ -196,7 +194,8 @@ public class BridgeQueueImpl extends QueueImpl {
         if (msg != null && ! Selector.matches(msg, not.getSelector()))
           msg = null;
 
-        QueueMsgReply reply = new QueueMsgReply(not, msg);
+        QueueMsgReply reply = new QueueMsgReply(not);
+        reply.addMessage(msg);
         Channel.sendTo(from, reply);
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -283,10 +282,11 @@ public class BridgeQueueImpl extends QueueImpl {
     deliveredMsgs = new Hashtable();
 
     // Retrieving the persisted messages, if any.
-    Vector persistedMsgs = persistenceModule.loadAll();
+    Vector persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
 
     if (persistedMsgs != null) {
-      persistenceModule.deleteAll();
+// persistence message are only in memory.
+//      MessagePersistenceModule.deleteAll(getDestinationId());
       Message persistedMsg;
       AgentId consId;
       while (! persistedMsgs.isEmpty()) {
@@ -296,12 +296,10 @@ public class BridgeQueueImpl extends QueueImpl {
           storeMessage(persistedMsg);
         else {
           deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-          persistenceModule.save(persistedMsg);
+          persistedMsg.save(getDestinationId());
         }
       }
     }
-    // Commiting the messages persistence orders.
-    persistenceModule.commit();
 
     // Re-launching the JMS module.
     try {

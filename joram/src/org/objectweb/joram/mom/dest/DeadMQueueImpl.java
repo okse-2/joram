@@ -103,7 +103,7 @@ public class DeadMQueueImpl extends QueueImpl {
          msgs.hasMoreElements();) {
       msg = (Message) msgs.nextElement();
       messages.add(msg);
-      persistenceModule.save(msg);
+      msg.save(getDestinationId());
     }
     // Lauching a delivery sequence:
     deliverMessages(0);
@@ -181,15 +181,15 @@ public class DeadMQueueImpl extends QueueImpl {
       return;
 
     // Putting the message back in queue:
-    Message msg = ((QueueMsgReply) not).getMessage();
-    messages.add(msg);
-    persistenceModule.save(msg);
+    Vector msgList = ((QueueMsgReply) not).getMessages();
+    for (int i = 0; i < msgList.size(); i++) {
+      Message msg = (Message)msgList.elementAt(i);
+      messages.add(msg);
+      msg.save(getDestinationId());
+    }
 
     // Launching a delivery sequence:
-    deliverMessages(messages.size() - 1); 
-
-    // Commiting the message persistence orders.
-    persistenceModule.commit();
+    deliverMessages(0); 
   }
 
   /**
@@ -209,16 +209,16 @@ public class DeadMQueueImpl extends QueueImpl {
     while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
       replied = false;
+      notMsg = new QueueMsgReply(notRec);
 
       // Checking the deliverable messages:
       while (j < messages.size()) {
         msg = (Message) messages.get(j);
-
+        
         // If the selector matches, sending it:
         if (Selector.matches(msg, notRec.getSelector())) {
-          notMsg = new QueueMsgReply(notRec, msg);
-          Channel.sendTo(notRec.requester, notMsg);
-
+          notMsg.addMessage(msg);
+          
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
                                           + msg.getIdentifier()
@@ -229,7 +229,7 @@ public class DeadMQueueImpl extends QueueImpl {
 
           // Removing the message:
           messages.remove(j);
-          persistenceModule.delete(msg);
+          msg.delete();
           // Removing the request.
           replied = true;
           requests.remove(index);
@@ -239,6 +239,11 @@ public class DeadMQueueImpl extends QueueImpl {
         else
           j++;
       }
+
+      if (notMsg.getSize() > 0) {
+        Channel.sendTo(notRec.requester, notMsg);
+      }
+
       // Next request:
       j = 0;
       if (! replied)

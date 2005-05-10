@@ -51,6 +51,9 @@ public class ReceiveRequest extends AbstractRequest
    */
   public fr.dyade.aaa.agent.AgentId requester;
 
+  private String[] msgIds;
+
+  private int msgCount;
 
   /**
    * Constructs a <code>ReceiveRequest</code> instance.
@@ -64,13 +67,19 @@ public class ReceiveRequest extends AbstractRequest
    * @param autoAck  <code>true</code> for immediately acknowledging the
    *          delivered message on the queue, <code>false</code> otherwise.
    */
-  public ReceiveRequest(int clientContext, int requestId, String selector,
-                        long timeOut, boolean autoAck) 
-  {
+  public ReceiveRequest(int clientContext, 
+                        int requestId, 
+                        String selector,
+                        long timeOut, 
+                        boolean autoAck,
+                        String[] msgIds,
+                        int msgCount) {
     super(clientContext, requestId);
     this.selector = selector;
     this.timeOut = timeOut;
     this.autoAck = autoAck;
+    this.msgIds = msgIds;
+    this.msgCount = msgCount;
   }
 
 
@@ -95,6 +104,10 @@ public class ReceiveRequest extends AbstractRequest
     return autoAck;
   }
 
+  public final String[] getMessageIds() {
+    return msgIds;
+  }
+
   /** Updates the expiration time field, if needed. */
   public void setExpiration(long currentTime)
   {
@@ -108,5 +121,9 @@ public class ReceiveRequest extends AbstractRequest
     if (timeOut > 0)
       return System.currentTimeMillis() < expirationTime;
     return true;
+  }
+
+  public final int getMessageCount() {
+    return msgCount;
   }
 } 

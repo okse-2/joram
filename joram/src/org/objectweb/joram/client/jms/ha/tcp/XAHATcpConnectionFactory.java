@@ -19,6 +19,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -57,7 +58,7 @@ public class XAHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new XAConnection(params, lc);
   }
 
@@ -68,6 +69,18 @@ public class XAHATcpConnectionFactory
    */ 
   public static javax.jms.XAConnectionFactory create(String url)
   {
-    return new XAHATcpConnectionFactory(url);
+    return create(url,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
+   * instance for creating tcp connections.
+   */ 
+  public static javax.jms.XAConnectionFactory 
+      create(String url, String reliableClass) {
+    XAHATcpConnectionFactory cf = new XAHATcpConnectionFactory(url);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 }

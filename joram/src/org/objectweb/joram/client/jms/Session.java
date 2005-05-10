@@ -43,6 +43,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class Session implements javax.jms.Session {
 
+  public static final String RECEIVE_ACK =
+      "org.objectweb.joram.client.jms.receiveAck";
+
+  public static boolean receiveAck =
+      Boolean.getBoolean(RECEIVE_ACK);
+
   /**
    * Status of the session
    */
@@ -1363,14 +1369,18 @@ public class Session implements javax.jms.Session {
     preReceive(mc);
     try {
       ConsumerMessages reply = null;
+      ConsumerReceiveRequest request =
+        new ConsumerReceiveRequest(
+          targetName, 
+          selector, 
+          requestTimeToLive,
+          queueMode);
+      if (receiveAck) request.setReceiveAck(true);
       reply =
         (ConsumerMessages)receiveRequestor.request(
-          new ConsumerReceiveRequest(
-            targetName, 
-            selector, 
-            requestTimeToLive,
-            queueMode),
+          request,
           waitTimeOut);
+
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, 
@@ -1394,15 +1404,16 @@ public class Session implements javax.jms.Session {
             String msgId = msg.getIdentifier();
             
             // Auto ack: acknowledging the message:
-            if (autoAck) {
-              mtpx.sendRequest(
+            if (autoAck && ! receiveAck) {
+              ConsumerAckRequest req = 
                 new ConsumerAckRequest(
                   targetName,
-                  msgId,
-                  queueMode));
+                  queueMode);
+              req.addId(msgId);
+              mtpx.sendRequest(req);
             } else {
-              prepareAck(targetName, 
-                         msgId, 
+              prepareAck(targetName,
+                         msgId,
                          queueMode);
             }
             return Message.wrapMomMessage(this, msg);
@@ -1618,7 +1629,7 @@ public class Session implements javax.jms.Session {
    * @exception 
    */
   void pushMessages(MessageConsumerListener consumerListener, 
-                    ConsumerMessages messages) {
+                   ConsumerMessages messages) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
@@ -1627,6 +1638,10 @@ public class Session implements javax.jms.Session {
     repliesIn.push(
       new MessageListenerContext(
         consumerListener, messages));
+  }
+
+  int getPendingMessageCount() {
+    return repliesIn.size();
   }
 
   /**
@@ -1650,9 +1665,10 @@ public class Session implements javax.jms.Session {
                           String msgId,
                           boolean queueMode) 
     throws JMSException {
-    mtpx.sendRequest(
-      new ConsumerAckRequest(
-        targetName, msgId, queueMode));
+    ConsumerAckRequest ack = new ConsumerAckRequest(
+      targetName, queueMode);
+    ack.addId(msgId);
+    mtpx.sendRequest(ack);
   }
 
   /**
@@ -1764,13 +1780,7 @@ public class Session implements javax.jms.Session {
         doRecover();
         recover = false;
       }
-    } else {
-      if (autoAck) {
-        ackMessage(consumer.targetName, 
-                   momMsg.getIdentifier(), 
-                   consumer.queueMode);
-      }
-    }
+    } 
   }
 
   /**
@@ -1877,6 +1887,10 @@ public class Session implements javax.jms.Session {
 
   final RequestMultiplexer getRequestMultiplexer() {
     return mtpx;
+  }
+
+  public final boolean isAutoAck() {
+    return autoAck;
   }
 
   /**

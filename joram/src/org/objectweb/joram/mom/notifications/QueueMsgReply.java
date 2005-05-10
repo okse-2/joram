@@ -25,6 +25,8 @@ package org.objectweb.joram.mom.notifications;
 
 import org.objectweb.joram.shared.messages.Message;
 
+import java.util.*;
+
 /**
  * A <code>QueueMsgReply</code> instance is used by a queue for replying to a
  * <code>ReceiveRequest</code> by sending a message to a client.
@@ -32,8 +34,7 @@ import org.objectweb.joram.shared.messages.Message;
 public class QueueMsgReply extends AbstractReply
 {
   /** The message sent by the queue. */
-  private Message message;
-
+  private Vector messages;
 
   /**
    * Constructs a <code>QueueMsgReply</code> instance.
@@ -41,21 +42,27 @@ public class QueueMsgReply extends AbstractReply
    * @param req  The <code>ReceiveRequest</code> actually replied.
    * @param message  The message to send.
    */
-  public QueueMsgReply(ReceiveRequest req, Message message)
+  public QueueMsgReply(ReceiveRequest req)
   {
     super(req.getClientContext(), req.getRequestId());
-    this.message = message;
+    messages = new Vector();
   }
 
-
   /** Returns the message wrapped by this reply. */
-  public Message getMessage()
-  {
-    return message;
+  public Vector getMessages() {
+    return messages;
+  }
+
+  public int getSize() {
+    return messages.size();
+  }
+
+  public void addMessage(Message msg) {
+    messages.addElement(msg);
   }
 
   public String toString() {
     return '(' + super.toString() + 
-      ",message=" + message + ')';
+      ",messages=" + messages + ')';
   }
 } 

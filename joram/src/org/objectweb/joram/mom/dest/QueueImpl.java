@@ -53,6 +53,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * basically storing messages and delivering them upon clients requests.
  */
 public class QueueImpl extends DestinationImpl {
+
   /**
    * Threshold above which messages are considered as undeliverable because
    * constantly denied; 0 stands for no threshold, <code>null</code> for value
@@ -75,8 +76,6 @@ public class QueueImpl extends DestinationImpl {
 
   /** Vector holding the requests before reply or expiry. */
   protected Vector requests;
-  /** The persistence module used for managing the messages' persistence. */
-  protected MessagePersistenceModule persistenceModule;
 
   /** <code>true</code> if the queue is currently receiving messages. */
   protected transient boolean receiving = false;
@@ -97,9 +96,7 @@ public class QueueImpl extends DestinationImpl {
     consumers = new Hashtable();
     contexts = new Hashtable();
     requests = new Vector();
-    persistenceModule = new MessagePersistenceModule(destId);
   }
-
 
   public String toString()
   {
@@ -113,8 +110,11 @@ public class QueueImpl extends DestinationImpl {
    *              notification.
    */
   public void react(AgentId from, Notification not)
-              throws UnknownNotificationException
-  {
+              throws UnknownNotificationException {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG,
+        "QueueImpl.react(" + from + ',' + not + ')');
     int reqId = -1;
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
@@ -146,8 +146,6 @@ public class QueueImpl extends DestinationImpl {
       else
         super.react(from, not);
 
-      // Commiting the message persistence orders.
-      persistenceModule.commit();
     }
     // MOM Exceptions are sent to the requester.
     catch (MomException exc) {
@@ -158,9 +156,6 @@ public class QueueImpl extends DestinationImpl {
         AbstractRequest req = (AbstractRequest) not;
         Channel.sendTo(from, new ExceptionReply(req, exc));
       }
-
-      // Rolling back the message persistence orders.
-      persistenceModule.rollback();
     }
   }
 
@@ -232,7 +227,7 @@ public class QueueImpl extends DestinationImpl {
         index++;
       else {
         messages.remove(index);
-        persistenceModule.delete(message);
+        message.delete();
         
         message.expired = true;
 
@@ -296,6 +291,13 @@ public class QueueImpl extends DestinationImpl {
     if (! isReader(from))
       throw new AccessException("READ right not granted");
 
+    String[] toAck = not.getMessageIds();
+    if (toAck != null) {
+      for (int i = 0; i < toAck.length; i++) {
+        acknowledge(toAck[i]);
+      }
+    }
+
     // Storing the request:
     not.requester = from;
     not.setExpiration(System.currentTimeMillis());
@@ -307,13 +309,16 @@ public class QueueImpl extends DestinationImpl {
 
     // Launching a delivery sequence for this request:
     int reqIndex = requests.size() - 1;
-    deliverMessages(reqIndex);
-
+    deliverMessages(reqIndex, not.getMessageCount());
+    
     // If the request has not been answered and if it is an immediate
     // delivery request, sending a null:
     if ((requests.size() - 1) == reqIndex && not.getTimeOut() == -1) {
       requests.remove(reqIndex);
-      QueueMsgReply reply = new QueueMsgReply(not, null);
+      QueueMsgReply reply = new QueueMsgReply(not);
+      if (isLocal(from)) {
+        reply.setPersistent(false);
+      }
       Channel.sendTo(from, reply);
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -359,7 +364,7 @@ public class QueueImpl extends DestinationImpl {
       // messages:
       else {
         messages.remove(i);
-        persistenceModule.delete(message);
+        message.delete();
         
         message.expired = true;
 
@@ -388,27 +393,28 @@ public class QueueImpl extends DestinationImpl {
    * Method implementing the reaction to an <code>AcknowledgeRequest</code>
    * instance, requesting messages to be acknowledged.
    */
-  protected void doReact(AgentId from, AcknowledgeRequest not)
-  {
-    String msgId;
-    Message msg;
+  protected void doReact(AgentId from, AcknowledgeRequest not) {
     for (Enumeration ids = not.getIds(); ids.hasMoreElements();) {
-      msgId = (String) ids.nextElement();
-      msg = (Message) deliveredMsgs.remove(msgId);
-      consumers.remove(msgId);
-      contexts.remove(msgId);
+      String msgId = (String) ids.nextElement();
+      acknowledge(msgId);
+    }
+  }
+  
+  private void acknowledge(String msgId) {
+    Message msg = (Message) deliveredMsgs.remove(msgId);
+    consumers.remove(msgId);
+    contexts.remove(msgId);
+    if (msg != null) {
+      msg.delete();
 
-      if (msg != null) {
-        persistenceModule.delete(msg);
-      
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                        + msgId + " acknowledged.");
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG)) {
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+                                      + msgId + " acknowledged.");
       }
-      else if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                      "Message " + msgId
-                                      + " not found for acknowledgement.");
+    } else if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG)) {
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "Message " + msgId
+                                    + " not found for acknowledgement.");
     }
   }
 
@@ -419,8 +425,12 @@ public class QueueImpl extends DestinationImpl {
    * This method denies the messages and launches a delivery sequence.
    * Messages considered as undeliverable are sent to the DMQ.
    */
-  protected void doReact(AgentId from, DenyRequest not)
-  {
+  protected void doReact(AgentId from, DenyRequest not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG,
+        "QueueImpl.doReact(" + from + ',' + not + ')');
+    
     Enumeration ids = not.getIds();
 
     String msgId;
@@ -437,9 +447,16 @@ public class QueueImpl extends DestinationImpl {
       for (Enumeration delIds = deliveredMsgs.keys();
            delIds.hasMoreElements();) {
         msgId = (String) delIds.nextElement();
+
+        
+
         msg = (Message) deliveredMsgs.get(msgId);
         consId = (AgentId) consumers.get(msgId);
         consCtx = ((Integer) contexts.get(msgId)).intValue();
+
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(
+            BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
 
         // If the current message has been consumed by the denier in the same
         // context: denying it.
@@ -452,7 +469,7 @@ public class QueueImpl extends DestinationImpl {
           // If message considered as undeliverable, adding
           // it to the vector of dead messages:
           if (isUndeliverable(msg)) {
-            persistenceModule.delete(msg);
+            msg.delete();
 
             msg.undeliverable = true;
 
@@ -481,10 +498,19 @@ public class QueueImpl extends DestinationImpl {
       // in that case it sends a contextual denying -, then when receiving 
       // the message from the queue - and in that case it also sends an
       // individual denying.
-      if (msg == null)
+      if (msg == null) {
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          MomTracing.dbgDestination.log(
+            BasicLevel.ERROR, " -> already denied message " + msgId);
         break;
+      }
 
       msg.denied = true;
+
+
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          MomTracing.dbgDestination.log(
+            BasicLevel.ERROR, " -> deny " + msgId);
 
       consumers.remove(msgId);
       contexts.remove(msgId);
@@ -492,7 +518,7 @@ public class QueueImpl extends DestinationImpl {
       // If message considered as undeliverable, adding it
       // to the vector of dead messages:
       if (isUndeliverable(msg)) {
-        persistenceModule.delete(msg);
+        msg.delete();
 
         msg.undeliverable = true;
 
@@ -637,7 +663,7 @@ public class QueueImpl extends DestinationImpl {
     AgentId replyTo,
     String requestMsgId,
     String replyMsgId) {
-    Message message = new Message();
+    Message message = Message.create();
     message.setCorrelationId(requestMsgId);
     message.setTimestamp(System.currentTimeMillis());
     message.setDestination(replyTo.toString(),
@@ -789,7 +815,7 @@ public class QueueImpl extends DestinationImpl {
         // If message considered as undeliverable, adding it to the
         // vector of dead messages:
         if (isUndeliverable(msg)) {
-          persistenceModule.delete(msg);
+          msg.delete();
           msg.undeliverable = true;
           if (deadMessages == null)
             deadMessages = new ClientMessages();
@@ -810,9 +836,6 @@ public class QueueImpl extends DestinationImpl {
 
     // Launching a delivery sequence:
     deliverMessages(0);
-
-    // Commiting the message persistence orders.
-    persistenceModule.commit();
   }
 
   /**
@@ -856,7 +879,7 @@ public class QueueImpl extends DestinationImpl {
     }
 
     // Deleting the messages:
-    persistenceModule.deleteAll();
+    MessagePersistenceModule.deleteAll(getDestinationId());
   }
 
   /**
@@ -917,11 +940,15 @@ public class QueueImpl extends DestinationImpl {
     }
 
     // Persisting the message.
-    persistenceModule.save(message);
+    message.save(getDestinationId());
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
                                     + message.getIdentifier() + " stored.");
+  }
+
+  protected void deliverMessages(int index) {
+    deliverMessages(index, 1);
   }
 
   /**
@@ -931,8 +958,13 @@ public class QueueImpl extends DestinationImpl {
    *
    * @param index  Index where starting to "browse" the requests.
    */
-  protected void deliverMessages(int index)
-  {
+  private void deliverMessages(int index,
+                               int msgCount) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + 
+        index + ',' + msgCount + ')');
+
     ReceiveRequest notRec = null;
     boolean replied;
     int j = 0;
@@ -940,10 +972,15 @@ public class QueueImpl extends DestinationImpl {
     QueueMsgReply notMsg;
     ClientMessages deadMessages = null;
 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG, " -> requests = " + requests + ')');
+
     // Processing each request as long as there are deliverable messages:
     while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
       replied = false;
+      notMsg = new QueueMsgReply(notRec);
 
       // Checking the request validity:
       if (notRec.isValid()) {
@@ -957,8 +994,11 @@ public class QueueImpl extends DestinationImpl {
             if (Selector.matches(msg, notRec.getSelector())) {
               messages.remove(j);
               msg.deliveryCount++;
-              notMsg = new QueueMsgReply(notRec, msg);
-              Channel.sendTo(notRec.requester, notMsg);
+              notMsg.addMessage(msg);
+              
+              if (isLocal(notRec.requester)) {
+                notMsg.setPersistent(false);
+              }
 
               // use in sub class see ClusterQueueImpl
               messageDelivered(msg.getIdentifier());
@@ -973,7 +1013,7 @@ public class QueueImpl extends DestinationImpl {
 
               // Removing the message if request in auto ack mode:
               if (notRec.getAutoAck())
-                persistenceModule.delete(msg);
+                msg.delete();
               // Else, putting the message in the delivered messages table:
               else {
                 consumers.put(msg.getIdentifier(), notRec.requester);
@@ -981,21 +1021,21 @@ public class QueueImpl extends DestinationImpl {
                              new Integer(notRec.getClientContext()));
                 deliveredMsgs.put(msg.getIdentifier(), msg);
               }
-
-              // Removing the request.
-              replied = true;
-              requests.remove(index);
-              break;
+              
+              if (notMsg.getSize() == msgCount) {
+                break;
+              }
             }
             // If message delivered or selector does not match: going on
-            else
+            else {
               j++;
+            }
           }
           // If message is invalid, removing it and adding it to the vector of
           // dead messages:
           else {
             messages.remove(j);
-            persistenceModule.delete(msg);
+            msg.delete();
 
             // use in sub class see ClusterQueueImpl
             messageRemoved(msg.getIdentifier());
@@ -1012,10 +1052,16 @@ public class QueueImpl extends DestinationImpl {
                                             + " removed.");
           } 
         }
+
         // Next request:
-        j = 0;
-        if (! replied)
+        if (notMsg.getSize() > 0) {
+          requests.remove(index);
+          Channel.sendTo(notRec.requester, notMsg);
+        } else {
           index++;
+        }
+
+        j = 0;
       }
       // The request expired: removing it.
       else {
@@ -1061,8 +1107,10 @@ public class QueueImpl extends DestinationImpl {
 
   /** Deserializes a <code>QueueImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
-               throws IOException, ClassNotFoundException
-  {
+               throws IOException, ClassNotFoundException {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG, "QueueImpl.readObject()");
     in.defaultReadObject();
 
     receiving = false;
@@ -1070,25 +1118,31 @@ public class QueueImpl extends DestinationImpl {
     deliveredMsgs = new Hashtable();
 
     // Retrieving the persisted messages, if any.
-    Vector persistedMsgs = persistenceModule.loadAll();
+    Vector persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
 
     if (persistedMsgs != null) {
-      persistenceModule.deleteAll();
+// persistence message are only in memory.
+//      MessagePersistenceModule.deleteAll(getDestinationId());
       Message persistedMsg;
       AgentId consId;
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
-        if (consId == null)
+        if (consId == null) {
           storeMessage(persistedMsg);
-        else {
+        } else if (isLocal(consId)) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgDestination.log(
+              BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
+          consumers.remove(persistedMsg.getIdentifier());
+          contexts.remove(persistedMsg.getIdentifier());
+          storeMessage(persistedMsg);
+        } else {
           deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-          persistenceModule.save(persistedMsg);
+          persistedMsg.save(getDestinationId());
         }
       }
     }
-    // Commiting the messages persistence orders.
-    persistenceModule.commit();
   }
 
   public void readBag(ObjectInputStream in) 
@@ -1098,7 +1152,7 @@ public class QueueImpl extends DestinationImpl {
     deliveredMsgs = (Hashtable)in.readObject();
     for (int i = 0; i < messages.size(); i++) {
       Message message = (Message)messages.elementAt(i);
-      persistenceModule.save(message);
+      message.save(getDestinationId());
     }
   }
 

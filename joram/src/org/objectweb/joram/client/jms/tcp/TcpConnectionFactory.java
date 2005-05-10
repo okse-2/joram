@@ -32,6 +32,8 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
+import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>TcpConnectionFactory</code> instance is a factory of
@@ -64,7 +66,16 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    */
   public javax.jms.Connection createConnection(String name, String password)
     throws javax.jms.JMSException {
-    return new Connection(params, new TcpConnection(params, name, password));
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "TcpConnectionFactory.createConnection(" + 
+        name + ',' + password + ") reliableClass=" + reliableClass);
+    return new Connection(params, 
+                          new TcpConnection(params, 
+                                            name, 
+                                            password, 
+                                            reliableClass));
   }
 
   /**
@@ -74,9 +85,32 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */ 
-  public static javax.jms.ConnectionFactory create(String host, int port)
-  {
-    return new TcpConnectionFactory(host, port);
+  public static javax.jms.ConnectionFactory create(String host, int port) {
+    return create(host, 
+                  port, 
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
+   * instance for creating TCP connections with a given server.
+   *
+   * @param host           Name or IP address of the server's host.
+   * @param port           Server's listening port.
+   * @param reliableClass  Reliable class name.
+   */ 
+  public static javax.jms.ConnectionFactory 
+      create(String host, 
+             int port,
+             String reliableClass) {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "TcpConnectionFactory.create(" + 
+        host + ',' + port + ',' + reliableClass +')');
+    TcpConnectionFactory cf = new TcpConnectionFactory(host, port);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 
   /**

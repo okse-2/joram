@@ -48,6 +48,7 @@ import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.UserAgent;
+import org.objectweb.joram.mom.proxies.SendReplyNot;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -431,6 +432,16 @@ public class AdminTopicImpl extends TopicImpl {
    */
   protected void doReact(AgentId from, ClientMessages not)
                  throws AccessException {
+    if (! not.getPersistent()) {
+      // Means that this notification has been sent by a local
+      // proxy (optimization). Must acknowledge it.
+      Channel.sendTo(
+        from, 
+        new SendReplyNot(
+          not.getClientContext(), 
+          not.getRequestId()));
+    }
+    
     if (! isWriter(from))
       throw new AccessException("WRITE right not granted");
 
@@ -1950,9 +1961,10 @@ public class AdminTopicImpl extends TopicImpl {
                          String msgId,
                          AgentId from) {
     try {
-      if (ServerConfigHelper.addDomain(request.getDomainName(),
-                                       request.getServerId(),
-                                       request.getPort())) {
+      ServerConfigHelper helper = new ServerConfigHelper(true);
+      if (helper.addDomain(request.getDomainName(),
+                           request.getServerId(),
+                           request.getPort())) {
         distributeReply(replyTo, msgId,
                         new AdminReply(true, "Domain added"));
       }
@@ -1990,7 +2002,8 @@ public class AdminTopicImpl extends TopicImpl {
                          String msgId,
                          AgentId from) {
     try {
-      if (ServerConfigHelper.removeDomain(request.getDomainName())) {
+      ServerConfigHelper helper = new ServerConfigHelper(true);
+      if (helper.removeDomain(request.getDomainName())) {
         distributeReply(replyTo, msgId,
                         new AdminReply(true, "Domain removed"));
       }
@@ -2012,11 +2025,25 @@ public class AdminTopicImpl extends TopicImpl {
                          String msgId,
                          AgentId from) {
     try {
-      ServerConfigHelper.addServer(request.getServerId(),
-                                   request.getHostName(),
-                                   request.getDomainName(),
-                                   request.getPort(),
-                                   request.getServerName());
+      ServerConfigHelper helper = new ServerConfigHelper(false);
+      helper.addServer(
+        request.getServerId(),
+        request.getHostName(),
+        request.getDomainName(),
+        request.getPort(),
+        request.getServerName());
+      helper.addService(
+        request.getServerId(),
+        "org.objectweb.joram.mom.proxies.ConnectionManager",
+        "root root");
+      String[] serviceNames = request.getServiceNames();
+      String[] serviceArgs = request.getServiceArgs();
+      for (int i = 0; i < serviceNames.length; i++) {
+        helper.addService(request.getServerId(), 
+                          serviceNames[i], 
+                          serviceArgs[i]);
+      }
+      helper.commit();
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server added"));
       if (from == null) {
@@ -2024,6 +2051,14 @@ public class AdminTopicImpl extends TopicImpl {
                          request.getServerId(), 
                          replyTo, msgId);
       }
+    } catch (ServerConfigHelper.ServerIdAlreadyUsedException exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(
+                        false, 
+                        AdminReply.SERVER_ID_ALREADY_USED, 
+                        exc.getMessage(), null));
     } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
@@ -2036,14 +2071,71 @@ public class AdminTopicImpl extends TopicImpl {
                          AgentId replyTo,
                          String msgId,
                          AgentId from) {
-    ConfigController ctrl = AgentServer.getConfigController();
     try {
-      ServerConfigHelper.removeServer(request.getServerId());
+      ServerConfigHelper helper = new ServerConfigHelper(true);
+      helper.removeServer(request.getServerId());
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server removed"));
       if (from == null) {
         broadcastRequest(request, 
-                         request.getServerId(), 
+                         request.getServerId(),
+                         replyTo, msgId);
+      }
+    } catch (UnknownServerException exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(
+                        false, 
+                        AdminReply.UNKNOWN_SERVER, 
+                        exc.getMessage(), null));
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(AddServiceRequest request,
+                         AgentId replyTo,
+                         String msgId,
+                         AgentId from) {
+    try {
+      ServerConfigHelper helper = new ServerConfigHelper(true);
+      helper.addService(
+        request.getServerId(),
+        request.getClassName(),
+        request.getArgs());
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Service added"));
+      if (from == null) {
+        broadcastRequest(request, 
+                         -1, 
+                         replyTo, msgId);
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      distributeReply(replyTo, msgId,
+                      new AdminReply(false, exc.toString()));
+    }
+  }
+
+  private void doProcess(RemoveServiceRequest request,
+                         AgentId replyTo,
+                         String msgId,
+                         AgentId from) {
+    try {
+      ServerConfigHelper helper = new ServerConfigHelper(true);
+      helper.removeService(
+        request.getServerId(),
+        request.getClassName());
+      distributeReply(replyTo, msgId,
+                      new AdminReply(true, "Service removed"));
+      if (from == null) {
+        broadcastRequest(request, 
+                         -1, 
                          replyTo, msgId);
       }
     } catch (Exception exc) {
@@ -2187,7 +2279,7 @@ public class AdminTopicImpl extends TopicImpl {
     if (to == null)
       return;
     
-    Message message = new Message();
+    Message message = Message.create();
     message.setIdentifier(createMessageId());
     message.setCorrelationId(msgId);
     message.setTimestamp(System.currentTimeMillis());

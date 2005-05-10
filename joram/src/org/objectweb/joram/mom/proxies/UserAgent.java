@@ -365,7 +365,7 @@ public class UserAgent extends Agent
   private void doReact(SendReplyNot not) {
     setNoSave();
     sendToClient(
-      not.getKey(), new ServerReply(not.getRequest()));
+      not.getKey(), new ServerReply(not.getRequestId()));
   }
   
   /**
@@ -399,8 +399,8 @@ public class UserAgent extends Agent
     if (connections != null) {
       Object ctx = connections.get(objKey);
       if (ctx != null) {
-      if (ctx instanceof ReliableConnectionContext) {
-        push((ReliableConnectionContext)ctx, reply);
+        if (ctx instanceof ReliableConnectionContext) {
+          push((ReliableConnectionContext)ctx, reply);
         } else if (ctx instanceof ConnectionContext) {
           ((ConnectionContext)ctx).queue.push(reply);
       } else {
@@ -506,6 +506,10 @@ public class UserAgent extends Agent
     public void touch() {
       lastRequestDate = System.currentTimeMillis();
     }
+  }
+
+  public void setNoSave() {
+    super.setNoSave();
   }
 
   public void readBag(ObjectInputStream in) 

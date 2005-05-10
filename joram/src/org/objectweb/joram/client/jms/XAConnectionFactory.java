@@ -41,6 +41,9 @@ public abstract class XAConnectionFactory
   /** Factory's parameters object. */
   protected FactoryParameters params;
 
+  /** Reliable class name, for exemple use by ssl. */
+  protected String reliableClass = null;
+
   /**
    * Constructs an <code>XAConnectionFactory</code> dedicated to a given
    * server.
@@ -60,6 +63,9 @@ public abstract class XAConnectionFactory
     return "XACF:" + params.getHost() + "-" + params.getPort();
   }
 
+  public void setReliableClass(String reliableClass) {
+    this.reliableClass = reliableClass;
+  }
 
   /**
    * API method, implemented according to the communication protocol.

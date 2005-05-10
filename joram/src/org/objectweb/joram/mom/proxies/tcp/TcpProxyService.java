@@ -53,7 +53,13 @@ public class TcpProxyService {
    * The proxy service reference
    * (used to stop it).
    */
-  private static TcpProxyService proxyService;
+  protected static TcpProxyService proxyService;
+
+  private static int port;
+
+  public static final int getListenPort() {
+    return port;
+  }
 
   /**
    * Initializes the TCP entry point by creating a
@@ -69,7 +75,6 @@ public class TcpProxyService {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.init(" + 
         args + ',' + firstTime + ')');
-    int port;
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);      
       port = Integer.parseInt(st.nextToken());
@@ -132,7 +137,7 @@ public class TcpProxyService {
     }
   }
 
-  private void start() {
+  protected void start() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.start()");

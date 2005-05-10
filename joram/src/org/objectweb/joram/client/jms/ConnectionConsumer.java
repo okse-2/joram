@@ -263,7 +263,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer {
   private void subscribe() throws JMSException {
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
-        targetName, selector, queueMode);
+        targetName, selector, queueMode, null, 1);
     mtpx.sendRequest(req, new ReplyListener() {
         public boolean replyReceived(AbstractJmsReply reply) {
           repliesIn.push(reply);

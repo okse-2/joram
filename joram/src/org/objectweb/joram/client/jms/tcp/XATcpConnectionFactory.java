@@ -56,10 +56,27 @@ public class XATcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XAConnection
-         createXAConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
-    return new XAConnection(params, new TcpConnection(params, name, password));
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException {
+    return new XAConnection(params,
+                            new TcpConnection(params, 
+                                              name, 
+                                              password,
+                                              reliableClass));
+  }
+  
+  /**
+   * Admin method creating a <code>javax.jms.XAConnectionFactory</code> 
+   * instance for creating TCP connections with a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   */ 
+  public static javax.jms.XAConnectionFactory
+      create(String host, int port) {
+    return create(host, 
+                  port,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
@@ -68,10 +85,15 @@ public class XATcpConnectionFactory
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
+   * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.XAConnectionFactory create(String host, int port)
-  {
-    return new XATcpConnectionFactory(host, port);
+  public static javax.jms.XAConnectionFactory 
+      create(String host, 
+             int port,
+             String reliableClass) {
+    XATcpConnectionFactory cf = new XATcpConnectionFactory(host, port);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 
   /**

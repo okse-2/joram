@@ -25,6 +25,7 @@ package org.objectweb.joram.shared.client;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * A <code>ConsumerAckRequest</code> instance is used by a
@@ -33,7 +34,7 @@ import java.util.Enumeration;
 public class ConsumerAckRequest extends AbstractJmsRequest
 {
   /** Message identifier. */
-  private String id;
+  private Vector ids;
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
 
@@ -45,10 +46,10 @@ public class ConsumerAckRequest extends AbstractJmsRequest
    * @param queueMode  <code>true</code> if this request is destinated to
    *          a queue.
    */
-  public ConsumerAckRequest(String targetName, String id, boolean queueMode)
+  public ConsumerAckRequest(String targetName, boolean queueMode)
   {
     super(targetName);
-    this.id = id;
+    ids = new Vector();
     this.queueMode = queueMode;
   }
 
@@ -59,9 +60,8 @@ public class ConsumerAckRequest extends AbstractJmsRequest
   {}
 
   /** Sets the acknowledged message identifier. */
-  public void setId(String id)
-  {
-    this.id = id;
+  public void addId(String id) {
+    ids.addElement(id);
   }
 
   /** Sets the target destination type. */
@@ -71,9 +71,8 @@ public class ConsumerAckRequest extends AbstractJmsRequest
   }
 
   /** Returns the acknowledged message identifier. */
-  public String getId()
-  {
-    return id;
+  public Vector getIds() {
+    return ids;
   }
 
   /** Returns <code>true</code> if the request is destinated to a queue. */
@@ -84,8 +83,11 @@ public class ConsumerAckRequest extends AbstractJmsRequest
 
   public Hashtable soapCode() {
     Hashtable h = super.soapCode();
-    if (id != null)
-      h.put("id",id);
+    if (ids.size() > 0) {
+      String[] idArray = new String[ids.size()];
+      ids.copyInto(idArray);
+      h.put("ids", idArray);
+    }
     h.put("queueMode",new Boolean(queueMode));
     return h;
   }
@@ -94,7 +96,13 @@ public class ConsumerAckRequest extends AbstractJmsRequest
     ConsumerAckRequest req = new ConsumerAckRequest();
     req.setRequestId(((Integer) h.get("requestId")).intValue());
     req.setTarget((String) h.get("target"));
-    req.setId((String) h.get("id"));
+    req.ids = new Vector();
+    String[] idArray = (String[]) h.get("ids");
+    if (idArray != null) {
+      for (int i = 0; i < idArray.length; i++) {
+        req.ids.addElement(idArray[i]);
+      }
+    }
     req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
     return req;
   }

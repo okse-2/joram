@@ -19,6 +19,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -58,7 +59,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new XATopicConnection(params, lc);
   }
 
@@ -72,7 +73,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new XAConnection(params, lc);
   }
 
@@ -86,7 +87,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new TopicConnection(params, lc);
   }
 
@@ -100,7 +101,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new Connection(params, lc);
   }
 
@@ -109,8 +110,19 @@ public class XATopicHATcpConnectionFactory
    * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating tcp connections.
    */ 
-  public static javax.jms.XATopicConnectionFactory create(String url)
-  {
-    return new XATopicHATcpConnectionFactory(url);
+  public static javax.jms.XATopicConnectionFactory create(String url) {
+    return create(url,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
+   * instance for creating tcp connections.
+   */ 
+  public static javax.jms.XATopicConnectionFactory 
+      create(String url, String reliableClass) {
+    XATopicHATcpConnectionFactory cf = new XATopicHATcpConnectionFactory(url);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 }

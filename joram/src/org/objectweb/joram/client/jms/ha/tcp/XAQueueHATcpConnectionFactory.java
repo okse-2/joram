@@ -19,6 +19,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -58,7 +59,7 @@ public class XAQueueHATcpConnectionFactory
          throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new XAQueueConnection(params, lc);
   }
 
@@ -72,7 +73,7 @@ public class XAQueueHATcpConnectionFactory
          throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new XAConnection(params, lc);
   }
 
@@ -86,7 +87,7 @@ public class XAQueueHATcpConnectionFactory
          throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new QueueConnection(params, lc);
   }
 
@@ -99,7 +100,7 @@ public class XAQueueHATcpConnectionFactory
          throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new Connection(params, lc);
   }
 
@@ -108,8 +109,19 @@ public class XAQueueHATcpConnectionFactory
    * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>
    * instance for creating tcp connections.
    */ 
-  public static javax.jms.XAQueueConnectionFactory create(String url)
-    {
-    return new XAQueueHATcpConnectionFactory(url);
+  public static javax.jms.XAQueueConnectionFactory create(String url) {
+    return create(url,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>
+   * instance for creating tcp connections.
+   */ 
+  public static javax.jms.XAQueueConnectionFactory 
+      create(String url, String reliableClass) {
+    XAQueueHATcpConnectionFactory cf = new XAQueueHATcpConnectionFactory(url);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 }

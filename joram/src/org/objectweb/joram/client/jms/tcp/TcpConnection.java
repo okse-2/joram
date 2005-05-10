@@ -36,6 +36,9 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
+import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * A <code>TcpConnection</code> links a Joram client and a Joram platform
  * with a TCP socket.
@@ -45,7 +48,7 @@ import javax.jms.JMSSecurityException;
 public class TcpConnection 
     implements RequestChannel { 
   
-  private ReliableTcpClient tcpClient;
+  private ReliableTcpClient tcpClient = null;
 
   /**
    * Creates a <code>TcpConnection</code> instance.
@@ -61,16 +64,72 @@ public class TcpConnection
                        String name,
                        String password) 
     throws JMSException {
-    tcpClient = new ReliableTcpClient(
-      params, 
-      name,
-      password,
-      params.cnxPendingTimer > 0);
+    this(params,
+         name,
+         password,
+         "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Creates a <code>TcpConnection</code> instance.
+   *
+   * @param params  Factory parameters.
+   * @param name  Name of user.
+   * @param password  Password of user.
+   * @param reliableClass  reliable class name.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception IllegalStateException  If the server is not reachable.
+   */
+  public TcpConnection(FactoryParameters params, 
+                       String name,
+                       String password,
+                       String reliableClass) 
+    throws JMSException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "TcpConnection.<init>(" + params + ',' +
+        name + ',' + password + ',' + reliableClass +')');
+
+    if (reliableClass == null ||
+        reliableClass.equals("") ||
+        reliableClass.length() < 1) {
+      reliableClass = "org.objectweb.joram.client.jms.tcp.ReliableTcpClient";
+    }
+    try {
+      tcpClient = 
+        (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
+    } catch (ClassNotFoundException exc) {
+      JMSException jmsExc = 
+        new JMSException("TcpConnection: ClassNotFoundException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    } catch (InstantiationException exc) {
+      JMSException jmsExc = 
+        new JMSException("TcpConnection: InstantiationException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    } catch (IllegalAccessException exc) {
+      JMSException jmsExc = 
+        new JMSException("TcpConnection: IllegalAccessException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    }
+    tcpClient.init(params, 
+                   name,
+                   password,
+                   params.cnxPendingTimer > 0);
     tcpClient.addServerAddress(
       params.getHost(),
       params.getPort());
     tcpClient.connect();
   }
+
   
   /**
    * Sending a JMS request through the TCP connection.

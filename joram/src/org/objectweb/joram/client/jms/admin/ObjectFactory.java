@@ -124,6 +124,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
@@ -135,6 +137,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpTCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
@@ -146,6 +150,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXACF)) {
       String host = (String) ref.get("cFactory.host").getContent();
@@ -155,6 +161,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
         new XATcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXAQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
@@ -164,6 +172,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
         new XAQueueTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXATCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
@@ -173,6 +183,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
         new XATopicTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      String reliableClass = (String) ref.get("reliableClass").getContent();
+      cnxFact.setReliableClass(reliableClass);
       return cnxFact;
     } else if (ref.getClassName().equals(localCF)) {
       return new LocalConnectionFactory();

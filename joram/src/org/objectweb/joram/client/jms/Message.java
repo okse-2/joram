@@ -53,9 +53,8 @@ public class Message implements javax.jms.Message {
   /**
    * Constructs a bright new <code>Message</code>.
    */
-  Message()
-  {
-    momMsg = new org.objectweb.joram.shared.messages.Message();
+  Message() {
+    momMsg = org.objectweb.joram.shared.messages.Message.create();
   }
 
   /**
