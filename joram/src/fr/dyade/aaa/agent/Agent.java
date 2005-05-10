@@ -160,7 +160,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   /**
    * Sets this <code>Agent</code>'s name.
    *
-   * @return the <code>Agent</code>'s name.
+   * @param name	the <code>Agent</code>'s name.
    */
   public void setName(String name) {
     if (name == null)
@@ -494,7 +494,6 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Tests if the agent is pinned in memory.
    *
    * @return true if this agent is a pinned in memory; false otherwise.
-   * @see fixed
    */
   public final  boolean isFixed() {
     return fixed;
