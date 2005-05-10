@@ -141,6 +141,16 @@
     </java>
   </target>
 
+  <!-- Runs the classic sender client with SoftReference messages -->
+  <target name="sendersr" depends="init"
+    description="--> Starts a Sender client with SoftReference messages">
+    <java classname="classic.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
+    </java>
+  </target>
+
   <!-- Runs the classic receiver client -->
   <target name="receiver" depends="init"
     description="--> Starts a Receiver client">
@@ -168,6 +178,16 @@
     </java>
   </target>
 
+  <!-- Runs the classic publisher client with SoftReference messages -->
+  <target name="publishersr" depends="init"
+    description="--> Starts a Publisher client with SoftReference messages">
+    <java classname="classic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
+    </java>
+  </target>
+
   <!-- Runs the classic consumer client -->
   <target name="consumer" depends="init"
     description="--> Starts a Consumer client">
@@ -183,6 +203,16 @@
     <java classname="classic.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic producer client with SoftReference messages -->
+  <target name="producersr" depends="init"
+    description="--> Starts a Producer client with SoftReference messages">
+    <java classname="classic.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
     </java>
   </target>
 
@@ -625,4 +655,121 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+
+
+<!-- ***************************************************************** -->
+<!-- *                            SSL                                * -->
+<!-- ***************************************************************** -->
+  <target name="sslinit" depends="init">
+    <property name="keystore" location="${run.dir}/joram_ks"/>
+    <property name="keystore_pass" value="passpass"/>
+  </target>
+
+  <!-- Initializes the ssl centralized configuration -->
+  <target name="sslsimple_init" depends="sslinit">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/sslcentralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="${conf.dir}/joram_ks" todir="${run.dir}"/>
+    <property name="keystore" location="${run.dir}/joram_ks"/>
+    <property name="keystore_pass" value="passpass"/>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="sslsingle_server" depends="sslsimple_init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+      <arg line="0 s0"/>
+    </java>
+  </target>
+
+  <!-- Setup the sslClassic configuration -->
+  <target name="sslclassic_admin" depends="sslinit"
+          description="--> Runs a ssl classic administration (for a centralized architecture)">
+    <java classname="classic.SSLClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic sender client -->
+  <target name="sslsender" depends="sslinit"
+    description="--> Starts a Sender client">
+    <java classname="classic.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic receiver client -->
+  <target name="sslreceiver" depends="sslinit"
+    description="--> Starts a Receiver client">
+    <java classname="classic.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic subscriber client -->
+  <target name="sslsubscriber" depends="sslinit"
+    description="--> Starts a Subscriber client">
+    <java classname="classic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic publisher client -->
+  <target name="sslpublisher" depends="sslinit"
+    description="--> Starts a Publisher client">
+    <java classname="classic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic consumer client -->
+  <target name="sslconsumer" depends="sslinit"
+    description="--> Starts a Consumer client">
+    <java classname="classic.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic producer client -->
+  <target name="sslproducer" depends="sslinit"
+    description="--> Starts a Producer client">
+    <java classname="classic.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic browser client -->
+  <target name="sslbrowser" depends="sslinit"
+    description="--> Starts a Browser client">
+    <java classname="classic.Browser" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
+    </java>
+  </target>
+
 </project>
