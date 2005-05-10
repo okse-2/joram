@@ -294,12 +294,31 @@
              version="false"
              author="false"
              use="false"
+             windowtitle="Joram ${version} Platform Documentation"
+             doctitle="Joram ${version} Platform Documentation"
+             header="Joram ${version}"
+             bottom="Copyright &#xA9; 2005 Scalagent - All rights reserved">
+      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <package name="org.objectweb.joram.*"/>
+    </javadoc>
+  </target>
+
+  <!-- JAVADOC --> 
+  <target name="javadoc.all" depends="prepare"
+      description="--> Generates the JavaDoc.">
+    <javadoc sourcepath="${src.dir}"
+             destdir="${doc.dir}"
+             classpathref="project.class.path"
+             overview="overview.html"
+             access="protected"
+             version="false"
+             author="false"
+             use="false"
              windowtitle="Joram(TM) Platform Documentation"
              doctitle="Joram(TM) Platform Documentation"
-             bottom="Copyright &#xA9; 2004 Scalagent - All rights reserved">
+             bottom="Copyright &#xA9; 2005 Scalagent - All rights reserved">
       <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
-      <package name="fr.dyade.aaa.*"/>
-      <package name="org.objectweb.joram.*"/>
+      <package name="*"/>
     </javadoc>
   </target>
 
