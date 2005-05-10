@@ -57,7 +57,7 @@ import fr.dyade.aaa.agent.management.MXWrapper;
  * <ul>
  * <li>Each domain of the configuration is described by an XML element with
  * attributes giving the name and the classname for <code>Network</code>
- * implementation (class {@link SingleCnxNetwork <code>SingleCnxNetwork</code>}
+ * implementation (class {@link SimpleNetwork <code>SimpleNetwork</code>}
  * by default).
  * <li>Each server is described by an XML element with attributes giving
  * the id, the name (optional) and the node (the <code>hostname</code>
@@ -332,8 +332,6 @@ public final class AgentServer {
    *
    * @param key property name.
    * @return 	the Integer value of the property.
-   *
-   * @see java.lang.Integer.getInteger
    */
   public static Integer getInteger(String key) {
     try {
@@ -350,8 +348,6 @@ public final class AgentServer {
    * @param key property name.
    * @param value  a default value.
    * @return 	the Integer value of the property.
-   *
-   * @see java.lang.Integer.getInteger
    */
   public static Integer getInteger(String key, int value) {
     try {
@@ -390,7 +386,7 @@ public final class AgentServer {
   /**
    * Gets the characteristics of the corresponding server.
    *
-   * @param id	agent server id.
+   * @param sid	agent server id.
    * @return	the server's descriptor.
    */
   final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
@@ -407,7 +403,7 @@ public final class AgentServer {
   /**
    * Gets the message consumer for the corresponding server.
    *
-   * @param id	agent server id.
+   * @param sid	agent server id.
    * @return	the corresponding message consumer.
    */
   final static MessageConsumer getConsumer(short sid) throws UnknownServerException {
@@ -417,7 +413,7 @@ public final class AgentServer {
   /**
    * Get the host name of an agent server.
    *
-   * @param id		agent server id
+   * @param sid		agent server id
    * @return		server host name as declared in configuration file
    */
   public final static String getHostname(short sid) throws UnknownServerException {
@@ -427,7 +423,6 @@ public final class AgentServer {
   /**
    * Get the description of all services of the current agent server.
    *
-   * @param id		agent server id
    * @return		server host name as declared in configuration file
    */
   final static ServiceDesc[] getServices() {
@@ -442,7 +437,7 @@ public final class AgentServer {
    *
    * @see A3CMLConfig#getServiceArgs(short,String)
    *
-   * @param id		agent server id
+   * @param sid		agent server id
    * @param classname	the service class name
    * @return		the arguments as declared in configuration file
    * @exception	UnknownServerException
