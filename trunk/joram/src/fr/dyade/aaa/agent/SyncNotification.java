@@ -26,59 +26,87 @@ package fr.dyade.aaa.agent;
  * local agent from a collocated thread.
  */
 public class SyncNotification extends Notification {
-  private transient Object lock;
-
-  private transient Result res;
+  
+  private transient Context ctx;
 
   protected SyncNotification() {
     persistent = false;
-    lock = new Object();
-    res = new Result();
+    ctx = new Context(this);
   }
 
   public Object[] invoke(AgentId to) 
     throws InterruptedException, Exception {
-    synchronized (lock) {
-      Channel.sendTo(to, this);
-      lock.wait();
-    }
-    if (res.exc != null) {
-      throw res.exc;
-    } else {
-      return res.values;
-    }
+    return ctx.invoke(to);
   }
 
   public void Throw(Exception exc) {
-    if (lock != null) {
-      synchronized (lock) {
-        res.exc = exc;
-        lock.notify();
-      }
+    if (ctx != null) {
+      ctx.Throw(exc);
     }
   }
 
   public void Return(Object[] values) {
-    if (lock != null) {
-      synchronized (lock) {
-        res.values = values;
-        lock.notify();
-      }
+    if (ctx != null) {
+      ctx.Return(values);
     }
   }
 
   public Object getValue(int index) {
-    if (res.values != null) {
-      return res.values[index];
+    if (ctx != null) {
+      return ctx.getValue(index);
     } else return null;
   }
 
   public final Exception getException() {
-    return res.exc;
+    if (ctx != null) {
+      return ctx.getException();
+    } else return null;
   }
 
   static class Result {
     Object[] values;
     Exception exc;
+  }
+
+  public static class Context {
+    private Notification syncRequest;
+
+    private Result res;
+
+    public Context(Notification syncRequest) {
+      this.syncRequest = syncRequest;
+      res = new Result();
+    }
+
+    public synchronized Object[] invoke(AgentId to) 
+      throws InterruptedException, Exception {
+      Channel.sendTo(to, syncRequest);
+      wait();
+      if (res.exc != null) {
+        throw res.exc;
+      } else {
+        return res.values;
+      }
+    }
+
+    public synchronized void Throw(Exception exc) {
+      res.exc = exc;
+      notify();
+    }
+
+    public synchronized void Return(Object[] values) {
+      res.values = values;
+      notify();
+    }
+
+    public Object getValue(int index) {
+      if (res.values != null) {
+        return res.values[index];
+      } else return null;
+    }
+
+    public final Exception getException() {
+      return res.exc;
+    }
   }
 }
