@@ -623,7 +623,7 @@ public class TopicImpl extends DestinationImpl
     AgentId replyTo,
     String requestMsgId,
     String replyMsgId) {
-    Message message = new Message();
+    Message message = Message.create();
     message.setCorrelationId(requestMsgId);
     message.setTimestamp(System.currentTimeMillis());
     message.setDestination(replyTo.toString(), 
@@ -820,6 +820,8 @@ public class TopicImpl extends DestinationImpl
     String selector;
     Vector deliverables;
     Message message;
+
+    setNoSave();
 
     // Browsing the subscribers.
     for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {

@@ -30,6 +30,8 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Agent;
+import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.shared.excepts.*;
@@ -48,6 +50,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * MOM destinations.
  */
 public abstract class DestinationImpl implements java.io.Serializable, DestinationImplMBean {
+
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
@@ -85,6 +88,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   transient StringBuffer strbuf;
 
+  private Destination agent;
+
   /**
    * Constructs a <code>DestinationImpl</code>.
    *
@@ -102,6 +107,19 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
   }
 
+  void setNoSave() {
+    if (agent != null) {
+      agent.setNoSave();
+    }
+  }
+
+  void setAgent(Destination agent) {
+    this.agent = agent;
+  }
+
+  boolean isLocal(AgentId id) {
+    return (destId.getTo() == id.getTo());
+  }
 
   /** Returns <code>true</code> if the destination might be deleted. */
   public boolean canBeDeleted()
@@ -117,8 +135,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *              unexpected by the destination.
    */
   public void react(AgentId from, Notification not)
-              throws UnknownNotificationException
-  {
+              throws UnknownNotificationException {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(
+        BasicLevel.DEBUG,
+        "DestinationImpl.react(" + from + ',' + not + ')');
     try {
       if (not instanceof SetRightRequest)
         doReact(from, (SetRightRequest) not);
@@ -404,8 +425,19 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *              destination.
    */
   protected void doReact(AgentId from, ClientMessages not)
-                 throws AccessException
-  {
+                 throws AccessException {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "DestinationImpl.doReact(" + from + ',' + not + ')');
+    if (! not.getPersistent()) {
+      Channel.sendTo(
+        from, 
+        new SendReplyNot(
+          not.getClientContext(), 
+          not.getRequestId()));
+    }
+
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
     if (! isWriter(from)) {
@@ -422,8 +454,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       sendToDMQ(deadM, not.getDMQId());
       throw new AccessException("WRITE right not granted");
     }
+
     specialProcess(not);
-  }
+  } 
 
   /**
    * Method implementing the reaction to an <code>UnknownAgent</code>
@@ -601,6 +634,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     out.writeBoolean(freeWriting);
     out.writeObject(clients);    
     out.writeObject(dmqId);
+    out.writeObject(agent);
   }
 
   private void readObject(java.io.ObjectInputStream in)
@@ -613,6 +647,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     clients = (Hashtable)in.readObject();
     dmqId = (AgentId)in.readObject();
     strbuf = new StringBuffer();
+    agent = (Destination)in.readObject();
   }
 
   // JMX

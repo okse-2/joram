@@ -156,10 +156,37 @@ public class AdminModule
                              String name,
                              String password,
                              int cnxTimer)
-         throws UnknownHostException, ConnectException, AdminException
-  {
+    throws UnknownHostException, ConnectException, AdminException {
+    connect(hostName,port,name,password,cnxTimer,
+            "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Opens a TCP connection with the Joram server running on a given host and
+   * listening to a given port.
+   *
+   * @param host  The name or IP address of the host the server is running on.
+   * @param port  The number of the port the server is listening to.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   * @param reliableClass  Reliable class name.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(String hostName,
+                             int port,
+                             String name,
+                             String password,
+                             int cnxTimer,
+                             String reliableClass)
+    throws UnknownHostException, ConnectException, AdminException {
     javax.jms.TopicConnectionFactory cnxFact =
-      TopicTcpConnectionFactory.create(hostName, port);
+      TopicTcpConnectionFactory.create(hostName, port, reliableClass);
     
     ((org.objectweb.joram.client.jms.ConnectionFactory)
      cnxFact).getParameters().connectingTimer = cnxTimer;
@@ -185,6 +212,29 @@ public class AdminModule
          throws UnknownHostException, ConnectException, AdminException
   {
     connect("localhost", 16010, name, password, cnxTimer);
+  }
+
+  /**
+   * Opens a TCP connection with the Joram server running on the default
+   * "locahost" host and listening to the default 16010 port.
+   *
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   * @param reliableClass  Reliable class name.
+   *
+   * @exception UnknownHostException  Never thrown.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(String name, 
+                             String password, 
+                             int cnxTimer, 
+                             String reliableClass)
+    throws UnknownHostException, ConnectException, AdminException {
+    connect("localhost", 16010, name, password, cnxTimer, reliableClass);
   }
 
   /**
@@ -276,12 +326,56 @@ public class AdminModule
                                int port,
                                String serverName)
     throws ConnectException, AdminException {
+    addServer(
+      sid,
+      hostName,
+      domainName,
+      port,
+      serverName, 
+      null, null);
+  }
+
+  /**
+   * Adds a server to the platform.
+   *
+   * @param serverId Id of the added server
+   * @param hostName Address of the host where the added server is started
+   * @param domainName Name of the domain where the server is added
+   * @param port Listening port of the server in the specified domain
+   * @param serverName Name of the added server
+   * @param serviceNames Names of the service to start within the server
+   * @param args Services' arguments
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void addServer(int sid,
+                               String hostName,
+                               String domainName,
+                               int port,
+                               String serverName,
+                               String[] serviceNames,
+                               String[] serviceArgs)
+    throws ConnectException, AdminException {
+    if (serviceNames != null &&
+        serviceArgs != null) {
+      if (serviceNames.length != serviceArgs.length)
+        throw new AdminException(
+          "Same number of service names and arguments expected");
+    } else {
+      if (serviceNames == null) throw new AdminException(
+        "Expected service names");
+      if (serviceArgs == null) throw new AdminException(
+        "Expected service arguments");
+    }
     doRequest(new AddServerRequest(
       sid,
       hostName,
       domainName,
       port,
-      serverName));
+      serverName,
+      serviceNames,
+      serviceArgs));
   }
 
   /**
@@ -706,6 +800,10 @@ public class AdminModule
           throw new NameAlreadyUsedException(reply.getInfo());
         case AdminReply.START_FAILURE:
           throw new StartFailureException(reply.getInfo());
+        case AdminReply.SERVER_ID_ALREADY_USED:
+          throw new ServerIdAlreadyUsedException(reply.getInfo());
+        case AdminReply.UNKNOWN_SERVER:
+          throw new UnknownServerException(reply.getInfo());
         default:
           throw new AdminException(reply.getInfo());
         }

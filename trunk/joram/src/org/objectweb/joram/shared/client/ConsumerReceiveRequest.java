@@ -39,6 +39,7 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
 
+  private boolean receiveAck;
 
   /**
    * Constructs a <code>ConsumerReceiveRequest</code>.
@@ -57,6 +58,7 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
     this.selector = selector;
     this.timeToLive = timeToLive;
     this.queueMode = queueMode;
+    receiveAck = false;
   }
 
   /**
@@ -64,6 +66,14 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
    */
   public ConsumerReceiveRequest()
   {}
+
+  public void setReceiveAck(boolean receiveAck) {
+    this.receiveAck = receiveAck;
+  }
+
+  public final boolean getReceiveAck() {
+    return receiveAck;
+  }
 
   /** Sets the selector. */
   public void setSelector(String selector)
@@ -107,6 +117,7 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
       h.put("selector",selector);
     h.put("timeToLive",new Long(timeToLive));
     h.put("queueMode",new Boolean(queueMode));
+    h.put("receiveAck",new Boolean(receiveAck));
     return h;
   }
 
@@ -117,6 +128,7 @@ public class ConsumerReceiveRequest extends AbstractJmsRequest
     req.setSelector((String) h.get("selector"));
     req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
     req.setTimeToLive(((Long) h.get("timeToLive")).longValue());
+    req.receiveAck = ((Boolean) h.get("receiveAck")).booleanValue();
     return req;
   }
 }

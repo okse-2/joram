@@ -34,6 +34,10 @@ public class AdminReply implements java.io.Serializable {
   public final static int NAME_ALREADY_USED = 0;
 
   public final static int START_FAILURE = 1;
+
+  public final static int SERVER_ID_ALREADY_USED = 2;
+
+  public final static int UNKNOWN_SERVER = 3;
   
   /** <code>true</code> if this reply replies to a successful request. */
   private boolean success = false;

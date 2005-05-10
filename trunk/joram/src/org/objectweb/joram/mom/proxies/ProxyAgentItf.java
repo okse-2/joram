@@ -48,4 +48,6 @@ public interface ProxyAgentItf {
    * @param reply  The reply to send to the client.
    */
   public void sendToClient(int id, AbstractJmsReply reply);
+
+  public void setNoSave();
 }

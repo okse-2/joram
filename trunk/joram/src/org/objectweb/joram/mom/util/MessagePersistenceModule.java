@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,409 +17,316 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
 package org.objectweb.joram.mom.util;
 
-import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.TransactionError;
 import fr.dyade.aaa.util.Transaction;
 
-import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.messages.MessageBody;
+import org.objectweb.joram.shared.messages.MessagePersistent;
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Vector;
+import java.io.IOException;
 
 
 /**
  * The <code>MessagePersistenceModule</code> class is a utility class used
  * by queues and proxies for persisting, retrieving and deleting messages.
- * <p>
- * Messages are either persisted individually, or grouped into vectors.
  */
-public class MessagePersistenceModule implements java.io.Serializable
-{
-  /** Identifier of the agent using the module. */
-  private AgentId agentId;
-  /**
-   * Table of the identifiers of the messages persisted in vectors.
-   * <p>
-   * <b>Key:</b> name of the persistence vector<br>
-   * <b>Value:</b> table of identifiers of the persisted messages
-   */
-  private Hashtable vectorsTable;
-  /** Counter of persistence objects. */
-  private long counter = 0;
-
-  /** Table of the messages to save for the first time. */
-  private transient Hashtable toBeSaved;
-  /** Table of the messages to update. */
-  private transient Hashtable toBeUpdated;
-  /** Table of the identifiers of the messages to delete. */
-  private transient Hashtable idsToBeDeleted;
-  /** 
-   * Table of the persisted messages' identifiers.
-   * <p>
-   * <b>Key:</b> identifier of the persisted message<br>
-   * <b>Value:</b> name of the vector in which the message is persisted,
-   *               <code>null</code> if message persisted individually.
-   */
-  private transient HashMap idsTable;
-
-
-  /**
-   * Constructs a <code>MessagePersistenceModule</code> instance.
-   *
-   * @param agentId  Identifier of the agent building the module.
-   */
-  public MessagePersistenceModule(AgentId agentId)
-  {
-    this.agentId = agentId;
-    vectorsTable = new Hashtable();
-
-    toBeSaved = new Hashtable();
-    toBeUpdated = new Hashtable();
-    idsToBeDeleted = new Hashtable();
-    idsTable = new HashMap();
+public class MessagePersistenceModule {
+ 
+  static public String getSaveName(String agentId, 
+                                   MessagePersistent message) {
+    String id = message.getIdentifier();
+    return "msg" + agentId + id.substring(3);
   }
 
- 
   /**
-   * Registers a message for future saving.  
+   * save the message (header and body).
    *
-   * @param message  Message to persist.
+   * @param agentId  id of agent.
+   * @param message  Message to save.
    */
-  public void save(Message message)
-  {
-    if (! message.getPersistent())
-      return;
+  static public String save(String agentId, 
+                            MessagePersistent message) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.save(" + agentId +
+                                    "," + message + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.save(" + agentId +
+                              "," + message + ')');
 
     String id = message.getIdentifier();
+    String name = "msg" + agentId + id.substring(3);
+    Transaction tx = AgentServer.getTransaction();
+
+    if (!tx.isPersistent())
+      return null;
+    
+    try {
+      // save header part of message.
+      tx.save(message,name);
+
+      // save body part of message.
+      MessageBody body = message.getMessageBody();
+      if (! body.saved) {
+        body.saved = true;
+        tx.save(body,name+".body");
+      }
+    } catch (Exception exc) {
+      throw new TransactionError(exc.toString());
+    }
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "Registering msg " + id + " for saving");
+                                    "msg " + id + " header save to " + name +
+                                    " body save to " + name + ".body");
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "Registering msg " + id + " for saving");
-
-    // If message already persisted, its persistent state will have
-    // to be upated.
-    if (idsTable.containsKey(id))
-      toBeUpdated.put(id, message);
-    // Else, the message will have to be saved.
-    else
-      toBeSaved.put(id, message);
-
-    idsToBeDeleted.remove(id);
+                              "msg " + id + " header save to " + name +
+                              " body save to " + name + ".body");
+    return name;
   }
 
   /**
-   * Registers a message for future deletion.
+   * save the message header.
+   *
+   * @param agentId  id of agent.
+   * @param message  Message to save header.
+   */
+  static public String saveHeader(String agentId, 
+                                  MessagePersistent message) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.saveHeader(" + agentId +
+                                    "," + message + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.saveHeader(" + agentId +
+                              "," + message + ')');
+
+    String id = message.getIdentifier();
+    String name = "msg" + agentId + id.substring(3);
+    Transaction tx = AgentServer.getTransaction();
+
+    if (!tx.isPersistent())
+      return null;
+    
+    try {
+      // save header part of message.
+      tx.save(message,name);
+    } catch (Exception exc) {
+      throw new TransactionError(exc.toString());
+    }
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "msg " + id + " header save to " + name);
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "msg " + id + " header save to " + name);
+    return name;
+  }
+
+  /**
+   * save the message body.
+   *
+   * @param agentId  id of agent.
+   * @param message  Message to save body.
+   */
+  static public String saveBody(String agentId, 
+                                MessagePersistent message) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.saveBody(" + agentId +
+                                    "," + message + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.saveBody(" + agentId +
+                              "," + message + ')');
+
+    String id = message.getIdentifier();
+    String name = "msg" + agentId + id.substring(3);
+    Transaction tx = AgentServer.getTransaction();
+    
+    if (!tx.isPersistent())
+      return null;
+
+    try {
+      // save body part of message.
+      MessageBody body = message.getMessageBody();
+      if (! body.saved) {
+        body.saved = true;
+        tx.save(body,name+".body");
+      }
+    } catch (Exception exc) {
+      throw new TransactionError(exc.toString());
+    }
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "msg " + id + 
+                                    " body save to " + name + ".body");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "msg " + id + 
+                              " body save to " + name + ".body");
+    return name+".body";
+  }
+
+  /** Load persisted message header. */
+  static public Message loadHeader(String name) 
+    throws ClassNotFoundException {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.loadHeader(" + name + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.loadHeader(" + name + ')');
+
+    Transaction tx = AgentServer.getTransaction();
+    try {
+      return ((MessagePersistent) tx.load(name)).getMessage();
+    } catch (IOException exc) {
+      throw new TransactionError(exc.toString());
+    }
+  }
+
+  /** Load persisted message body. */
+  static public MessageBody loadBody(String name)
+    throws ClassNotFoundException {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.loadBody(" + name + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.loadBody(" + name + ')');
+
+    Transaction tx = AgentServer.getTransaction();
+    try {
+      return (MessageBody) tx.load(name+".body");
+    } catch (IOException exc) {
+      throw new TransactionError(exc.toString());
+    }
+  }
+
+  /**
+   * delete the message.
    *
    * @param message  Message to delete.
    */
-  public void delete(Message message)
-  {
-    if (! message.getPersistent())
-      return;
-
-    String id = message.getIdentifier();
-
+  static public void delete(MessagePersistent message) {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "Registering msg " + id + " for deletion");
+                                    "MessagePersistenceModule.delete(" + message + ')');
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "Registering msg " + id + " for deletion");
+                              "MessagePersistenceModule.delete(" + message + ')');
 
-    idsToBeDeleted.put(id, id);
-
-    toBeSaved.remove(id);
-    toBeUpdated.remove(id);
-  }
-    
-  /** Commits the registered savings and deletions. */
-  public void commit()
-  {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Commiting...");
-
-    // Nothing to commit.
-    if (toBeUpdated.isEmpty()
-        && toBeSaved.isEmpty()
-        && idsToBeDeleted.isEmpty())
-      return;
-
-    Enumeration e;
-    String id;
-    String name;
-    Hashtable ids;
-    Vector msgs = new Vector();
-    Hashtable msgIds = new Hashtable();
-    
+    String id = message.getIdentifier();
+    String name = message.getSaveName();
     Transaction tx = AgentServer.getTransaction();
 
-    // Deletion: browsing the identifiers of the messages to delete.
-    for (e = idsToBeDeleted.keys(); e.hasMoreElements();) {
-      id = (String) e.nextElement();
-      name = (String) idsTable.remove(id);
+    if (!tx.isPersistent()) return;
 
-      // No vector name: message was persisted individually.
-      if (name == null) {
-        tx.delete("msg" + agentId + id.substring(3));
+    if (name != null) {
+      tx.delete(name);
+      tx.delete(name+".body");
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "Message deleted: " + id);
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                        "Message deleted: " + id);
-      }
-      // Vector name retrieved: message was persisted in a vector.
-      else {
-        ids = (Hashtable) vectorsTable.get(name);
-        ids.remove(id);
-
-        // No more messages to be kept: removing the persistence object.
-        if (ids.isEmpty()) {
-          vectorsTable.remove(name);
-          tx.delete(name);
-
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                          "Vector deleted: " + name);
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                    "Vector deleted: " + name);
-        }
-      }
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                      "msg " + id + " delete " + name +
+                                      " and " + name + ".body");
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "msg " + id + " delete " + name +
+                                " and " + name + ".body");
     }
-
-    // Update: deleting the previous message's state.
-    for (e = toBeUpdated.keys(); e.hasMoreElements();) {
-      id = (String) e.nextElement();
-      name = (String) idsTable.get(id);
-
-      // No vector name: message was persisted individually.
-      if (name == null) {
-        tx.delete("msg" + agentId + id.substring(3));
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "Message deleted: " + id);
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                  "Message deleted: " + id);
-      }
-      // Vector name retrieved: message was persisted in a vector.
-      else {
-        ids = (Hashtable) vectorsTable.get(name);
-        ids.remove(id);
-
-        // No more messages to be kept: removing the persistence object.
-        if (ids.isEmpty()) {
-          vectorsTable.remove(name);
-          tx.delete(name);
-
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                          "Vector deleted: " + name);
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                    "Vector deleted: " + name);
-        }
-      }
-      // Adding the message to the vector of the messages to persist.
-      msgs.add(toBeUpdated.get(id));
-      msgIds.put(id, id);
-    }
-
-    // Adding the messages to be saved to the vector.
-    for (e = toBeSaved.keys(); e.hasMoreElements();) {
-      id = (String) e.nextElement();
-      msgs.add(toBeSaved.get(id));
-      msgIds.put(id, id);
-    }
-
-    // Saving the messages. 
-    try {
-      // Single message: saving it individually.
-      if (msgs.size() == 1) {
-        Message msg = (Message) msgs.get(0);
-        name = "msg" + agentId + msg.getIdentifier().substring(3);
-        idsTable.put(msg.getIdentifier(), null);
-        tx.save(msg, name);
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "Message saved: "
-                                        + msg.getIdentifier());
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                  "Message saved: "
-                                  + msg.getIdentifier());
-      }
-      // Many messages: saving the vector.
-      else if (! msgs.isEmpty()) {
-        if (counter == Long.MAX_VALUE)
-          counter = 0;
-        name = "msgs" + agentId + "-" + counter++;
-        vectorsTable.put(name, msgIds);
-
-        for (e = msgIds.keys(); e.hasMoreElements();)
-          idsTable.put(e.nextElement(), name);
-  
-        tx.save(msgs, name);
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "Vector saved: " + name);
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                  "Vector saved: " + name);
-      }
-    }
-    catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        MomTracing.dbgDestination.log(BasicLevel.ERROR, 
-                                      "Messages with ids ["
-                                      + toBeSaved.toString()
-                                      + "] could not be saved by queue ["
-                                      + agentId.toString()
-                                      + "]: "
-                                      + exc);
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        MomTracing.dbgProxy.log(BasicLevel.ERROR, 
-                                "Messages with ids ["
-                                + toBeSaved.toString()
-                                + "] could not be saved by queue ["
-                                + agentId.toString()
-                                + "]: "
-                                + exc);
-    }
-    toBeSaved = new Hashtable();
-    toBeUpdated = new Hashtable();
-    idsToBeDeleted = new Hashtable();
   }
 
-  /** Rolls back all the registered saving and deletion requests. */
-  public void rollback()
-  {
-    toBeSaved.clear();
-    toBeUpdated.clear();
-    idsToBeDeleted.clear();
-  }
+  /** Loads all persisted messages. */
+  static public Vector loadAll(String agentId) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.loadAll(" + agentId + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.loadAll(" + agentId + ')');
 
-  /** Loads all persisted objects. */
-  public Vector loadAll()
-  {
-    Enumeration e;
     Vector messages = new Vector();
-    Vector persistedVec;
-    Message msg;
-    String msgId;
 
-    // Getting the identifiers of the messages persisted in vectors, and to
-    // be kept.
-    Hashtable idsToPersist = new Hashtable();
-    for (e = vectorsTable.keys(); e.hasMoreElements();)
-      idsToPersist.putAll((Hashtable) vectorsTable.remove(e.nextElement()));
-     
-    // Retrieving the names of the persistence objects previously saved. 
+    // Retrieving the names of the persistence message previously saved. 
     Transaction tx = AgentServer.getTransaction();
     String[] messageNames = tx.getList("msg" + agentId);
-    String[] vectorNames = tx.getList("msgs" + agentId);
 
     // Retrieving the messages individually persisted.
     for (int i = 0; i < messageNames.length; i++) {
+      if (messageNames[i].endsWith("body")) continue;
       try {
-        messages.add(tx.load(messageNames[i]));
-      }
-      catch (Exception exc) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Message named ["
-                                        + messageNames[i]
-                                        + "] could not be loaded for queue ["
-                                        + agentId.toString()
-                                        + "]: "
-                                        + exc);
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgProxy.log(BasicLevel.ERROR,
-                                  "Message named ["
-                                  + messageNames[i]
-                                  + "] could not be loaded for queue ["
-                                  + agentId.toString()
-                                  + "]: "
-                                  + exc);
-      }
-    }
-
-    // Retrieving the messages persisted in vectors.
-    for (int i = 0; i < vectorNames.length; i++) {
-      try {
-        persistedVec = (Vector) tx.load(vectorNames[i]);
-        // Browsing the messages to check if they are still to be persisted.
-        for (e = persistedVec.elements(); e.hasMoreElements();) {
-          msg = (Message) e.nextElement();
-          msgId = msg.getIdentifier();
-          if (idsToPersist.contains(msgId))
-            messages.add(msg);
+        MessagePersistent mp = (MessagePersistent) tx.load(messageNames[i]);
+        Message msg = mp.getMessage();
+        msg.setPin(mp.getPin());
+        if (msg.isPin() && 
+            ! msg.noBody) {
+          msg.setMessageBody((MessageBody) tx.load(messageNames[i]+".body"));
         }
-      }
-      catch (Exception exc) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Vector named ["
-                                        + vectorNames[i]
-                                        + "] could not be loaded for queue ["
-                                        + agentId.toString()
-                                        + "]: "
-                                        + exc);
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgProxy.log(BasicLevel.ERROR,
-                                  "Vector named ["
-                                  + vectorNames[i]
-                                  + "] could not be loaded for queue ["
-                                  + agentId.toString()
-                                  + "]: "
-                                  + exc);
+
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                        "loadAll: messageNames[" + i +
+                                        "] msg = " + msg);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                  "loadAll: messageNames[" + i +
+                                  "] msg = " + msg);
+        messages.add(msg);
+      } catch (Exception exc) {
+        MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                      "Message named ["
+                                      + messageNames[i]
+                                      + "] could not be loaded for queue ["
+                                      + agentId
+                                      + "]",
+                                      exc);
+        MomTracing.dbgProxy.log(BasicLevel.ERROR,
+                                "Message named ["
+                                + messageNames[i]
+                                + "] could not be loaded for queue ["
+                                + agentId
+                                + "]",
+                                exc);
       }
     }
     return messages;
   }
 
   /** Deletes all persisted objects. */
-  public void deleteAll()
-  {
+  static public void deleteAll(String agentId) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "MessagePersistenceModule.deleteAll(" + agentId + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "MessagePersistenceModule.deleteAll(" + agentId + ')');
+
     Transaction tx = AgentServer.getTransaction();
 
-    // Retrieving the names of the persistence objects previously saved. 
+    // Retrieving the names of the persistence message previously saved. 
     String[] messageNames = tx.getList("msg" + agentId);
-    String[] vectorNames = tx.getList("msgs" + agentId);
 
-    // Deleting the objects.
-    for (int i = 0; i < messageNames.length; i++)
+    // Deleting the message.
+    for (int i = 0; i < messageNames.length; i++) {
       tx.delete(messageNames[i]);
-    for (int i = 0; i < vectorNames.length; i++)
-      tx.delete(vectorNames[i]);
-  }
-
-
-  /** Deserializes a <code>PersistenceModule</code>. */
-  private void readObject(java.io.ObjectInputStream in)
-               throws java.io.IOException, ClassNotFoundException
-  {
-    in.defaultReadObject();
-    toBeSaved = new Hashtable();
-    toBeUpdated = new Hashtable();
-    idsToBeDeleted = new Hashtable();
-    idsTable = new HashMap();
+      tx.delete(messageNames[i]+".body");
+    }
   }
 }

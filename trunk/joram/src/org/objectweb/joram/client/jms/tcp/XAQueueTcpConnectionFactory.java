@@ -61,11 +61,13 @@ public class XAQueueTcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XAQueueConnection
-         createXAQueueConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+      createXAQueueConnection(String name, String password)
+    throws javax.jms.JMSException {
     return new XAQueueConnection(params,
-                                 new TcpConnection(params, name, password));
+                                 new TcpConnection(params, 
+                                                   name, 
+                                                   password,
+                                                   reliableClass));
   }
 
   /**
@@ -75,10 +77,13 @@ public class XAQueueTcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XAConnection
-         createXAConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
-    return new XAConnection(params, new TcpConnection(params, name, password));
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException {
+    return new XAConnection(params,
+                            new TcpConnection(params, 
+                                              name, 
+                                              password,
+                                              reliableClass));
   }
 
   /**
@@ -88,11 +93,13 @@ public class XAQueueTcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.QueueConnection
-         createQueueConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+      createQueueConnection(String name, String password)
+    throws javax.jms.JMSException {
     return new QueueConnection(params,
-                               new TcpConnection(params, name, password));
+                               new TcpConnection(params, 
+                                                 name, 
+                                                 password,
+                                                 reliableClass));
   }
 
   /**
@@ -102,9 +109,12 @@ public class XAQueueTcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection createConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
-    return new Connection(params, new TcpConnection(params, name, password));
+    throws javax.jms.JMSException {
+    return new Connection(params,
+                          new TcpConnection(params, 
+                                            name, 
+                                            password,
+                                            reliableClass));
   }
 
   /**
@@ -115,9 +125,27 @@ public class XAQueueTcpConnectionFactory
    * @param port  Server's listening port.
    */ 
   public static javax.jms.XAQueueConnectionFactory
-                create(String host, int port)
-  {
-    return new XAQueueTcpConnectionFactory(host, port);
+                create(String host, int port) {
+    return create(host, 
+                  port,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code> 
+   * instance for creating TCP connections with a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   * @param reliableClass  Reliable class name.
+   */ 
+  public static javax.jms.XAQueueConnectionFactory
+      create(String host, 
+             int port,
+             String reliableClass) {
+    XAQueueTcpConnectionFactory cf = new XAQueueTcpConnectionFactory(host, port);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 
   /**

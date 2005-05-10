@@ -34,8 +34,13 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
 {
   /** Selector for filtering messages on a queue. */
   private String selector;
+
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
+  
+  private String[] msgIdsToAck;
+
+  private int msgCount;
 
   /**
    * Constructs a <code>ConsumerSetListRequest</code>.
@@ -45,12 +50,17 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
    * @param queueMode  <code>true</code> if this request is destinated to a
    *          queue.
    */
-  public ConsumerSetListRequest(String targetName, String selector, 
-                                boolean queueMode)
+  public ConsumerSetListRequest(String targetName, 
+                                String selector, 
+                                boolean queueMode,
+                                String[] msgIdsToAck,
+                                int msgCount)
   {
     super(targetName);
     this.selector = selector;
     this.queueMode = queueMode;
+    this.msgIdsToAck = msgIdsToAck;
+    this.msgCount = msgCount;
   }
 
   /**
@@ -83,11 +93,21 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
     return queueMode;
   }
 
+  public final String[] getMessageIdsToAck() {
+    return msgIdsToAck;
+  }
+
+  public final int getMessageCount() {
+    return msgCount;
+  }
+
   public Hashtable soapCode() {
     Hashtable h = super.soapCode();
     if (selector != null)
       h.put("selector",selector);
     h.put("queueMode",new Boolean(queueMode));
+    h.put("msgIdsToAck", msgIdsToAck);
+    h.put("msgCount", new Integer(msgCount));
     return h;
   }
 
@@ -97,6 +117,8 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
     req.setTarget((String) h.get("target"));
     req.setSelector((String) h.get("selector"));
     req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    req.msgIdsToAck = (String[]) h.get("msgIdsToAck");
+    req.msgCount = ((Integer) h.get("msgCount")).intValue();
     return req;
   }
 

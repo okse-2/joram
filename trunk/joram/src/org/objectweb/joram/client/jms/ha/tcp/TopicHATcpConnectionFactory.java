@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -43,7 +44,7 @@ public class TopicHATcpConnectionFactory
          throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);    
+      url, params, name, password, reliableClass);    
     return new TopicConnection(params, lc);
   }
 
@@ -58,7 +59,7 @@ public class TopicHATcpConnectionFactory
     throws javax.jms.JMSException
   {
     HATcpConnection lc = new HATcpConnection(
-      url, params, name, password);
+      url, params, name, password, reliableClass);
     return new Connection(params, lc);
   }
 
@@ -66,8 +67,19 @@ public class TopicHATcpConnectionFactory
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA tcp connections with a given server.
    */ 
-  public static javax.jms.TopicConnectionFactory create(String url)
-  {
-    return new TopicHATcpConnectionFactory(url);
+  public static javax.jms.TopicConnectionFactory create(String url) {
+    return create(url,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
+   * instance for creating HA tcp connections with a given server.
+   */ 
+  public static javax.jms.TopicConnectionFactory 
+      create(String url, String reliableClass) {
+    TopicHATcpConnectionFactory cf = new TopicHATcpConnectionFactory(url);
+    cf.setReliableClass(reliableClass);
+    return cf;
   }
 }

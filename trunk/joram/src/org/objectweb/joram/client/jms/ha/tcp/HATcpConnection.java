@@ -19,6 +19,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -26,6 +27,8 @@ import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
+
+import javax.jms.JMSException;
 
 import java.io.*;
 import java.util.*;
@@ -50,13 +53,58 @@ public class HATcpConnection
   public HATcpConnection(String url,
                          FactoryParameters params, 
                          String name,
-                         String password) throws javax.jms.JMSException
-  {
-    tcpClient = new ReliableTcpClient(
-      params, 
-      name,
-      password,
-      true);
+                         String password) 
+    throws JMSException {
+    this(url,
+         params, 
+         name,
+         password,
+         "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+  
+  /**
+   * Creates a <code>HATcpConnection</code> instance.
+   *
+   * @param params  Factory parameters.
+   * @param name  Name of user.
+   * @param password  Password of user.
+   * @param reliableClass  reliable class name.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception IllegalStateException  If the server is not reachable.
+   */
+  public HATcpConnection(String url,
+                         FactoryParameters params, 
+                         String name,
+                         String password,
+                         String reliableClass) 
+    throws JMSException {
+    try {
+      tcpClient = 
+        (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
+    } catch (ClassNotFoundException exc) {
+      JMSException jmsExc = 
+        new JMSException("HATcpConnection: ClassNotFoundException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    } catch (InstantiationException exc) {
+      JMSException jmsExc = 
+        new JMSException("HATcpConnection: InstantiationException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    } catch (IllegalAccessException exc) {
+      JMSException jmsExc = 
+        new JMSException("HATcpConnection: IllegalAccessException : " + 
+                         reliableClass);
+      jmsExc.setLinkedException(exc);
+      throw jmsExc;
+    }
+    tcpClient.init(params, 
+                   name,
+                   password,
+                   true);
     StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
     if (! tokenizer.hasMoreElements()) 
       throw new javax.jms.JMSException("URL not valid:" + url);

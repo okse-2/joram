@@ -62,7 +62,7 @@ public class MessageConverterModule
   {
     if (jmsMessage == null) return null;
 
-    Message msg = new Message();
+    Message msg = Message.create();
 
     try {
       if (jmsMessage instanceof BytesMessage) {

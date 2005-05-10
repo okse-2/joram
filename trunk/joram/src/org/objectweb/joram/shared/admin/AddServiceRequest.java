@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,30 +19,32 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
-package org.objectweb.joram.mom.proxies;
+package org.objectweb.joram.shared.admin;
 
-import fr.dyade.aaa.agent.Notification;
+public class AddServiceRequest extends AdminRequest {
+  private int serverId;
+  private String className;
+  private String args;
 
-import org.objectweb.joram.shared.client.*;
-
-public class SendReplyNot extends Notification {
-
-  private int key;
-
-  private int requestId;
-
-  public SendReplyNot(int key, int requestId) {
-    persistent = false;
-    this.key = key;
-    this.requestId = requestId;
+  public AddServiceRequest(int serverId,
+                           String className,
+                           String args) {
+    this.serverId = serverId;
+    this.className = className;
+    this.args = args;
   }
 
-  public final int getKey() {
-    return key;
+  public final int getServerId() {
+    return serverId;
   }
 
-  public final int getRequestId() {
-    return requestId;
+  public final String getClassName() {
+    return className;
+  }
+
+  public final String getArgs() {
+    return args;
   }
 }

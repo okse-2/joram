@@ -62,6 +62,14 @@ public abstract class AbstractNotification
     return clientContext;
   }
 
+  public void setPersistent(boolean persistent) {
+    this.persistent = persistent;
+  }
+  
+  public final boolean getPersistent() {
+    return persistent;
+  }
+
   public String toString() {
     return '(' + super.toString() + 
       ", clientContext=" + clientContext + ')';

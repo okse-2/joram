@@ -26,6 +26,8 @@ import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.ConsumerSetListRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
+import org.objectweb.joram.shared.client.ActivateConsumerRequest;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 
@@ -33,6 +35,7 @@ import fr.dyade.aaa.util.StoppedQueueException;
 
 import javax.jms.MessageListener;
 import javax.jms.JMSException;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -42,6 +45,30 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * a message consumer.
  */
 class MessageConsumerListener implements ReplyListener {
+
+  public static final String QUEUE_MSG_COUNT = 
+      "org.objectweb.joram.client.jms.queueMsgCount";
+
+  public static final String TOPIC_ACK_COUNT = 
+      "org.objectweb.joram.client.jms.topicAckCount";
+
+  public static final String PENDING_MSG_MAX =
+      "org.objectweb.joram.client.jms.pendingMsgMax";
+
+  public static final String PENDING_MSG_MIN =
+      "org.objectweb.joram.client.jms.pendingMsgMin";
+
+  private static int queueMsgCount =
+      Integer.getInteger(QUEUE_MSG_COUNT, 1).intValue();
+  
+  private static int topicAckCount = 
+      Integer.getInteger(TOPIC_ACK_COUNT, 100).intValue();
+
+  private static int pendingMsgMax = 
+      Integer.getInteger(PENDING_MSG_MAX, Integer.MAX_VALUE).intValue();
+
+  private static int pendingMsgMin = 
+      Integer.getInteger(PENDING_MSG_MIN, 0).intValue();
 
   /**
    * Status of the message consumer listener.
@@ -78,15 +105,21 @@ class MessageConsumerListener implements ReplyListener {
   private int status;
 
   private MessageListener listener;
-  
+
+  private Vector messagesToAck;
+
+  private volatile boolean passive;
+
   MessageConsumerListener(MessageConsumer consumer,
                           Session session,
                           MessageListener listener) {
     this.consumer = consumer;
     this.session = session;
     this.listener = listener;
+    messagesToAck = new Vector();
     requestId = -1;
     setStatus(Status.INIT);
+    passive = false;
   }
 
   private void setStatus(int status) {
@@ -114,11 +147,19 @@ class MessageConsumerListener implements ReplyListener {
   }
 
   private void subscribe() throws JMSException {
+    String[] toAck = null;
+    if (messagesToAck.size() > 0) {
+      toAck = new String[messagesToAck.size()];
+      messagesToAck.copyInto(toAck);
+      messagesToAck.clear();
+    }
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
         consumer.targetName, 
         consumer.selector, 
-        consumer.queueMode);
+        consumer.queueMode,
+        toAck,
+        queueMsgCount);
     session.getRequestMultiplexer().sendRequest(req, this);
     requestId = req.getRequestId();
   }
@@ -144,6 +185,9 @@ class MessageConsumerListener implements ReplyListener {
           status == Status.CLOSE) return;
       
       session.getRequestMultiplexer().abortRequest(requestId);
+
+      acknowledge(0);
+
       setStatus(Status.CLOSE);
     }
     
@@ -159,6 +203,26 @@ class MessageConsumerListener implements ReplyListener {
     }
     session.syncRequest(unsetLR);
   }
+
+  private void acknowledge(int threshold) {
+    try {
+      if (messagesToAck.size() > threshold) {
+        ConsumerAckRequest ack = new ConsumerAckRequest(
+          consumer.targetName, 
+          consumer.queueMode);
+        for (int i = 0; i < messagesToAck.size(); i ++) {
+          String msgId = (String)messagesToAck.elementAt(i);
+          ack.addId(msgId);
+        }
+        session.getRequestMultiplexer().sendRequest(ack);
+        messagesToAck.clear();
+      }
+    } catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(
+          BasicLevel.ERROR, "", exc); 
+    }
+  }
   
   /**
    * Called by RequestMultiplexer.
@@ -166,9 +230,10 @@ class MessageConsumerListener implements ReplyListener {
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "MessageConsumerListener.replyReceived(" + 
-                                 reply + ')');
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
+        reply + ')');
+
     if (status == Status.CLOSE) {
       throw new AbortedRequestException();
     } else {
@@ -180,6 +245,24 @@ class MessageConsumerListener implements ReplyListener {
       if (consumer.queueMode) {
         return true;
       } else {
+        if (session.isAutoAck()) {
+          acknowledge(topicAckCount);
+        }
+        
+        try {
+          int pendingMessageCount = session.getPendingMessageCount();
+          if (! passive && pendingMessageCount > 
+              pendingMsgMax) {
+            session.getRequestMultiplexer().sendRequest(
+              new ActivateConsumerRequest(
+                consumer.targetName, false));
+            passive = true;
+          }
+        } catch (JMSException exc) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgClient.log(
+              BasicLevel.ERROR, "", exc); 
+        }
         return false;
       }
     }
@@ -206,14 +289,14 @@ class MessageConsumerListener implements ReplyListener {
    */
   public void onMessage(Message msg) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "MessageConsumerListener.onMessage(" + 
-                                 msg + ')');
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + 
+        msg + ')');
 
     if (consumer.queueMode) {
       // Consume one message in advance.
       subscribe();
-    }
+    } 
 
     synchronized (this) {
       if (status == Status.RUN) {
@@ -224,19 +307,26 @@ class MessageConsumerListener implements ReplyListener {
     }
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 " -> consumer.onMessage(" + msg + ')');
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, " -> consumer.onMessage(" + 
+        msg + ')');
 
     try {
       listener.onMessage(msg);
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   " -> consumer.onMessage(" + 
-                                   msg + ") returned");
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> consumer.onMessage(" + 
+          msg + ") returned");
+      if (session.isAutoAck()) {
+        synchronized (this) {
+          messagesToAck.addElement(msg.getJMSMessageID());
+        }
+      }
     } catch (RuntimeException re) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", re);
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", re);
       JMSException exc = new JMSException(re.toString());
       exc.setLinkedException(re);
       throw exc;
@@ -246,6 +336,18 @@ class MessageConsumerListener implements ReplyListener {
         
         // Notify threads trying to close the listener.
         notifyAll();
+      }
+    }
+
+    if (! consumer.queueMode) {
+      int pendingMessageCount = 
+        session.getPendingMessageCount();
+      if (passive && pendingMessageCount <
+          pendingMsgMin) {
+        session.getRequestMultiplexer().sendRequest(
+          new ActivateConsumerRequest(
+            consumer.targetName, true));
+        passive = false;
       }
     }
   }

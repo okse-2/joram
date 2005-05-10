@@ -29,17 +29,23 @@ public class AddServerRequest extends AdminRequest {
   private int serverId;
   private String domainName;
   private int port;
+  private String[] serviceNames;
+  private String[] serviceArgs;
 
   public AddServerRequest(int serverId,
                           String hostName,
                           String domainName,
                           int port,
-                          String serverName) {
+                          String serverName,
+                          String[] serviceNames,
+                          String[] serviceArgs) {
     this.serverId = serverId;
     this.hostName = hostName;
     this.serverName = serverName;
     this.domainName = domainName;
     this.port = port;
+    this.serviceNames = serviceNames;
+    this.serviceArgs = serviceArgs;
   }
 
   public final String getServerName() {
@@ -60,5 +66,13 @@ public class AddServerRequest extends AdminRequest {
 
   public final int getPort() {
     return port;
+  }
+
+  public final String[] getServiceNames() {
+    return serviceNames;
+  }
+
+  public final String[] getServiceArgs() {
+    return serviceArgs;
   }
 }
