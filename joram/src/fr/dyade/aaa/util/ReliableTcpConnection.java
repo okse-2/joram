@@ -295,9 +295,10 @@ public class ReliableTcpConnection {
         "close()");
     if (getStatus() == INIT) 
       return;
-    try { 
-      if (bis != null) bis.close();
-    } catch (IOException exc) {}
+// Remove for SSL (bis.close() ==> lock)
+//      try { 
+//        if (bis != null) bis.close();
+//      } catch (IOException exc) {}
     try { 
       sock.getOutputStream().close();
     } catch (IOException exc) {}

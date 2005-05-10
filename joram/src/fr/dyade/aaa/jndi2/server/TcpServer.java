@@ -150,6 +150,11 @@ public class TcpServer {
               BasicLevel.ERROR,
               this.getName() + 
               ", error during send", exc);
+            if (socket != null) {
+              try {
+                socket.close();
+              } catch (IOException exc2) {}
+            }
           }
         }
       } finally {

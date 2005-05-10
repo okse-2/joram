@@ -34,9 +34,15 @@ public class ServerConfigHelper {
   private static Logger logger = Debug.getLogger(
     "fr.dyade.aaa.agent.ServerConfigHelper");
 
-  public static boolean addDomain(String domainName,
-                                  int routerId,
-                                  int port) 
+  private boolean autoCommit;
+
+  public ServerConfigHelper(boolean autoCommit) {
+    this.autoCommit = autoCommit;
+  }
+
+  public boolean addDomain(String domainName,
+                           int routerId,
+                           int port) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -97,13 +103,12 @@ public class ServerConfigHelper {
       res = true;
     }
     
-    // commit changes
-    commitChanges();
+    if (autoCommit) commit();
 
     return res;
   }
 
-  public static boolean removeDomain(String domainName) 
+  public boolean removeDomain(String domainName) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -150,17 +155,16 @@ public class ServerConfigHelper {
       res = true;
     }
     
-    // commit changes
-    commitChanges();
+    if (autoCommit) commit();
 
     return res;
   }
 
-  public static void addServer(int sid, 
-                               String hostName, 
-                               String domainName,
-                               int port,
-                               String name) 
+  public void addServer(int sid, 
+                        String hostName, 
+                        String domainName,
+                        int port,
+                        String name)
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -170,14 +174,14 @@ public class ServerConfigHelper {
                  domainName + ',' + 
                  port + ',' + 
                  name + ')');
-
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
     if (a3cmlConfig.servers.get(new Integer(sid)) != null)
-      throw new Exception("Server id already used: " + sid);
-
+      throw new ServerIdAlreadyUsedException(
+        "Server id already used: " + sid);
+    
     A3CMLDomain domain = 
         (A3CMLDomain) a3cmlConfig.getDomain(domainName);
-
+    
     A3CMLPServer server = new A3CMLPServer(
       (short)sid,
       name,
@@ -188,11 +192,6 @@ public class ServerConfigHelper {
     server.addNetwork(network);
     domain.addServer(server);
     server.domain = domainName;
-
-    A3CMLService service = new A3CMLService(
-      "org.objectweb.joram.mom.proxies.ConnectionManager",
-      "root root");
-    server.addService(service);
 
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
     a3cmlConfig.configure((A3CMLPServer) root);
@@ -213,11 +212,10 @@ public class ServerConfigHelper {
       }
     }
 
-    // commit changes
-    commitChanges();
+    if (autoCommit) commit();
   }
 
-  public static void removeServer(int sid) 
+  public void removeServer(int sid) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -258,14 +256,62 @@ public class ServerConfigHelper {
           sd.domain = null;
         }
       }
-      
-      // commit changes
-      commitChanges();
+
+      if (autoCommit) commit();
     }
     //else do nothing (don't remove the local server)
   }
 
-  public static void commitChanges() throws Exception {
+  public void addService(int sid,
+                         String className, 
+                         String args) 
+    throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ServerConfigHelper.addService(" + 
+                 sid + ',' + className + ',' + args + ')');
+    A3CMLConfig a3cmlConfig = AgentServer.getConfig();
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)sid);
+    A3CMLService a3cmlService = new A3CMLService(className, args);
+    a3cmlServer.addService(a3cmlService);
+    
+    if (sid == AgentServer.getServerId()) {
+      try {
+        ServiceManager.register(className, args);
+        ServiceDesc desc = 
+          (ServiceDesc) ServiceManager.manager.registry.get(
+            className);
+        if (! desc.running) {
+          ServiceManager.start(desc);
+        }
+      } catch (Exception exc) {
+        a3cmlServer.removeService(className);
+      }
+    }
+
+    if (autoCommit) commit();
+  }
+
+  public void removeService(int sid,
+                            String className) 
+    throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ServerConfigHelper.addService(" + 
+                 sid + ',' + className + ')');
+    A3CMLConfig a3cmlConfig = AgentServer.getConfig();
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)sid);
+    
+    if (sid == AgentServer.getServerId()) {
+      ServiceManager.stop(className);
+    }
+
+    a3cmlServer.removeService(className);
+
+    if (autoCommit) commit();
+  }
+
+  public void commit() throws Exception {
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
     if (AgentServer.getTransaction() instanceof 
         fr.dyade.aaa.util.NullTransaction) {
@@ -287,6 +333,12 @@ public class ServerConfigHelper {
     }
   }
 
+  public static class ServerIdAlreadyUsedException extends Exception {
+    public ServerIdAlreadyUsedException(String info) {
+      super(info);
+    }
+  }
+  
   public static class NameAlreadyUsedException extends Exception {
     public NameAlreadyUsedException(String info) {
       super(info);
