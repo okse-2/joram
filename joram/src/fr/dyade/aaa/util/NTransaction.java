@@ -54,6 +54,15 @@ public final class NTransaction implements Transaction {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   static int LogFileSize = 16 * Mb;
+  /**
+   *  Number of pooled operation, by default 1000.
+   *  This value can be adjusted for a particular server by setting
+   * <code>NTLogThresholdOperation</code> specific property.
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  static int LogThresholdOperation = 1000;
 
   /** Log context associated with each Thread using NTransaction. */
   private class Context {
@@ -98,7 +107,8 @@ public final class NTransaction implements Transaction {
                                            LogMemoryCapacity).intValue();
     LogFileSize = Integer.getInteger("NTLogFileSize",
                                      LogFileSize /Mb).intValue() *Mb;
-
+    LogThresholdOperation = Integer.getInteger("NTLogThresholdOperation",
+                                               LogThresholdOperation).intValue();
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())
@@ -153,9 +163,69 @@ public final class NTransaction implements Transaction {
     setPhase(RUN);
   }
 
-  // Be careful: only used in Server 
-  public final String[] getList(String prefix) {
-    return dir.list(new StartWithFilter(prefix));
+  /**
+   *  Returns an array of strings naming the persistent objects denoted by
+   * a name that satisfy the specified prefix. Each string is an object name.
+   * 
+   *
+   * @param prefix	the prefix
+   * @return		An array of strings naming the persistent objects
+   *		 denoted by a name that satisfy the specified prefix. The
+   *		 array will be empty if no names match.
+   */
+  public final synchronized String[] getList(String prefix) {
+    logmon.log(BasicLevel.DEBUG, "NTransaction, getList(" + prefix + ")");
+    String[] list1 = dir.list(new StartWithFilter(prefix));
+    if (list1 == null) list1 = new String[0];
+    for (int i=list1.length-1; i>=0; i--)
+      logmon.log(BasicLevel.DEBUG, "NTransaction, getList -> " + list1[i]);
+    Object[] list2 = logFile.log.keySet().toArray();
+    int nb = list1.length;
+    for (int i=0; i<list2.length; i++) {
+      if ((list2[i] instanceof String) &&
+          (((String) list2[i]).startsWith(prefix))) {
+        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(2) - " + list2[i]);
+        int j=0;
+        for (; j<list1.length; j++) {
+          if (list2[i].equals(list1[j])) break;
+        }
+        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(2bis) - ");
+        if (j<list1.length) {
+          // The file is already in the directory list, it must be count
+          // at most once.
+          if (((Operation) logFile.log.get(list2[i])).type == Operation.DELETE) {
+            logmon.log(BasicLevel.DEBUG, "NTransaction, getList(3) - ");
+            // The file is deleted in transaction log.
+            list1[j] = null;
+            nb -= 1;
+          }
+          list2[i] = null;
+        } else if (((Operation) logFile.log.get(list2[i])).type == Operation.SAVE) {
+            logmon.log(BasicLevel.DEBUG, "NTransaction, getList(4) - ");
+          // The file is added in transaction log
+          nb += 1;
+        } else {
+          logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5b) - " + list2[i]);
+          list2[i] = null;
+        }
+      } else {
+        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5) - " + list2[i]);
+        list2[i] = null;
+      }
+    }
+    String[] list = new String[nb];
+    logmon.log(BasicLevel.DEBUG, "NTransaction, getList nb= " + nb);
+    for (int i=list1.length-1; i>=0; i--) {
+      logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5)= " + list1[i]);
+      if (list1[i] != null) list[--nb] = list1[i];
+    }
+    for (int i=list2.length-1; i>=0; i--) {
+      logmon.log(BasicLevel.DEBUG, "NTransaction, getList(6)= " + list2[i]);
+      if (list2[i] != null) list[--nb] = (String) list2[i];
+    }
+        
+    return list;
+//     return list1;
   }
 
   public final void save(Serializable obj, String name) throws IOException {
@@ -696,5 +766,114 @@ public final class NTransaction implements Transaction {
       if (logmon.isLoggable(BasicLevel.INFO))
         logmon.log(BasicLevel.INFO, "NTransaction, exits.");
     }
+  }
+}
+
+final class Operation implements Serializable {
+  static final int SAVE = 1;
+  static final int DELETE = 2;
+  static final int COMMIT = 3;
+  static final int END = 127;
+ 
+  int type;
+  String dirName;
+  String name;
+  byte[] value;
+
+  private Operation(int type, String dirName, String name, byte[] value) {
+    this.type = type;
+    this.dirName = dirName;
+    this.name = name;
+    this.value = value;
+  }
+
+  /**
+   * Returns a string representation for this object.
+   *
+   * @return	A string representation of this object. 
+   */
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",type=").append(type);
+    strbuf.append(",dirName=").append(dirName);
+    strbuf.append(",name=").append(name);
+    strbuf.append(')');
+    
+    return strbuf.toString();
+  }
+
+  private static Pool pool = null;
+
+  static {
+    pool = new Pool("Ntransaction$Operation",
+                    Integer.getInteger("NTLogThresholdOperation",
+                                       NTransaction.LogThresholdOperation).intValue());
+  }
+
+  static Operation alloc(int type, String dirName, String name) {
+    return alloc(type, dirName, name, null);
+  }
+
+  static Operation alloc(int type,
+                         String dirName, String name,
+                         byte[] value) {
+    Operation op = null;
+    
+    try {
+      op = (Operation) pool.allocElement();
+    } catch (Exception exc) {
+      return new Operation(type, dirName, name, value);
+    }
+    op.type = type;
+    op.dirName = dirName;
+    op.name = name;
+    op.value = value;
+    return op;
+  }
+
+  void free() {
+    /* to let gc do its work */
+    dirName = null;
+    name = null;
+    value = null;
+    pool.freeElement(this);
+  }
+}
+
+final class OperationKey {
+  static Object newKey(String dirName, String name) {
+    if (dirName == null) {
+      return name;
+    } else {
+      return new OperationKey(dirName, name);
+    }
+  }
+
+  private String dirName;
+  private String name;
+
+  private OperationKey(String dirName,
+                       String name) {
+    this.dirName = dirName;
+    this.name = name;
+  }
+
+  public int hashCode() {
+    // Should compute a specific one.
+    return dirName.hashCode();
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj instanceof OperationKey) {
+      OperationKey opk = (OperationKey)obj;
+      if (opk.name.length() != name.length()) return false;
+      if (opk.dirName.length() != dirName.length()) return false;
+      if (!opk.dirName.equals(dirName)) return false;            
+      return opk.name.equals(name);
+    }
+    return false;
   }
 }
