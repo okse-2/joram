@@ -32,7 +32,7 @@ import fr.dyade.aaa.agent.conf.*;
  * create/remove domain, network, server and set/unset property or
  * jvm argument in A3CMLConfig (configuration).
  *
- * @see AgentAdmin
+ * @see fr.dyade.aaa.agent.AgentAdmin
  * @see AdminCmd
  * @see A3CMLConfig
  */

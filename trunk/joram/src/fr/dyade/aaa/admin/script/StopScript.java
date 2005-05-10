@@ -31,8 +31,8 @@ import fr.dyade.aaa.agent.conf.*;
  * StopScript contain a StopAdminCmd vector to stop networks, servers
  * and services.
  *
- * @see AgentAdmin
- * @see AgentServer
+ * @see fr.dyade.aaa.agent.AgentAdmin
+ * @see fr.dyade.aaa.agent.AgentServer
  * @see StopAdminCmd
  * @see A3CMLConfig
  */
