@@ -29,8 +29,12 @@ import java.io.*;
 public class Notification implements Serializable, Cloneable {
   static final long serialVersionUID = 3007264908616389613L;
 
-  /** True if the notification is persistent, false otherwise. */
-  protected boolean persistent = true;
+  /**
+   * True if the notification is persistent, false otherwise. By default, this
+   * field is set to true during object creation and disk loading. This field
+   * is carry by network protocol.
+   */
+  protected transient boolean persistent = true;
 
   /**
    * True if the notification is detachable, false otherwise. A detachable

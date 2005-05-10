@@ -97,7 +97,7 @@ final class Message implements Serializable {
     return strbuf;
   }
 
-  private byte iobuf[] = new byte [25];
+  transient private byte iobuf[] = new byte [25];
 
   /**
    *  The writeObject method is responsible for writing the state of the
@@ -237,6 +237,8 @@ final class Message implements Serializable {
       msg.not.detachable = true;
       msg.not.detached = false;
     }
+    msg.not.persistent = true;
+
     return msg;
   }
 

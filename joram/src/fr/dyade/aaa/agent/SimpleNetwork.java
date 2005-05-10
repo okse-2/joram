@@ -557,11 +557,13 @@ public class SimpleNetwork extends StreamNetwork {
               ((iobuf[25] & 0xFF) << 16) +
               ((iobuf[26] & 0xFF) <<  8) +
               ((iobuf[27] & 0xFF) <<  0);
-            // Reads if notification is detachable
-            boolean detachable = (iobuf[28] == 1) ? true : false;
+            // Reads notification attributes
+            boolean persistent = ((iobuf[28] & 0x01) == 0x01) ? true : false;
+            boolean detachable = ((iobuf[28] & 0x10) == 0x10) ? true : false;
             // Reads notification object
             ois = new ObjectInputStream(is);
             msg.not = (Notification) ois.readObject();
+            msg.not.persistent = persistent;
             msg.not.detachable = detachable;
             msg.not.detached = false;
 
@@ -657,8 +659,9 @@ public class SimpleNetwork extends StreamNetwork {
       buf[25] = (byte) (msg.stamp >>>  16);
       buf[26] = (byte) (msg.stamp >>>  8);
       buf[27] = (byte) (msg.stamp >>>  0);
-      // Writes if notification is detachable
-      buf[28] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
+      // Writes notification attributes
+      buf[28] = (byte) ((msg.not.persistent?0x01:0) |
+                        (msg.not.detachable?0x10:0));
       // Be careful, the stream header is hard-written in buf[29..32]
       count = 33;
 
