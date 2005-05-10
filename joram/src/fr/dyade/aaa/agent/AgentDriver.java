@@ -35,9 +35,9 @@ public abstract class AgentDriver extends Driver {
   /**
    * Constructor.
    *
-   * @param proxy	id of associated proxy agent
-   * @param mq		queue of <code>Notification</code> objects to be sent
-   * @param out		stream to write notifications to
+   * @param id		internal id of driver
+   * @param proxy	Reference to the associated proxy agent
+   * @param mq		Queue of <code>Notification</code> objects to be sent
    */
   protected AgentDriver(int id, Agent proxy, Queue mq) {
     super(id);
@@ -93,15 +93,13 @@ public abstract class AgentDriver extends Driver {
    * @exception Exception
    *	unspecialized exception
    */
-  protected abstract void react(Notification m) throws Exception;
+  protected abstract void react(Notification not) throws Exception;
 
   /**
    * Finalizes the driver.
    *
    * Reports driver end to the proxy agent, with a <code>DriverDone</code>
    * notification.
-   *
-   * @param not		notification to react to
    */
   protected void end() {
     // report end to proxy

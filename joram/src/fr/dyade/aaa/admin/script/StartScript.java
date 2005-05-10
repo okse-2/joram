@@ -31,11 +31,11 @@ import fr.dyade.aaa.agent.conf.*;
  * StartScript contain a StartAdminCmd vector and a ServerDesc hashtable.
  * It permits to start networks, servers and services.
  *
- * @see AgentAdmin
- * @see AgentServer
+ * @see fr.dyade.aaa.agent.AgentAdmin
+ * @see fr.dyade.aaa.agent.AgentServer
  * @see StartAdminCmd
  * @see A3CMLConfig
- * @see ServerDesc
+ * @see fr.dyade.aaa.agent.ServerDesc
  */
 public class StartScript implements Serializable {
   /** vector of StartAdminCmd */

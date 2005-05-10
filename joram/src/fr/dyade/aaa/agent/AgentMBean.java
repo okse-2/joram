@@ -41,8 +41,7 @@ public interface AgentMBean {
   /** 
    * Tests if the agent is pinned in memory.
    *
-   * @return true if this agent is a pinned in memory; false otherwise.
-   * @see fixed
+   * @return true if this agent is pinned in memory; false otherwise.
    */
   public boolean isFixed();
 
