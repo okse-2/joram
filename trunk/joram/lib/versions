@@ -11,6 +11,6 @@ jta.jar                 1.0.1
 kxml.jar                ?
 mail.jar                1.3
 midpapi.jar             ?
-ow_monolog.jar          1.8
+ow_monolog.jar          1.9.1
 soap.jar                ?
 soap.war                ?
