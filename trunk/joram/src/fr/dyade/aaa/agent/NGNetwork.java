@@ -784,8 +784,9 @@ public class NGNetwork extends StreamNetwork {
         count = 28;
 
         if (msg.not != null) {
-          // Writes if notification is detachable
-          buf[28] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
+          // Writes notification attributes
+          buf[28] = (byte) ((msg.not.persistent?0x01:0) |
+                            (msg.not.detachable?0x10:0));
           // Be careful, the stream header is hard-written in buf[29..32]
           count = 33;
 
@@ -1031,12 +1032,14 @@ public class NGNetwork extends StreamNetwork {
 
       Message readMessage() throws Exception {
         if (length > 28) {
-          // Reads if notification is detachable
-          boolean detachable = (buf[28] == 1) ? true : false;
+          // Reads notification attributes
+          boolean persistent = ((buf[28] & 0x01) == 0x01) ? true : false;
+          boolean detachable = ((buf[28] & 0x10) == 0x10) ? true : false;
           pos = 1;
           // Reads notification object
           ObjectInputStream ois = new ObjectInputStream(this);
           msg.not = (Notification) ois.readObject();
+          msg.not.persistent = persistent;
           msg.not.detachable = detachable;
           msg.not.detached = false;
         } else {

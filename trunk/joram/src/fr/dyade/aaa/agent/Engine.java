@@ -383,7 +383,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       for (int i=0; i<fixedAgentIdList.size(); ) {
 	try {
           if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.ERROR,
+            logmon.log(BasicLevel.DEBUG,
                        getName() + ", loads fixed agent" +
                        fixedAgentIdList.elementAt(i));
 	  Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
@@ -443,6 +443,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    *	unspecialized exception
    */
   final void createAgent(Agent agent) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", creates: " + agent);
+
     if (agent.isFixed()) {
       // Subscribe the agent in pre-loading list.
       addFixedAgentId(agent.getId());
@@ -496,7 +499,11 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (agents.size() < (NbMaxAgents + fixedAgentIdList.size()))
       return;
 
-    logmon.log(BasicLevel.WARN, getName() + ", garbaged");
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
+                 getName() + ", garbage: " + agents.size() +
+                 '/' + NbMaxAgents + '+' + fixedAgentIdList.size() +
+                 ' ' + now);
     long deadline = now - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
@@ -513,6 +520,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         ag[i] = null;
       }
     }
+
+    logmon.log(BasicLevel.INFO,
+               getName() + ", garbage: " + agents.size());
   }
 
   /**
@@ -539,7 +549,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
   /**
    *   Method used for debug and monitoring. It returns an enumeration
-   * of all agents loaded.
+   * of all agents loaded in memory.
    */
   AgentId[] getLoadedAgentIdlist() {
     AgentId list[] = new AgentId[agents.size()];
@@ -549,10 +559,25 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     return list;
   }
 
+  /**
+   *  Returns a string representation of the specified agent.
+   *
+   * @param id	The string representation of the agent's unique identification.
+   * @return	A string representation of the specified agent.
+   * @see 	Engine#dumpAgent(AgentId)
+   */
   public String dumpAgent(String id) throws Exception {
     return dumpAgent(AgentId.fromString(id));
   }
 
+  /**
+   *  Returns a string representation of the specified agent. If the agent
+   * is not present it is loaded in memory, be careful it is not initialized
+   * (agentInitialize) nor cached in agents vector.
+   *
+   * @param id	The agent's unique identification.
+   * @return	A string representation of specified agent.
+   */
   public String dumpAgent(AgentId id)
     throws IOException, ClassNotFoundException, Exception {
     Agent ag = (Agent) agents.get(id);
@@ -589,10 +614,14 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   final Agent load(AgentId id)
     throws IOException, ClassNotFoundException, Exception {
     now += 1;
-    Agent ag = (Agent) agents.get(id);
-    if (ag == null)  return reload(id);
 
+    Agent ag = (Agent) agents.get(id);
+    if (ag == null)  {
+      ag = reload(id);
+      garbage();
+    }
     ag.last = now;
+
     return ag;
   }
 
@@ -640,7 +669,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     } else {
       throw new UnknownAgentException();
     }
-    ag.last = now;
+
     return ag;
   }
 

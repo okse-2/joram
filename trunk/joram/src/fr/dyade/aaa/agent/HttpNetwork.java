@@ -672,13 +672,15 @@ public class HttpNetwork extends StreamNetwork {
           ((buf[21] & 0xFF) << 16) +
           ((buf[22] & 0xFF) <<  8) +
           ((buf[23] & 0xFF) <<  0);
-        // Reads if notification is detachable
-        boolean detachable = (buf[24] == 1) ? true : false;
+        // Reads notification attributes
+        boolean persistent = ((buf[24] & 0x01) == 0x01) ? true : false;
+        boolean detachable = ((buf[24] & 0x10) == 0x10) ? true : false;
 
         readFully(is, msgLen-37);
         // Reads notification object
         ObjectInputStream ois = new ObjectInputStream(this);
         msg.not = (Notification) ois.readObject();
+        msg.not.persistent = persistent;
         msg.not.detachable = detachable;
         msg.not.detached = false;
 
@@ -765,8 +767,9 @@ public class HttpNetwork extends StreamNetwork {
         buf[33] = (byte) (msg.stamp >>>  16);
         buf[34] = (byte) (msg.stamp >>>  8);
         buf[35] = (byte) (msg.stamp >>>  0);
-        // Writes if notification is detachable
-        buf[36] = (msg.not.detachable) ? ((byte) 1) : ((byte) 0);
+        // Writes notification attributes
+        buf[36] = (byte) ((msg.not.persistent?0x01:0) |
+                          (msg.not.detachable?0x10:0));
         // Be careful, the stream header is hard-written in buf[29..32]
         count = 41;
 
