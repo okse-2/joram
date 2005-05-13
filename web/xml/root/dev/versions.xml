@@ -15,7 +15,7 @@
       <p>This is a maintenance release, the last one before version 4.3. It is available in the CVS repository with tag JORAM_4_2_3. This maintenance release provides the following fixes and changes compare to the 4.2.0 version (bug and fixes of maintenance release 4.2.1 and 4.2.2 are hereafter included)</p>
       <s2 name="Bug fixes">
 	<ul>
-	  <li>JMS Client API: Fix bug in ClientSubscription: Avoid multiples denies. Fix bug in MessageConsumerListener: Avoid messages buffering in queue mode.</li>
+	  <li>JMS Client API: Fix bug in ClientSubscription by avoiding multiple denies, fix bug in MessageConsumerListener by avoiding messages buffering in queue mode.</li>
 	  <li>JMS Messages :  Fix bug in Message.convertJMSMessage : no JMSException thrown if optional header (JMSX) are set in a non Joram message, just ignore.</li>
 	  <li>Transactions and XA: Fix bug in Session setTransacted (deadlock) come from TX SUSPEND, add Joram version in start of JoramAdapter, fix bug in XAResourceMngr (deadlock).</li>
 	  <li>Packaging:   change traces in connector and add project name "joram" in build.xml, add JGroups library in shipping.</li>
