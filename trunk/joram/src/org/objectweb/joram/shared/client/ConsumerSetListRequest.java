@@ -106,7 +106,8 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
     if (selector != null)
       h.put("selector",selector);
     h.put("queueMode",new Boolean(queueMode));
-    h.put("msgIdsToAck", msgIdsToAck);
+    if (msgIdsToAck != null)
+      h.put("msgIdsToAck", msgIdsToAck);
     h.put("msgCount", new Integer(msgCount));
     return h;
   }
