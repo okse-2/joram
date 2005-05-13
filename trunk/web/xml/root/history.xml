@@ -16,12 +16,12 @@
 	<subtitle>May 13, 2005: JORAM 4.2.3 maintenanece release and 4.3 preview</subtitle>
 	<p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
            bug fixes, their complete list is available in the 
-           <a href="dev/version.html">Code Update</a> page. </p>
+           <a href="dev/versions.html">Code Update</a> page. </p>
 	<p>The next JORAM 4.3 version will include new features :</p>
 	<ul>
 	  <li>JMX management improved and extended</li>
 	  <li>Performance improvments</li>
-	  <li>Handling of large message transmission( called swap out mode)</li>
+	  <li>Handling of large message transmission (called swap out mode)</li>
 	  <li>Complete SSL support with handling of encrypted client to server communications</li>
 	</ul>
 
