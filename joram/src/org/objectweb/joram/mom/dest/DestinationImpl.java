@@ -612,7 +612,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
 
     if (destDmqId != null &&
-        destDmqId.equals(destId)) {
+        ! destDmqId.equals(destId)) {
       Channel.sendTo(destDmqId, deadMessages);
     }
     // Else it means that the dead message queue is
