@@ -49,26 +49,20 @@ class MessageConsumerListener implements ReplyListener {
   public static final String QUEUE_MSG_COUNT = 
       "org.objectweb.joram.client.jms.queueMsgCount";
 
+  public static final String LAZY_ACK = 
+      "org.objectweb.joram.client.jms.lazyAck";
+
   public static final String TOPIC_ACK_COUNT = 
       "org.objectweb.joram.client.jms.topicAckCount";
-
-  public static final String PENDING_MSG_MAX =
-      "org.objectweb.joram.client.jms.pendingMsgMax";
-
-  public static final String PENDING_MSG_MIN =
-      "org.objectweb.joram.client.jms.pendingMsgMin";
 
   private static int queueMsgCount =
       Integer.getInteger(QUEUE_MSG_COUNT, 1).intValue();
   
   private static int topicAckCount = 
-      Integer.getInteger(TOPIC_ACK_COUNT, 100).intValue();
+      Integer.getInteger(TOPIC_ACK_COUNT, 1).intValue();
 
-  private static int pendingMsgMax = 
-      Integer.getInteger(PENDING_MSG_MAX, Integer.MAX_VALUE).intValue();
-
-  private static int pendingMsgMin = 
-      Integer.getInteger(PENDING_MSG_MIN, 0).intValue();
+  private static boolean lazyAck = 
+      Boolean.getBoolean(LAZY_ACK);
 
   /**
    * Status of the message consumer listener.
@@ -108,18 +102,15 @@ class MessageConsumerListener implements ReplyListener {
 
   private Vector messagesToAck;
 
-  private volatile boolean passive;
-
   MessageConsumerListener(MessageConsumer consumer,
                           Session session,
                           MessageListener listener) {
     this.consumer = consumer;
     this.session = session;
     this.listener = listener;
-    messagesToAck = new Vector();
+    messagesToAck = new Vector(0);
     requestId = -1;
     setStatus(Status.INIT);
-    passive = false;
   }
 
   private void setStatus(int status) {
@@ -148,7 +139,7 @@ class MessageConsumerListener implements ReplyListener {
 
   private void subscribe() throws JMSException {
     String[] toAck = null;
-    if (messagesToAck.size() > 0) {
+    if (lazyAck && messagesToAck.size() > 0) {
       toAck = new String[messagesToAck.size()];
       messagesToAck.copyInto(toAck);
       messagesToAck.clear();
@@ -186,7 +177,9 @@ class MessageConsumerListener implements ReplyListener {
       
       session.getRequestMultiplexer().abortRequest(requestId);
 
-      acknowledge(0);
+      if (lazyAck) {
+	  acknowledge(0);
+      }
 
       setStatus(Status.CLOSE);
     }
@@ -245,23 +238,8 @@ class MessageConsumerListener implements ReplyListener {
       if (consumer.queueMode) {
         return true;
       } else {
-        if (session.isAutoAck()) {
+        if (lazyAck && session.isAutoAck()) {
           acknowledge(topicAckCount);
-        }
-        
-        try {
-          int pendingMessageCount = session.getPendingMessageCount();
-          if (! passive && pendingMessageCount > 
-              pendingMsgMax) {
-            session.getRequestMultiplexer().sendRequest(
-              new ActivateConsumerRequest(
-                consumer.targetName, false));
-            passive = true;
-          }
-        } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgClient.log(
-              BasicLevel.ERROR, "", exc); 
         }
         return false;
       }
@@ -318,11 +296,6 @@ class MessageConsumerListener implements ReplyListener {
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, " -> consumer.onMessage(" + 
           msg + ") returned");
-      if (session.isAutoAck()) {
-        synchronized (this) {
-          messagesToAck.addElement(msg.getJMSMessageID());
-        }
-      }
     } catch (RuntimeException re) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
@@ -338,17 +311,32 @@ class MessageConsumerListener implements ReplyListener {
         notifyAll();
       }
     }
+  }
 
-    if (! consumer.queueMode) {
-      int pendingMessageCount = 
-        session.getPendingMessageCount();
-      if (passive && pendingMessageCount <
-          pendingMsgMin) {
-        session.getRequestMultiplexer().sendRequest(
-          new ActivateConsumerRequest(
-            consumer.targetName, true));
-        passive = false;
+  void ack(String targetName,
+	   String msgId,
+	   boolean queueMode) throws JMSException {
+    if (lazyAck) {
+      synchronized (this) {
+	messagesToAck.addElement(msgId);
       }
+    } else {
+      ConsumerAckRequest ack = new ConsumerAckRequest(
+        targetName, queueMode);
+      ack.addId(msgId);
+      session.getRequestMultiplexer().sendRequest(ack);
     }
+  }
+
+  void activateMessageInput() throws JMSException {
+    session.getRequestMultiplexer().sendRequest(
+      new ActivateConsumerRequest(
+        consumer.targetName, true));
+  }
+
+  void passivateMessageInput() throws JMSException {
+    session.getRequestMultiplexer().sendRequest(
+      new ActivateConsumerRequest(
+	consumer.targetName, false));
   }
 }

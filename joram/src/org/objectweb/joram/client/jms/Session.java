@@ -49,6 +49,18 @@ public class Session implements javax.jms.Session {
   public static boolean receiveAck =
       Boolean.getBoolean(RECEIVE_ACK);
 
+ public static final String PENDING_MSG_MAX =
+     "org.objectweb.joram.client.jms.pendingMsgMax";
+
+  public static final String PENDING_MSG_MIN =
+      "org.objectweb.joram.client.jms.pendingMsgMin";
+
+  private static int pendingMsgMax = 
+      Integer.getInteger(PENDING_MSG_MAX, Integer.MAX_VALUE).intValue();
+
+  private static int pendingMsgMin = 
+      Integer.getInteger(PENDING_MSG_MIN, 0).intValue();
+
   /**
    * Status of the session
    */
@@ -263,6 +275,13 @@ public class Session implements javax.jms.Session {
    * The current active control thread.
    */
   private Thread singleThreadOfControl;
+
+  /**
+   * Status boolean indicating whether
+   * the message input is activated or not
+   * for the message listeners.
+   */
+  private boolean passiveMsgInput;
 
   /**
    * Opens a session.
@@ -1638,10 +1657,17 @@ public class Session implements javax.jms.Session {
     repliesIn.push(
       new MessageListenerContext(
         consumerListener, messages));
-  }
 
-  int getPendingMessageCount() {
-    return repliesIn.size();
+    if (! passiveMsgInput && repliesIn.size() >
+	pendingMsgMax) {
+      try {
+        passivateMessageInput();
+      } catch (JMSException exc) {
+	if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+	  JoramTracing.dbgClient.log(
+	    BasicLevel.ERROR, "", exc);
+      }
+    }
   }
 
   /**
@@ -1780,7 +1806,14 @@ public class Session implements javax.jms.Session {
         doRecover();
         recover = false;
       }
-    } 
+    } else {
+      if (autoAck) {
+	consumerListener.ack(
+	  consumer.targetName, 
+	  momMsg.getIdentifier(), 
+	  consumer.queueMode);
+      }
+    }
   }
 
   /**
@@ -1893,6 +1926,24 @@ public class Session implements javax.jms.Session {
     return autoAck;
   }
 
+  private void activateMessageInput() throws JMSException {
+    for (int i = 0; i < consumers.size(); i++) {
+      MessageConsumer cons = 
+        (MessageConsumer) consumers.elementAt(i);
+      cons.activateMessageInput();
+    }
+    passiveMsgInput = false;
+  }
+
+  private void passivateMessageInput() throws JMSException {
+    for (int i = 0; i < consumers.size(); i++) {
+      MessageConsumer cons = 
+        (MessageConsumer) consumers.elementAt(i);
+      cons.passivateMessageInput();
+    }
+    passiveMsgInput = true;
+  }
+
   /**
    * The <code>SessionCloseTask</code> class is used by non-XA transacted
    * sessions for taking care of closing them if they tend to be pending,
@@ -1942,6 +1993,17 @@ public class Session implements javax.jms.Session {
             JoramTracing.dbgClient.log(BasicLevel.WARN, "", exc);
           return;
         }
+
+	if (passiveMsgInput && repliesIn.size() <
+	    pendingMsgMin) {
+	  try {
+	    activateMessageInput();
+	  } catch (JMSException exc) {
+	    if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+              JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+	  }
+	}
+
         canStop = false;
         try {
           onMessages(ctx);
