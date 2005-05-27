@@ -401,4 +401,14 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
 
     setStatus(Status.CLOSE);
   }
+
+  void activateMessageInput() throws JMSException {
+    if (mcl != null) 
+      mcl.activateMessageInput();
+  }
+
+  void passivateMessageInput() throws JMSException {
+    if (mcl != null) 
+      mcl.passivateMessageInput();
+  }
 }
