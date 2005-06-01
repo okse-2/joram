@@ -826,9 +826,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    stamp(msg);
-    msg.save();
-
+    if (msg.isPersistent()) {
+      stamp(msg);
+      msg.save();
+    }
     qin.push(msg);
   }
 
