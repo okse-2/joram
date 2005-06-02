@@ -385,7 +385,7 @@ public class A3CML {
                    exc);
     }
 
-    if (a3config.servers == null)
+    if ((a3config == null) || (a3config.servers == null))
       throw new Exception("Empty configuration \"" + cfgName +
                           "\" in configuration file.");
 
