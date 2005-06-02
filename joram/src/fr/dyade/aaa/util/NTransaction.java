@@ -45,6 +45,16 @@ public final class NTransaction implements Transaction {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   static int LogMemoryCapacity = 4096;
+
+  /**
+   * Returns the initial capacity of global in memory log (by default 4096).
+   *
+   * @return The initial capacity of global in memory log.
+   */
+  public int getLogMemoryCapacity() {
+    return LogMemoryCapacity;
+  }
+
   /**
    *  Size of disk log in Mb, by default 16Mb.
    *  This value can be adjusted for a particular server by setting
@@ -54,6 +64,25 @@ public final class NTransaction implements Transaction {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   static int LogFileSize = 16 * Mb;
+
+  /**
+   * Returns the size of disk log in Mb, by default 16Mb.
+   *
+   * @return The size of disk log in Mb.
+   */
+  public int getLogFileSize() {
+    return LogFileSize/Mb;
+  }
+
+  /**
+   * Sets the size of disk log in Mb. Currently, this method have no effect.
+   *
+   * @param size The size of disk log in Mb.
+   */
+  public void setLogFileSize(int size) {
+    if (size > 0) LogFileSize = size *Mb;
+  }
+
   /**
    *  Number of pooled operation, by default 1000.
    *  This value can be adjusted for a particular server by setting
@@ -63,6 +92,33 @@ public final class NTransaction implements Transaction {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   static int LogThresholdOperation = 1000;
+
+  /**
+   * Returns the pool size for <code>operation</code> objects, by default 1000.
+   *
+   * @return The pool size for <code>operation</code> objects.
+   */
+  public int getLogThresholdOperation() {
+    return LogThresholdOperation;
+  }
+
+  /**
+   * Returns the number of commit operation since starting up.
+   *
+   * @return The number of commit operation.
+   */
+  public int getCommitCount() {
+    return logFile.commitCount;
+  }
+
+  /**
+   * Returns the number of garbage operation since starting up.
+   *
+   * @return The number of garbage operation.
+   */
+  public int getGarbageCount() {
+    return logFile.garbageCount;
+  }
 
   /** Log context associated with each Thread using NTransaction. */
   private class Context {
@@ -92,6 +148,11 @@ public final class NTransaction implements Transaction {
 
   public NTransaction() {}
 
+  /**
+   * Tests if the Transaction component is persistent.
+   *
+   * @return true.
+   */
   public boolean isPersistent() {
     return true;
   }
@@ -107,8 +168,7 @@ public final class NTransaction implements Transaction {
                                            LogMemoryCapacity).intValue();
     LogFileSize = Integer.getInteger("NTLogFileSize",
                                      LogFileSize /Mb).intValue() *Mb;
-    LogThresholdOperation = Integer.getInteger("NTLogThresholdOperation",
-                                               LogThresholdOperation).intValue();
+
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())
@@ -145,6 +205,15 @@ public final class NTransaction implements Transaction {
 
   public final File getDir() {
     return dir;
+  }
+
+  /**
+   * Returns the path of persistence directory.
+   *
+   * @return The path of persistence directory.
+   */
+  String getPersistenceDir() {
+    return dir.getPath();
   }
 
   private final void setPhase(int newPhase) {
@@ -473,14 +542,28 @@ public final class NTransaction implements Transaction {
     
     logFile.stop();
 
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, stopped");
+    if (logmon.isLoggable(BasicLevel.INFO)) {
+      logmon.log(BasicLevel.INFO,
+                 "NTransaction, stopped: " +
+                 "garbage=" + logFile.garbageCount + ", " +
+                 "commit=" + logFile.commitCount);
+    }
   }
 
   /**
    *
    */
   static final class LogFile extends ByteArrayOutputStream {
+    /**
+     * Number of commit operation since starting up.
+     */
+    int commitCount = 0;
+
+    /**
+     * Number of garbage operation since starting up.
+     */
+    int garbageCount = 0;
+
     /**
      * Log of all operations already commited but not reported on disk.
      */
@@ -492,25 +575,28 @@ public final class NTransaction implements Transaction {
 
     /** Root directory of transaction storage */
     private File dir = null;
+    /** Coherency lock filename */
+    static private final String LockPathname = "lock";
     /** Coherency lock file */
-    static private final String LOCK = "lock";
-
     private File lockFile = null;
 
     LogFile(File dir) throws IOException {
-      super(1 * Kb);
+      super(4 * Kb);
       this.dir = dir;
 
-      lockFile = new File(dir, LOCK);
-      if (! lockFile.createNewFile()) {
-        logmon.log(BasicLevel.FATAL,
-                   "NTransaction.init(): " +
-                   "Either the server is already running, " + 
-                   "either you have to remove lock file: " +
-                   lockFile.getAbsolutePath());
-        throw new IOException("Transaction already running.");
+      boolean nolock = Boolean.getBoolean("NTNoLockFile");
+      if (! nolock) {
+        lockFile = new File(dir, LockPathname);
+        if (! lockFile.createNewFile()) {
+          logmon.log(BasicLevel.FATAL,
+                     "NTransaction.init(): " +
+                     "Either the server is already running, " + 
+                     "either you have to remove lock file: " +
+                     lockFile.getAbsolutePath());
+          throw new IOException("Transaction already running.");
+        }
+        lockFile.deleteOnExit();
       }
-      lockFile.deleteOnExit();
 
       //  Search for old log file, then apply all committed operation,
       // finally cleans it.
@@ -576,6 +662,7 @@ public final class NTransaction implements Transaction {
 
         logFile = new RandomAccessFile(logFilePN, "rwd");
         garbage();
+        logFile.setLength(LogFileSize);
       } else {
         logFile = new RandomAccessFile(logFilePN, "rwd");
         logFile.setLength(LogFileSize);
@@ -624,6 +711,11 @@ public final class NTransaction implements Transaction {
      * Reports all buffered operations in logs.
      */
     void commit(Hashtable ctxlog) throws IOException {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
+
+      commitCount += 1;
+      
       Operation op = null;
       for (Enumeration e = ctxlog.elements(); e.hasMoreElements(); ) {
         op = (Operation) e.nextElement();
@@ -648,7 +740,7 @@ public final class NTransaction implements Transaction {
       write(Operation.END);
 
       logFile.seek(current);
-      logFile.write(buf);
+      logFile.write(buf, 0, count);
 
       logFile.seek(current -1);
       logFile.write(Operation.COMMIT);
@@ -666,7 +758,9 @@ public final class NTransaction implements Transaction {
      */
     private final void garbage() throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction.garbage()");
+        logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.garbage()");
+
+      garbageCount += 1;
 
       Operation op = null;
       for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
@@ -675,7 +769,7 @@ public final class NTransaction implements Transaction {
         if (op.type == Operation.SAVE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "NTransaction, Save (" + op.dirName + ',' + op.name + ')');
+                       "NTransaction, LogFile.Save (" + op.dirName + ',' + op.name + ')');
         
           File file;
           if (op.dirName == null) {
@@ -695,7 +789,7 @@ public final class NTransaction implements Transaction {
         } else if (op.type == Operation.DELETE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "NTransaction, Delete (" + op.dirName + ',' + op.name + ')');
+                       "NTransaction, LogFile.Delete (" + op.dirName + ',' + op.name + ')');
 
           File file;
           boolean deleted;
@@ -718,6 +812,11 @@ public final class NTransaction implements Transaction {
       //  Be careful, do not clear log before all modifications are reported
       // to disk, in order to avoid load errors.
       log.clear();
+
+//       // Fix the logFile size
+//       if (current > ((LogFileSize *12) /10)) {
+//         logFile.setLength(LogFileSize);
+//       }
 
       current = 1;
       // Cleans log file
@@ -752,12 +851,13 @@ public final class NTransaction implements Transaction {
 
       try {
         garbage();
+        logFile.setLength(LogFileSize);
         logFile.close();
       } catch (IOException exc) {
         logmon.log(BasicLevel.WARN, "NTransaction, can't close logfile", exc);
       }
 
-      if (! lockFile.delete()) {
+      if ((lockFile != null) && (! lockFile.delete())) {
         logmon.log(BasicLevel.FATAL,
                    "NTransaction, - can't delete lockfile: " +
                    lockFile.getAbsolutePath());
