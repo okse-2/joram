@@ -11,14 +11,46 @@
   </properties>
 
   <body>
-    <s1 name="JORAM maintenance release 4.2.3 (May 13, 2005)">
-      <p>This is a maintenance release, the last one before version 4.3. It is available in the CVS repository with tag JORAM_4_2_3. This maintenance release provides the following fixes and changes compare to the 4.2.0 version (bug and fixes of maintenance release 4.2.1 and 4.2.2 are hereafter included)</p>
+    <s1 name="JORAM maintenance release 4.3.1 (June 3, 2005)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_1. This maintenance release provides the following fixes and changes.</p>
       <s2 name="Bug fixes">
 	<ul>
-	  <li>JMS Client API: Fix bug in ClientSubscription by avoiding multiple denies, fix bug in MessageConsumerListener by avoiding messages buffering in queue mode.</li>
-	  <li>JMS Messages :  Fix bug in Message.convertJMSMessage : no JMSException thrown if optional header (JMSX) are set in a non Joram message, just ignore.</li>
-	  <li>Transactions and XA: Fix bug in Session setTransacted (deadlock) come from TX SUSPEND, add Joram version in start of JoramAdapter, fix bug in XAResourceMngr (deadlock).</li>
-	  <li>Packaging:   change traces in connector and add project name "joram" in build.xml, add JGroups library in shipping.</li>
+	  <li>Internal transactions: NTransaction behavior with big messages. Comments added to NTransaction javadoc. 
+              Statistics added. Use of lockfile is now configurable. Optimizations in the Engine, related to stamp savings
+              for non-persistent messages.</li>
+	  <li>JMS API :  fixes in sendToDMQ method in DestinationImpl</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM 4.3 (May 17, 2005)">
+      <p>The Joram 4.3 final release is available in the CVS repository with the tag JORAM_4_3_0. 
+         It provides a lot of fixes and improvements.</p>
+      <s2 name="New features">
+	<ul>
+	  <li>extended JMX management,</li>
+	  <li>Performance improvments,</li>
+	  <li>Handling of large message transmission (called swap out mode),</li>
+	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.2.3 (May 13, 2005)">
+      <p>This is a maintenance release, the last one before version 4.3. It is available in the CVS repository 
+      with tag JORAM_4_2_3. This maintenance release provides the following fixes and changes compare to the 4.2.0 
+      version (bug and fixes of maintenance release 4.2.1 and 4.2.2 are hereafter included)</p>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>JMS Client API: Fix bug in ClientSubscription by avoiding multiple denies, fix bug in MessageConsumerListener
+               by avoiding messages buffering in queue mode.</li>
+	  <li>JMS Messages :  Fix bug in Message.convertJMSMessage : no JMSException thrown if optional header (JMSX) 
+              are set in a non Joram message, just ignore.</li>
+	  <li>Transactions and XA: Fix bug in Session setTransacted (deadlock) come from TX SUSPEND, add Joram version 
+              in start of JoramAdapter, fix bug in XAResourceMngr (deadlock).</li>
+	  <li>Packaging:   change traces in connector and add project name "joram" in build.xml, add JGroups library in 
+              shipping.</li>
 	  <li> SOAP : Bug fix: Soap encode/decode.</li>
 	</ul>
       </s2>

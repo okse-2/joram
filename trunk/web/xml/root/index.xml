@@ -14,8 +14,8 @@
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
-      <subtitle>As a standalone software, JORAM has been downloaded
-                more than 22,000 times</subtitle>
+      <subtitle>JORAM has been made available for download since May 2000.  As a standalone software, JORAM has been downloaded
+                more than 24,000 times since beginning of 2003. </subtitle>
 
       <table border="0">
 	<tr>
@@ -36,18 +36,23 @@
    
       <s2 name="Latest News">
 
-	<subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
-	<p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
-           bug fixes, their complete list is available in the 
-           <a href="dev/versions.html">Code Update</a> page. </p>
-	<p>The next JORAM 4.3 version will include new features :</p>
+	<subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
+	<p> This version includes bug fixes. You may check their detailed description in the 
+        <a href="dev/versions.html">Code Update</a> page.</p>
+
+	<subtitle>May 17, 2005: JORAM 4.3 version is released</subtitle>
+	<p>This version includes new features :</p>
 	<ul>
-	  <li>JMX management improved and extended,</li>
+	  <li>extended JMX management,</li>
 	  <li>Performance improvments,</li>
 	  <li>Handling of large message transmission (called swap out mode),</li>
 	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
 	</ul>
 
+	<subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
+	<p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
+           bug fixes, their complete list is available in the 
+           <a href="dev/versions.html">Code Update</a> page. </p>
 
 	<subtitle>March 31, 2005: JORAM 4.2 final release is available</subtitle>
 	<p>The Joram 4.2 release features high availability, enhanced management facilities and improved performances.

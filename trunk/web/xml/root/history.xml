@@ -12,6 +12,18 @@
 
   <body>
     <s1 name="JORAM History">
+	<subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
+	<p> This version includes bug fixes. You may check their detailed description in the 
+        <a href="dev/versions.html">Code Update</a> page.</p>
+
+	<subtitle>May 17, 2005: JORAM 4.3 version is released</subtitle>
+	<p>This version includes new features :</p>
+	<ul>
+	  <li>extended JMX management,</li>
+	  <li>Performance improvments,</li>
+	  <li>Handling of large message transmission (called swap out mode),</li>
+	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
+	</ul>
 
 	<subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
 	<p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
