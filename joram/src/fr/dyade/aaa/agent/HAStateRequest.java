@@ -23,7 +23,7 @@
 package fr.dyade.aaa.agent;
 
 import java.io.Serializable;
-import org.javagroups.Address;
+import org.jgroups.Address;
 
 /**
  * Message used by a slave component to request the server state.

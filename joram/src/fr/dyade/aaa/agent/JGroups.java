@@ -28,19 +28,18 @@ import java.io.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import org.javagroups.MembershipListener;
-import org.javagroups.MessageListener;
-import org.javagroups.Message;
-import org.javagroups.Channel;
-import org.javagroups.JChannel;
-import org.javagroups.Address;
-import org.javagroups.View;
-import org.javagroups.blocks.*;
-import org.javagroups.util.Util;
-import org.javagroups.log.Trace;
-import org.javagroups.ChannelException;
-import org.javagroups.ChannelClosedException;
-import org.javagroups.ChannelNotConnectedException;
+import org.jgroups.MembershipListener;
+import org.jgroups.MessageListener;
+import org.jgroups.Message;
+import org.jgroups.Channel;
+import org.jgroups.JChannel;
+import org.jgroups.Address;
+import org.jgroups.View;
+import org.jgroups.blocks.*;
+import org.jgroups.util.Util;
+import org.jgroups.ChannelException;
+import org.jgroups.ChannelClosedException;
+import org.jgroups.ChannelNotConnectedException;
 
 /**
  *  Implementation of JGroups in order to improve HA.
