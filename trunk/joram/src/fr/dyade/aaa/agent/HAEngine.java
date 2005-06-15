@@ -69,7 +69,7 @@ final class HAEngine extends Engine {
    * new time stamp to the message ; be Careful, changing the stamp imply
    * the filename change too.
    */
-  public void post(Message msg) throws Exception {
+  public synchronized void post(Message msg) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + " post(" + msg +")");
 
