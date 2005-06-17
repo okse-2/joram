@@ -242,10 +242,10 @@ final class HAEngine extends Engine {
     // Get Network clock
     reply.setNetworkStamp(jgroups.network.getStamp());
 
-//  while (! requestor.isEmpty()) {
-//    jgroups.sendTo((org.javagroups.Address) requestor.firstElement(), reply);
-//    requestor.removeElementAt(0);
-//  }
+//    while (! requestor.isEmpty()) {
+//      jgroups.sendTo((org.jgroups.Address) requestor.firstElement(), reply);
+//      requestor.removeElementAt(0);
+//    }
     requestor.clear();
     jgroups.send(reply);
   }
