@@ -36,6 +36,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -162,6 +165,31 @@ class ClientSubscription implements java.io.Serializable {
                               this + ": created.");
   }
 
+//    public String dump() {
+//      StringBuffer buff = new StringBuffer();
+//      buff.append("ClientSubscription (proxyId=");
+//      buff.append(proxyId);
+//      buff.append(",topicId=");
+//      buff.append(topicId);
+//      buff.append(",messageIds=");
+//      buff.append(messageIds);
+//      buff.append(",contextId=");
+//      buff.append(contextId);
+//      buff.append(",subRequestId=");
+//      buff.append(subRequestId);
+//      buff.append(",noLocal=");
+//      buff.append(noLocal);
+//      buff.append(",active=");
+//      buff.append(active);
+//      buff.append(",requestId=");
+//      buff.append(requestId);
+//      buff.append(",toListener=");
+//      buff.append(toListener);
+//      buff.append(",messagesTable=");
+//      buff.append(messagesTable);
+//      buff.append(")");
+//      return buff.toString();
+//    }
 
   public String toString()
   {
@@ -455,7 +483,7 @@ class ClientSubscription implements java.io.Serializable {
         BasicLevel.DEBUG,
         "ClientSubscription[" + proxyId + ',' + 
         topicId + ',' + name + "].deliver()");
-    
+
     // Returning null if no request exists:
     if (requestId == -1)
       return null;
@@ -899,5 +927,43 @@ class ClientSubscription implements java.io.Serializable {
       }
     }
     return msg;
+  }
+
+  public void readBag(ObjectInputStream in) 
+    throws IOException, ClassNotFoundException {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + 
+        proxyId + 
+        "].readbag()");
+
+    contextId = in.readInt();
+    subRequestId = in.readInt();
+    noLocal = in.readBoolean();
+    noFiltering = in.readBoolean();
+    active = in.readBoolean();
+    requestId = in.readInt();
+    toListener = in.readBoolean();
+    requestExpTime = in.readLong();
+  }
+
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + 
+        proxyId + 
+        "].writeBag()");
+
+    out.writeInt(contextId);
+    out.writeInt(subRequestId);
+    out.writeBoolean(noLocal);
+    out.writeBoolean(noFiltering);
+    out.writeBoolean(active);
+    out.writeInt(requestId);
+    out.writeBoolean(toListener);
+    out.writeLong(requestExpTime);
   }
 }
