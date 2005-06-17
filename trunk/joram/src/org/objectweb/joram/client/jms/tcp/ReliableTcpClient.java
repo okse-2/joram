@@ -118,6 +118,8 @@ public class ReliableTcpClient {
     }
 
     long endTime = startTime + connectionTime;
+    if (params.cnxPendingTimer == 0)
+      endTime = Long.MAX_VALUE;
     int attemptsC = 0;
     long nextSleep = 100;
     while (true) {
