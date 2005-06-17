@@ -194,7 +194,9 @@ final class JGroups
         logmon.log(BasicLevel.DEBUG," receive obj = " + obj + 
                    "\nmsg.getSrc =" + msg.getSrc() + 
                    "\nmsg.getDest =" + msg.getDest() + 
-                   "\nmyAddr = " + myAddr);
+                   "\nmyAddr = " + myAddr +
+                   "\ncoordinator = " + coordinator +
+                   "\nstate=" + state);
       
       if (myAddr.equals(msg.getSrc())) {
         if (logmon.isLoggable(BasicLevel.DEBUG))

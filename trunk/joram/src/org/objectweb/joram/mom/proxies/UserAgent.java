@@ -394,7 +394,7 @@ public class UserAgent extends Agent
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
-        "UserAgent.doReply(" + key + ',' + reply + ')');
+        "UserAgent.sendToClient(" + key + ',' + reply + ')');
     Integer objKey = new Integer(key);
     if (connections != null) {
       Object ctx = connections.get(objKey);
