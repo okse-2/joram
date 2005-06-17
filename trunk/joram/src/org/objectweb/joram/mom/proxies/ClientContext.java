@@ -242,4 +242,28 @@ class ClientContext implements java.io.Serializable
     out.writeObject(activeSubs);
     out.writeObject(repliesBuffer);
   }
+
+  public String toString() {
+    StringBuffer buff = new StringBuffer();
+    buff.append("ClientContext (proxyId=");
+    buff.append(proxyId);
+    buff.append(",id=");
+    buff.append(id);
+    buff.append(",tempDestinations=");
+    buff.append(tempDestinations);
+    buff.append(",deliveringQueues=");
+    buff.append(deliveringQueues);
+    buff.append(",transactionsTable=");
+    buff.append(transactionsTable);
+    buff.append(",started=");
+    buff.append(started);
+    buff.append(",cancelledRequestId=");
+    buff.append(cancelledRequestId);
+    buff.append(",activeSubs=");
+    buff.append(activeSubs);
+    buff.append(",repliesBuffer=");
+    buff.append(repliesBuffer);
+    buff.append(')');
+    return buff.toString();
+  }
 }
