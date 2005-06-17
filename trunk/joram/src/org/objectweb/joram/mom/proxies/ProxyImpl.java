@@ -2344,10 +2344,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       ((ClientContext)elements.nextElement()).readBag(in);
     }
 
-//     elements = subsTable.elements();
-//     while (elements.hasMoreElements()) {
-//       ((ClientSubscription)elements.nextElement()).readBag(in);
-//     }
+    elements = subsTable.elements();
+    while (elements.hasMoreElements()) {
+      ((ClientSubscription)elements.nextElement()).readBag(in);
+    }
 
     activeCtx = (ClientContext)contexts.get(
       new Integer(activeCtxId));
@@ -2357,7 +2357,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
-        " -> messages = " + messages + ')');
+        " -> messages = " + messages);
     
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
@@ -2370,7 +2370,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, " -> subName = " + subName + ')');
+          BasicLevel.DEBUG, " -> subName = " + subName);
       
       ClientSubscription cSub = (ClientSubscription) subsTable.get(subName);
       AgentId destId = cSub.getTopicId();
@@ -2380,7 +2380,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                         messagesTable, 
                         messages,
                         false);
-      
+
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(
           BasicLevel.DEBUG, " -> destId = " + destId + ')');
@@ -2420,10 +2420,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       ((ClientContext)elements.nextElement()).writeBag(out);
     }
 
-//     elements = subsTable.elements();
-//     while (elements.hasMoreElements()) {
-//       ((ClientSubscription)elements.nextElement()).writeBag(out);
-//     }
+    elements = subsTable.elements();
+    while (elements.hasMoreElements()) {
+      ((ClientSubscription)elements.nextElement()).writeBag(out);
+    }
 
     Vector messages = new Vector();
     elements = messagesTable.elements();
