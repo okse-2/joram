@@ -1082,6 +1082,27 @@ public class JoramAdapter
     }
   }
 
+  /**
+   * Remove a destination on the underlying JORAM server
+   *
+   * @param name       The name of the destination.
+   */
+  public void removeDestination(String name) 
+    throws AdminException {
+    try {
+      Context ctx = new InitialContext();
+      Destination dest = (Destination) ctx.lookup(name);
+      ctx.close();
+
+      if (dest instanceof org.objectweb.joram.client.jms.Destination)
+        ((org.objectweb.joram.client.jms.Destination) dest).delete();      
+      unbind(name);
+    } catch (Exception exc) {
+      throw new AdminException("removeDestination(" + name + 
+                               ") failed: use Destination.delete()");
+    }
+  }
+
   /** Binds an object to the JNDI context. */
   void bind(String name, Object obj) {
     try {
