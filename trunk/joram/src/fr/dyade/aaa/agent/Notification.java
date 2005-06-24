@@ -98,6 +98,15 @@ public class Notification implements Serializable, Cloneable {
     }
   }
 
+  /**
+   * Return true if notification is persistent.
+   *
+   * @return  persistent of this notification.
+   */
+  public boolean isPersistent() {
+    return persistent;
+  }
+
   public String toString() {
     StringBuffer output = new StringBuffer();
 

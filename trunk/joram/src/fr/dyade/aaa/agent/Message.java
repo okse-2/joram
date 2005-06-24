@@ -211,10 +211,10 @@ final class Message implements Serializable {
    */
   void save() throws IOException {
     if (isPersistent()) {
-      AgentServer.transaction.save(this, toStringId());
+      AgentServer.getTransaction().save(this, toStringId());
       if (not.detachable) {
         not.messageId = StringId.toStringId('N', '_', dest, stamp, -1);
-        AgentServer.transaction.save(not, not.messageId);
+        AgentServer.getTransaction().save(not, not.messageId);
       }
     }
   }
@@ -229,10 +229,10 @@ final class Message implements Serializable {
    */
   static Message
   load(String name) throws IOException, ClassNotFoundException {
-    Message msg = (Message) AgentServer.transaction.load(name);
+    Message msg = (Message) AgentServer.getTransaction().load(name);
     if (msg.not == null) {
       String messageId = StringId.toStringId('N', '_', msg.dest, msg.stamp, -1);
-      msg.not = (Notification) AgentServer.transaction.load(messageId);
+      msg.not = (Notification) AgentServer.getTransaction().load(messageId);
       msg.not.messageId = messageId;
       msg.not.detachable = true;
       msg.not.detached = false;
@@ -247,11 +247,11 @@ final class Message implements Serializable {
    */
   void delete()  throws IOException {
     if (isPersistent()) {
-      AgentServer.transaction.delete(toStringId());
+      AgentServer.getTransaction().delete(toStringId());
       if (not.detachable && ! not.detached) {
         // The Notification is not stored with message, and it is not detached
         // so it may be deleted individually.
-        AgentServer.transaction.delete(not.getMessageId());
+        AgentServer.getTransaction().delete(not.getMessageId());
       }
     }
   }

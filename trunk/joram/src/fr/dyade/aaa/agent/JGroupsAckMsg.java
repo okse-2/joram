@@ -44,7 +44,7 @@ public class JGroupsAckMsg implements java.io.Serializable {
    */
   void delete()  throws IOException {
     if (isPersistent) {
-      AgentServer.transaction.delete(name);
+      AgentServer.getTransaction().delete(name);
     }
   }
 

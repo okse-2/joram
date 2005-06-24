@@ -71,7 +71,7 @@ public class DeadMQueueImpl extends QueueImpl {
   }
   
   /** Static method returning the default threshold. */
-  public static Integer getThreshold() {
+  public static Integer getDefaultThreshold() {
     return threshold;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,8 +28,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
-import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.management.MXWrapper;
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * A <code>JMXRIHttpService</code> service provides a JMX server throught the
@@ -66,21 +66,23 @@ public class JMXRIHttpService {
 
       startService();
     } catch (Exception exc) {
-      Logger logmon = Debug.getLogger(Debug.A3Service + ".JMXRIHttpService");
-      logmon.log(BasicLevel.ERROR,
-                 "JMXRIService initialization failed", exc);
+      Debug.getLogger("com.scalagent.jmx").log(
+        BasicLevel.ERROR, "JMXRIService initialization failed", exc);
       throw exc;
     }
   }
  
   public static void startService() {
-    Debug.getLogger(Debug.A3Debug).log(BasicLevel.DEBUG,
-                                       "JMXRIHttpService.startService");
+    Debug.getLogger("com.scalagent.jmx").log(BasicLevel.DEBUG,
+                                             "JMXRIHttpService.startService");
 
     adapterServer.start();
   }
 
   public static void stopService() {
+    Debug.getLogger("com.scalagent.jmx").log(BasicLevel.DEBUG,
+                                             "JMXRIHttpService.stopService");
+
     adapterServer.stop();
   }
 

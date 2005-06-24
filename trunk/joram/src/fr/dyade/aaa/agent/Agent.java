@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -28,7 +28,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.management.MXWrapper;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * The <code>Agent</code> class represents the basic component in our model.
@@ -86,6 +86,14 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
+   * Sets the <code>updated</code> field to <code>true</code> so that the
+   * agent state is saved after the current reaction.
+   */
+  protected void setSave() {
+    updated = true;
+  }
+
+  /**
    *
    */
   protected final boolean needToBeCommited() {
@@ -102,7 +110,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   protected final void save() throws IOException {
     if (updated) {
-      AgentServer.transaction.save(this, id.toString());
+      AgentServer.getTransaction().save(this, id.toString());
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    "Agent" + id + " [" + name + "] saved");
@@ -124,7 +132,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   final static Agent
   load(AgentId id) throws IOException, ClassNotFoundException {
-    Agent ag = (Agent) AgentServer.transaction.load(id.toString());
+    Agent ag = (Agent) AgentServer.getTransaction().load(id.toString());
     if (ag != null) {
       ag.id = id;
       ag.deployed = true;

@@ -367,7 +367,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     try {
       // Creates or initializes AgentFactory, then loads and initializes
       // all fixed agents.
-      fixedAgentIdList = (Vector) AgentServer.transaction.load(getName() + ".fixed");
+      fixedAgentIdList = (Vector) AgentServer.getTransaction().load(getName() + ".fixed");
       if (fixedAgentIdList == null) {
         // It's the first launching of this engine, in other case theres is
         // at least the factory in fixedAgentIdList.
@@ -474,7 +474,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
                    getName() + ", delete Agent" + ag.id + " [" + ag.name + "]");
-      AgentServer.transaction.delete(ag.id.toString());
+      AgentServer.getTransaction().delete(ag.id.toString());
     } catch (UnknownAgentException exc) {
       logmon.log(BasicLevel.ERROR,
                  getName() +
@@ -533,7 +533,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   void removeFixedAgentId(AgentId id) throws IOException {
     fixedAgentIdList.removeElement(id);
-    AgentServer.transaction.save(fixedAgentIdList, getName() + ".fixed");
+    AgentServer.getTransaction().save(fixedAgentIdList, getName() + ".fixed");
   }
 
   /**
@@ -544,7 +544,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   void addFixedAgentId(AgentId id) throws IOException {   
     fixedAgentIdList.addElement(id);
-    AgentServer.transaction.save(fixedAgentIdList, getName() + ".fixed");
+    AgentServer.getTransaction().save(fixedAgentIdList, getName() + ".fixed");
   }
 
   /**
@@ -774,7 +774,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       stampBuf[1] = (byte)((stamp >>> 16) & 0xFF);
       stampBuf[2] = (byte)((stamp >>>  8) & 0xFF);
       stampBuf[3] = (byte)(stamp & 0xFF);
-      AgentServer.transaction.saveByteArray(stampBuf, getName());
+      AgentServer.getTransaction().saveByteArray(stampBuf, getName());
       modified = false;
     }
   }
@@ -783,7 +783,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * Restores logical clock information from persistent storage.
    */
   public void restore() throws Exception {
-    stampBuf = AgentServer.transaction.loadByteArray(getName());
+    stampBuf = AgentServer.getTransaction().loadByteArray(getName());
     if (stampBuf == null) {
       stamp = 0;
       stampBuf = new byte[4];
@@ -830,6 +830,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       stamp(msg);
       msg.save();
     }
+
     qin.push(msg);
   }
 
@@ -943,7 +944,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * </ul>
    */
   void commit() throws Exception {
-    AgentServer.transaction.begin();
+    AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
     // .. then deletes it ..
@@ -955,10 +956,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     dispatch();
     // Saves the agent state then commit the transaction.
     if (agent != null) agent.save();
-    AgentServer.transaction.commit();
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
-    AgentServer.transaction.release();
+    AgentServer.getTransaction().release();
   }
 
   /**
@@ -972,7 +973,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * </ul>
    */
   void abort(Exception exc) throws Exception {
-    AgentServer.transaction.begin();
+    AgentServer.getTransaction().begin();
     // Reload the state of agent.
     try {
       agent = reload(msg.to);
@@ -995,10 +996,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
          msg.from,
          new ExceptionNotification(msg.to, msg.not, exc));
     dispatch();
-    AgentServer.transaction.commit();
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
-    AgentServer.transaction.release();
+    AgentServer.getTransaction().release();
   }
 
   /**

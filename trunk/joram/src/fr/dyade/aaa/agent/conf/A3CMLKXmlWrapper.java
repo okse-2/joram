@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002-2005 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -135,7 +135,7 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
               throw new Exception("bad value for server id: " +
                                   getValue(atts, A3CML.ATT_ID));
             }
-            server = new A3CMLPServer(
+            server = new A3CMLServer(
               sid,
               getValue(atts, A3CML.ATT_NAME),
               getValue(atts, A3CML.ATT_HOSTNAME));
@@ -183,10 +183,8 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
             a3cmlconfig.addServer(server);
             server = null;
           } else if (name.equals(A3CML.ELT_NETWORK)) {
-            if ((server != null) &&
-                (server instanceof A3CMLPServer)) {
-              A3CMLPServer pserver = (A3CMLPServer) server;
-              ((A3CMLPServer) server).addNetwork(network);
+            if (server != null) {
+              server.addNetwork(network);
               // Add the server to the corresponding domains
               // AF: This step should be done at the end of parsing, in order
               // to avoid to declare domains first.

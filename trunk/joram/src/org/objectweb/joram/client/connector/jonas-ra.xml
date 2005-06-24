@@ -23,8 +23,7 @@
 <jonas-connector xmlns="http://www.objectweb.org/jonas/ns"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://www.objectweb.org/jonas/ns
- http://www.objectweb.org/jonas/ns/jonas-connector_4_2.xsd" >
-  <jndi-name>JOnASJDBC_DM</jndi-name>
+ http://www.objectweb.org/jonas/ns/jonas-connector_4_4.xsd" >
   <rarlink></rarlink>
   <log-enabled>false</log-enabled>
   <log-topic></log-topic>
@@ -39,10 +38,6 @@
     <pool-max-waittime>0</pool-max-waittime>
     <pool-sampling-period>30</pool-sampling-period>
   </pool-params>
-  <jdbc-conn-params>
-    <jdbc-check-level>0</jdbc-check-level>
-    <jdbc-test-statement></jdbc-test-statement>
-  </jdbc-conn-params>
   <jonas-config-property>
     <jonas-config-property-name>dsClass</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
@@ -105,6 +100,18 @@
   </jonas-config-property>
   <jonas-config-property>
     <jonas-config-property-name>ServerPort</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
     <jonas-config-property-value></jonas-config-property-value>
   </jonas-config-property>
   <jonas-connection-definition>

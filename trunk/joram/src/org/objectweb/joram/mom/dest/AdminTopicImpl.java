@@ -207,6 +207,9 @@ public class AdminTopicImpl extends TopicImpl {
                                     + ": got " + not
                                     + " from: " + from.toString());
 
+    // state change, so save.
+    setSave();
+
     if (not instanceof AdminNotification)
       doReact(from, (AdminNotification) not);
     else if (not instanceof AdminRequestNot)
@@ -280,6 +283,10 @@ public class AdminTopicImpl extends TopicImpl {
       reply = doProcess((Monit_GetClusterRep) not);
     else if (not instanceof Monit_GetNumberRep)
       reply = doProcess((Monit_GetNumberRep) not);
+    else if (not instanceof Monit_GetStatRep)
+      reply = doProcess((Monit_GetStatRep) not);
+    else if (not instanceof Monit_GetNbMaxMsgRep)
+      reply = doProcess((Monit_GetNbMaxMsgRep) not);
     else
       reply = new AdminReply(not.getSuccess(), 
                              not.getInfo(),
@@ -394,6 +401,22 @@ public class AdminTopicImpl extends TopicImpl {
    */
   private AdminReply doProcess(Monit_GetNumberRep not) {
     return new Monitor_GetNumberRep(not.getNumber());
+  }
+
+  /**
+   * Processes a <code>Monit_GetStatRep</code> notification holding a
+   * statistic sent by a destination.
+   */
+  private AdminReply doProcess(Monit_GetStatRep not) {
+    return new Monitor_GetStatRep(not.getStats());
+  }
+
+  /**
+   * Processes a <code>Monit_GetNbMaxMsgRep</code> notification holding a
+   * nbMaxMsg sent by a destination.
+   */
+  private AdminReply doProcess(Monit_GetNbMaxMsgRep not) {
+    return new Monitor_GetNbMaxMsgRep(not.getNbMaxMsg());
   }
 
   /**
@@ -617,6 +640,7 @@ public class AdminTopicImpl extends TopicImpl {
     Enumeration messages = not.getMessages().elements();
 
     while (messages.hasMoreElements()) {
+      nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + 1;
       msg = (Message) messages.nextElement();
       msgId = msg.getIdentifier();
       replyTo = AgentId.fromString(msg.getReplyToId());
@@ -661,6 +685,9 @@ public class AdminTopicImpl extends TopicImpl {
                                     AgentId from) {
     String info = null;
 
+    // state change, so save.
+    setSave();
+
     try {
       if (request instanceof StopServerRequest)
         doProcess((StopServerRequest) request, replyTo, msgId);
@@ -690,6 +717,8 @@ public class AdminTopicImpl extends TopicImpl {
         doProcess((SetDestinationDMQ) request, replyTo, msgId);
       else if (request instanceof SetUserDMQ)
         doProcess((SetUserDMQ) request, replyTo, msgId);
+      else if (request instanceof SetNbMaxMsg)
+        doProcess((SetNbMaxMsg) request, replyTo, msgId);
       else if (request instanceof SetDefaultThreshold)
         doProcess((SetDefaultThreshold) request, replyTo, msgId);
       else if (request instanceof SetQueueThreshold)
@@ -734,6 +763,10 @@ public class AdminTopicImpl extends TopicImpl {
         doProcess((Monitor_GetPendingMessages) request, replyTo, msgId);
       else if (request instanceof Monitor_GetPendingRequests)
         doProcess((Monitor_GetPendingRequests) request, replyTo, msgId);
+      else if (request instanceof Monitor_GetStat)
+        doProcess((Monitor_GetStat) request, replyTo, msgId);
+      else if (request instanceof Monitor_GetNbMaxMsg)
+        doProcess((Monitor_GetNbMaxMsg) request, replyTo, msgId);
       else if (request instanceof Monitor_GetSubscriptions)
         doProcess((Monitor_GetSubscriptions) request, replyTo, msgId);
       else if (request instanceof SpecialAdmin)
@@ -1368,6 +1401,30 @@ public class AdminTopicImpl extends TopicImpl {
   }
 
   /**
+   * Processes a <code>SetNbMaxMsg</code> request requesting
+   * a given nbMaxMsg value to be set in queue or subscription.
+   */
+  private void doProcess(SetNbMaxMsg request,
+                         AgentId replyTo,
+                         String msgId) 
+    throws UnknownServerException {
+    AgentId destId = AgentId.fromString(request.getId());
+
+    if (checkServerId(destId.getTo())) {
+      // The destination is not local, doing nothing.
+      int nbMaxMsg = request.getNbMaxMsg();
+      String subName = request.getSubName();
+      Channel.sendTo(destId, 
+                     new SetNbMaxMsgRequest(msgId, nbMaxMsg, subName));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
+    } else {
+      // Forward the request to the right AdminTopic agent.
+      Channel.sendTo(AdminTopic.getDefault(destId.getTo()),
+             new AdminRequestNot(replyTo, msgId, request));
+    }
+  }
+
+  /**
    * Processes a <code>SetQueueThreshold</code> request requesting
    * a given threshold value to be set as the threshold of a given
    * queue.
@@ -1908,6 +1965,49 @@ public class AdminTopicImpl extends TopicImpl {
   }
 
   /**
+   * Processes a <code>Monitor_GetStat</code> request by
+   * forwarding it to its target destination, if local.
+   */
+  private void doProcess(Monitor_GetStat request,
+                         AgentId replyTo,
+                         String msgId) 
+    throws UnknownServerException {
+    AgentId destId = AgentId.fromString(request.getDest());
+    
+    if (checkServerId(destId.getTo())) {
+      // The destination is local, process the request.
+      Channel.sendTo(destId, new Monit_GetStat(msgId));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
+    } else {
+      // Forward the request to the right AdminTopic agent.
+      Channel.sendTo(AdminTopic.getDefault(destId.getTo()),
+                     new AdminRequestNot(replyTo, msgId, request));
+    }
+  }
+
+  /**
+   * Processes an <code>Monitor_GetNbMaxMsg</code> request requesting
+   * to get the nb max msg.
+   */
+  private void doProcess(Monitor_GetNbMaxMsg request,
+                         AgentId replyTo,
+                         String msgId)
+    throws UnknownServerException {
+     AgentId destId = AgentId.fromString(request.getId());
+
+     if (checkServerId(destId.getTo())) {
+       // The destination is local, process the request.
+       String subName = request.getSubName();
+       Channel.sendTo(destId, new Monit_GetNbMaxMsg(msgId, subName));
+       if (replyTo != null) requestsTable.put(msgId, replyTo);
+     } else {
+       // Forward the request to the right AdminTopic agent.
+       Channel.sendTo(AdminTopic.getDefault(destId.getTo()),
+             new AdminRequestNot(replyTo, msgId, request));
+    }
+  }
+
+  /**
    * Processes a <code>Monitor_GetSubscriptions</code> request by
    * forwarding it to its target queue, if local.
    */
@@ -2293,6 +2393,7 @@ public class AdminTopicImpl extends TopicImpl {
 
       ClientMessages clientMessages = new ClientMessages(-1, -1, messages);
       Channel.sendTo(to, clientMessages);
+      nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + 1;
     } catch (Exception exc) {
       MomTracing.dbgDestination.log(
         BasicLevel.ERROR, "", exc);

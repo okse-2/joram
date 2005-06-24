@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,6 +67,9 @@ class ClientSubscription implements java.io.Serializable {
    * value not set.
    */
   private Integer threshold;
+
+  /** nb Max of Message store in queue (-1 no limit). */
+  protected int nbMaxMsg = -1;
 
   /** Vector of identifiers of the messages to deliver. */
   private Vector messageIds;
@@ -239,10 +242,41 @@ class ClientSubscription implements java.io.Serializable {
     return active;
   }
 
+  /**
+   * Returns the maximum number of message for the subscription.
+   * If the limit is unset the method returns -1.
+   *
+   * @return the maximum number of message for subscription if set;
+   *	     -1 otherwise.
+   */
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
+
+  /**
+   * Sets the maximum number of message for the subscription.
+   *
+   * @param nbMaxMsg the maximum number of message for subscription (-1 set
+   *		     no limit).
+   */
+  public void setNbMaxMsg(int nbMaxMsg) {
+    this.nbMaxMsg = nbMaxMsg;
+  }
+
+  /**
+   * Returns the number of pending messages for the subscription.
+   *
+   * @return The number of pending message for the subscription.
+   */
   int getMessageCount() {
     return messageIds.size();
   }
 
+  /**
+   * Returns the list of message's identifiers for the subscription.
+   *
+   * @return the list of message's identifiers for the subscription.
+   */
   String[] getMessageIds() {
     String[] res = new String[messageIds.size()];
     messageIds.copyInto(res);
@@ -292,13 +326,14 @@ class ClientSubscription implements java.io.Serializable {
               " -> messagesTable.put(" + msgId + ')');
           messagesTable.put(msgId, message);
         }
-        if (message.durableAcksCounter == 1) {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(
-              BasicLevel.DEBUG,
-              " -> save message " + message);
-          message.save(proxyStringId);          
-        }
+//          if (message.durableAcksCounter == 1) {
+//            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+//              MomTracing.dbgProxy.log(
+//                BasicLevel.DEBUG,
+//                " -> save message " + message);
+// it's alredy save.
+//          message.save(proxyStringId);          
+//        }
       }
     }
 
@@ -397,8 +432,12 @@ class ClientSubscription implements java.io.Serializable {
    * @param requestId  Identifier of the "receive" request.
    * @param timeToLive  Request's time to live value.
    */
-  void setReceiver(int requestId, long timeToLive)
-  {
+  void setReceiver(int requestId, long timeToLive) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".setReceiver(" + requestId + 
+                              "," + timeToLive + ")");
+
     this.requestId = requestId;
     toListener = false;
 
@@ -409,8 +448,10 @@ class ClientSubscription implements java.io.Serializable {
   }
 
   /** Unsets a receiver request. */
-  void unsetReceiver()
-  {
+  void unsetReceiver() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".unsetReceiver()");
     requestId = -1;
     requestExpTime = 0;
   }
@@ -444,6 +485,14 @@ class ClientSubscription implements java.io.Serializable {
       message = (Message) e.nextElement();
       msgId = message.getIdentifier();
 
+      // test nbMaxMsg
+      if (nbMaxMsg > -1 && nbMaxMsg <= messageIds.size()) {
+        ClientMessages deadMessages = new ClientMessages();
+        deadMessages.addMessage(message);
+        sendToDMQ(deadMessages);
+        continue;
+      }
+
       // Keeping the message if filtering is successful.
       if (noFiltering
           || (Selector.matches(message, selector)
@@ -460,8 +509,8 @@ class ClientSubscription implements java.io.Serializable {
 
         if (durable) {
           message.durableAcksCounter++;
-          if (message.durableAcksCounter == 1)
-            message.save(proxyStringId);
+//          if (message.durableAcksCounter == 1)
+//            message.save(proxyStringId); //NT: save in proxy
         }
 
         messageIds.add(msgId);
@@ -516,6 +565,7 @@ class ClientSubscription implements java.io.Serializable {
       while (! messageIds.isEmpty()) {
         id = (String) messageIds.remove(0);
         message = (Message) messagesTable.get(id);
+
         // Message still exists.
         if (message != null) {
           // Delivering it if valid.
@@ -639,6 +689,7 @@ class ClientSubscription implements java.io.Serializable {
           deniedMsgs.remove(id);
         }
       }
+
       // Putting the kept message in the vector.
       if (keptMsg != null) {
         messageIds.remove(keptMsg.getIdentifier());
@@ -853,8 +904,8 @@ class ClientSubscription implements java.io.Serializable {
   {
     if (threshold != null)
       return deliveryAttempts == threshold.intValue();
-    else if (DeadMQueueImpl.getThreshold() != null)
-      return deliveryAttempts == DeadMQueueImpl.getThreshold().intValue();
+    else if (DeadMQueueImpl.getDefaultThreshold() != null)
+      return deliveryAttempts == DeadMQueueImpl.getDefaultThreshold().intValue();
     return false;
   }
 
@@ -914,6 +965,12 @@ class ClientSubscription implements java.io.Serializable {
     messageIds.clear();
   }
 
+  /**
+   * Removes a particular pending message in the subscription.
+   * The message is pointed out through its unique identifier.
+   *
+   * @param msgId    The unique message's identifier.
+   */
   Message removeMessage(String msgId) {
     Message msg = (Message) messagesTable.get(msgId);
     if (msg != null) {

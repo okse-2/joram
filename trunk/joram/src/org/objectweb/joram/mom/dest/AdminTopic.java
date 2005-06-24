@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.dest;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * An <code>AdminTopic</code> agent is a MOM administration service, which
@@ -54,5 +55,19 @@ public class AdminTopic extends Topic {
    */
   public static AgentId getDefault(short serverId) {
     return new AgentId(serverId, serverId, AgentId.JoramAdminStamp);
+  }
+
+  static AgentId adminId = null;
+
+  /**
+   * Gets the identifier of the default administration topic on the
+   * current server.
+   */
+  public static AgentId getDefault() {
+    if (adminId == null)
+      adminId = new AgentId(AgentServer.getServerId(),
+                            AgentServer.getServerId(),
+                            AgentId.JoramAdminStamp);
+    return adminId;
   }
 }

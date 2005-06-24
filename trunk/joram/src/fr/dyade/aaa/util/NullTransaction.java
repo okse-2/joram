@@ -25,7 +25,7 @@ package fr.dyade.aaa.util;
 
 import java.io.*;
 
-public class NullTransaction implements Transaction {
+public class NullTransaction implements Transaction, NullTransactionMBean {
   // State of the transaction monitor.
   private int phase;
 
@@ -35,6 +35,11 @@ public class NullTransaction implements Transaction {
 
   public NullTransaction() {}
 
+  /**
+   * Tests if the Transaction component is persistent.
+   *
+   * @return false.
+   */
   public boolean isPersistent() {
     return false;
   }
@@ -47,6 +52,15 @@ public class NullTransaction implements Transaction {
   }
 
   public File getDir() {
+    return null;
+  }
+
+  /**
+   * Returns the path of persistence directory.
+   *
+   * @return null.
+   */
+  public String getPersistenceDir() {
     return null;
   }
 

@@ -404,12 +404,7 @@ final public class AgentAdmin extends Agent {
     }
 
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
-    if (root instanceof A3CMLPServer) {
-      a3cmlConfig.configure((A3CMLPServer) root);
-    } else {
-      throw new Exception("Unknown agent server type: #" +
-                          AgentServer.getServerId());
-    }
+    a3cmlConfig.configure(root);
 
     if (script.newConfig)
       AgentServer.setConfig(a3cmlConfig);
@@ -474,7 +469,7 @@ final public class AgentAdmin extends Agent {
           id = cmd.sid;
         
         a3cmlConfig.addServer(
-          new A3CMLPServer(id.shortValue(),
+          new A3CMLServer(id.shortValue(),
                            cmd.name,
                            cmd.hostname));
         rollback.add(new RemoveServerCmd(cmd.name,cmd.hostname));
@@ -538,7 +533,7 @@ final public class AgentAdmin extends Agent {
                                           cmd.className,
                                           cmd.args));
         
-        A3CMLPServer adm = (A3CMLPServer) a3cmlConfig.getServer(AgentServer.getServerId());
+        A3CMLServer adm = a3cmlConfig.getServer(AgentServer.getServerId());
         if (cmd.serverName.equals(adm.name)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
@@ -572,7 +567,7 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.doReact(" + cmd + ")");
 
     try {
-      A3CMLPServer server = (A3CMLPServer) a3cmlConfig.getServer(cmd.serverName);
+      A3CMLServer server = a3cmlConfig.getServer(cmd.serverName);
       A3CMLNetwork toadd = new A3CMLNetwork(cmd.domain,cmd.port);
       if (server.networks.contains(toadd)) {
         if (silence) {
@@ -629,7 +624,7 @@ final public class AgentAdmin extends Agent {
       logmon.log(BasicLevel.DEBUG,
                  "AgentAdmin.doReact(" + cmd + ")");
     try {
-      A3CMLPServer server = (A3CMLPServer) a3cmlConfig.getServer(cmd.serverName);
+      A3CMLServer server = a3cmlConfig.getServer(cmd.serverName);
       A3CMLNetwork network = null;
       for (int i = 0; i < server.networks.size(); i++) {
         A3CMLNetwork nw = 
@@ -830,8 +825,7 @@ final public class AgentAdmin extends Agent {
     try {
       if (a3cmlConfig == null)
         a3cmlConfig = AgentServer.getConfig();
-      A3CMLPServer a3cmlServer = 
-        (A3CMLPServer) a3cmlConfig.getServer(cmd.sid);
+      A3CMLServer a3cmlServer = a3cmlConfig.getServer(cmd.sid);
       A3CMLNetwork a3cmlNetwork = null;
       for (int i = 0; i < a3cmlServer.networks.size(); i++) {
         A3CMLNetwork nw = 
@@ -967,24 +961,14 @@ final public class AgentAdmin extends Agent {
 //                      "AgentAdmin.StartServerCmd : NAT desc = " + desc);
 //       }
 
-      if (current instanceof A3CMLPServer) {
-        // current server is persistent
-        if (server instanceof A3CMLPServer) {
- //       if(!setGatewayAndDomain((A3CMLPServer) server,
-//                                (A3CMLPServer) current))
-//          throw new ServerCmdException(server + " is inaccessible from " + current);
-          AgentServer.initServerDesc(desc, (A3CMLPServer) server);
-        } else {
-          // TODO: Throw an UnknownServerType
-        }
-
+      AgentServer.initServerDesc(desc, server);
         if (desc.gateway == desc.sid)
           ((Network) desc.domain).addServer(server.sid);
-      }
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   "AgentAdmin.StartServerCmd : desc = " + AgentServer.getServerDesc(server.sid));
+                   "AgentAdmin.StartServerCmd : " +
+                   "desc = " + AgentServer.getServerDesc(server.sid));
     } catch (Exception exc) {
       if (logmon.isLoggable(BasicLevel.ERROR))
         logmon.log(BasicLevel.ERROR, "", exc);
@@ -1037,12 +1021,10 @@ final public class AgentAdmin extends Agent {
     throws Exception {
     if (a3cmlConfig == null)
       a3cmlConfig = AgentServer.getConfig();
-    A3CMLPServer server = 
-      (A3CMLPServer) a3cmlConfig.getServer(sid);
+    A3CMLServer server = a3cmlConfig.getServer(sid);
     if (server == null) return null;
     for (int i = 0; i < server.networks.size(); i++) {
-      A3CMLNetwork network = 
-        (A3CMLNetwork)server.networks.elementAt(i);
+      A3CMLNetwork network = (A3CMLNetwork) server.networks.elementAt(i);
       if (network.domain.equals(domainName)) {
         return network;
       }
@@ -1094,7 +1076,7 @@ final public class AgentAdmin extends Agent {
 
         Vector toRemove = new Vector();
         for (Enumeration s = domain.servers.elements(); s.hasMoreElements(); ) {
-          A3CMLPServer server = (A3CMLPServer) s.nextElement();
+          A3CMLServer server = (A3CMLServer) s.nextElement();
 
           if (server.networks.size() > 2) {
             doReact(new RemoveNetworkCmd(server.name,
@@ -1138,9 +1120,9 @@ final public class AgentAdmin extends Agent {
       logmon.log(BasicLevel.DEBUG,
                  "AgentAdmin.doReact(" + cmd + ")");
     
-    A3CMLPServer server = null;
+    A3CMLServer server = null;
     try {
-      server = (A3CMLPServer) a3cmlConfig.getServer(cmd.serverName);
+      server = a3cmlConfig.getServer(cmd.serverName);
     } catch(fr.dyade.aaa.agent.conf.UnknownServerException e) { return;}
     if (server == null) return;
     
@@ -1175,7 +1157,7 @@ final public class AgentAdmin extends Agent {
     
     A3CMLServer svr = null;
     try {
-      svr = (A3CMLServer) a3cmlConfig.getServer(cmd.name);
+      svr = a3cmlConfig.getServer(cmd.name);
     } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
       return;
     }
@@ -1204,7 +1186,7 @@ final public class AgentAdmin extends Agent {
     
     A3CMLServer server = null;
     try {
-      server = (A3CMLServer) a3cmlConfig.getServer(cmd.serverName);
+      server = a3cmlConfig.getServer(cmd.serverName);
     } catch(fr.dyade.aaa.agent.conf.UnknownServerException exc) { return;}
 
     if (server == null) return;
@@ -1239,7 +1221,7 @@ final public class AgentAdmin extends Agent {
     
     A3CMLServer server = null;
     try {
-      server = (A3CMLServer) a3cmlConfig.getServer(cmd.serverName);
+      server = a3cmlConfig.getServer(cmd.serverName);
     } catch(fr.dyade.aaa.agent.conf.UnknownServerException exc) { return;}
     
     if (server == null) return;
@@ -1309,7 +1291,7 @@ final public class AgentAdmin extends Agent {
     
     A3CMLServer server = null;
     try {
-      server = (A3CMLServer) a3cmlConfig.getServer(cmd.serverName);
+      server = a3cmlConfig.getServer(cmd.serverName);
     } catch(fr.dyade.aaa.agent.conf.UnknownServerException exc) { return;}
     
     if (server == null) return;
@@ -1336,8 +1318,7 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.removeNetwork(" + sid + 
                  "," + domainName + ")");
     try {
-      A3CMLPServer server = 
-        (A3CMLPServer) a3cmlConfig.getServer(sid);
+      A3CMLServer server = a3cmlConfig.getServer(sid);
       if (server == null) return;
       for (int i = 0; i < server.networks.size(); i++) {
         A3CMLNetwork network = 
@@ -1411,8 +1392,7 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.removeService(" + sid +
                  "," + className + ")");
 
-    A3CMLServer server = 
-      (A3CMLServer) a3cmlConfig.getServer(sid);
+    A3CMLServer server = a3cmlConfig.getServer(sid);
     if (server == null) return;
     for (int i = 0; i < server.services.size(); i++) {
       A3CMLService service = 
@@ -1432,8 +1412,7 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.unsetServerProperty(" + sid +
                  "," + name + ")");
     
-    A3CMLPServer server = 
-      (A3CMLPServer) a3cmlConfig.getServer(sid);
+    A3CMLServer server = a3cmlConfig.getServer(sid);
     if (server == null) return;
     server.removeProperty(name);
   }
@@ -1452,8 +1431,7 @@ final public class AgentAdmin extends Agent {
                  "AgentAdmin.unsetArgs(" + sid +
                  "," + name + ")");
 
-    A3CMLServer server = 
-      (A3CMLServer) a3cmlConfig.getServer(sid);
+    A3CMLServer server = a3cmlConfig.getServer(sid);
     if (server == null) return;
     //server.jvmArgs = server.jvmArgs.replaceAll(args,"");
 

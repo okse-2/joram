@@ -580,10 +580,10 @@ public class NGNetwork extends StreamNetwork {
           buf.flip();
           int boot = buf.getInt();
 
-          AgentServer.transaction.begin();
+          AgentServer.getTransaction().begin();
           testBootTS(sid, boot);
-          AgentServer.transaction.commit();
-          AgentServer.transaction.release();
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         } else {
           throw new ConnectException("Can't get status");
         }
@@ -648,10 +648,10 @@ public class NGNetwork extends StreamNetwork {
         buf.flip();
         channel.write(buf);
 
-        AgentServer.transaction.begin();
+        AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.transaction.commit();
-        AgentServer.transaction.release();
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.channel = channel;
@@ -1063,11 +1063,11 @@ public class NGNetwork extends StreamNetwork {
         //  Suppress the acknowledged notification from waiting list,
         // and deletes it.
         msg = sendlist.removeMessage(ack);
-        AgentServer.transaction.begin();
+        AgentServer.getTransaction().begin();
         msg.delete();
         msg.free();
-        AgentServer.transaction.commit();
-        AgentServer.transaction.release();
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.agent.management.MXWrapper;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 import org.objectweb.joram.mom.MomTracing;
 
@@ -142,8 +142,12 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    * Reactions to notifications are implemented by the
    * <tt>DestinationImpl</tt> class.
    */
-  public void react(AgentId from, Notification not) throws Exception
-  {
+  public void react(AgentId from, Notification not) 
+    throws Exception {
+
+    // set agent no save (this is the default).
+    setNoSave();
+
     try {
       destImpl.react(from, not);
 
@@ -158,6 +162,16 @@ public abstract class Destination extends Agent implements AdminDestinationItf
   }
 
   protected void setNoSave() {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    this + ": setNoSave().");
     super.setNoSave();
+  }
+
+  protected void setSave() {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    this + ": setSave().");
+    super.setSave();
   }
 }

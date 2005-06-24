@@ -144,7 +144,7 @@ public class ConfigController {
 
     try {
       A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
-      a3cmlConfig.configure((A3CMLPServer) root);
+      a3cmlConfig.configure(root);
       
       stop();
       
@@ -366,15 +366,8 @@ public class ConfigController {
           throw new Exception("Missing server id");
         }
       }
-      a3cmlConfig.addServer(
-        new A3CMLPServer(id,
-                         name,
-                         hostName));       
-      ServerDesc serverDesc = new ServerDesc(
-        id,
-        name,
-        hostName,
-        -1);
+      a3cmlConfig.addServer(new A3CMLServer(id, name, hostName));       
+      ServerDesc serverDesc = new ServerDesc(id, name, hostName, -1);
       serverDesc.gateway = id;
       newServers.addElement(serverDesc);
     } else {
@@ -439,7 +432,7 @@ public class ConfigController {
                  domainName + ',' + 
                  port + ')');
     checkStatus(Status.CONFIG);
-    A3CMLPServer server = (A3CMLPServer)a3cmlConfig.getServer(serverId);
+    A3CMLServer server = a3cmlConfig.getServer(serverId);
     A3CMLNetwork newNetwork = new A3CMLNetwork(domainName, port);    
     try {
       server.addNetwork(newNetwork);
@@ -583,7 +576,7 @@ public class ConfigController {
                  serverName + ',' + 
                  domainName + ')');
     checkStatus(Status.CONFIG);
-    A3CMLPServer server = (A3CMLPServer) a3cmlConfig.getServer(serverName);
+    A3CMLServer server = a3cmlConfig.getServer(serverName);
     server.removeNetwork(domainName);
 
     if (server.sid == AgentServer.getServerId()) {
@@ -594,7 +587,7 @@ public class ConfigController {
   public void removeServer(String serverName) throws Exception {
     checkStatus(Status.CONFIG);
     try {
-      A3CMLServer server = (A3CMLPServer) a3cmlConfig.getServer(serverName);
+      A3CMLServer server = a3cmlConfig.getServer(serverName);
       ServerDesc servDesc = AgentServer.getServerDesc(server.sid);
       removeServer(servDesc);
     } catch (fr.dyade.aaa.agent.conf.UnknownServerException exc) {
@@ -649,7 +642,7 @@ public class ConfigController {
   public void removeService(String serverName,
                             String serviceClassName) throws Exception {
     checkStatus(Status.CONFIG);
-    A3CMLServer server = (A3CMLPServer) a3cmlConfig.getServer(serverName);
+    A3CMLServer server = a3cmlConfig.getServer(serverName);
     server.removeService(serviceClassName);
   }
   
@@ -666,8 +659,7 @@ public class ConfigController {
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.startNetwork(" + 
                  domainName + ')');
-    A3CMLPServer a3cmlServer = 
-      (A3CMLPServer) a3cmlConfig.getServer(AgentServer.getServerId());
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer(AgentServer.getServerId());
     A3CMLNetwork a3cmlNetwork = a3cmlServer.getNetwork(domainName);
     if (a3cmlNetwork == null) throw new Exception(
       "Unknown network " + domainName);
@@ -720,8 +712,7 @@ public class ConfigController {
                  sid + ',' + 
                  domainName + ',' + 
                  port + ')');
-    A3CMLPServer a3cmlServer = 
-      (A3CMLPServer) a3cmlConfig.getServer(sid);
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer(sid);
     ServerDesc serverDesc = 
       AgentServer.getServerDesc(sid);
     if (domainName.equals(serverDesc.getDomainName())) {
@@ -755,7 +746,7 @@ public class ConfigController {
                  "ConfigController.startServer(" + sid + ')');
     A3CMLServer server = a3cmlConfig.getServer(sid);
     ServerDesc desc = AgentServer.getServerDesc(sid);
-    AgentServer.initServerDesc(desc, (A3CMLPServer) server);
+    AgentServer.initServerDesc(desc, server);
     if (desc.gateway == desc.sid) {
       if (desc.domain instanceof Network) {
         ((Network) desc.domain).addServer(server.sid);

@@ -1,6 +1,5 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,26 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-package org.objectweb.joram.client.connector;
+package fr.dyade.aaa.util;
 
-
-/**
- * The <code>LocalQueueMBean<code> interface defines the administration
- * methods provided by the <code>LocalQueue</code> class.
- */
-public interface LocalQueueMBean
-{
-  public String getAgentId();
-
-  public String getJndiName();
-
-  public int getNumberOfPendingMessages();
-
-  public int getNumberOfPendingRequests();
-
-  
-  public void delete() throws Exception;
-}
+public interface NullTransactionMBean extends TransactionMBean {}

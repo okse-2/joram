@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003        Bull SA
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,7 +86,9 @@ public class TopicImpl extends DestinationImpl
     selectors = new Hashtable();
   }
 
-
+  /**
+   * Returns a string representation of this destination.
+   */
   public String toString() {
     return "TopicImpl:" + destId.toString();
   }
@@ -183,8 +185,11 @@ public class TopicImpl extends DestinationImpl
 
     AgentId newFriendId = req.getTopicId();
 
-    if (friends == null)
-     friends = new Vector();
+    if (friends == null) {
+      // state change, so save.
+      setSave();
+      friends = new Vector();
+    }
 
     if (friends.contains(newFriendId) || destId.equals(newFriendId)) {
       info = strbuf.append("Request [").append(req.getClass().getName())
@@ -224,6 +229,8 @@ public class TopicImpl extends DestinationImpl
       Channel.sendTo(from, new ClusterAck(not, false, info));
     // The topic is free: joining the cluster.
     } else {
+      // state change, so save.
+      setSave();
       friends = new Vector();
       friends.add(from);
       info = strbuf.append("Topic [").append(destId)
@@ -263,6 +270,8 @@ public class TopicImpl extends DestinationImpl
       // Notifying the current fellow of the joining topic.
       Channel.sendTo(fellowId, newFriendNot);
     }
+    // state change, so save.
+    setSave();
     friends.add(from);
 
     String info = strbuf.append("Request [")
@@ -284,6 +293,8 @@ public class TopicImpl extends DestinationImpl
    */
   protected void doReact(AgentId from, ClusterNot not)
   {
+    // state change, so save.
+    setSave();
     friends.add(not.topicId);
       
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -319,6 +330,8 @@ public class TopicImpl extends DestinationImpl
     AgentId fellowId;
     // Notifying each fellow of the leave.
     while (! friends.isEmpty()) {
+      // state change, so save.
+      setSave();
       fellowId = (AgentId) friends.remove(0);
       Channel.sendTo(fellowId, not);
     }
@@ -341,6 +354,8 @@ public class TopicImpl extends DestinationImpl
    */
   protected void doReact(AgentId from, UnclusterNot not)
   {
+    // state change, so save.
+    setSave();
     friends.remove(from);
 
     if (friends.isEmpty()) friends = null;
@@ -417,6 +432,8 @@ public class TopicImpl extends DestinationImpl
       return;
     }
   
+    // state change, so save.
+    setSave();
     // The topic accepts to be a father: setting it.
     fatherId = from;
   
@@ -454,6 +471,8 @@ public class TopicImpl extends DestinationImpl
       return;
     }
 
+    // state change, so save.
+    setSave();
     fatherId = null;
 
     info = strbuf.append("Request [").append(request.getClass().getName())
@@ -537,8 +556,14 @@ public class TopicImpl extends DestinationImpl
       throw new AccessException("READ right not granted");
 
     // Adding new subscriber.
-    if (! subscribers.contains(from))
+    if (! subscribers.contains(from)) {
+      // state change, so save.
+      setSave();
       subscribers.add(from);
+    }
+
+    // state change, so save.
+    setSave();
 
     // The requester might either be a new subscriber, or an existing one;
     // setting the selector, possibly by removing or modifying an already set
@@ -563,6 +588,8 @@ public class TopicImpl extends DestinationImpl
    */
   protected void doReact(AgentId from, UnsubscribeRequest not)
   {
+    // state change, so save.
+    setSave();
     subscribers.remove(from);
     selectors.remove(from);
 
@@ -609,6 +636,13 @@ public class TopicImpl extends DestinationImpl
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
   }
 
+  /**
+   * Returns the list of unique identifiers of all subscribers. Each user
+   * appears once even if there is multiples subscriptions, the different
+   * subscriptions can be enumerate through the proxy MBean.
+   *
+   * @return the list of unique identifiers of all subscribers.
+   */
   public String[] getSubscriberIds() {
     String[] res = new String[subscribers.size()];
     for (int i = 0; i < res.length; i++) {
@@ -677,6 +711,8 @@ public class TopicImpl extends DestinationImpl
 
     // Identified user: removing it.
     if (user != null) {
+      // state change, so save.
+      setSave();
       subscribers.remove(user);
       selectors.remove(user);
       Channel.sendTo(user, new ExceptionReply(exc));
@@ -687,6 +723,8 @@ public class TopicImpl extends DestinationImpl
            subs.hasMoreElements();) {
         user = (AgentId) subs.nextElement();
         if (! isReader(user)) {
+          // state change, so save.
+          setSave();
           subscribers.remove(user);
           selectors.remove(user);
           Channel.sendTo(user, new ExceptionReply(exc));
@@ -739,13 +777,18 @@ public class TopicImpl extends DestinationImpl
       strbuf.setLength(0);
       Channel.sendTo(fT.requester, new AdminReply(fT.request, false, info));
     } else {
+      // state change, so save.
+      setSave();
       // Removing the deleted client's subscriptions, if any.
       subscribers.remove(agId);
       selectors.remove(agId);
 
       // Removing the father identifier, if needed.
-      if (fatherId != null && agId.equals(fatherId))
+      if (fatherId != null && agId.equals(fatherId)) {
+        // state change, so save.
+        setSave();
         fatherId = null;
+      }
     }
   }
 
@@ -773,6 +816,8 @@ public class TopicImpl extends DestinationImpl
     if (friends != null) {
       AgentId topicId;
       while (! friends.isEmpty()) {
+        // state change, so save.
+        setSave();
         topicId = (AgentId) friends.remove(0);
         Channel.sendTo(topicId, new UnclusterNot());
       }
@@ -821,7 +866,10 @@ public class TopicImpl extends DestinationImpl
     Vector deliverables;
     Message message;
 
+    nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + messages.size();
+
     setNoSave();
+    boolean persistent = false;
 
     // Browsing the subscribers.
     for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
@@ -834,9 +882,10 @@ public class TopicImpl extends DestinationImpl
       if (selector == null || selector.equals("")) {
         // Subscriber not local, or no other sending occured locally: directly
         // sending the messages.
-        if (! local)
+        if (! local) {
           deliverables = messages;
-        else if (! alreadySentLocally) {
+          persistent = true;
+        } else if (! alreadySentLocally) {
           deliverables = messages;
           alreadySentLocally = true;
         }
@@ -857,21 +906,26 @@ public class TopicImpl extends DestinationImpl
 
             // Subscriber not local, or no other sending occured locally:
             // directly sending the message.
-            if (! local)
+            if (! local) {
               deliverables.add(message);
-            else if (! alreadySentLocally) {
+              persistent = true;
+            } else if (! alreadySentLocally) {
               deliverables.add(message);
               alreadySentLocally = true;
             }
             // A local sending already occured: cloning the message.
-            else
+            else 
               deliverables.add(message.clone());
           }
         }  
       }
       // There are messages to send.
-      if (! deliverables.isEmpty())
-        Channel.sendTo(subscriber, new TopicMsgsReply(deliverables));
+      if (! deliverables.isEmpty()) {
+        TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
+        topicMsgsReply.setPersistent(persistent);
+        Channel.sendTo(subscriber, topicMsgsReply);
+        nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
+      }
     }
   }
 }

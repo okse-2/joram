@@ -31,8 +31,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
-import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.management.*;
+import fr.dyade.aaa.util.management.*;
 
 /**
  * 
@@ -69,7 +68,8 @@ public class JMXServer implements MXServer {
 
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain);
-    strbuf.append(':').append(name);
+    if (name != null)
+      strbuf.append(':').append(name);
 
     try {
       mxserver.registerMBean(bean, new ObjectName(strbuf.toString()));

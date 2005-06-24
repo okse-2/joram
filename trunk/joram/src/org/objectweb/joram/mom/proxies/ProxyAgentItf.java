@@ -50,4 +50,5 @@ public interface ProxyAgentItf {
   public void sendToClient(int id, AbstractJmsReply reply);
 
   public void setNoSave();
+  public void setSave();
 }

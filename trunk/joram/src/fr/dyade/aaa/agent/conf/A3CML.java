@@ -118,12 +118,12 @@ public class A3CML {
     }
     out.write("\n");
 
-    // write all know server persistent and transient.
+    // write all know servers.
     for (Enumeration e = config.servers.elements();
          e.hasMoreElements();) {
       Object obj = e.nextElement();
 
-      if (obj instanceof A3CMLPServer)
+      if (obj instanceof A3CMLServer)
         writeToXMLServer(obj,out);
       out.write("\n");
     }
@@ -159,7 +159,7 @@ public class A3CML {
         for (Enumeration e2 = cluster.servers.elements();
              e2.hasMoreElements();) {
           Object o = e2.nextElement();
-          if (o instanceof A3CMLPServer)
+          if (o instanceof A3CMLServer)
             writeToXMLServer(o,out);
         }
         out.write(TAB + "</" + ELT_CLUSTER + ">\n");
@@ -172,8 +172,8 @@ public class A3CML {
 
   private static final void writeToXMLServer(Object obj,
                                              PrintWriter out) {
-    if (obj instanceof A3CMLPServer) {
-      A3CMLPServer server = (A3CMLPServer) obj;
+    if (obj instanceof A3CMLServer) {
+      A3CMLServer server = (A3CMLServer) obj;
       out.write(TAB + "<" + ELT_SERVER + " " + ATT_HOSTNAME + "=\"");
       out.write(server.hostname);
       out.write("\" " + ATT_ID + "=\"");

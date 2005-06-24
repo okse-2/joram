@@ -26,20 +26,25 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.List;
 import java.net.ConnectException;
 
 import javax.naming.*;
 import javax.jms.JMSException;
 
+import fr.dyade.aaa.util.management.MXWrapper;
 import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.shared.admin.*;
+
+import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>User</code> class is a utility class needed for administering
  * JORAM users.
  */
 public class User extends AdministeredObject
-{
+  implements UserMBean {
   /** The name of the user. */
   String name;
   /** Identifier of the user's proxy agent. */
@@ -101,11 +106,21 @@ public class User extends AdministeredObject
    * @exception AdminException  If the request fails.
    */ 
   public static User create(String name, String password, int serverId)
-         throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
     AdminReply reply = AdminModule.doRequest(
       new CreateUserRequest(name, password, serverId));
-    return new User(name, ((CreateUserReply) reply).getProxId());
+    User user = new User(name, ((CreateUserReply) reply).getProxId());
+    try {
+      MXWrapper.registerMBean(user,
+                              "joramClient",
+                              "type=User,name="+name+
+                              "["+user.getProxyId()+"]");
+    } catch (Exception e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "registerMBean",e);
+    }
+    return user;
   }
   
   /**
@@ -141,8 +156,7 @@ public class User extends AdministeredObject
    * @exception AdminException  If the request fails.
    */
   public void update(String newName, String newPassword)
-         throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
     AdminModule.doRequest(new UpdateUser(name, proxyId, newName, newPassword));
     name = newName;
   }
@@ -153,9 +167,17 @@ public class User extends AdministeredObject
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public void delete() throws ConnectException, AdminException
-  {
+  public void delete() throws ConnectException, AdminException {
     AdminModule.doRequest(new DeleteUser(name, proxyId));
+    try {
+      MXWrapper.unregisterMBean("joramClient",
+                                "type=User,name="+name+
+                                "["+proxyId+"]");
+    } catch (Exception e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "unregisterMBean",e);
+    }
   } 
 
   /**
@@ -231,6 +253,42 @@ public class User extends AdministeredObject
   }
 
   /**
+   * Admin method setting nbMaxMsg for this subscription.
+   * <p>
+   * The request fails if the sub is deleted server side.
+   *
+   * @param subName the name of the subscription.
+   * @param nbMaxMsg  nb Max of Message (-1 no limit).
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void setNbMaxMsg(String subName, int nbMaxMsg)
+    throws ConnectException, AdminException {
+    Subscription sub = getSubscription(subName);
+    AdminModule.doRequest(new SetNbMaxMsg(proxyId, nbMaxMsg, subName));
+  } 
+
+  /** 
+   * Monitoring method returning the nbMaxMsg of this subscription, -1 if no limit.
+   * <p>
+   * The request fails if the sub is deleted server side.
+   *
+   * @param subName the name of the subscription.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public int getNbMaxMsg(String subName) 
+    throws ConnectException, AdminException {
+    Subscription sub = getSubscription(subName);
+    Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(proxyId, subName);
+    Monitor_GetNbMaxMsgRep reply;
+    reply = (Monitor_GetNbMaxMsgRep) AdminModule.doRequest(request);
+    return reply.getNbMaxMsg();
+  }
+
+  /**
    * Returns the subscriptions owned by a user.
    *
    * @param serverId the identifier of the server where the user has been
@@ -262,6 +320,17 @@ public class User extends AdministeredObject
     return res;
   }
 
+  /** used by MBean jmx */
+  public List getSubscriptionList() 
+    throws AdminException, ConnectException {
+    Vector list = new Vector();
+    Subscription[] sub = getSubscriptions();
+    for (int i = 0; i < sub.length; i++) {
+      list.add(sub[i].toString());
+    }
+    return list;
+  }
+
   /**
    * Returns a subscription.
    *
@@ -287,6 +356,12 @@ public class User extends AdministeredObject
       reply.getTopicId(),
       reply.getMessageCount(),
       reply.getDurable());
+  }
+
+  public String getSubscriptionString(String subName) 
+    throws AdminException, ConnectException {
+    Subscription sub = getSubscription(subName);
+    return sub.toString();
   }
 
   public String[] getMessageIds(String subName) 

@@ -59,7 +59,7 @@ final class GCEngine extends Engine {
     }
     loop += 1;
 
-    AgentServer.transaction.begin();
+    AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
     // .. then deletes it ..
@@ -97,10 +97,10 @@ final class GCEngine extends Engine {
       // Post all notifications temporary keeped in mq in the rigth consumers,
       // then saves changes.
       dispatch();
-      AgentServer.transaction.commit();
+      AgentServer.getTransaction().commit();
       // The transaction has commited, then validate all messages.
       Channel.validate();
     }
-    AgentServer.transaction.release();
+    AgentServer.getTransaction().release();
   }
 }

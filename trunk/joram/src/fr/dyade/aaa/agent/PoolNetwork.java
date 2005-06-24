@@ -350,10 +350,10 @@ public class PoolNetwork extends StreamNetwork {
 	writeBoot(sock.getOutputStream());
         int boot = readAck(sock.getInputStream());
 
-        AgentServer.transaction.begin();
+        AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.transaction.commit();
-        AgentServer.transaction.release();
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         nis = new MessageInputStream(sock.getInputStream());
         nos = new MessageOutputStream(sock.getOutputStream());
@@ -421,10 +421,10 @@ public class PoolNetwork extends StreamNetwork {
 
         writeAck(sock.getOutputStream());
 
-        AgentServer.transaction.begin();
+        AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.transaction.commit();
-        AgentServer.transaction.release();
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         nis = new MessageInputStream(sock.getInputStream());
         nos = new MessageOutputStream(sock.getOutputStream());
@@ -574,11 +574,11 @@ public class PoolNetwork extends StreamNetwork {
         //  Suppress the acknowledged notification from waiting list,
         // and deletes it.
         msg = sendList.removeMessage(ack);
-        AgentServer.transaction.begin();
+        AgentServer.getTransaction().begin();
         msg.delete();
         msg.free();
-        AgentServer.transaction.commit();
-        AgentServer.transaction.release();
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

@@ -350,14 +350,14 @@ public class HttpNetwork extends StreamNetwork {
   protected int handle(Message msgout) throws Exception {
     int ack = nis.getAckStamp();
     if ((msgout != null) && (msgout.stamp == ack)) {
-      AgentServer.transaction.begin();
+      AgentServer.getTransaction().begin();
       //  Suppress the processed notification from message queue,
       // and deletes it.
       qout.pop();
       msgout.delete();
       msgout.free();
-      AgentServer.transaction.commit();
-      AgentServer.transaction.release();
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
     }
 
     Message msg = nis.getMessage();

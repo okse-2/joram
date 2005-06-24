@@ -64,14 +64,14 @@ public class ServerConfigHelper {
       domainName, 
       fr.dyade.aaa.agent.SimpleNetwork.class.getName());
     a3cmlConfig.addDomain(domain);
-    A3CMLPServer a3cmlServer = (A3CMLPServer)a3cmlConfig.getServer((short)routerId);
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)routerId);
     domain.addServer(a3cmlServer);
     A3CMLNetwork a3cmlNetwork = new A3CMLNetwork(domainName, port);
     a3cmlServer.addNetwork(a3cmlNetwork);
 
     A3CMLServer root = a3cmlConfig.getServer(
       AgentServer.getServerId());
-    a3cmlConfig.configure((A3CMLPServer) root);
+    a3cmlConfig.configure(root);
 
     boolean res = false;
     if (routerId == AgentServer.getServerId()) {
@@ -95,7 +95,7 @@ public class ServerConfigHelper {
 
         a3cmlServer.removeNetwork(domainName);
         a3cmlConfig.removeDomain(domainName);
-        a3cmlConfig.configure((A3CMLPServer) root);
+        a3cmlConfig.configure(root);
 
         throw new StartFailureException(exc.getMessage());
       }
@@ -129,9 +129,9 @@ public class ServerConfigHelper {
     if (domain.servers.size() > 1) 
       throw new Exception("Can't remove domain: it contains more than one server.");
 
-    A3CMLPServer router = null;    
+    A3CMLServer router = null;    
     if (domain.servers.size() == 1) {
-      router = (A3CMLPServer)domain.servers.elementAt(0);
+      router = (A3CMLServer) domain.servers.elementAt(0);
     }
     
     // Update the configuration and the run-time entities
@@ -143,7 +143,7 @@ public class ServerConfigHelper {
     }
 
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
-    a3cmlConfig.configure((A3CMLPServer) root);
+    a3cmlConfig.configure(root);
 
     boolean res = false;
     if (router != null && 
@@ -182,10 +182,7 @@ public class ServerConfigHelper {
     A3CMLDomain domain = 
         (A3CMLDomain) a3cmlConfig.getDomain(domainName);
     
-    A3CMLPServer server = new A3CMLPServer(
-      (short)sid,
-      name,
-      hostName);
+    A3CMLServer server = new A3CMLServer((short)sid, name, hostName);
     a3cmlConfig.addServer(server);
 
     A3CMLNetwork network = new A3CMLNetwork(domainName, port);
@@ -194,7 +191,7 @@ public class ServerConfigHelper {
     server.domain = domainName;
 
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
-    a3cmlConfig.configure((A3CMLPServer) root);
+    a3cmlConfig.configure(root);
     
     ServerDesc serverDesc = new ServerDesc(
       (short)sid,
@@ -238,7 +235,7 @@ public class ServerConfigHelper {
       a3cmlConfig.removeServer((short)sid);
       
       A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
-      a3cmlConfig.configure((A3CMLPServer) root);
+      a3cmlConfig.configure(root);
       
       ServerDesc servDesc = 
         AgentServer.removeServerDesc((short)sid);

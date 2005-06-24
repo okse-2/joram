@@ -78,14 +78,14 @@ public class ServiceManager implements Serializable {
    *	if the corresponding image class may not be found
    */
   static ServiceManager load() throws IOException, ClassNotFoundException {
-    return (ServiceManager) AgentServer.transaction.load("serviceManager");
+    return (ServiceManager) AgentServer.getTransaction().load("serviceManager");
   }
 
   /**
    * Saves object in persistent storage.
    */
   static void save() throws IOException {
-    AgentServer.transaction.save(manager, "serviceManager");
+    AgentServer.getTransaction().save(manager, "serviceManager");
   }
 
   /** repository holding <code>Service</code>s */

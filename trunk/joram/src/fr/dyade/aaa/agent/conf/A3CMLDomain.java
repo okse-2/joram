@@ -100,7 +100,7 @@ public class A3CMLDomain implements Serializable {
     A3CMLDomain clone = new A3CMLDomain(name,network);
     if (servers != null) {
       for (Enumeration s = servers.elements(); s.hasMoreElements(); )
-        clone.addServer(((A3CMLPServer) s.nextElement()).duplicate());
+        clone.addServer(((A3CMLServer) s.nextElement()).duplicate());
     }
     clone.gateway = gateway;
     return clone;
@@ -110,7 +110,7 @@ public class A3CMLDomain implements Serializable {
     A3CMLDomain clone = new A3CMLDomain(name,network);
     if (servers != null) {
       for (Enumeration s = servers.elements(); s.hasMoreElements(); )
-        clone.addServer(((A3CMLPServer) s.nextElement()).duplicate(context));
+        clone.addServer(((A3CMLServer) s.nextElement()).duplicate(context));
     }
     clone.gateway = gateway;
     return clone;

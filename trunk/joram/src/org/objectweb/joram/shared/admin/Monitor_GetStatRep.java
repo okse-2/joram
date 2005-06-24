@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2005 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,21 +17,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s):
  */
-package org.objectweb.joram.client.connector;
+package org.objectweb.joram.shared.admin;
+
+import java.util.Hashtable;
 
 
 /**
- * The <code>RemoteServerMBean<code> interface defines the administration
- * methods provided by the <code>RemoteServer</code> class.
+ * A <code>Monitor_GetStatRep</code> instance replies to a get stat,
+ * monitoring request.
  */
-public interface RemoteServerMBean
-{
-  public String getRemoteServerId();
+public class Monitor_GetStatRep extends Monitor_Reply {
+  /** Table holding the statistic. */
+  private Hashtable stats;
 
-  public java.util.List retrieveRemoteQueuesNames() throws Exception;
+  /**
+   * Constructs a <code>Monitor_GetStatRep</code> instance.
+   */
+  public Monitor_GetStatRep(Hashtable stats) {
+    this.stats = stats;
+  }
 
-  public java.util.List retrieveRemoteTopicsNames() throws Exception;
+  /** Returns the stats table. */
+  public Hashtable getStats() {
+    return stats;
+  }
 }

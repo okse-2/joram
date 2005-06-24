@@ -499,8 +499,7 @@ public class AdminTool extends JFrame
         if (subRootTn.getChildCount() == 0) {
           TopicTreeNode topicTn = (TopicTreeNode)subRootTn.getParent();
           String[] subscriberIds = 
-            topicTn.getTopic().getSubscriberIds(
-              (javax.jms.Topic)topicTn.getDestination());
+            topicTn.getTopic().getSubscriberIds();
           for (int i = 0; i < subscriberIds.length; i++) {
             SubscriberTreeNode subTn = new SubscriberTreeNode(
               subscriberIds[i]);
@@ -516,8 +515,7 @@ public class AdminTool extends JFrame
         if (msgRootTn.getChildCount() == 0) {
           QueueTreeNode queueTn = 
             (QueueTreeNode)msgRootTn.getParent();
-          String[] msgIds = queueTn.getQueue().getMessageIds(
-            (javax.jms.Queue)queueTn.getDestination());
+          String[] msgIds = queueTn.getQueue().getMessageIds();
           for (int i = 0; i < msgIds.length; i++) {
             MessageTreeNode msgTn = new MessageTreeNode(
               c, msgIds[i]);

@@ -70,7 +70,7 @@ final class AgentIdStamp implements Serializable {
    *  Saves the object state on persistent storage.
    */
   void save() throws IOException {
-    AgentServer.transaction.save(this, "AgentIdStamp");
+    AgentServer.getTransaction().save(this, "AgentIdStamp");
   }
 
   /**
@@ -78,7 +78,7 @@ final class AgentIdStamp implements Serializable {
    */
   static AgentIdStamp
   load() throws IOException, ClassNotFoundException {
-    return (AgentIdStamp) AgentServer.transaction.load("AgentIdStamp");
+    return (AgentIdStamp) AgentServer.getTransaction().load("AgentIdStamp");
   }
 
   /**
@@ -353,30 +353,65 @@ public final class AgentId implements Serializable {
   }
 
   /**
+   * Parses the string argument as a non signed integer.
+   * The characters in the substring must all be digits.
+   *
+   * @param      str   	the <code>String</code> containing the integer 
+   * 		        representation to be parsed.
+   * @param      idx	the beginning index, inclusive.
+   * @param      end	the ending index, exclusive.
+   * @return     	the integer represented by the string argument.
+   * @exception  NumberFormatException if the <code>String</code>
+   * 		   	does not contain a parsable <code>int</code>.
+   */
+  public static final int parseInt(String str,
+                                   int idx,
+                                   int end) throws NumberFormatException {
+    int result = 0;
+    int digit;
+    int limit = Integer.MAX_VALUE / 10;
+    int digitzero = '0';
+        
+    while (idx < end) {
+      digit = str.charAt(idx++) - digitzero;
+      if ((digit < 0) || (digit > 9))
+        throw new NumberFormatException("bad digit");
+
+      if (result >= limit)
+        throw new NumberFormatException("limit");
+
+      result *= 10;
+      result += digit;
+    }
+
+    return result;
+  }
+
+  /**
    * Parses the string argument as an <code>AgentId</code>.
    *
    * @return	The <code>AgentId</code> object represented by the argument.
    */
-  public static AgentId fromString(String str) {
+  public static final AgentId fromString(String str) {
     if (str == null) return null;
     if (str.charAt(0) != '#')
       throw new IllegalArgumentException(str + ": bad id");
-    short from;
-    short to;
-    int stamp;
+
     try {
-      String buf = str.substring(1);
-      int index = buf.indexOf('.');
-      from = Short.parseShort(buf.substring(0, index));
-      buf = buf.substring(index+1);
-      index = buf.indexOf('.');
-      to = Short.parseShort(buf.substring(0, index));
-      buf = buf.substring(index+1);
-      stamp = Integer.parseInt(buf);
+      int start = 1;
+      int end = str.indexOf('.', start);
+      short from = (short) parseInt(str, start, end);
+      start = end +1;
+      end = str.indexOf('.', start);
+      short to = (short) parseInt(str, start, end);
+      start = end +1;
+      end = str.length();
+      int stamp = parseInt(str, start, end);
+
+      return new AgentId(from, to, stamp);
     } catch (Exception exc) {
       throw new IllegalArgumentException(str + ": " + exc);
     }
-    return new AgentId(from, to, stamp);
   }
 
   /**

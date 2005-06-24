@@ -59,11 +59,15 @@ public class Channel {
    * subclasses).
    */
   protected Channel() {
+    consumers = new Vector();
+
     // Get the logging monitor from current server MonologLoggerFactory
     logmon = Debug.getLogger(Debug.A3Engine +
                              ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
   }
+
+  static Vector consumers = null;
 
   /**
    * Sends a notification to an agent. It may be used anywhere,
@@ -118,7 +122,11 @@ public class Channel {
    */
   static final void post(Message msg) throws Exception {
     try {
-      AgentServer.getConsumer(msg.to.getTo()).post(msg);
+      MessageConsumer cons = AgentServer.getConsumer(msg.to.getTo());
+      if (! consumers.contains(cons)) {
+        consumers.add(cons);
+      }
+      cons.post(msg);
     } catch (UnknownServerException exc) {
       channel.logmon.log(BasicLevel.ERROR,
                          channel.toString() + ", can't post message: " + msg,
@@ -131,8 +139,8 @@ public class Channel {
    * Save state of all modified consumer.
    */
   static final void save() throws IOException {
-    for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-      ((MessageConsumer) c.nextElement()).save();
+    for (int i=0; i<consumers.size(); i++) {
+      ((MessageConsumer) consumers.elementAt(i)).save();
     }
   }
 
@@ -148,9 +156,10 @@ public class Channel {
    * @see Engine#commit()
    */
   static final void validate() {
-    for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-      ((MessageConsumer) c.nextElement()).validate();
+    for (int i=0; i<consumers.size(); i++) {
+      ((MessageConsumer) consumers.elementAt(i)).validate();
     }
+    consumers.clear();
   }
 
   /**
@@ -195,13 +204,13 @@ public class Channel {
     }
 
     try {
-      AgentServer.transaction.begin();
+      AgentServer.getTransaction().begin();
       consumer.post(msg);
       consumer.save();
-      AgentServer.transaction.commit();
+      AgentServer.getTransaction().commit();
       // then commit and validate the message.
       consumer.validate();
-      AgentServer.transaction.release();
+      AgentServer.getTransaction().release();
     } catch (Exception exc) {
       // Should never happened (IOException or ClassNotFoundException).
       logmon.log(BasicLevel.FATAL,
