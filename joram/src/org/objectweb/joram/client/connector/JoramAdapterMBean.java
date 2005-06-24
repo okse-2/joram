@@ -84,4 +84,6 @@ public interface JoramAdapterMBean
    * considered as dead and processed as required.
    */
   public java.lang.Integer getCnxPendingTimer();
+
+  public void removeDestination(String name) throws AdminException;
 }
