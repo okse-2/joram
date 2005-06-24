@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,10 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  */
-package fr.dyade.aaa.agent.management;
-
-import java.io.*;
-import java.util.*;
+package fr.dyade.aaa.util.management;
 
 public interface  MXServer {
   public void registerMBean(Object bean,
