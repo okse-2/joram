@@ -31,17 +31,18 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.shared.admin.*;
 import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Vector;
 
 import javax.naming.*;
 
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.Destination</code> interface and provides
@@ -49,8 +50,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public abstract class Destination
   extends AdministeredObject
-  implements javax.jms.Destination
-{
+  implements javax.jms.Destination, DestinationMBean {
   /** Identifier of the agent destination. */
   protected String agentId;
 
@@ -180,9 +180,22 @@ public abstract class Destination
    * @exception JMSException      Never thrown.
    */
   public void delete()
-         throws ConnectException, AdminException, javax.jms.JMSException
-  {
+    throws ConnectException, AdminException, javax.jms.JMSException {
     AdminModule.doRequest(new DeleteDestination(getName()));
+    if (MXWrapper.mxserver != null) {
+      StringBuffer buff = new StringBuffer();
+      buff.append("type=");
+      buff.append(getType());
+      buff.append(",name=");
+      buff.append(getAdminName());
+      try {
+        MXWrapper.unregisterMBean("joramClient",buff.toString());
+      } catch (Exception e) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                     "unregisterMBean",e);
+      }
+    }
   }
 
   /**
@@ -252,6 +265,12 @@ public abstract class Destination
     AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
   }
 
+  /** used by MBean jmx */
+  public void addReader(String proxyId)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetReader(proxyId, getName()));
+  }
+
   /**
    * Admin method setting a given user as a writer on this destination.
    * <p>
@@ -267,6 +286,12 @@ public abstract class Destination
     AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
   }
 
+  /** used by MBean jmx */
+  public void addWriter(String proxyId)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetWriter(proxyId, getName()));
+  }
+
   /**
    * Admin method unsetting a given user as a reader on this destination.
    * <p>
@@ -277,9 +302,15 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetReader(User user) throws ConnectException, AdminException
-  {
+  public void unsetReader(User user) 
+    throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetReader(user.getProxyId(), getName()));
+  }
+
+  /** used by MBean jmx */
+  public void removeReader(String proxyId)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(new UnsetReader(proxyId, getName()));
   }
 
   /**
@@ -292,11 +323,16 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetWriter(User user) throws ConnectException, AdminException
-  {
+  public void unsetWriter(User user) 
+    throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetWriter(user.getProxyId(), getName()));
   }
 
+  /** used by MBean jmx */
+  public void removeWriter(String proxyId)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(new UnsetWriter(proxyId, getName()));
+  }
 
   /**
    * Admin method setting or unsetting a dead message queue for this
@@ -346,6 +382,16 @@ public abstract class Destination
     return list;
   }
 
+  /** used by MBean jmx */
+  public List getReaderList() throws ConnectException, AdminException {
+    Vector list = new Vector();
+    List readers = getReaders();
+    for (ListIterator iterator = readers.listIterator(); iterator.hasNext(); ) {
+      list.add(iterator.next().toString());
+    }
+    return list;
+  }
+
   /**
    * Monitoring method returning the list of all users that have a writing
    * permission on this destination, or an empty list if no specific writers
@@ -372,6 +418,16 @@ public abstract class Destination
     return list;
   }
 
+  /** used by MBean jmx */
+  public List getWriterList() throws ConnectException, AdminException {
+    Vector list = new Vector();
+    List readers = getWriters();
+    for (ListIterator iterator = readers.listIterator(); iterator.hasNext(); ) {
+      list.add(iterator.next().toString());
+    }
+    return list;
+  }
+
   /**
    * Monitoring method returning <code>true</code> if this destination
    * provides free READ access.
@@ -390,6 +446,15 @@ public abstract class Destination
     return reply.getFreeReading();
   }
 
+  /** used by MBean */
+  public void setFreelyReadable(boolean b)
+    throws ConnectException, AdminException {
+    if (b)
+      setFreeReading();
+    else 
+      unsetFreeReading();
+  }
+
   /**
    * Monitoring method returning <code>true</code> if this destination
    * provides free WRITE access.
@@ -406,6 +471,15 @@ public abstract class Destination
     reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
     return reply.getFreeWriting();
+  }
+
+  /** used by MBean */
+  public void setFreelyWriteable(boolean b) 
+    throws ConnectException, AdminException {
+    if (b)
+      setFreeWriting();
+    else
+      unsetFreeWriting();
   }
 
   /** 
@@ -462,5 +536,14 @@ public abstract class Destination
   public static boolean isAssignableTo(String realType,
                                        String resultingType) {
     return realType.startsWith(resultingType);
+  }
+
+  public Hashtable getStatistic() 
+    throws ConnectException, AdminException {
+    Monitor_GetStat request =
+      new Monitor_GetStat(agentId);
+    Monitor_GetStatRep reply =
+      (Monitor_GetStatRep) AdminModule.doRequest(request);
+    return  reply.getStats();
   }
 }

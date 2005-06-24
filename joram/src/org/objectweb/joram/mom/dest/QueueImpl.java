@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,14 +52,37 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>QueueImpl</code> class implements the MOM queue behaviour,
  * basically storing messages and delivering them upon clients requests.
  */
-public class QueueImpl extends DestinationImpl {
-
+public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /**
    * Threshold above which messages are considered as undeliverable because
    * constantly denied; 0 stands for no threshold, <code>null</code> for value
    * not set.
    */
   private Integer threshold = null;
+
+  /**
+   * Returns  the threshold value of this queue, -1 if not set.
+   *
+   * @return the threshold value of this queue; -1 if not set.
+   */
+  public int getThreshold() {
+    if (threshold == null)
+      return -1;
+    else
+      return threshold.intValue();
+  }
+
+  /**
+   * Sets or unsets the threshold for this queue.
+   *
+   * @param The threshold value to be set (-1 for unsetting previous value).
+   */
+  public void setThreshold(int threshold) {
+    if (threshold < 0)
+      this.threshold = null;
+    else
+      this.threshold = new Integer(threshold);
+  }
 
   /** <code>true</code> if all the stored messages have the same priority. */
   private boolean samePriorities;
@@ -74,15 +97,90 @@ public class QueueImpl extends DestinationImpl {
   /** Counter of messages arrivals. */
   protected long arrivalsCounter = 0;
 
+  /**
+   * Returns the number of messages received since creation time.
+   *
+   * @return The number of received messages.
+   */
+  public int getMessageCounter() {
+    if (messages != null) {
+      return messages.size();
+    }
+    return 0;
+  }
+
   /** Vector holding the requests before reply or expiry. */
   protected Vector requests;
 
+  /**
+   * Returns the number of waiting requests in the queue.
+   *
+   * @return The number of waiting requests.
+   */
+  public int getWaitingRequestCount() {
+    if (requests != null) {
+      return requests.size();
+    }
+    return 0;
+  }
+
   /** <code>true</code> if the queue is currently receiving messages. */
   protected transient boolean receiving = false;
+
   /** Vector holding the messages before delivery. */
   protected transient Vector messages;
+
+  /**
+   * Returns the number of pending messages in the queue.
+   *
+   * @return The number of pending messages.
+   */
+  public int getPendingMessageCount() {
+    if (messages != null) {
+      return messages.size();
+    }
+    return 0;
+  }
+
   /** Table holding the delivered messages before acknowledgement. */
   protected transient Hashtable deliveredMsgs;
+
+  /**
+   * Returns the number of messages delivered and waiting for acknowledge.
+   *
+   * @return The number of messages delivered.
+   */
+  public int getDeliveredMessageCount() {
+    if (deliveredMsgs != null) {
+      return deliveredMsgs.size();
+    }
+    return 0;
+  }
+
+  /** nb Max of Message store in queue (-1 no limit). */
+  protected int nbMaxMsg = -1;
+
+  /**
+   * Returns the maximum number of message for the destination.
+   * If the limit is unset the method returns -1.
+   *
+   * @return the maximum number of message for subscription if set;
+   *	     -1 otherwise.
+   */
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
+
+  /**
+   * Sets the maximum number of message for the destination.
+   *
+   * @param nbMaxMsg the maximum number of message (-1 set no limit).
+   */
+  public void setNbMaxMsg(int nbMaxMsg) {
+    // state change, so save.
+    setSave();
+    this.nbMaxMsg = nbMaxMsg;
+  }
 
   /**
    * Constructs a <code>QueueImpl</code> instance.
@@ -98,8 +196,10 @@ public class QueueImpl extends DestinationImpl {
     requests = new Vector();
   }
 
-  public String toString()
-  {
+  /**
+   * Returns a string representation of this destination.
+   */
+  public String toString() {
     return "QueueImpl:" + destId.toString();
   }
 
@@ -115,6 +215,7 @@ public class QueueImpl extends DestinationImpl {
       MomTracing.dbgDestination.log(
         BasicLevel.DEBUG,
         "QueueImpl.react(" + from + ',' + not + ')');
+
     int reqId = -1;
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
@@ -127,10 +228,14 @@ public class QueueImpl extends DestinationImpl {
     try {
       if (not instanceof SetThreshRequest)
         doReact(from, (SetThreshRequest) not);
+      else if (not instanceof SetNbMaxMsgRequest)
+        doReact(from, (SetNbMaxMsgRequest) not);
       else if (not instanceof Monit_GetPendingMessages)
         doReact(from, (Monit_GetPendingMessages) not);
       else if (not instanceof Monit_GetPendingRequests)
         doReact(from, (Monit_GetPendingRequests) not);
+      else if (not instanceof Monit_GetNbMaxMsg)
+        doReact(from, (Monit_GetNbMaxMsg) not);
       else if (not instanceof ReceiveRequest)
         doReact(from, (ReceiveRequest) not);
       else if (not instanceof BrowseRequest)
@@ -167,10 +272,12 @@ public class QueueImpl extends DestinationImpl {
    * @exception AccessException  If the requester is not the administrator.
    */
   protected void doReact(AgentId from, SetThreshRequest req)
-                 throws AccessException
-  {
+    throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
+
+    // state change, so save.
+    setSave();
 
     threshold = req.getThreshold();
     
@@ -178,6 +285,30 @@ public class QueueImpl extends DestinationImpl {
       .append("], sent to Queue [").append(destId)
       .append("], successful [true]: threshold [")
       .append(threshold).append("] set").toString();
+    strbuf.setLength(0);
+    Channel.sendTo(from, new AdminReply(req, true, info));
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
+   * instance setting the NbMaxMsg value for this queue.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, SetNbMaxMsgRequest req)
+    throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    nbMaxMsg = req.getNbMaxMsg();
+    
+    String info = strbuf.append("Request [").append(req.getClass().getName())
+      .append("], sent to Queue [").append(destId)
+      .append("], successful [true]: nbMaxMsg [")
+      .append(nbMaxMsg).append("] set").toString();
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(req, true, info));
 
@@ -267,13 +398,30 @@ public class QueueImpl extends DestinationImpl {
       request = (ReceiveRequest) requests.get(index);
 
       // Request expired: removing it
-      if (! request.isValid())
+      if (! request.isValid()) {
+        // state change, so save.
+        setSave();
         requests.remove(index);
-      else
+      } else
         index++;
     }
 
     Channel.sendTo(from, new Monit_GetNumberRep(not, requests.size()));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetNbMaxMsg</code> notification requesting the
+   * number max of messages in this queue.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetNbMaxMsg not)
+    throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Channel.sendTo(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
   }
 
   /**
@@ -301,6 +449,10 @@ public class QueueImpl extends DestinationImpl {
     // Storing the request:
     not.requester = from;
     not.setExpiration(System.currentTimeMillis());
+    if (not.isPersistent()) {
+      // state change, so save.
+      setSave();
+    }
     requests.add(not);
 
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -402,6 +554,10 @@ public class QueueImpl extends DestinationImpl {
   
   private void acknowledge(String msgId) {
     Message msg = (Message) deliveredMsgs.remove(msgId);
+    if (msg.getPersistent()) {
+      // state change, so save.
+      setSave();
+    }
     consumers.remove(msgId);
     contexts.remove(msgId);
     if (msg != null) {
@@ -461,6 +617,8 @@ public class QueueImpl extends DestinationImpl {
         // If the current message has been consumed by the denier in the same
         // context: denying it.
         if (consId.equals(from) && consCtx == not.getClientContext()) {
+          // state change, so save.
+          setSave();
           consumers.remove(msgId);
           contexts.remove(msgId);
           deliveredMsgs.remove(msgId);
@@ -512,6 +670,8 @@ public class QueueImpl extends DestinationImpl {
           MomTracing.dbgDestination.log(
             BasicLevel.ERROR, " -> deny " + msgId);
 
+      // state change, so save.
+      setSave();
       consumers.remove(msgId);
       contexts.remove(msgId);
 
@@ -549,6 +709,10 @@ public class QueueImpl extends DestinationImpl {
       if (request.requester.equals(from) &&
           request.getClientContext() == not.getClientContext() &&
           request.getRequestId() == not.getAbortedRequestId()) {
+        if (not.isPersistent()) {
+          // state change, so save.
+          setSave();
+        }
         requests.remove(i);
         break;
       }
@@ -727,6 +891,8 @@ public class QueueImpl extends DestinationImpl {
           exc = new AccessException("Free READ access removed");
           reply = new ExceptionReply(request, exc);
           Channel.sendTo(request.requester, reply);
+          // state change, so save.
+          setSave();
           requests.remove(i);
           i--;
         }
@@ -741,6 +907,8 @@ public class QueueImpl extends DestinationImpl {
           exc = new AccessException("READ right removed");
           reply = new ExceptionReply(request, exc);
           Channel.sendTo(request.requester, reply);
+          // state change, so save.
+          setSave();
           requests.remove(i);
           i--;
         }
@@ -766,6 +934,10 @@ public class QueueImpl extends DestinationImpl {
         arrivalsCounter = 0;
 
       msg = (Message) msgs.nextElement();
+      if (not.isPersistent()) {
+        // state change, so save.
+        setSave();
+      }
       msg.order = arrivalsCounter++;
       storeMessage(msg);
     }
@@ -809,6 +981,8 @@ public class QueueImpl extends DestinationImpl {
         deliveredMsgs.remove(msgId);
         msg.denied = true;
 
+        // state change, so save.
+        setSave();
         consumers.remove(msgId);
         contexts.remove(msgId);
 
@@ -889,6 +1063,15 @@ public class QueueImpl extends DestinationImpl {
    */
   protected synchronized void storeMessage(Message message)
   {
+    nbMsgsReceiveSinceCreation++;
+
+    if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
+      ClientMessages deadMessages = new ClientMessages();
+      deadMessages.addMessage(message);
+      sendToDMQ(deadMessages, null);
+      return;
+    }
+
     if (messages.isEmpty()) {
       samePriorities = true;
       priority = message.getPriority();
@@ -917,7 +1100,7 @@ public class QueueImpl extends DestinationImpl {
     } else {
       // Non constant priorities: inserting the message according to its 
       // priority.
-         Message currentMsg;
+      Message currentMsg;
       int currentP;
       long currentO;
       int i = 0;
@@ -1000,6 +1183,8 @@ public class QueueImpl extends DestinationImpl {
                 notMsg.setPersistent(false);
               }
 
+              nbMsgsDeliverSinceCreation++;
+
               // use in sub class see ClusterQueueImpl
               messageDelivered(msg.getIdentifier());
 
@@ -1016,6 +1201,10 @@ public class QueueImpl extends DestinationImpl {
                 msg.delete();
               // Else, putting the message in the delivered messages table:
               else {
+                if (notMsg.isPersistent()) {
+                  // state change, so save.
+                  setSave();
+                }
                 consumers.put(msg.getIdentifier(), notRec.requester);
                 contexts.put(msg.getIdentifier(),
                              new Integer(notRec.getClientContext()));

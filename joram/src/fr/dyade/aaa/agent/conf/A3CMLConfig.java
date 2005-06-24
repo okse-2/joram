@@ -498,7 +498,7 @@ public class A3CMLConfig implements Serializable {
   /**
    *  Adapts the current configuration to the specified persistent server.
    */
-  public void configure(A3CMLPServer root) throws Exception {
+  public void configure(A3CMLServer root) throws Exception {
     short rootid = root.sid;
     Vector toExplore = new Vector();
 
@@ -528,7 +528,7 @@ public class A3CMLConfig implements Serializable {
     while (toExplore.size() > 0) {
       A3CMLDomain domain = (A3CMLDomain) toExplore.elementAt(0);
       toExplore.removeElementAt(0);
-      A3CMLPServer gateway = (A3CMLPServer) servers.get(new Short(domain.gateway));
+      A3CMLServer gateway = (A3CMLServer) servers.get(new Short(domain.gateway));
 
       if (Log.logger.isLoggable(BasicLevel.DEBUG))
         Log.logger.log(BasicLevel.DEBUG, "configure - explore(" + domain + ")");
@@ -536,7 +536,7 @@ public class A3CMLConfig implements Serializable {
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
 	   s.hasMoreElements();) {
-	A3CMLPServer server = (A3CMLPServer) s.nextElement();
+	A3CMLServer server = (A3CMLServer) s.nextElement();
 
         if (server.visited) continue;
 
@@ -606,10 +606,8 @@ public class A3CMLConfig implements Serializable {
       A3CMLServer server = (A3CMLServer) s.nextElement();
       if (Log.logger.isLoggable(BasicLevel.DEBUG))
         Log.logger.log(BasicLevel.DEBUG, "configure - verify " + server);
-      if (server instanceof A3CMLPServer) {
         if (! server.visited)
           throw new Exception(server + " inaccessible");
-      }
     }
   }
 
@@ -638,7 +636,7 @@ public class A3CMLConfig implements Serializable {
     
     // add persistent server in domainConf.
     for (int i = 0; i < dom.servers.size(); i++) {
-      A3CMLPServer server = (A3CMLPServer) dom.servers.elementAt(i);
+      A3CMLServer server = (A3CMLServer) dom.servers.elementAt(i);
       domainConf.servers.put(new Short(server.sid),server);
     }
 
@@ -653,7 +651,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLPServer s0 = (A3CMLPServer) domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {
@@ -705,7 +703,7 @@ public class A3CMLConfig implements Serializable {
       
       // add persistent server in domainConf.
       for (int i = 0; i < dom.servers.size(); i++) {
-        A3CMLPServer server = (A3CMLPServer) dom.servers.elementAt(i);
+        A3CMLServer server = (A3CMLServer) dom.servers.elementAt(i);
         for (int j = 0; j < server.networks.size(); ) {
           A3CMLNetwork network = (A3CMLNetwork) server.networks.elementAt(j);
           if (!(network.domain.equals(AgentServer.ADMIN_DOMAIN) ||
@@ -730,7 +728,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLPServer s0 = (A3CMLPServer) domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {
@@ -982,10 +980,7 @@ public class A3CMLConfig implements Serializable {
     for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
       A3CMLServer server = (A3CMLServer) s.nextElement();
       server.visited = false;
-      if (server instanceof A3CMLPServer)
-        // don't reset gateway attribute for transient server (set
-        // in initialization).
-        server.gateway = (short) -1;
+      server.gateway = (short) -1;
     }
     for (Enumeration d = domains.elements(); d.hasMoreElements(); ) {
       A3CMLDomain domain = (A3CMLDomain) d.nextElement();

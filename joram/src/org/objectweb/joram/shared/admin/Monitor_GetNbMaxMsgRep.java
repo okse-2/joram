@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2005 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,24 +17,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s):
  */
-package org.objectweb.joram.client.connector;
+package org.objectweb.joram.shared.admin;
 
 
 /**
- * The <code>LocalTopicMBean<code> interface defines the administration
- * methods provided by the <code>LocalTopic</code> class.
+ * A <code>Monitor_GetNbMaxMsgRep</code> instance replies to a get NbMaxMsg,
+ * monitoring request.
  */
-public interface LocalTopicMBean
-{
-  public String getAgentId();
+public class Monitor_GetNbMaxMsgRep extends Monitor_Reply {
+  /** nbMaxMsg value (-1 no limit).*/
+  private int nbMaxMsg;
 
-  public String getJndiName();
-
-  public int getNumberOfSubscribers();
-
-
-  public void delete() throws Exception;
+  /**
+   * Constructs a <code>Monitor_GetNbMaxMsg</code> instance.
+   */
+  public Monitor_GetNbMaxMsgRep(int nbMaxMsg) {
+    this.nbMaxMsg = nbMaxMsg;
+  }
+  
+  /** Returns the nbMaxMsg value. */
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
 }

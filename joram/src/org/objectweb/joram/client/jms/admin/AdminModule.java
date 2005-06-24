@@ -101,11 +101,10 @@ public class AdminModule
   public static void connect(javax.jms.TopicConnectionFactory cnxFact, 
                              String name,
                              String password)
-         throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
     if (cnx != null)
       return;
-    
+
     try {
       cnx = cnxFact.createTopicConnection(name, password);
       requestor = new AdminRequestor(cnx);
@@ -696,6 +695,32 @@ public class AdminModule
   }
 
   /**
+   * Returns the list of all destinations that exist on a given server,
+   * or an empty list if none exist.
+   * The request is abort after delay.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static List getDestinations(int serverId, long delay)
+    throws ConnectException, AdminException {
+
+    Monitor_GetDestinations request = new Monitor_GetDestinations(serverId);
+    Monitor_GetDestinationsRep reply =
+      (Monitor_GetDestinationsRep) doRequest(request,delay);
+
+    Vector list = new Vector();
+    String[] ids = reply.getIds();
+    String[] names = reply.getNames();
+    String[] types = reply.getTypes();    
+    for (int i = 0; i < types.length; i++) {
+      list.addElement(Destination.newInstance(
+        ids[i], names[i], types[i]));
+    }
+    return list;
+  }
+
+  /**
    * Returns the list of all users that exist on a given server, or an empty
    * list if none exist.
    * <p>
@@ -709,6 +734,30 @@ public class AdminModule
   {
     Monitor_GetUsers request = new Monitor_GetUsers(serverId);
     Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
+
+    Vector list = new Vector();
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
+    }
+    return list;
+  }
+
+  /**
+   * Returns the list of all users that exist on a given server, or an empty
+   * list if none exist.
+   * The request is abort after delay.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static List getUsers(int serverId, long delay)
+    throws ConnectException, AdminException {
+
+    Monitor_GetUsers request = new Monitor_GetUsers(serverId);
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request,delay);
 
     Vector list = new Vector();
     Hashtable users = reply.getUsers();
@@ -781,6 +830,19 @@ public class AdminModule
    *              the request failed.
    */  
   public static AdminReply doRequest(AdminRequest request)
+    throws AdminException, ConnectException {
+    return doRequest(request,requestTimeout);
+  }
+
+  /**
+   * Method actually sending an <code>AdminRequest</code> instance to
+   * the platform and getting an <code>AdminReply</code> instance.
+   *
+   * @exception ConnectException  If the connection to the platform fails.
+   * @exception AdminException  If the platform's reply is invalid, or if
+   *              the request failed.
+   */  
+  public static AdminReply doRequest(AdminRequest request, long timeout)
          throws AdminException, ConnectException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
@@ -789,9 +851,12 @@ public class AdminModule
     if (cnx == null)
       throw new ConnectException("Admin connection not established.");
 
+    if (timeout < 1)
+      timeout = requestTimeout;
+
     try {
       replyMsg = (ObjectMessage) requestor.request(
-        request, requestTimeout);
+        request, timeout);
       reply = (AdminReply) replyMsg.getObject();
 
       if (! reply.succeeded()) {
@@ -811,14 +876,14 @@ public class AdminModule
         return reply;
       }
     } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
-          BasicLevel.ERROR, "", exc);
+          BasicLevel.DEBUG, "", exc);
       throw new ConnectException("Connection failed: " + exc.getMessage());
     } catch (ClassCastException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
-          BasicLevel.ERROR, "", exc);
+          BasicLevel.DEBUG, "", exc);
       throw new AdminException("Invalid server reply: " + exc.getMessage());
     }
   }
@@ -906,4 +971,4 @@ public class AdminModule
       sess.close();
     }
   }
-} 
+}

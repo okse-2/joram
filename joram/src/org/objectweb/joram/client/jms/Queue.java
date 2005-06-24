@@ -27,6 +27,7 @@ package org.objectweb.joram.client.jms;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.shared.admin.*;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 import java.util.Vector;
@@ -36,12 +37,14 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.Queue</code> interface and provides
  * JORAM specific administration and monitoring methods.
  */
-public class Queue extends Destination implements javax.jms.Queue {
+public class Queue extends Destination 
+  implements javax.jms.Queue, QueueMBean {
 
   private final static String QUEUE_TYPE = "queue";
 
@@ -97,11 +100,23 @@ public class Queue extends Destination implements javax.jms.Queue {
                              String name,
                              String className,
                              Properties prop)
-                throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
     Queue queue = new Queue();
     doCreate(serverId, name, className, 
              prop, queue, QUEUE_TYPE);
+
+    StringBuffer buff = new StringBuffer();
+    buff.append("type=");
+    buff.append(QUEUE_TYPE);
+    buff.append(",name=");
+    buff.append(name);
+    try {
+      MXWrapper.registerMBean(queue,"joramClient",buff.toString());
+    } catch (Exception e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "registerMBean",e);
+    }
     return queue;
   }
 
@@ -213,9 +228,6 @@ public class Queue extends Destination implements javax.jms.Queue {
     return create(AdminModule.getLocalServerId());
   }
 
-  
-
-
   /**
    * Admin method setting or unsetting the threshold for this queue.
    * <p>
@@ -255,6 +267,37 @@ public class Queue extends Destination implements javax.jms.Queue {
     else
       return reply.getThreshold().intValue();
   }
+
+  /**
+   * Admin method setting nbMaxMsg for this queue.
+   * <p>
+   * The request fails if the queue is deleted server side.
+   *
+   * @param nbMaxMsg  nb Max of Message (-1 no limit).
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void setNbMaxMsg(int nbMaxMsg)
+    throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetNbMaxMsg(agentId, nbMaxMsg));
+  } 
+
+  /** 
+   * Monitoring method returning the nbMaxMsg of this queue, -1 if no limit.
+   * <p>
+   * The request fails if the queue is deleted server side.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public int getNbMaxMsg() 
+    throws ConnectException, AdminException {
+    Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(agentId);
+    Monitor_GetNbMaxMsgRep reply;
+    reply = (Monitor_GetNbMaxMsgRep) AdminModule.doRequest(request);
+    return reply.getNbMaxMsg();
+  }
    
   /**
    * Monitoring method returning the number of pending messages on this queue.
@@ -292,7 +335,7 @@ public class Queue extends Destination implements javax.jms.Queue {
     return reply.getNumber();
   }
 
-  public String[] getMessageIds(javax.jms.Queue queue) 
+  public String[] getMessageIds() 
     throws AdminException, ConnectException {
     GetQueueMessageIdsRep reply = 
       (GetQueueMessageIdsRep)AdminModule.doRequest(

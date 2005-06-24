@@ -28,11 +28,18 @@ public class A3CMLServer implements Serializable {
   public short sid = -1;
   public String name = null;
   public String hostname = null;
+  /** Domain (1st hop) used to access this server from current node. */
+  public String domain = null;
+  /**
+   * Communication port if the server is directly accessible by the root
+   * server.
+   */
+  public int port = -1;
+  public Hashtable nat = null;
+  public Vector networks = null;
   public Vector services = null;
   public String jvmArgs = null;
   public Hashtable properties = null;
-  public Hashtable nat = null;
-  public Vector networks = null;
   /**
    * True if the server is already visited during configuration phase.
    */
@@ -41,8 +48,6 @@ public class A3CMLServer implements Serializable {
    * For persistent server, Id. of router (1st hop) used to access the
    * server from current node. if -1 the server is not accessible. This
    * value is fixed during configuration phase.
-   * For transient server, Id. of proxy used to access this server. This
-   * value is statically fixed.
    */
   public short gateway = -1;
   /**
@@ -62,6 +67,25 @@ public class A3CMLServer implements Serializable {
     this.hostname = hostname;
     this.services = new Vector();
     this.networks = new Vector();
+  }
+
+  public void addNetwork(A3CMLNetwork newNetwork) throws Exception {
+    for (int i = 0; i < networks.size(); i++) {
+      A3CMLNetwork network = (A3CMLNetwork)networks.elementAt(i);
+      if (network.domain.equals(newNetwork.domain)) {
+        throw new Exception("Network " + newNetwork.domain + "already added");
+      }
+    }
+    networks.addElement(newNetwork);
+  }
+
+  public void removeNetwork(String domainName) {
+    for (int i = 0; i < networks.size(); i++) {
+      A3CMLNetwork network = (A3CMLNetwork)networks.elementAt(i);
+      if (network.domain.equals(domainName)) {
+        networks.removeElementAt(i);
+      }
+    }
   }
 
   public void addService(A3CMLService newService) throws Exception {
@@ -167,6 +191,54 @@ public class A3CMLServer implements Serializable {
     return null;
   }
 
+  public A3CMLServer duplicate(Hashtable context) throws Exception {
+    A3CMLServer clone = null;
+    Short serverSid = new Short(sid);
+    if (!context.containsKey(serverSid)) {
+      clone = duplicate();
+      context.put(serverSid,clone);
+    } else
+      clone = (A3CMLServer) context.get(serverSid);
+    return clone;
+  }
+
+  public A3CMLServer duplicate() throws Exception {
+    A3CMLServer clone = new A3CMLServer(sid, 
+                                        name, 
+                                        hostname);
+    if (networks != null) {
+      for (Enumeration n = networks.elements(); n.hasMoreElements(); )
+        clone.networks.addElement(
+          ((A3CMLNetwork) n.nextElement()).duplicate());
+    }
+    clone.gateway = gateway;
+    clone.domain = domain;
+    clone.port = port;
+
+    // super class
+    clone.visited = visited;
+    if (services != null) {
+      for (Enumeration e = services.elements(); e.hasMoreElements(); )
+        clone.services.addElement(
+          ((A3CMLService) e.nextElement()).duplicate());
+    }
+    if (properties != null) {
+      for (Enumeration e = properties.keys(); e.hasMoreElements(); ) {
+        Short sid = (Short) e.nextElement();
+        clone.properties.put(sid, 
+                             ((A3CMLProperty) properties.get(sid)).duplicate());
+      }
+    }
+    if (nat != null) {
+      for (Enumeration e = nat.elements(); e.hasMoreElements(); )
+        clone.addNat(
+          ((A3CMLNat) e.nextElement()).duplicate());
+    }
+    clone.jvmArgs = jvmArgs;
+
+    return clone;
+  }
+
   public String toString() {
     StringBuffer strBuf = new StringBuffer();
     strBuf.append("(");
@@ -174,6 +246,8 @@ public class A3CMLServer implements Serializable {
     strBuf.append(",name=").append(name);
     strBuf.append(",sid=").append(sid);
     strBuf.append(",hostname=").append(hostname);
+    strBuf.append(",port=").append(port);
+    strBuf.append(",domain=").append(domain);
     strBuf.append(",visited=").append(visited);
     strBuf.append(",networks=").append(networks);
     strBuf.append(",jvmArgs=").append(jvmArgs);
@@ -195,6 +269,9 @@ public class A3CMLServer implements Serializable {
           name.equals(server.name) &&
           ((hostname == server.hostname) ||
            ((hostname != null) && hostname.equals(server.hostname))) &&
+          ((domain == server.domain) ||
+           ((domain != null) && domain.equals(server.domain))) &&
+          (port == server.port) &&
           services.equals(server.services) &&
           ((jvmArgs == server.jvmArgs) ||
            ((jvmArgs != null) && jvmArgs.equals(server.jvmArgs))) &&

@@ -49,12 +49,12 @@ public class SimpleNetwork extends StreamNetwork {
   
   void ackMsg(JGroupsAckMsg ack) {
     try {
-      AgentServer.transaction.begin();
+      AgentServer.getTransaction().begin();
       //  Deletes the processed notification
       qout.remove(ack.getStamp());
       ack.delete();
-      AgentServer.transaction.commit();
-      AgentServer.transaction.release();
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,
                         this.getName() + ", ackMsg(...) done.");
@@ -289,7 +289,7 @@ public class SimpleNetwork extends StreamNetwork {
               // error notification to sender.
             }
 
-            AgentServer.transaction.begin();
+            AgentServer.getTransaction().begin();
             //  Suppress the processed notification from message queue,
             // and deletes it.
             qout.pop();
@@ -298,8 +298,8 @@ public class SimpleNetwork extends StreamNetwork {
               jgroups.send(new JGroupsAckMsg(msg));
             msg.delete();
             msg.free();
-            AgentServer.transaction.commit();
-            AgentServer.transaction.release();
+            AgentServer.getTransaction().commit();
+            AgentServer.getTransaction().release();
           } else {
             watchdog();
           }
@@ -342,13 +342,13 @@ public class SimpleNetwork extends StreamNetwork {
                           exc);
           // Remove the message, may be we have to post an error
           // notification to sender.
-          AgentServer.transaction.begin();
+          AgentServer.getTransaction().begin();
           // Deletes the processed notification
           sendList.removeMessageAt(i); i--;
           msg.delete();
           msg.free();
-          AgentServer.transaction.commit();
-          AgentServer.transaction.release();
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
 
           continue;
         }
@@ -421,13 +421,13 @@ public class SimpleNetwork extends StreamNetwork {
                             this.getName() + ", error", exc);
           }
 
-          AgentServer.transaction.begin();
+          AgentServer.getTransaction().begin();
           //  Deletes the processed notification
           sendList.removeMessageAt(i); i--;
           msg.delete();
           msg.free();
-          AgentServer.transaction.commit();
-          AgentServer.transaction.release();
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         }
       }
     }

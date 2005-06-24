@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,13 +17,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.mom.dest;
 
 public interface TopicImplMBean extends DestinationImplMBean {
-  
+  /**
+   * Returns the list of unique identifiers of all subscribers. Each user
+   * appears once even if there is multiples subscriptions, the different
+   * subscriptions can be enumerate through the proxy MBean.
+   *
+   * @return the list of unique identifiers of all subscribers.
+   */
   String[] getSubscriberIds();
-
 }

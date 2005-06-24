@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -60,6 +60,7 @@ import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.messages.MessageSoftRef;
 
 import javax.management.openmbean.CompositeDataSupport;
 
@@ -132,11 +133,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   /** Reference to the active <code>ClientContext</code> instance. */
   private transient ClientContext activeCtx;  
 
+  private transient boolean haveDurableSub = false;
   /**
    * Constructs a <code>ProxyImpl</code> instance.
    */
-  public ProxyImpl(ProxyAgentItf proxyAgent)
-  {
+  public ProxyImpl(ProxyAgentItf proxyAgent) {
     contexts = new Hashtable();
     subsTable = new Hashtable();
     this.proxyAgent = proxyAgent;
@@ -144,8 +145,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
   }
 
-  public String toString()
-  {
+  /**
+   * Returns a string representation of this user's proxy.
+   */
+  public String toString() {
     if (proxyAgent == null)
       return "ProxyImpl:";
     else
@@ -168,6 +171,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
  
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
+
+    haveDurableSub = false;
 
     setActiveCtxId(-1);
     
@@ -228,8 +233,12 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // Retrieving the subscriptions' messages.
     Vector messages = MessagePersistenceModule.loadAll(getStringId());
-// persistence message are only in memory.
-//    MessagePersistenceModule.deleteAll(getStringId());
+
+    if (subsTable.isEmpty()) {
+      // it is possible because we always save MessageSoftRef
+      // so we must delete all message.
+      MessagePersistenceModule.deleteAll(getStringId());
+    }
     
     // Browsing the pre-crash subscriptions:
     String subName;
@@ -248,6 +257,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         subsTable.remove(subName);
       // Reinitializing the durable ones.
       else {
+        haveDurableSub = true;
         cSub.reinitialize(getStringId(), 
                           messagesTable, 
                           messages,
@@ -330,6 +340,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
                               "ProxyImpl.reactToClientRequest(" + 
                               key + ',' + req + ')');
+
     AgentId destId = AgentId.fromString(req.getTarget());
     ClientMessages not = new ClientMessages(
       key,
@@ -442,6 +453,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <li><code>SyncReply</code> proxy synchronizing notification,</li>
    * <li><code>SetDMQRequest</code> admin notification,</li>
    * <li><code>SetThreshRequest</code> admin notification,</li>
+   * <li><code>SetNbMaxMsgRequest</code> admin notification,</li>
+   * <li><code>Monit_GetNbMaxMsg</code> admin notification,</li>
    * <li><code>Monit_GetDMQSettings</code> monitoring notification,</li>
    * <li><code>AbstractReply</code> destination replies,</li>
    * <li><code>AdminReply</code> administration replies,</li>
@@ -458,6 +471,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       doReact(from, (SetDMQRequest) not);
     else if (not instanceof SetThreshRequest)
       doReact(from, (SetThreshRequest) not);
+    else if (not instanceof SetNbMaxMsgRequest)
+      doReact(from, (SetNbMaxMsgRequest) not);
+    else if (not instanceof Monit_GetNbMaxMsg)
+      doReact(from, (Monit_GetNbMaxMsg) not);
     else if (not instanceof Monit_GetDMQSettings)
       doReact(from, (Monit_GetDMQSettings) not);
     // Synchronization notification:
@@ -608,8 +625,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *              is not available.
    */
   private void doReact(int key, CnxConnectRequest req)
-               throws DestinationException
-  {
+    throws DestinationException {
+    // state change, so save.
+    proxyAgent.setSave();
+
     setActiveCtxId(key);
     activeCtx = new ClientContext(proxyAgent.getId(), key);
     contexts.put(new Integer(key), activeCtx);
@@ -682,7 +701,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(proxyAgent.getId(),
                          new SyncReply(activeCtxId, reply));
 
-      proxyAgent.sendNot(AdminTopic.getDefault(AgentServer.getServerId()),
+      proxyAgent.sendNot(AdminTopic.getDefault(),
                          new RegisterTmpDestNot(qId, false, true));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -723,7 +742,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(proxyAgent.getId(),
                          new SyncReply(activeCtxId, reply));
 
-      proxyAgent.sendNot(AdminTopic.getDefault(AgentServer.getServerId()),
+      proxyAgent.sendNot(AdminTopic.getDefault(),
                          new RegisterTmpDestNot(tId, true, true));
 
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -765,6 +784,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
 
     if (newSub) { // New subscription...
+      // state change, so save.
+      proxyAgent.setSave();
+      if (req.getDurable())
+        haveDurableSub = true;
       cSub = new ClientSubscription(proxyAgent.getId(),
                                     activeCtxId,
                                     req.getRequestId(),
@@ -932,8 +955,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerUnsubRequest req) throws DestinationException
-  {
+  private void doReact(ConsumerUnsubRequest req) 
+    throws DestinationException {
+    // state change, so save.
+    proxyAgent.setSave();
+
     // Getting the subscription.
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
@@ -1180,7 +1206,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   private void deleteTemporaryDestination(AgentId destId) {
     proxyAgent.sendNot(destId, new DeleteNot());
-    proxyAgent.sendNot(AdminTopic.getDefault(AgentServer.getServerId()),
+    proxyAgent.sendNot(AdminTopic.getDefault(),
                        new RegisterTmpDestNot(destId, false, false));
   }
 
@@ -1308,8 +1334,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @exception StateException  If a recovered transaction branch is already
    *                              present in the context.
    */
-  private void doReact(XACnxRecoverRequest req) throws StateException
-  {
+  private void doReact(XACnxRecoverRequest req)
+    throws StateException {
+    // state change, so save.
+    proxyAgent.setSave();
+
     Vector bqs = new Vector();
     Vector fis = new Vector();
     Vector gtis = new Vector();
@@ -1339,8 +1368,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * instance setting the dead message queue identifier for this proxy
    * and its subscriptions.
    */
-  private void doReact(AgentId from, SetDMQRequest not)
-  {
+  private void doReact(AgentId from, SetDMQRequest not) {
+    // state change, so save.
+    proxyAgent.setSave();
+    
     dmqId = not.getDmqId();
 
     for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
@@ -1354,8 +1385,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * instance setting the threshold value for this proxy and its
    * subscriptions.
    */
-  private void doReact(AgentId from, SetThreshRequest not)
-  {
+  private void doReact(AgentId from, SetThreshRequest not) {
+    // state change, so save.
+    proxyAgent.setSave();
+    
     threshold = not.getThreshold();
 
     for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
@@ -1366,6 +1399,77 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                        new AdminReply(not,
                                       true,
                                       "Threshold set: " + threshold));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
+   * instance setting the NbMaxMsg value for the subscription.
+   */
+  protected void doReact(AgentId from, SetNbMaxMsgRequest not) {
+    int nbMaxMsg = not.getNbMaxMsg();
+    String subName = not.getSubName();
+
+    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    if (sub != null) {
+      sub.setNbMaxMsg(nbMaxMsg);
+      proxyAgent.sendNot(from,
+                         new AdminReply(not,
+                                        true,
+                                        "NbMaxMsg set: " + nbMaxMsg + " on " + subName));
+    } else {
+      proxyAgent.sendNot(from,
+                         new AdminReply(not,
+                                        false,
+                                        "NbMaxMsg not set: " + nbMaxMsg + " on " + subName));
+    }
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetNbMaxMsg</code> notification requesting the
+   * number max of messages in the subscription.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetNbMaxMsg not) {
+    int nbMaxMsg = -1;
+    String subName = not.getSubName();
+    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    if (sub != null)
+      nbMaxMsg = sub.getNbMaxMsg();
+
+    Channel.sendTo(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
+  }
+
+  /**
+   * Returns the maximum number of message for identified subscription.
+   * The subscription is identified  by its unique name, if the limit is unset
+   * the method returns -1.
+   *
+   * @param subName  The subscription unique name.
+   * @return the maximum number of message for subscription if set;
+   *	     -1 otherwise.
+   */
+  public int getNbMaxMsg(String subName) {
+    int nbMaxMsg = -1;
+    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    if (sub != null)
+      nbMaxMsg = sub.getNbMaxMsg();
+    return nbMaxMsg;
+  }
+
+  /**
+   * Sets the maximum number of message for identified subscription.
+   * The subscription is identified  by its unique name.
+   *
+   * @param subName  The subscription unique name.
+   * @param nbMaxMsg the maximum number of message for subscription (-1 set
+   *		     no limit).
+   */
+  public void setNbMaxMsg(String subName, int nbMaxMsg) {
+    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+    if (sub != null)
+      sub.setNbMaxMsg(nbMaxMsg);
   }
 
   /**
@@ -1496,7 +1600,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             rep.getMessages(),
             from.toString(),
             true);
-          
           activeCtx.addDeliveringQueue(from);
         } else {
           jRep = new ConsumerMessages(
@@ -1581,14 +1684,27 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       return;
 
     // Setting the arrival order of the messages. 
+    // and save message if it is MessageSoftRef.
     for (Enumeration msgs = rep.getMessages().elements(); 
       msgs.hasMoreElements();) { 
         
       if (arrivalsCounter == Long.MAX_VALUE) 
         arrivalsCounter = 0; 
     
-      ((Message) msgs.nextElement()).order = arrivalsCounter++; 
+      Message message = (Message) msgs.nextElement();
+      message.order = arrivalsCounter++;
+      
+      if (haveDurableSub || message instanceof MessageSoftRef) {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG,
+            " -> save message " + message);
+        message.save(proxyAgent.getId().toString());
+      }
     } 
+
+    if (haveDurableSub)
+      proxyAgent.setSave();  
 
     String subName;
     ClientSubscription sub;
@@ -1730,6 +1846,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         // If the queue actually was a dead message queue, updating its
         // identifier:
         if (dmqId != null && agId.equals(dmqId)) {
+          // state change, so save.
+          proxyAgent.setSave();
           dmqId = null;
           for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();)
             ((ClientSubscription)
@@ -1825,6 +1943,12 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
   }
 
+  /**
+   * Returns the list of subscriptions for this user. Each subscription is
+   * identified by its unique 'symbolic' name.
+   *
+   * @return The list of subscriptions for this user.
+   */
   public String[] getSubscriptionNames() {
     Enumeration keys = subsTable.keys();
     String[] res = new String[subsTable.size()];
@@ -1836,12 +1960,24 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     return res;
   }
 
+  /**
+   * Returns the number of pending messages for an identified subscription.
+   * The subscription must be identified by its unique 'symbolic' name.
+   *
+   * @return The number of pending message for the subscription.
+   */
   public int getSubscriptionMessageCount(String subName) {
     ClientSubscription cs = 
       (ClientSubscription)subsTable.get(subName);
     return cs.getMessageCount();
   }
 
+  /**
+   * Returns the unique identifier of the topic related to this subscription.
+   *
+   * @param subName  The subscription unique name.
+   * @return the unique identifier of the topic related to this subscription.
+   */
   public String getSubscriptionTopicId(String subName) {
     ClientSubscription cs = 
       (ClientSubscription)subsTable.get(subName);
@@ -1871,6 +2007,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
+  /**
+   * Returns the list of message's identifiers for a subscription.
+   * The subscription must be identified by its unique 'symbolic' name.
+   *
+   * @param subName  The subscription unique name.
+   * @return the list of message's identifiers for the subscription.
+   */
   public String[] getSubscriptionMessageIds(String subName) {
     ClientSubscription cs = 
       (ClientSubscription)subsTable.get(subName);
@@ -1939,6 +2082,16 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
+  /**
+   * Returns the description of a particular pending message in a subscription.
+   * The subscription is identified  by its unique name, the message is pointed
+   * out through its unique identifier.
+   * The description includes the type and priority of the message.
+   *
+   * @param subName  The subscription unique name.
+   * @param msgId    The unique message's identifier.
+   * @return the description of the message.
+   */
   public CompositeDataSupport getSubscriptionMessage(
     String subName,
     String msgId) throws Exception {
@@ -1984,6 +2137,14 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
+  /**
+   * Deletes a particular pending message in a subscription.
+   * The subscription is identified  by its unique name, the message is pointed
+   * out through its unique identifier.
+   *
+   * @param subName  The subscription unique name.
+   * @param msgId    The unique message's identifier.
+   */
   public void deleteSubscriptionMessage(String subName,
                                         String msgId) {
     ClientSubscription cs = 
@@ -2115,6 +2276,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * subscriptions and destinations.
    */
   private void closeConnection(int key) {
+    // state change, so save.
+    proxyAgent.setSave();
+    
       //setCtx(cKey);
 
       // Denying the non acknowledged messages:

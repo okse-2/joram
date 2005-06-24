@@ -63,4 +63,19 @@ public class Subscription {
   public void setMessageCount(int messageCount) {
     this.messageCount = messageCount;
   }
+
+  public String toString() {
+    StringBuffer buff = new StringBuffer();
+    buff.append("Subscription(");
+    buff.append("name=");
+    buff.append(name);
+    buff.append(",topicId=");
+    buff.append(topicId);
+    buff.append(",messageCount=");
+    buff.append(messageCount);
+    buff.append(",durable=");
+    buff.append(durable);
+    buff.append(")");
+    return buff.toString();
+  }
 }

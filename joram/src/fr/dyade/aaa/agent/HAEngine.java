@@ -144,8 +144,8 @@ final class HAEngine extends Engine {
 
       // Now feed qin if possible
       needToSync = false;
-      postFromExt();
     }
+    postFromExt();
   }
 
   /**
@@ -168,7 +168,7 @@ final class HAEngine extends Engine {
       logmon.log(BasicLevel.DEBUG,
                  getName() + " receiveFromJGroups(" + msg + ")");
 
-    AgentServer.transaction.begin();
+    AgentServer.getTransaction().begin();
     stamp(msg);
     msg.save();
     
@@ -177,10 +177,10 @@ final class HAEngine extends Engine {
                  " receiveFromJGroups qin.size() = " + qin.size() +
                  ", qinFromExt.size() = " + qinFromExt.size());
 
-    AgentServer.transaction.commit();
+    AgentServer.getTransaction().commit();
     qinFromExt.addElement(msg);
     postFromExt();
-    AgentServer.transaction.release();
+    AgentServer.getTransaction().release();
   }
 
   volatile boolean needToSync = false;

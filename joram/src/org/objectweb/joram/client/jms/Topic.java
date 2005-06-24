@@ -27,6 +27,7 @@ package org.objectweb.joram.client.jms;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.shared.admin.*;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 import java.util.Vector;
@@ -37,11 +38,14 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * Implements the <code>javax.jms.Topic</code> interface and provides
  * JORAM specific administration and monitoring methods.
  */
-public class Topic extends Destination implements javax.jms.Topic {
+public class Topic extends Destination 
+  implements javax.jms.Topic, TopicMBean {
 
   private final static String TOPIC_TYPE = "topic";
 
@@ -97,11 +101,23 @@ public class Topic extends Destination implements javax.jms.Topic {
                              String name,
                              String className,
                              Properties prop)
-                throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
     Topic topic = new Topic();
     doCreate(serverId, name, className, 
              prop, topic, TOPIC_TYPE);
+
+    StringBuffer buff = new StringBuffer();
+    buff.append("type=");
+    buff.append(TOPIC_TYPE);
+    buff.append(",name=");
+    buff.append(name);
+    try {
+      MXWrapper.registerMBean(topic,"joramClient",buff.toString());
+    } catch (Exception e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "registerMBean",e);
+    }
     return topic;
   }
 
@@ -274,7 +290,7 @@ public class Topic extends Destination implements javax.jms.Topic {
     return reply.getNumber();
   }
 
-  public String[] getSubscriberIds(javax.jms.Topic topic) 
+  public String[] getSubscriberIds() 
     throws AdminException, ConnectException {
       GetSubscriberIdsRep reply = 
         (GetSubscriberIdsRep)AdminModule.doRequest(
@@ -331,8 +347,9 @@ public class Topic extends Destination implements javax.jms.Topic {
    * @exception AdminException  If the request fails.
    */
   public void setParent(Topic parent)
-         throws ConnectException, AdminException
-  {
+    throws ConnectException, AdminException {
+    if (parent == null)
+      unsetParent();
     AdminModule.doRequest(
       new SetFather(parent.getName(), agentId));
   }

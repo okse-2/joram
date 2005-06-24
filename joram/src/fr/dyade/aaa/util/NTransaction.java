@@ -29,7 +29,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
-public final class NTransaction implements Transaction {
+public final class NTransaction implements Transaction, NTransactionMBean {
   // Logging monitor
   private static Logger logmon = null;
 
@@ -75,7 +75,7 @@ public final class NTransaction implements Transaction {
   }
 
   /**
-   * Sets the size of disk log in Mb. Currently, this method have no effect.
+   * Sets the size of disk log in Mb.
    *
    * @param size The size of disk log in Mb.
    */
@@ -212,7 +212,7 @@ public final class NTransaction implements Transaction {
    *
    * @return The path of persistence directory.
    */
-  String getPersistenceDir() {
+  public String getPersistenceDir() {
     return dir.getPath();
   }
 
@@ -243,58 +243,45 @@ public final class NTransaction implements Transaction {
    *		 array will be empty if no names match.
    */
   public final synchronized String[] getList(String prefix) {
-    logmon.log(BasicLevel.DEBUG, "NTransaction, getList(" + prefix + ")");
     String[] list1 = dir.list(new StartWithFilter(prefix));
     if (list1 == null) list1 = new String[0];
-    for (int i=list1.length-1; i>=0; i--)
-      logmon.log(BasicLevel.DEBUG, "NTransaction, getList -> " + list1[i]);
     Object[] list2 = logFile.log.keySet().toArray();
     int nb = list1.length;
     for (int i=0; i<list2.length; i++) {
       if ((list2[i] instanceof String) &&
           (((String) list2[i]).startsWith(prefix))) {
-        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(2) - " + list2[i]);
         int j=0;
         for (; j<list1.length; j++) {
           if (list2[i].equals(list1[j])) break;
         }
-        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(2bis) - ");
         if (j<list1.length) {
           // The file is already in the directory list, it must be count
           // at most once.
           if (((Operation) logFile.log.get(list2[i])).type == Operation.DELETE) {
-            logmon.log(BasicLevel.DEBUG, "NTransaction, getList(3) - ");
             // The file is deleted in transaction log.
             list1[j] = null;
             nb -= 1;
           }
           list2[i] = null;
         } else if (((Operation) logFile.log.get(list2[i])).type == Operation.SAVE) {
-            logmon.log(BasicLevel.DEBUG, "NTransaction, getList(4) - ");
           // The file is added in transaction log
           nb += 1;
         } else {
-          logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5b) - " + list2[i]);
           list2[i] = null;
         }
       } else {
-        logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5) - " + list2[i]);
         list2[i] = null;
       }
     }
     String[] list = new String[nb];
-    logmon.log(BasicLevel.DEBUG, "NTransaction, getList nb= " + nb);
     for (int i=list1.length-1; i>=0; i--) {
-      logmon.log(BasicLevel.DEBUG, "NTransaction, getList(5)= " + list1[i]);
       if (list1[i] != null) list[--nb] = list1[i];
     }
     for (int i=list2.length-1; i>=0; i--) {
-      logmon.log(BasicLevel.DEBUG, "NTransaction, getList(6)= " + list2[i]);
       if (list2[i] != null) list[--nb] = (String) list2[i];
     }
         
     return list;
-//     return list1;
   }
 
   public final void save(Serializable obj, String name) throws IOException {
@@ -555,6 +542,15 @@ public final class NTransaction implements Transaction {
    */
   static final class LogFile extends ByteArrayOutputStream {
     /**
+     * Log of all operations already commited but not reported on disk.
+     */
+    Hashtable log = null;
+    /** log file */
+    RandomAccessFile logFile = null; 
+
+    int current = -1;
+
+    /**
      * Number of commit operation since starting up.
      */
     int commitCount = 0;
@@ -563,15 +559,6 @@ public final class NTransaction implements Transaction {
      * Number of garbage operation since starting up.
      */
     int garbageCount = 0;
-
-    /**
-     * Log of all operations already commited but not reported on disk.
-     */
-    Hashtable log = null;
-    /** log file */
-    RandomAccessFile logFile = null; 
-
-    int current = -1;
 
     /** Root directory of transaction storage */
     private File dir = null;
@@ -662,7 +649,6 @@ public final class NTransaction implements Transaction {
 
         logFile = new RandomAccessFile(logFilePN, "rwd");
         garbage();
-        logFile.setLength(LogFileSize);
       } else {
         logFile = new RandomAccessFile(logFilePN, "rwd");
         logFile.setLength(LogFileSize);
@@ -813,11 +799,6 @@ public final class NTransaction implements Transaction {
       // to disk, in order to avoid load errors.
       log.clear();
 
-//       // Fix the logFile size
-//       if (current > ((LogFileSize *12) /10)) {
-//         logFile.setLength(LogFileSize);
-//       }
-
       current = 1;
       // Cleans log file
       logFile.seek(0);
@@ -851,7 +832,6 @@ public final class NTransaction implements Transaction {
 
       try {
         garbage();
-        logFile.setLength(LogFileSize);
         logFile.close();
       } catch (IOException exc) {
         logmon.log(BasicLevel.WARN, "NTransaction, can't close logfile", exc);

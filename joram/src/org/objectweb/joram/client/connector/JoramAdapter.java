@@ -25,11 +25,13 @@
 package org.objectweb.joram.client.connector;
 
 import fr.dyade.aaa.agent.AgentServer;
+import com.scalagent.jmx.JMXServer;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
@@ -51,6 +53,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -84,9 +87,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * management contract) and inbound connectivity (asynchronous message
  * delivery as specified by the JCA message inflow contract).
  */
-public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
-                                     java.io.Serializable
-{
+public class JoramAdapter 
+  implements javax.resource.spi.ResourceAdapter,
+             java.io.Serializable, JoramAdapterMBean {
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
 
@@ -153,8 +156,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   private static ObjectName jmsResourceON;
   /** Local MBean server. */
   private static MBeanServer mbs = null;
-  /** Registered MBeans. */
-  private static Vector mbeans = new Vector();
 
   /**
    * Duration in seconds during which connecting is attempted (connecting
@@ -174,20 +175,26 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * request during more than 2 * cnxPendingTimer, the connection is
    * considered as dead and processed as required.
    */
-
   public int cnxPendingTimer = 0;
+
+
+  public JMXServer jmxServer;
+
+  private transient JoramAdmin joramAdmin;
 
   /**
    * Constructs a <code>JoramAdapter</code> instance. 
    */
-  public JoramAdapter()
-  {
+  public JoramAdapter() {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                     "JORAM adapter instanciated.");
 
     consumers = new Hashtable();
     producers = new Vector();
+
+    mbs = (MBeanServer) MBeanServerFactory.findMBeanServer(null).get(0);
+    jmxServer = new JMXServer(mbs,"JoramAdapter");
   }
   
 
@@ -249,7 +256,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     // Starting an admin session...
     try {
       adminConnect();
-      serverId = (short)AdminModule.getLocalServerId();
+      serverId = (short) joramAdmin.getPlatformAdmin().getLocalServerId();
     }
     catch (Exception exc) {
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
@@ -352,11 +359,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
           AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
                                         "Creation failed",exc);
         }
-        // JNDI error.
-        catch (NamingException exc) {
-          AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
-                                        "Binding failed",exc);
-        }
       }
     }
     // No destination to deploy.
@@ -370,22 +372,20 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                     "Server port is " + serverPort);
 
-    // Registering MBeans...    
-    register(new LocalServer(this));
-
-    try {
-      platformServersIds = AdminModule.getServersIds();
-      Iterator it = platformServersIds.iterator();
-      short id;
-      while (it.hasNext()) {
-        id = ((Short) it.next()).shortValue();
-        if (id != serverId)
-          register(new RemoteServer(id));
-      }
-    }
-    catch (Exception exc) {}
-
     started = true;
+
+    // Registering MBeans...   
+    try {
+      jmxServer.registerMBean(this, 
+                              "joramClient", 
+                              "type=JoramAdapter,version=" + 
+                              ConnectionMetaData.providerVersion);
+    } catch (Exception e) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "  - Could not register JoramAdapterMBean",
+                                      e);
+    }
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
@@ -407,16 +407,12 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     if (! started || stopped)
       return;
 
-    // Unregistering the MBeans...
-    while (! mbeans.isEmpty())
-      unregister(mbeans.remove(0));
-
     // Unbinds the bound objects...
     while (! boundNames.isEmpty())
       unbind((String) boundNames.remove(0));
 
     // Finishing the admin session.
-    AdminModule.disconnect();
+    joramAdmin.getPlatformAdmin().disconnect();
 
     // Closing the outbound connections, if any.
     while (! producers.isEmpty()) {
@@ -449,6 +445,18 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     }
 
     stopped = true;
+
+    try {
+      jmxServer.unregisterMBean("joramClient", 
+                                "type=JoramAdapter,version=" +
+                                ConnectionMetaData.providerVersion);
+    } catch (Exception e) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "unregisterMBean",
+                                      e);
+    }
+
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
@@ -583,10 +591,6 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       throw new ResourceException("Problem when handling the JORAM "
                                   + "destinations: " + exc);
     }
-    catch (NamingException exc) {
-      throw new ResourceException("Problem when handling the JORAM "
-                                  + "destinations: " + exc);
-    }
   }
 
   /**
@@ -717,13 +721,70 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
     return res;
   }
 
+  public List getDestinations() {
+    return joramAdmin.getDestinations();
+  }
+
+  public List getDestinations(int serverId) {
+    return joramAdmin.getDestinations(serverId);
+  }
+
+  public List getUsers() {
+    return joramAdmin.getUsers();
+  }
+
+  public List getUsers(int serverId) {
+    return joramAdmin.getUsers(serverId);
+  }
+
+  public List getPlatformServersIds() {
+    return joramAdmin.getPlatformAdmin().getServersIds();
+  }
+
+  public List getLocalUsers() {
+    return joramAdmin.getUsers(serverId);
+  }
+
+  public void setDefaultDMQ(int serverId, DeadMQueue dmq)
+    throws ConnectException, AdminException {
+    joramAdmin.setDefaultDMQ(serverId,dmq);
+  }
+
+  public DeadMQueue getDefaultDMQ(int serverId)
+    throws ConnectException, AdminException {
+    return joramAdmin.getDefaultDMQ(serverId);
+  }
+
+  public DeadMQueue getDefaultDMQ()
+    throws ConnectException, AdminException {
+    return joramAdmin.getDefaultDMQ();
+  }
+  
+  public void exit() {
+    joramAdmin.exit();
+  }
+
+  /**
+   * wait before abort a request.
+   */
+  public void setTimeOutToAbortRequest(long timeOut) {
+    joramAdmin.setTimeOutToAbortRequest(timeOut);
+  }
+
+  /**
+   * wait before abort a request.
+   */
+  public long getTimeOutToAbortRequest() {
+    return joramAdmin.getTimeOutToAbortRequest();
+  }
+
   /**
    * Creates or retrieves a user on the underlying JORAM server.
    *
    * @exception AdminException   If the creation fails.
    */
-  void createUser(String name, String password) throws AdminException
-  {
+  public void createUser(String name, String password) 
+    throws AdminException {
     try {
       User.create(name, password);
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
@@ -737,12 +798,28 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
   }
 
   /**
-   * Creates a non managed connection factory and binds it to JNDI.
+   * Creates or retrieves a user on the underlying JORAM server.
    *
-   * @exception NamingException  If the binding fails.
+   * @exception AdminException   If the creation fails.
    */
-  void createCF(String name) throws NamingException
-  {
+  public void createUser(String name, String password, int serverId) 
+    throws AdminException {
+    try {
+      User.create(name, password,serverId);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - User [" + name + "] has been created.");
+    }
+    catch (ConnectException exc) {
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+
+  /**
+   * Creates a non managed connection factory and binds it to JNDI.
+   */
+  public void createCF(String name) {
     ManagedConnectionFactoryImpl mcf = 
       new ManagedConnectionFactoryImpl();
 
@@ -756,20 +833,13 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                       "  - ConnectionFactory [" + name
                                       + "] has been created and bound.");
-    }
-    catch (NamingException exc) {
-      throw exc;
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
   }
 
   /**
    * Creates a non managed PTP connection factory and binds it to JNDI.
-   *
-   * @exception NamingException  If the binding fails.
    */
-  void createQCF(String name) throws NamingException
-  {
+  public void createQCF(String name) {
     ManagedConnectionFactoryImpl mcf = 
       new ManagedQueueConnectionFactoryImpl();
 
@@ -783,20 +853,13 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                       "  - QueueConnectionFactory [" + name
                                       + "] has been created and bound.");
-    }
-    catch (NamingException exc) {
-      throw exc;
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
   }
 
   /**
    * Creates a non managed PubSub connection factory and binds it to JNDI.
-   *
-   * @exception NamingException  If the binding fails.
    */
-  void createTCF(String name) throws NamingException
-  {
+  public void createTCF(String name) {
     ManagedConnectionFactoryImpl mcf = 
       new ManagedTopicConnectionFactoryImpl();
 
@@ -810,11 +873,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
         AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                       "  - TopicConnectionFactory [" + name
                                       + "] has been created and bound.");
-    }
-    catch (NamingException exc) {
-      throw exc;
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
   }
 
   /**
@@ -834,7 +893,7 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
         .getParameters().connectingTimer = 60;
 
-      AdminModule.connect(factory, "root", "root");
+      joramAdmin = new JoramAdmin(factory, "root", "root");
     }
     catch (ConnectException exc) {
       throw new AdminException("Admin connection can't be established: " 
@@ -871,28 +930,115 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * Creates or retrieves a queue destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Queue</code> instance.
    *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param name       The name of the queue.
+   * @param className  The queue class name.
+   * @param prop       The queue properties.
+   *
    * @exception AdminException   If the creation fails.
-   * @exception NamingException  If the binding fails.
    */
-  static Destination createQueue(String name)
-    throws AdminException, NamingException {
-    Context ctx = new InitialContext();
+  public Destination createQueue(int serverId,
+                                 String name,
+                                 String className,
+                                 Properties prop)
+    throws AdminException {
     try {
+      Context ctx = new InitialContext();
       return (Queue) ctx.lookup(name);
     } catch (javax.naming.NamingException exc) {
       try {
         String shortName = removePrefix(name);
-        Queue queue = Queue.create(shortName); 
+        Queue queue = Queue.create(serverId,
+                                   shortName,
+                                   className,
+                                   prop); 
         queue.setFreeReading();
         queue.setFreeWriting();
         if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
           AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                         "  - Queue [" + shortName + "] has been created.");
         bind(name, queue);
-        register(new LocalQueue(queue));
         return queue;
       } catch (ConnectException exc2) {
         throw new AdminException("createQueue() failed: admin connection "
+                                 + "has been lost.");
+      }
+    }
+  }
+  
+  /**
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param name       The name of the queue.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public Destination createQueue(int serverId, String name)
+    throws AdminException {
+    return createQueue(serverId, 
+                       name, 
+                       "org.objectweb.joram.mom.dest.Queue", 
+                       null);
+  }
+
+  /**
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
+   *
+   * @param name       The name of the queue.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public Destination createQueue(String name)
+    throws AdminException {
+    try {
+      return createQueue(joramAdmin.getPlatformAdmin().getLocalServerId(),
+                         name,
+                         "org.objectweb.joram.mom.dest.Queue",
+                         null);
+    } catch (ConnectException exc2) {
+      throw new AdminException("createQueue() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+
+  /**
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param name       The name of the topic.
+   * @param className  The topic class name.
+   * @param prop       The topic properties.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public Destination createTopic(int serverId,
+                                 String name,
+                                 String className,
+                                 Properties prop)
+    throws AdminException {
+    try {
+      Context ctx = new InitialContext();
+      return (Topic) ctx.lookup(name);
+    } catch (javax.naming.NamingException exc) {
+      try {
+        String shortName = removePrefix(name);
+        Topic topic = Topic.create(serverId,
+                                   shortName,
+                                   className,
+                                   prop);
+        topic.setFreeReading();
+        topic.setFreeWriting();
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                        "  - Topic [" + shortName + "] has been created.");
+        bind(name, topic);
+        return topic;
+      } catch (ConnectException exc2) {
+        throw new AdminException("createTopic() failed: admin connection "
                                  + "has been lost.");
       }
     }
@@ -902,135 +1048,62 @@ public class JoramAdapter implements javax.resource.spi.ResourceAdapter,
    * Creates or retrieves a topic destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Topic</code> instance.
    *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param name       The name of the topic.
+   *
    * @exception AdminException   If the creation fails.
-   * @exception NamingException  If the binding fails.
    */
-  static Destination createTopic(String name)
-    throws AdminException, NamingException {
-    Context ctx = new InitialContext();
+  public Destination createTopic(int serverId, String name)
+    throws AdminException {
+    return createTopic(serverId, 
+                       name, 
+                       "org.objectweb.joram.mom.dest.Topic", 
+                       null);
+  }
+
+  /**
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
+   *
+   * @param name       The name of the topic.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public Destination createTopic(String name)
+    throws AdminException {
     try {
-      return (Topic) ctx.lookup(name);
-    } catch (javax.naming.NamingException exc) {
-      try {
-        String shortName = removePrefix(name);
-        Topic topic = Topic.create(shortName);
-        topic.setFreeReading();
-        topic.setFreeWriting();
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                        "  - Topic [" + shortName + "] has been created.");
-        bind(name, topic);
-        register(new LocalTopic(topic));
-        return topic;
-      } catch (ConnectException exc2) {
-        throw new AdminException("createTopic() failed: admin connection "
-                                 + "has been lost.");
-      }
+      return createTopic(joramAdmin.getPlatformAdmin().getLocalServerId(),
+                         name,
+                         "org.objectweb.joram.mom.dest.Topic",
+                         null);
+    } catch (ConnectException exc2) {
+      throw new AdminException("createTopic() failed: admin connection "
+                               + "has been lost.");
     }
   }
 
   /** Binds an object to the JNDI context. */
-  static void bind(String name, Object obj) throws NamingException
-  {
-    Context ctx = new InitialContext();
-    ctx.rebind(name, obj);
-    if (! boundNames.contains(name))
-      boundNames.add(name);
+  void bind(String name, Object obj) {
+    try {
+      Context ctx = new InitialContext();
+      ctx.rebind(name, obj);
+      if (! boundNames.contains(name))
+        boundNames.add(name);
+    } catch (Exception e) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
+                                      "Binding failed:  bind(" + name +"," + obj +")", e);
+    }
   }
 
   /** Unbinds an object from the JNDI context. */
-  static void unbind(String name)
-  {
+  void unbind(String name) {
     try {
       Context ctx = new InitialContext();
       ctx.unbind(name);
       boundNames.remove(name);
     }
     catch (Exception exc) {}
-  }
-
-  /** Registers an MBean to the MBean server. */
-  static void register(Object bean)
-  {
-    try {
-      if (mbs == null)
-        mbs = (MBeanServer) MBeanServerFactory.findMBeanServer(null).get(0);
-
-      if (mbs == null)
-        throw new Exception("Could not retrieve local MBean server.");
-
-      ObjectName name = getObjectName(bean);
-      mbs.registerMBean(bean, name);
-      mbeans.add(bean);
-
-      // Registering a standard JMSResource MBean.
-      if (bean instanceof LocalServer) {
-        String defaultDomain = mbs.getDefaultDomain();
-        java.util.Set oNames =
-          mbs.queryNames(new ObjectName(defaultDomain
-                                        + ":j2eeType=J2EEServer,*"), null);
-        Iterator it = oNames.iterator();
-        if (it.hasNext()) {
-          ObjectName oName = (ObjectName) it.next();
-          String serverName = oName.getKeyProperty("name");
-          jmsResourceON = new ObjectName(defaultDomain
-                                         + ":j2eeType=JMSResource,"
-                                         + "name=JORAMlocalServer,"
-                                         + "J2EEServer="
-                                         + serverName);
-          ((LocalServer) bean).setObjectName(jmsResourceON.toString());
-          mbs.registerMBean(bean, jmsResourceON);
-        }
-      }
-    }
-    catch (Exception exc) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "  - Could not register MBean ["
-                                      + bean.getClass().getName()
-                                      + "] to MBean server: "
-                                      + exc);
-    }
-  }
-
-  /** Unregisters an MBean from the MBean server. */
-  static void unregister(Object bean)
-  {
-    try {
-      mbeans.remove(bean);
-      ObjectName name = getObjectName(bean);
-      mbs.unregisterMBean(name);
-
-      // Unregistering the standard JMSResource MBean.
-      if (bean instanceof LocalServer && jmsResourceON != null)
-        mbs.unregisterMBean(jmsResourceON);
-    }
-    catch (Exception exc) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "  - Could not unregister MBean ["
-                                      + bean.getClass().getName()
-                                      + "] from MBean server: "
-                                      + exc);
-    }
-  }
-
-  /** Constructs an ObjectName for a given MBean. */
-  static ObjectName getObjectName(Object bean) throws Exception
-  {
-    if (bean instanceof LocalServer)
-      return new ObjectName("joram:type=JMSlocalServer");
-    else if (bean instanceof RemoteServer)
-      return new ObjectName("joram:type=JMSremoteServer,id="
-                            + ((RemoteServer) bean).getRemoteServerId());
-    else if (bean instanceof LocalQueue)
-      return new ObjectName("joram:type=JMSqueue,name="
-                            + ((LocalQueue) bean).getJndiName());
-    else if (bean instanceof LocalTopic)
-      return new ObjectName("joram:type=JMStopic,name="
-                            + ((LocalTopic) bean).getJndiName());
-    else
-      throw new Exception("Unknown MBean: " + bean.getClass().getName());
   }
 
   /** Deserializing method. */

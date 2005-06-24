@@ -20,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): Nicolas Tachker (Bull SA)
+ *                 Florent Benoit (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -74,6 +75,9 @@ public class ManagedConnectionImpl
 
   /** <code>true</code> if the connection is valid. */
   private boolean valid = false;
+
+  /** hashCode */
+  private int hashCode = -1;
 
   /** Underlying JORAM server host name. */
   String hostName;
@@ -133,6 +137,8 @@ public class ManagedConnectionImpl
     listeners = new Vector();
 
     valid = true;
+
+    hashCode = -1;
 
     ra.addProducer(this);
   }
@@ -462,15 +468,10 @@ public class ManagedConnectionImpl
    * Returns a code based on the JORAM server and user identification
    * parameters.
    */
-  public int hashCode()
-  {
-    return (mode
-            + ":"
-            + hostName 
-            + ":"
-            + serverPort
-            + "-"
-            + userName).hashCode();
+  public int hashCode() {
+    if (hashCode == -1)
+      hashCode = (mode  + ":" + hostName  + ":"  + ":" + serverPort + "-" + userName).hashCode();
+    return hashCode;
   }
 
   /** 

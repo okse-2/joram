@@ -56,8 +56,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    */
   A3CMLDomain domain = null;
   /**
-   * Working attribute used during server's definition (persitent or transient)
-   * between start and end element.
+   * Working attribute used during server's definition between start and
+   * end element.
    */
   A3CMLServer server = null;
   /**
@@ -213,9 +213,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
             throw new Exception("bad value for server id: " +
                                 atts.getValue(A3CML.ATT_ID));
           }
-          server = new A3CMLPServer(sid,
-                                    atts.getValue(A3CML.ATT_NAME),
-                                    atts.getValue(A3CML.ATT_HOSTNAME));
+          server = new A3CMLServer(sid,
+                                   atts.getValue(A3CML.ATT_NAME),
+                                   atts.getValue(A3CML.ATT_HOSTNAME));
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage());
         }
@@ -301,12 +301,10 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
           a3cmlConfig.addCluster(cluster);
           cluster = null;
         } else if (name.equals(A3CML.ELT_NETWORK)) {
-          if ((server != null) &&
-              (server instanceof A3CMLPServer)) {
-            ((A3CMLPServer) server).addNetwork(network);
+          if (server != null) {
+            server.addNetwork(network);
             // Add the server to the corresponding domains
-            if (! network.domain.equals("transient"))
-              a3cmlConfig.getDomain(network.domain).addServer(server);
+            a3cmlConfig.getDomain(network.domain).addServer(server);
           } else {
             // Can never happen (see DTD).
           }

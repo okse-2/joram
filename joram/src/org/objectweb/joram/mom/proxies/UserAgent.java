@@ -23,7 +23,7 @@
 package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.agent.management.MXWrapper;
+import fr.dyade.aaa.util.management.MXWrapper;
 import fr.dyade.aaa.util.Queue;
 
 import java.io.*;
@@ -134,6 +134,10 @@ public class UserAgent extends Agent
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "UserAgent.react(" + 
         from + ',' + not + ')');
+
+    // set agent no save (this is the default).
+    setNoSave();
+    
     if (not instanceof OpenConnectionNot) {
       doReact((OpenConnectionNot)not);
     } else if (not instanceof GetConnectionNot) {
@@ -163,6 +167,9 @@ public class UserAgent extends Agent
    * Registers and starts the <code>UserConnection</code>.
    */
   private void doReact(OpenConnectionNot not) {
+    // state change, so save.
+    setSave();
+
     if (connections == null) {
       connections = new Hashtable();
       heartBeatTasks = new Hashtable();
@@ -261,6 +268,8 @@ public class UserAgent extends Agent
           ctx.key, 
           (AbstractJmsRequest)not.getMessage());
         if (not.getMessage() instanceof CnxCloseRequest) {
+          // state change, so save.
+          setSave();
           CnxCloseRequest request = (CnxCloseRequest)not.getMessage();
           connections.remove(key);
           HeartBeatTask hbt = 
@@ -297,6 +306,8 @@ public class UserAgent extends Agent
         receiveReliableMessage(ctx, not.getMessage());
         
         if (msg.getObject() instanceof CnxCloseRequest) {
+          // state change, so save.
+          setSave();
           CnxCloseRequest request = (CnxCloseRequest)msg.getObject();
           connections.remove(key);
           HeartBeatTask hbt = 
@@ -331,6 +342,8 @@ public class UserAgent extends Agent
 
   private void doReact(CloseConnectionNot not) {
     if (connections != null) {
+      // state change, so save.
+      setSave();
       Integer key = new Integer(not.getKey());
       // The connection may have already been 
       // explicitely closed by a CnxCloseRequest.
@@ -509,7 +522,19 @@ public class UserAgent extends Agent
   }
 
   public void setNoSave() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "setNoSave()");
+    
     super.setNoSave();
+  }
+
+  public void setSave() {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "UserAgent.setSave()");
+    
+    super.setSave();
   }
 
   public void readBag(ObjectInputStream in) 

@@ -28,14 +28,12 @@
       <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <!-- include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/ -->
-      <include name="fr/dyade/aaa/agent/management/*.java"/>
       <include name="com/scalagent/jmx/*.java"/>
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
-      <include name="fr/dyade/aaa/util/ATransaction.java"/>
-      <include name="fr/dyade/aaa/util/AFastTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/management/*.java"/>
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
       <include name="org/objectweb/joram/shared/admin/**/*.java"/>
       <include name="org/objectweb/joram/shared/client/**/*.java"/>
@@ -61,11 +59,13 @@
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectHelper.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
+        <include name="fr/dyade/aaa/util/management/*.class"/>
         <include name="org/objectweb/joram/shared/admin/*.class"/>
         <include name="org/objectweb/joram/shared/client/*.class"/>
         <include name="org/objectweb/joram/shared/excepts/*.class"/>
         <include name="org/objectweb/joram/shared/messages/*.class"/>
         <include name="org/objectweb/joram/shared/selectors/*.class"/>
+        <include name="com/scalagent/jmx/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-mom.jar">
@@ -75,7 +75,6 @@
         <include name="fr/dyade/aaa/admin/script/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
-        <include name="fr/dyade/aaa/agent/management/*.class"/>
         <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
         <include name="fr/dyade/aaa/jndi2/ha/*.class"/>
         <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
@@ -88,7 +87,6 @@
         <include name="org/objectweb/joram/mom/proxies/soap/*.class"/>
         <include name="org/objectweb/joram/mom/proxies/tcp/*.class"/>
         <include name="org/objectweb/joram/mom/util/*.class"/>
-        <include name="com/scalagent/jmx/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
@@ -300,7 +298,7 @@
              header="Joram ${version}"
              bottom="Copyright &#xA9; 2005 Scalagent - All rights reserved">
       <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
-      <package name="org.objectweb.joram.client.*"/>
+      <package name="org.objectweb.joram.*"/>
     </javadoc>
   </target>
 

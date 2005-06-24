@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,7 @@ import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -91,6 +92,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   private Destination agent;
 
   /**
+   * date of creation.
+   */
+  public long creationDate = -1;
+
+  protected long nbMsgsReceiveSinceCreation = 0;
+  protected long nbMsgsDeliverSinceCreation = 0;
+  protected long nbMsgsSendToDMQSinceCreation = 0;
+
+  /**
    * Constructs a <code>DestinationImpl</code>.
    *
    * @param destId  Identifier of the agent hosting the destination.
@@ -103,17 +113,35 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     clients = new Hashtable();
     strbuf = new StringBuffer();
 
+    if (creationDate == -1)
+      creationDate = System.currentTimeMillis();
+
+
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   void setNoSave() {
     if (agent != null) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                      this + ": setNoSave().");
       agent.setNoSave();
     }
   }
 
+  void setSave() {
+    if (agent != null) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                      this + ": setSave().");
+      agent.setSave();
+    }
+  }
+
   void setAgent(Destination agent) {
+    // state change, so save.
+    setSave();
     this.agent = agent;
   }
 
@@ -140,6 +168,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       MomTracing.dbgDestination.log(
         BasicLevel.DEBUG,
         "DestinationImpl.react(" + from + ',' + not + ')');
+
     try {
       if (not instanceof SetRightRequest)
         doReact(from, (SetRightRequest) not);
@@ -153,6 +182,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         doReact(from, (Monit_FreeAccess) not);
       else if (not instanceof Monit_GetDMQSettings)
         doReact(from, (Monit_GetDMQSettings) not);
+      else if (not instanceof Monit_GetStat)
+        doReact(from, (Monit_GetStat) not);
       else if (not instanceof SpecialAdminRequest)
         doReact(from, (SpecialAdminRequest) not);
       else if (not instanceof ClientMessages)
@@ -221,6 +252,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   /** set user right. */
   protected void processSetRight(AgentId user, int right) 
     throws RequestException {
+    // state change, so save.
+    setSave();
+
     // Setting "all" users rights:
     if (user == null) {
       if (right == READ)
@@ -278,6 +312,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
+
+    // state change, so save.
+    setSave();
 
     dmqId = not.getDmqId();
     
@@ -347,6 +384,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
   public static String[] _rights = {":R;", ";W;", ":RW;"};
 
+  /**
+   * Returns a string representation of the rights set on this destination.
+   *
+   * @return the rights set on this destination.
+   */
   public String[] getRights() {
     String rigths[] = new String[clients.size()];
 
@@ -363,6 +405,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return rigths;
   }
 
+  /**
+   * Returns a string representation of rights set on this destination for a
+   * particular user. The user is pointed out by its unique identifier.
+   *
+   * @param userid The user's unique identifier.
+   * @return the rights set on this destination.
+   */
   public String getRight(String userid) {
     AgentId key = AgentId.fromString(userid);
     if (key == null) return userid + ":bad user;";
@@ -372,11 +421,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return userid + _rights[right.intValue() -1];
   }
 
-  public void setRight(String userid, String right) {
-    AgentId key = AgentId.fromString(userid);
+//   public void setRight(String userid, String right) {
+//     AgentId key = AgentId.fromString(userid);
 
-    // To be continued
-  }
+//     // To be continued
+//   }
 
   /**
    * Method implementing the reaction to a <code>Monit_FreeAccess</code>
@@ -414,6 +463,26 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
 
   /**
+   * Method implementing the reaction to a <code>Monit_GetStat</code>
+   * notification requesting to get statistic of this destination.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  protected void doReact(AgentId from, Monit_GetStat not)
+    throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    Hashtable stats = new Hashtable();
+    stats.put("nbMsgsReceiveSinceCreation", new Long(nbMsgsReceiveSinceCreation));
+    stats.put("nbMsgsDeliverSinceCreation", new Long(nbMsgsDeliverSinceCreation));
+    stats.put("nbMsgsSendToDMQSinceCreation", new Long(nbMsgsSendToDMQSinceCreation));
+    stats.put("creationDate", new Long(creationDate));
+
+    Channel.sendTo(from, new Monit_GetStatRep(not, stats));
+  }
+
+  /**
    * Method implementing the reaction to a <code>ClientMessages</code>
    * notification holding messages sent by a client.
    * <p>
@@ -430,13 +499,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "DestinationImpl.doReact(" + from + ',' + not + ')');
-    if (! not.getPersistent()) {
-      Channel.sendTo(
-        from, 
-        new SendReplyNot(
-          not.getClientContext(), 
-          not.getRequestId()));
-    }
 
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
@@ -456,6 +518,19 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
 
     specialProcess(not);
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // NT :
+    // for topic performance :
+    // must send reply after process ClientMessage
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (! not.getPersistent()) {
+      Channel.sendTo(
+        from, 
+        new SendReplyNot(
+          not.getClientContext(), 
+          not.getRequestId()));
+    }
   } 
 
   /**
@@ -475,8 +550,12 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
                                           + destId
                                           + " does not exist anymore.");
     } else if (not.agent.equals(dmqId)) {
+      // state change, so save.
+      setSave();
       dmqId = null;
     } else {
+      // state change, so save.
+      setSave();
       clients.remove(from);
       specialProcess(not);
     }
@@ -497,6 +576,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
                                       + " client " + from);
     } else {
       specialProcess(not);
+      // state change, so save.
+      setSave();
       deletable = true;
     }
   }
@@ -509,6 +590,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   protected void doReact(AgentId from, SpecialAdminRequest not) {
     String info;
     Object obj = null;
+
+    // state change, so save.
+    setSave();
+
     try {
       if (!isAdministrator(from)) {
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
@@ -588,7 +673,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   protected boolean isAdministrator(AgentId client) {
     return client.equals(adminId) ||
-      client.equals(AdminTopic.getDefault(AgentServer.getServerId()));
+      client.equals(AdminTopic.getDefault());
   }
 
   /**
@@ -599,6 +684,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *          <code>null</code> if not provided.
    */
   protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId) {
+    Vector messages = deadMessages.getMessages();
+    nbMsgsSendToDMQSinceCreation = nbMsgsSendToDMQSinceCreation + messages.size();
+
     AgentId destDmqId = null;
     if (dmqId != null) {
       // Sending the dead messages to the provided DMQ
@@ -634,6 +722,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     out.writeBoolean(freeWriting);
     out.writeObject(clients);    
     out.writeObject(dmqId);
+    out.writeLong(creationDate);
+    out.writeLong(nbMsgsReceiveSinceCreation);
+    out.writeLong(nbMsgsDeliverSinceCreation);
+    out.writeLong(nbMsgsSendToDMQSinceCreation);
     out.writeObject(agent);
   }
 
@@ -647,34 +739,126 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     clients = (Hashtable)in.readObject();
     dmqId = (AgentId)in.readObject();
     strbuf = new StringBuffer();
+    creationDate = in.readLong();
+    nbMsgsReceiveSinceCreation = in.readLong();
+    nbMsgsDeliverSinceCreation = in.readLong();
+    nbMsgsSendToDMQSinceCreation = in.readLong();
     agent = (Destination)in.readObject();
   }
 
   // JMX
 
+  /**
+   * Returns the unique identifier of the destination.
+   *
+   * @return the unique identifier of the destination.
+   */
   public String getDestinationId() {
     return destId.toString();
   }
 
+  /**
+   * Tests if this destination is free for reading.
+   *
+   * @return true if anyone can receive messages from this destination;
+   * 	     false otherwise.
+   */
   public boolean isFreeReading() {
     return freeReading;
   }
 
+  /**
+   * Sets the <code>FreeReading</code> attribute for this destination.
+   *
+   * @param on	if true anyone can receive message from this destination.
+   */
+  public void setFreeReading(boolean on) {
+    // state change, so save.
+    setSave();
+    freeReading = on;
+  }
+
+  /**
+   * Tests if this destination is free for writing.
+   *
+   * @return true if anyone can send messages to this destination;
+   * 	     false otherwise.
+   */
   public boolean isFreeWriting() {
     return freeWriting;
   }
 
-  public void setFreeReading(boolean on) {
-    freeReading = on;
-  }
-
+  /**
+   * Sets the <code>FreeWriting</code> attribute for this destination.
+   *
+   * @param on	if true anyone can send message to this destination.
+   */
   public void setFreeWriting(boolean on) {
+    // state change, so save.
+    setSave();
     freeWriting = on;
   }
 
+  /**
+   * Return the unique identifier of DMQ set for this destnation if any.
+   *
+   * @return the unique identifier of DMQ set for this destnation if any;
+   *	     null otherwise.
+   */
   public String getDMQId() {
     if (dmqId != null) 
       return dmqId.toString();
     return null;
+  }
+
+  /**
+   * Returns this destination creation time as a long.
+   *
+   * @return the destination creation time as UTC milliseconds from the epoch.
+   */
+  public long getCreationTimeInMillis() {
+    return creationDate;
+  }
+
+  /**
+   * Returns this destination creation time through a <code>String</code> of
+   * the form: <code>dow mon dd hh:mm:ss zzz yyyy</code>.
+   *
+   * @return the destination creation time.
+   */
+  public String getCreationDate() {
+    Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(creationDate);
+    return cal.getTime().toString();
+  }
+
+  /**
+   * Returns the number of messages received since creation time of this
+   * destination.
+   *
+   * @return the number of messages received since creation time.
+   */
+  public long getNbMsgsReceiveSinceCreation() {
+    return nbMsgsReceiveSinceCreation;
+  }
+  /**
+   * Returns the number of messages delivered since creation time of this
+   * destination. It includes messages all delivered messages to a consumer,
+   * already acknowledged or not.
+   *
+   * @return the number of messages delivered since creation time.
+   */
+  public long getNbMsgsDeliverSinceCreation() {
+    return nbMsgsDeliverSinceCreation;
+  }
+
+  /**
+   * Returns the number of erroneous messages forwarded to the DMQ since
+   * creation time of this destination..
+   *
+   * @return the number of erroneous messages forwarded to the DMQ.
+   */
+  public long getNbMsgsSendToDMQSinceCreation() {
+    return nbMsgsSendToDMQSinceCreation;
   }
 }
