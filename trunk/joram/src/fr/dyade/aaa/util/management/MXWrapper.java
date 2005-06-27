@@ -60,7 +60,7 @@ public final class MXWrapper {
     if (mxserver == null) return;
 
     Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.WARN, "registerMBean: " + name + " -> " + mxserver);
+      BasicLevel.INFO, "registerMBean: " + name + " -> " + mxserver);
 
     mxserver.registerMBean(bean, domain, name);
   }
@@ -70,7 +70,7 @@ public final class MXWrapper {
     if (mxserver == null) return;
 
     Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.WARN, "unregisterMBean: " + name + " -> " + mxserver);
+      BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
 
     mxserver.unregisterMBean(domain, name);
   }
