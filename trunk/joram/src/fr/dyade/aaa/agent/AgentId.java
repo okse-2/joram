@@ -153,6 +153,8 @@ final class AgentIdStamp implements Serializable {
  * @see AgentIdStamp
  */
 public final class AgentId implements Serializable {
+  static final long serialVersionUID = -5096976989176739863L;
+
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
 
