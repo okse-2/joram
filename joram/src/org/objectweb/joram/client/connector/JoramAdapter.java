@@ -193,10 +193,11 @@ public class JoramAdapter
     consumers = new Hashtable();
     producers = new Vector();
 
-    mbs = (MBeanServer) MBeanServerFactory.findMBeanServer(null).get(0);
+    java.util.ArrayList array = MBeanServerFactory.findMBeanServer(null);
+    if (!array.isEmpty())
+      mbs = (MBeanServer) array.get(0);
     jmxServer = new JMXServer(mbs,"JoramAdapter");
   }
-  
 
   /**
    * Initializes the adapter; starts, if needed, a collocated JORAM server, 
