@@ -12,30 +12,45 @@
 
   <body>
     <s1 name="JORAM History">
-	<subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
-	<p> This version includes bug fixes. You may check their detailed description in the 
+
+      <subtitle>September 20-21, 2005: JORAM Training Session, Grenoble, France</subtitle>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
+	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate 
+	the JORAM component within a global distributed solution. It includes a significant part of 
+	experimentations and case studies based on real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
+	of the JORAM component. We offer to share our expertise through a training session that provides
+	 the key knowledge to use and deploy a JORAM system that fits your requirements.
+	This two-day session details the design principles of JORAM and describes the best practices 
+	to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online 
+	<a href="http://www.scalagent.com/pages/fr/datasheet/050920-JORAM-formation.pdf">(PDF, in french only)</a></p>
+
+      <subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
+      <p> This version includes bug fixes. You may check their detailed description in the 
         <a href="dev/versions.html">Code Update</a> page.</p>
 
-	<subtitle>May 17, 2005: JORAM 4.3 version is released</subtitle>
-	<p>This version includes new features :</p>
-	<ul>
-	  <li>extended JMX management,</li>
-	  <li>Performance improvments,</li>
-	  <li>Handling of large message transmission (called swap out mode),</li>
-	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
-	</ul>
+      <subtitle>May 17, 2005: JORAM 4.3 version is released</subtitle>
+      <p>This version includes new features :</p>
+      <ul>
+	<li>extended JMX management,</li>
+	<li>Performance improvments,</li>
+	<li>Handling of large message transmission (called swap out mode),</li>
+	<li>Complete SSL support with handling of encrypted client to server communications.</li>
+      </ul>
 
-	<subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
-	<p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
+      <subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
+      <p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
            bug fixes, their complete list is available in the 
            <a href="dev/versions.html">Code Update</a> page. </p>
-	<p>The next JORAM 4.3 version will include new features :</p>
-	<ul>
-	  <li>JMX management improved and extended</li>
-	  <li>Performance improvments</li>
-	  <li>Handling of large message transmission (called swap out mode)</li>
-	  <li>Complete SSL support with handling of encrypted client to server communications</li>
-	</ul>
+      <p>The next JORAM 4.3 version will include new features :</p>
+      <ul>
+	<li>JMX management improved and extended</li>
+	<li>Performance improvments</li>
+	<li>Handling of large message transmission (called swap out mode)</li>
+	<li>Complete SSL support with handling of encrypted client to server communications</li>
+      </ul>
 
       <subtitle>March 31, 2005: JORAM 4.2 final release is available</subtitle>
 	<p>The Joram 4.2 release features high availability, enhanced management facilities and improved performances.
