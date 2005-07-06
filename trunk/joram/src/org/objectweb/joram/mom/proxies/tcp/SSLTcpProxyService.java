@@ -128,8 +128,12 @@ public class SSLTcpProxyService extends TcpProxyService {
 
   private static ServerSocket createServerSocket(int port) throws Exception {
     ServerSocketFactory serverSocketFactory = createServerSocketFactory();
+    
+    int backlog = Integer.getInteger(
+      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+
     SSLServerSocket serverSocket = 
-      (SSLServerSocket) serverSocketFactory.createServerSocket(port);
+      (SSLServerSocket) serverSocketFactory.createServerSocket(port, backlog);
     // requie mutual authentification
     serverSocket.setNeedClientAuth(true);
     // request mutual authentification
