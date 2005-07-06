@@ -47,6 +47,11 @@ public class TcpProxyService {
 
   public static final int DEFAULT_POOL_SIZE = 1;
 
+  public static final String BACKLOG_PROP = 
+      "org.objectweb.joram.mom.proxies.tcp.backlog";
+
+  public static final int DEFAULT_BACKLOG = 50;
+
   public static final int DEFAULT_PORT = 16010;
 
   /**
@@ -81,16 +86,20 @@ public class TcpProxyService {
     } else {
       port = DEFAULT_PORT;
     }
+    
+    int backlog = Integer.getInteger(
+      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    ServerSocket serverSocket = new ServerSocket(port);
+    ServerSocket serverSocket = new ServerSocket(port, backlog);
 
     int poolSize = Integer.getInteger(
       POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
     int timeout = Integer.getInteger(
       SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
-    
+
     proxyService = new TcpProxyService(
       serverSocket, poolSize, timeout);
     proxyService.start();
