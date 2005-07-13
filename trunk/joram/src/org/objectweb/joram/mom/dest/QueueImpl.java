@@ -665,10 +665,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
       msg.denied = true;
 
-
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(
-            BasicLevel.ERROR, " -> deny " + msgId);
+            BasicLevel.DEBUG, " -> deny " + msgId);
 
       // state change, so save.
       setSave();
