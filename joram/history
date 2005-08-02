@@ -1,46 +1,4 @@
 ###############################################################################
-# 2005/06/24 | Joram 4.3.2 tag.
-###############################################################################
-+==============================================================================
-| 2005/06/17 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- Bug fixes in HA.
-  -add readBag and writeBag methods in joram.mom.proxies.ClientSubscrition
-  -reconnect set endTime to MaxValue if cnxPendingTimer=0
-+==============================================================================
-| 2005/06/14 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- add sample HA.
-+==============================================================================
-| 2005/06/07 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- Performence improvement:
-   Optimize management of transient message.
-   Save Message and Agent only if it is necessary.
-+==============================================================================
-| 2005/06/07 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- Update javagroups-all to jgroups-all.
- add commons-logging-api.jar.
-+==============================================================================
-| 2005/05/19 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- Add feature Nb max message in destination, and add statistic.
- JMX improvment:
-  - client side: manage Queue, Topic, User, Admin, ...
-  - replace in connector Local... and Remote... MBean by JoramAdapteMBean.
-  - server side: statistic, ...
-  - ship: move com.scalagent.jmx and fr.dyade.aaa.util.management 
-    in joram-shared.jar.
-+==============================================================================
-| 2005/05/19 | Nicolas Tachker - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- fix bug in DestinationImpl sendToDMQ method.
-+==============================================================================
-| 2005/04/08 | Andre Freyssinet - ScalAgent Distributed Technologies
-+------------+-----------------------------------------------------------------
- Move management package from fr.dyade.aaa.agent to fr.dyade.aaa.util.
-###############################################################################
 # 2005/06/02 | Joram 4.3.1 tag.
 ###############################################################################
 +==============================================================================
