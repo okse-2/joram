@@ -803,6 +803,12 @@ public class Message
     bodyRO = false;
   }
 
+  /** set message read-only */
+  public void setReadOnly() {
+    propertiesRO = true;
+    bodyRO = true;
+  }
+
   /** Returns <code>true</code> if the message is valid. */
   public boolean isValid()
   {
