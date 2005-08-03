@@ -390,6 +390,13 @@ public class RequestMultiplexer {
         AbstractJmsReply reply;
         try {
           reply = channel.receive();
+          if (reply instanceof ConsumerMessages) {
+            java.util.Vector msgs = ((ConsumerMessages)reply).getMessages();
+            // set momMessage read-only
+            for (int i = 0; i < msgs.size(); i++ )
+              ((org.objectweb.joram.shared.messages.Message)
+               msgs.elementAt(i)).setReadOnly();
+          }
         } catch (Exception exc) {
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
