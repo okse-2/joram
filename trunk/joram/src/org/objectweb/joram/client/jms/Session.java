@@ -1888,7 +1888,9 @@ public class Session implements javax.jms.Session {
         dest,
         (org.objectweb.joram.shared.messages.Message) momMsg.clone());
     } else {
-      ProducerMessages pM = new ProducerMessages(dest.getName(), momMsg);
+      ProducerMessages pM = 
+        new ProducerMessages(dest.getName(),
+                             (org.objectweb.joram.shared.messages.Message) momMsg.clone());
       
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending " + momMsg);
