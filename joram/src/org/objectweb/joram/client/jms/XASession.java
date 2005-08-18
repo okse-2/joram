@@ -26,6 +26,8 @@ package org.objectweb.joram.client.jms;
 
 import org.objectweb.joram.shared.client.*;
 
+
+
 import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
 import javax.jms.TransactionInProgressException;
