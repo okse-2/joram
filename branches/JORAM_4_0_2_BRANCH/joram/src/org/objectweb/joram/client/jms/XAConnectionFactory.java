@@ -58,11 +58,9 @@ public abstract class XAConnectionFactory
   }
 
   /** Returns a string view of the connection factory. */
-  public String toString()
-  {
+  public String toString() {
     return "XACF:" + params.getHost() + "-" + params.getPort();
   }
-
 
   /**
    * API method, implemented according to the communication protocol.
@@ -86,11 +84,8 @@ public abstract class XAConnectionFactory
     return createXAConnection("anonymous", "anonymous");
   }
 
-  /**
-   * Returns the factory's configuration parameters.
-   */
-  public FactoryParameters getParameters()
-  {
+  /** Returns the factory's configuration parameters. */
+  public FactoryParameters getParameters() {
     return params;
   } 
 
@@ -100,10 +95,13 @@ public abstract class XAConnectionFactory
     Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.host", params.getHost()));
     ref.add(new StringRefAddr("cFactory.port",
-                              (new Integer(params.getPort())).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.cnxT",
-                        (new Integer(params.connectingTimer)).toString()));
+                              new Integer(params.getPort()).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxT",
+                              new Integer(params.connectingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.txT",
+                              new Integer(params.txPendingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxPT",
+                              new Integer(params.cnxPendingTimer).toString()));
     return ref;
   }
 
@@ -116,6 +114,8 @@ public abstract class XAConnectionFactory
     h.put("host",params.getHost());
     h.put("port",new Integer(params.getPort()));
     h.put("connectingTimer",new Integer(params.connectingTimer));
+    h.put("txPendingTimer",new Integer(params.txPendingTimer));
+    h.put("cnxPendingTimer",new Integer(params.cnxPendingTimer));
     return h;
   }
 
