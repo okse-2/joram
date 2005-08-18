@@ -41,7 +41,6 @@ public abstract class ConnectionFactory
   /** Object containing the factory's parameters. */
   protected FactoryParameters params;
 
-
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
@@ -60,16 +59,13 @@ public abstract class ConnectionFactory
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
    */
-  public ConnectionFactory()
-  {}
+  public ConnectionFactory() {}
 
 
   /** Returns a string view of the connection factory. */
-  public String toString()
-  {
+  public String toString() {
     return "CF:" + params.getHost() + "-" + params.getPort();
   }
-
 
   /**
    * API method, implemented according to the communication protocol.
@@ -93,27 +89,24 @@ public abstract class ConnectionFactory
     return createConnection("anonymous", "anonymous");
   }
 
-
   /** Returns the factory's configuration parameters. */
-  public FactoryParameters getParameters()
-  {
+  public FactoryParameters getParameters() {
     return params;
   } 
 
-  
   /** Sets the naming reference of a connection factory. */
   public Reference getReference() throws NamingException
   {
     Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.host", params.getHost()));
     ref.add(new StringRefAddr("cFactory.port",
-                              (new Integer(params.getPort())).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.cnxT",
-                        (new Integer(params.connectingTimer)).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.txT",
-                        (new Integer(params.txPendingTimer)).toString()));
+                              new Integer(params.getPort()).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxT",
+                              new Integer(params.connectingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.txT",
+                              new Integer(params.txPendingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxPT",
+                              new Integer(params.cnxPendingTimer).toString()));
     return ref;
   }
 
