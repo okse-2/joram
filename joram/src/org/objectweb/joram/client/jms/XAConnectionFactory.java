@@ -105,6 +105,7 @@ public abstract class XAConnectionFactory
     ref.add(
       new StringRefAddr("cFactory.cnxT",
                         (new Integer(params.connectingTimer)).toString()));
+    ref.add(new StringRefAddr("reliableClass",reliableClass));
     return ref;
   }
 
