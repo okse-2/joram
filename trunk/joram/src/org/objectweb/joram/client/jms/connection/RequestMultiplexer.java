@@ -33,6 +33,7 @@ import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
 import org.objectweb.joram.shared.excepts.MomException;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -397,6 +398,12 @@ public class RequestMultiplexer {
               ((org.objectweb.joram.shared.messages.Message)
                msgs.elementAt(i)).setReadOnly();
           }
+        } catch (IOException ioe) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", ioe);
+            RequestMultiplexer.this.close();
+            exceptionListener.onException(new JMSException("Could not connect to JMS server!"));
+            break loop;
         } catch (Exception exc) {
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
