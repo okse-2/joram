@@ -34,6 +34,10 @@ public interface Transaction {
   final int GARBAGE = 5;   // A garbage phase start
   final int FINALIZE = 6;  // During last garbage.
 
+  public static String[] PhaseInfo = {"init", "free",
+                                      "run", "commit", "rollback",
+                                      "garbage", "finalize"};
+
   final int Kb = 1024;
   final int Mb = Kb * Kb;
 
@@ -63,5 +67,12 @@ public interface Transaction {
 
   void release() throws IOException;
 
+  /**
+   * Set the transaction module in order to allow stop.
+   */
   void stop();
+  /**
+   * Close the transaction module. It will be initialized before using it.
+   */
+  void close();
 }
