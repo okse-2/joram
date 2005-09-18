@@ -46,11 +46,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class SSLTcpProxyService extends TcpProxyService {
 
-  private final static String CIPHER = "cipherList";
-  private final static String KS = "keystore";
-  private final static String KS_PASS = "keystore_pass";
-  private final static String KS_TYPE = "keystore_type";
-  private final static String SSLCONTEXT = "sslCtx";
+  private final static String CIPHER = "org.objectweb.joram.cipherList";
+  private final static String KS = "org.objectweb.joram.keystore";
+  private final static String KS_PASS = "org.objectweb.joram.keystorepass";
+  private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
+  private final static String SSLCONTEXT = "org.objectweb.joram.sslCtx";
 
 
   /**
