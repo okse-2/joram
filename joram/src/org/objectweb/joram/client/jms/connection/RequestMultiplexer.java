@@ -402,7 +402,9 @@ public class RequestMultiplexer {
             if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
               JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", ioe);
             RequestMultiplexer.this.close();
-            exceptionListener.onException(new JMSException("Could not connect to JMS server!"));
+            if (exceptionListener != null) {
+              exceptionListener.onException(new JMSException("Could not connect to JMS server!"));
+            }
             break loop;
         } catch (Exception exc) {
           if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
