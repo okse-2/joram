@@ -61,7 +61,7 @@ public class ZeroconfJoramServer {
 
   private static void adminConnect() throws Exception {
     String adminHostName = System.getProperty(ADMIN_HOST_NAME, "localhost");
-    int adminPort = Integer.getInteger(ADMIN_PORT, 2560).intValue();
+    int adminPort = Integer.getInteger(ADMIN_PORT, 16010).intValue();
     String rootUserName = System.getProperty(ROOT_USER_NAME, "root");
     String rootUserPwd = System.getProperty(ROOT_USER_PWD, "root");
     AdminModule.connect(
