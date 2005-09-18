@@ -50,4 +50,24 @@ public interface NTransactionMBean extends TransactionMBean {
    */
   int getLogThresholdOperation();
 
+  /**
+   * Returns the number of commit operation since starting up.
+   *
+   * @return The number of commit operation.
+   */
+  public int getCommitCount();
+
+  /**
+   * Returns the number of garbage operation since starting up.
+   *
+   * @return The number of garbage operation.
+   */
+  public int getGarbageCount();
+
+  /**
+   *
+   */
+  public int getPhase();
+
+  public String getPhaseInfo();
 }
