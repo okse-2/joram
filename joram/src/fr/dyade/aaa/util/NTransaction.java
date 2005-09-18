@@ -33,9 +33,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   // Logging monitor
   private static Logger logmon = null;
 
-  // State of the transaction monitor.
-  private int phase;
-
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
@@ -216,8 +213,24 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return dir.getPath();
   }
 
+  // State of the transaction monitor.
+  private int phase = INIT;
+  String phaseInfo = PhaseInfo[phase];
+
+  /**
+   *
+   */
+  public int getPhase() {
+    return phase;
+  }
+
+  public String getPhaseInfo() {
+    return phaseInfo;
+  }
+
   private final void setPhase(int newPhase) {
     phase = newPhase;
+    phaseInfo = PhaseInfo[phase];
   }
 
 
@@ -524,10 +537,14 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       } catch (InterruptedException exc) {
       }
     }
-    // Change the transaction state.
+
     setPhase(FINALIZE);
-    
-    logFile.stop();
+    try {
+      logFile.garbage();
+    } catch (IOException exc) {
+      logmon.log(BasicLevel.WARN, "NTransaction, can't garbage logfile", exc);
+    }
+    setPhase(FREE);
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
@@ -536,6 +553,32 @@ public final class NTransaction implements Transaction, NTransactionMBean {
                  "commit=" + logFile.commitCount);
     }
   }
+
+
+  public final synchronized void close() {
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, "NTransaction, stops");
+
+    while (phase != FREE) {
+      // Wait for the transaction subsystem to be free
+      try {
+        wait();
+      } catch (InterruptedException exc) {
+      }
+    }
+
+    setPhase(FINALIZE);
+    logFile.stop();
+    setPhase(INIT);
+
+    if (logmon.isLoggable(BasicLevel.INFO)) {
+      logmon.log(BasicLevel.INFO,
+                 "NTransaction, stopped: " +
+                 "garbage=" + logFile.garbageCount + ", " +
+                 "commit=" + logFile.commitCount);
+    }
+  }
+
 
   /**
    *
@@ -887,7 +930,7 @@ final class Operation implements Serializable {
   private static Pool pool = null;
 
   static {
-    pool = new Pool("Ntransaction$Operation",
+    pool = new Pool("NTransaction$Operation",
                     Integer.getInteger("NTLogThresholdOperation",
                                        NTransaction.LogThresholdOperation).intValue());
   }

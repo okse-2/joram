@@ -140,6 +140,19 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
       }
     }
     // Change the transaction state.
-    setPhase(FINALIZE);
+    setPhase(FREE);
+  }
+
+
+  public synchronized final void close() {
+    while (phase != FREE) {
+      // Wait for the transaction subsystem to be free
+      try {
+        wait();
+      } catch (InterruptedException exc) {
+      }
+    }
+    // Change the transaction state.
+    setPhase(INIT);
   }
 }
