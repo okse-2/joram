@@ -214,7 +214,10 @@ public final class AgentServer {
   }
 
   static Enumeration getConsumers() {
-    return consumers.elements();
+    if (consumers == null)
+      return null;
+    else
+      return consumers.elements();
   }
 
   static MessageConsumer getConsumer(String domain) throws Exception {
@@ -691,13 +694,15 @@ public final class AgentServer {
     public static final int STARTED = 0x4;
     public static final int STOPPING = 0x5;
     public static final int STOPPED = 0x6;
+    public static final int RESETING = 0x7;
 
     private int value = INSTALLED;
 
     public static String[] info = {"installed",
                                    "initializing", "initialized",
                                    "starting", "started",
-                                   "stopping", "stopped"};
+                                   "stopping", "stopped",
+                                   "reseting"};
   }
 
   static Status status = new Status();
@@ -751,16 +756,57 @@ public final class AgentServer {
    *  Cleans an AgentServer configuration in order to restart it from
    * persistent storage.
    */
-  private static void reset() {
+  public static void reset() {
+    synchronized(status) {
+      if (status.value != Status.STOPPED) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", cannot reset, bad status: " + status.value);
+        return;
+      }
+      status.value = Status.RESETING;
+    }
+
+    // Remove all consumers Mbean
+    Enumeration e = getConsumers();
+    if (e != null) {
+      for (; e.hasMoreElements();) {
+        MessageConsumer cons = (MessageConsumer) e.nextElement();
+        try {
+          MXWrapper.unregisterMBean(
+            "AgentServer",
+            "server=" + getName() + ",cons=" + cons.getName());
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", jmx failed: " +
+                     "server=" + getName() + ",cons=" + cons.getName(), exc);
+        }
+      }
+      consumers = null;
+    }
+
+    try {
+      MXWrapper.unregisterMBean("AgentServer",
+                                "server=" + getName() + ",cons=Transaction");
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.WARN,
+                 getName() + ", jmx failed: " +
+                 "server=" + getName() + ",cons=Transaction", exc);
+    }
+    transaction.close();
+    transaction = null;
+
     try {
       MXWrapper.unregisterMBean("AgentServer", "server=" + getName());
-      MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=Transaction");
     } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.WARN,
+                 getName() + " jmx failed: "+ "server=" + getName(), exc);
     }
     
-    transaction = null;
     a3config = null;
+
+    synchronized(status) {
+      status.value = Status.INSTALLED;
+    }
   }
 
  /**
