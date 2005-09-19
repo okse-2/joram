@@ -1,5 +1,4 @@
-monolog.classname org.objectweb.util.monolog.wrapper.javaLog.LoggerFactory
-
+monolog.classname org.objectweb.util.monolog.wrapper.log4j.MonologLoggerFactory
 # -----------------------------------------------------------------------
 # tty : console handler
 # -----------------------------------------------------------------------
