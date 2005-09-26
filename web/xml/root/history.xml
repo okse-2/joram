@@ -12,6 +12,29 @@
 
   <body>
     <s1 name="JORAM History">
+      <subtitle>November 29-30, 2005: JORAM Training Session, Paris, France</subtitle>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
+	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate 
+	the JORAM component within a global distributed solution. It includes a significant part of 
+	experimentations and case studies based on real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
+	of the JORAM component. We offer to share our expertise through a training session that provides
+	 the key knowledge to use and deploy a JORAM system that fits your requirements.
+	This two-day session details the design principles of JORAM and describes the best practices 
+	to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online 
+	<a href="http://www.scalagent.com/pages/fr/datasheet/051129-JORAM-formation.pdf">(PDF, in french only)</a></p>
+
+      <subtitle>September 26th, 2005: JORAM Survey Synthesis</subtitle>
+      <p>A synthesis of the JORAM Survey is available 
+        <a href="http://www.scalagent.com/pages/en/datasheet/050926-JORAM_Survey-Synthesis.pdf">here</a>.
+      </p>
+      <p>Several users have expressed their need for various forms of services (support, consulting, training, etc.).
+        Therefore we would like to remind that a description of professional services on JORAM is available  here.
+        Do not hesitate to contact us for any further question you may have on JORAM :
+        <a href="mailto:contact@scalagent.com">contact@scalagent.com</a>.
+      </p>
 
       <subtitle>September 20-21, 2005: JORAM Training Session, Grenoble, France</subtitle>
       <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
