@@ -115,10 +115,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     this.cnx = cnx;
     this.transacted = transacted;
 
-    if (maxWorks < 0)
-      this.maxWorks = 0;
-    else {
-      this.maxWorks = maxWorks;
+    if (maxWorks < 0) maxWorks = 0;
+    this.maxWorks = maxWorks;
+
+    if (maxWorks != 0) {
       pool = new Vector(maxWorks);
     }
 
@@ -172,8 +172,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getServerSession()");
     
-    // No limit to work 
     if (maxWorks <= 0) {
+      // No limit to the number of allocated session and concurrent threads 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       "ServerSessionPool provides new ServerSession.");
@@ -187,6 +187,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     try {
       synchronized (pool) {
         if (pool.isEmpty() && (serverSessions < maxWorks)) {
+          // Allocates a new ServerSession
           if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
             AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                           "ServerSessionPool provides "
@@ -197,8 +198,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                     endpointFactory,
                                     cnx,
                                     transacted);
-        }
-        else if (pool.isEmpty()) {
+        } else if (pool.isEmpty()) {
+          // Wait for a free ServerSession
           if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
             AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                           "ServerSessionPool waits for "
@@ -208,8 +209,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
         return (ServerSession) pool.remove(0);
       }
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       throw new JMSException("Error while getting server session from pool: "
                              + exc);
     }
@@ -221,13 +221,17 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " releaseSession(" + session + ")");
 
+    if (maxWorks == 0) {
+      // Let GC do its work.
+      return;
+    }
+
     try {
       synchronized (pool) {
         pool.add(session);
         pool.notify();
       }
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
   }
 
   /** Closes the consumer. */
