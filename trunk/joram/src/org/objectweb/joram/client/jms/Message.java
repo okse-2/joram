@@ -108,6 +108,16 @@ public class Message implements javax.jms.Message {
   } 
 
   /**
+   * Resets the read-only flag, in order to allow the modification
+   * of message properties.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public void resetPropertiesRO() throws JMSException {
+    momMsg.resetPropertiesRO();
+  } 
+
+  /**
    * API method.
    *
    * @exception JMSException  Actually never thrown.
