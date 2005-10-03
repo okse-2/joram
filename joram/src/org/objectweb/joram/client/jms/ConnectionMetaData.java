@@ -31,101 +31,99 @@ import javax.jms.JMSException;
 /**
  * Implements the <code>javax.jms.ConnectionMetaData</code> interface.
  */
-public class ConnectionMetaData implements javax.jms.ConnectionMetaData
-{
+public class ConnectionMetaData implements javax.jms.ConnectionMetaData {
+  /** JMS major version number */
   public final static int jmsMajorVersion = 1;
+  /** JMS minor version number */
   public final static int jmsMinorVersion = 1;
+  /** JMS provider name: Joram */
   public final static String jmsProviderName = "Joram";
+  /** JMS API version, currently 1.1 */
   public final static String jmsVersion = "1.1";
+  /** Joram's major version number */
   public final static int providerMajorVersion = 4;
+  /** Joram's minor version number */
   public final static int providerMinorVersion = 3;
+  /** Joram's implementation version, currently @version@. */
   public final static String providerVersion = "@version@";
+  /** Enumeration of the Joram's JMSX property names */
   public final static Vector jmsxProperties = new Vector();
 
-  static
-  {
+  static {
     jmsxProperties.add("JMSXDeliveryCount");
     jmsxProperties.add("JMSXGroupID");
     jmsxProperties.add("JMSXGroupSeq");
   }
 
   /**
-   * API method.
+   * API method: Gets the JMS major version number..
    *
    * @exception JMSException  Actually never thrown.
    */
-  public int getJMSMajorVersion() throws JMSException
-  {
+  public int getJMSMajorVersion() throws JMSException {
     return jmsMajorVersion;
   }
 
   /**
-   * API method.
+   * API method: Gets the JMS minor version number..
    *
    * @exception JMSException  Actually never thrown.
    */
-  public int getJMSMinorVersion() throws JMSException
-  {
+  public int getJMSMinorVersion() throws JMSException {
     return jmsMinorVersion;
   }
 
   /**
-   * API method.
+   * API method: Gets the JMS provider name: Joram.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getJMSProviderName() throws JMSException
-  {
+  public String getJMSProviderName() throws JMSException {
     return jmsProviderName;
   }
 
   /**
-   * API method.
+   * API method: Gets the JMS API version, currently 1.1.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getJMSVersion() throws JMSException
-  {
+  public String getJMSVersion() throws JMSException {
     return jmsVersion;
   }
 
   /**
-   * API method.
+   * API method: Gets an enumeration of the JMSX property names.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public Enumeration getJMSXPropertyNames() throws JMSException
-  {
+  public Enumeration getJMSXPropertyNames() throws JMSException {
     return jmsxProperties.elements();
   }
 
   /**
-   * API method.
+   * API method: Gets the Joram's major version number.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public int getProviderMajorVersion() throws JMSException
-  {
+  public int getProviderMajorVersion() throws JMSException {
     return providerMajorVersion;
   }
 
   /**
-   * API method.
+   * API method: Gets the Joram's minor version number.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public int getProviderMinorVersion() throws JMSException
-  {
+  public int getProviderMinorVersion() throws JMSException {
     return providerMinorVersion;
   }
 
   /**
-   * API method.
+   * API method: Gets the Joram's implementation version, currently @version@.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getProviderVersion() throws JMSException
-  {
+  public String getProviderVersion() throws JMSException {
     return providerVersion;
   }
 }
