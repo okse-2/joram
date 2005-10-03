@@ -671,8 +671,15 @@ public class Message
     properties.clear();
     properties = null;
   }
-  
-  
+
+  /**
+   * Resets the read-only flag, in order to allow the modification
+   * of message properties.
+   */
+  public void resetPropertiesRO() {
+    propertiesRO = false;
+  }
+   
   /**
    * Sets an object as the body of the message. 
    *
