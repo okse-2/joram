@@ -9,7 +9,7 @@
   &common;
 
   <!-- Initializes properties -->
-  <target name="init.joram" depends="init">
+  <target name="init.joram" depends="init,setver">
     <property name="releases.dir" location="../releases"/>
     <property name="samples.dir" location="../samples"/>
 
@@ -47,6 +47,11 @@
     <path id="specific.class.path">
       <path refid="project.class.path"/>
     </path>
+  </target>
+
+  <target name="setver" depends="init" if="version">
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@version@" value="${version}"/>
   </target>
 
   <!-- Builds all needed jars, except kjoram (needs 1.1 compiler) -->
