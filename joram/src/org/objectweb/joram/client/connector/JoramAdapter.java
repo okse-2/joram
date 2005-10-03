@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
- *                 ScalAgent Distributed Technologies
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.connector;
 
@@ -519,11 +518,10 @@ public class JoramAdapter
                                   + "context: " + exc);
     }
 
-    int maxWorks = 0;
+    int maxWorks = 10;
     try {
       maxWorks = Integer.parseInt(specImpl.getMaxNumberOfWorks());
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       throw new ResourceException("Invalid max number of works instances "
                                   + "number: " + exc);
     }
