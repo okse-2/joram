@@ -22,9 +22,12 @@
  */
 package org.objectweb.joram.client.jms;
 
-import org.objectweb.joram.client.jms.admin.AdminException;
+import java.util.Properties;
+
 import javax.jms.JMSException;
 import java.net.ConnectException;
+
+import org.objectweb.joram.client.jms.admin.AdminException;
 
 public interface QueueMBean extends DestinationMBean {
 
@@ -63,8 +66,14 @@ public interface QueueMBean extends DestinationMBean {
 
   public String[] getMessageIds()
     throws ConnectException, AdminException;
+
+  public String getMessageDigest(String msgId)
+    throws AdminException, ConnectException, JMSException;
+ 
+  public Properties getMessageHeader(String msgId)
+    throws ConnectException, AdminException, JMSException;
   
-  public javax.jms.Message readMessage(String msgId)
+  public Properties getMessageProperties(String msgId)
     throws ConnectException, AdminException, JMSException;
 
   public void deleteMessage(String msgId)
