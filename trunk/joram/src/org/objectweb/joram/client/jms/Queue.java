@@ -343,13 +343,79 @@ public class Queue extends Destination
     return reply.getMessageIds();
   }
   
-  public javax.jms.Message readMessage(
-    String msgId)
-    throws AdminException, ConnectException, JMSException {
+  public javax.jms.Message readMessage(String msgId) throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
       (GetQueueMessageRep)AdminModule.doRequest(
         new GetQueueMessage(agentId, msgId));
     return Message.wrapMomMessage(null, reply.getMessage());
+  }
+
+  public String getMessageDigest(String msgId)
+    throws AdminException, ConnectException, JMSException {
+    GetQueueMessageRep reply = 
+      (GetQueueMessageRep)AdminModule.doRequest(
+        new GetQueueMessage(agentId, msgId));
+    javax.jms.Message msg = Message.wrapMomMessage(null, reply.getMessage());
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("Message: ").append(msg.getJMSMessageID());
+    strbuf.append("\n\tTo: ").append(msg.getJMSDestination());
+    strbuf.append("\n\tCorrelationId: ").append(msg.getJMSCorrelationID());
+    strbuf.append("\n\tDeliveryMode: ").append(msg.getJMSDeliveryMode());
+    strbuf.append("\n\tExpiration: ").append(msg.getJMSExpiration());
+    strbuf.append("\n\tPriority: ").append(msg.getJMSPriority());
+    strbuf.append("\n\tRedelivered: ").append(msg.getJMSRedelivered());
+    strbuf.append("\n\tReplyTo: ").append(msg.getJMSReplyTo());
+    strbuf.append("\n\tTimestamp: ").append(msg.getJMSTimestamp());
+    strbuf.append("\n\tType: ").append(msg.getJMSType());
+    return strbuf.toString();
+  }
+
+  public Properties getMessageHeader(String msgId)
+    throws AdminException, ConnectException, JMSException {
+    GetQueueMessageRep reply = 
+      (GetQueueMessageRep)AdminModule.doRequest(
+        new GetQueueMessage(agentId, msgId));
+    Message msg = (Message) Message.wrapMomMessage(null, reply.getMessage());
+
+    Properties prop = new Properties();
+    prop.setProperty("JMSMessageID", msg.getJMSMessageID());
+    prop.setProperty("JMSDestination", msg.getJMSDestination().toString());
+    if (msg.getJMSCorrelationID() != null)
+      prop.setProperty("JMSCorrelationID", msg.getJMSCorrelationID());
+    prop.setProperty("JMSDeliveryMode",
+                     new Integer(msg.getJMSDeliveryMode()).toString());
+    prop.setProperty("JMSExpiration",
+                     new Long(msg.getJMSExpiration()).toString());
+    prop.setProperty("JMSPriority",
+                     new Integer(msg.getJMSPriority()).toString());
+    prop.setProperty("JMSRedelivered",
+                     new Boolean(msg.getJMSRedelivered()).toString());
+    if (msg.getJMSReplyTo() != null)
+      prop.setProperty("JMSReplyTo", msg.getJMSReplyTo().toString());
+    prop.setProperty("JMSTimestamp",
+                     new Long(msg.getJMSTimestamp()).toString());
+    if (msg.getJMSType() != null)
+      prop.setProperty("JMSType", msg.getJMSType());
+
+    if (msg.momMsg != null) {
+      msg.momMsg.getOptionalHeader(prop);
+    }
+
+    return prop;
+  }
+
+  public Properties getMessageProperties(String msgId)
+    throws AdminException, ConnectException, JMSException {
+    GetQueueMessageRep reply = 
+      (GetQueueMessageRep)AdminModule.doRequest(
+        new GetQueueMessage(agentId, msgId));
+    Message msg = (Message) Message.wrapMomMessage(null, reply.getMessage());
+
+    Properties prop = new Properties();
+    if (msg.momMsg != null) {
+      msg.momMsg.getProperties(prop);
+    }
+    return prop;
   }
 
   public void deleteMessage(
