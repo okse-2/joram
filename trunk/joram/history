@@ -1,5 +1,24 @@
 ###############################################################################
-# 2005/08/03 | Joram 4.3.5 tag.
+# 2005/09/19 | Joram 4.3.6 tag.
+###############################################################################
++==============================================================================
+| 2005/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Removes readMessage in QueueMBean in order to cut out dependancy to
+the JMS API. Replaces it by getMessageDigest, getMessageHeader and
+getMessageProperties.
++==============================================================================
+| 2005/10/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds resetPropertiesRO method to Message class.
+ Fix MaxNumberOfWorks default value to 10.
++==============================================================================
+| 2005/09/30 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: Memory leak in Joram adpater. With maxWorks parameter set to 0
+(no limit) the pool is not used, InboundSessions are alwaye created, inserted in the pool and never garbaged.
+###############################################################################
+# 2005/09/19 | Joram 4.3.5 tag.
 ###############################################################################
 +==============================================================================
 | 2005/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies
