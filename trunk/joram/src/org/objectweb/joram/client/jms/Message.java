@@ -34,6 +34,8 @@ import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * Implements the <code>javax.jms.Message</code> interface.
  * <p>
@@ -863,5 +865,30 @@ public class Message implements javax.jms.Message {
     momMsg.expired = false;
     momMsg.notWriteable = false;
     momMsg.undeliverable = false;
+  }
+
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    try {
+      strbuf.append('(').append(super.toString());
+      strbuf.append(",messageID=").append(getJMSMessageID());
+      strbuf.append(",destination=").append(getJMSDestination());
+      strbuf.append(",correlationId=").append(getJMSCorrelationID());
+      strbuf.append(",deliveryMode=").append(getJMSDeliveryMode());
+      strbuf.append(",expiration=").append(getJMSExpiration());
+      strbuf.append(",priority=").append(getJMSPriority());
+      strbuf.append(",redelivered=").append(getJMSRedelivered());
+      strbuf.append(",replyTo=").append(getJMSReplyTo());
+      strbuf.append(",timestamp=").append(getJMSTimestamp());
+      strbuf.append(",type=").append(getJMSType());
+      strbuf.append(')');
+    } catch (JMSException exc) {
+      JoramTracing.dbgClient.log(BasicLevel.ERROR,
+                                 "Message.toString()", exc);
+      return super.toString();
+    }
+ 
+    return strbuf.toString();
   }
 }  
