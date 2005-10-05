@@ -298,6 +298,16 @@ public class Message
     optionalHeader.put(name, value);
   }
 
+  /**
+   *  Copies all of the mappings from the optionalHeader of this message to
+   * the specified hashtable. These mappings will replace any mappings that
+   * this Hashtable had for any of the keys currently in the optional header.
+   */
+  public void getOptionalHeader(Hashtable h) {
+    if (optionalHeader != null)
+      h.putAll(optionalHeader);
+  }
+
   /** Returns the message type. */
   public int getType()
   {
@@ -680,6 +690,16 @@ public class Message
     propertiesRO = false;
   }
    
+  /**
+   *  Copies all of the mappings from the properties of this message to
+   * the specified hashtable. These mappings will replace any mappings that
+   * this Hashtable had for any of the keys currently in the properties.
+   */
+  public void getProperties(Hashtable h) {
+    if (properties != null)
+      h.putAll(properties);
+  }
+
   /**
    * Sets an object as the body of the message. 
    *
