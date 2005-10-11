@@ -768,9 +768,15 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       }
       write(Operation.END);
 
+      // AF: Is it needed? Normally the file pointer should already set at
+      // the right position... To be verified, but not really a big cost.
       logFile.seek(current);
       logFile.write(buf, 0, count);
 
+      // AF: May be we can avoid this second synchronous write, using a
+      // marker: determination d'un marqueur lié au log courant (date en
+      // millis par exemple), ecriture du marqueur au debut du log, puis
+      // ecriture du marqueur apres chaque Operation.COMMIT.
       logFile.seek(current -1);
       logFile.write(Operation.COMMIT);
 
