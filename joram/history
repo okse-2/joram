@@ -1,5 +1,16 @@
 ###############################################################################
-# 2005/09/19 | Joram 4.3.6 tag.
+# 2005/10/13 | Joram 4.3.7 tag.
+###############################################################################
++==============================================================================
+| 2005/10/13 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: avoid NullPointerException in case of acknowledgment of an
+inexistent message.
+ Bug fixes: avoid sharing of message structure between different messages in
+MOM; clone the MessagePersistent and correctly set the message field.
+ Removes '#' character in Message unique identifier.
+###############################################################################
+# 2005/10/05 | Joram 4.3.6 tag.
 ###############################################################################
 +==============================================================================
 | 2005/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies
