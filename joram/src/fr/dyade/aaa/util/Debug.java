@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,8 @@ import java.io.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.*;
+import org.objectweb.util.monolog.wrapper.remote.lib.MonologFactoryMBeanImpl;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * This class handles the debug traces.
@@ -39,6 +41,8 @@ public class Debug {
    * path used to load classes.
    */
   public final static String DEBUG_DIR_PROPERTY = "fr.dyade.aaa.DEBUG_DIR";
+  /** Default value for A3 debug configuration directory. */
+  public final static String DEFAULT_DEBUG_DIR = ".";
   /** Property name for A3 debug configuration filename */
   public final static String DEBUG_FILE_PROPERTY = "fr.dyade.aaa.DEBUG_FILE";
   /** Default filename for A3 debug configuration */
@@ -51,12 +55,12 @@ public class Debug {
    * Name of the directory where the debug configuration
    * file can be found.
    */
-  private static String debugDir;
+  private static String debugDir = null;
 
   /**
    * Name of the debug configuration file.
    */
-  private static String debugFileName;
+  private static String debugFileName = null;
 
   public static void setDebugDir(String debugDir) {
     Debug.debugDir = debugDir;
@@ -73,7 +77,7 @@ public class Debug {
   protected static void init() throws Exception {
     try {
       initialize();
-    } catch(Exception exc){
+    } catch(Exception exc) {
       System.err.println("Monolog configuration file not found, use defaults");
       try {
         ((MonologFactory) factory).configure(null);
@@ -86,6 +90,22 @@ public class Debug {
         throw new Exception("Unable to configure monolog wrapper");
       }
     }
+
+    // Be careful, initialize first the monolog factory before trying to
+    // register the monolog MBean (see MXWrapper.init).
+
+//     try {
+//       System.out.println("try to register");
+//       MXWrapper.init();
+//       MXWrapper.registerMBean(
+//         new MonologFactoryMBeanImpl((MonologFactory) factory),
+//         "logging", "name=monolog");
+//       System.out.println("registered");
+//     } catch (Exception exc) {
+//       System.err.println("Unable to register monolog MBean");
+//       exc.printStackTrace();
+//     }
+
   }
 
   private static PrivateLogger logger = null;
@@ -94,17 +114,21 @@ public class Debug {
    * Initializes the package.
    */
   private static void initialize() throws Exception {
-    String debugDir = System.getProperty(DEBUG_DIR_PROPERTY);
-    String debugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
-                                              DEFAULT_DEBUG_FILE);
-    if (debugDir != null) {
-      File debugFile = new File(debugDir, debugFileName);
+    String ldebugDir = debugDir;
+    if (ldebugDir == null)
+      ldebugDir = System.getProperty(DEBUG_DIR_PROPERTY);
+    String ldebugFileName = debugFileName;
+    if (ldebugFileName == null)
+      ldebugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
+                                          DEFAULT_DEBUG_FILE);
+    if (ldebugDir != null) {
+      File debugFile = new File(ldebugDir, ldebugFileName);
       try {
         if ((debugFile != null) &&
-            (debugFile.length() != 0) &&
             debugFile.exists() &&
-            debugFile.isFile()) {
-          debugFileName = debugFile.getPath();
+            debugFile.isFile() &&
+            (debugFile.length() != 0)) {
+          ldebugFileName = debugFile.getPath();
         } else {
           throw new IOException();
         }
@@ -112,14 +136,20 @@ public class Debug {
         // debug configuration file seems not exist, search it from the
         // search path used to load classes.
         System.err.println("Unable to find \"" + debugFile.getPath() + "\".");
-        debugDir = null;
+        ldebugDir = null;
       }
     }
 
     try {
       System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
-                         debugFileName);
+                         ldebugFileName);
       factory = org.objectweb.util.monolog.Monolog.init();
+      if (factory == null) {
+        System.err.println("Error in Monolog initialization: null factory");
+      } else {
+        Logger dl = factory.getLogger("fr.dyade.aaa.util.debug");
+        dl.log(BasicLevel.INFO, "Debug.initialize() - " + ldebugFileName);
+      }
     } catch(Throwable exc) {
       System.err.println("Unable to instantiate monolog wrapper");
       exc.printStackTrace();
