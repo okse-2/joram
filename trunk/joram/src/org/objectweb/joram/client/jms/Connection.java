@@ -171,7 +171,7 @@ public class Connection implements javax.jms.Connection {
 
   /** String image of the connection. */
   public String toString() {
-    return "Cnx:" + proxyId + "-" + key;
+    return "Cnx:" + proxyId + ':' + key;
   }
 
   final long getTxPendingTimer() {
@@ -551,7 +551,7 @@ public class Connection implements javax.jms.Connection {
     if (messagesC == Integer.MAX_VALUE)
       messagesC = 0;
     messagesC++;
-    return "ID:" + proxyId + "c" + key + "m" + messagesC;
+    return "ID:" + proxyId.substring(1) + "c" + key + "m" + messagesC;
   }
 
   /** Returns a new subscription name. */
