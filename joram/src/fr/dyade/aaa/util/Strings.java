@@ -49,12 +49,20 @@ public class Strings {
       toString(output, (String) obj);
       return;
     }
-    if (obj instanceof Vector) {
-      toString(output, (Vector) obj);
+    if (obj instanceof List) {
+      toString(output, (List) obj);
       return;
     }
-    if (obj instanceof Hashtable) {
-      toString(output, (Hashtable) obj);
+    if (obj instanceof Collection) {
+      toString(output, (Collection) obj);
+      return;
+    }
+    if (obj instanceof Map) {
+      toString(output, (Map) obj);
+      return;
+    }
+    if (obj instanceof Map.Entry) {
+      toString(output, (Map.Entry) obj);
       return;
     }
 
@@ -647,25 +655,26 @@ public class Strings {
   }
 
   /**
-   * Provides a string representation of a vector of objects.
+   * Provides a string representation of a list of objects.
+   * This includes Vectors.
    * Uses the <code>listMax</code> and <code>listBorder</code> variables.
    *
    * @param output	a buffer to print the object into
-   * @param vector	the vector of <code>Object</code> objects to print
+   * @param list	the list of <code>Object</code> objects to print
    */
-  public static final void toString(StringBuffer output, Vector vector) {
-    if (vector == null) {
+  public static final void toString(StringBuffer output, List list) {
+    if (list == null) {
       output.append("null");
       return;
     }
 
     output.append("(");
-    int size = vector.size();
+    int size = list.size();
     output.append(size);
-    if (listMax == -1 || size <= listMax) {
-      for (Enumeration e = vector.elements(); e.hasMoreElements();) {
+    if (listMax == -1 || size <= listMax || size <= (listBorder*2)) {
+      for (Iterator it = list.iterator(); it.hasNext();) {
 	output.append(",");
-	toString(output, e.nextElement());
+	toString(output, it.next());
       }
     } else {
       int border = size / 2;
@@ -673,91 +682,124 @@ public class Strings {
 	border = listBorder;
       for (int i = 0; i < border; i ++) {
 	output.append(",");
-	toString(output, vector.elementAt(i));
+	toString(output, list.get(i));
       }
       output.append(",...");
       for (int i = border; i > 0; i --) {
 	output.append(",");
-	toString(output, vector.elementAt(size - i));
+	toString(output, list.get(size - i));
       }
     }
     output.append(")");
   }
 
   /**
-   * Provides a string representation of a vector of objects.
+   * Provides a string representation of a list of objects.
    * Calls <code>toString(StringBuffer, ...)</code>.
    *
-   * @param vector	the vector of <code>Object</code> objects to print
-   * @return		a string representation of the vector
+   * @param list	the list of <code>Object</code> objects to print
+   * @return		a string representation of the list
    */
-  public static final String toString(Vector vector) {
-    if (vector == null)
+  public static final String toString(List list) {
+    if (list == null)
       return "null";
 
     StringBuffer output = new StringBuffer();
-    toString(output, vector);
+    toString(output, list);
     return output.toString();
   }
 
   /**
-   * Provides a string representation of a hash table of objects.
+   * Provides a string representation of an unordered Collection of objects.
+   * This includes HashSets.
    * Uses the <code>listMax</code> and <code>listBorder</code> variables.
    *
    * @param output	a buffer to print the object into
-   * @param table	the table of <code>Object</code> objects to print
+   * @param set		the collection to print
    */
-  public static final void toString(StringBuffer output, Hashtable table) {
-    if (table == null) {
+  public static final void toString(StringBuffer output, Collection set) {
+    if (set == null) {
       output.append("null");
       return;
     }
 
     output.append("(");
-    int size = table.size();
+    int size = set.size();
     output.append(size);
-    if (listMax == -1 || size <= listMax) {
-      for (Enumeration e = table.keys(); e.hasMoreElements();) {
-	Object key = e.nextElement();
-	output.append(",(");
-	toString(output, key);
-	output.append(",");
-	toString(output, table.get(key));
-	output.append(")");
-      }
-    } else {
-      int border = size;
-      if (listBorder < border)
-	border = listBorder;
-      Enumeration e = table.keys();
-      for (int i = 0; i < border; i ++) {
-	Object key = e.nextElement();
-	output.append(",(");
-	toString(output, key);
-	output.append(",");
-	toString(output, table.get(key));
-	output.append(")");
-      }
-      if (border < size)
-	output.append(",...");
+    if (listMax != -1 && size > listMax)
+      size = listBorder;
+    for (Iterator it = set.iterator(); size > 0; size --) {
+      output.append(",");
+      toString(output, it.next());
     }
     output.append(")");
   }
 
   /**
-   * Provides a string representation of a hash table of objects.
+   * Provides a string representation of an unordered Collection of objects.
    * Calls <code>toString(StringBuffer, ...)</code>.
    *
-   * @param table	the table of <code>Object</code> objects to print
-   * @return		a string representation of the table
+   * @param list	the collection to print
+   * @return		a string representation of the list
    */
-  public static final String toString(Hashtable table) {
-    if (table == null)
+  public static final String toString(Collection set) {
+    if (set == null)
       return "null";
 
     StringBuffer output = new StringBuffer();
-    toString(output, table);
+    toString(output, set);
     return output.toString();
+  }
+
+  /**
+   * Provides a string representation of a Map.
+   * This includes HashTables.
+   * Uses the <code>listMax</code> and <code>listBorder</code> variables.
+   *
+   * @param output	a buffer to print the object into
+   * @param map		the map to print
+   */
+  public static final void toString(StringBuffer output, Map map) {
+    if (map == null) {
+      output.append("null");
+      return;
+    }
+
+    toString(output, map.values());
+  }
+
+  /**
+   * Provides a string representation of a Map.
+   * Calls <code>toString(StringBuffer, ...)</code>.
+   *
+   * @param map		the map to print
+   * @return		a string representation of the map
+   */
+  public static final String toString(Map map) {
+    if (map == null)
+      return "null";
+
+    StringBuffer output = new StringBuffer();
+    toString(output, map);
+    return output.toString();
+  }
+
+  /**
+   * Provides a string representation of a Map entry.
+   *
+   * @param output	a buffer to print the object into
+   * @param entry	the map entry to print
+   */
+  public static final void toString(StringBuffer output, Map.Entry entry) {
+    if (entry == null) {
+      output.append("null");
+      return;
+    }
+    output.append("(");
+    output.append(entry.getKey());
+    output.append(",");
+    output.append(entry.getValue());
+    output.append(")");
   }
 
 }
