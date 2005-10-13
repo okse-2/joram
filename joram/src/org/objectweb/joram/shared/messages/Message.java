@@ -869,6 +869,10 @@ public class Message
           clone.properties.put(key,properties.get(key));
         }
       }
+      if (messagePersistent != null) {
+        clone.messagePersistent = (MessagePersistent) messagePersistent.clone();
+        clone.messagePersistent.message = clone;
+      }
       return clone;
     } catch (CloneNotSupportedException cE) {
       return null;
