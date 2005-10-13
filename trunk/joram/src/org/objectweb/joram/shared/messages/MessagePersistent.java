@@ -28,9 +28,9 @@ import java.util.*;
 /** 
  *
  */
-public class MessagePersistent implements Serializable {
+public class MessagePersistent implements Cloneable, Serializable {
 
-  transient private Message message;
+  transient Message message;
   transient String msgClassName;
   transient private boolean pin;
 
@@ -241,6 +241,15 @@ public class MessagePersistent implements Serializable {
     message.acksCounter = 0;
     message.durableAcksCounter = 0;
     message.propertiesRO = true;
+  }
+  
+  /** Clones the MessageBody. */
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch (CloneNotSupportedException cE) {
+      return null;
+    }
   }
 
   public String toString() {
