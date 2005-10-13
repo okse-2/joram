@@ -554,7 +554,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   
   private void acknowledge(String msgId) {
     Message msg = (Message) deliveredMsgs.remove(msgId);
-    if (msg.getPersistent()) {
+    if ((msg != null) && msg.getPersistent()) {
       // state change, so save.
       setSave();
     }
@@ -564,11 +564,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       msg.delete();
 
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG)) {
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                      + msgId + " acknowledged.");
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                      "Message " + msgId + " acknowledged.");
       }
-    } else if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG)) {
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+    } else if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN)) {
+      MomTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Message " + msgId
                                     + " not found for acknowledgement.");
     }
