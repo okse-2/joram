@@ -907,7 +907,7 @@ public class Message
     if (getBodyBytes() != null)
       fieldsTb.put("body_bytes", getBodyBytes());
     else if (getBodyMap() != null)
-      fieldsTb.put("body_map", getBodyMap());
+      fieldsTb.put("body_map", new Hashtable(getBodyMap()));
     else if (getBodyText() != null)
       fieldsTb.put("body_text", getBodyText());
     fieldsTb.put("bodyRO", new Boolean(bodyRO));
@@ -960,7 +960,7 @@ public class Message
         msg.replyToType = (String)fieldsTb.get("replyToType");
       }
       msg.setBodyBytes(ConversionHelper.toBytes(fieldsTb.get("body_bytes")));
-      msg.setBodyMap((HashMap) fieldsTb.get("body_map"));
+      msg.setBodyMap(new HashMap((Hashtable) fieldsTb.get("body_map")));
       msg.setBodyText((String) fieldsTb.get("body_text"));
       msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
       msg.propertiesRO =
