@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -34,6 +34,8 @@ import javax.jms.JMSSecurityException;
 import javax.jms.IllegalStateException;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
+import javax.jms.XAQueueConnection;
+import javax.jms.XATopicConnection;
 import javax.naming.StringRefAddr;
 import javax.naming.Reference;
 import javax.resource.ResourceException;
@@ -66,7 +68,7 @@ public class ManagedConnectionFactoryImpl
   private transient Vector connections = null;
   /** Out stream for error logging and tracing. */
   protected transient PrintWriter out = null;
- 
+
   /** Resource adapter central authority. */
   transient JoramAdapter ra = null;
 
@@ -76,7 +78,7 @@ public class ManagedConnectionFactoryImpl
   String hostName;
   /** Underlying JORAM server port number. */
   int serverPort;
- 
+
   /** Default user identification. */
   String userName = "anonymous";
   /** Default user password. */
@@ -94,7 +96,7 @@ public class ManagedConnectionFactoryImpl
    * the 0 value means "no timer".
    */
   public int txPendingTimer = 0;
-  /** 
+  /**
    * Period in milliseconds between two ping requests sent by the client
    * connection to the server; if the server does not receive any ping
    * request during more than 2 * cnxPendingTimer, the connection is
@@ -102,7 +104,7 @@ public class ManagedConnectionFactoryImpl
    */
   public int cnxPendingTimer = 0;
 
-  /** 
+  /**
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
    */
   public ManagedConnectionFactoryImpl()
@@ -122,13 +124,13 @@ public class ManagedConnectionFactoryImpl
 
   protected void setParameters(Object factory) {
     if (factory instanceof org.objectweb.joram.client.jms.ConnectionFactory) {
-      org.objectweb.joram.client.jms.ConnectionFactory f = 
+      org.objectweb.joram.client.jms.ConnectionFactory f =
         (org.objectweb.joram.client.jms.ConnectionFactory) factory;
       f.getParameters().connectingTimer = connectingTimer;
       f.getParameters().cnxPendingTimer = cnxPendingTimer;
       f.getParameters().txPendingTimer = txPendingTimer;
     } else if (factory instanceof org.objectweb.joram.client.jms.XAConnectionFactory) {
-      org.objectweb.joram.client.jms.XAConnectionFactory f = 
+      org.objectweb.joram.client.jms.XAConnectionFactory f =
         (org.objectweb.joram.client.jms.XAConnectionFactory) factory;
       f.getParameters().connectingTimer = connectingTimer;
       f.getParameters().cnxPendingTimer = cnxPendingTimer;
@@ -153,7 +155,7 @@ public class ManagedConnectionFactoryImpl
   }
 
   /**
-   * Method called in the non managed case for creating an 
+   * Method called in the non managed case for creating an
    * <code>OutboundConnectionFactory</code> instance.
    *
    * @exception ResourceException  Never thrown.
@@ -162,7 +164,7 @@ public class ManagedConnectionFactoryImpl
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
-    OutboundConnectionFactory factory = 
+    OutboundConnectionFactory factory =
       new OutboundConnectionFactory(this, null);
 
     Reference ref =
@@ -193,13 +195,13 @@ public class ManagedConnectionFactoryImpl
    * @exception ResourceException      If the provided user info is invalid,
    *                                   or if connecting fails for any other
    *                                   reason.
-   */ 
+   */
   public ManagedConnection
       createManagedConnection(Subject subject,
                               ConnectionRequestInfo cxRequest)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection(" + subject +
                                     ", " + cxRequest + ")");
 
@@ -242,7 +244,7 @@ public class ManagedConnectionFactoryImpl
       cnx = factory.createXAConnection(userName, password);
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
       out.print("Could not access the JORAM server: " + exc);
@@ -263,7 +265,7 @@ public class ManagedConnectionFactoryImpl
     managedCx.setLogWriter(out);
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection managedCx = " + managedCx);
     return managedCx;
   }
@@ -285,13 +287,15 @@ public class ManagedConnectionFactoryImpl
                               ConnectionRequestInfo cxRequest)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " matchManagedConnections(" + connectionSet +
                                     ", " + subject + ", " + cxRequest + ")");
 
     String userName;
 
     // No user identification provided, using the default one.
+    String mode = "Unified";
+
     if (cxRequest == null)
       userName = this.userName;
     else {
@@ -301,6 +305,11 @@ public class ManagedConnectionFactoryImpl
                                     + "is not a JORAM object.");
       }
 
+      if (cxRequest instanceof QueueConnectionRequest)
+          mode = "PTP";
+      else if (cxRequest instanceof TopicConnectionRequest)
+          mode = "PubSub";
+
       userName = ((ConnectionRequest) cxRequest).getUserName();
     }
 
@@ -308,24 +317,39 @@ public class ManagedConnectionFactoryImpl
     boolean matching = false;
 
     Iterator it = connectionSet.iterator();
+
+    String hostName = this.hostName;
+    int serverPort = this.serverPort;
+
+    if (collocated) {
+        hostName = "localhost";
+        serverPort = -1;
+    }
+
+
     while (! matching && it.hasNext()) {
       try {
         managedCx = (ManagedConnectionImpl) it.next();
+
         matching =
-          managedCx.matches(hostName, serverPort, userName, "Unified");
+          managedCx.matches(hostName, serverPort, userName, mode);
       }
-      catch (ClassCastException exc) {}
+      catch (ClassCastException exc) {
+      }
     }
 
     if (matching) {
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " matchManagedConnections managedCx = " + managedCx);
       managedCx.setLogWriter(out);
       return managedCx;
     }
+    
     return null;
   }
+
+
 
   /**
    * Sets the log writer for this <code>ManagedConnectionFactoryImpl</code>
@@ -339,16 +363,16 @@ public class ManagedConnectionFactoryImpl
   /**
    * Gets the log writer of this <code>ManagedConnectionFactoryImpl</code>
    * instance.
-   */ 
+   */
   public PrintWriter getLogWriter() throws ResourceException
   {
     return out;
   }
- 
+
   /** Returns a code depending on the managed factory configuration. */
   public int hashCode()
   {
-    return ("Unified:" 
+    return ("Unified:"
             + hostName
             + ":"
             + serverPort
@@ -365,14 +389,14 @@ public class ManagedConnectionFactoryImpl
       return false;
 
     ManagedConnectionFactoryImpl other = (ManagedConnectionFactoryImpl) o;
-  
+
     boolean res =
       hostName.equals(other.hostName)
       && serverPort == other.serverPort
       && userName.equals(other.userName);
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " equals " + res);
     return res;
   }
@@ -380,7 +404,7 @@ public class ManagedConnectionFactoryImpl
   /** Returns the resource adapter central authority instance. */
   public ResourceAdapter getResourceAdapter() {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " getResourceAdapter() = " + ra);
     return ra;
   }
@@ -390,10 +414,10 @@ public class ManagedConnectionFactoryImpl
    *
    * @exception ResourceException  If the adapter could not be set.
    */
-  public void setResourceAdapter(ResourceAdapter ra) 
+  public void setResourceAdapter(ResourceAdapter ra)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " setResourceAdapter(" + ra + ")");
 
     if (this.ra != null) {
@@ -421,22 +445,22 @@ public class ManagedConnectionFactoryImpl
     cnxPendingTimer = ((JoramAdapter) ra).cnxPendingTimer;
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " setResourceAdapter collocated = " + collocated +
                                     ", hostName = " + hostName +
-                                    ", serverPort = " + serverPort + 
-                                    ", connectingTimer = " + connectingTimer + 
-                                    ", txPendingTimer = " + txPendingTimer + 
+                                    ", serverPort = " + serverPort +
+                                    ", connectingTimer = " + connectingTimer +
+                                    ", txPendingTimer = " + txPendingTimer +
                                     ", cnxPendingTimer = " + cnxPendingTimer);
   }
 
   /**
    * From a set of managed connections, returns the set of invalid ones.
    */
-  public Set getInvalidConnections(Set connectionSet) 
+  public Set getInvalidConnections(Set connectionSet)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " getInvalidConnections(" + connectionSet + ")");
 
     Iterator it = connectionSet.iterator();
@@ -514,5 +538,5 @@ public class ManagedConnectionFactoryImpl
   public java.lang.String getPassword()
   {
     return password;
-  } 
+  }
 }
