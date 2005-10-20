@@ -41,15 +41,34 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   /** JMS API version, currently 1.1 */
   public final static String jmsVersion = "1.1";
   /** Joram's major version number */
-  public final static int providerMajorVersion = 4;
+  public static int providerMajorVersion = 4;
   /** Joram's minor version number */
-  public final static int providerMinorVersion = 3;
+  public static int providerMinorVersion = 3;
   /** Joram's implementation version, currently @version@. */
   public final static String providerVersion = "@version@";
   /** Enumeration of the Joram's JMSX property names */
   public final static Vector jmsxProperties = new Vector();
 
   static {
+    int idx1 = 0;
+    int idx2 = 0;
+    try {
+      idx1 = providerVersion.indexOf('.');
+      if (idx1 != -1) {
+        providerMajorVersion =
+          Integer.parseInt(providerVersion.substring(0, idx1));
+      }
+    } catch (Exception exc) {
+    }
+    try {
+      idx2 = providerVersion.indexOf('.', idx1 +1);
+      if (idx2 != -1) {
+        providerMinorVersion =
+          Integer.parseInt(providerVersion.substring(idx1 +1, idx2));
+      }
+    } catch (Exception exc) {
+    }
+
     jmsxProperties.add("JMSXDeliveryCount");
     jmsxProperties.add("JMSXGroupID");
     jmsxProperties.add("JMSXGroupSeq");
