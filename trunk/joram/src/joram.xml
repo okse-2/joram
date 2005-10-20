@@ -16,6 +16,8 @@
     <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
              token="@version@" value="${version}"/>
 
+    <echo message="Joram ${version}"/>
+
     <!-- Defines specific fileset to compile -->
     <patternset id="specific.compile.sources" >
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
@@ -53,7 +55,6 @@
   </target>
 
   <target name="setver" depends="init" unless="version">
-    <echo message="joram ${version}"/>
     <!-- If version is not set, fix it -->
     <property name="version" value="${joram.version}"/>
   </target>
@@ -144,7 +145,7 @@
   </target>
 
   <!-- Builds kjoram (needs 1.1 compiler) -->
-  <target name="build.kjoram" depends="prepare"
+  <target name="build.kjoram" depends="init.joram, prepare"
       description="--> Builds kjoram jars.">
     <!-- Compilation phase -->
     <javac source="1.3" target="1.1"
@@ -292,7 +293,7 @@
   </target>
 
   <!-- JAVADOC --> 
-  <target name="javadoc" depends="prepare"
+  <target name="javadoc" depends="init.joram"
       description="--> Generates the JavaDoc.">
     <javadoc sourcepath="${src.dir}"
              destdir="${doc.dir}"
@@ -312,7 +313,7 @@
   </target>
 
   <!-- JAVADOC --> 
-  <target name="javadoc.all" depends="prepare"
+  <target name="javadoc.all" depends="init.joram"
       description="--> Generates the JavaDoc.">
     <javadoc sourcepath="${src.dir}"
              destdir="${doc.dir}"
@@ -332,8 +333,7 @@
 
   <!-- RELEASES -->
   <target name="releases"
-          depends="clean,release.src,release.jar"
-          if="version">
+          depends="clean,release.src,release.jar">
     <antcall target="ship.adapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-RA.rar"/>
@@ -366,7 +366,7 @@
 
   </target>
 
-  <target name="release.jar" depends="ship.joram,javadoc" if="version">
+  <target name="release.jar" depends="ship.joram,javadoc">
     <mkdir dir="${releases.dir}"/>
     <tar tarfile="${releases.dir}/joram-${version}.tar"
          longfile="gnu">
@@ -391,7 +391,7 @@
     <delete file="${releases.dir}/joram-${version}.tar"/>
   </target>
 
-  <target name="release.src" depends="init.joram" if="version">
+  <target name="release.src" depends="init.joram">
    <mkdir dir="${releases.dir}"/>
      <tar tarfile="${releases.dir}/joram-${version}-src.tar"
           longfile="gnu">
