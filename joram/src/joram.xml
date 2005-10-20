@@ -13,6 +13,9 @@
     <property name="releases.dir" location="../releases"/>
     <property name="samples.dir" location="../samples"/>
 
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@version@" value="${version}"/>
+
     <!-- Defines specific fileset to compile -->
     <patternset id="specific.compile.sources" >
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
@@ -49,9 +52,10 @@
     </path>
   </target>
 
-  <target name="setver" depends="init" if="version">
-    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
-             token="@version@" value="${version}"/>
+  <target name="setver" depends="init" unless="version">
+    <echo message="joram ${version}"/>
+    <!-- If version is not set, fix it -->
+    <property name="version" value="${joram.version}"/>
   </target>
 
   <!-- Builds all needed jars, except kjoram (needs 1.1 compiler) -->
