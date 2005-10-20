@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -69,7 +69,7 @@ public class ManagedTopicConnectionFactoryImpl
                         javax.resource.spi.ValidatingManagedConnectionFactory,
                         java.io.Serializable
 {
-  /** 
+  /**
    * Constructs a <code>ManagedTopicConnectionFactoryImpl</code> instance.
    */
   public ManagedTopicConnectionFactoryImpl()
@@ -87,24 +87,24 @@ public class ManagedTopicConnectionFactoryImpl
   public Object createConnectionFactory(ConnectionManager cxManager)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createConnectionFactory(" + cxManager + ")");
 
     return new OutboundTopicConnectionFactory(this, cxManager);
   }
 
   /**
-   * Method called in the non managed case for creating an 
+   * Method called in the non managed case for creating an
    * <code>OutboundTopicConnectionFactory</code> instance.
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory() 
+  public Object createConnectionFactory()
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
-    OutboundConnectionFactory factory = 
+    OutboundConnectionFactory factory =
       new OutboundTopicConnectionFactory(this,
                                          DefaultConnectionManager.getRef());
 
@@ -136,16 +136,16 @@ public class ManagedTopicConnectionFactoryImpl
    * @exception ResourceException      If the provided user info is invalid,
    *                                   or if connecting fails for any other
    *                                   reason.
-   */ 
+   */
   public ManagedConnection
          createManagedConnection(Subject subject,
                                  ConnectionRequestInfo cxRequest)
     throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " createManagedConnection(" + subject + 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    this + " createManagedConnection(" + subject +
                                     ", " + cxRequest + ")");
-    
+
     String userName;
     String password;
 
@@ -200,7 +200,7 @@ public class ManagedTopicConnectionFactoryImpl
       }
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
       out.print("Could not access the JORAM server: " + exc);
@@ -221,7 +221,7 @@ public class ManagedTopicConnectionFactoryImpl
     managedCx.setLogWriter(out);
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection managedCx = " + managedCx);
 
     return managedCx;
@@ -245,7 +245,7 @@ public class ManagedTopicConnectionFactoryImpl
     throws ResourceException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " matchManagedConnections(" + connectionSet +
                                     ", " + subject +
                                     ", " + cxRequest + ")");
@@ -269,6 +269,14 @@ public class ManagedTopicConnectionFactoryImpl
         mode = "PubSub";
     }
 
+    String hostName = this.hostName;
+    int serverPort = this.serverPort;
+
+    if (collocated) {
+        hostName = "localhost";
+        serverPort = -1;
+    }
+
     ManagedConnectionImpl managedCx = null;
     boolean matching = false;
 
@@ -282,7 +290,7 @@ public class ManagedTopicConnectionFactoryImpl
 
     if (matching) {
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " matchManagedConnections match " + managedCx);
       managedCx.setLogWriter(out);
       return managedCx;
@@ -293,7 +301,7 @@ public class ManagedTopicConnectionFactoryImpl
   /** Returns a code depending on the managed factory configuration. */
   public int hashCode()
   {
-    return ("PubSub:" 
+    return ("PubSub:"
             + hostName
             + ":"
             + serverPort
@@ -308,14 +316,14 @@ public class ManagedTopicConnectionFactoryImpl
       return false;
 
     ManagedConnectionFactoryImpl other = (ManagedConnectionFactoryImpl) o;
-  
+
     boolean res =
       hostName.equals(other.hostName)
       && serverPort == other.serverPort
       && userName.equals(other.userName);
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " equals = " + res);
     return res;
   }
