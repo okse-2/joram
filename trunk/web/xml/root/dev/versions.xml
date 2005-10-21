@@ -11,6 +11,52 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.8 (October 20, 2005)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_8. This maintenance release provides the following fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Automatically process provider major and minor Version.</li>
+	  <li>Use default version number from build.properties.</li>
+	  <li>Removes '#' character in Message unique identifier.</li>
+	  <li>Removes readMessage in QueueMBean in order to cut out dependancy to the JMS API. Replaces it by getMessageDigest, getMessageHeader and getMessageProperties.</li>
+	  <li>Adds resetPropertiesRO method to Message class.</li>
+	  <li>Use the ExceptionListener if any in cas of connection problem.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Usage of connection's pool in Resource adapter.</li>
+	  <li>Memory leak in Joram adpater. With maxWorks parameter set to 0
+(no limit) the pool is not used, InboundSessions are alwaye created, inserted in the pool and never garbaged.</li>
+	  <li>Fix Soap serialization problem with MapMessage.</li>
+	  <li>Avoid NullPointerException in case of acknowledgment of an
+inexistent message.</li>
+	  <li>Avoid sharing of message structure between different messages in
+MOM; clone the MessagePersistent and correctly set the message field.</li>
+	  <li>Fix reliableClass property in getReference.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.3.4 (August 3, 2005)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_4. This maintenance release provides the following fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Performance improvements: management of transient message, saving of messages and agents.</li>
+	  <li>Updates JGroups version.</li>
+	  <li>Many JMX improvments.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Colocated mode: clones message in sending, fix RO in receiving.</li>
+	  <li>HA mode: Adds bag management for ClientSubscription.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.1 (June 3, 2005)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_1. This maintenance release provides the following fixes and changes.</p>
