@@ -35,6 +35,16 @@
       the <strong>LGPL</strong> license.</p>
    
       <s2 name="Latest News">
+	<subtitle>October 21, 2005: JORAM 4.3.8 version is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes:</p>
+	<ul>
+	  <li>extended JMX management,</li>
+	  <li>performance improvments,</li>
+	  <li>and several bug fixes.</li>
+	</ul>
+	<p>It is tagged in CVS (JORAM_4_3_8) and will be embedded in the next
+        Jonas release. The complete list can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
 	<subtitle>November 29-30, 2005: JORAM Training Session, Paris, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language.
 	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
@@ -60,32 +70,16 @@
         <a href="mailto:contact@scalagent.com">contact@scalagent.com</a>.
         </p>
 
-	<subtitle>September 20-21, 2005: JORAM Training Session, Grenoble, France</subtitle>
-	<p>A two-day training session on JORAM is scheduled and will be delivered in french language.
-	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-	<p>This training session is targeted at architects and system designers that intend to integrate 
-	the JORAM component within a global distributed solution. It includes a significant part of 
-	experimentations and case studies based on real-world application scenarios.</p>
-	<p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
-	of the JORAM component. We offer to share our expertise through a training session that provides
-	 the key knowledge to use and deploy a JORAM system that fits your requirements.
-	This two-day session details the design principles of JORAM and describes the best practices 
-	to take advantage of its advanced properties in complex networked environments.</p>
-	<p>Detailed information about this training session is available online 
-	<a href="http://www.scalagent.com/pages/fr/datasheet/050920-JORAM-formation.pdf">(PDF, in french only)</a></p>
-
 	<subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
-	<p> This version includes bug fixes. You may check their detailed description in the 
-        <a href="dev/versions.html">Code Update</a> page.</p>
-
-	<subtitle>May 17, 2005: JORAM 4.3 version is released</subtitle>
-	<p>This version includes new features :</p>
+	<p> This version includes new features and bug fixes:</p>
 	<ul>
 	  <li>extended JMX management,</li>
 	  <li>Performance improvments,</li>
 	  <li>Handling of large message transmission (called swap out mode),</li>
 	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
 	</ul>
+        <p> You may check their detailed description in the 
+        <a href="dev/versions.html">Code Update</a> page.</p>
 		
     </s2>
     </s1>

@@ -30,7 +30,7 @@
     <subtitle>API documentation</subtitle>
       <ul>
         <li>Browsing the <a href="../current/javadoc/">
-        4.2 release javadoc</a>.</li>
+        4.3 release javadoc</a>.</li>
       </ul>
     </s1>
 
@@ -64,20 +64,6 @@
         <li>IBM developerWork article about administration and naming: <a href="http://www-106.ibm.com/developerworks/java/library/j-jmsvendor/">"Implementing vendor-independent JMS solutions"</a></li>
         <li>IBM developerWork article about JMS 1.1: <a href="http://www-106.ibm.com/developerworks/java/library/j-jms11/">"JMS 1.1 simplifies messaging with unified domains"</a></li>
         <li>TheServerSide article about architectural issues: <a href="http://www.theserverside.com/resources/article.jsp?l=JMSArchitecture">"JMS Application Architectures"</a></li>
-      </ul>
-
-      <subtitle>J2EE resource</subtitle>
-      <ul>
-        <li>A
-            <a href="http://www.wiley.com/WileyCDA/WileyTitle/productCd-0471444359,descCd-description.html">book</a>
-            talking about JORAM?</li>
-      </ul>
-
-      <subtitle>J2ME related site</subtitle>
-      <ul>
-        <li>Wireless Developer Homepage:
-            <a href="http://wireless.java.sun.com/index.jsp">
-            http://wireless.java.sun.com/index.jsp</a></li>
       </ul>
 
     </s1>
