@@ -497,8 +497,7 @@ class ClientSubscription implements java.io.Serializable {
       if (noFiltering
           || (Selector.matches(message, selector)
               && (! noLocal
-                  || (msgId.indexOf(proxyId.toString()) == -1
-                      || msgId.indexOf("c" + contextId + "m") == -1)))) {
+                  || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
 
         if (messagesTable.containsKey(msgId))
           message = (Message) messagesTable.get(msgId);
