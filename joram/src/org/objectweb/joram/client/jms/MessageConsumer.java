@@ -280,6 +280,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   public synchronized javax.jms.MessageListener getMessageListener() 
     throws JMSException {
     checkClosed();
+    if (mcl == null) return null;
     return mcl.getMessageListener();
   }
 
