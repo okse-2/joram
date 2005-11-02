@@ -145,6 +145,7 @@ public class JoramAdapter
    * create and bind.
    */
   private String adminFile = "joram-admin.cfg";
+  private String adminFileXML = "joramAdmin.xml";
 
   /** Name of the JORAM server to start. */
   private String serverName = "s0";
@@ -253,6 +254,18 @@ public class JoramAdapter
       }
     }
 
+    // Starting admin.
+    try {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - Reading the provided admin file: " + adminFileXML);
+      JoramAdmin.executeXMLAdmin(platformConfigDir, adminFileXML);
+    } catch (Exception exc) {
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "JORAM ADMIN XML not found.");
+    }
+
     // Starting an admin session...
     try {
       adminConnect();
@@ -268,12 +281,16 @@ public class JoramAdapter
     try {
       File file = null;
 
-      if (platformConfigDir == null) {
-        java.net.URL url = ClassLoader.getSystemResource(adminFile);
-        file = new File(url.getFile());
+      try {
+        if (platformConfigDir == null) {
+          java.net.URL url = ClassLoader.getSystemResource(adminFile);
+          file = new File(url.getFile());
+        }
+        else
+          file = new File(platformConfigDir, adminFile);
+      } catch (NullPointerException e) {
+        throw new java.io.FileNotFoundException();
       }
-      else
-        file = new File(platformConfigDir, adminFile);
 
       FileReader fileReader = new FileReader(file);
       BufferedReader reader = new BufferedReader(fileReader);
@@ -363,8 +380,8 @@ public class JoramAdapter
     }
     // No destination to deploy.
     catch (java.io.FileNotFoundException fnfe) { 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG)) 
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       "  - No administration task requested.");
     }
     
@@ -964,7 +981,7 @@ public class JoramAdapter
       }
     }
   }
-  
+
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Queue</code> instance.
@@ -1002,7 +1019,7 @@ public class JoramAdapter
                                + "has been lost.");
     }
   }
-
+  
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Topic</code> instance.

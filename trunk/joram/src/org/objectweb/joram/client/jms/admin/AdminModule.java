@@ -41,6 +41,15 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import java.io.Reader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+
+
 import javax.jms.*;
 
 import org.objectweb.joram.client.jms.JoramTracing;
@@ -53,6 +62,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class AdminModule
 {
+  public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
+  public static final String DEFAULT_ADM_NAME = "default";
+
   public static final String REQUEST_TIMEOUT_PROP = 
       "org.objectweb.joram.client.jms.admin.requestTimeout";
 
@@ -970,5 +982,90 @@ public class AdminModule
       tmpTopic.delete();
       sess.close();
     }
+  }
+
+  public static boolean executeXMLAdmin(String cfgDir,
+                                        String cfgFileName) 
+    throws Exception {
+    return executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
+  }
+
+  public static boolean executeXMLAdmin(String path) throws Exception {
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,"executeXMLAdmin(" + path + ")");
+    
+    boolean res = false;
+    Reader reader = null;
+    
+    // 1st, search XML configuration file in directory.    
+    File cfgFile = new File(path);
+    try {
+      if (!cfgFile.exists() || !cfgFile.isFile() || (cfgFile.length() == 0)) {
+        throw new IOException();
+      }
+      reader = new FileReader(cfgFile);
+    } catch (IOException exc) {
+      // configuration file seems not exist, search it from the
+      // search path used to load classes.
+      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                  "Unable to find Joram Admin configuration file \"" +
+                                  cfgFile.getPath() + "\".");
+      reader = null;
+    }
+    
+    // 2nd, search XML configuration file in path used to load classes.
+    if (reader == null) {
+      ClassLoader classLoader = null;
+      InputStream is = null;
+      try {
+        classLoader = AdminModule.class.getClassLoader();
+        if (classLoader != null) {
+          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                      "Trying to find [" + path + "] using " +
+                                      classLoader + " class loader.");
+          is = classLoader.getResourceAsStream(path);
+        }
+      } catch (Throwable t) {
+        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                    "Can't find [" + path + "] using " +
+                                    classLoader + " class loader.",
+                                    t);
+        is = null;
+      }
+      
+      if (is == null) {
+        // Last ditch attempt: get the resource from the class path.
+        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                    "Trying to find [" + path +
+                                    "] using ClassLoader.getSystemResource().");
+        is = ClassLoader.getSystemResourceAsStream(path);
+      }
+      if (is != null) {
+        res = executeAdmin(new InputStreamReader(is));
+      }
+    } else {
+      res = executeAdmin(reader);
+    }
+    
+    if (!res)
+      throw new FileNotFoundException("xml Joram Admin configuration file not found.");
+
+    return res;
+  }
+
+  public static boolean executeAdmin(Reader reader) 
+    throws Exception {
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "executeAdmin(" + reader + ")");
+    
+    String cfgName = System.getProperty(AdminModule.ADM_NAME_PROPERTY, 
+                                        AdminModule.DEFAULT_ADM_NAME);
+
+    JoramSaxWrapper wrapper = new JoramSaxWrapper();
+    return wrapper.parse(reader,cfgName);
   }
 }
