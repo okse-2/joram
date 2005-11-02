@@ -526,7 +526,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     notify();
   }
 
-  public final synchronized void stop() {
+  /**
+   * Stops the transaction module.
+   * It waits all transactions termination, then the module is kept
+   * in a FREE 'ready to use' state.
+   * The log file is garbaged, all operations are reported to disk.
+   */
+  public synchronized void stop() {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, stops");
 
@@ -555,7 +561,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
 
-  public final synchronized void close() {
+  /**
+   * Close the transaction module.
+   * It waits all transactions termination, the module will be initialized
+   * anew before reusing it.
+   * The log file is garbaged then closed.
+   */
+  public synchronized void close() {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, stops");
 
@@ -573,7 +585,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
-                 "NTransaction, stopped: " +
+                 "NTransaction, closed: " +
                  "garbage=" + logFile.garbageCount + ", " +
                  "commit=" + logFile.commitCount);
     }
