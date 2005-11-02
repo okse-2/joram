@@ -665,6 +665,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
       msg.denied = true;
 
+
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(
             BasicLevel.DEBUG, " -> deny " + msgId);
@@ -1173,7 +1174,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           // If the message is still valid:
           if (msg.isValid()) {
             // If selector matches, sending the message:
-            if (Selector.matches(msg, notRec.getSelector())) {
+            if (Selector.matches(msg, notRec.getSelector()) 
+		&& checkDelivery(msg)) {
               messages.remove(j);
               msg.deliveryCount++;
               notMsg.addMessage(msg);
@@ -1265,6 +1267,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
   }
+
+    protected boolean checkDelivery(Message msg) {
+	return true;
+    }
 
   /** 
    * call in deliverMessages just after channel.sendTo(msg),
