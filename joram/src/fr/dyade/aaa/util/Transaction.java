@@ -68,11 +68,15 @@ public interface Transaction {
   void release() throws IOException;
 
   /**
-   * Set the transaction module in order to allow stop.
+   * Stops the transaction module.
+   * It waits all transactions termination, then the module is kept
+   * in a FREE 'ready to use' state.
    */
   void stop();
   /**
-   * Close the transaction module. It will be initialized before using it.
+   * Close the transaction module.
+   * It waits all transactions termination, the module will be initialized
+   * anew before reusing it.
    */
   void close();
 }
