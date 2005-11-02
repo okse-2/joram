@@ -427,4 +427,15 @@ public class JoramAdmin
                                + "has been lost.");
     }
   }
+
+  public static boolean executeXMLAdmin(String cfgDir,
+                                        String cfgFileName) 
+    throws Exception {
+    return AdminModule.executeXMLAdmin(cfgDir, cfgFileName);
+  }
+
+  public static boolean executeXMLAdmin(String path) 
+    throws Exception {
+    return AdminModule.executeXMLAdmin(path);
+  }
 }
