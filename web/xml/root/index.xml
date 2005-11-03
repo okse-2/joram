@@ -14,8 +14,7 @@
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
-      <subtitle>JORAM has been made available for download since May 2000.  As a standalone software, JORAM has been downloaded
-                more than 24,000 times since beginning of 2003. </subtitle>
+      <subtitle>JORAM has been made available for download since May 2000.  As a standalone software, JORAM has been downloaded more than 24,000 times since beginning of 2003. </subtitle>
 
       <table border="0">
 	<tr>
@@ -35,15 +34,12 @@
       the <strong>LGPL</strong> license.</p>
    
       <s2 name="Latest News">
-	<subtitle>October 21, 2005: JORAM 4.3.8 version is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes:</p>
-	<ul>
-	  <li>extended JMX management,</li>
-	  <li>performance improvments,</li>
-	  <li>and several bug fixes.</li>
-	</ul>
-	<p>It is tagged in CVS (JORAM_4_3_8) and will be embedded in the next
-        Jonas release. The complete list can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<subtitle>November 3, 2005: JORAM 4.3.10 version is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes XML scripting capabilities and some bug fixes.</p>
+	<p>It is tagged in CVS (JORAM_4_3_10), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
+	<subtitle>October 25, 2005: JORAM 4.3.9 version is released</subtitle>
+	<p>The Joram 4.3.9 maintenance release is now available for download. This version is embedded in the last JOnAS build (4.6.1). It fixes an incorrect behavior of subscriptions with nolocal attribute. It is tagged in CVS: JORAM_4_3_9.</p>
 
 	<subtitle>November 29-30, 2005: JORAM Training Session, Paris, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language.
@@ -70,17 +66,6 @@
         <a href="mailto:contact@scalagent.com">contact@scalagent.com</a>.
         </p>
 
-	<subtitle>June 3rd, 2005: JORAM 4.3.1 maintenance release is available</subtitle>
-	<p> This version includes new features and bug fixes:</p>
-	<ul>
-	  <li>extended JMX management,</li>
-	  <li>Performance improvments,</li>
-	  <li>Handling of large message transmission (called swap out mode),</li>
-	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
-	</ul>
-        <p> You may check their detailed description in the 
-        <a href="dev/versions.html">Code Update</a> page.</p>
-		
     </s2>
     </s1>
 
