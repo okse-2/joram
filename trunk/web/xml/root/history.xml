@@ -12,15 +12,12 @@
 
   <body>
     <s1 name="JORAM History">
-	<subtitle>October 21, 2005: JORAM 4.3.8 version is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes:</p>
-	<ul>
-	  <li>extended JMX management,</li>
-	  <li>performance improvments,</li>
-	  <li>and several bug fixes.</li>
-	</ul>
-	<p>It is tagged in CVS (JORAM_4_3_8) and will be embedded in the next
-        Jonas release. The complete list can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+      <subtitle>November 3, 2005: JORAM 4.3.10 version is released</subtitle>
+      <p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes XML scripting capabilities and some bug fixes.</p>
+      <p>It is tagged in CVS (JORAM_4_3_10), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
+      <subtitle>October 25, 2005: JORAM 4.3.9 version is released</subtitle>
+      <p>The Joram 4.3.9 maintenance release is now available for download. This version is embedded in the last JOnAS build (4.6.1). It fixes an incorrect behavior of subscriptions with nolocal attribute. It is tagged in CVS: JORAM_4_3_9.</p>
 
       <subtitle>November 29-30, 2005: JORAM Training Session, Paris, France</subtitle>
       <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
@@ -35,6 +32,16 @@
 	to take advantage of its advanced properties in complex networked environments.</p>
       <p>Detailed information about this training session is available online 
 	<a href="http://www.scalagent.com/pages/fr/datasheet/051129-JORAM-formation.pdf">(PDF, in french only)</a></p>
+
+	<subtitle>October 21, 2005: JORAM 4.3.8 version is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes:</p>
+	<ul>
+	  <li>extended JMX management,</li>
+	  <li>performance improvments,</li>
+	  <li>and several bug fixes.</li>
+	</ul>
+	<p>It is tagged in CVS (JORAM_4_3_8) and will be embedded in the next
+        Jonas release. The complete list can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
       <subtitle>September 26th, 2005: JORAM Survey Synthesis</subtitle>
       <p>A synthesis of the JORAM Survey is available 

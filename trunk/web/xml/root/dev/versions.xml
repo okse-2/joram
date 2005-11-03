@@ -11,6 +11,33 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.10 (November 3, 2005)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_10. This maintenance release provides the following fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Basic XML scripting capabilities: it allows creation, deployment and JNDI binding of Destinations, Users and ConnectionFactories.</li>
+	  <li>Adds PoolNetwork component in default packaging.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Avoid endless retry during connection.</li>
+	  <li>No longer throw a NPE in getMessageListener if none is set.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.3.9 (October 25, 2005)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_9. This maintenance release essentially provides a bug fix, it is embedded in the last JOnAS build (4.6.1).</p>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Subscription behavior with nolocal attribute set.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.8 (October 20, 2005)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_8. This maintenance release provides the following fixes and changes.</p>
