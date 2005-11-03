@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,6 +48,8 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
+import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>SoapConnection</code> links a Joram client and a Joram platform
@@ -224,8 +226,7 @@ public class SoapConnection
                                         + " the call: "
                                         + resp.getFault().getFaultString());
       }
-    }
-    catch (SOAPException exc) {
+    } catch (SOAPException exc) {
       throw new IllegalStateException("The SOAP call failed: "
                                       + exc.getMessage());
     }
@@ -356,13 +357,10 @@ public class SoapConnection
     }
   }
 
-  public AbstractJmsReply receive()
-    throws Exception {
+  public AbstractJmsReply receive() throws Exception {
     Vector params = new Vector();
-    params.addElement(
-      new Parameter("name", String.class, name, null));
-    params.addElement(
-      new Parameter("cnxId", int.class, new Integer(cnxId), null));    
+    params.addElement(new Parameter("name", String.class, name, null));
+    params.addElement(new Parameter("cnxId", int.class, new Integer(cnxId), null));    
     receiveCall.setParams(params);
     
     Response resp = null;
@@ -370,8 +368,7 @@ public class SoapConnection
     
     try {
       resp = receiveCall.invoke(serviceUrl, "");
-    }
-    catch (SOAPException exc) {
+    } catch (SOAPException exc) {
       throw new IOException("The SOAP call failed: " + exc.getMessage());
     }
 
