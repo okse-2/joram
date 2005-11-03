@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -960,7 +960,12 @@ public class Message
         msg.replyToType = (String)fieldsTb.get("replyToType");
       }
       msg.setBodyBytes(ConversionHelper.toBytes(fieldsTb.get("body_bytes")));
-      msg.setBodyMap(new HashMap((Hashtable) fieldsTb.get("body_map")));
+      Hashtable ht = (Hashtable) fieldsTb.get("body_map");
+      if (ht != null) {
+        msg.setBodyMap(new HashMap(ht));
+      } else {
+        msg.setBodyMap((HashMap) null);
+      }
       msg.setBodyText((String) fieldsTb.get("body_text"));
       msg.bodyRO = ConversionHelper.toBoolean(fieldsTb.get("bodyRO"));
       msg.propertiesRO =
