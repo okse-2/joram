@@ -1,7 +1,26 @@
 ###############################################################################
+# 2005/10/25 | Joram 4.3.10 tag.
+###############################################################################
++==============================================================================
+| 2005/11/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid endless retry during connection in non HA mode.
+ Adds PoolNetwork in default shipment.
++==============================================================================
+| 2005/11/02 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ New administration xml file for Joram (joramAdmin.dtd/xml).
+ Provide creation, deployment and bind of destination, connectionFactory 
+ and user.
++==============================================================================
+| 2005/10/25 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: don't throw NPE iin getMessageListener if none is set.
+###############################################################################
 # 2005/10/25 | Joram 4.3.9 tag.
 ###############################################################################
-+==============================================================================| 2005/10/25 | Andre Freyssinet - ScalAgent Distributed Technologies
++==============================================================================
+| 2005/10/25 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
  Bug fix: Due to the '#' removal in message identifier, the nolocal property
 was no longer working. Change the filtering of message identifier in
