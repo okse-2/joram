@@ -110,16 +110,27 @@ public class ReliableTcpClient {
 
     long startTime = System.currentTimeMillis();
     
-    long connectionTime;
+    long endTime = startTime;
     if (reconnect) {
-      connectionTime = 2 * params.cnxPendingTimer;
+      if ((addresses.size() >1) && (params.cnxPendingTimer == 0)) {
+        // infinite retry in case of HA.
+        endTime = Long.MAX_VALUE;
+      } else {
+        endTime += 2 * params.cnxPendingTimer;
+      }
     } else {
-      connectionTime = params.connectingTimer * 1000;
+      if ((addresses.size() >1) && (params.connectingTimer == 0)) {
+        // infinite retry in case of HA.
+        endTime = Long.MAX_VALUE;
+      } else {
+        endTime += params.connectingTimer * 1000;
+      }
     }
 
-    long endTime = startTime + connectionTime;
-    if (params.cnxPendingTimer == 0)
+    if ((addresses.size() >1) && (params.cnxPendingTimer == 0)) {
+      // infinite retry in case of HA.
       endTime = Long.MAX_VALUE;
+    }
     int attemptsC = 0;
     long nextSleep = 100;
     while (true) {
