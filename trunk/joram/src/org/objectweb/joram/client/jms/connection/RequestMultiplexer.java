@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.MomExceptionReply;
@@ -45,6 +44,7 @@ import javax.jms.JMSException;
 
 import fr.dyade.aaa.util.Timer;
 
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class RequestMultiplexer {
@@ -465,5 +465,3 @@ public class RequestMultiplexer {
     }
   }
 }
-
-
