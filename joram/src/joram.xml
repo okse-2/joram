@@ -25,6 +25,7 @@
       <include name="fr/dyade/aaa/agent/GCEngine.java"/>
       <include name="fr/dyade/aaa/agent/HAEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
       <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
       <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
