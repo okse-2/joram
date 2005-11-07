@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.LineNumberReader;
 import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -56,9 +57,13 @@ public class RAConfig {
   private static final String A3SERVERS_XML = "a3servers.xml";
   private static final String A3DEBUG_CFG = "a3debug.cfg";
   private static final String RA_PROPERTIES = "ra.properties";
+  private static final String JORAMADMIN_CFG = "joram-admin.cfg";
+  private static final String JORAMADMIN_XML = "joramAdmin.xml";
   private static final int BUFFER_SIZE = 2048;
   private static boolean debug = false;
   private static boolean verbose = false;
+  private static String confDir = null;
+
 
   private RAConfig() {
   }
@@ -119,6 +124,9 @@ public class RAConfig {
           newFileName = args[i+2];
           oldFileName = args[i+3];
           i = i + 3;
+        } else if (args[i].equals("-conf")) {
+          confDir = args[i+1];
+          i = i + 2;
         } else if (args[i].equals("-v")) {
           verbose = true;
           i = i + 1;
@@ -543,7 +551,8 @@ public class RAConfig {
   private void updateA3Servers(String rarName, 
                                String hostName, 
                                String port,
-                               short serverId) throws Exception {
+                               short serverId) 
+    throws Exception {
     if (debug)
       System.out.println("RAConfig.updateA3Servers(" + rarName + 
                          "," + hostName + 
@@ -570,6 +579,19 @@ public class RAConfig {
     // write changes to A3SERVERS_XML file
     A3CML.toXML(conf,null,A3SERVERS_XML);
 
+    if (debug)
+      System.out.println("RAConfig.updateA3Servers : confDir=" + confDir);
+    // update file in conf dir.
+    if (confDir != null) {
+      File f = new File(confDir, A3SERVERS_XML);
+      if (f.exists())
+        copy(A3SERVERS_XML, f.getPath());
+      if (new File(confDir, JORAMADMIN_CFG).exists())
+        updateJoramAdminCfg(hostName, port);
+      if (new File(confDir, JORAMADMIN_XML).exists())
+        updateJoramAdminXml(hostName, port);
+    }
+
     // update jar 
     updateZIP(JORAM_CONFIG_JAR,A3SERVERS_XML,A3SERVERS_XML,A3SERVERS_XML);
     // update rar
@@ -578,6 +600,168 @@ public class RAConfig {
     // remove temporary file
     new File(JORAM_CONFIG_JAR).delete();
     new File(A3SERVERS_XML).delete();
+  }
+
+  private boolean copy(String file1, String file2) 
+    throws Exception {
+    if (! new File(file1).exists())
+      return false;
+
+    new File(file2).delete();
+
+    FileInputStream fis = new FileInputStream(file1);
+    FileOutputStream fos = new FileOutputStream(file2);
+    try {
+      dump(fis,fos);
+      return true;
+    } finally {
+      fos.close();
+      fis.close();
+    }
+  }
+
+  private void updateJoramAdminCfg(String hostName, 
+                                   String port) 
+    throws Exception {
+    File file = new File(confDir, JORAMADMIN_CFG);
+    FileReader fileReader = new FileReader(file);
+    BufferedReader reader = new BufferedReader(fileReader);
+    boolean end = false;
+    String line;
+    StringTokenizer tokenizer;
+    String firstToken;
+    StringBuffer buff = new StringBuffer();
+    
+    while (! end) {
+      line = reader.readLine();
+      if (line == null)
+        end = true;
+      else {
+        tokenizer = new StringTokenizer(line);
+        if (tokenizer.hasMoreTokens()) {
+          firstToken = tokenizer.nextToken();
+          if (firstToken.equalsIgnoreCase("Host")) {
+            buff.append("Host   " + hostName + "\n");
+            continue;
+          }
+          else if (firstToken.equalsIgnoreCase("Port")) {
+            buff.append("Port   " + port + "\n");
+            continue;
+          }
+        }
+        buff.append(line + "\n");
+      }
+    }
+    file.delete();
+    ByteArrayInputStream bis = new ByteArrayInputStream(buff.toString().getBytes());
+    FileOutputStream fos = new FileOutputStream(file);
+    try {
+      dump(bis,fos);
+    } finally {
+      fos.close();
+      bis.close();
+    }
+  }
+
+  private void updateJoramAdminXml(String hostName, 
+                                   String port) 
+    throws Exception {
+    File file = new File(confDir, JORAMADMIN_XML);
+    FileReader fileReader = new FileReader(file);
+    BufferedReader reader = new BufferedReader(fileReader);
+    boolean end = false;
+    String line;
+    StringTokenizer tokenizer;
+    String firstToken;
+    StringBuffer buff = new StringBuffer();
+    int i = -1;
+
+    while (! end) {
+      line = reader.readLine();
+      if (line == null)
+        end = true;
+      else {
+        if (line.trim().startsWith("<connect")) {
+          while (true) {
+            i = line.indexOf("hostName");
+            if (i > 0) {
+              buff.append(line.substring(0,i+10));
+              buff.append(hostName);
+              int j = line.indexOf("\"",i+11);
+              buff.append(line.substring(j,line.length()) + "\n");
+              if (line.trim().endsWith("/>")) {
+                line = reader.readLine();
+                break;
+              }
+              line = reader.readLine();
+              continue;
+            }
+            i = line.indexOf("port");
+            if (i > 0) {
+              buff.append(line.substring(0,i+6));
+              buff.append(port);
+              int j = line.indexOf("\"",i+7);
+              buff.append(line.substring(j,line.length()) + "\n");
+              if (line.trim().endsWith("/>")) {
+                line = reader.readLine();
+                break;
+              }
+              line = reader.readLine();
+              continue;
+            }
+            buff.append(line + "\n");
+            if (line.trim().endsWith("/>")) {
+              line = reader.readLine();
+              break;
+            }
+            line = reader.readLine();
+          }
+        } else if (line.trim().startsWith("<tcp")) {
+          while (true) {
+            i = line.indexOf("host");
+            if (i > 0) {
+              buff.append(line.substring(0,i+6));
+              buff.append(hostName);
+              int j = line.indexOf("\"",i+7);
+              buff.append(line.substring(j,line.length()) + "\n");
+              if (line.trim().endsWith("/>")) {
+                line = reader.readLine();
+                break;
+              }
+              line = reader.readLine();
+              continue;
+            }
+            i = line.indexOf("port");
+            if (i > 0) {
+              buff.append(line.substring(0,i+6));
+              buff.append(port);
+              int j = line.indexOf("\"",i+7);
+              buff.append(line.substring(j,line.length()) + "\n");
+              if (line.trim().endsWith("/>")) {
+                line = reader.readLine();
+                break;
+              }
+              line = reader.readLine();
+              continue;
+            }
+            buff.append(line + "\n");
+            if (line.trim().endsWith("/>"))
+              break;
+            line = reader.readLine();
+          }
+        }
+        buff.append(line + "\n");
+      }
+    }
+    file.delete();
+    ByteArrayInputStream bis = new ByteArrayInputStream(buff.toString().getBytes());
+    FileOutputStream fos = new FileOutputStream(file);
+    try {
+      dump(bis,fos);
+    } finally {
+      fos.close();
+      bis.close();
+    }
   }
 
   /**
@@ -672,6 +856,7 @@ public class RAConfig {
         updateA3Servers(rarName,host,port,serverId);
       }
     }
+    new File("ra.xml").delete();
   }
 
   /**
