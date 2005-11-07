@@ -39,7 +39,7 @@
     description="--> Compile all samples">
     <javac srcdir="${src.dir}"
            destdir="${obj.dir}/joram"
-           debug="${debug}"
+           debug="true"
            deprecation="${deprecation}"
            optimize="${optimize}"
            nowarn="${nowarn}"
@@ -126,6 +126,17 @@
   <target name="classic_admin" depends="init"
           description="--> Runs a classic administration (for a centralized architecture)">
     <java classname="classic.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Setup the classic configuration -->
+  <target name="classic_adminxml" depends="init"
+          description="--> Runs a classic administration XML (for a centralized architecture)">
+    <copy file="${src.dir}/classic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="classic.ClassicAdminXML"
       failonerror="no" fork="yes"
       dir="${run.dir}">
       <classpath path="${project.class.path}"/>
@@ -386,6 +397,33 @@
     </java>
   </target>
 
+  <target name="cluster_adminxml" depends="init"
+    description="--> Runs the cluster administration xml">
+    <copy file="${src.dir}/cluster/topic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="cluster.topic.ClusterAdminXML" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="cadmin0" depends="init"
+    description="--> Runs the cluster administration">
+    <java classname="cluster.queue.perfs.ClusterQAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0"/>
+    </java>
+  </target>
+
+  <target name="cadmin1" depends="init"
+    description="--> Runs the cluster administration">
+    <java classname="cluster.queue.perfs.ClusterQAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="1"/>
+    </java>
+  </target>
+
   <!-- Runs a cluster subscriber -->
   <target name="subscriber10" depends="init">
     <java classname="cluster.topic.Subscriber10" failonerror="no" fork="yes"
@@ -422,6 +460,15 @@
   <target name="queue_cluster_admin" depends="init"
     description="--> Runs queue cluster administration">
     <java classname="cluster.queue.ClusterAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="queue_cluster_adminxml" depends="init"
+    description="--> Runs queue cluster administration xml">
+    <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="cluster.queue.ClusterAdminXML" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
@@ -512,6 +559,15 @@
   <target name="dmq_admin" depends="init"
           description="--> Runs a dead message queue administration (for a centralized architecture)">
     <java classname="deadMQueue.DMQAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="dmq_adminxml" depends="init"
+          description="--> Runs a dead message queue administration xml (for a centralized architecture)">
+    <copy file="${src.dir}/deadMQueue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="deadMQueue.DMQAdminXML" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
