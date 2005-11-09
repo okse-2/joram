@@ -1991,8 +1991,8 @@ public class Session implements javax.jms.Session {
           ctx = (MessageListenerContext)repliesIn.get();
           repliesIn.pop();
         } catch (InterruptedException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-            JoramTracing.dbgClient.log(BasicLevel.WARN, "", exc);
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
           return;
         }
 
