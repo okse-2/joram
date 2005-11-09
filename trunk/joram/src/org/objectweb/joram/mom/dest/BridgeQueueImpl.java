@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -284,19 +284,25 @@ public class BridgeQueueImpl extends QueueImpl {
     // Retrieving the persisted messages, if any.
     Vector persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
 
+    // AF: This code is already in QueueImpl, it seems the message are
+    // loaded 2 times !!
     if (persistedMsgs != null) {
-// persistence message are only in memory.
-//      MessagePersistenceModule.deleteAll(getDestinationId());
       Message persistedMsg;
       AgentId consId;
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
-        if (consId == null)
-          storeMessage(persistedMsg);
-        else {
+        if (consId == null) {
+          addMessage(persistedMsg);
+        } else if (isLocal(consId)) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgDestination.log(
+              BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
+          consumers.remove(persistedMsg.getIdentifier());
+          contexts.remove(persistedMsg.getIdentifier());
+          addMessage(persistedMsg);
+        } else {
           deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-          persistedMsg.save(getDestinationId());
         }
       }
     }
