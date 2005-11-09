@@ -604,8 +604,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
            delIds.hasMoreElements();) {
         msgId = (String) delIds.nextElement();
 
-        
-
         msg = (Message) deliveredMsgs.get(msgId);
         consId = (AgentId) consumers.get(msgId);
         consCtx = ((Integer) contexts.get(msgId)).intValue();
@@ -1061,8 +1059,18 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @param message  The message to store.
    */
-  protected synchronized void storeMessage(Message message)
-  {
+  protected final synchronized void storeMessage(Message message) {
+    addMessage(message);
+
+    // Persisting the message.
+    message.save(getDestinationId());
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+                                    + message.getIdentifier() + " stored.");
+  }
+
+  protected final synchronized void addMessage(Message message) {
     nbMsgsReceiveSinceCreation++;
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
@@ -1075,9 +1083,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (messages.isEmpty()) {
       samePriorities = true;
       priority = message.getPriority();
-    }
-    else if (samePriorities && priority != message.getPriority())
+    } else if (samePriorities && priority != message.getPriority()) {
       samePriorities = false;
+    }
 
     if (samePriorities) {
       // Constant priorities: no need to insert the message according to
@@ -1121,13 +1129,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       }
       messages.insertElementAt(message, i);
     }
-
-    // Persisting the message.
-    message.save(getDestinationId());
-
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                    + message.getIdentifier() + " stored.");
   }
 
   protected void deliverMessages(int index) {
@@ -1315,25 +1316,22 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     Vector persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
 
     if (persistedMsgs != null) {
-// persistence message are only in memory.
-//      MessagePersistenceModule.deleteAll(getDestinationId());
       Message persistedMsg;
       AgentId consId;
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
         if (consId == null) {
-          storeMessage(persistedMsg);
+          addMessage(persistedMsg);
         } else if (isLocal(consId)) {
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgDestination.log(
               BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
-          storeMessage(persistedMsg);
+          addMessage(persistedMsg);
         } else {
           deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-          persistedMsg.save(getDestinationId());
         }
       }
     }
