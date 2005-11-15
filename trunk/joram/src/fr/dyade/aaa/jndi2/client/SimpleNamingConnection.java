@@ -97,12 +97,17 @@ public class SimpleNamingConnection
     }
   }
 
+  private static String TIMEOUT_PROPERTY =
+      "fr.dyade.aaa.jndi2.client.SimpleNamingConnection.timeout";
+
   private void open() throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
                        "SimpleNamingConnection.open()");
     try {
-      Socket socket = new Socket(hostName, port);
+      int timeout = Integer.getInteger(TIMEOUT_PROPERTY, 0).intValue();
+      Socket socket = new Socket();
+      socket.connect(new InetSocketAddress(hostName, port), timeout);
       ioCtrl = new IOControl(socket);
     } catch (IOException exc) {
       if (Trace.logger.isLoggable(BasicLevel.ERROR))
