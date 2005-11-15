@@ -98,6 +98,20 @@ public class AdminModule
                    DEFAULT_REQUEST_TIMEOUT).longValue();
 
   /**
+   * This method execute the XML script file that the path is given in
+   * parameter.
+   *
+   * @since 4.3.12
+   */
+  public static void main(String[] args) {
+    try {
+      AdminModule.executeXMLAdmin(args[0]);
+    } catch (Exception exc) {
+      exc.printStackTrace();
+    }
+  }
+
+  /**
    * Opens a connection dedicated to administering with the Joram server
    * which parameters are wrapped by a given
    * <code>TopicConnectionFactory</code>.
@@ -984,12 +998,29 @@ public class AdminModule
     }
   }
 
+  /**
+   * This method execute the XML script file that the location is given
+   * in parameter.
+   *
+   * @param cfgDir	The directory containing the file.
+   * @param cfgFileName	The script filename.
+   *
+   * @since 4.3.10
+   */
   public static boolean executeXMLAdmin(String cfgDir,
                                         String cfgFileName) 
     throws Exception {
     return executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
   }
 
+  /**
+   * This method execute the XML script file that the pathname is given
+   * in parameter.
+   *
+   * @param path	The script pathname.
+   *
+   * @since 4.3.10
+   */
   public static boolean executeXMLAdmin(String path) throws Exception {
     if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,"executeXMLAdmin(" + path + ")");
