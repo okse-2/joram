@@ -13,12 +13,14 @@
   <body>
 
     <s1 name="JORAM manuals">
-      <p>The JORAM documentation is packaged for the 4.2 version as a single pdf document.</p>
+      <p>The JORAM documentation is packaged as a single pdf document.</p>
       <p>It is well known by the JORAM team that this documentation is not
       sufficient and sometimes vague or unclear. Do not hesitate to provide
       any comment or feedback that could help us improving the doc. Also, 
       any contribution is welcome.</p>
-      <p>The Old documentation is still accessible <a href="old-documentation.html">here</a></p>
+      <p>The Old documentation (before 4.1 version) is still accessible
+      <a href="old-documentation.html">here</a>. Since 4.1 the documentation
+      can be downloaded <a href="../download/index.html">in the download area</a>.</p>
 
     <subtitle>Installation and Users Guide</subtitle>
       <ul>
