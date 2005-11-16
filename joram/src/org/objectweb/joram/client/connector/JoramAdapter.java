@@ -1181,6 +1181,10 @@ public class JoramAdapter
     this.adminFile = adminFile;
   }
 
+  public void setAdminFileXML(java.lang.String adminFileXML) {
+    this.adminFileXML = adminFileXML;
+  }
+
   public void setCollocatedServer(java.lang.Boolean collocatedServer)
   {
     collocated = collocatedServer.booleanValue();
@@ -1231,6 +1235,10 @@ public class JoramAdapter
   public java.lang.String getAdminFile()
   {
     return adminFile;
+  }
+
+  public java.lang.String getAdminFileXML() {
+    return adminFileXML;
   }
 
   public java.lang.Boolean getCollocatedServer()
