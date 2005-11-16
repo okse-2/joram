@@ -695,10 +695,10 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (jndi)
             toBind.put(jndiName, dest);
 
-          if (dest.getName() != null && dest.getName().length() > 0)
-            destinations.put(dest.getName(), dest);
-          else
+          if (dest.getAdminName() != null && dest.getAdminName().length() > 0)
             destinations.put(dest.getAdminName(), dest);
+          else
+            destinations.put(dest.getName(), dest);
 
           if (dmq != null && 
               dmq.length() >0 && 
@@ -755,10 +755,10 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (jndi)
             toBind.put(jndiName, queue);
 
-          if (queue.getName() != null && queue.getName().length() > 0)
-            destinations.put(queue.getName(), queue);
-          else
+          if (queue.getAdminName() != null && queue.getAdminName().length() > 0)
             destinations.put(queue.getAdminName(), queue);
+          else
+            destinations.put(queue.getName(), queue);
 
           if (dmq != null && 
               dmq.length() >0 && 
@@ -815,10 +815,10 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (jndi)
             toBind.put(jndiName, topic);
 
-          if (topic.getName() != null && topic.getName().length() > 0)
-            destinations.put(topic.getName(), topic);
-          else
+          if (topic.getAdminName() != null && topic.getAdminName().length() > 0)
             destinations.put(topic.getAdminName(), topic);
+          else
+            destinations.put(topic.getName(), topic);
 
           if (dmq != null && 
               dmq.length() >0 && 
@@ -863,7 +863,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (name != null && name.length() > 0)
             destinations.put(name, dmq);
           else
-            destinations.put(dmq.getAdminName(), dmq);
+            destinations.put(dmq.getName(), dmq);
 
         } else if (rawName.equals(ELT_PROPERTY)) {
         } else if (rawName.equals(ELT_READER)) {
