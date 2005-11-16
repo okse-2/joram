@@ -57,6 +57,8 @@ public interface JoramAdapterMBean
    */
   public java.lang.String getAdminFile();
 
+  public java.lang.String getAdminFileXML();
+
   public java.lang.Boolean getCollocatedServer();
 
   public java.lang.String getHostName();
