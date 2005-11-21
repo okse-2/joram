@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.proxies;
 
@@ -32,9 +32,8 @@ import java.util.Hashtable;
  * The <code>TopicSubscription</code> class holds the parameters of a proxy's
  * subscription to a topic.
  */
-class TopicSubscription
-{
-  /** Table of subscriptions' selectors. */
+class TopicSubscription {
+  /** Table of subscriptions selectors. */
   private Hashtable subs;
   /** Last built selector. */
   private String lastSelector = null;
@@ -43,8 +42,7 @@ class TopicSubscription
   /** 
    * Creates a <code>TopicSubscription</code> instance.
    */
-  TopicSubscription()
-  {
+  TopicSubscription() {
     this.subs = new Hashtable();
   }
 
@@ -55,8 +53,7 @@ class TopicSubscription
    * @param name  Subscription name.
    * @param selector  Selector.
    */
-  void putSubscription(String name, String selector)
-  {
+  void putSubscription(String name, String selector) {
     if (selector == null)
       selector = "";
     subs.put(name, selector);
@@ -67,27 +64,23 @@ class TopicSubscription
    *
    * @param name  Subscription name.
    */
-  void removeSubscription(String name) 
-  {
+  void removeSubscription(String name)  {
     subs.remove(name);
   }
 
   /** Returns <code>true</code> if the subscriptions table is empty. */
-  boolean isEmpty()
-  {
+  boolean isEmpty() {
     return subs.isEmpty();
   }
 
   /** Returns a selector built from the subscriptions' selectors. */
-  String buildSelector()
-  {
+  String buildSelector() {
     String currentSel;
     String builtSelector = null;
     for (Enumeration names = subs.keys(); names.hasMoreElements();) {
       currentSel = (String) subs.get(names.nextElement());
 
-      if (currentSel.equals(""))
-        return "";
+      if (currentSel.equals("")) return "";
       
       if (builtSelector == null)
         builtSelector = "(" + currentSel + ")";
@@ -99,20 +92,17 @@ class TopicSubscription
   }
 
   /** Sets the last selector value. */
-  void setLastSelector(String selector)
-  {
+  void setLastSelector(String selector) {
     this.lastSelector = selector;
   }
 
   /** Returns the last selector value. */
-  String getLastSelector()
-  {
+  String getLastSelector() {
     return lastSelector;
   }
 
   /** Returns the names of the subscriptions. */
-  Enumeration getNames()
-  {
+  Enumeration getNames() {
     return subs.keys();
   }
 }
