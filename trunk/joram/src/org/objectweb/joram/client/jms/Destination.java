@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,18 +20,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.admin.AdministeredObject;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.shared.admin.*;
-import org.objectweb.util.monolog.api.BasicLevel;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 import java.util.Enumeration;
@@ -43,6 +34,16 @@ import java.util.Vector;
 
 import javax.naming.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.AdministeredObject;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.shared.admin.*;
+
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Implements the <code>javax.jms.Destination</code> interface and provides
@@ -68,14 +69,12 @@ public abstract class Destination
   }
 
   /** Returns the name of the destination. */
-  public String getName()
-  {
+  public String getName() {
     return agentId;
   }
 
   /** Returns the admin name of the destination. */
-  public final String getAdminName()
-  {
+  public final String getAdminName() {
     return adminName;
   }
 
@@ -87,12 +86,24 @@ public abstract class Destination
    * Returns <code>true</code> if the parameter object is a Joram destination
    * wrapping the same agent identifier.
    */
-  public boolean equals(Object obj)
-  {
+  public boolean equals(Object obj) {
     if (! (obj instanceof Destination))
       return false;
 
     return (getName().equals(((Destination) obj).getName()));
+  }
+
+  /**
+   * Returns a String image of the queue.
+   *
+   * @return A provider-specific identity values for this queue.
+   */
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(type).append(agentId);
+    if (adminName != null)
+      strbuf.append('(').append(adminName).append(')');
+    return strbuf.toString();
   }
 
   /**
