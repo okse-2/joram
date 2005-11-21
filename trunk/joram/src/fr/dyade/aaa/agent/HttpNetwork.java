@@ -374,6 +374,23 @@ public class HttpNetwork extends StreamNetwork {
     return -1;
   }
 
+  /**
+   * This method creates a tunnelling socket if a proxy is used.
+   *
+   * @param host	the server host.
+   * @param port	the server port.
+   * @param proxy	the proxy host.
+   * @param proxyport	the proxy port.
+   * @return		a socket connected to a ServerSocket at the specified
+   *			network address and port.
+   *
+   * @exception IOException	if the connection can't be established
+   */
+  Socket createTunnelSocket(InetAddress host, int port,
+                            InetAddress proxy, int proxyport) throws IOException {
+    return createSocket(proxy, proxyport);
+  }
+
   final class NetServerOut extends Daemon {
     Socket socket = null;
     InputStream is = null;
@@ -403,7 +420,8 @@ public class HttpNetwork extends StreamNetwork {
           }
         } else {
           try {
-            socket = createSocket(proxy, proxyport);
+            socket = createTunnelSocket(server.getAddr(), server.getPort(),
+                                        proxy, proxyport);
             break;
           } catch (IOException exc) {
             logmon.log(BasicLevel.WARN,
