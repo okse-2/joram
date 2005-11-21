@@ -39,7 +39,7 @@
     description="--> Compile all samples">
     <javac srcdir="${src.dir}"
            destdir="${obj.dir}/joram"
-           debug="true"
+           source="1.4" target="1.4" debug="true"
            deprecation="${deprecation}"
            optimize="${optimize}"
            nowarn="${nowarn}"
@@ -109,7 +109,8 @@
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y" / -->
+      <!-- jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/ -->
       <arg line="${sid} ./s${sid}"/>
     </java>
   </target>
@@ -129,6 +130,7 @@
       failonerror="no" fork="yes"
       dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y" / -->
     </java>
   </target>
 
@@ -136,10 +138,11 @@
   <target name="classic_adminxml" depends="init"
           description="--> Runs a classic administration XML (for a centralized architecture)">
     <copy file="${src.dir}/classic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="classic.ClassicAdminXML"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
       failonerror="no" fork="yes"
       dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
@@ -386,7 +389,6 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-
   
   <!-- Runs the cluster administration -->
   <target name="cluster_admin" depends="init"
@@ -400,9 +402,11 @@
   <target name="cluster_adminxml" depends="init"
     description="--> Runs the cluster administration xml">
     <copy file="${src.dir}/cluster/topic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="cluster.topic.ClusterAdminXML" failonerror="no" fork="yes"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
@@ -567,9 +571,11 @@
   <target name="dmq_adminxml" depends="init"
           description="--> Runs a dead message queue administration xml (for a centralized architecture)">
     <copy file="${src.dir}/deadMQueue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="deadMQueue.DMQAdminXML" failonerror="no" fork="yes"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
