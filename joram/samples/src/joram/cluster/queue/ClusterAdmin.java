@@ -44,11 +44,11 @@ public class ClusterAdmin {
     admin.connect("root", "root", 60);
 
     Properties prop = new Properties();
-    prop.setProperty("period","10000");
-    prop.setProperty("producThreshold","50");
+    prop.setProperty("period","100");
+    prop.setProperty("producThreshold","25");
     prop.setProperty("consumThreshold","2");
-    prop.setProperty("autoEvalThreshold","false");
-    prop.setProperty("waitAfterClusterReq","1000");
+    prop.setProperty("autoEvalThreshold","true");
+    prop.setProperty("waitAfterClusterReq","100");
 
 //     prop.setProperty("period",args[0]);
 //     prop.setProperty("producThreshold",args[1]);

@@ -51,8 +51,7 @@ public class Consumer {
 
     cnx.start();
 
-    System.in.read();
-    cnx.close();
+//    cnx.close();
 
     System.out.println();
     System.out.println("Consumer closed.");
