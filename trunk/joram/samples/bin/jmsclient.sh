@@ -45,6 +45,12 @@ JORAM_LIBS=$JORAM_HOME/ship/lib
 RUN_DIR=$JORAM_HOME/samples/run
 SAMPLE_CLASSES=$JORAM_HOME/samples/classes/joram
 
+# Verify if RUN_DIR is correctly installed
+if [ ! -r "$RUN_DIR"/a3servers.xml ]; then
+  echo "You must first launch servers to create run directory."
+  exit 1
+fi
+
 # Building the Classpath
 CLASSPATH=$JORAM_LIBS/joram-client.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
@@ -55,12 +61,6 @@ CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jmxri.jar
 CLASSPATH=$CLASSPATH:$SAMPLE_CLASSES
 CLASSPATH=$CLASSPATH:$RUN_DIR
-
-mkdir $RUN_DIR
-cp $CONFIG_DIR/a3config.dtd $RUN_DIR/a3config.dtd
-cp $CONFIG_DIR/a3debug.cfg $RUN_DIR/a3debug.cfg
-cp $CONFIG_DIR/distributed_a3servers.xml $RUN_DIR/a3servers.xml
-cp $CONFIG_DIR/jndi.properties $RUN_DIR/jndi.properties
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then

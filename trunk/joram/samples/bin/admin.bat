@@ -8,6 +8,8 @@ set CONFIG_DIR=%JORAM_HOME%\samples\config
 set JORAM_LIBS=%JORAM_HOME%\ship\lib
 set RUN_DIR=%JORAM_HOME%\samples\run
 
+if not exist "%RUN_DIR%\a3servers.xml" goto nokRunDir
+
 REM  Building the Classpath
 set CLASSPATH=%JORAM_LIBS%\joram-gui.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-client.jar
@@ -19,10 +21,6 @@ set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jmxri.jar
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
 
-mkdir %RUN_DIR%
-copy %CONFIG_DIR%\a3debug.cfg %RUN_DIR%\a3debug.cfg
-copy %CONFIG_DIR%\jndi.properties %RUN_DIR%\jndi.properties
-
 echo == Launching the graphical administration tool ==
 start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -classpath %CLASSPATH% org.objectweb.joram.client.tools.admin.AdminTool
 goto end
@@ -33,6 +31,9 @@ goto end
 :nokJava
 echo The JAVA_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
+goto end
+:nokRunDir
+echo You must first launch servers to create run directory.
 goto end
 
 :end
