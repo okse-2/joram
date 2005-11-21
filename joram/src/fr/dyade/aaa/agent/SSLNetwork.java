@@ -28,14 +28,29 @@ import javax.security.cert.X509Certificate;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
+/**
+ *
+ */
 public final class SSLNetwork extends PoolNetwork {
   public final static String SSLCONTEXT = "fr.dyade.aaa.agent.SSLNetwork.SSLContext";
-  public final static String KMGRFACT = "fr.dyade.aaa.agent.SSLNetwork.KeyMgrFact";
   public final static String KTYPE = "fr.dyade.aaa.agent.SSLNetwork.KeyStoreType";
-  public final static String KPROVIDER = "fr.dyade.aaa.agent.SSLNetwork.KeyStoreProvider";
 
-  public final static String PASS = "fr.dyade.aaa.agent.SSLNetwork.pass";
-  public final static String KEYFILE = "fr.dyade.aaa.agent.SSLNetwork.KeyFile";
+  /**
+   * Name of property that allow to fix the keystore's password:
+   * "SSLNetwork.pass". By default the password is "changeit".
+   * This property can be fixed either from <code>java</code> launching
+   * command (-Dname=value), or by in <code>a3servers.xml</code> configuration
+   * file (property element).
+   */
+  public final static String PASS = "SSLNetwork.pass";
+  /**
+   * Name of property that allow to fix the keystore's pathname:
+   * "SSLNetwork.keyfile". By default the key file is ".keystore".
+   * This property can be fixed either from <code>java</code> launching
+   * command (-Dname=value), or by in <code>a3servers.xml</code> configuration
+   * file (property element).
+   */
+  public final static String KEYFILE = "SSLNetwork.keyfile";
 
   SSLSocketFactory socketFactory = null;
   SSLServerSocketFactory serverSocketFactory = null;
@@ -44,27 +59,20 @@ public final class SSLNetwork extends PoolNetwork {
     super();
     name = "SSLNetwork#" + AgentServer.getServerId();
 
-    char[] pass =  AgentServer.getProperty(PASS, "A3TBJAP").toCharArray();
-    String keyFile = AgentServer.getProperty(KEYFILE, "./keyfile");
-    KeyStore keystore = KeyStore.getInstance(
-      AgentServer.getProperty(KTYPE, "JKS"));
+    char[] pass =  AgentServer.getProperty(PASS, "changeit").toCharArray();
+    String keyFile = AgentServer.getProperty(KEYFILE, ".keystore");
+
+    KeyStore keystore = KeyStore.getInstance(AgentServer.getProperty(KTYPE, "JKS"));
     keystore.load(new FileInputStream(keyFile), pass);
 
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance(
-      AgentServer.getProperty(KMGRFACT, "SunX509"));
+    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
     kmf.init(keystore, pass);
-    KeyManager[] keymanager = kmf.getKeyManagers();
-    // Create trust manager. The trust manager hold other peers'
-    // certificates.
-    TrustManagerFactory trustmanagerfactory =
-      TrustManagerFactory.getInstance("SunX509");
-    trustmanagerfactory.init(keystore);
-    TrustManager[] trustmanager = trustmanagerfactory.getTrustManagers();
 
-    SSLContext ctx = SSLContext.getInstance(
-      AgentServer.getProperty(SSLCONTEXT, "SSL"));
-    SecureRandom securerandom = SecureRandom.getInstance("SHA1PRNG");
-    ctx.init(keymanager, trustmanager, securerandom);
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+    tmf.init(keystore);
+
+    SSLContext ctx = SSLContext.getInstance(AgentServer.getProperty(SSLCONTEXT, "TLS"));
+    ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
     socketFactory = ctx.getSocketFactory();
     serverSocketFactory = ctx.getServerSocketFactory();

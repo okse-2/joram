@@ -26,7 +26,8 @@
       <include name="fr/dyade/aaa/agent/HAEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
       <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
-      <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
       <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
@@ -35,6 +36,8 @@
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <!-- include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/ -->
       <include name="com/scalagent/jmx/*.java"/>
+      <include name="com/scalagent/scheduler/**/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
@@ -98,6 +101,8 @@
         <include name="org/objectweb/joram/mom/proxies/soap/*.class"/>
         <include name="org/objectweb/joram/mom/proxies/tcp/*.class"/>
         <include name="org/objectweb/joram/mom/util/*.class"/>
+        <include name="com/scalagent/joram/mom/dest/scheduler/*.class"/>
+        <include name="com/scalagent/scheduler/**/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
@@ -295,7 +300,7 @@
 
   <!-- JAVADOC --> 
   <target name="javadoc" depends="init.joram"
-      description="--> Generates the JavaDoc.">
+      description="--> Generates the Joram's client and server JavaDoc.">
     <javadoc sourcepath="${src.dir}"
              destdir="${doc.dir}"
              classpathref="project.class.path"
@@ -315,7 +320,7 @@
 
   <!-- JAVADOC --> 
   <target name="javadoc.all" depends="init.joram"
-      description="--> Generates the JavaDoc.">
+      description="--> Generates the complete JavaDoc.">
     <javadoc sourcepath="${src.dir}"
              destdir="${doc.dir}"
              classpathref="project.class.path"
@@ -334,7 +339,8 @@
 
   <!-- RELEASES -->
   <target name="releases"
-          depends="clean,release.src,release.jar">
+          depends="clean,release.src,release.jar"
+          description="--> Builds a Joram complete distribution.">
     <antcall target="ship.adapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-RA.rar"/>
@@ -367,7 +373,8 @@
 
   </target>
 
-  <target name="release.jar" depends="ship.joram,javadoc">
+  <target name="release.jar" depends="ship.joram,javadoc"
+          description="--> Builds a Joram binary distribution.">
     <mkdir dir="${releases.dir}"/>
     <tar tarfile="${releases.dir}/joram-${version}.tar"
          longfile="gnu">
@@ -392,7 +399,8 @@
     <delete file="${releases.dir}/joram-${version}.tar"/>
   </target>
 
-  <target name="release.src" depends="init.joram">
+  <target name="release.src" depends="init.joram"
+          description="--> Builds a Joram source distribution.">
    <mkdir dir="${releases.dir}"/>
      <tar tarfile="${releases.dir}/joram-${version}-src.tar"
           longfile="gnu">
