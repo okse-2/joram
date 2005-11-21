@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.shared.admin.*;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 import java.util.Vector;
@@ -39,9 +34,19 @@ import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import org.objectweb.joram.shared.admin.*;
+
+import fr.dyade.aaa.util.management.MXWrapper;
+
 /**
- * Implements the <code>javax.jms.Queue</code> interface and provides
- * JORAM specific administration and monitoring methods.
+ *  Implements the <code>javax.jms.Queue</code> interface and provides
+ * Joram specific administration and monitoring methods. This is a proxy
+ * object a client uses to specify the destination of messages it is
+ * sending and the source of messages it receives.
+ *  
  */
 public class Queue extends Destination 
   implements javax.jms.Queue, QueueMBean {
@@ -63,34 +68,29 @@ public class Queue extends Destination
     super(name, type);
   }
 
-  /** Returns a String image of the queue. */
-  public String toString()
-  {
-    if (adminName == null)
-      return "Queue:" + agentId;
-    return "Queue:" + agentId + "(" + adminName + ")";
-  }
-
   /**
+   * Gets the The Joram's internal unique identifier of this queue.
    * API method.
    *
    * @exception JMSException  Actually never thrown.
+   * @return	The Joram's internal unique identifier.
    */
-  public String getQueueName() throws JMSException
-  {
+  public String getQueueName() throws JMSException {
     return getName();
   }
 
   /**
-   * Admin method creating and deploying (or retrieving) a queue on a given
-   * server.
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
    * <p>
-   * The request fails if the target server does not belong to the platform,
+   *  The request fails if the target server does not belong to the platform,
    * or if the destination deployement fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
-   * @param className  The queue class name.
+   * @param className  The MOM's queue class name.
    * @param prop       The queue properties.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
@@ -102,20 +102,16 @@ public class Queue extends Destination
                              Properties prop)
     throws ConnectException, AdminException {
     Queue queue = new Queue();
-    doCreate(serverId, name, className, 
-             prop, queue, QUEUE_TYPE);
+    doCreate(serverId, name, className, prop, queue, QUEUE_TYPE);
 
     StringBuffer buff = new StringBuffer();
-    buff.append("type=");
-    buff.append(QUEUE_TYPE);
-    buff.append(",name=");
-    buff.append(name);
+    buff.append("type=").append(QUEUE_TYPE);
+    buff.append(",name=").append(name);
     try {
-      MXWrapper.registerMBean(queue,"joramClient",buff.toString());
+      MXWrapper.registerMBean(queue, "joramClient", buff.toString());
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "registerMBean",e);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
     }
     return queue;
   }
@@ -136,13 +132,13 @@ public class Queue extends Destination
   public static Queue create(int serverId,
                              String className,
                              Properties prop)
-                throws ConnectException, AdminException
-  {
+                throws ConnectException, AdminException {
     return create(serverId, null, className, prop);
   }
 
   /**
    * Admin method creating and deploying a queue on a given server.
+   * It creates a Joram's standart queue.
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployement fails server side.
@@ -154,14 +150,15 @@ public class Queue extends Destination
    * @exception AdminException  If the request fails.
    */
   public static Queue create(int serverId, Properties prop)
-                throws ConnectException, AdminException
-  {
+                throws ConnectException, AdminException {
     return create(serverId, "org.objectweb.joram.mom.dest.Queue", prop);
   }
 
   /**
    * Admin method creating and deploying (or retrieving) a queue on a given
-   * server with a given name.
+   * server with a given name. First a destination with the specified name is
+   * searched on the given server, if it does not exist it is created. In any
+   * case, its provider-specific address is returned.
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployement fails server side.
@@ -173,14 +170,15 @@ public class Queue extends Destination
    * @exception AdminException  If the request fails.
    */
   public static Queue create(int serverId, String name)
-                throws ConnectException, AdminException
-  {
+                throws ConnectException, AdminException {
     return create(serverId, name, "org.objectweb.joram.mom.dest.Queue", null);
   }
 
   /**
    * Admin method creating and deploying (or retrieving) a queue on the
-   * local server.
+   * local server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
    * <p>
    * The request fails if the destination deployement fails server side.
    *
@@ -190,8 +188,7 @@ public class Queue extends Destination
    * @exception AdminException  If the request fails.
    */
   public static Queue create(String name)
-                throws ConnectException, AdminException
-  {
+                throws ConnectException, AdminException {
     return create(AdminModule.getLocalServerId(),
                   name,
                   "org.objectweb.joram.mom.dest.Queue",
@@ -210,8 +207,7 @@ public class Queue extends Destination
    * @exception AdminException  If the request fails.
    */
   public static Queue create(int serverId)
-                throws ConnectException, AdminException
-  {
+                throws ConnectException, AdminException {
     return create(serverId, null, "org.objectweb.joram.mom.dest.Queue", null);
   }
 
@@ -223,8 +219,7 @@ public class Queue extends Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Queue create() throws ConnectException, AdminException
-  {
+  public static Queue create() throws ConnectException, AdminException {
     return create(AdminModule.getLocalServerId());
   }
 
