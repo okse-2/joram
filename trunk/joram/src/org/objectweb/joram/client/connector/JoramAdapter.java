@@ -188,7 +188,7 @@ public class JoramAdapter
   public JoramAdapter() {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
       AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                    "JORAM adapter instanciated.");
+                                    "JORAM adapter instantiated.");
 
     consumers = new Hashtable();
     producers = new Vector();
