@@ -204,27 +204,74 @@ final class MessageVector implements MessageQueue {
     return item;
   }
 
-//   public synchronized Message get(int index, long timeout) throws InterruptedException {
-//     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
-//       logmon.log(BasicLevel.DEBUG,
-//                  logmsg + "get(" + idx + ", " + timeout + ")");
+  /**
+   * Looks at the first message of this queue where the destination server
+   * is the specified one.
+   * The message is not removed from the queue. It should never be used during
+   * a transaction to avoid dead-lock problems.
+   *
+   * @param	to	the unique server id.
+   * @return    	the corresponding message or null if none . 
+   */
+  public synchronized Message getMessageTo(short to) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
+      logmon.log(BasicLevel.DEBUG, logmsg + "getFrom(" + to + ")");
 
-//       cpt1 += 1; cpt2 += validated;
-//       if ((cpt1 & 0xFFFFL) == 0L) {
-//         logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
-//       }
-//     }
+      cpt1 += 1; cpt2 += validated;
+      if ((cpt1 & 0xFFFFL) == 0L) {
+        logmon.log(BasicLevel.DEBUG, logmsg + (cpt2/cpt1) + '/' + validated);
+      }
+    }
     
-//     Message item = null;
-//     if ((validated <= index) && (timeout > 0)) wait(timeout);
-//     if (validated > index) item = getMessageAt(index);
+    Message item = null;
+    for (int i=0; i<validated; i++) {
+      Message msg = getMessageAt(i);
+      if (msg.getDest() == to) {
+        item = msg;
+        break;
+      }
+    }
 
-//     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-//       logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, logmsg + "get() -> " + item);
 
-//     return item;
-//   }
+    return item;
+  }
 
+  /**
+   * Removes the specified message from the queue if exists.
+   *
+   * @param	msg	the message to remove.
+   */
+  synchronized void removeMessage(Message msg) {
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 logmsg + "removeMessage #" + msg.getStamp());
+
+    for (int i = 0; i<validated; i++) {
+      if (getMessageAt(i) ==  msg) {
+
+        if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     logmsg + "removeMessage #" + msg.getStamp() + " -> " + i);
+
+        removeMessageAt(i);
+        validated -= 1;
+        return;
+      }
+    }
+
+    logmon.log(BasicLevel.ERROR,
+               logmsg + "removeMessage #" + msg.getStamp() + " not found");
+
+    return;
+  }
+
+  /**
+   *  Removes all messages with a stamp less than the specified one.
+   * Be careful with the use of this method, in particular it does not
+   * take in account the multiples incoming nodes.
+   */
   synchronized int remove(int stamp) {
     if (validated == 0) return 0;
     
