@@ -505,8 +505,6 @@ public class A3CMLConfig implements Serializable {
     // Temporary fix, reset visited and gateway fields
     reset();
     
-    // TODO: Adds the local domain
-//  Domain domain = new Domain("local"
     // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
@@ -609,6 +607,36 @@ public class A3CMLConfig implements Serializable {
         if (! server.visited)
           throw new Exception(server + " inaccessible");
     }
+
+    // Search alls directly accessible domains, then set special routes
+    // for HttpNetworks.
+    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
+      A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
+      A3CMLDomain domain = (A3CMLDomain) domains.get(network.domain);
+
+      if (("fr.dyade.aaa.agent.HttpNetwork".equals(domain.network)) ||
+          ("fr.dyade.aaa.agent.HttpsNetwork".equals(domain.network))) {
+
+        // First search for the listen server..
+        short router = -1;
+        for (int i=0; i<domain.servers.size(); i++) {
+          A3CMLServer server = (A3CMLServer) domain.servers.elementAt(i);
+          if ((server.port > 0) && (server.sid != rootid)) {
+            router = server.sid;
+            break;
+          }
+        }
+        // .. then set the gateway for all clients.
+        if (router != -1) {
+          for (int i=0; i<domain.servers.size(); i++) {
+            A3CMLServer server = (A3CMLServer) domain.servers.elementAt(i);
+            if ((server.sid != router) && (server.sid != rootid))
+              server.gateway = router;
+          }
+        }
+      }
+    }
+
   }
 
   /**
