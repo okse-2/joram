@@ -853,7 +853,7 @@ public final class AgentServer {
     name = new StringBuffer("AgentServer#").append(sid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
-    logmon = Debug.getLogger(Debug.A3Debug + '.' + getName());
+    logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer.#" + sid);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", init()", new Exception());
@@ -996,9 +996,9 @@ public final class AgentServer {
       }
     }
 
-      MXWrapper.registerMBean(transaction,
-                              "AgentServer",
-                              "server=" + getName() + ",cons=Transaction");
+    MXWrapper.registerMBean(transaction,
+                            "AgentServer",
+                            "server=" + getName() + ",cons=Transaction");
 
     // save A3CMLConfig (May be we can omit it in some case).
     a3config.save();
