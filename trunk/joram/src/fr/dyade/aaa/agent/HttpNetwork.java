@@ -81,7 +81,10 @@ public class HttpNetwork extends StreamNetwork {
     super();
   }
 
-  short remote = -1;
+  /**
+   * Descriptor of the listen server, it is used only on the client side
+   * (NetServerOut component).
+   */
   ServerDesc server = null;
 
   MessageInputStream nis = null;
@@ -101,19 +104,6 @@ public class HttpNetwork extends StreamNetwork {
    *			network interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
-    if (servers.length != 2)
-      throw new Exception("Configuration needs exactly 2 servers, " +
-                          "HttpDomain: " + name + ", servers=" + 
-                          Strings.toString(servers));
-
-    if (servers[0] == AgentServer.getServerId())
-      remote = servers[1];
-    else if (servers[1] == AgentServer.getServerId())
-      remote = servers[0];
-    else
-      throw new Exception("Configuration needs to include current server, " +
-                          "HttpDomain: " + name);
-
     super.init(name, port, servers);
 
     nis = new MessageInputStream();
@@ -144,7 +134,16 @@ public class HttpNetwork extends StreamNetwork {
     try {
       if (isRunning()) return;
 
-      server = AgentServer.getServerDesc(remote);
+    // AF: May be, we have to verify that there is only one 'listen' network.
+    for (int i=0; i<servers.length; i++) {
+      server = AgentServer.getServerDesc(servers[i]);
+      if ((server.getServerId() != AgentServer.getServerId()) &&
+          (server.getPort() > 0)) {
+        logmon.log(BasicLevel.DEBUG, getName() + ", server=" + server);
+        break;
+      }
+      server = null;
+    }
 
       if (port != 0) {
         dmon = new NetServerIn(getName(), logmon);
@@ -226,11 +225,14 @@ public class HttpNetwork extends StreamNetwork {
     if (proxy != null) {
       strbuf.append("http://").append(server.getHostname()).append(':').append(server.getPort());
     }
+    strbuf.append("/msg?from=").append(AgentServer.getServerId());
+    strbuf.append("&stamp=");
     if (msg != null) {
-      strbuf.append("/msg#").append(msg.getStamp()).append(" HTTP/1.1");
+      strbuf.append(msg.getStamp());
     } else {
-        strbuf.append("/msg HTTP/1.1");
+      strbuf.append("-1");
     }
+    strbuf.append(" HTTP/1.1");
     nos.writeMessage(msg, ack);
 
     if (proxy != null)
@@ -262,7 +264,7 @@ public class HttpNetwork extends StreamNetwork {
     os.flush();
   }
 
-  protected void getRequest(InputStream is) throws Exception {
+  protected short getRequest(InputStream is) throws Exception {
     String line = null;
 
     line = readLine(is);
@@ -270,6 +272,12 @@ public class HttpNetwork extends StreamNetwork {
         (! (line.startsWith("GET ") || line.startsWith("PUT ")))) {
       throw new Exception("Bad request: " + line);
     }
+
+    int idx1 = line.indexOf("?from=");
+    if (idx1 == -1) throw new Exception("Bad request: " + line);
+    int idx2 = line.indexOf("&", idx1);
+    if (idx2 == -1) throw new Exception("Bad request: " + line);
+    short from = Short.parseShort(line.substring(idx1+6, idx2));
 
     // Skip all header lines, get length
     int length = 0;
@@ -285,6 +293,8 @@ public class HttpNetwork extends StreamNetwork {
 
     if (nis.readFrom(is) != length)
       logmon.log(BasicLevel.WARN, name + "Bad request length: " + length);
+
+    return from;
   }
 
   protected void sendReply(Message msg, OutputStream os, int ack) throws Exception {
@@ -353,7 +363,7 @@ public class HttpNetwork extends StreamNetwork {
       AgentServer.getTransaction().begin();
       //  Suppress the processed notification from message queue,
       // and deletes it.
-      qout.pop();
+      qout.removeMessage(msgout);
       msgout.delete();
       msgout.free();
       AgentServer.getTransaction().commit();
@@ -480,7 +490,7 @@ public class HttpNetwork extends StreamNetwork {
             do {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", sendRequest: " + msgout);
+                           this.getName() + ", sendRequest: " + msgout + ", ack=" + ack);
 
               sendRequest(msgout, os, ack);
               getReply(is);
@@ -581,13 +591,13 @@ public class HttpNetwork extends StreamNetwork {
             socket = listen.accept();
             open(socket);
             
-            getRequest(is);
+            short from = getRequest(is);
             do {
               canStop = false;
               ack = handle(msgout);
               canStop = true;
 
-              msgout = qout.get(0);
+              msgout = qout.getMessageTo(from);
 
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
