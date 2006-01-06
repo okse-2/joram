@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Contributor(s): Alex Porras (MediaOcean)
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
@@ -67,17 +67,34 @@ public class SSLTcpProxyService extends TcpProxyService {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SSLTcpProxyService.init(" + 
         args + ',' + firstTime + ')');
-    int port;
+
+    int port =  DEFAULT_PORT;;
+    String address = DEFAULT_BINDADDRESS;
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);      
       port = Integer.parseInt(st.nextToken());
-    } else {
-      port = DEFAULT_PORT;
+      if (st.hasMoreTokens()) {
+        address = st.nextToken();
+      }
     }
+    
+    int backlog = Integer.getInteger(
+      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    ServerSocket serverSocket = createServerSocket(port);
+    ServerSocket serverSocket;
+
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
+
+    if (address.equals("0.0.0.0")) {
+      serverSocket = new ServerSocket(port);
+    }
+    else {
+      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
+    }
 
     int poolSize = Integer.getInteger(
       POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
