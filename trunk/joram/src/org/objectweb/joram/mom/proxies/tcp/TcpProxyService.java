@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): David Feliot (ScalAgent DT)
+ * Contributor(s): Alex Porras (MediaOcean)
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
@@ -54,6 +55,9 @@ public class TcpProxyService {
 
   public static final int DEFAULT_PORT = 16010;
 
+  public static final String DEFAULT_BINDADDRESS = "0.0.0.0"; // all
+
+
   /**
    * The proxy service reference
    * (used to stop it).
@@ -64,6 +68,12 @@ public class TcpProxyService {
 
   public static final int getListenPort() {
     return port;
+  }
+
+  private static String address;
+
+  public static final String getListenAddress() {
+    return address;
   }
 
   /**
@@ -80,11 +90,15 @@ public class TcpProxyService {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.init(" + 
         args + ',' + firstTime + ')');
+
+    port =  DEFAULT_PORT;;
+    address = DEFAULT_BINDADDRESS;
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);      
       port = Integer.parseInt(st.nextToken());
-    } else {
-      port = DEFAULT_PORT;
+      if (st.hasMoreTokens()) {
+        address = st.nextToken();
+      }
     }
     
     int backlog = Integer.getInteger(
@@ -92,7 +106,18 @@ public class TcpProxyService {
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    ServerSocket serverSocket = new ServerSocket(port, backlog);
+    ServerSocket serverSocket;
+
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
+
+    if (address.equals("0.0.0.0")) {
+      serverSocket = new ServerSocket(port);
+    }
+    else {
+      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
+    }
 
     int poolSize = Integer.getInteger(
       POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
