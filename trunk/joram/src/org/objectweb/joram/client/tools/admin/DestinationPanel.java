@@ -1,11 +1,6 @@
 /*
- * Created on May 31, 2003
- *
- * To change the template for this generated file go to
- * Window>Preferences>Java>Code Generation>Code and Comments
- */
-/*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Alexander Fedorowicz
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.tools.admin;
 
@@ -50,21 +45,21 @@ public class DestinationPanel extends JPanel {
 
   private Destination dest = null;
   private JLabel idLabel = new JLabel("");
-	private JLabel nameLabel = new JLabel("");
+  private JLabel nameLabel = new JLabel("");
   private JLabel typeLabel = new JLabel("");
-	private JLabel pendingMsgsLabel = new JLabel("");
-	private JLabel pendingReqsLabel = new JLabel("");
+  private JLabel pendingMsgsLabel = new JLabel("");
+  private JLabel pendingReqsLabel = new JLabel("");
   private JTextField thresholdField = new JTextField(10);
   private JComboBox dmqCombo = new JComboBox();
   private JCheckBox freeRead = new JCheckBox();
   private JCheckBox freeWrite = new JCheckBox();
   private ACLPanel readingACL = new ACLPanel("Reading Access Control List");
-	private ACLPanel writingACL = new ACLPanel("Writing Access Control List");
-	private boolean nonZeroThreshold = false;
+  private ACLPanel writingACL = new ACLPanel("Writing Access Control List");
+  private boolean nonZeroThreshold = false;
   private boolean dmqSelected = false;
 
   public DestinationPanel(AdminController c) {
-  	super(new BorderLayout());
+    super(new BorderLayout());
     this.c = c;
 
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -80,23 +75,23 @@ public class DestinationPanel extends JPanel {
     idPanel.add(new JLabel("Destination identifier: "));
     idPanel.add(idLabel);
     form.add(idPanel);
-		JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		namePanel.add(new JLabel("JNDI name: "));
-		namePanel.add(nameLabel);
-		form.add(namePanel);
+    JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    namePanel.add(new JLabel("JNDI name: "));
+    namePanel.add(nameLabel);
+    form.add(namePanel);
     JPanel typePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     typePanel.add(new JLabel("Destination type: "));
     typePanel.add(typeLabel);
     form.add(typePanel);
 
-		JPanel pendingMsgsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pendingMsgsPanel.add(new JLabel("Pending messages: "));
-		pendingMsgsPanel.add(pendingMsgsLabel);
-		form.add(pendingMsgsPanel);
-		JPanel pendingReqsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pendingReqsPanel.add(new JLabel("Pending requests: "));
-		pendingReqsPanel.add(pendingReqsLabel);
-		form.add(pendingReqsPanel);
+    JPanel pendingMsgsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    pendingMsgsPanel.add(new JLabel("Pending messages: "));
+    pendingMsgsPanel.add(pendingMsgsLabel);
+    form.add(pendingMsgsPanel);
+    JPanel pendingReqsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    pendingReqsPanel.add(new JLabel("Pending requests: "));
+    pendingReqsPanel.add(pendingReqsLabel);
+    form.add(pendingReqsPanel);
 
     JPanel dtPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     dtPanel.add(new JLabel("Threshold: "));
@@ -115,11 +110,11 @@ public class DestinationPanel extends JPanel {
     fwPanel.add(new JLabel(" Allow free writing"));
     form.add(fwPanel);
 
-		form.add(Box.createVerticalStrut(15));
-		form.add(readingACL);
+    form.add(Box.createVerticalStrut(15));
+    form.add(readingACL);
 
-		form.add(Box.createVerticalStrut(15));
-		form.add(writingACL);
+    form.add(Box.createVerticalStrut(15));
+    form.add(writingACL);
 
     form.add(Box.createVerticalStrut(25));
 
@@ -146,7 +141,7 @@ public class DestinationPanel extends JPanel {
         }
         else if (nonZeroThreshold) {
       	  try {
-      	  	Queue q = (Queue) dest;
+            Queue q = (Queue) dest;
             c.unsetQueueThreshold(q);
       	  }
       	  catch (Exception exc) {
@@ -209,51 +204,54 @@ public class DestinationPanel extends JPanel {
         }
       }
 
-			try {
-				for (Iterator it = readingACL.getNewlyAuthorizedUsers().iterator(); it.hasNext();)
-					c.setReader((User) it.next(), dest);
+      try {
+        for (Iterator it = readingACL.getNewlyAuthorizedUsers().iterator();
+             it.hasNext();)
+          c.setReader((User) it.next(), dest);
 	
-				for (Iterator it = readingACL.getNewlyUnauthorizedUsers().iterator(); it.hasNext();)
-					c.unsetReader((User) it.next(), dest);
+        for (Iterator it = readingACL.getNewlyUnauthorizedUsers().iterator();
+             it.hasNext();)
+          c.unsetReader((User) it.next(), dest);
 	
-				for (Iterator it = writingACL.getNewlyAuthorizedUsers().iterator(); it.hasNext();)
-					c.setWriter((User) it.next(), dest);
+        for (Iterator it = writingACL.getNewlyAuthorizedUsers().iterator();
+             it.hasNext();)
+          c.setWriter((User) it.next(), dest);
 	
-				for (Iterator it = writingACL.getNewlyUnauthorizedUsers().iterator(); it.hasNext();)
-					c.unsetWriter((User) it.next(), dest);
-			}
-			catch (Exception exc) {
-				JOptionPane.showMessageDialog(null, exc.getMessage());
-			}
+        for (Iterator it = writingACL.getNewlyUnauthorizedUsers().iterator();
+             it.hasNext();)
+          c.unsetWriter((User) it.next(), dest);
+      }
+      catch (Exception exc) {
+        JOptionPane.showMessageDialog(null, exc.getMessage());
+      }
     }
   }
 
   public void setDestination(Destination dest) {
     this.dest = dest;
-    int i = dest.toString().indexOf(':');
-    idLabel.setText(dest.toString().substring(i + 1));
+    idLabel.setText(dest.getName());
+    typeLabel.setText(dest.getType());
     String name = c.findDestinationJndiName(dest);
-		nameLabel.setText((name == null ? "Unknown" : name));
-    typeLabel.setText(dest.toString().substring(0, i));
+    nameLabel.setText((name == null ? "Unknown" : name));
   }
 
-	public void setPendingMessages(int count) {
-		if (count >= 0)
-			pendingMsgsLabel.setText(Integer.toString(count));
-		else
-			pendingMsgsLabel.setText("N/A");
-	}
+  public void setPendingMessages(int count) {
+    if (count >= 0)
+      pendingMsgsLabel.setText(Integer.toString(count));
+    else
+      pendingMsgsLabel.setText("N/A");
+  }
 
-	public void setPendingRequests(int count) {
-		if (count >= 0)
-			pendingReqsLabel.setText(Integer.toString(count));
-		else
-			pendingReqsLabel.setText("N/A");
-	}
+  public void setPendingRequests(int count) {
+    if (count >= 0)
+      pendingReqsLabel.setText(Integer.toString(count));
+    else
+      pendingReqsLabel.setText("N/A");
+  }
 
   public void setThreshold(String threshold) {
-  	thresholdField.setText(threshold);
-  	nonZeroThreshold = (!"".equals(threshold));
+    thresholdField.setText(threshold);
+    nonZeroThreshold = (!"".equals(threshold));
   }
 
   public void setThresholdActive(boolean val) {
@@ -269,8 +267,8 @@ public class DestinationPanel extends JPanel {
   }
 
   public void setDMQList(java.util.List dmqs, DeadMQueue ddmq) {
-		dmqCombo.removeAllItems();
-		dmqCombo.addItem("No Dead Message Queue");
+    dmqCombo.removeAllItems();
+    dmqCombo.addItem("No Dead Message Queue");
 
     for (Iterator i = dmqs.iterator(); i.hasNext();) {
       DeadMQueue dmq = (DeadMQueue) i.next();
@@ -281,15 +279,15 @@ public class DestinationPanel extends JPanel {
       if (ddmq != null && ddmq.toString().equals(dmq.toString())) {
         dmqCombo.setSelectedItem(dmq);
         dmqSelected = true;
-	  }
+      }
     }
   }
 
-	public void setReadingACL(java.util.List users, java.util.List auth) {
-		readingACL.setupLists(users, auth);
-	}
+  public void setReadingACL(java.util.List users, java.util.List auth) {
+    readingACL.setupLists(users, auth);
+  }
 
-	public void setWritingACL(java.util.List users, java.util.List auth) {
-		writingACL.setupLists(users, auth);
-	}
+  public void setWritingACL(java.util.List users, java.util.List auth) {
+    writingACL.setupLists(users, auth);
+  }
 }
