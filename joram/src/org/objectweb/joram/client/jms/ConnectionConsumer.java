@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,15 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Implements the <code>javax.jms.ConnectionConsumer</code> interface.
  */
 public class ConnectionConsumer implements javax.jms.ConnectionConsumer {
+  /**
+   * This property allows to set the maximum number of messages get by
+   * each request, its default value is 1.
+   */
+  public static final String QUEUE_MSG_COUNT = 
+      "org.objectweb.joram.client.jms.queueMsgCount";
+
+  private static int queueMsgCount =
+      Integer.getInteger(QUEUE_MSG_COUNT, 1).intValue();
 
   private static class Status {
     public static final int OPEN = 0;
@@ -263,7 +272,7 @@ public class ConnectionConsumer implements javax.jms.ConnectionConsumer {
   private void subscribe() throws JMSException {
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
-        targetName, selector, queueMode, null, 1);
+        targetName, selector, queueMode, null, queueMsgCount);
     mtpx.sendRequest(req, new ReplyListener() {
         public boolean replyReceived(AbstractJmsReply reply) {
           repliesIn.push(reply);
