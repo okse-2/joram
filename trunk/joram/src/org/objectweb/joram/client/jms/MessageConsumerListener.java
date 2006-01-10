@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -45,7 +45,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * a message consumer.
  */
 class MessageConsumerListener implements ReplyListener {
-
+  /**
+   * This property allows to set the maximum number of messages get by
+   * each request, its default value is 1.
+   */
   public static final String QUEUE_MSG_COUNT = 
       "org.objectweb.joram.client.jms.queueMsgCount";
 
