@@ -749,7 +749,7 @@
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
       <arg line="0 s0"/>
     </java>
   </target>
@@ -761,7 +761,7 @@
       failonerror="no" fork="yes"
       dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -771,7 +771,7 @@
     <java classname="classic.Sender" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -781,7 +781,7 @@
     <java classname="classic.Receiver" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -791,7 +791,7 @@
     <java classname="classic.Subscriber" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -801,7 +801,7 @@
     <java classname="classic.Publisher" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -811,7 +811,7 @@
     <java classname="classic.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -821,7 +821,6 @@
     <java classname="classic.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
     </java>
   </target>
 
@@ -831,7 +830,7 @@
     <java classname="classic.Browser" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dkeystore=${keystore} -Dkeystore_pass=${keystore_pass}"/>
     </java>
   </target>
 
