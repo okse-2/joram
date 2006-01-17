@@ -1,3 +1,46 @@
++==============================================================================
+| 2006/01/17 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Report unknown destination to message producer, either throw an
+exception if the destination is local, or call the exception listener if any.
++==============================================================================
+| 2006/01/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid OutOfRange exception (DestinationPanel.setDestination) in
+administration GUI.
+ Adds the handling of queueMsgCount property in J2EE environment.
++==============================================================================
+| 2006/01/06 | Alex Porras - MediaOcean
++------------+-----------------------------------------------------------------
+ Allows to bind Joram to a single IP address in multi-homed host. An optional
+IP address can be passed in argument of the Joram TCP or SSL service.
++==============================================================================
+| 2005/12/12 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Fix: Correct the Ant target for SSL sample.
++==============================================================================
+| 2005/12/07 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Allows multiples 'client' in an Http(s)Network, the unique 'listen' server
+routes messages between 'client' servers.
++==============================================================================
+| 2005/11/18 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds the HttpsNetwork component.
++==============================================================================
+| 2005/11/15 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds a timeout property for jndi2 connection: its default value is 0, and its
+name fr.dyade.aaa.jndi2.client.SimpleNamingConnection.timeout.
++==============================================================================
+| 2005/11/09 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Avoid to load then store all messages contained in a queue at
+startup.
++==============================================================================
+| 2005/11/04 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Soap serialization problem with Message, NPE if mapBody is null.
 ###############################################################################
 # 2005/11/07 | Joram 4.3.11 tag.
 ###############################################################################
@@ -87,7 +130,7 @@ getMessageProperties.
 +==============================================================================
 | 2005/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
- Use the ExceptionListener if any in cas of connection problem.
+ Use the ExceptionListener if any in case of connection problem.
  Bug fixes.
 +==============================================================================
 | 2005/08/22 | Andre Freyssinet - ScalAgent Distributed Technologies
