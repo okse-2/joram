@@ -1857,6 +1857,21 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         if (DeadMQueueImpl.getId() != null
             && ! agId.equals(DeadMQueueImpl.getId()))
           sendToDMQ((ClientMessages) req);
+
+        DestinationException exc = new DestinationException("Destination " + agId + " does not exist.");
+        MomExceptionReply mer = new MomExceptionReply(req.getRequestId(), exc);
+        try {
+          setCtx(req.getClientContext());
+          if (activeCtx.getActivated()) {
+            doReply(mer);
+          } else {
+            activeCtx.addPendingDelivery(mer);
+          }
+        } catch (StateException se) {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", se);          
+          // Do nothing (the context doesn't exist any more).
+        }
       } else if (req instanceof ReceiveRequest) {
         DestinationException exc = new DestinationException(
           "Destination " + agId + " does not exist.");
