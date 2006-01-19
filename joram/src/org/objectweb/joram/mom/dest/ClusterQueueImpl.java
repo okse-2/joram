@@ -634,6 +634,8 @@ public class ClusterQueueImpl extends QueueImpl {
     for (Enumeration e = messages.elements(); e.hasMoreElements(); ) {
       Message msg = (Message) e.nextElement();
       if (msgId.equals(msg.getIdentifier())) {
+        // fix bug for softRefMessage
+        msg.setPin(true);
         if (messages.remove(msg))
           return msg;
         else 
@@ -644,7 +646,10 @@ public class ClusterQueueImpl extends QueueImpl {
   }
 
   Message removeMessage(int index) {
-   return (Message) messages.remove(0);
+    Message msg = (Message) messages.remove(0);
+    // fix bug for softRefMessage
+    msg.setPin(true);
+    return msg;
   }
 
   boolean messagesIsEmpty() {
