@@ -64,13 +64,8 @@
           <li>Client libraries allowing J2ME applications to
           access the JORAM platform in a JMS 1.1 "way"</li>
           <li>A graphical administration and monitoring tool</li>
-	  <li>High Availability provides the active replication of Joram servers and underlying 
-          agent servers, as well as replicated JORAM clients. It transparently handles network 
-           handover and server failover. This version currently relies on the use of  JGroups.</li>
-	  <li>Dynamic Configuration,provide facilities to remotely add and remove Joram servers 
-          dynamically through the Administration API of JORAM.
-          This great feature, combined with updated JMX implementation, initiates a new set of 
-          management facilities in JORAM
+	  <li>High Availability provides the active replication of Joram servers and underlying agent servers, as well as replicated JORAM clients. It transparently handles network handover and server failover. This version currently relies on the use of  JGroups.</li>
+	  <li>Dynamic Configuration,provide facilities to remotely add and remove Joram servers dynamically through the Administration API of JORAM. This great feature, combined with updated JMX implementation, initiates a new set of  management facilities in JORAM
           </li>
         </ul>
       </s2>
