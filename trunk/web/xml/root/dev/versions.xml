@@ -11,6 +11,29 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.12 (January 19, 2006)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_12. This maintenance release provides the following fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Allows to bind Joram to a single IP address in multi-homed host. An optional IP address can be passed in argument of the Joram TCP or SSL service. Thank's to Alex Porras (MediaOcean) for its contribution.</li>
+	  <li>Allows multiples 'client' in an Http(s)Network, the unique 'listen' server routes messages between 'client' servers.</li>
+	  <li>Adds the HttpsNetwork component.</li>
+	  <li>Adds a timeout property for jndi2 connection: its default value is 0, and its name fr.dyade.aaa.jndi2.client.SimpleNamingConnection.timeout.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Report unknown destination to message producer, either throw an exception if the destination is local, or call the exception listener if any.</li>
+	  <li>Avoid OutOfRange exception (DestinationPanel.setDestination) in administration GUI.</li>
+	  <li>Adds the handling of queueMsgCount property in J2EE environment.</li>
+	  <li>Correct the Ant target for SSL sample.</li>
+	  <li>Avoid to load then store all messages contained in a queue at startup.</li>
+	  <li>Soap serialization problem with Message, NPE if mapBody is null.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.10 (November 3, 2005)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_10. This maintenance release provides the following fixes and changes.</p>
