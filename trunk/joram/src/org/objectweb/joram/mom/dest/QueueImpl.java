@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -113,12 +113,35 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected Vector requests;
 
   /**
+   * Cleans the waiting request list.
+   * Removes all request that the expiration time is less than the time
+   * given in parameter.
+   *
+   * @param currentTime The current time.
+   */
+  protected void cleanWaitingRequest(long currentTime) {
+    int index = 0;
+    while (index < requests.size()) {
+      if (! ((ReceiveRequest) requests.get(index)).isValid(currentTime)) {
+        // Request expired: removing it
+        requests.remove(index);
+        // State change, so save.
+        // AF: It's not really necessary to save its state
+        // setSave();
+      } else {
+        index++;
+      }
+    }
+  }
+
+  /**
    * Returns the number of waiting requests in the queue.
    *
    * @return The number of waiting requests.
    */
   public int getWaitingRequestCount() {
-    if (requests != null) {
+    if (requests != null) { 
+      cleanWaitingRequest(System.currentTimeMillis());
       return requests.size();
     }
     return 0;
@@ -129,6 +152,43 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   /** Vector holding the messages before delivery. */
   protected transient Vector messages;
+
+  /**
+   * Cleans the pending messages list.
+   * Removes all messages that the expiration time is less than the time
+   * given in parameter.
+   *
+   * @param currentTime The current time.
+   * @return		A vector of all expired messages.
+   */
+  protected ClientMessages cleanPendingMessage(long currentTime) {
+    int index = 0;
+
+    ClientMessages deadMessages = null;
+
+    Message message = null;
+    while (index < messages.size()) {
+      message = (Message) messages.get(index);
+      if (! message.isValid(currentTime)) {
+        messages.remove(index);
+        message.delete();
+        
+        message.expired = true;
+
+        if (deadMessages == null)
+          deadMessages = new ClientMessages();
+        deadMessages.addMessage(message);
+
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
+                                        + message.getIdentifier()
+                                        + " removed.");
+      } else {
+        index++;
+      }
+    }
+    return deadMessages;
+  }
 
   /**
    * Returns the number of pending messages in the queue.
@@ -342,36 +402,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @exception AccessException  If the requester is not the administrator.
    */
   protected void doReact(AgentId from, Monit_GetPendingMessages not)
-                 throws AccessException
-  {
+                 throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     // Cleaning the possible expired messages.
-    int index = 0;
-    Message message;
-    ClientMessages deadMessages = null;
-    while (index < messages.size()) {
-      message = (Message) messages.get(index);
-
-      if (message.isValid())
-        index++;
-      else {
-        messages.remove(index);
-        message.delete();
-        
-        message.expired = true;
-
-        if (deadMessages == null)
-          deadMessages = new ClientMessages();
-        deadMessages.addMessage(message);
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
-                                        + message.getIdentifier()
-                                        + " removed.");
-      }
-    }
+    ClientMessages deadMessages = cleanPendingMessage(System.currentTimeMillis());
     // Sending the dead messages to the DMQ, if needed:
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
@@ -392,21 +428,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    int index = 0;
-    ReceiveRequest request;
-    while (index < requests.size()) {
-      request = (ReceiveRequest) requests.get(index);
 
-      // Request expired: removing it
-      if (! request.isValid()) {
-        // state change, so save.
-        setSave();
-        requests.remove(index);
-      } else
-        index++;
-    }
-
-    Channel.sendTo(from, new Monit_GetNumberRep(not, requests.size()));
+    Channel.sendTo(from,
+                   new Monit_GetNumberRep(not, getWaitingRequestCount()));
   }
 
   /**
@@ -446,9 +470,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       }
     }
 
+    long current = System.currentTimeMillis();
+    cleanWaitingRequest(current);
     // Storing the request:
     not.requester = from;
-    not.setExpiration(System.currentTimeMillis());
+    not.setExpiration(current);
     if (not.isPersistent()) {
       // state change, so save.
       setSave();
@@ -497,39 +523,21 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
     // Building the reply:
     BrowseReply rep = new BrowseReply(not);
-
+    
+    // Cleaning the possible expired messages.
+    ClientMessages deadMessages = cleanPendingMessage(System.currentTimeMillis());
     // Adding the deliverable messages to it:
     int i = 0;
     Message message;
-    ClientMessages deadMessages = null;
     while (i < messages.size()) {
       message = (Message) messages.get(i);
-      // Testing message validity:
-      if (message.isValid()) {
+      if (Selector.matches(message, not.getSelector())) {
         // Matching selector: adding the message:
-        if (Selector.matches(message, not.getSelector()))
-          rep.addMessage(message);
-
-        i++;
+        rep.addMessage(message);
       }
-      // Invalid message: removing it and adding it to the vector of dead
-      // messages:
-      else {
-        messages.remove(i);
-        message.delete();
-        
-        message.expired = true;
-
-        if (deadMessages == null)
-          deadMessages = new ClientMessages();
-        deadMessages.addMessage(message);
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
-                                        + message.getIdentifier()
-                                        + " removed.");
-      }
+      i++;
     }
+
     // Sending the dead messages to the DMQ, if needed:
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
@@ -1025,18 +1033,16 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     ReceiveRequest rec;
     ExceptionReply excRep;
     // Sending it to the pending receivers:
+    cleanWaitingRequest(System.currentTimeMillis());
     for (int i = 0; i < requests.size(); i++) {
       rec = (ReceiveRequest) requests.elementAt(i);
 
-      // Check that the request is valid
-      if (rec.isValid()) {
-        excRep = new ExceptionReply(rec, exc);
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
-                                        + rec.requester
-                                        + " notified of the queue deletion.");
-        Channel.sendTo(rec.requester, excRep);
-      }
+      excRep = new ExceptionReply(rec, exc);
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
+                                      + rec.requester
+                                      + " notified of the queue deletion.");
+      Channel.sendTo(rec.requester, excRep);
     }
     // Sending the remaining messages to the DMQ, if needed:
     if (! messages.isEmpty()) {
@@ -1160,109 +1166,79 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       MomTracing.dbgDestination.log(
         BasicLevel.DEBUG, " -> requests = " + requests + ')');
 
+    long current = System.currentTimeMillis();
+    cleanWaitingRequest(current);
+     // Cleaning the possible expired messages.
+    deadMessages = cleanPendingMessage(current);
+   
     // Processing each request as long as there are deliverable messages:
     while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
       replied = false;
       notMsg = new QueueMsgReply(notRec);
 
-      // Checking the request validity:
-      if (notRec.isValid()) {
-        // Checking the deliverable messages:
-        while (j < messages.size()) {
-          msg = (Message) messages.get(j);
+      // Checking the deliverable messages:
+      while (j < messages.size()) {
+        msg = (Message) messages.get(j);
 
-          // If the message is still valid:
-          if (msg.isValid()) {
-            // If selector matches, sending the message:
-            if (Selector.matches(msg, notRec.getSelector()) 
-		&& checkDelivery(msg)) {
-              messages.remove(j);
-              msg.deliveryCount++;
-              notMsg.addMessage(msg);
+        // If selector matches, sending the message:
+        if (Selector.matches(msg, notRec.getSelector()) 
+            && checkDelivery(msg)) {
+          messages.remove(j);
+          msg.deliveryCount++;
+          notMsg.addMessage(msg);
               
-              if (isLocal(notRec.requester)) {
-                notMsg.setPersistent(false);
-              }
-
-              nbMsgsDeliverSinceCreation++;
-
-              // use in sub class see ClusterQueueImpl
-              messageDelivered(msg.getIdentifier());
-
-              if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-                MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                              + msg.getIdentifier()
-                                              + " sent to "
-                                              + notRec.requester
-                                              + " as a reply to "
-                                              + notRec.getRequestId());
-
-              // Removing the message if request in auto ack mode:
-              if (notRec.getAutoAck())
-                msg.delete();
-              // Else, putting the message in the delivered messages table:
-              else {
-                if (notMsg.isPersistent()) {
-                  // state change, so save.
-                  setSave();
-                }
-                consumers.put(msg.getIdentifier(), notRec.requester);
-                contexts.put(msg.getIdentifier(),
-                             new Integer(notRec.getClientContext()));
-                deliveredMsgs.put(msg.getIdentifier(), msg);
-              }
-              
-              if (notMsg.getSize() == msgCount) {
-                break;
-              }
-            }
-            // If message delivered or selector does not match: going on
-            else {
-              j++;
-            }
+          if (isLocal(notRec.requester)) {
+            notMsg.setPersistent(false);
           }
-          // If message is invalid, removing it and adding it to the vector of
-          // dead messages:
-          else {
-            messages.remove(j);
+
+          nbMsgsDeliverSinceCreation++;
+
+          // use in sub class see ClusterQueueImpl
+          messageDelivered(msg.getIdentifier());
+
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+                                          + msg.getIdentifier()
+                                          + " sent to "
+                                          + notRec.requester
+                                          + " as a reply to "
+                                          + notRec.getRequestId());
+
+          // Removing the message if request in auto ack mode:
+          if (notRec.getAutoAck())
             msg.delete();
-
-            // use in sub class see ClusterQueueImpl
-            messageRemoved(msg.getIdentifier());
-
-            msg.expired = true;
-
-            if (deadMessages == null)
-              deadMessages = new ClientMessages();
-            deadMessages.addMessage(msg);
-  
-            if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-              MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired"
-                                            + " message " + msg.getIdentifier()
-                                            + " removed.");
-          } 
+          // Else, putting the message in the delivered messages table:
+          else {
+            if (notMsg.isPersistent()) {
+              // state change, so save.
+              setSave();
+            }
+            consumers.put(msg.getIdentifier(), notRec.requester);
+            contexts.put(msg.getIdentifier(),
+                         new Integer(notRec.getClientContext()));
+            deliveredMsgs.put(msg.getIdentifier(), msg);
+          }
+              
+          if (notMsg.getSize() == msgCount) {
+            break;
+          }
         }
-
-        // Next request:
-        if (notMsg.getSize() > 0) {
-          requests.remove(index);
-          Channel.sendTo(notRec.requester, notMsg);
-        } else {
-          index++;
+        // If message delivered or selector does not match: going on
+        else {
+          j++;
         }
-
-        j = 0;
       }
-      // The request expired: removing it.
-      else {
+
+      // Next request:
+      if (notMsg.getSize() > 0) {
         requests.remove(index);
-
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Request "
-                                        + notRec.getRequestId()
-                                        + " expired");
+        Channel.sendTo(notRec.requester, notMsg);
+      } else {
+        index++;
       }
+
+      j = 0;
     }
     // If needed, sending the dead messages to the DMQ:
     if (deadMessages != null)

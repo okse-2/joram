@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.notifications;
 
@@ -27,8 +27,7 @@ package org.objectweb.joram.mom.notifications;
  * A <code>ReceiveRequest</code> instance is used by a client agent for 
  * requesting a message on a queue.
  */
-public class ReceiveRequest extends AbstractRequest
-{
+public class ReceiveRequest extends AbstractRequest {
   /**
    * String selector for filtering messages, null or empty for no selection.
    */
@@ -84,8 +83,7 @@ public class ReceiveRequest extends AbstractRequest
 
 
   /** Returns the selector of the request. */
-  public String getSelector()
-  {
+  public String getSelector() {
     return selector;
   }
 
@@ -93,14 +91,12 @@ public class ReceiveRequest extends AbstractRequest
    * Returns the time-to-live parameter of this request, in milliseconds (0 for
    * immediate delivery, negative for infinite validity).
    */
-  public long getTimeOut()
-  {
+  public long getTimeOut() {
     return timeOut;
   }
 
   /** Checks the autoAck mode of this request. */
-  public boolean getAutoAck()
-  {
+  public boolean getAutoAck() {
     return autoAck;
   }
 
@@ -108,18 +104,26 @@ public class ReceiveRequest extends AbstractRequest
     return msgIds;
   }
 
-  /** Updates the expiration time field, if needed. */
-  public void setExpiration(long currentTime)
-  {
+  /**
+   * Updates the expiration time field, if needed.
+   * This method calculate the expiration time of the request from the
+   * current time (1st argument) and the timeout attribute.
+   *
+   * @param startTime	The starting time to calculate the expiration time.
+   */
+  public void setExpiration(long startTime) {
     if (timeOut > 0)
-      this.expirationTime = currentTime + timeOut;
+      this.expirationTime = startTime + timeOut;
   }
 
-  /** Returns <code>false</code> if the request expired. */
-  public boolean isValid()
-  {
+  /**
+   * Returns <code>false</code> if the request expired.
+   *
+   * @param currentTime	The current time to verify the expiration time.
+   */
+  public boolean isValid(long currentTime) {
     if (timeOut > 0)
-      return System.currentTimeMillis() < expirationTime;
+      return currentTime < expirationTime;
     return true;
   }
 
