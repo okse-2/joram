@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -568,7 +568,7 @@ class ClientSubscription implements java.io.Serializable {
         // Message still exists.
         if (message != null) {
           // Delivering it if valid.
-          if (message.isValid()) {
+          if (message.isValid(System.currentTimeMillis())) {
             deliveredIds.put(id, id);
 
             // Setting the message's deliveryCount and denied fields.
@@ -643,7 +643,7 @@ class ClientSubscription implements java.io.Serializable {
         // Message still exists.
         if (message != null) {
           // Checking valid message.
-          if (message.isValid()) {
+          if (message.isValid(System.currentTimeMillis())) {
             if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
               MomTracing.dbgProxy.log(
                 BasicLevel.DEBUG, " -> valid message");

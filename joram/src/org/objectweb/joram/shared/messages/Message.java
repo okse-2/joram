@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -39,9 +39,7 @@ import java.util.*;
  * hashtable, or bytes, even nothing. It is charaterized by properties and
  * "header" fields.
  */
-public class Message
-  implements Cloneable, Serializable {
-
+public class Message implements Cloneable, Serializable {
   transient public boolean pin = true;
   transient private String saveName = null;
   transient public boolean toBeUpdated = false;
@@ -214,14 +212,12 @@ public class Message
   }
 
   /** Sets the message identifier. */ 
-  public void setIdentifier(String id)
-  {
+  public void setIdentifier(String id) {
     this.id = id;
   }
 
   /** Sets the message persistence mode. */
-  public void setPersistent(boolean persistent)
-  {
+  public void setPersistent(boolean persistent) {
     this.persistent = persistent;
   }
 
@@ -230,22 +226,23 @@ public class Message
    *
    * @param priority  Priority value: 0 the lowest, 9 the highest, 4 normal.
    */ 
-  public void setPriority(int priority)
-  {
+  public void setPriority(int priority) {
     if (priority >= 0 && priority <= 9)
       this.priority = priority;
   }
 
-  /** Sets the message expiration. */
-  public void setExpiration(long expiration)
-  {
+  /**
+   * Sets the message expiration.
+   *
+   * @param expiration	The expiration time.
+   */
+  public void setExpiration(long expiration) {
     if (expiration >= 0)
       this.expiration = expiration;
   }
 
   /** Sets the message time stamp. */
-  public void setTimestamp(long timestamp)
-  {
+  public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }
 
@@ -261,8 +258,7 @@ public class Message
   }
 
   /** Sets the message correlation identifier. */
-  public void setCorrelationId(String correlationId)
-  {
+  public void setCorrelationId(String correlationId) {
     this.correlationId = correlationId;
   }
 
@@ -272,8 +268,7 @@ public class Message
    * @param id  The destination identifier.
    * @param type The destination type.
    */
-  public void setReplyTo(String id, String type)
-  {
+  public void setReplyTo(String id, String type) {
     this.replyToId = id;
     this.replyToType = type;
   }
@@ -284,8 +279,7 @@ public class Message
    * @param name  The header field name.
    * @param value  The corresponding value.
    */
-  public void setOptionalHeader(String name, Object value)
-  {
+  public void setOptionalHeader(String name, Object value) {
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid header name: " + name);
 
@@ -309,68 +303,57 @@ public class Message
   }
 
   /** Returns the message type. */
-  public int getType()
-  {
+  public int getType() {
     return type;
   }
 
   /** Returns the message identifier. */
-  public String getIdentifier()
-  {
+  public String getIdentifier() {
     return id;
   }
 
   /** Returns <code>true</code> if the message is persistent. */
-  public boolean getPersistent()
-  {
+  public boolean getPersistent() {
     return persistent;
   }
 
   /** Returns the message priority. */
-  public int getPriority()
-  {
+  public int getPriority() {
     return priority;
   }
 
   /** Returns the message expiration time. */
-  public long getExpiration()
-  {
+  public long getExpiration() {
     return expiration;
   }
   
   /** Returns the message time stamp. */
-  public long getTimestamp()
-  {
+  public long getTimestamp() {
     return timestamp;
   }
 
   /** Returns the message destination identifier. */
-  public final String getDestinationId()
-  {
+  public final String getDestinationId() {
     return toId;
   }
 
   /** Returns <code>true</code> if the destination is a queue. */
-  public final String toType()
-  {
+  public final String toType() {
     return toType;
   }
 
   /** Returns the message correlation identifier. */
-  public final String getCorrelationId()
-  {
+  public final String getCorrelationId() {
     return correlationId;
   }
 
   /** Returns the destination id the reply should be sent to. */
-  public final String getReplyToId()
-  {
+  public final String getReplyToId() {
     return replyToId;
   }
 
   /** Returns <code>true</code> if the reply to destination is a queue. */
-  public final String replyToType()
-  {
+  public final String replyToType() {
     return replyToType;
   }
 
@@ -379,8 +362,7 @@ public class Message
    *
    * @param name  The header field name.
    */
-  public Object getOptionalHeader(String name)
-  {
+  public Object getOptionalHeader(String name) {
     if (optionalHeader == null)
       return null;
 
@@ -395,9 +377,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setBooleanProperty(String name, boolean value)
-         throws MessageROException
-  {
+  public void setBooleanProperty(String name, boolean value) throws MessageROException {
     setProperty(name, new Boolean(value));
   }
 
@@ -409,9 +389,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setByteProperty(String name, byte value)
-         throws MessageROException
-  {
+  public void setByteProperty(String name, byte value) throws MessageROException {
     setProperty(name, new Byte(value));
   }
 
@@ -423,9 +401,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setDoubleProperty(String name, double value)
-         throws MessageROException
-  {
+  public void setDoubleProperty(String name, double value) throws MessageROException {
     setProperty(name, new Double(value));
   }
 
@@ -437,9 +413,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setFloatProperty(String name, float value)
-         throws MessageROException
-  {
+  public void setFloatProperty(String name, float value) throws MessageROException {
     setProperty(name, new Float(value));
   }
 
@@ -451,8 +425,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setIntProperty(String name, int value) throws MessageROException
-  {
+  public void setIntProperty(String name, int value) throws MessageROException {
     setProperty(name, new Integer(value));
   }
 
@@ -464,9 +437,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setLongProperty(String name, long value)
-         throws MessageROException
-  {
+  public void setLongProperty(String name, long value) throws MessageROException {
     setProperty(name, new Long(value));
   }
 
@@ -478,9 +449,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setShortProperty(String name, short value)
-         throws MessageROException
-  {
+  public void setShortProperty(String name, short value) throws MessageROException {
     setProperty(name, new Short(value));
   }
 
@@ -492,9 +461,7 @@ public class Message
    *
    * @exception MessageROException  If the message properties are read-only.
    */
-  public void setStringProperty(String name, String value)
-         throws MessageROException
-  {
+  public void setStringProperty(String name, String value) throws MessageROException {
     setProperty(name, value);
   }
 
@@ -511,9 +478,7 @@ public class Message
    * @exception IllegalArgumentException
    *	If the key name is illegal (null or empty string).
    */
-  public void setObjectProperty(String name, Object value)
-         throws MessageException
-  {
+  public void setObjectProperty(String name, Object value) throws MessageException {
     if (value instanceof Boolean || value instanceof Number
         || value instanceof String) {
       setProperty(name, value);
@@ -534,9 +499,7 @@ public class Message
    * @exception IllegalArgumentException
    *	If the key name is illegal (null or empty string).
    */
-  private void setProperty(String name, Object value)
-         throws MessageROException
-  {
+  private void setProperty(String name, Object value) throws MessageROException {
     if (propertiesRO)
       throw new MessageROException("Can't set property as the message "
                                    + "properties are READ-ONLY.");
@@ -553,8 +516,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public boolean getBooleanProperty(String name) throws MessageValueException 
-  {
+  public boolean getBooleanProperty(String name) throws MessageValueException  {
     return ConversionHelper.toBoolean(getObjectProperty(name));
   }
   
@@ -562,8 +524,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public byte getByteProperty(String name) throws MessageValueException 
-  {
+  public byte getByteProperty(String name) throws MessageValueException {
     return ConversionHelper.toByte(getObjectProperty(name));
   }
 
@@ -574,8 +535,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public double getDoubleProperty(String name) throws MessageValueException
-  {
+  public double getDoubleProperty(String name) throws MessageValueException {
     return ConversionHelper.toDouble(getObjectProperty(name));
   }
 
@@ -586,8 +546,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public float getFloatProperty(String name) throws MessageValueException
-  {
+  public float getFloatProperty(String name) throws MessageValueException {
     return ConversionHelper.toFloat(getObjectProperty(name));
   }
 
@@ -598,8 +557,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public int getIntProperty(String name) throws MessageValueException
-  {
+  public int getIntProperty(String name) throws MessageValueException {
     return ConversionHelper.toInt(getObjectProperty(name));
   }
 
@@ -610,8 +568,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public long getLongProperty(String name) throws MessageValueException
-  {
+  public long getLongProperty(String name) throws MessageValueException {
     return ConversionHelper.toLong(getObjectProperty(name));
   }
 
@@ -622,8 +579,7 @@ public class Message
    *
    * @exception MessageValueException  If the property type is invalid.
    */
-  public short getShortProperty(String name) throws MessageValueException
-  {
+  public short getShortProperty(String name) throws MessageValueException {
     return ConversionHelper.toShort(getObjectProperty(name));
   }
 
@@ -632,8 +588,7 @@ public class Message
    *
    * @param name  The property name.
    */
-  public String getStringProperty(String name)
-  {
+  public String getStringProperty(String name) {
     return ConversionHelper.toString(getObjectProperty(name));
   }
 
@@ -642,8 +597,7 @@ public class Message
    *
    * @param name  The property name.
    */
-  public Object getObjectProperty(String name)
-  {
+  public Object getObjectProperty(String name) {
     if (properties == null) return null;
     return properties.get(name);
   }
@@ -653,8 +607,7 @@ public class Message
    *
    * @param name  The name of the property to check.
    */
-  public boolean propertyExists(String name)
-  {
+  public boolean propertyExists(String name) {
     if (properties == null)
       return false;
 
@@ -662,8 +615,7 @@ public class Message
   }
 
   /** Returns an enumeration of the properties names. */
-  public Enumeration getPropertyNames()
-  {
+  public Enumeration getPropertyNames() {
     if (properties == null)
       return (new Hashtable()).keys();
 
@@ -671,8 +623,7 @@ public class Message
   }
 
   /** Empties the properties table. */
-  public void clearProperties()
-  {
+  public void clearProperties() {
     propertiesRO = false;
 
     if (properties == null)
@@ -706,8 +657,7 @@ public class Message
    * @exception IOException  In case of an error while setting the object.
    * @exception  MessageROException  If the message body is read-only.
    */
-  public void setObject(Object object) 
-    throws IOException, MessageROException {
+  public void setObject(Object object) throws IOException, MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
@@ -732,8 +682,7 @@ public class Message
    * @exception IOException  In case of an error while setting the map.
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setMap(HashMap map) 
-    throws Exception {
+  public void setMap(HashMap map) throws Exception {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
@@ -746,8 +695,7 @@ public class Message
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setText(String text) 
-    throws MessageROException {
+  public void setText(String text) throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
@@ -760,8 +708,7 @@ public class Message
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setStream(byte[] bytes) 
-    throws MessageROException {
+  public void setStream(byte[] bytes) throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
@@ -774,8 +721,7 @@ public class Message
    *
    * @exception MessageROException  If the message body is read-only.
    */
-  public void setBytes(byte[] bytes) 
-    throws MessageROException {
+  public void setBytes(byte[] bytes) throws MessageROException {
     if (bodyRO)
       throw new MessageROException("Can't set the body as it is READ-ONLY.");
 
@@ -789,8 +735,7 @@ public class Message
    * @exception IOException  In case of an error while getting the object.
    * @exception ClassNotFoundException  If the object class is unknown.
    */
-  public Object getObject() 
-    throws Exception {
+  public Object getObject() throws Exception {
     if (getBodyBytes() == null)
       return null;
     ByteArrayInputStream bais = new ByteArrayInputStream(getBodyBytes());
@@ -836,13 +781,16 @@ public class Message
     bodyRO = true;
   }
 
-  /** Returns <code>true</code> if the message is valid. */
-  public boolean isValid()
-  {
+  /**
+   * Returns <code>true</code> if the message is valid.
+   *
+   * @param currentTime	The current time to verify the expiration time.
+   */
+  public boolean isValid(long currentTime) {
     if (expiration == 0)
       return true;
 
-    return ((expiration - System.currentTimeMillis()) > 0);
+    return ((expiration - currentTime) > 0);
   }
 
   /** Clones the message. */
@@ -936,8 +884,7 @@ public class Message
    * Transforms a table of primitive values into a <code>Message</code>
    * instance.
    */
-  public static Message soapDecode(Hashtable h) 
-  {
+  public static Message soapDecode(Hashtable h) {
     if (h == null) return null;
 
     Hashtable fieldsTb = (Hashtable) h.get("fieldsTb");
