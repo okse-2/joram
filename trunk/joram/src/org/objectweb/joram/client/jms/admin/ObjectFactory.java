@@ -119,11 +119,13 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       ConnectionFactory cnxFact =
         new TcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;
@@ -132,11 +134,13 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       QueueConnectionFactory cnxFact =
         new QueueTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;
@@ -145,11 +149,13 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
       String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       TopicConnectionFactory cnxFact =
         new TopicTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
       params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;
@@ -157,10 +163,14 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
+      String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XAConnectionFactory cnxFact =
         new XATcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;
@@ -168,10 +178,14 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
+      String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XAQueueConnectionFactory cnxFact =
         new XAQueueTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;
@@ -179,10 +193,14 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
       String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
+      String txTimer = (String) ref.get("cFactory.txT").getContent();
+      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XATopicConnectionFactory cnxFact =
         new XATopicTcpConnectionFactory(host, (new Integer(port)).intValue());
       FactoryParameters params = cnxFact.getParameters();
       params.connectingTimer = (new Integer(cnxTimer)).intValue();
+      params.txPendingTimer = (new Integer(txTimer)).intValue();
+      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       return cnxFact;

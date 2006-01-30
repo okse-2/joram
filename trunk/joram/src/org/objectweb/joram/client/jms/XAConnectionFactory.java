@@ -101,10 +101,13 @@ public abstract class XAConnectionFactory
     Reference ref = super.getReference();
     ref.add(new StringRefAddr("cFactory.host", params.getHost()));
     ref.add(new StringRefAddr("cFactory.port",
-                              (new Integer(params.getPort())).toString()));
-    ref.add(
-      new StringRefAddr("cFactory.cnxT",
-                        (new Integer(params.connectingTimer)).toString()));
+                              new Integer(params.getPort()).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxT",
+                              new Integer(params.connectingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.txT",
+                              new Integer(params.txPendingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxPT",
+                              new Integer(params.cnxPendingTimer).toString()));
     ref.add(new StringRefAddr("reliableClass",reliableClass));
     return ref;
   }
@@ -118,6 +121,8 @@ public abstract class XAConnectionFactory
     h.put("host",params.getHost());
     h.put("port",new Integer(params.getPort()));
     h.put("connectingTimer",new Integer(params.connectingTimer));
+    h.put("txPendingTimer", new Integer(params.txPendingTimer));
+    h.put("cnxPendingTimer", new Integer(params.cnxPendingTimer));
     return h;
   }
 
@@ -133,6 +138,7 @@ public abstract class XAConnectionFactory
     params = new FactoryParameters((String)h.get("host"),
                                    ((Integer)h.get("port")).intValue());
     params.connectingTimer = ((Integer)h.get("connectingTimer")).intValue();
+    params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
     params.cnxPendingTimer = ((Integer)h.get("cnxPendingTimer")).intValue();
   }
 }
