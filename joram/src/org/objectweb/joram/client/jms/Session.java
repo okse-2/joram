@@ -1091,7 +1091,13 @@ public class Session implements javax.jms.Session {
     for (int i = 0; i < consumersToClose.size(); i++) {
       MessageConsumer mc = 
         (MessageConsumer)consumersToClose.elementAt(i);
-      mc.close();
+      try {
+        mc.close();
+      } catch (JMSException exc) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, "", exc);
+      }
     }
     
     Vector browsersToClose = (Vector)browsers.clone();
@@ -1099,7 +1105,13 @@ public class Session implements javax.jms.Session {
     for (int i = 0; i < browsersToClose.size(); i++) {
       QueueBrowser qb = 
         (QueueBrowser)browsersToClose.elementAt(i);
+      try {
       qb.close();
+      } catch (JMSException exc) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, "", exc);
+      }
     }
     
     Vector producersToClose = (Vector)producers.clone();
@@ -1107,12 +1119,18 @@ public class Session implements javax.jms.Session {
     for (int i = 0; i < producersToClose.size(); i++) {
       MessageProducer mp = 
         (MessageProducer)producersToClose.elementAt(i);
+      try {
       mp.close();
+      } catch (JMSException exc) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, "", exc);
+      }
     }
     
-    try {
-      repliesIn.stop();
-    } catch (InterruptedException iE) {}
+//     try {
+//       repliesIn.stop();
+//     } catch (InterruptedException iE) {}
       
     stop();
 
@@ -1630,6 +1648,9 @@ public class Session implements javax.jms.Session {
       listenerCount--;
       if (status == Status.START &&
           listenerCount == 0) {
+        try {
+          repliesIn.stop();
+        } catch (InterruptedException iE) {}
         // All the message listeners have been closed
         // so we can call doStop() in a synchronized
         // block. No deadlock possible.
