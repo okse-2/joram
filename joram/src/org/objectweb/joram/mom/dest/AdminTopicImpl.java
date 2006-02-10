@@ -222,6 +222,8 @@ public class AdminTopicImpl extends TopicImpl {
       doReact((GetProxyIdListNot)not);
     else if (not instanceof RegisterTmpDestNot)
       doReact((RegisterTmpDestNot)not);
+    else if (not instanceof RegisterDestNot)
+      doReact((RegisterDestNot)not);
     else
       super.react(from, not);
   }
@@ -339,6 +341,19 @@ public class AdminTopicImpl extends TopicImpl {
     } else {
       destinationsTable.remove(destName);
     }
+  }
+
+  private void doReact(RegisterDestNot not) {
+    if (destinationsTable.contains(not.getName()))
+      return;
+    
+    DestinationDesc destDesc = 
+      new DestinationDesc(
+        not.getId(),
+        not.getName(),
+        not.getClassName(),
+        not.getType());
+    destinationsTable.put(not.getName(), destDesc);
   }
 
   /**
@@ -826,7 +841,7 @@ public class AdminTopicImpl extends TopicImpl {
       // It's the local server, process the request.
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server stopped"));
-      AgentServer.stop(false, 1000);
+      AgentServer.stop(false, 500L, true);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
