@@ -1235,7 +1235,7 @@ public final class AgentServer {
    *			a thread is created and the method returns.
    */
   public static void stop(boolean sync) {
-    stop(sync, 0);
+    stop(sync, 0, false);
   }
 
   /**
@@ -1250,14 +1250,15 @@ public final class AgentServer {
    * @param delay       if sync is false then the thread in charge of
    *                    stopping the server waits this delay before
    *                    initiating the stop.
+   * @param reset	If true the server is stopped then reseted.
    */
-  public static void stop(boolean sync, long delay) {
+  public static void stop(boolean sync, long delay, boolean reset) {
+    ServerStopper stopper = new ServerStopper(delay, reset);
     if (sync == true) {
-      AgentServer.stop();
+      stopper.run();
     } else {
       // Creates a thread to execute AgentServer.stop in order to
       // avoid deadlock.
-      ServerStopper stopper = new ServerStopper(delay);
       Thread t = new Thread(stopper);
       t.setDaemon(true);
       t.start();
@@ -1266,9 +1267,11 @@ public final class AgentServer {
 
   static class ServerStopper implements Runnable {
     private long delay;
+    private boolean reset;
 
-    ServerStopper(long delay) {
+    ServerStopper(long delay, boolean reset) {
       this.delay = delay;
+      this.reset = reset;
     }
 
     public void run() {
@@ -1278,6 +1281,9 @@ public final class AgentServer {
         } catch (InterruptedException exc) {}
       }
       AgentServer.stop();
+      if (reset) {
+        AgentServer.reset();
+      }
     }
   }
 
