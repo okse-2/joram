@@ -205,7 +205,7 @@ public class ReliableTcpClient {
           // If timer is over, throwing an IllegalStateException:
           long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
           IllegalStateException jmsExc =
-            new IllegalStateException("Could not open the connection"
+            new IllegalStateException("Could not connect to JMS server"
                                       + " with "
                                       + addresses
                                       + " after " + attemptsC
