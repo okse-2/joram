@@ -110,8 +110,8 @@ public class SimpleNamingConnection
       socket.connect(new InetSocketAddress(hostName, port), timeout);
       ioCtrl = new IOControl(socket);
     } catch (IOException exc) {
-      if (Trace.logger.isLoggable(BasicLevel.ERROR))
-        Trace.logger.log(BasicLevel.ERROR, "NamingConnection.open()", exc);
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "NamingConnection.open()", exc);
       NamingException exc2 = new NamingException(exc.getMessage());
       exc2.setRootCause(exc);
       throw exc2;
