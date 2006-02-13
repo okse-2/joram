@@ -73,7 +73,6 @@ public class JndiServer {
       poolSize, 
       timeout,
       getDefault());
-    tcpServer.start();
 
     if (firstTime) {
       RequestManager manager = new RequestManager();
@@ -88,6 +87,8 @@ public class JndiServer {
       manager.setContainer(container);
       container.deploy();
     }
+
+    tcpServer.start();
   }
 
   /**
