@@ -85,7 +85,6 @@ public class DistributedJndiServer {
       poolSize, 
       timeout,
       getDefault());
-    tcpServer.start();
 
     if (firstTime) {
       ReplicationManager manager = 
@@ -105,6 +104,8 @@ public class DistributedJndiServer {
       manager.setContainer(container);
       container.deploy();
     }
+
+    tcpServer.start();
   }
 
   /**
