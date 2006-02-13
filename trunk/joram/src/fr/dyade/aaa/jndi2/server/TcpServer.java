@@ -141,15 +141,11 @@ public class TcpServer {
           }
 
           try {
-            Channel.sendTo(
-              tcpServer.getServerId(), 
-              new TcpRequestNot(
-                new TcpRequestContext(socket)));
+            TcpRequestContext ctx = new TcpRequestContext(socket);
+            Channel.sendTo(tcpServer.getServerId(), new TcpRequestNot(ctx));
           } catch (Exception exc) {
-            Trace.logger.log(
-              BasicLevel.ERROR,
-              this.getName() + 
-              ", error during send", exc);
+            Trace.logger.log(BasicLevel.ERROR,
+                             this.getName() + ", error during send", exc);
             if (socket != null) {
               try {
                 socket.close();
