@@ -135,10 +135,9 @@ public class Connection implements javax.jms.Connection {
         "Connection.<init>(" + 
         factoryParameters + ',' + requestChannel + ')');
     this.factoryParameters = factoryParameters;
-    mtpx = new RequestMultiplexer(
-      requestChannel,
-      factoryParameters.cnxPendingTimer,
-      toString());
+    mtpx = new RequestMultiplexer(this,
+                                  requestChannel,
+                                  factoryParameters.cnxPendingTimer);
     requestor = new Requestor(mtpx);
     sessions = new Vector();
     cconsumers = new Vector();
