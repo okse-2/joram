@@ -381,14 +381,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
         return;
     }
 
-    sess.closeConsumer(this);
-
-    if (mcl != null) {
-      // 1- Stop and unsubscribe 
-      // the listener.
-      sess.removeMessageListener(mcl, false);
-    }
-
     if (! queueMode) {
       // 2- Remove the subscription.
       if (durableSubscriber) {
@@ -398,6 +390,14 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
         sess.syncRequest(
           new ConsumerUnsubRequest(targetName));
       }
+    }
+
+    sess.closeConsumer(this);
+
+    if (mcl != null) {
+      // 1- Stop and unsubscribe 
+      // the listener.
+      sess.removeMessageListener(mcl, false);
     }
 
     setStatus(Status.CLOSE);
