@@ -61,8 +61,17 @@ public class ReliableTcpClient {
   private JMSException error;
 
   private Vector addresses;
-
+  /**
+   *  True if the client must try to reconnect in case of connection
+   * failure. It depends of cnxPendingTimer on a "normal" TCP connection,
+   * always true on HA.
+   */
   private boolean reconnect;
+  /**
+   *  Time in ms during the client try to reconnect to the server. It depends
+   * of connectingTimer and cnxPendingTimer from the connection parameters.
+   */
+  private int reconnectTimeout = 0;
 
   public ReliableTcpClient() {}
 
@@ -79,6 +88,10 @@ public class ReliableTcpClient {
     this.name = name;
     this.password = password;
     this.reconnect = reconnect;
+    if (params.cnxPendingTimer > 0)
+      this.reconnectTimeout =
+        Math.max(2*params.cnxPendingTimer,
+                 (params.connectingTimer*1000)+params.cnxPendingTimer);
     addresses = new Vector();
     key = -1;
     setStatus(INIT);
@@ -109,28 +122,18 @@ public class ReliableTcpClient {
       throw new IllegalStateException("Connect: state error");
 
     long startTime = System.currentTimeMillis();
-    
     long endTime = startTime;
-    if (reconnect) {
-      if ((addresses.size() >1) && (params.cnxPendingTimer == 0)) {
-        // infinite retry in case of HA.
-        endTime = Long.MAX_VALUE;
-      } else {
-        endTime += 2 * params.cnxPendingTimer;
-      }
+    if (addresses.size() > 1) {
+      // infinite retry in case of HA.
+      endTime = Long.MAX_VALUE;
     } else {
-      if ((addresses.size() >1) && (params.connectingTimer == 0)) {
-        // infinite retry in case of HA.
-        endTime = Long.MAX_VALUE;
+      if (reconnect) {
+        endTime += reconnectTimeout;
       } else {
-        endTime += params.connectingTimer * 1000;
+        endTime += params.connectingTimer * 1000L;
       }
     }
 
-    if ((addresses.size() >1) && (params.cnxPendingTimer == 0)) {
-      // infinite retry in case of HA.
-      endTime = Long.MAX_VALUE;
-    }
     int attemptsC = 0;
     long nextSleep = 100;
     while (true) {
@@ -260,7 +263,7 @@ public class ReliableTcpClient {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, " -> open new connection");      
-      dos.writeInt(params.cnxPendingTimer);
+      dos.writeInt(reconnectTimeout);
       dos.flush();
 
       int res = dis.readInt();
@@ -345,9 +348,10 @@ public class ReliableTcpClient {
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, "ReliableTcpClient[" + 
             name + ',' + key + "]", exc);
-        if (reconnect ||
-            params.cnxPendingTimer > 0) reconnect();
-        else throw exc;
+        if (reconnect)
+          reconnect();
+        else
+          throw exc;
       }
     }
   }
