@@ -68,6 +68,17 @@
       description="--> Builds Joram server and client jars.">
     <mkdir dir="${build.dir}/META-INF"/>
     <jar jarfile="${build.dir}/joram-shared.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="${licenses.dir}/NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectHelper.class"/>
@@ -83,6 +94,17 @@
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-mom.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/admin/*.class"/>
         <include name="fr/dyade/aaa/admin/cmd/*.class"/>
@@ -106,6 +128,17 @@
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
         <include name="fr/dyade/aaa/jndi2/haclient/*.class"/>
@@ -122,11 +155,33 @@
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-connector.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="org/objectweb/joram/client/connector/**/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-raconfig.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
         <include name="fr/dyade/aaa/agent/Debug.class"/>
@@ -135,12 +190,34 @@
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-config.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${src.dir}/org/objectweb/joram/client/connector/">
         <include name="a3debug.cfg"/>
         <include name="a3servers.xml"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-gui.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="org/objectweb/joram/client/tools/admin/*.class"/>
       </fileset>
@@ -170,6 +247,17 @@
     </javac>
     <!-- jars building -->
     <jar jarfile="${build.dir}/joram-kclient.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
         <include name="com/scalagent/ksoap/**/*.class"/>
         <include name="com/scalagent/kjndi/**/*.class"/>
@@ -215,6 +303,8 @@
         <include name="APACHE_LICENSE.TXT"/>
         <include name="CUP_LICENSE.TXT"/>
         <include name="LGPL_HEADER.TXT"/>
+        <include name="LGPL_LICENSE.TXT"/>
+        <include name="NOTICE.TXT"/>
       </fileset>
     </copy>
   </target>
@@ -234,6 +324,17 @@
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
     <jar jarfile="${ship.dir}/lib/joram.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${build.dir}">
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
@@ -257,6 +358,17 @@
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
     <jar jarfile="${ship.dir}/lib/joram.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${build.dir}">
         <include name="joram-shared.jar"/>
         <include name="joram-client.jar"/>
@@ -280,6 +392,17 @@
     <copy file="${src.dir}/org/objectweb/joram/client/connector/jonas-ra.xml"
           tofile="${build.dir}/META-INF/jonas-ra.xml"/>
     <jar jarfile="${ship.dir}/lib/joram_for_jonas_ra.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${build.dir}">
         <include name="joram-client.jar"/>
         <include name="joram-connector.jar"/>
