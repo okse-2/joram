@@ -1802,8 +1802,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doReact(UnknownAgent uA) {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "ProxyImpl.doReact(" + uA + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ProxyImpl.doReact(" + uA + ')');
     Notification not = uA.not;
     AgentId agId = uA.agent;
 
@@ -1814,16 +1814,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     
     // The deleted destination is a topic: deleting its subscriptions.
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, " -> topicsTable.remove(" + agId + ')');
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                " -> topicsTable.remove(" + agId + ')');
     TopicSubscription tSub = (TopicSubscription) topicsTable.remove(agId);
     if (tSub != null) {
       String name;
       ClientSubscription sub;
-      DestinationException exc = new DestinationException("Destination "
-                                                          + agId + " does"
-                                                          + " not"
-                                                          + " exist.");
+      DestinationException exc;
+      exc = new DestinationException("Destination " + agId +
+                                     " does not exist.");
       for (Enumeration e = tSub.getNames(); e.hasMoreElements();) { 
         name = (String) e.nextElement();
         sub = (ClientSubscription) subsTable.remove(name); 
@@ -1858,15 +1857,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             && ! agId.equals(DeadMQueueImpl.getId()))
           sendToDMQ((ClientMessages) req);
 
-        DestinationException exc = new DestinationException("Destination " + agId + " does not exist.");
+        DestinationException exc;
+        exc = new DestinationException("Destination " + agId +
+                                       " does not exist.");
         MomExceptionReply mer = new MomExceptionReply(req.getRequestId(), exc);
         try {
           setCtx(req.getClientContext());
-          if (activeCtx.getActivated()) {
-            doReply(mer);
-          } else {
-            activeCtx.addPendingDelivery(mer);
-          }
+          // Contrary to a receive, send the error even if the
+          // connection is not started.
+          doReply(mer);
         } catch (StateException se) {
           if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
             MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", se);          
