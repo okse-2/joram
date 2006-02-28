@@ -133,21 +133,33 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	if the connection can't be established
    */
   final Socket createSocket(ServerDesc server) throws IOException {
-    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-      this.logmon.log(BasicLevel.DEBUG,
-                      this.getName() + ", try to connect " +
-                      "addr=" + server.getAddr() +
-                      ",port=" + server.getPort());
-                  
-    try {
-      Socket socket = createSocket(server.getAddr(), server.getPort());
+    for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
+      SocketAddress sa = (SocketAddress) e.nextElement();
+
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
-        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
-      return socket;
-    } catch (IOException exc) {
-    }
+        this.logmon.log(BasicLevel.DEBUG,
+                        this.getName() + ", try to connect server#" +
+                        server.getServerId() +
+                        ", addr=" + sa.getHostname() +
+                        ", port=" + sa.getPort());
                   
-    throw new ConnectException();
+      try {
+        Socket socket = createSocket(sa);
+
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
+
+        // Memorize the right address for next try.
+        server.moveToFirst(sa);
+        return socket;
+      } catch (IOException exc) {
+        this.logmon.log(BasicLevel.DEBUG,
+                        this.getName() + ", connection refused, try next element");
+        continue;
+      }
+    }
+           
+    throw new ConnectException("Cannot connect to server#" + server.getServerId());
   }
 
   /**
