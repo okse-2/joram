@@ -1,3 +1,48 @@
+###############################################################################
+# 2005/03/06 | Joram 4.3.13 tag.
+###############################################################################
++==============================================================================
+| 2006/02/28 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Adds LGPL and Notice files in ship.
+ Adds manifest with version in jars.
+ Bug fix: Throw DestinationException on sending even if the connection is
+not started.
++==============================================================================
+| 2006/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Moves round-robin connection algorithm (for HA) from SimpleNetwork to
+StreamNetwork (now shared for all networks).
++==============================================================================
+| 2006/02/14 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Improvment about Heart-Beat: time during the client try to reconnect, and
+the server keep the context.
+ Fix in MessageConsumer closing (method doClose).
++==============================================================================
+| 2006/02/13 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes in JNDI:
+- Channel deadlock if problem during deserialization of request.
+- Unknown agent on race condition at starting.
++==============================================================================
+| 2006/02/10 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Best cleaning and stop of Joram's connection.
+ Adds RegisterDestNot handling.
+ Allows stop and reset of server.
++==============================================================================
+| 2006/01/30 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: retrieves cnxPendingTimer and txPendingTimer ConnectionFactory's
+parameters through JNDI.
++==============================================================================
+| 2006/01/24 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix: Best cleaning of expired request and messages.
+###############################################################################
+# 2005/01/19 | Joram 4.3.12 tag.
+###############################################################################
 +==============================================================================
 | 2006/01/17 | Andre Freyssinet - ScalAgent Distributed Technologies
 +------------+-----------------------------------------------------------------
