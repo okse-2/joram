@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -102,6 +102,7 @@ public class DeadMQueueImpl extends QueueImpl {
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
       msg = (Message) msgs.nextElement();
+      msg.setExpiration(0L);
       messages.add(msg);
       msg.save(getDestinationId());
     }
