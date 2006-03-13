@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -1854,8 +1854,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         }
         // Sending the messages again if not coming from the default DMQ:
         if (DeadMQueueImpl.getId() != null
-            && ! agId.equals(DeadMQueueImpl.getId()))
+            && ! agId.equals(DeadMQueueImpl.getId())) {
+          // Setting 'deletedDest' attribute for each message
+          for (Enumeration msgs = ((ClientMessages) req).getMessages().elements();
+               msgs.hasMoreElements();) {
+            Message msg = (Message) msgs.nextElement();
+            msg.deletedDest = true;
+          }
           sendToDMQ((ClientMessages) req);
+        }
 
         DestinationException exc;
         exc = new DestinationException("Destination " + agId +
