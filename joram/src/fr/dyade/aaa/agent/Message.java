@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -97,7 +97,12 @@ final class Message implements Serializable {
     return strbuf;
   }
 
-  transient private byte iobuf[] = new byte [25];
+  final static int LENGTH = 25;
+
+  final static int PERSISTENT = 0x01;
+  final static int DETACHABLE = 0x10;
+
+  transient private byte iobuf[] = new byte [LENGTH];
 
   /**
    *  The writeObject method is responsible for writing the state of the
@@ -108,46 +113,58 @@ final class Message implements Serializable {
    */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
-    // Writes sender's AgentId
-    iobuf[0] = (byte) (from.from >>>  8);
-    iobuf[1] = (byte) (from.from >>>  0);
-    iobuf[2] = (byte) (from.to >>>  8);
-    iobuf[3] = (byte) (from.to >>>  0);
-    iobuf[4] = (byte) (from.stamp >>>  24);
-    iobuf[5] = (byte) (from.stamp >>>  16);
-    iobuf[6] = (byte) (from.stamp >>>  8);
-    iobuf[7] = (byte) (from.stamp >>>  0);
-    // Writes adressee's AgentId
-    iobuf[8]  = (byte) (to.from >>>  8);
-    iobuf[9]  = (byte) (to.from >>>  0);
-    iobuf[10] = (byte) (to.to >>>  8);
-    iobuf[11] = (byte) (to.to >>>  0);
-    iobuf[12] = (byte) (to.stamp >>>  24);
-    iobuf[13] = (byte) (to.stamp >>>  16);
-    iobuf[14] = (byte) (to.stamp >>>  8);
-    iobuf[15] = (byte) (to.stamp >>>  0);
-    // Writes source server id of message
-    iobuf[16]  = (byte) (source >>>  8);
-    iobuf[17]  = (byte) (source >>>  0);
-    // Writes destination server id of message
-    iobuf[18] = (byte) (dest >>>  8);
-    iobuf[19] = (byte) (dest >>>  0);
-    // Writes stamp of message
-    iobuf[20] = (byte) (stamp >>>  24);
-    iobuf[21] = (byte) (stamp >>>  16);
-    iobuf[22] = (byte) (stamp >>>  8);
-    iobuf[23] = (byte) (stamp >>>  0);
-    // Writes if notification is detachable
-    iobuf[24] = (not.detachable) ? ((byte) 1) : ((byte) 0);
+    int idx = writeToBuf(iobuf, 0);
+
+    // Writes notification attributes
+    iobuf[idx++] = (byte) ((not.persistent?PERSISTENT:0) |
+                           (not.detachable?DETACHABLE:0));
+
     // Writes data on stream
-    out.write(iobuf, 0, 25);
+    out.write(iobuf, 0, LENGTH);
     
     if (! not.detachable) {
       // Writes notification object
       out.writeObject(not);
     }
   }
-    
+
+  /**
+   *  Write the Message internal state to the buffer.
+   */
+  int writeToBuf(byte[] buf, int idx) {
+      // Writes sender's AgentId
+    buf[idx++] = (byte) (from.from >>>  8);
+    buf[idx++] = (byte) (from.from >>>  0);
+    buf[idx++] = (byte) (from.to >>>  8);
+    buf[idx++] = (byte) (from.to >>>  0);
+    buf[idx++] = (byte) (from.stamp >>>  24);
+    buf[idx++] = (byte) (from.stamp >>>  16);
+    buf[idx++] = (byte) (from.stamp >>>  8);
+    buf[idx++] = (byte) (from.stamp >>>  0);
+    // Writes adressee's AgentId
+    buf[idx++]  = (byte) (to.from >>>  8);
+    buf[idx++]  = (byte) (to.from >>>  0);
+    buf[idx++] = (byte) (to.to >>>  8);
+    buf[idx++] = (byte) (to.to >>>  0);
+    buf[idx++] = (byte) (to.stamp >>>  24);
+    buf[idx++] = (byte) (to.stamp >>>  16);
+    buf[idx++] = (byte) (to.stamp >>>  8);
+    buf[idx++] = (byte) (to.stamp >>>  0);
+    // Writes source server id of message
+    buf[idx++]  = (byte) (source >>>  8);
+    buf[idx++]  = (byte) (source >>>  0);
+    // Writes destination server id of message
+    buf[idx++] = (byte) (dest >>>  8);
+    buf[idx++] = (byte) (dest >>>  0);
+    // Writes stamp of message
+    buf[idx++] = (byte) (stamp >>>  24);
+    buf[idx++] = (byte) (stamp >>>  16);
+    buf[idx++] = (byte) (stamp >>>  8);
+    buf[idx++] = (byte) (stamp >>>  0);
+
+    return idx;
+  }
+
   /**
    *  The readObject method is responsible for reading from the stream and
    * restoring the classes fields.
@@ -157,27 +174,13 @@ final class Message implements Serializable {
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
     iobuf = new byte[25];
-
     in.readFully(iobuf, 0, 25);
-    // Reads sender's AgentId
-    from = new AgentId((short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF)),
-                       (short) (((iobuf[2] & 0xFF) <<  8) + (iobuf[3] & 0xFF)),
-                       ((iobuf[4] & 0xFF) << 24) + ((iobuf[5] & 0xFF) << 16) +
-                       ((iobuf[6] & 0xFF) <<  8) + ((iobuf[7] & 0xFF) <<  0));
-    // Reads adressee's AgentId
-    to = new AgentId((short) (((iobuf[8] & 0xFF) <<  8) + (iobuf[9] & 0xFF)),
-                     (short) (((iobuf[10] & 0xFF) <<  8) + (iobuf[11] & 0xFF)),
-                     ((iobuf[12] & 0xFF) << 24) + ((iobuf[13] & 0xFF) << 16) +
-                     ((iobuf[14] & 0xFF) <<  8) + ((iobuf[15] & 0xFF) <<  0));
-    // Reads source server id of message
-    source = (short) (((iobuf[16] & 0xFF) <<  8) + ((iobuf[17] & 0xFF) <<  0));
-    // Reads destination server id of message
-    dest = (short) (((iobuf[18] & 0xFF) <<  8) + ((iobuf[19] & 0xFF) <<  0));
-    // Reads stamp of message
-    stamp = ((iobuf[20] & 0xFF) << 24) + ((iobuf[21] & 0xFF) << 16) +
-      ((iobuf[22] & 0xFF) <<  8) + ((iobuf[23] & 0xFF) <<  0);
-    // Reads if notification is detachable
-    boolean detachable = (iobuf[24] == 1) ? true : false;
+
+    int idx = readFromBuf(iobuf, 0);
+
+    // Reads notification attributes
+    boolean persistent = ((iobuf[idx] & PERSISTENT) == 0)?false:true;
+    boolean detachable = ((iobuf[idx] & DETACHABLE) == 0)?false:true;
 
     if (! detachable) {
       // Reads notification object
@@ -185,6 +188,32 @@ final class Message implements Serializable {
       not.detachable = false;
       not.detached = false;
     }
+  }
+
+  int readFromBuf(byte[] buf, int idx) {
+    // Reads sender's AgentId
+    from = new AgentId(
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0));
+    // Reads adressee's AgentId
+    to = new AgentId(
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0));
+    // Reads source server id of message
+    source = (short) (((buf[idx++] & 0xFF) <<  8) + 
+                      ((buf[idx++] & 0xFF) <<  0));
+    // Reads destination server id of message
+    dest = (short) (((buf[idx++] & 0xFF) <<  8) +
+                    ((buf[idx++] & 0xFF) <<  0));
+    // Reads stamp of message
+    stamp = ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0);
+
+    return idx;
   }
 
   transient private String stringId = null;
