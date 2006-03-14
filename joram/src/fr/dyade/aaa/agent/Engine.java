@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -826,6 +826,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
+    if ((msg.not.expiration > 0) &&
+        (msg.not.expiration < System.currentTimeMillis())) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ": removes expired notification " +
+                   msg.from + ", " + msg.not);
+      return;
+    }
+      
     if (msg.isPersistent()) {
       stamp(msg);
       msg.save();
@@ -863,30 +872,39 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 	canStop = false;
 	if (! isRunning) break;
 
-	try {
-	  agent = load(msg.to);
-	} catch (UnknownAgentException exc) {
-          //  The destination agent don't exists, send an error
-          // notification to sending agent.
-          logmon.log(BasicLevel.ERROR,
-                     getName() + ": Unknown agent, " + msg.to + ".react(" +
-                     msg.from + ", " + msg.not + ")");
-	  agent = null;
-	  push(AgentId.localId,
-               msg.from,
-               new UnknownAgent(msg.to, msg.not));
-	} catch (Exception exc) {
-          //  Can't load agent then send an error notification
-          // to sending agent.
-          logmon.log(BasicLevel.ERROR,
-                     getName() + ": Can't load agent, " + msg.to + ".react(" +
-                     msg.from + ", " + msg.not + ")",
-                     exc);
-	  agent = null;
-          // Stop the AgentServer
-          AgentServer.stop(false);
-          break main_loop;
-	}
+        if ((msg.not.expiration <= 0) ||
+            (msg.not.expiration >= System.currentTimeMillis())) {
+          // The message is valid, try to load the destination agent
+          try {
+            agent = load(msg.to);
+          } catch (UnknownAgentException exc) {
+            //  The destination agent don't exists, send an error
+            // notification to sending agent.
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ": Unknown agent, " + msg.to + ".react(" +
+                       msg.from + ", " + msg.not + ")");
+            agent = null;
+            push(AgentId.localId,
+                 msg.from,
+                 new UnknownAgent(msg.to, msg.not));
+          } catch (Exception exc) {
+            //  Can't load agent then send an error notification
+            // to sending agent.
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ": Can't load agent, " + msg.to + ".react(" +
+                       msg.from + ", " + msg.not + ")",
+                       exc);
+            agent = null;
+            // Stop the AgentServer
+            AgentServer.stop(false);
+            break main_loop;
+          }
+        } else {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+        }
 
 	if (agent != null) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
