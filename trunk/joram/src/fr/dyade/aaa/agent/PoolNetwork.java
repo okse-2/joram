@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -436,8 +436,7 @@ public class PoolNetwork extends StreamNetwork {
       } catch (Exception exc) {
 	// May be a a connection is in progress, try it later...
         if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                         getName() + ", connection refused", exc);
+          logmon.log(BasicLevel.WARN, getName() + ", connection refused", exc);
 
 	// Close the connection (# NACK).
 	try {
@@ -492,8 +491,7 @@ public class PoolNetwork extends StreamNetwork {
       thread.start();
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                         getName() + ", connection started");
+        logmon.log(BasicLevel.DEBUG, getName() + ", connection started");
 
       //  Try to send all waiting messages. As this.sock is no longer null
       // so we must do a copy a waiting messages. New messages will be send
@@ -506,8 +504,28 @@ public class PoolNetwork extends StreamNetwork {
       Object[] waiting = sendList.toArray();
       logmon.log(BasicLevel.DEBUG,
 		 getName() + ", send " + waiting.length + " waiting messages");
+
+      Message msg = null;
+      long currentTimeMillis = System.currentTimeMillis();
       for (int i=0; i<waiting.length; i++) {
-	transmit((Message) waiting[i]);
+        msg = (Message) waiting[i];
+        if ((msg.not != null) &&
+            (msg.not.expiration > 0) &&
+            (msg.not.expiration < currentTimeMillis)) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+          try {
+            doAck(msg.getStamp());
+          } catch (IOException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ": cannot removes expired notification " +
+                       msg.from + ", " + msg.not, exc);
+          }
+        } else {
+          transmit(msg, currentTimeMillis);
+        }
       }
     }
 
@@ -604,8 +622,26 @@ public class PoolNetwork extends StreamNetwork {
         }
       }
 
+      long currentTimeMillis = System.currentTimeMillis();
+
       if (msg.not != null) {
         sendList.addElement(msg);
+
+        if ((msg.not.expiration > 0) &&
+            (msg.not.expiration < currentTimeMillis)) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+          try {
+            doAck(msg.getStamp());
+          } catch (IOException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       getName() + ": cannot removes expired notification " +
+                       msg.from + ", " + msg.not, exc);
+          }
+          return;
+        }
       }
 
       if (sock == null) {
@@ -613,7 +649,7 @@ public class PoolNetwork extends StreamNetwork {
 	// try to make one!
 	start();
       } else {
-	transmit(msg);
+	transmit(msg, currentTimeMillis);
       }
     }
     
@@ -632,10 +668,11 @@ public class PoolNetwork extends StreamNetwork {
       qout.push(ack);
     }
 
-    final private synchronized void transmit(Message msg) {
+    final private synchronized void transmit(Message msg,
+                                             long currentTimeMillis) {
       last = current++;
       try {
-        nos.writeMessage(msg);
+        nos.writeMessage(msg, currentTimeMillis);
       } catch (IOException exc) {
         logmon.log(BasicLevel.ERROR,
                    getName() + ", exception in sending message", exc);
@@ -742,46 +779,28 @@ public class PoolNetwork extends StreamNetwork {
 
       Message readMessage() throws Exception {
         count = 0;
-        readFully(28);
+        readFully(Message.LENGTH +4 -1);
         // Reads boot timestamp of source server
         int length = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
           ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
 
         Message msg = Message.alloc();
-        // Reads sender's AgentId
-        msg.from = new AgentId(
-          (short) (((buf[4] & 0xFF) <<  8) + (buf[5] & 0xFF)),
-          (short) (((buf[6] & 0xFF) <<  8) + (buf[7] & 0xFF)),
-          ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
-          ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0));
-        // Reads adressee's AgentId
-        msg.to = new AgentId(
-          (short) (((buf[12] & 0xFF) <<  8) + (buf[13] & 0xFF)),
-          (short) (((buf[14] & 0xFF) <<  8) + (buf[15] & 0xFF)),
-          ((buf[16] & 0xFF) << 24) + ((buf[17] & 0xFF) << 16) +
-          ((buf[18] & 0xFF) <<  8) + ((buf[19] & 0xFF) <<  0));
-        // Reads source server id of message
-        msg.source = (short) (((buf[20] & 0xFF) <<  8) +
-                              ((buf[21] & 0xFF) <<  0));
-        // Reads destination server id of message
-        msg.dest = (short) (((buf[22] & 0xFF) <<  8) +
-                            ((buf[23] & 0xFF) <<  0));
-        // Reads stamp of message
-        msg.stamp = ((buf[24] & 0xFF) << 24) +
-          ((buf[25] & 0xFF) << 16) +
-          ((buf[26] & 0xFF) <<  8) +
-          ((buf[27] & 0xFF) <<  0);
+        int idx = msg.readFromBuf(buf, 4);
 
-        if (length > 28) {
-          readFully(length -28);
+        if (length > idx) {
+          // Be careful, the buffer is resetted
+          readFully(length - idx);
 
           // Reads notification attributes
-          boolean persistent = ((buf[28] & 0x01) == 0x01) ? true : false;
-          boolean detachable = ((buf[28] & 0x10) == 0x10) ? true : false;
+          boolean persistent = ((buf[0] & Message.PERSISTENT) == 0)?false:true;
+          boolean detachable = ((buf[0] & Message.DETACHABLE) == 0)?false:true;
+
           pos = 1;
           // Reads notification object
           ObjectInputStream ois = new ObjectInputStream(this);
           msg.not = (Notification) ois.readObject();
+          if (msg.not.expiration > 0)
+            msg.not.expiration += System.currentTimeMillis();
           msg.not.persistent = persistent;
           msg.not.detachable = detachable;
           msg.not.detached = false;
@@ -805,57 +824,35 @@ public class PoolNetwork extends StreamNetwork {
 
         this.os = os;
         oos = new ObjectOutputStream(this);
-
         count = 0;
-        buf[29] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-        buf[30] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-        buf[31] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-        buf[32] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+        buf[Message.LENGTH +4] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+        buf[Message.LENGTH +5] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+        buf[Message.LENGTH +6] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+        buf[Message.LENGTH +7] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
       }
 
-      void writeMessage(Message msg) throws IOException {
+      void writeMessage(Message msg,
+                        long currentTimeMillis) throws IOException {
         logmon.log(BasicLevel.DEBUG, getName() + ", sends " + msg);
 
-        // Writes sender's AgentId
-        buf[4] = (byte) (msg.from.from >>>  8);
-        buf[5] = (byte) (msg.from.from >>>  0);
-        buf[6] = (byte) (msg.from.to >>>  8);
-        buf[7] = (byte) (msg.from.to >>>  0);
-        buf[8] = (byte) (msg.from.stamp >>>  24);
-        buf[9] = (byte) (msg.from.stamp >>>  16);
-        buf[10] = (byte) (msg.from.stamp >>>  8);
-        buf[11] = (byte) (msg.from.stamp >>>  0);
-        // Writes adressee's AgentId
-        buf[12]  = (byte) (msg.to.from >>>  8);
-        buf[13]  = (byte) (msg.to.from >>>  0);
-        buf[14] = (byte) (msg.to.to >>>  8);
-        buf[15] = (byte) (msg.to.to >>>  0);
-        buf[16] = (byte) (msg.to.stamp >>>  24);
-        buf[17] = (byte) (msg.to.stamp >>>  16);
-        buf[18] = (byte) (msg.to.stamp >>>  8);
-        buf[19] = (byte) (msg.to.stamp >>>  0);
-        // Writes source server id of message
-        buf[20]  = (byte) (msg.source >>>  8);
-        buf[21]  = (byte) (msg.source >>>  0);
-        // Writes destination server id of message
-        buf[22] = (byte) (msg.dest >>>  8);
-        buf[23] = (byte) (msg.dest >>>  0);
-        // Writes stamp of message
-        buf[24] = (byte) (msg.stamp >>>  24);
-        buf[25] = (byte) (msg.stamp >>>  16);
-        buf[26] = (byte) (msg.stamp >>>  8);
-        buf[27] = (byte) (msg.stamp >>>  0);
-        count = 28;
-
+        int idx = msg.writeToBuf(buf, 4);
+        // Be careful, notification attribute are not written if there
+        // is no notification.
+        count = Message.LENGTH +4 -1;
+        
         try {
           if (msg.not != null) {
             // Writes notification attributes
-            buf[28] = (byte) ((msg.not.persistent?0x01:0) |
-                              (msg.not.detachable?0x10:0));
-            // Be careful, the stream header is hard-written in buf[29..32]
-            count = 33;
+            buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
+                                 (msg.not.detachable?Message.DETACHABLE:0));
 
+            // Be careful, the stream header is hard-written in buf
+            count = Message.LENGTH +8;
+
+            if (msg.not.expiration > 0)
+              msg.not.expiration -= currentTimeMillis;
             oos.writeObject(msg.not);
+            
             oos.reset();
             oos.flush();
           }
@@ -866,11 +863,11 @@ public class PoolNetwork extends StreamNetwork {
           buf[2] = (byte) (count >>>  8);
           buf[3] = (byte) (count >>>  0);
 
-          logmon.log(BasicLevel.DEBUG, getName() + ", writes " + count);
-
           os.write(buf, 0, count);;
           os.flush();
         } finally {
+          if ((msg.not != null) && (msg.not.expiration > 0))
+            msg.not.expiration += currentTimeMillis;
           count = 0;
         }
       }
@@ -1009,10 +1006,6 @@ public class PoolNetwork extends StreamNetwork {
     }
 
     public void run() {
-      int ret;
-      Message msg = null;
-      long currentTimeMillis;
-      
       try {
         synchronized (lock) {
           while (running) {

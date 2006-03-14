@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -207,6 +207,8 @@ public class SimpleNetwork extends StreamNetwork {
           canStop = false;
           if (! running) break;
 
+          long currentTimeMillis = System.currentTimeMillis();
+
           if (msg != null) {
             msgto = msg.getDest();
             
@@ -216,6 +218,12 @@ public class SimpleNetwork extends StreamNetwork {
                 this.logmon.log(BasicLevel.DEBUG,
                                 this.getName() + ", try to send message -> " +
                                 msg + "/" + msgto);
+
+              if ((msg.not.expiration > 0) &&
+                  (msg.not.expiration < currentTimeMillis)) {
+                throw new ExpirationExceededException();
+              }
+              
               // Can throw an UnknownServerException...
               server = AgentServer.getServerDesc(msgto);
               
@@ -271,7 +279,7 @@ public class SimpleNetwork extends StreamNetwork {
               }
               
               try {
-                send(socket, msg);
+                send(socket, msg, currentTimeMillis);
               } catch (IOException exc) {
                 this.logmon.log(BasicLevel.WARN,
                                 this.getName() + ", move msg in watchdog list", exc);
@@ -287,6 +295,11 @@ public class SimpleNetwork extends StreamNetwork {
                               exc);
               // Remove the message (see below), may be we have to post an
               // error notification to sender.
+            } catch (ExpirationExceededException exc) {
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
+                           getName() + ": removes expired notification " +
+                           msg.from + ", " + msg.not);
             }
 
             AgentServer.getTransaction().begin();
@@ -300,9 +313,8 @@ public class SimpleNetwork extends StreamNetwork {
             msg.free();
             AgentServer.getTransaction().commit();
             AgentServer.getTransaction().release();
-          } else {
-            watchdog();
           }
+          watchdog(currentTimeMillis);
         }
       } catch (Exception exc) {
         this.logmon.log(BasicLevel.FATAL,
@@ -315,13 +327,19 @@ public class SimpleNetwork extends StreamNetwork {
       }
     }
 
+    /** The date of the last watchdog execution. */
+    private long last = 0L;
+
     /*
      *
      * @exception IOException unrecoverable exception during transaction.
      */
-    void watchdog() throws IOException {
+    void watchdog(long currentTimeMillis) throws IOException {
+      if (currentTimeMillis < (last + WDActivationPeriod))
+        return;
+      last = currentTimeMillis;
+
       ServerDesc server = null;
-      long currentTimeMillis = System.currentTimeMillis();
 
       for (int i=0; i<sendList.size(); i++) {
         Message msg = (Message) sendList.getMessageAt(i);
@@ -334,6 +352,27 @@ public class SimpleNetwork extends StreamNetwork {
                           " from " + msg.from +
                           " to " + msg.to);
 
+        if ((msg.not.expiration > 0) &&
+            (msg.not.expiration < currentTimeMillis)) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+
+          // Remove the message.
+          AgentServer.getTransaction().begin();
+          // Deletes the processed notification
+          sendList.removeMessageAt(i); i--;
+// AF: A reprendre.
+//           // send ack in JGroups to delete msg
+//           if (jgroups != null)
+//             jgroups.send(new JGroupsAckMsg(msg));
+          msg.delete();
+          msg.free();
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
+        }
+
         try {
           server = AgentServer.getServerDesc(msgto);
         } catch (UnknownServerException exc) {
@@ -345,6 +384,10 @@ public class SimpleNetwork extends StreamNetwork {
           AgentServer.getTransaction().begin();
           // Deletes the processed notification
           sendList.removeMessageAt(i); i--;
+// AF: A reprendre.
+//          // send ack in JGroups to delete msg
+//           if (jgroups != null)
+//             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
           AgentServer.getTransaction().commit();
@@ -375,14 +418,14 @@ public class SimpleNetwork extends StreamNetwork {
 
             setSocketOption(socket);
 
-            send(socket, msg);
+            send(socket, msg, currentTimeMillis);
           } catch (SocketException exc) {
             if (this.logmon.isLoggable(BasicLevel.WARN))
               this.logmon.log(BasicLevel.WARN,
                               this.getName() + ", let msg in watchdog list",
                               exc);
             server.active = false;
-            server.last = System.currentTimeMillis();
+            server.last = currentTimeMillis;
             server.retry += 1;
             //  There is a connection problem, let the message in the
             // waiting list.
@@ -395,6 +438,10 @@ public class SimpleNetwork extends StreamNetwork {
           AgentServer.getTransaction().begin();
           //  Deletes the processed notification
           sendList.removeMessageAt(i); i--;
+// AF: A reprendre.
+//           // send ack in JGroups to delete msg
+//           if (jgroups != null)
+//             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
           AgentServer.getTransaction().commit();
@@ -403,7 +450,9 @@ public class SimpleNetwork extends StreamNetwork {
       }
     }
 
-    public void send(Socket socket, Message msg) throws IOException {
+    public void send(Socket socket,
+                     Message msg,
+                     long currentTimeMillis) throws IOException {
       int ret;
       InputStream is = null;
 
@@ -412,7 +461,7 @@ public class SimpleNetwork extends StreamNetwork {
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", write message");
-        nos.writeMessage(socket, msg);
+        nos.writeMessage(socket, msg, currentTimeMillis);
         // and wait the acknowledge.
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
@@ -494,10 +543,10 @@ public class SimpleNetwork extends StreamNetwork {
             Message msg = Message.alloc();
             int n = 0;
             do {
-              int count = is.read(iobuf, n, 29 - n);
+              int count = is.read(iobuf, n, Message.LENGTH +4 - n);
               if (count < 0) throw new EOFException();
               n += count;
-            } while (n < 29);
+            } while (n < (Message.LENGTH +4));
 
             // Reads boot timestamp of source server
             int boot = ((iobuf[0] & 0xFF) << 24) +
@@ -505,35 +554,17 @@ public class SimpleNetwork extends StreamNetwork {
               ((iobuf[2] & 0xFF) <<  8) +
               ((iobuf[3] & 0xFF) <<  0);
             
-            // Reads sender's AgentId
-            msg.from = new AgentId(
-              (short) (((iobuf[4] & 0xFF) <<  8) + (iobuf[5] & 0xFF)),
-              (short) (((iobuf[6] & 0xFF) <<  8) + (iobuf[7] & 0xFF)),
-              ((iobuf[8] & 0xFF) << 24) + ((iobuf[9] & 0xFF) << 16) +
-              ((iobuf[10] & 0xFF) <<  8) + ((iobuf[11] & 0xFF) <<  0));
-            // Reads adressee's AgentId
-            msg.to = new AgentId(
-              (short) (((iobuf[12] & 0xFF) <<  8) + (iobuf[13] & 0xFF)),
-              (short) (((iobuf[14] & 0xFF) <<  8) + (iobuf[15] & 0xFF)),
-              ((iobuf[16] & 0xFF) << 24) + ((iobuf[17] & 0xFF) << 16) +
-              ((iobuf[18] & 0xFF) <<  8) + ((iobuf[19] & 0xFF) <<  0));
-            // Reads source server id of message
-            msg.source = (short) (((iobuf[20] & 0xFF) <<  8) +
-                                  ((iobuf[21] & 0xFF) <<  0));
-            // Reads destination server id of message
-            msg.dest = (short) (((iobuf[22] & 0xFF) <<  8) +
-                                ((iobuf[23] & 0xFF) <<  0));
-            // Reads stamp of message
-            msg.stamp = ((iobuf[24] & 0xFF) << 24) +
-              ((iobuf[25] & 0xFF) << 16) +
-              ((iobuf[26] & 0xFF) <<  8) +
-              ((iobuf[27] & 0xFF) <<  0);
+            int idx = msg.readFromBuf(iobuf, 4);
+
             // Reads notification attributes
-            boolean persistent = ((iobuf[28] & 0x01) == 0x01) ? true : false;
-            boolean detachable = ((iobuf[28] & 0x10) == 0x10) ? true : false;
+            boolean persistent = ((iobuf[idx] & Message.PERSISTENT) == 0)?false:true;
+            boolean detachable = ((iobuf[idx] & Message.DETACHABLE) == 0)?false:true;
+
             // Reads notification object
             ois = new ObjectInputStream(is);
             msg.not = (Notification) ois.readObject();
+            if (msg.not.expiration > 0)
+              msg.not.expiration += System.currentTimeMillis();
             msg.not.persistent = persistent;
             msg.not.detachable = detachable;
             msg.not.detached = false;
@@ -586,13 +617,15 @@ public class SimpleNetwork extends StreamNetwork {
       super(256);
       oos = new ObjectOutputStream(this);
       count = 0;
-      buf[29] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[30] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[31] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[32] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+      buf[Message.LENGTH +4] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+      buf[Message.LENGTH +5] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+      buf[Message.LENGTH +6] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+      buf[Message.LENGTH +7] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
     }
 
-    void writeMessage(Socket sock, Message msg) throws IOException {
+    void writeMessage(Socket sock,
+                      Message msg,
+                      long currentTimeMillis) throws IOException {
       os = sock.getOutputStream();
 
       // Writes boot timestamp of source server
@@ -601,49 +634,25 @@ public class SimpleNetwork extends StreamNetwork {
       buf[2] = (byte) (getBootTS() >>>  8);
       buf[3] = (byte) (getBootTS() >>>  0);
 
-      // Writes sender's AgentId
-      buf[4] = (byte) (msg.from.from >>>  8);
-      buf[5] = (byte) (msg.from.from >>>  0);
-      buf[6] = (byte) (msg.from.to >>>  8);
-      buf[7] = (byte) (msg.from.to >>>  0);
-      buf[8] = (byte) (msg.from.stamp >>>  24);
-      buf[9] = (byte) (msg.from.stamp >>>  16);
-      buf[10] = (byte) (msg.from.stamp >>>  8);
-      buf[11] = (byte) (msg.from.stamp >>>  0);
-      // Writes adressee's AgentId
-      buf[12]  = (byte) (msg.to.from >>>  8);
-      buf[13]  = (byte) (msg.to.from >>>  0);
-      buf[14] = (byte) (msg.to.to >>>  8);
-      buf[15] = (byte) (msg.to.to >>>  0);
-      buf[16] = (byte) (msg.to.stamp >>>  24);
-      buf[17] = (byte) (msg.to.stamp >>>  16);
-      buf[18] = (byte) (msg.to.stamp >>>  8);
-      buf[19] = (byte) (msg.to.stamp >>>  0);
-      // Writes source server id of message
-      buf[20]  = (byte) (msg.source >>>  8);
-      buf[21]  = (byte) (msg.source >>>  0);
-      // Writes destination server id of message
-      buf[22] = (byte) (msg.dest >>>  8);
-      buf[23] = (byte) (msg.dest >>>  0);
-      // Writes stamp of message
-      buf[24] = (byte) (msg.stamp >>>  24);
-      buf[25] = (byte) (msg.stamp >>>  16);
-      buf[26] = (byte) (msg.stamp >>>  8);
-      buf[27] = (byte) (msg.stamp >>>  0);
+      int idx = msg.writeToBuf(buf, 4);
       // Writes notification attributes
-      buf[28] = (byte) ((msg.not.persistent?0x01:0) |
-                        (msg.not.detachable?0x10:0));
-      // Be careful, the stream header is hard-written in buf[29..32]
-      count = 33;
+      buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
+                           (msg.not.detachable?Message.DETACHABLE:0));
+
+      // Be careful, the stream header is hard-written in buf
+      count = Message.LENGTH +8;
 
       try {
+        if (msg.not.expiration > 0)
+          msg.not.expiration -= currentTimeMillis;
         oos.writeObject(msg.not);
         oos.reset();
         oos.flush();
-
         os.write(buf, 0, count);;
         os.flush();
       } finally {
+        if (msg.not.expiration > 0)
+          msg.not.expiration += currentTimeMillis;
         count = 0;
       }
     }
