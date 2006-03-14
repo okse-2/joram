@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -49,6 +49,46 @@ public class Notification implements Serializable, Cloneable {
    * message.
    */
   protected transient boolean detached = false;
+
+  /** 
+   * The expiration date for this notification.
+   *
+   * This field is handled by the network protocol in order to fit
+   * the time synchronisation problem.
+   */
+  long expiration = -1L;
+
+  /**
+   * Sets the expiration date for this notification.
+   *
+   * A value of -1L (default) indicates that the notification does
+   * not expire.
+   *
+   * @param expiration the expiration date for this notification.
+   */
+  public void setExpiration(long expiration) {
+    this.expiration = expiration;
+  }
+
+  /**
+   * Gets the notification's expiration value.
+   *
+   * This field is handled by the network protocol in order to fit
+   * the time synchronisation problem.
+   *
+   * If the expiration date is set to -1L (default), it indicates that
+   * the notification does not expire.
+   *
+   * When a notification's expiration time is reached, the MOM should
+   * discard it without any form of notification of message expiration.
+   * Agents should not receive messages that have expired; however, the
+   * MOM does not guarantee that this will not happen.
+   *
+   * @return The notification's expiration value.
+   */
+  public long getExpiration() {
+    return expiration;
+  }
 
   /**
    * If the notification is stored independently that its containing message
@@ -117,6 +157,7 @@ public class Notification implements Serializable, Cloneable {
     output.append(",detachable=").append(detachable);
     output.append(",detached=").append(detached);
     output.append(",context=").append(context);
+    output.append(",expiration=").append(expiration);
     output.append(")");
 
     return output.toString();
