@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.*;
  * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>
  * based on HTTP 1.1 protocol.
  */
-public class HttpNetwork extends StreamNetwork {
+public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   private InetAddress proxy = null;
   /**
    *  Hostname (or IP dotted address) of proxy host, if not defined there
@@ -73,6 +73,24 @@ public class HttpNetwork extends StreamNetwork {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   protected long activationPeriod = 10000L;
+
+  /**
+   * Gets the activationPeriod value.
+   *
+   * @return the activationPeriod value
+   */
+  public long getActivationPeriod() {
+    return activationPeriod;
+  }
+
+  /**
+   * Sets the activationPeriod value.
+   *
+   * @param activationPeriod	the activationPeriod value
+   */
+  public void setActivationPeriod(long activationPeriod) {
+    this.activationPeriod = activationPeriod;
+  }
 
   /**
    * Creates a new network component.
@@ -218,7 +236,9 @@ public class HttpNetwork extends StreamNetwork {
     return null;
   }
   
-  protected void sendRequest(Message msg, OutputStream os, int ack) throws Exception {
+  protected void sendRequest(Message msg,
+                             OutputStream os, int ack,
+                             long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append("PUT ");
@@ -233,7 +253,7 @@ public class HttpNetwork extends StreamNetwork {
       strbuf.append("-1");
     }
     strbuf.append(" HTTP/1.1");
-    nos.writeMessage(msg, ack);
+    nos.writeMessage(msg, ack, currentTimeMillis);
 
     if (proxy != null)
       strbuf.append("\r\nHost: ").append(server.getHostname());
@@ -297,12 +317,14 @@ public class HttpNetwork extends StreamNetwork {
     return from;
   }
 
-  protected void sendReply(Message msg, OutputStream os, int ack) throws Exception {
+  protected void sendReply(Message msg,
+                           OutputStream os, int ack,
+                           long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append("HTTP/1.1 200 OK\r\n");
 
-    nos.writeMessage(msg, ack);
+    nos.writeMessage(msg, ack, currentTimeMillis);
 
     strbuf.append("Date: ").append("Fri, 21 Feb 2003 14:30:51 GMT");
     strbuf.append("\r\n" +
@@ -479,7 +501,8 @@ public class HttpNetwork extends StreamNetwork {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", waiting message");
-	      msgout = qout.get(activationPeriod);
+
+              msgout = qout.get(activationPeriod);
 	    } catch (InterruptedException exc) {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
@@ -492,7 +515,33 @@ public class HttpNetwork extends StreamNetwork {
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendRequest: " + msgout + ", ack=" + ack);
 
-              sendRequest(msgout, os, ack);
+              if ((msgout != null) &&(msgout.not.expiration != -1))
+                logmon.log(BasicLevel.FATAL,
+                           getName() + ": AF YYY " + msgout.not);
+
+              long currentTimeMillis = System.currentTimeMillis();
+              do {
+                if ((msgout != null) &&
+                    (msgout.not.expiration > 0) &&
+                    (msgout.not.expiration < currentTimeMillis)) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG,
+                               getName() + ": AF removes expired notification XXX " +
+                               msgout.from + ", " + msgout.not);
+                  //  Suppress the processed notification from message queue,
+                  // and deletes it. It can be done outside of a transaction
+                  // and commited later (on next handle).
+                  qout.removeMessage(msgout);
+                  msgout.delete();
+                  msgout.free();
+
+                  msgout = qout.get(0L);
+                  continue;
+                }
+                break;
+              } while (true);
+
+              sendRequest(msgout, os, ack, currentTimeMillis);
               getReply(is);
 
               canStop = false;
@@ -592,18 +641,47 @@ public class HttpNetwork extends StreamNetwork {
             open(socket);
             
             short from = getRequest(is);
+            long currentTimeMillis = System.currentTimeMillis();
             do {
               canStop = false;
               ack = handle(msgout);
               canStop = true;
 
-              msgout = qout.getMessageTo(from);
+              do {
+                msgout = qout.getMessageTo(from);
 
+                if ((msgout != null) &&(msgout.not.expiration != -1))
+                  logmon.log(BasicLevel.FATAL,
+                             getName() + ": AF YYY " + msgout.not);
+
+                if ((msgout != null) &&
+                    (msgout.not.expiration > 0) &&
+                    (msgout.not.expiration < currentTimeMillis)) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG,
+                               getName() + ": AF removes expired notification " +
+                               msgout.from + ", " + msgout.not);
+                  //  Suppress the processed notification from message queue,
+                  // and deletes it. It can be done outside of a transaction
+                  // and commited later (on next handle).
+                  qout.removeMessage(msgout);
+                  msgout.delete();
+                  msgout.free();
+
+                  continue;
+                }
+                break;
+              } while (true);
+ 
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendReply: " + msgout);
 
-              sendReply(msgout, os, ack);
+              sendReply(msgout, os, ack, currentTimeMillis);
+
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ": AF WWW " + msgout);
+
               getRequest(is);
             } while (running);
           } catch (Exception exc) {
@@ -673,41 +751,22 @@ public class HttpNetwork extends StreamNetwork {
       msgAck = ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
         ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0);
 
-      if (msgLen > 36) {
+      if (msgLen > (Message.LENGTH +11)) {
         msg = Message.alloc();
-        readFully(is, 25);
+        readFully(is, Message.LENGTH);
 
-        // Reads sender's AgentId
-        msg.from = new AgentId(
-          (short) (((buf[0] & 0xFF) <<  8) + (buf[1] & 0xFF)),
-          (short) (((buf[2] & 0xFF) <<  8) + (buf[3] & 0xFF)),
-          ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) +
-          ((buf[6] & 0xFF) <<  8) + ((buf[7] & 0xFF) <<  0));
-        // Reads adressee's AgentId
-        msg.to = new AgentId(
-          (short) (((buf[8] & 0xFF) <<  8) + (buf[9] & 0xFF)),
-          (short) (((buf[10] & 0xFF) <<  8) + (buf[11] & 0xFF)),
-          ((buf[12] & 0xFF) << 24) + ((buf[13] & 0xFF) << 16) +
-          ((buf[14] & 0xFF) <<  8) + ((buf[15] & 0xFF) <<  0));
-        // Reads source server id of message
-        msg.source = (short) (((buf[16] & 0xFF) <<  8) +
-                              ((buf[17] & 0xFF) <<  0));
-        // Reads destination server id of message
-        msg.dest = (short) (((buf[18] & 0xFF) <<  8) +
-                            ((buf[19] & 0xFF) <<  0));
-        // Reads stamp of message
-        msg.stamp = ((buf[20] & 0xFF) << 24) +
-          ((buf[21] & 0xFF) << 16) +
-          ((buf[22] & 0xFF) <<  8) +
-          ((buf[23] & 0xFF) <<  0);
+        int idx = msg.readFromBuf(buf, 0);
         // Reads notification attributes
-        boolean persistent = ((buf[24] & 0x01) == 0x01) ? true : false;
-        boolean detachable = ((buf[24] & 0x10) == 0x10) ? true : false;
+        boolean persistent = ((buf[idx] & Message.PERSISTENT) == 0)?false:true;
+        boolean detachable = ((buf[idx] & Message.DETACHABLE) == 0)?false:true;
 
-        readFully(is, msgLen-37);
+        readFully(is, msgLen - (Message.LENGTH +12));
         // Reads notification object
         ObjectInputStream ois = new ObjectInputStream(this);
         msg.not = (Notification) ois.readObject();
+        if (msg.not.expiration > 0) {
+          msg.not.expiration += System.currentTimeMillis();
+        }
         msg.not.persistent = persistent;
         msg.not.detachable = detachable;
         msg.not.detached = false;
@@ -745,13 +804,14 @@ public class HttpNetwork extends StreamNetwork {
       super(256);
       oos = new ObjectOutputStream(this);
       count = 0;
-      buf[37] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[38] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[39] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[40] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+        buf[Message.LENGTH +12] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+        buf[Message.LENGTH +13] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+        buf[Message.LENGTH +14] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+        buf[Message.LENGTH +15] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
     }
 
-    void writeMessage(Message msg, int ack) throws IOException {
+    void writeMessage(Message msg, int ack,
+                      long currentTimeMillis) throws IOException {
       // Writes boot timestamp of source server
       buf[4] = (byte) (getBootTS() >>>  24);
       buf[5] = (byte) (getBootTS() >>>  16);
@@ -766,44 +826,25 @@ public class HttpNetwork extends StreamNetwork {
 
       count = 12;
       if (msg != null) {
-        // Writes sender's AgentId
-        buf[12] = (byte) (msg.from.from >>>  8);
-        buf[13] = (byte) (msg.from.from >>>  0);
-        buf[14] = (byte) (msg.from.to >>>  8);
-        buf[15] = (byte) (msg.from.to >>>  0);
-        buf[16] = (byte) (msg.from.stamp >>>  24);
-        buf[17] = (byte) (msg.from.stamp >>>  16);
-        buf[18] = (byte) (msg.from.stamp >>>  8);
-        buf[19] = (byte) (msg.from.stamp >>>  0);
-        // Writes adressee's AgentId
-        buf[20]  = (byte) (msg.to.from >>>  8);
-        buf[21]  = (byte) (msg.to.from >>>  0);
-        buf[22] = (byte) (msg.to.to >>>  8);
-        buf[23] = (byte) (msg.to.to >>>  0);
-        buf[24] = (byte) (msg.to.stamp >>>  24);
-        buf[25] = (byte) (msg.to.stamp >>>  16);
-        buf[26] = (byte) (msg.to.stamp >>>  8);
-        buf[27] = (byte) (msg.to.stamp >>>  0);
-        // Writes source server id of message
-        buf[28]  = (byte) (msg.source >>>  8);
-        buf[29]  = (byte) (msg.source >>>  0);
-        // Writes destination server id of message
-        buf[30] = (byte) (msg.dest >>>  8);
-        buf[31] = (byte) (msg.dest >>>  0);
-        // Writes stamp of message
-        buf[32] = (byte) (msg.stamp >>>  24);
-        buf[33] = (byte) (msg.stamp >>>  16);
-        buf[34] = (byte) (msg.stamp >>>  8);
-        buf[35] = (byte) (msg.stamp >>>  0);
+        int idx = msg.writeToBuf(buf, 12);
         // Writes notification attributes
-        buf[36] = (byte) ((msg.not.persistent?0x01:0) |
-                          (msg.not.detachable?0x10:0));
-        // Be careful, the stream header is hard-written in buf[29..32]
-        count = 41;
+        buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
+                             (msg.not.detachable?Message.DETACHABLE:0));
+        // Be careful, the stream header is hard-written in buf
+        count = (Message.LENGTH + 12 +4);
 
-        oos.writeObject(msg.not);
-        oos.reset();
-        oos.flush();
+        try {
+          if (msg.not.expiration > 0) {
+            msg.not.expiration -= currentTimeMillis;
+          }
+          oos.writeObject(msg.not);
+          oos.reset();
+          oos.flush();
+        } finally {
+          if ((msg.not != null) && (msg.not.expiration > 0)) {
+            msg.not.expiration += currentTimeMillis;
+          }
+        }
       }
       // Writes boot timestamp of source server
       buf[0] = (byte) (count >>>  24);
