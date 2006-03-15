@@ -224,9 +224,13 @@ public class A3CMLServer implements Serializable {
     }
     if (properties != null) {
       for (Enumeration e = properties.keys(); e.hasMoreElements(); ) {
-        Short sid = (Short) e.nextElement();
-        clone.properties.put(sid, 
-                             ((A3CMLProperty) properties.get(sid)).duplicate());
+        
+        String pName = (String) e.nextElement();
+        A3CMLProperty prop = (A3CMLProperty) properties.get(pName);
+        if (prop != null) {
+          if (clone.properties == null) clone.properties = new Hashtable();
+          clone.properties.put(pName, prop.duplicate());
+        }
       }
     }
     if (nat != null) {

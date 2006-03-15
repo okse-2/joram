@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2005 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,36 +20,43 @@
  * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
-package org.objectweb.joram.shared.admin;
+package org.objectweb.joram.mom.notifications;
 
-import org.objectweb.joram.shared.admin.SpecialAdmin;
+import fr.dyade.aaa.agent.AgentId;
 
+public class RegisteredDestNot 
+    extends fr.dyade.aaa.agent.Notification {
 
-public class AddQueueCluster extends SpecialAdmin {
-
-  public String joiningQueue;
-
-  /**
-   * Adds a queue to a cluster.
-   * <p>
-   *
-   * @param clusterQueue  Queue part of the cluster.
-   * @param joiningQueue  Queue joining the cluster.
-   *
-   */
-  public AddQueueCluster(String clusterQueue,
-                         String joiningQueue) {
-    super(clusterQueue);
-    this.joiningQueue = joiningQueue;
+  private AgentId reply;
+  private String name;
+  private AgentId dest = null;
+  
+  public RegisteredDestNot(String name,
+                           AgentId reply) {
+    this.name = name;
+    this.reply = reply;
+  }
+  
+  public final void setDestination(AgentId dest) {
+    this.dest = dest;
   }
 
+  public final AgentId getDestination() {
+    return dest;
+  }
+  
+  public final String getName() {
+    return name;
+  }
+
+  public final AgentId getReply() {
+    return reply;
+  }
+  
   public String toString() {
-    StringBuffer buff = new StringBuffer();
-    buff.append("AddQueueCluster (clusterQueue=");
-    buff.append(getDestId());
-    buff.append(",joiningQueue=");
-    buff.append(joiningQueue);
-    buff.append(')');
-    return buff.toString();
+    return '(' +
+      ",name=" + name +
+      ",dest=" + dest + 
+      ",reply=" + reply + ')';
   }
 }
