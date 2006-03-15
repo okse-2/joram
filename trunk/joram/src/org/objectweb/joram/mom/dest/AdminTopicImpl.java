@@ -224,6 +224,8 @@ public class AdminTopicImpl extends TopicImpl {
       doReact((RegisterTmpDestNot)not);
     else if (not instanceof RegisterDestNot)
       doReact((RegisterDestNot)not);
+    else if (not instanceof RegisteredDestNot)
+      doReact(from, (RegisteredDestNot)not);
     else
       super.react(from, not);
   }
@@ -344,7 +346,8 @@ public class AdminTopicImpl extends TopicImpl {
   }
 
   private void doReact(RegisterDestNot not) {
-    if (destinationsTable.contains(not.getName()))
+    String name = not.getName();
+    if (name == null || destinationsTable.contains(name))
       return;
     
     DestinationDesc destDesc = 
@@ -353,7 +356,15 @@ public class AdminTopicImpl extends TopicImpl {
         not.getName(),
         not.getClassName(),
         not.getType());
-    destinationsTable.put(not.getName(), destDesc);
+    destinationsTable.put(name, destDesc);
+  }
+  
+  private void doReact(AgentId from, RegisteredDestNot not) {
+    DestinationDesc destDesc = 
+      (DestinationDesc) destinationsTable.get(not.getName());
+    if (destDesc != null)
+      not.setDestination(destDesc.getId());
+    Channel.sendTo(not.getReply(), not);
   }
 
   /**

@@ -139,7 +139,7 @@ public class ClusterQueueImpl extends QueueImpl {
   /** 
    * use to add or remove ClusterQueue to cluster. 
    */
-  protected Object specialAdminProcess(SpecialAdminRequest not) 
+  public Object specialAdminProcess(SpecialAdminRequest not) 
     throws RequestException {
 
     Object ret = null;
