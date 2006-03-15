@@ -38,29 +38,52 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Starts a TCP entry point for MOM clients.
  */
 public class TcpProxyService {
+  /**
+   * Name the property that allow to fix the TCP SO_TIMEOUT property for the
+   * client's connections.
+   */
   public static final String SO_TIMEOUT_PROP = 
       "org.objectweb.joram.mom.proxies.tcp.soTimeout";
 
+  /**
+   * Default value for the TCP SO_TIMEOUT property.
+   */
   public static final int DEFAULT_SO_TIMEOUT = 10000;
 
+  /**
+   * Name the property that allow to fix the pool size for the
+   * connection's listener.
+   */
   public static final String POOL_SIZE_PROP = 
       "org.objectweb.joram.mom.proxies.tcp.poolSize";
 
+  /**
+   * Default value for the pool size.
+   */
   public static final int DEFAULT_POOL_SIZE = 1;
 
+  /**
+   * Name the property that allow to fix the TCP BACKLOG property for the
+   * client's connections.
+   */
   public static final String BACKLOG_PROP = 
       "org.objectweb.joram.mom.proxies.tcp.backlog";
 
-  public static final int DEFAULT_BACKLOG = 50;
+  /**
+   * Default value for the TCP BACKLOG property.
+   */
+  public static final int DEFAULT_BACKLOG = 10;
 
+  /**
+   * Default value for the TCP port of the listen socket.
+   */
   public static final int DEFAULT_PORT = 16010;
 
   public static final String DEFAULT_BINDADDRESS = "0.0.0.0"; // all
 
 
   /**
-   * The proxy service reference
-   * (used to stop it).
+   * The proxy service reference (used to stop it).
    */
   protected static TcpProxyService proxyService;
 
@@ -77,12 +100,11 @@ public class TcpProxyService {
   }
 
   /**
-   * Initializes the TCP entry point by creating a
-   * server socket listening to the specified port.
+   * Initializes the TCP entry point by creating a server socket listening
+   * to the specified port.
    * 
    * @param args stringified listening port
-   * @param firstTime <code>true</code> 
-   * when the agent server starts.   
+   * @param firstTime <code>true</code>  when the agent server starts.   
    */
   public static void init(String args, boolean firstTime) 
     throws Exception {
@@ -135,9 +157,7 @@ public class TcpProxyService {
    */ 
   public static void stopService() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "TcpProxyService.stop()");
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpProxyService.stop()");
     proxyService.stop();
   }
 
@@ -162,12 +182,11 @@ public class TcpProxyService {
                          int timeout) {
     this.serverSocket = serverSocket;
     this.connections = new Vector();
-    connectionListeners = 
-      new TcpConnectionListener[poolSize];
+    connectionListeners = new TcpConnectionListener[poolSize];
     for (int i = 0; i < poolSize; i++) {
-      connectionListeners[i] = 
-        new TcpConnectionListener(
-          serverSocket, this, timeout);
+      connectionListeners[i] = new TcpConnectionListener(serverSocket,
+                                                         this,
+                                                         timeout);
     }
   }
 
