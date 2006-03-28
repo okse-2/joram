@@ -56,9 +56,10 @@ public class Publisher {
     TextMessage msg = sess.createTextMessage();
 
     int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 1000; i++) {
       msg.setText("Msg " + i);
       pub.send(msg);
+      Thread.sleep(250L);
       System.out.println("publish message " + i);
     }
   }

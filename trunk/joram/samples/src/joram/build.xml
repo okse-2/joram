@@ -510,7 +510,7 @@
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="0 100"/>
+      <arg line="0 1000"/>
     </java>
   </target>
 
@@ -519,7 +519,7 @@
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="1 100"/>
+      <arg line="1 1000"/>
     </java>
   </target>
 
@@ -528,7 +528,7 @@
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="2 100"/>
+      <arg line="2 1000"/>
     </java>
   </target>
 

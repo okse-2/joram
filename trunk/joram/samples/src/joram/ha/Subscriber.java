@@ -60,7 +60,6 @@ public class Subscriber {
 
     System.in.read();
 
-
     System.out.println();
     System.out.println("Subscriber closed.");
   }
