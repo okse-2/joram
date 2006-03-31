@@ -38,7 +38,7 @@ public class Producer {
 
     int nbMsg = new Integer(args[1]).intValue();
 
-    int sleep = Integer.getInteger("sleep", 500).intValue();
+    int sleep = Integer.getInteger("sleep", 0).intValue();
     int nbMsgSleep = Integer.getInteger("nbMsgSleep", 10).intValue();
 
     System.out.println();
