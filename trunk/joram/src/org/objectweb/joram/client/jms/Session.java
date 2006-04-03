@@ -27,8 +27,6 @@ import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
 import org.objectweb.joram.shared.client.*;
 
-import fr.dyade.aaa.util.TimerTask;
-
 import java.util.*;
 
 import javax.jms.JMSException;

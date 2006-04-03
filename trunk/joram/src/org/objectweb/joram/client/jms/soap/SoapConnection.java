@@ -23,9 +23,17 @@
  */
 package org.objectweb.joram.client.jms.soap;
 
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Timer;
+import java.util.Vector;
+import java.util.Hashtable;
+import java.lang.reflect.Method;
+
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.apache.soap.Constants;
 import org.apache.soap.Fault;
@@ -37,16 +45,9 @@ import org.apache.soap.rpc.Parameter;
 import org.apache.soap.rpc.Response;
 import org.apache.soap.util.xml.QName;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.lang.reflect.Method;
-
-import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
+import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -61,6 +62,10 @@ public class SoapConnection
     implements RequestChannel { 
   /** The user's name */
   private String name;
+  
+  private String password;
+  
+  private FactoryParameters factParams;
 
   /** URL of the SOAP service this object communicates with. */
   private URL serviceUrl = null;
@@ -83,11 +88,20 @@ public class SoapConnection
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public SoapConnection(FactoryParameters factParams, 
-                        String name,
-                        String password) throws JMSException
+  public SoapConnection(FactoryParameters factParams2, 
+                        String name2,
+                        String password2) throws JMSException
   {
-    this.name = name;
+    factParams = factParams2;
+    name = name2;
+    password = password2;
+  }
+  
+  public void setTimer(Timer timer) {
+    // No timer is useful
+  }
+  
+  public void connect() throws Exception {
     connect(factParams, name, password);
 
     // Building the Call object for sending the requests:

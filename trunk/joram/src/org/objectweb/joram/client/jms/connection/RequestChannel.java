@@ -22,10 +22,16 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.util.Timer;
+
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 
 public interface RequestChannel {
+  
+  public void setTimer(Timer timer);
+  
+  public void connect() throws Exception;
 
   public void send(AbstractJmsRequest obj)
     throws Exception;

@@ -117,7 +117,14 @@ public class HATcpConnection
       }
     } else {
       throw new javax.jms.JMSException("Unknown protocol:" + protocol);
-    }    
+    }
+  }
+  
+  public void setTimer(Timer timer) {
+    tcpClient.setTimer(timer);
+  }
+  
+  public void connect() throws Exception {
     tcpClient.connect();
   }
 

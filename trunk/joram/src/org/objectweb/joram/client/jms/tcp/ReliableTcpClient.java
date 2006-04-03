@@ -28,6 +28,7 @@ import fr.dyade.aaa.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.Timer;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
@@ -72,8 +73,14 @@ public class ReliableTcpClient {
    * of connectingTimer and cnxPendingTimer from the connection parameters.
    */
   private int reconnectTimeout = 0;
+  
+  private Timer timer;
 
   public ReliableTcpClient() {}
+  
+  public void setTimer(Timer timer2) {
+    timer = timer2;
+  }
 
   public void init(FactoryParameters params, 
                    String name,
@@ -276,7 +283,7 @@ public class ReliableTcpClient {
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, " -> key = " + name + ',' + key);
         connection = 
-          new ReliableTcpConnection();
+          new ReliableTcpConnection(timer);
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, " -> init reliable connection");
