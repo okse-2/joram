@@ -47,11 +47,11 @@ public class ReliableTcpConnection {
 
   private int windowSize;
 
-  private long inputCounter;
+  private volatile long inputCounter;
 
   private long outputCounter;
 
-  private int unackCounter;
+  private volatile int unackCounter;
 
   private Vector pendingMessages;
 
@@ -66,8 +66,10 @@ public class ReliableTcpConnection {
   private Object outputLock;
 
   private int status;
+  
+  private java.util.Timer timer;
 
-  public ReliableTcpConnection() {    
+  public ReliableTcpConnection(java.util.Timer timer2) {    
     windowSize = Integer.getInteger(
       WINDOW_SIZE_PROP_NAME,
       DEFAULT_WINDOW_SIZE).intValue();
@@ -76,12 +78,14 @@ public class ReliableTcpConnection {
         BasicLevel.INFO, 
         "ReliableTcpConnection.windowSize=" + 
         windowSize);
+    timer = timer2;
     inputCounter = -1;
     outputCounter = 0;
     unackCounter = 0;
     pendingMessages = new Vector();
     inputLock = new Object();
     outputLock = new Object();
+    
     setStatus(INIT);
   }
 
@@ -164,7 +168,8 @@ public class ReliableTcpConnection {
   private void doSend(long id, long ackId, Object obj) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpConnection.doSend(" + id + ',' + obj + ')');
+                 "ReliableTcpConnection.doSend(" + id + 
+                 ',' + ackId + ',' + obj + ')');
     synchronized (outputLock) {
       nos.send(id, ackId, obj);
       unackCounter = 0;
@@ -264,12 +269,17 @@ public class ReliableTcpConnection {
             " -> id = " + messageId);
         ackPendingMessages(ackId);
         if (obj != null) {
-          synchronized (outputLock) {
-            if (unackCounter < windowSize) {
-              unackCounter++;
-            } else {
-              doSend(-1, inputCounter, null);
-            }
+          if (unackCounter < windowSize) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(
+                BasicLevel.DEBUG, " -> unackCounter++");
+            unackCounter++;
+          } else {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(
+                BasicLevel.DEBUG, " -> schedule");
+            AckTimerTask ackTimertask = new AckTimerTask();
+            timer.schedule(ackTimertask, 0);
           }
           if (messageId > inputCounter) {
             inputCounter = messageId;
@@ -321,6 +331,21 @@ public class ReliableTcpConnection {
       return '(' + super.toString() + 
         ",id=" + id + 
         ",object=" + object + ')';
+    }
+  }
+
+  class AckTimerTask extends java.util.TimerTask {
+    public void run() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
+          BasicLevel.DEBUG, "AckTimerTask.run()");
+      try {
+        doSend(-1, inputCounter, null);
+        cancel();
+      } catch (IOException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", exc);
+      }
     }
   }
 }

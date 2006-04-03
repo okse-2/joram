@@ -23,18 +23,16 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-
-import java.io.*;
-import java.net.*;
+import java.util.Timer;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
 
 import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -127,9 +125,15 @@ public class TcpConnection
     tcpClient.addServerAddress(
       params.getHost(),
       params.getPort());
+  }
+  
+  public void setTimer(Timer timer) {
+    tcpClient.setTimer(timer);
+  }
+  
+  public void connect() throws Exception {
     tcpClient.connect();
   }
-
   
   /**
    * Sending a JMS request through the TCP connection.

@@ -98,10 +98,14 @@ public class HALocalConnection
     }
   }
 
+  private String userName;
+  
+  private String password;
+  
   private LocalConnection localConnection;
 
   public HALocalConnection(
-    String userName, String password) throws JMSException {
+    String userName2, String password2) throws JMSException {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
@@ -112,6 +116,15 @@ public class HALocalConnection
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         " -> create the local connection");
+    userName = userName2;
+    password = password2;
+  }
+  
+  public void setTimer(Timer timer) {
+    // No timer is useful
+  }
+  
+  public void connect() throws Exception {
     localConnection = new LocalConnection(userName, password);
   }
   
@@ -124,7 +137,7 @@ public class HALocalConnection
     throws Exception {
     return localConnection.receive();
   }
-
+  
   public void close() {
     localConnection.close();
   }

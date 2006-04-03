@@ -22,24 +22,34 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.mom.notifications.*;
+import java.util.Timer;
+
+import javax.jms.JMSException;
+
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.proxies.FlowControl;
+import org.objectweb.joram.mom.proxies.OpenConnectionNot;
+import org.objectweb.joram.mom.proxies.RequestNot;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.ProducerMessages;
 
-import fr.dyade.aaa.agent.*;
-
-import fr.dyade.aaa.util.Queue;
-
-import javax.jms.*;
-
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Queue;
 
 public class LocalConnection 
     implements RequestChannel {
+  
+  private String userName;
+  
+  private String password;
 
   private AgentId proxyId;
 
@@ -48,18 +58,24 @@ public class LocalConnection
   private Queue replyQueue;
 
   public LocalConnection(
-    String userName, String password) throws JMSException {
+    String userName2, String password2) throws JMSException {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
-        "LocalConnection.<init>(" + userName + ',' + password + ')');
-
-    GetProxyIdNot gpin = new GetProxyIdNot(
-      userName, password);
+        "LocalConnection.<init>(" + userName2 + ',' + password2 + ')');
+    userName = userName2;
+    password = password2;
+  }
+  
+  public void setTimer(Timer timer) {
+    // No timer is useful
+  }
+  
+  public void connect() throws Exception {
+    GetProxyIdNot gpin = new GetProxyIdNot(userName, password);
     try {
-      gpin.invoke(new AgentId(AgentServer.getServerId(),
-                              AgentServer.getServerId(),
-                              AgentId.JoramAdminStamp));
+      gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer
+          .getServerId(), AgentId.JoramAdminStamp));
       proxyId = gpin.getProxyId();
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -70,13 +86,12 @@ public class LocalConnection
     OpenConnectionNot ocn = new OpenConnectionNot(false, 0);
     try {
       ocn.invoke(proxyId);
-      replyQueue = (Queue)ocn.getReplyQueue();
+      replyQueue = (Queue) ocn.getReplyQueue();
       key = ocn.getKey();
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
-      JMSException jmse = new JMSException(
-        exc.getMessage());
+      JMSException jmse = new JMSException(exc.getMessage());
       jmse.setLinkedException(exc);
       throw jmse;
     }

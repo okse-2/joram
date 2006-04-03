@@ -22,6 +22,18 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+
+import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.MomExceptionReply;
@@ -32,20 +44,7 @@ import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
 import org.objectweb.joram.shared.excepts.MomException;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import javax.jms.InvalidDestinationException;
-import javax.jms.IllegalStateException;
-import javax.jms.JMSSecurityException;
-import javax.jms.JMSException;
-
-import fr.dyade.aaa.util.Timer;
-
 import org.objectweb.joram.client.jms.JoramTracing;
-import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class RequestMultiplexer {
@@ -99,11 +98,21 @@ public class RequestMultiplexer {
     this.cnxId = cnx.toString();
     requestsTable = new Hashtable();
     requestCounter = 0;
+    
+    timer = new Timer();
+    channel.setTimer(timer);
+    try {
+      channel.connect();
+    } catch (Exception exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+      throw new JMSException(exc.toString());
+    }
+    
     demtpx = new DemultiplexerDaemon();
     demtpx.start();
     setStatus(Status.OPEN);
     
-    timer = new Timer();
     if (heartBeat > 0) {
       heartBeatTask = new HeartBeatTask(heartBeat);
       lastRequestDate = System.currentTimeMillis();
@@ -384,7 +393,7 @@ public class RequestMultiplexer {
       exceptionListener.onException(jmsExc);
   }
 
-  public void schedule(fr.dyade.aaa.util.TimerTask task,
+  public void schedule(TimerTask task,
                        long period) {
     if (timer != null) {
       try {
@@ -475,7 +484,7 @@ public class RequestMultiplexer {
    * the specified timeout ('cnxPendingTimer' from the
    * factory parameters).
    */
-  private class HeartBeatTask extends fr.dyade.aaa.util.TimerTask {    
+  private class HeartBeatTask extends TimerTask {    
 
     private long heartBeat;
 
@@ -486,10 +495,16 @@ public class RequestMultiplexer {
     public void run() {
       try {
         long date = System.currentTimeMillis();        
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                     this + ".run() - begin");
         if ((date - lastRequestDate) > heartBeat) {
           sendRequest(new PingRequest());
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                       this + ".run() - end");
         }
-        start();
+//         start();
       } catch (Exception exc) {
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
           JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
@@ -497,7 +512,7 @@ public class RequestMultiplexer {
     }
 
     public void start() throws Exception {
-      timer.schedule(this, heartBeat);
+      timer.schedule(this, heartBeat, heartBeat);
     }
   }
 }
