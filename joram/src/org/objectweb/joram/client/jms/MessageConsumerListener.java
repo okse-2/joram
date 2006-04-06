@@ -181,23 +181,25 @@ class MessageConsumerListener implements ReplyListener {
       session.getRequestMultiplexer().abortRequest(requestId);
 
       if (lazyAck) {
-	  acknowledge(0);
+        acknowledge(0);
       }
 
       setStatus(Status.CLOSE);
     }
     
-    // Out of the synchronized block because it could 
-    // lead to a dead lock with 
-    // the connection driver thread calling replyReceived.
-    ConsumerUnsetListRequest unsetLR = 
-      new ConsumerUnsetListRequest(
-        consumer.queueMode);
-    unsetLR.setTarget(consumer.targetName);
     if (consumer.queueMode) {
+      // Out of the synchronized block because it could
+      // lead to a dead lock with
+      // the connection driver thread calling replyReceived.
+      ConsumerUnsetListRequest unsetLR = new ConsumerUnsetListRequest(
+          consumer.queueMode);
+      unsetLR.setTarget(consumer.targetName);
       unsetLR.setCancelledRequestId(requestId);
+      session.syncRequest(unsetLR);
     }
-    session.syncRequest(unsetLR);
+    // else useless for a topic 
+    // because the subscription
+    // is deleted (see MessageConsumer.close())
   }
 
   private void acknowledge(int threshold) {
