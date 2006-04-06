@@ -23,20 +23,24 @@
  */
 package org.objectweb.joram.client.jms;
 
-import org.objectweb.joram.shared.excepts.*;
+import java.util.Vector;
+
+import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
-import org.objectweb.joram.shared.client.*;
-import fr.dyade.aaa.util.*;
-
-import java.util.*;
-
-import javax.jms.InvalidDestinationException;
-import javax.jms.IllegalStateException;
-import javax.jms.JMSSecurityException;
-import javax.jms.JMSException;
-
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.CnxConnectReply;
+import org.objectweb.joram.shared.client.CnxConnectRequest;
+import org.objectweb.joram.shared.client.CnxStartRequest;
+import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -116,6 +120,11 @@ public class Connection implements javax.jms.Connection {
 
   /** Vector of the connection's consumers. */
   private Vector cconsumers;
+  
+  /**
+   * Used to synchronize the method close()
+   */
+  private Closer closer;
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -141,6 +150,9 @@ public class Connection implements javax.jms.Connection {
     requestor = new Requestor(mtpx);
     sessions = new Vector();
     cconsumers = new Vector();
+    
+    closer = new Closer();
+    
     setStatus(Status.STOP);
 
     // Requesting the connection key and proxy identifier:
@@ -433,8 +445,8 @@ public class Connection implements javax.jms.Connection {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         newTrace(".close()"));
-
-    new Closer().close();
+    
+    closer.close();
   }
 
   /**

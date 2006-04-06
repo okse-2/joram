@@ -34,17 +34,16 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
-import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
 import org.objectweb.joram.shared.excepts.MomException;
-
-import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class RequestMultiplexer {
@@ -52,7 +51,7 @@ public class RequestMultiplexer {
   private static class Status {
     public static final int OPEN = 0;
     public static final int CLOSE = 1;
-
+    
     private static final String[] names = {
       "OPEN", "CLOSE"};
 
@@ -65,7 +64,7 @@ public class RequestMultiplexer {
 
   private String cnxId;
 
-  private int status;
+  private volatile int status;
 
   private RequestChannel channel;
 
@@ -89,6 +88,11 @@ public class RequestMultiplexer {
    * The date of the last request
    */
   private long lastRequestDate;
+  
+  /**
+   * Indicates whether the 
+   */
+  private volatile boolean closing;
 
   public RequestMultiplexer(Connection cnx,
                             RequestChannel channel,
@@ -425,33 +429,43 @@ public class RequestMultiplexer {
                 ((org.objectweb.joram.shared.messages.Message)
                  msgs.elementAt(i)).setReadOnly();
             }
-          } catch (JMSException exc) {
-            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                         "Exception during receive", exc);
-            RequestMultiplexer.this.close();
-            try {
-              RequestMultiplexer.this.cnx.close();
-            } catch (JMSException exc2) {
-              if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-                JoramTracing.dbgClient.log(BasicLevel.WARN,
-                                           "Error during close", exc2);
-            }
-            onException(exc);
-            break loop;
           } catch (Exception exc) {
             if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
               JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                          "Exception during receive", exc);
-            RequestMultiplexer.this.close();
-            try {
-              RequestMultiplexer.this.cnx.close();
-            } catch (JMSException exc2) {
-              if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-                JoramTracing.dbgClient.log(BasicLevel.WARN,
-                                           "Error during close", exc2);
+            // Check if the connection is not already
+            // closed (the exception may occur as a consequence
+            // of a closure or at the same time as an independant
+            // close call).
+            if (! isClosed()) {
+              // The connection close() must be
+              // called by another thread. Calling it with
+              // this thread (demultiplexer daemon) could
+              // lead to a deadlock if another thread called
+              // close() just before.
+              new Thread() {
+                public void run() {
+                  try {
+                    RequestMultiplexer.this.cnx.close();
+                  } catch (JMSException exc2) {
+                    if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+                      JoramTracing.dbgClient.log(BasicLevel.WARN,
+                          "Error during close", exc2);
+                  }
+                }
+              }.start();
             }
-            onException(new IllegalStateException(exc.getMessage()));
+            // Else it means that the connection is
+            // already closed
+            
+            JMSException jmsExc;
+            if (exc instanceof JMSException) {
+              jmsExc = (JMSException) exc;
+            } else {
+              jmsExc = new IllegalStateException(exc.getMessage());
+            }
+            onException(jmsExc);
+            
             break loop;
           }
           canStop = false; 
@@ -495,16 +509,10 @@ public class RequestMultiplexer {
     public void run() {
       try {
         long date = System.currentTimeMillis();        
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                     this + ".run() - begin");
         if ((date - lastRequestDate) > heartBeat) {
           sendRequest(new PingRequest());
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                       this + ".run() - end");
         }
-//         start();
+        start();
       } catch (Exception exc) {
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
           JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
@@ -512,7 +520,7 @@ public class RequestMultiplexer {
     }
 
     public void start() throws Exception {
-      timer.schedule(this, heartBeat, heartBeat);
+      timer.schedule(this, heartBeat);
     }
   }
 }

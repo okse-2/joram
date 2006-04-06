@@ -280,6 +280,12 @@ public class Session implements javax.jms.Session {
    * for the message listeners.
    */
   private boolean passiveMsgInput;
+  
+  /**
+   * Used to synchronize the
+   * method close()
+   */
+  private Closer closer;
 
   /**
    * Opens a session.
@@ -322,6 +328,8 @@ public class Session implements javax.jms.Session {
     repliesIn = new fr.dyade.aaa.util.Queue();
     sendings = new Hashtable();
     deliveries = new Hashtable();
+    
+    closer = new Closer();
 
     // If the session is transacted and the transactions limited by a timer,
     // a closing task might be useful.
@@ -1058,7 +1066,7 @@ public class Session implements javax.jms.Session {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "Session.close()");
-    new Closer().close();
+    closer.close();
   }
 
   /**
@@ -1126,6 +1134,9 @@ public class Session implements javax.jms.Session {
       }
     }
     
+    // This is now in removeMessageListener
+    // called by MessageConsumer.close()
+    // (see above)
 //     try {
 //       repliesIn.stop();
 //     } catch (InterruptedException iE) {}
@@ -1639,16 +1650,16 @@ public class Session implements javax.jms.Session {
     
     // This may block if a message listener
     // is currently receiving a message (onMessage is called)
-    // so we have to go out of the synchronized block.
+    // so we have to be out of the synchronized block.
     mcl.close();
     
     synchronized (this) {
       listenerCount--;
-      if (status == Status.START &&
-          listenerCount == 0) {
+      if (status == Status.START && listenerCount == 0) {
         try {
           repliesIn.stop();
-        } catch (InterruptedException iE) {}
+        } catch (InterruptedException iE) {
+        }
         // All the message listeners have been closed
         // so we can call doStop() in a synchronized
         // block. No deadlock possible.

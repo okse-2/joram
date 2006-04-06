@@ -23,17 +23,15 @@
  */
 package org.objectweb.joram.client.jms;
 
-import org.objectweb.joram.shared.client.*;
-import fr.dyade.aaa.util.TimerTask;
-
-import java.util.Vector;
-
-import javax.jms.InvalidSelectorException;
-import javax.jms.InvalidDestinationException;
 import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
+import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
+import org.objectweb.joram.shared.client.ConsumerSubRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -102,6 +100,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * OPEN, CLOSE
    */
   private int status;
+  
+  /**
+   * Used to synchonize the 
+   * method close()
+   */
+  private Closer closer;
 
   /**
    * Constructs a consumer.
@@ -181,6 +185,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     this.sess = sess;
     this.dest = dest;
     this.selector = selector;
+    
+    closer = new Closer();
 
     setStatus(Status.OPEN);
   }
@@ -359,7 +365,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "MessageConsumer.close()");
-    new Closer().close();
+    closer.close();
   }
 
   /**
@@ -380,9 +386,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       if (status == Status.CLOSE) 
         return;
     }
-
+    
     if (! queueMode) {
-      // 2- Remove the subscription.
+      // For a topic, remove the subscription.
       if (durableSubscriber) {
         sess.syncRequest(
           new ConsumerCloseSubRequest(targetName));
@@ -391,15 +397,14 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
           new ConsumerUnsubRequest(targetName));
       }
     }
-
+    
     sess.closeConsumer(this);
-
+    
     if (mcl != null) {
-      // 1- Stop and unsubscribe 
-      // the listener.
+      // Stop the listener.
       sess.removeMessageListener(mcl, false);
     }
-
+    
     setStatus(Status.CLOSE);
   }
 
