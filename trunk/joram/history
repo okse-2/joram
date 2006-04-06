@@ -1,4 +1,33 @@
 ###############################################################################
+# 2005/03/06 | Joram 4.3.15 tag.
+###############################################################################
++==============================================================================
+| 2006/04/06 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bug in org.objectweb.joram.mom.proxies.tcp.TcpReader (canStop not
+   properly assigned -> InterruptedIOException raised when stopping Joram)
+2- Fix synchronization of close() in Connection, Session and MessageConsumer
+   (org.objectweb.joram.client.jms): instantiate closer in constructor.
+   org.objectweb.joram.client.jms.connection.RequestMultiplexer is also 
+   fixed in order to prevent deadlock between concurrent call to 
+   Connection.close()
+3- Fix bug in org.objectweb.joram.client.jms.MessageConsumerListener: sending
+   ConsumerUnsetListRequest is useless for a Topic and raises an 
+   InvalidDestinationException.
+   Comment the request reaction in ProxyImpl.
++==============================================================================
+| 2006/04/03 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Report a configuration feature in JNDI: Allow to set SO_TIMEOUT TCP parameter
+on the client's socket throught fr.dyade.aaa.jndi2.socketTimeOut (by default
+0 for an infinite timeout).
+ Fix a potential deadlock in acknowledge handling between client and server
+reader anad writer thread.
++==============================================================================
+| 2006/03/28 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Fix bug in fr.dyade.aaa.util.ReliableTcpConnection (deadlock with server)
+###############################################################################
 # 2005/03/14 | Joram 4.3.14 tag.
 ###############################################################################
 +==============================================================================
