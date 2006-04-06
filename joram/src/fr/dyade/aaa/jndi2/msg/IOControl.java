@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent DT
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.msg;
 
@@ -26,6 +26,23 @@ import java.io.*;
 import java.net.*;
 
 public class IOControl {
+  /**
+   *  This property allow to enable/disable SO_TIMEOUT with the specified
+   * timeout in milliseconds.
+   */
+  public static final String SOCKET_SOTIMEOUT = "fr.dyade.aaa.jndi2.socketTimeOut";
+
+  /**
+   *  Enable/disable SO_TIMEOUT with the specified timeout in milliseconds.
+   * The default value is zero which means the option is disabled.
+   *  This value can be adjusted by setting the environment property
+   * <code>fr.dyade.aaa.jndi2.socketTimeOut</code>.
+   *  With this option set to a non-zero timeout, a read() call on the
+   * InputStream associated with this Socket will block for only this amount
+   * of time.
+   */
+  private static int socketTimeOut =
+      Integer.getInteger(SOCKET_SOTIMEOUT, 0).intValue();
 
   private Socket socket;
 
@@ -36,7 +53,7 @@ public class IOControl {
   public IOControl(Socket socket) throws IOException {
     this.socket = socket;
     socket.setTcpNoDelay(true);
-    socket.setSoTimeout(0);
+    socket.setSoTimeout(socketTimeOut);
     socket.setSoLinger(true, 1000);
     nos = new NetOutputStream(socket);
     bis = new BufferedInputStream(socket.getInputStream());
