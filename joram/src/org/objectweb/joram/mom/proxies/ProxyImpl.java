@@ -910,7 +910,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         new AbortReceiveRequest(activeCtx.getId(), 
                                 req.getRequestId(),
                                 req.getCancelledRequestId()));
-    } else {
+    }
+    
+      // This never happens. Useless for a topic because
+      // the subscription is deleted before.
+    /* else {
       // If the listener was listening to a topic, unsetting the listener.
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
@@ -921,6 +925,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
       sub.unsetListener();
     }
+    */
+    
     // Acknowledging the request:
     doReply(new ServerReply(req));
   }
