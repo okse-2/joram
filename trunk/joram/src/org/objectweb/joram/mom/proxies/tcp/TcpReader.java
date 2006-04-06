@@ -23,49 +23,49 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.shared.client.*;
+import java.io.IOException;
+
 import org.objectweb.joram.mom.MomTracing;
-
-import java.io.*;
-import java.net.*;
-
-import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.*;
-
+import org.objectweb.joram.mom.proxies.CloseConnectionNot;
+import org.objectweb.joram.mom.proxies.FlowControl;
+import org.objectweb.joram.mom.proxies.ProxyMessage;
+import org.objectweb.joram.mom.proxies.ProxyMessageNot;
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Daemon;
+
 /**
- * The activity responsible for reading the requests
- * from the socket and invoke the user's proxy.
+ * The activity responsible for reading the requests from the socket and invoke
+ * the user's proxy.
  */
 public class TcpReader extends Daemon {
 
   /**
-   * The TCP connection that started
-   * this reader.
+   * The TCP connection that started this reader.
    */
   private TcpConnection tcpConnection;
 
   private IOControl ioctrl;
-  
+
   private AgentId proxyId;
-  
+
   private boolean closeConnection;
 
   /**
    * Creates a new reader.
-   *
-   * @param sock the socket to read
-   * @param userConnection the connection 
-   * with the user's proxy
-   * @param tcpConnection the TCP connection
+   * 
+   * @param sock
+   *          the socket to read
+   * @param userConnection
+   *          the connection with the user's proxy
+   * @param tcpConnection
+   *          the TCP connection
    */
-  public TcpReader(IOControl ioctrl,
-		   AgentId proxyId,
-                   TcpConnection tcpConnection,
-                   boolean closeConnection) 
-    throws IOException {
+  public TcpReader(IOControl ioctrl, AgentId proxyId,
+      TcpConnection tcpConnection, boolean closeConnection) throws IOException {
     super("tcpReader");
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
@@ -75,52 +75,48 @@ public class TcpReader extends Daemon {
 
   public void run() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpReader.run()");
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.run()");
     try {
       while (running) {
         ProxyMessage msg = ioctrl.receive();
-
+        canStop = false;
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(
-            BasicLevel.DEBUG, "TcpReader reads msg: " + msg);
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
+              + msg);
 
-        Channel.sendTo(
-          proxyId, 
-          new ProxyMessageNot(tcpConnection.getKey(), msg));        
-        
+        Channel.sendTo(proxyId,
+            new ProxyMessageNot(tcpConnection.getKey(), msg));
+
+        canStop = true;
         if (msg.getObject() instanceof ProducerMessages) {
           FlowControl.flowControl();
         }
       }
     } catch (Throwable error) {
+      canStop = false;
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, "", error);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", error);
     } finally {
+      canStop = false;
       if (closeConnection) {
- 	Channel.sendTo(proxyId, 
-                       new CloseConnectionNot(
-                         tcpConnection.getKey()));
+        Channel.sendTo(proxyId, new CloseConnectionNot(tcpConnection.getKey()));
       }
       new Thread(new Runnable() {
-          public void run() {            
-            tcpConnection.close();
-          }
-        }).start();
+        public void run() {
+          tcpConnection.close();
+        }
+      }).start();
+
     }
   }
 
   protected void shutdown() {
     close();
   }
-    
+
   protected void close() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpReader.close()");
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.close()");
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;
