@@ -89,11 +89,6 @@ public class RequestMultiplexer {
    */
   private long lastRequestDate;
   
-  /**
-   * Indicates whether the 
-   */
-  private volatile boolean closing;
-
   public RequestMultiplexer(Connection cnx,
                             RequestChannel channel,
                             long heartBeat) throws JMSException {
@@ -180,6 +175,9 @@ public class RequestMultiplexer {
     try {
       channel.send(request);
     } catch (Exception exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
       JMSException jmsExc = new JMSException(exc.toString());
       jmsExc.setLinkedException(exc);
       throw jmsExc;
@@ -388,11 +386,16 @@ public class RequestMultiplexer {
 //     }
 //   }
 
-  private void onException(JMSException jmsExc) {
+  private void onException(Exception exc) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "RequestMultiplexer.onException(" + 
-        jmsExc + ')');
+        BasicLevel.DEBUG, "RequestMultiplexer.onException(" + exc + ')');
+    JMSException jmsExc;
+    if (exc instanceof JMSException) {
+      jmsExc = (JMSException) exc;
+    } else {
+      jmsExc = new IllegalStateException(exc.getMessage());
+    }
     if (exceptionListener != null)
       exceptionListener.onException(jmsExc);
   }
@@ -438,33 +441,19 @@ public class RequestMultiplexer {
             // of a closure or at the same time as an independant
             // close call).
             if (! isClosed()) {
+              RequestMultiplexer.this.close();
               // The connection close() must be
               // called by another thread. Calling it with
               // this thread (demultiplexer daemon) could
               // lead to a deadlock if another thread called
               // close() just before.
-              new Thread() {
-                public void run() {
-                  try {
-                    RequestMultiplexer.this.cnx.close();
-                  } catch (JMSException exc2) {
-                    if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-                      JoramTracing.dbgClient.log(BasicLevel.WARN,
-                          "Error during close", exc2);
-                  }
-                }
-              }.start();
-            }
-            // Else it means that the connection is
-            // already closed
-            
-            JMSException jmsExc;
-            if (exc instanceof JMSException) {
-              jmsExc = (JMSException) exc;
+              Closer closer = new Closer(exc);
+              new Thread(closer).start();
             } else {
-              jmsExc = new IllegalStateException(exc.getMessage());
+              // Else it means that the connection is
+              // already closed
+              onException(exc);
             }
-            onException(jmsExc);
             
             break loop;
           }
@@ -475,7 +464,7 @@ public class RequestMultiplexer {
         finish();
       }
     }
-
+    
     /**
      * Enables the daemon to stop itself.
      */
@@ -490,6 +479,26 @@ public class RequestMultiplexer {
     protected void shutdown() {}
 
     protected void close() {}
+  }
+  
+  private class Closer implements Runnable {
+    private Exception exc;
+    
+    Closer(Exception e) {
+      exc = e;
+    }
+    
+    public void run() {
+      try {
+        RequestMultiplexer.this.cnx.close();
+      } catch (JMSException exc2) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN,
+              "Error during close", exc2);
+      }
+      
+      onException(exc);
+    }
   }
 
   /**
@@ -512,15 +521,14 @@ public class RequestMultiplexer {
         if ((date - lastRequestDate) > heartBeat) {
           sendRequest(new PingRequest());
         }
-        start();
       } catch (Exception exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
       }
     }
 
     public void start() throws Exception {
-      timer.schedule(this, heartBeat);
+      timer.schedule(this, heartBeat, heartBeat);
     }
   }
 }
