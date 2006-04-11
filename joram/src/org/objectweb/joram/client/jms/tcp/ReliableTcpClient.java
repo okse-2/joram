@@ -42,10 +42,9 @@ public class ReliableTcpClient {
   public static final int INIT = 0;
   public static final int CONNECT = 1;
   public static final int CLOSE = 2;
-  public static final int ERROR = 3;
 
   public static final String[] statusNames =
-  {"INIT", "CONNECT", "CLOSE", "ERROR"};
+  {"INIT", "CONNECT", "CLOSE"};
 
   private FactoryParameters params;
 
@@ -57,9 +56,7 @@ public class ReliableTcpClient {
 
   private ReliableTcpConnection connection;
 
-  private int status;
-
-  private JMSException error;
+  private volatile int status;
 
   private Vector addresses;
   /**
@@ -90,7 +87,7 @@ public class ReliableTcpClient {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "ReliableTcpClient.init(" + 
-        params + ',' + name + ',' + password + ')');
+        params + ',' + name + ',' + password + ',' + reconnect + ')');
     this.params = params;
     this.name = name;
     this.password = password;
@@ -327,6 +324,8 @@ public class ReliableTcpClient {
         BasicLevel.DEBUG, 
         "ReliableTcpClient[" + name + ',' + key + 
         "].send(" + request + ')');
+    if (status != CONNECT) 
+      throw new IOException("Closed connection");
     while (true) {
       try {
         connection.send(request);
@@ -336,7 +335,12 @@ public class ReliableTcpClient {
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, "ReliableTcpClient[" + 
             name + ',' + key + "]", exc);
-        waitForReconnection();
+        if (reconnect) {
+          waitForReconnection();
+        } else {
+          close();
+          throw exc;
+        }
       }
     }
   }
@@ -355,24 +359,23 @@ public class ReliableTcpClient {
           JoramTracing.dbgClient.log(
             BasicLevel.DEBUG, "ReliableTcpClient[" + 
             name + ',' + key + "]", exc);
-        if (reconnect)
+        if (reconnect) {
           reconnect();
-        else
+        } else {
+          close();
           throw exc;
+        }
       }
     }
   }
 
-  private synchronized void waitForReconnection() 
-    throws Exception {
+  private synchronized void waitForReconnection() throws Exception {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "ReliableTcpClient[" + name + ',' + key + 
-	"].waitForReconnection()");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient[" + name
+          + ',' + key + "].waitForReconnection()");
     while (status == INIT) {
       try {
-	wait();
+        wait();
       } catch (InterruptedException exc) {
         //continue
       }
@@ -380,8 +383,6 @@ public class ReliableTcpClient {
     switch (status) {
     case CONNECT:
       break;
-    case ERROR:
-      throw error;
     case CLOSE:
       throw new Exception("Connection closed");
     }
@@ -389,21 +390,19 @@ public class ReliableTcpClient {
 
   private synchronized void reconnect() throws Exception {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "ReliableTcpClient[" + name + ',' + key + "].reconnect()");
-    switch (status) {   
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient[" + name
+          + ',' + key + "].reconnect()");
+    switch (status) {
     case CONNECT:
       setStatus(INIT);
     case INIT:
       try {
-	connect(true);
+        connect(true);
       } catch (JMSException exc) {
-	setStatus(ERROR);
-	error = exc;
-	throw exc;
+        close();
+        throw exc;
       } finally {
-	notifyAll();
+        notifyAll();
       }
       break;
     case CLOSE:
@@ -418,8 +417,10 @@ public class ReliableTcpClient {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "ReliableTcpClient[" + name + ',' + key + "].close()");
-    setStatus(CLOSE);
-    connection.close();
+    if (status != CLOSE) {
+      setStatus(CLOSE);
+      connection.close();
+    }
   }
 
   public void addServerAddress(String host, int port) {
@@ -434,7 +435,6 @@ public class ReliableTcpClient {
       ",key=" + key + 
       ",connection=" + connection + 
       ",status=" + statusNames[status] + 
-      ",error=" + error + 
       ",addresses=" + addresses + ')';
   }
 
