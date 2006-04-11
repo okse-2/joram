@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -371,20 +371,17 @@ public class RequestMultiplexer {
     }
   }
 
-//   class ExceptionListenerRunner implements Runnable {
-//     javax.jms.ExceptionListener listener;
-//     JMSException exc;
+  class onExceptionRunner implements Runnable {
+    Exception exc;
 
-//     ExceptionListenerRunner(javax.jms.ExceptionListener listener,
-//                             JMSException exc) {
-//       this.listener = listener;
-//       this.exc = exc;
-//     }
+    onExceptionRunner(Exception exc) {
+      this.exc = exc;
+    }
 
-//     public void run() {
-//       listener.onException(exc);
-//     }
-//   }
+    public void run() {
+      onException(exc);
+    }
+  }
 
   private void onException(Exception exc) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
@@ -450,9 +447,11 @@ public class RequestMultiplexer {
               Closer closer = new Closer(exc);
               new Thread(closer).start();
             } else {
-              // Else it means that the connection is
-              // already closed
-              onException(exc);
+              // Else it means that the connection is already closed
+              // Runs the onException in a separate thread in order to avoid
+              // deadlock in connector onException (synchronized).
+              onExceptionRunner oer = new onExceptionRunner(exc);
+              new Thread(oer).start();
             }
             
             break loop;
