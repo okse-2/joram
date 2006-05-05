@@ -93,6 +93,27 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
 
   /**
+   *  Number of listening daemon, this value is only valid for the server
+   * part of the HttpNetwork.
+   *  This value can be adjusted for all HttpNetwork components by setting
+   * <code>NbDaemon</code> global property or for a particular network by
+   * setting <code>\<DomainName\>.NbDaemon</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int NbDaemon = 1;
+
+  /**
+   * Gets the NbDaemon value.
+   *
+   * @return the NbDaemon value
+   */
+  public long getNbDaemon() {
+    return NbDaemon;
+  }
+
+  /**
    * Creates a new network component.
    */
   public HttpNetwork() {
@@ -132,6 +153,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     activationPeriod = Long.getLong(name + ".ActivationPeriod",
                                     activationPeriod).longValue();
     
+    NbDaemon = Integer.getInteger("NbDaemon", NbDaemon).intValue();
+    NbDaemon = Integer.getInteger(name + ".NbDaemon", NbDaemon).intValue();
+
     proxyhost = System.getProperty("proxyhost");
     proxyhost = System.getProperty(name + ".proxyhost", proxyhost);
     if (proxyhost != null) {
@@ -142,7 +166,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
 
   /** Daemon component */
-  Daemon dmon = null;
+  Daemon dmon[] = null;
 
   /**
    * Causes this network component to begin execution.
@@ -152,23 +176,32 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     try {
       if (isRunning()) return;
 
-    // AF: May be, we have to verify that there is only one 'listen' network.
-    for (int i=0; i<servers.length; i++) {
-      server = AgentServer.getServerDesc(servers[i]);
-      if ((server.getServerId() != AgentServer.getServerId()) &&
-          (server.getPort() > 0)) {
-        logmon.log(BasicLevel.DEBUG, getName() + ", server=" + server);
-        break;
+      // AF: May be, we have to verify that there is only one 'listen' network.
+      for (int i=0; i<servers.length; i++) {
+        server = AgentServer.getServerDesc(servers[i]);
+        if ((server.getServerId() != AgentServer.getServerId()) &&
+            (server.getPort() > 0)) {
+          logmon.log(BasicLevel.DEBUG, getName() + ", server=" + server);
+          break;
+        }
+        server = null;
       }
-      server = null;
-    }
 
       if (port != 0) {
-        dmon = new NetServerIn(getName(), logmon);
+        dmon = new Daemon[NbDaemon];
+        ServerSocket listen = createServerSocket();
+
+        for (int i=0; i<NbDaemon; i++) {
+          dmon[i] = new NetServerIn(getName(), listen, logmon);
+        }
       } else {
-        dmon = new NetServerOut(getName(), logmon);
+        dmon = new Daemon[1];
+        dmon[0] = new NetServerOut(getName(), logmon);
       }
-      dmon.start();
+
+      for (int i=0; i<dmon.length; i++) {
+        dmon[i].start();
+      }
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
@@ -187,7 +220,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * Forces the network component to stop executing.
    */
   public void stop() {
-    if (dmon != null) dmon.stop();
+    if (dmon != null) {
+      for (int i=0; i<dmon.length; i++) {
+        dmon[i].stop();
+      }
+    }
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
@@ -198,10 +235,12 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * 		otherwise.
    */
   public boolean isRunning() {
-    if ((dmon != null) && dmon.isRunning())
-      return true;
-    else
-      return false;
+    if (dmon != null) {
+      for (int i=0; i<dmon.length; i++) {
+        if (dmon[i].isRunning()) return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -214,15 +253,15 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append(super.toString()).append("\n\t");
-    if (dmon != null)
-      strbuf.append(dmon.toString()).append("\n\t");
-
+    if (dmon != null) {
+      for (int i=0; i<dmon.length; i++) {
+        strbuf.append(dmon[i].toString()).append("\n\t");
+      }
+    }
     return strbuf.toString();
   }
 
-  byte[] buf = new byte[120];
-
-  protected String readLine(InputStream is) throws IOException {
+  protected String readLine(InputStream is, byte[] buf) throws IOException {
     int i = 0;
     while ((buf[i++] = (byte) is.read()) != -1) {
       if ((buf[i-1] == '\n') && (buf[i-2] == '\r')) {
@@ -284,10 +323,10 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected short getRequest(InputStream is) throws Exception {
+  protected short getRequest(InputStream is, byte[] buf) throws Exception {
     String line = null;
 
-    line = readLine(is);
+    line = readLine(is, buf);
     if ((line == null) ||
         (! (line.startsWith("GET ") || line.startsWith("PUT ")))) {
       throw new Exception("Bad request: " + line);
@@ -302,7 +341,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     // Skip all header lines, get length
     int length = 0;
     while (line != null) {
-      line = readLine(is);
+      line = readLine(is, buf);
       if ((line != null) && line.startsWith("Content-Length: ")) {
         // get content length
 	length = Integer.parseInt(line.substring(16));
@@ -353,10 +392,10 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected void getReply(InputStream is) throws Exception {
+  protected void getReply(InputStream is, byte[] buf) throws Exception {
     String line = null;
 
-    line = readLine(is);
+    line = readLine(is, buf);
     if ((line == null) ||
         ((! line.equals("HTTP/1.1 200 OK")) &&
          (! line.equals("HTTP/1.1 204 No Content")))) {
@@ -366,7 +405,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     // Skip all header lines, get length
     int length = 0;
     while (line != null) {
-      line = readLine(is);
+      line = readLine(is, buf);
       if ((line != null) && line.startsWith("Content-Length: ")) {
         // get content length
 	length = Integer.parseInt(line.substring(16));
@@ -493,6 +532,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       Message msgout = null;
       int ack = -1;
 
+      byte[] buf = new byte[120];
+
       try {
 	while (running) {
           canStop = true;
@@ -542,7 +583,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
               } while (true);
 
               sendRequest(msgout, os, ack, currentTimeMillis);
-              getReply(is);
+              getReply(is, buf);
 
               canStop = false;
               ack = handle(msgout);
@@ -586,9 +627,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     InputStream is = null;
     OutputStream os = null;
 
-    NetServerIn(String name, Logger logmon) throws IOException {
+    NetServerIn(String name, ServerSocket listen, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
-      listen = createServerSocket();
+      this.listen = listen;
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -628,6 +669,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       Message msgout= null;
       int ack = -1;
 
+      byte[] buf = new byte[120];
+
       try {
 	while (running) {
           canStop = true;
@@ -640,7 +683,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
             socket = listen.accept();
             open(socket);
             
-            short from = getRequest(is);
+            short from = getRequest(is, buf);
             long currentTimeMillis = System.currentTimeMillis();
             do {
               canStop = false;
@@ -682,7 +725,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": AF WWW " + msgout);
 
-              getRequest(is);
+              getRequest(is, buf);
             } while (running);
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
