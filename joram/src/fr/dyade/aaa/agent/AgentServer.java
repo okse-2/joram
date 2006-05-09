@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -752,6 +752,19 @@ public final class AgentServer {
     return 2;
   }
 
+  public static void reset(boolean force) {
+    if (force) {
+      synchronized(status) {
+        if (status.value != Status.STOPPED) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", force status: " + status.value);
+        }
+        status.value = Status.STOPPED;
+      }
+    }
+    reset();
+  }
+
   /**
    *  Cleans an AgentServer configuration in order to restart it from
    * persistent storage.
@@ -776,7 +789,7 @@ public final class AgentServer {
             "AgentServer",
             "server=" + getName() + ",cons=" + cons.getName());
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN,
+          logmon.log(BasicLevel.DEBUG,
                      getName() + ", jmx failed: " +
                      "server=" + getName() + ",cons=" + cons.getName(), exc);
         }
@@ -788,17 +801,18 @@ public final class AgentServer {
       MXWrapper.unregisterMBean("AgentServer",
                                 "server=" + getName() + ",cons=Transaction");
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN,
+      logmon.log(BasicLevel.DEBUG,
                  getName() + ", jmx failed: " +
                  "server=" + getName() + ",cons=Transaction", exc);
     }
-    transaction.close();
+
+    if (transaction != null) transaction.close();
     transaction = null;
 
     try {
       MXWrapper.unregisterMBean("AgentServer", "server=" + getName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN,
+      logmon.log(BasicLevel.DEBUG,
                  getName() + " jmx failed: "+ "server=" + getName(), exc);
     }
     
@@ -864,46 +878,128 @@ public final class AgentServer {
       if (status.value == Status.STOPPED) {
         logmon.log(BasicLevel.DEBUG, getName() + ", reset configuration");
         reset();
-        status.value = Status.INSTALLED;
       }
       if (status.value != Status.INSTALLED)
         throw new Exception("cannot initialize, bad status: " + status.value);
       status.value = Status.INITIALIZING;
     }
 
-    serverId = sid; 
+    try {
+      serverId = sid; 
 
-    tgroup = new ThreadGroup(getName()) {
-      public void uncaughtException(Thread t, Throwable e) {
-        if (logmon.isLoggable(BasicLevel.WARN)) {
-          logmon.log(BasicLevel.WARN,
-                     "Abnormal termination for " +
-                     t.getThreadGroup().getName() + "." + t.getName(),
-                     e);
+      tgroup = new ThreadGroup(getName()) {
+          public void uncaughtException(Thread t, Throwable e) {
+            if (logmon.isLoggable(BasicLevel.WARN)) {
+              logmon.log(BasicLevel.WARN,
+                         "Abnormal termination for " +
+                         t.getThreadGroup().getName() + "." + t.getName(),
+                         e);
+            }
+          }
+        };
+   
+      //  Try to get transaction type from disk, then initialize the rigth
+      // transaction manager and get the configuration.
+      File dir = new File(path);
+      if (dir.exists() && dir.isDirectory()) {
+        File tfc = new File(dir, "TFC");
+        if (tfc.exists()) {
+          DataInputStream dis = null;
+          try {
+            dis = new DataInputStream(new FileInputStream(tfc));
+            String tname = dis.readUTF();
+            Class tclass = Class.forName(tname);
+            transaction = (Transaction) tclass.newInstance();
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.FATAL,
+                       getName() + ", can't instanciate transaction manager",
+                       exc);
+            throw new Exception("Can't instanciate transaction manager");
+          } finally {
+            if (dis != null) dis.close();
+          }
+          try {
+            transaction.init(path);
+          } catch (IOException exc) {
+            logmon.log(BasicLevel.FATAL,
+                       getName() + ", can't start transaction manager", exc);
+            throw new Exception("Can't start transaction manager");
+          }
         }
       }
-    };
-   
-    //  Try to get transaction type from disk, then initialize the rigth
-    // transaction manager and get the configuration.
-    File dir = new File(path);
-    if (dir.exists() && dir.isDirectory()) {
-      File tfc = new File(dir, "TFC");
-      if (tfc.exists()) {
-        DataInputStream dis = null;
+
+      // Gets static configuration of agent servers from a file. This method
+      // fills the object graph configuration in the <code>A3CMLConfig</code>
+      // object, then the configure method really initializes the server.
+      // There are two steps because the configuration step needs the
+      // transaction components to be initialized.
+      if (transaction != null) {
+        // Try to read the serialiazed configuration (trough transaction)
         try {
-          dis = new DataInputStream(new FileInputStream(tfc));
-          String tname = dis.readUTF();
+          a3config = A3CMLConfig.load();
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN, getName() + ", config not found");
+        }
+      }
+
+      if (a3config == null) {
+        //  Try to load an initial configuration (serialized or XML), or
+        // generates a default one in case of failure.
+        try {
+          a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", serialized a3cmlconfig not found");
+        }
+
+        if (a3config == null) {
+          // Try to found XML configuration file, then parse it.
+          try {
+            a3config = A3CML.getXMLConfig();
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.WARN,
+                       getName() + ", XML configuration file not found");
+          }
+        }
+
+        if (a3config == null) {
+          // 3rd, Generate A3CMLConfig base.
+          logmon.log(BasicLevel.WARN,
+                     "Generate default configuration");
+          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN,
+                                          "fr.dyade.aaa.agent.SimpleNetwork");
+          A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
+          s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
+          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
+          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.HttpDebug","20080"));
+          d.addServer(s);
+          a3config = new A3CMLConfig();
+          a3config.addDomain(d);
+          a3config.addServer(s);
+        }
+      }
+
+      // if JGroups
+      if (cid > NULL_ID) clusterId = cid;
+
+      // set properties
+      setProperties(serverId, clusterId);
+
+      // Initializes the JMX Wrapper
+      MXWrapper.init();
+
+      if (transaction == null) {
+        try {
+          String tname = getProperty("Transaction",
+                                     "fr.dyade.aaa.util.NTransaction");
           Class tclass = Class.forName(tname);
-          transaction = (Transaction) tclass.newInstance();
+          transaction = (Transaction) Class.forName(tname).newInstance();
         } catch (Exception exc) {
           logmon.log(BasicLevel.FATAL,
-                     getName() + ", can't instanciate transaction manager",
-                     exc);
+                     getName() + ", can't instanciate transaction manager", exc);
           throw new Exception("Can't instanciate transaction manager");
-        } finally {
-          if (dis != null) dis.close();
         }
+
         try {
           transaction.init(path);
         } catch (IOException exc) {
@@ -911,217 +1007,154 @@ public final class AgentServer {
                      getName() + ", can't start transaction manager", exc);
           throw new Exception("Can't start transaction manager");
         }
-
       }
-    }
 
-    // Gets static configuration of agent servers from a file. This method
-    // fills the object graph configuration in the <code>A3CMLConfig</code>
-    // object, then the configure method really initializes the server.
-    // There are two steps because the configuration step needs the transaction
-    // components to be initialized.
-    if (transaction != null) {
-      // Try to read the serialiazed configuration (trough transaction)
       try {
-        a3config = A3CMLConfig.load();
+        MXWrapper.registerMBean(transaction,
+                                "AgentServer",
+                                "server=" + getName() + ",cons=Transaction");
       } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN, getName() + ", config not found");
+        if (logmon == null)
+          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+        logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
-    }
 
-    if (a3config == null) {
-      //  Try to load an initial configuration (serialized or XML), or
-      // generates a default one in case of failure.
+      // save A3CMLConfig (May be we can omit it in some case).
+      a3config.save();
+
       try {
-        a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.WARN,
-                   getName() + ", serialized a3cmlconfig not found");
-      }
-
-      if (a3config == null) {
-        // Try to found XML configuration file, then parse it.
-        try {
-          a3config = A3CML.getXMLConfig();
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", XML configuration file not found");
-        }
-      }
-
-      if (a3config == null) {
-        // 3rd, Generate A3CMLConfig base.
-        logmon.log(BasicLevel.WARN,
-                   "Generate default configuration");
-        A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN,
-                                        "fr.dyade.aaa.agent.SimpleNetwork");
-        A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
-        s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
-        s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
-        s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.HttpDebug","20080"));
-        d.addServer(s);
-        a3config = new A3CMLConfig();
-        a3config.addDomain(d);
-        a3config.addServer(s);
-      }
-    }
-
-    // if JGroups
-    if (cid > NULL_ID) clusterId = cid;
-
-    // set properties
-    setProperties(serverId, clusterId);
-
-    // Initializes the JMX Wrapper
-    MXWrapper.init();
-
-    if (transaction == null) {
-      try {
-        String tname = getProperty("Transaction",
-                                   "fr.dyade.aaa.util.NTransaction");
-        Class tclass = Class.forName(tname);
-        transaction = (Transaction) Class.forName(tname).newInstance();
-      } catch (Exception exc) {
+        // Initialize AgentId class's variables.
+        AgentId.init();
+      } catch (ClassNotFoundException exc) {
         logmon.log(BasicLevel.FATAL,
-                   getName() + ", can't instanciate transaction manager", exc);
-        throw new Exception("Can't instanciate transaction manager");
-      }
-
-      try {
-        transaction.init(path);
+                   getName() + ", can't initialize AgentId", exc);
+        throw new Exception("Can't initialize AgentId, bad classpath");
       } catch (IOException exc) {
         logmon.log(BasicLevel.FATAL,
-                   getName() + ", can't start transaction manager", exc);
-        throw new Exception("Can't start transaction manager");
+                   getName() + ", can't initialize AgentId", exc);
+        throw new Exception("Can't initialize AgentId, storage problems");
       }
-    }
 
-    MXWrapper.registerMBean(transaction,
-                            "AgentServer",
-                            "server=" + getName() + ",cons=Transaction");
+      try {
+        // Configure the agent server.
+        configure();
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.FATAL, getName() + ", can't configure", exc);
+        throw new Exception("Can't configure server");
+      }
 
-    // save A3CMLConfig (May be we can omit it in some case).
-    a3config.save();
+      try {
+        // then restores all messages.
+        String[] list = transaction.getList("@");
+        for (int i=0; i<list.length; i++) {
+          Message msg = Message.load(list[i]);
 
-    try {
-      // Initialize AgentId class's variables.
-      AgentId.init();
-    } catch (ClassNotFoundException exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't initialize AgentId", exc);
-      throw new Exception("Can't initialize AgentId, bad classpath");
-    } catch (IOException exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't initialize AgentId", exc);
-      throw new Exception("Can't initialize AgentId, storage problems");
-    }
-
-    try {
-      // Configure the agent server.
-      configure();
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL, getName() + ", can't configure", exc);
-      throw new Exception("Can't configure server");
-    }
-
-    try {
-      // then restores all messages.
-      String[] list = transaction.getList("@");
-      for (int i=0; i<list.length; i++) {
-        Message msg = Message.load(list[i]);
-
-	if (msg.getSource() == serverId) {
-	  // The update has been locally generated, the message is ready to
-	  // deliver to its consumer (Engine or Network component). So we have
-	  // to insert it in the queue of this consumer.
-          try {
-            getServerDesc(msg.getDest()).domain.insert(msg);
-          } catch (NullPointerException exc) {
+          if (msg.getSource() == serverId) {
+            // The update has been locally generated, the message is ready to
+            // deliver to its consumer (Engine or Network component). So we have
+            // to insert it in the queue of this consumer.
+            try {
+              getServerDesc(msg.getDest()).domain.insert(msg);
+            } catch (NullPointerException exc) {
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ", discard message to unknown server id#" +
+                         msg.getDest());
+              msg.delete();
+              msg.free();
+              continue;
+            } catch (ArrayIndexOutOfBoundsException exc) {
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ", discard message to unknown server id#" +
+                         msg.getDest());
+              msg.delete();
+              msg.free();
+              continue;
+            }
+          } else {
             logmon.log(BasicLevel.ERROR,
-                       getName() + ", discard message to unknown server id#" +
+                       getName() + ", discard undelivered message from server id#" +
                        msg.getDest());
             msg.delete();
-            msg.free();
-            continue;
-          } catch (ArrayIndexOutOfBoundsException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ", discard message to unknown server id#" +
-                       msg.getDest());
-            msg.delete();
-            msg.free();
             continue;
           }
-	} else {
-          logmon.log(BasicLevel.ERROR,
-                     getName() + ", discard undelivered message from server id#" +
-                     msg.getDest());
-          msg.delete();
-          continue;
-	}
-      }
-    } catch (ClassNotFoundException exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't restore messages", exc);
-      throw new Exception("Can't restore messages, bad classpath");
-    } catch (IOException exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't restore messages", exc);
-      throw new Exception("Can't restore messages, storage problems");
-    }
-
-    // initializes channel before initializing fixed agents
-    Channel.newInstance();    
-
-    try {
-      //  Initialize services.
-      ServiceManager.init();
-
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", ServiceManager initialized");
-
-      /* Actually get Services from A3CML configuration file. */
-      ServiceDesc services[] = AgentServer.getServices();
-      if (services != null) {
-	for (int i = 0; i < services.length; i ++) {
-	  ServiceManager.register(services[i].getClassName(),
-				  services[i].getArguments());
         }
+      } catch (ClassNotFoundException exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't restore messages", exc);
+        throw new Exception("Can't restore messages, bad classpath");
+      } catch (IOException exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't restore messages", exc);
+        throw new Exception("Can't restore messages, storage problems");
       }
-      ServiceManager.save();
+
+      // initializes channel before initializing fixed agents
+      Channel.newInstance();    
+
+      try {
+        //  Initialize services.
+        ServiceManager.init();
+
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", ServiceManager initialized");
+
+        /* Actually get Services from A3CML configuration file. */
+        ServiceDesc services[] = AgentServer.getServices();
+        if (services != null) {
+          for (int i = 0; i < services.length; i ++) {
+            ServiceManager.register(services[i].getClassName(),
+                                    services[i].getArguments());
+          }
+        }
+        ServiceManager.save();
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't initialize services", exc);
+        throw new Exception("Can't initialize services");
+      }
+
+      // initializes fixed agents
+      engine.init();
+
+      // If the server is part of an HA group starts the JGroup component
+      if (jgroups != null) jgroups.init(getName());
+
+      logmon.log(BasicLevel.WARN,
+                 getName() + ", initialized at " + new Date());
+
+      // Commit all changes.
+      transaction.begin();
+      transaction.commit();
+      transaction.release();
+
+      try {
+        SCServerMBean bean = new SCServer();
+        MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
+      } catch (Exception exc) {
+        if (logmon == null)
+          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+        logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+      }
     } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't initialize services", exc);
-      throw new Exception("Can't initialize services");
+      logmon.log(BasicLevel.ERROR, getName() + "Cannot initialize", exc);
+      synchronized(status) {
+        // AF: Will be replaced by a BAD_INITIALIZED status allowing the
+        // re-initialization..
+        status.value = Status.INSTALLED;
+      }
+      throw exc;
+    } catch (Throwable t) {
+      logmon.log(BasicLevel.ERROR, getName() + "Cannot initialize", t);
+      synchronized(status) {
+        // AF: Will be replaced by a BAD_INITIALIZED status allowing the
+        // re-initialization..
+        status.value = Status.INSTALLED;
+      }
+      throw new Exception(t);
     }
-
-    // initializes fixed agents
-    engine.init();
-
-    // If the server is part of an HA group starts the JGroup component
-    if (jgroups != null) jgroups.init(getName());
-
-    logmon.log(BasicLevel.WARN,
-               getName() + ", initialized at " + new Date());
-
-    // Commit all changes.
-    transaction.begin();
-    transaction.commit();
-    transaction.release();
 
     synchronized(status) {
-      if (status.value != Status.INITIALIZING)
-        throw new Exception("Bad initialization, status: " + status.value);
       status.value = Status.INITIALIZED;
-    }
-
-    try {
-      SCServerMBean bean = new SCServer();
-      MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
-    } catch (Exception exc) {
-      if (logmon == null)
-        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
-      logmon.log(BasicLevel.ERROR,
-                 getName() + " jmx failed", exc);
     }
   }
 
@@ -1170,53 +1203,69 @@ public final class AgentServer {
       status.value = Status.STARTING;
     }
 
-    try {
-      if (jgroups == null) {
-        ServiceManager.start();
-        // Be careful, we have to save ServiceManager after start (initialized
-        // attribute).
-        ServiceManager.save();
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", ServiceManager started");
-      }
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", can't initialize services", exc);
-      throw new Exception("Can't initialize services");
-    }
-
-    // Now we can start all message consumers.
     StringBuffer errBuf = null;
-    if (consumers != null) {
-      for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-	MessageConsumer cons = (MessageConsumer) c.nextElement();
-        if (cons != null) {
-          try {
-            if ((jgroups == null) || (cons instanceof Engine)) {
-              cons.start();
+    try {
+      try {
+        if (jgroups == null) {
+          ServiceManager.start();
+          // Be careful, we have to save ServiceManager after start (initialized
+          // attribute).
+          ServiceManager.save();
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + ", ServiceManager started");
+        }
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.FATAL,
+                   getName() + ", can't initialize services", exc);
+        throw new Exception("Can't initialize services");
+      }
+
+      // Now we can start all message consumers.
+      if (consumers != null) {
+        for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+          MessageConsumer cons = (MessageConsumer) c.nextElement();
+          if (cons != null) {
+            try {
+              if ((jgroups == null) || (cons instanceof Engine)) {
+                cons.start();
+              }
+            } catch (IOException exc) {
+              if (errBuf == null) errBuf = new StringBuffer();
+              errBuf.append(cons.getName()).append(": ");
+              errBuf.append(exc.getMessage()).append('\n');
+              logmon.log(BasicLevel.FATAL,
+                         getName() +
+                         ", problem during " + cons.getName() + " starting", exc);
             }
-          } catch (IOException exc) {
-            if (errBuf == null) errBuf = new StringBuffer();
-            errBuf.append(cons.getName()).append(": ");
-            errBuf.append(exc.getMessage()).append('\n');
-            logmon.log(BasicLevel.FATAL,
-                       getName() +
-                       ", problem during " + cons.getName() + " starting", exc);
           }
         }
       }
-    }
-    // The server is running.
-    logmon.log(BasicLevel.WARN, getName() + ", started at " + new Date());
+      // The server is running.
+      logmon.log(BasicLevel.WARN, getName() + ", started at " + new Date());
 
-    // Commit all changes.
-    transaction.begin();
-    transaction.commit();
-    transaction.release();
+      // Commit all changes.
+      transaction.begin();
+      transaction.commit();
+      transaction.release();
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
+      synchronized(status) {
+        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // stop and reset..
+        status.value = Status.STOPPED;
+      }
+      throw exc;
+    } catch (Throwable t) {
+      logmon.log(BasicLevel.ERROR, getName() + "Cannot start", t);
+      synchronized(status) {
+        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // stop and reset..
+        status.value = Status.STOPPED;
+      }
+      throw new Exception(t);
+    }
 
     synchronized(status) {
-      if (status.value != Status.STARTING)
-        throw new Exception("bad start, status: " + status.value);
       status.value = Status.STARTED;
     }
 
@@ -1300,7 +1349,8 @@ public final class AgentServer {
       logmon.log(BasicLevel.WARN, getName() + ", stop()");
 
     synchronized(status) {
-      if (status.value != Status.STARTED) {
+      if ((status.value != Status.STARTED) &&
+          (status.value != Status.STOPPED)) {
         logmon.log(BasicLevel.WARN,
                    getName() + "cannot stop, bad status: " + status.value);
         return;
@@ -1308,69 +1358,74 @@ public final class AgentServer {
       status.value = Status.STOPPING;
     }
 
-    // If the server is part of an HA group stops the JGroup component
-    if (jgroups != null) jgroups.disconnect();
+    try {
+      // If the server is part of an HA group stops the JGroup component
+      if (jgroups != null) jgroups.disconnect();
 
-    // Stop all message consumers.
-    if (consumers != null) {
-      for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-	MessageConsumer cons = (MessageConsumer) c.nextElement();
-        if (cons != null) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ", stop " + cons.getName());
+      // Stop all message consumers.
+      if (consumers != null) {
+        for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+          MessageConsumer cons = (MessageConsumer) c.nextElement();
+          if (cons != null) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ", stop " + cons.getName());
 
-          cons.stop();
+            cons.stop();
 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ", " + cons.getName() + " stopped");
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ", " + cons.getName() + " stopped");
+          }
         }
       }
-    }
-    // Stop all services.
-    ServiceManager.stop();
-    // Stop all drivers
-    Driver.stopAll();
+      // Stop all services.
+      ServiceManager.stop();
+      // Stop all drivers
+      Driver.stopAll();
 
-    // Wait for all threads before stop the TM !!
-    while (true) {
-      int nbt = getThreadGroup().activeCount();
-      if (nbt == 0) break;
+      // Wait for all threads before stop the TM !!
+      while (true) {
+        int nbt = getThreadGroup().activeCount();
+        if (nbt == 0) break;
 
-      Thread[] tab = new Thread[nbt];
-      getThreadGroup().enumerate(tab);
-      if ((nbt == 1) && (tab[0] == Thread.currentThread())) break;
+        Thread[] tab = new Thread[nbt];
+        getThreadGroup().enumerate(tab);
+        if ((nbt == 1) && (tab[0] == Thread.currentThread())) break;
 
-      for (int j=0; j<tab.length; j++) {
-        logmon.log(BasicLevel.DEBUG,
-                   "[" +  tab[j].getName() + ":" +
-                   (tab[j].isAlive()?"alive":"-") + "/" +
-                   (tab[j].isDaemon()?"daemon":"-") + "," +
-                   tab[j]);
+        for (int j=0; j<tab.length; j++) {
+          logmon.log(BasicLevel.DEBUG,
+                     "[" +  tab[j].getName() + ":" +
+                     (tab[j].isAlive()?"alive":"-") + "/" +
+                     (tab[j].isDaemon()?"daemon":"-") + "," +
+                     tab[j]);
+        }
+        try {
+          Thread.sleep(2500);
+        } catch (InterruptedException e) {}
       }
-      try {
-        Thread.sleep(2500);
-      } catch (InterruptedException e) {}
+
+      // Stop the transaction manager.
+      if (transaction != null) transaction.stop();
+
+      // Wait for the transaction manager stop
+
+      Runtime.getRuntime().gc();
+      System.runFinalization();
+
+      logmon.log(BasicLevel.WARN, getName() + ", stopped at " + new Date());
+    } catch (Throwable t) {
+      logmon.log(BasicLevel.ERROR, getName() + "Cannot stop", t);
+      synchronized(status) {
+        // AF: Will be replaced by a BAD_STOPPED status allowing the
+        // stop and reset..
+        status.value = Status.STOPPED;
+      }
     }
-
-    // Stop the transaction manager.
-    if (transaction != null) transaction.stop();
-
-    // Wait for the transaction manager stop
-
-    Runtime.getRuntime().gc();
-    System.runFinalization();
 
     synchronized(status) {
-      if (status.value != Status.STOPPING)
-        logmon.log(BasicLevel.WARN,
-                   getName() + "bad stop, status: " + status.value);
       status.value = Status.STOPPED;
     }
-
-    logmon.log(BasicLevel.WARN,
-               getName() + ", stopped at " + new Date());
   }
 
   public static final String OKSTRING = "OK";
@@ -1387,7 +1442,7 @@ public final class AgentServer {
    * @exception Exception
    *	unspecialized exception
    */
-  public static void main (String args[]) throws Exception {
+  public static void main(String args[]) throws Exception {
     try {
       init(args);
     } catch (Throwable exc) {
