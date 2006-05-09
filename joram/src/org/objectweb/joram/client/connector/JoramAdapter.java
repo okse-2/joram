@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -222,14 +222,14 @@ public class JoramAdapter
 
     // Collocated mode: starting the JORAM server. 
     if (collocated) {
-
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
         AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                       "  - Collocated JORAM server is starting...");
 
-      if (persistentPlatform)
-        System.setProperty("Transaction", "fr.dyade.aaa.util.NTransaction");   
-      else {
+      if (persistentPlatform) {
+        System.setProperty("Transaction", "fr.dyade.aaa.util.NTransaction");
+        System.setProperty("NTNoLockFile", "true");
+      } else {
         System.setProperty("Transaction", "fr.dyade.aaa.util.NullTransaction");
         System.setProperty("NbMaxAgents", "" + Integer.MAX_VALUE);
       }
@@ -240,14 +240,15 @@ public class JoramAdapter
       }
 
       try {
-        String[] args = {"" + serverId, serverName};
-        AgentServer.init(args);
+        AgentServer.init(serverId, serverName, null);
         AgentServer.start();
         if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
           AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                         "  - Collocated JORAM server has successfully started.");
-      }
-      catch (Exception exc) {
+      } catch (Exception exc) {
+        AgentServer.stop();
+        AgentServer.reset(true);
+
         throw new ResourceAdapterInternalException("Could not start "
                                                    + "collocated JORAM "
                                                    + " instance: " + exc);
@@ -270,8 +271,7 @@ public class JoramAdapter
     try {
       adminConnect();
       serverId = (short) joramAdmin.getPlatformAdmin().getLocalServerId();
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN)) 
         AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
                                       "  - JORAM server not administerable: " + exc);
@@ -370,9 +370,9 @@ public class JoramAdapter
           }
         }
         // Error while reading one line.
-        catch (IOException exc) {}
+        catch (IOException exc) {
         // Error while creating the destination.
-        catch (AdminException exc) {
+        } catch (AdminException exc) {
           AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
                                         "Creation failed",exc);
         }
