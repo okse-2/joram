@@ -30,6 +30,27 @@ public interface NTransactionMBean extends TransactionMBean {
   int getLogMemoryCapacity();
 
   /**
+   * Returns the maximum size of memory log in Kb, by default 2048Kb.
+   *
+   * @return The maximum size of memory log in Kb.
+   */
+  public int getMaxLogMemorySize();
+
+  /**
+   * Sets the maximum size of memory log in Kb.
+   *
+   * @param size The maximum size of memory log in Kb.
+   */
+  public void setMaxLogMemorySize(int size);
+
+  /**
+   * Returns the size of memory log in byte.
+   *
+   * @return The size of memory log in byte.
+   */
+  public int getLogMemorySize();
+
+  /**
    * Returns the size of disk log in Mb, by default 16Mb.
    *
    * @return The size of disk log in Mb.
@@ -65,9 +86,61 @@ public interface NTransactionMBean extends TransactionMBean {
   public int getGarbageCount();
 
   /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime();
+
+  /**
+   * Returns the cumulated time of garbage operations.
+   *
+   * @return The cumulated time of garbage operations.
+   */
+  public long getGarbageTime();
+
+  /**
+   * Returns the ratio of garbage operations since starting up.
+   *
+   * @return The ratio of garbage operations since starting up.
+   */
+  public int getGarbageRatio();
+
+  /**
    *
    */
   public int getPhase();
 
   public String getPhaseInfo();
+
+  public String getRepositoryImpl();
+
+  /**
+   * Returns the number of save operation to repository.
+   *
+   * @return The number of save operation to repository.
+   */
+  public int getNbSavedObjects();
+
+  /**
+   * Returns the number of delete operation on repository.
+   *
+   * @return The number of delete operation on repository.
+   */
+  public int getNbDeletedObjects();
+
+  /**
+   * Returns the number of useless delete operation on repository.
+   *
+   * @return The number of useless delete operation on repository.
+   */
+  public int getNbBadDeletedObjects();
+
+  /**
+   * Returns the number of load operation from repository.
+   *
+   * @return The number of load operation from repository.
+   */
+  public int getNbLoadedObjects();
+
 }
