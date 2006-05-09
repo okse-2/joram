@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,4 +35,11 @@ public interface TransactionMBean {
    * @return The path of persistence directory.
    */
   String getPersistenceDir(); 
+
+  /**
+   *
+   */
+  public int getPhase();
+
+  public String getPhaseInfo();
 }

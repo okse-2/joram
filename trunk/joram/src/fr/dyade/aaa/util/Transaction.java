@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -42,6 +42,13 @@ public interface Transaction {
   final int Mb = Kb * Kb;
 
   void init(String path) throws IOException;
+
+  /**
+   *
+   */
+  public int getPhase();
+
+  public String getPhaseInfo();
 
   void begin() throws IOException;
 
