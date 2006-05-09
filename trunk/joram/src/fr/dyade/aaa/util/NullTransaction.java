@@ -27,10 +27,21 @@ import java.io.*;
 
 public class NullTransaction implements Transaction, NullTransactionMBean {
   // State of the transaction monitor.
-  private int phase;
+  private int phase = INIT;
 
   private final void setPhase(int newPhase) {
     phase = newPhase;
+  }
+
+  /**
+   *
+   */
+  public int getPhase() {
+    return phase;
+  }
+
+  public String getPhaseInfo() {
+    return PhaseInfo[phase];
   }
 
   public NullTransaction() {}
@@ -145,6 +156,8 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
 
 
   public synchronized final void close() {
+    if (phase == INIT) return;
+
     while (phase != FREE) {
       // Wait for the transaction subsystem to be free
       try {
