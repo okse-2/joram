@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,8 +53,45 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   /**
+   *  Maximum size of memory log, by default 2048Kb.
+   *  This value can be adjusted (Kb) for a particular server by setting
+   * <code>NTLogMemorySize</code> specific property.
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  static int MaxLogMemorySize = 2048 * Kb;
+
+  /**
+   * Returns the maximum size of memory log in Kb, by default 2048Kb.
+   *
+   * @return The maximum size of memory log in Kb.
+   */
+  public int getMaxLogMemorySize() {
+    return MaxLogMemorySize/Mb;
+  }
+
+  /**
+   * Sets the maximum size of memory log in Kb.
+   *
+   * @param size The maximum size of memory log in Kb.
+   */
+  public void setMaxLogMemorySize(int size) {
+    if (size > 0) MaxLogMemorySize = size *Kb;
+  }
+
+  /**
+   * Returns the size of memory log in byte.
+   *
+   * @return The size of memory log in byte.
+   */
+  public int getLogMemorySize() {
+    return logFile.logMemorySize;
+  }
+
+  /**
    *  Size of disk log in Mb, by default 16Mb.
-   *  This value can be adjusted for a particular server by setting
+   *  This value can be adjusted (Mb) for a particular server by setting
    * <code>NTLogFileSize</code> specific property.
    * <p>
    *  These property can be fixed either from <code>java</code> launching
@@ -117,6 +154,91 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return logFile.garbageCount;
   }
 
+  long startTime = 0L;
+
+  /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime() {
+    return startTime;
+  }
+
+  /**
+   * Returns the cumulated time of garbage operations since starting up.
+   *
+   * @return The cumulated time of garbage operations since starting up.
+   */
+  public long getGarbageTime() {
+    return logFile.garbageTime;
+  }
+
+  /**
+   * Returns the ratio of garbage operations since starting up.
+   *
+   * @return The ratio of garbage operations since starting up.
+   */
+  public int getGarbageRatio() {
+    return (int) ((logFile.garbageTime *100) / (System.currentTimeMillis() - startTime));
+  }
+
+  /**
+   *  The Repository classname implementation.
+   *  This value can be set for a particular server by setting the
+   * <code>NTRepositoryImpl</code> specific property. By default its value
+   * is "fr.dyade.aaa.util.FileRepository".
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  String repositoryImpl = "fr.dyade.aaa.util.FileRepository";
+
+  /**
+   * Returns the Repository classname implementation.
+   *
+   * @return The Repository classname implementation.
+   */
+  public String getRepositoryImpl() {
+    return repositoryImpl;
+  }
+
+  /**
+   * Returns the number of save operation to repository.
+   *
+   * @return The number of save operation to repository.
+   */
+  public int getNbSavedObjects() {
+    return repository.getNbSavedObjects();
+  }
+
+  /**
+   * Returns the number of delete operation on repository.
+   *
+   * @return The number of delete operation on repository.
+   */
+  public int getNbDeletedObjects() {
+    return repository.getNbDeletedObjects();
+  }
+
+  /**
+   * Returns the number of useless delete operation on repository.
+   *
+   * @return The number of useless delete operation on repository.
+   */
+  public int getNbBadDeletedObjects() {
+    return repository.getNbBadDeletedObjects();
+  }
+
+  /**
+   * Returns the number of load operation from repository.
+   *
+   * @return The number of load operation from repository.
+   */
+  public int getNbLoadedObjects() {
+    return repository.getNbLoadedObjects();
+  }
+
   /** Log context associated with each Thread using NTransaction. */
   private class Context {
     Hashtable log = null;
@@ -132,6 +254,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   File dir = null;
 
   LogFile logFile = null;
+
+  Repository repository = null;
 
   /**
    *  ThreadLocal variable used to get the log to associate state with each
@@ -165,13 +289,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
                                            LogMemoryCapacity).intValue();
     LogFileSize = Integer.getInteger("NTLogFileSize",
                                      LogFileSize /Mb).intValue() *Mb;
+    MaxLogMemorySize = Integer.getInteger("NTLogMemorySize",
+                                          MaxLogMemorySize /Kb).intValue() *Kb;
 
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
-
-    logFile = new LogFile(dir);
 
     // Saves the transaction classname in order to prevent use of a
     // different one after restart (see AgentServer.init).
@@ -187,14 +311,35 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       if (ldos != null) ldos.close();
     }
 
+    try {
+      repositoryImpl = System.getProperty("NTRepositoryImpl", repositoryImpl);
+      repository = (Repository) Class.forName(repositoryImpl).newInstance();
+      repository.init(dir);
+    } catch (ClassNotFoundException exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "NTransaction, cannot initializes the repository ", exc);
+      throw new IOException(exc.getMessage());
+    } catch (InstantiationException exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "NTransaction, cannot initializes the repository ", exc);
+      throw new IOException(exc.getMessage());
+    } catch (IllegalAccessException exc) {
+      logmon.log(BasicLevel.FATAL,
+                 "NTransaction, cannot initializes the repository ", exc);
+      throw new IOException(exc.getMessage());
+    }
+    logFile = new LogFile(dir, repository);
+
     perThreadContext = new ThreadLocal() {
         protected synchronized Object initialValue() {
           return new Context();
         }
       };
 
+    startTime = System.currentTimeMillis();
+
     if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, initialized");
+      logmon.log(BasicLevel.INFO, "NTransaction, initialized " + startTime);
 
     /* The Transaction subsystem is ready */
     setPhase(FREE);
@@ -233,7 +378,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     phaseInfo = PhaseInfo[phase];
   }
 
-
   public final synchronized void begin() throws IOException {
     while (phase != FREE) {
       try {
@@ -249,14 +393,18 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *  Returns an array of strings naming the persistent objects denoted by
    * a name that satisfy the specified prefix. Each string is an object name.
    * 
-   *
    * @param prefix	the prefix
    * @return		An array of strings naming the persistent objects
    *		 denoted by a name that satisfy the specified prefix. The
    *		 array will be empty if no names match.
    */
-  public final synchronized String[] getList(String prefix) {
-    String[] list1 = dir.list(new StartWithFilter(prefix));
+  public synchronized String[] getList(String prefix) {
+    String[] list1 = null;
+    try {
+      list1 = repository.list(prefix);
+    } catch (IOException exc) {
+      // AF: TODO
+    }
     if (list1 == null) list1 = new String[0];
     Object[] list2 = logFile.log.keySet().toArray();
     int nb = list1.length;
@@ -402,7 +550,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return load(null, name);
   }
 
-  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NTransaction, load(" + dirName + ", " + name + ")");
 
@@ -414,23 +562,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 	ObjectInputStream ois = new ObjectInputStream(bis);	  
 	return ois.readObject();
       }
-
-      // Gets it from disk.      
-      File file;
-      Object obj;
-      if (dirName == null) {
-        file = new File(dir, name);
-      } else {
-        File parentDir = new File(dir, dirName);
-        file = new File(parentDir, name);
-      }
-      FileInputStream fis = new FileInputStream(file);
-      ObjectInputStream ois = new ObjectInputStream(fis);
-      obj = ois.readObject();
       
-      fis.close();
-      return obj;
+      // Gets it from disk.      
+      return repository.loadobj(dirName, name);
     } catch (FileNotFoundException exc) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction, load(" + dirName + ", " + name + ") NOT FOUND");
+
       return null;
     }
   }
@@ -440,31 +578,21 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
 
-  public final byte[] loadByteArray(String dirName, String name) throws IOException {
+  public byte[] loadByteArray(String dirName, String name) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "NTransaction, loadByteArray(" + dirName + ", " + name + ")");
+
     // First searchs in the logs a new value for the object.
     try {
       byte[] buf = getFromLog(dirName, name);
       if (buf != null) return buf;
 
       // Gets it from disk.      
-      File file;
-      if (dirName == null) {
-        file = new File(dir, name);
-      } else {
-        File parentDir = new File(dir, dirName);
-        file = new File(parentDir, name);
-      }
-      FileInputStream fis = new FileInputStream(file);
-      buf = new byte[(int) file.length()];
-      for (int nb=0; nb<buf.length; ) {
-        int ret = fis.read(buf, nb, buf.length-nb);
-        if (ret == -1) throw new EOFException();
-        nb += ret;
-      }
-      fis.close();
-
-      return buf;
+      return repository.load(dirName, name);
     } catch (FileNotFoundException exc) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction, loadByteArray(" + dirName + ", " + name + ") NOT FOUND");
+
       return null;
     }
   }
@@ -556,10 +684,10 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logmon.log(BasicLevel.INFO,
                  "NTransaction, stopped: " +
                  "garbage=" + logFile.garbageCount + ", " +
-                 "commit=" + logFile.commitCount);
+                 "commit=" + logFile.commitCount + ", " +
+                 "ratio=" + getGarbageRatio());
     }
   }
-
 
   /**
    * Close the transaction module.
@@ -570,6 +698,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   public synchronized void close() {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, stops");
+
+    if (phase == INIT) return;
 
     while (phase != FREE) {
       // Wait for the transaction subsystem to be free
@@ -587,7 +717,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logmon.log(BasicLevel.INFO,
                  "NTransaction, closed: " +
                  "garbage=" + logFile.garbageCount + ", " +
-                 "commit=" + logFile.commitCount);
+                 "commit=" + logFile.commitCount + ", " +
+                 "ratio=" + getGarbageRatio());
     }
   }
 
@@ -615,6 +746,11 @@ public final class NTransaction implements Transaction, NTransactionMBean {
      */
     int garbageCount = 0;
 
+    /**
+     * Cumulated time of garbage operations since starting up.
+     */
+    long garbageTime = 0l;
+
     /** Root directory of transaction storage */
     private File dir = null;
     /** Coherency lock filename */
@@ -622,9 +758,12 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     /** Coherency lock file */
     private File lockFile = null;
 
-    LogFile(File dir) throws IOException {
+    private Repository repository = null;
+
+    LogFile(File dir, Repository repository) throws IOException {
       super(4 * Kb);
       this.dir = dir;
+      this.repository = repository;
 
       boolean nolock = Boolean.getBoolean("NTNoLockFile");
       if (! nolock) {
@@ -748,6 +887,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       buf[count++] = (byte) ((v >>>  0) & 0xFF);
     }
 
+    int logMemorySize = 0;
+
     /**
      * Reports all buffered operations in logs.
      */
@@ -770,13 +911,20 @@ public final class NTransaction implements Transaction, NTransactionMBean {
         }
         writeUTF(op.name);
         if (op.type == Operation.SAVE) {
+          logMemorySize += op.value.length;
+
           writeInt(op.value.length);
           write(op.value);
         }
 
         // Reports all committed operation in clog
         op = (Operation) log.put(OperationKey.newKey(op.dirName, op.name), op);
-        if (op != null) op.free();
+        if (op != null) {
+          if (op.type == Operation.SAVE)
+            logMemorySize -= op.value.length;
+
+          op.free();
+        }
       }
       write(Operation.END);
 
@@ -797,15 +945,19 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
       ctxlog.clear();
 
-      if (current > LogFileSize) garbage();
+      if ((current > LogFileSize) || (logMemorySize > MaxLogMemorySize))
+        garbage();
     }
 
     /**
      * Reports all logged operations on disk.
      */
     private final void garbage() throws IOException {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.garbage()");
+      long start = System.currentTimeMillis();
+
+      if (logmon.isLoggable(BasicLevel.INFO))
+        logmon.log(BasicLevel.INFO,
+                   "NTransaction.LogFile.garbage() - begin");
 
       garbageCount += 1;
 
@@ -817,74 +969,38 @@ public final class NTransaction implements Transaction, NTransactionMBean {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        "NTransaction, LogFile.Save (" + op.dirName + ',' + op.name + ')');
-        
-          File file;
-          if (op.dirName == null) {
-            file = new File(dir, op.name);
-          } else {
-            File parentDir = new File(dir, op.dirName);
-            if (!parentDir.exists()) {
-              parentDir.mkdirs();
-            }
-            file = new File(parentDir, op.name);
-          }
 
-          FileOutputStream fos = new FileOutputStream(file);
-          fos.write(op.value);
-          fos.getFD().sync();
-          fos.close();
+          repository.save(op.dirName, op.name, op.value);
         } else if (op.type == Operation.DELETE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        "NTransaction, LogFile.Delete (" + op.dirName + ',' + op.name + ')');
 
-          File file;
-          boolean deleted;
-          if (op.dirName == null) {
-            file = new File(dir, op.name);
-            deleted = file.delete();
-          } else {
-            File parentDir = new File(dir, op.dirName);
-            file = new File(parentDir, op.name);
-            deleted = file.delete();
-            deleteDir(parentDir);
-          }
-
-          if (!deleted && file.exists())
-            logmon.log(BasicLevel.ERROR,
-                       "NTransaction, can't delete " + file.getCanonicalPath());
+          repository.delete(op.dirName, op.name);
+//           if (!deleted && file.exists())
+//             logmon.log(BasicLevel.ERROR,
+//                        "NTransaction, can't delete " + file.getCanonicalPath());
         }
         op.free();
       }
       //  Be careful, do not clear log before all modifications are reported
       // to disk, in order to avoid load errors.
       log.clear();
+      logMemorySize = 0;
+
+      repository.commit();
 
       current = 1;
       // Cleans log file
       logFile.seek(0);
       logFile.write(Operation.END);
 
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction, garbaged");
-    }
+      long end = System.currentTimeMillis();
+      garbageTime += end - start;
 
-    /**
-     * Delete the specified directory if it is empty.
-     * Also recursively delete the parent directories if they are empty.
-     */
-    private final void deleteDir(File dir) {
-      // Check the disk state. It may be false according to the transaction
-      // log but it doesn't matter because directories are lazily created.
-      String[] children = dir.list();
-      // children may be null if dir doesn't exist any more.
-      if (children != null && children.length == 0) {
-        dir.delete();
-        if (dir.getAbsolutePath().length() > 
-            this.dir.getAbsolutePath().length()) {
-          deleteDir(dir.getParentFile());
-        }
-      }
+      if (logmon.isLoggable(BasicLevel.INFO))
+        logmon.log(BasicLevel.INFO,
+                   "NTransaction.LogFile.garbage() - end: " + (end - start));
     }
 
     void stop() {
@@ -894,6 +1010,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       try {
         garbage();
         logFile.close();
+        repository.close();
       } catch (IOException exc) {
         logmon.log(BasicLevel.WARN, "NTransaction, can't close logfile", exc);
       }
