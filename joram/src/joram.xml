@@ -42,6 +42,9 @@
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/FileRepository.java"/>
+      <!-- include name="fr/dyade/aaa/util/DBRepository.java"/ -->
+      <!-- include name="fr/dyade/aaa/util/DBTransaction.java"/ -->
       <include name="fr/dyade/aaa/util/management/*.java"/>
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
       <include name="org/objectweb/joram/shared/admin/**/*.java"/>
@@ -289,6 +292,8 @@
     <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/midpapi.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/hsqldb.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/derby.jar" todir="${ship.dir}/lib"/ -->
     <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
