@@ -499,25 +499,18 @@ class ClientSubscription implements java.io.Serializable {
               && (! noLocal
                   || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
 
-        if (messagesTable.containsKey(msgId))
-          message = (Message) messagesTable.get(msgId);
-        else
+        // It's the first delivery, adds the message to the proxy's table
+        if (message.acksCounter == 0)
           messagesTable.put(msgId, message);
-
+        
         message.acksCounter++;
-
-        if (durable) {
-          message.durableAcksCounter++;
-//          if (message.durableAcksCounter == 1)
-//            message.save(proxyStringId); //NT: save in proxy
-        }
+        if (durable) message.durableAcksCounter++;
 
         messageIds.add(msgId);
 
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                  this + ": added msg " + msgId
-                                  + " for delivery.");
+                                  this + ": added msg " + msgId + " for delivery.");
       }
     }
   }
