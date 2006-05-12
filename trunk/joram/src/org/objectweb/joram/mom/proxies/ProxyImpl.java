@@ -133,7 +133,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   /** Reference to the active <code>ClientContext</code> instance. */
   private transient ClientContext activeCtx;  
 
-  private transient boolean haveDurableSub = false;
   /**
    * Constructs a <code>ProxyImpl</code> instance.
    */
@@ -171,8 +170,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
  
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
-
-    haveDurableSub = false;
 
     setActiveCtxId(-1);
     
@@ -257,7 +254,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         subsTable.remove(subName);
       // Reinitializing the durable ones.
       else {
-        haveDurableSub = true;
         cSub.reinitialize(getStringId(), 
                           messagesTable, 
                           messages,
@@ -786,8 +782,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (newSub) { // New subscription...
       // state change, so save.
       proxyAgent.setSave();
-      if (req.getDurable())
-        haveDurableSub = true;
       cSub = new ClientSubscription(proxyAgent.getId(),
                                     activeCtxId,
                                     req.getRequestId(),
@@ -1686,42 +1680,42 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   {
     // Browsing the target subscriptions:
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
-    if (tSub == null || tSub.isEmpty())
-      return;
-
-    // Setting the arrival order of the messages. 
-    // and save message if it is MessageSoftRef.
-    for (Enumeration msgs = rep.getMessages().elements(); 
-      msgs.hasMoreElements();) { 
-        
-      if (arrivalsCounter == Long.MAX_VALUE) 
-        arrivalsCounter = 0; 
-    
-      Message message = (Message) msgs.nextElement();
-      message.order = arrivalsCounter++;
-      
-      if (haveDurableSub || message instanceof MessageSoftRef) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(
-            BasicLevel.DEBUG,
-            " -> save message " + message);
-        message.save(proxyAgent.getId().toString());
-      }
-    } 
-
-    if (haveDurableSub)
-      proxyAgent.setSave();  
+    if (tSub == null || tSub.isEmpty()) return;
 
     String subName;
     ClientSubscription sub;
     for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
       subName = (String) names.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
-      if (sub == null)
-        return;
+      if (sub == null) continue;
 
       // Browsing the delivered messages.
       sub.browseNewMessages(rep.getMessages());
+    }
+
+    // Setting the arrival order of the messages and save message if it
+    // is MessageSoftRef.
+    boolean haveDurableSub = false;
+    for (Enumeration msgs = rep.getMessages().elements(); msgs.hasMoreElements();) { 
+      Message message = (Message) msgs.nextElement();
+      message.order = arrivalsCounter++;
+      
+      if ((message.durableAcksCounter > 0) ||
+          (message instanceof MessageSoftRef)) {
+        
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                  " -> save message " + message);
+        message.save(proxyAgent.getId().toString());
+      }
+    } 
+
+    if (haveDurableSub) proxyAgent.setSave();
+
+    for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
+      subName = (String) names.nextElement();
+      sub = (ClientSubscription) subsTable.get(subName);
+      if (sub == null) continue;
 
       // If the subscription is active, lauching a delivery sequence.
       if (sub.getActive()) {
