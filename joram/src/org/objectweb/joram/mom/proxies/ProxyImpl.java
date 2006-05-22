@@ -1676,8 +1676,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * Method implementing the proxy reaction to a <code>TopicMsgsReply</code>
    * holding messages published by a topic.
    */
-  private void doFwd(AgentId from, TopicMsgsReply rep)
-  {
+  private void doFwd(AgentId from, TopicMsgsReply rep) {
     // Browsing the target subscriptions:
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(from);
     if (tSub == null || tSub.isEmpty()) return;
@@ -1695,22 +1694,19 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // Setting the arrival order of the messages and save message if it
     // is MessageSoftRef.
-    boolean haveDurableSub = false;
     for (Enumeration msgs = rep.getMessages().elements(); msgs.hasMoreElements();) { 
       Message message = (Message) msgs.nextElement();
       message.order = arrivalsCounter++;
       
       if ((message.durableAcksCounter > 0) ||
           (message instanceof MessageSoftRef)) {
-        
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgProxy.log(BasicLevel.DEBUG,
                                   " -> save message " + message);
+        proxyAgent.setSave();
         message.save(proxyAgent.getId().toString());
       }
     } 
-
-    if (haveDurableSub) proxyAgent.setSave();
 
     for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
       subName = (String) names.nextElement();
