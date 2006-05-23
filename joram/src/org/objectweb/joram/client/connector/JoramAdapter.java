@@ -129,6 +129,9 @@ public class JoramAdapter
   /** Identifier of the JORAM server to start. */
   short serverId = 0;
 
+  /** Identifier of the JORAM replica to start in case of HA. */
+  short clusterId = AgentServer.NULL_ID;
+
   /** Platform servers identifiers. */
   List platformServersIds = null;
 
@@ -240,7 +243,7 @@ public class JoramAdapter
       }
 
       try {
-        AgentServer.init(serverId, serverName, null);
+        AgentServer.init(serverId, serverName, null, clusterId);
         AgentServer.start();
         if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO)) 
           AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
@@ -1156,28 +1159,27 @@ public class JoramAdapter
   // ------------------------------------------
   // --- JavaBean setter and getter methods ---
   // ------------------------------------------
-  public void setPlatformConfigDir(java.lang.String platformConfigDir)
-  {
+  public void setPlatformConfigDir(java.lang.String platformConfigDir) {
     this.platformConfigDir = platformConfigDir;
   }
 
-  public void setPersistentPlatform(java.lang.Boolean persistentPlatform)
-  {
+  public void setPersistentPlatform(java.lang.Boolean persistentPlatform) {
     this.persistentPlatform = persistentPlatform.booleanValue();
   }
 
-  public void setServerId(java.lang.Short serverId)
-  {
+  public void setServerId(java.lang.Short serverId) {
     this.serverId = serverId.shortValue();
   }
 
-  public void setServerName(java.lang.String serverName)
-  {
+  public void setClusterId(java.lang.Short clusterId) {
+    this.clusterId = clusterId.shortValue();
+  }
+
+  public void setServerName(java.lang.String serverName) {
     this.serverName = serverName;
   }
 
-  public void setAdminFile(java.lang.String adminFile)
-  {
+  public void setAdminFile(java.lang.String adminFile) {
     this.adminFile = adminFile;
   }
 
@@ -1185,18 +1187,15 @@ public class JoramAdapter
     this.adminFileXML = adminFileXML;
   }
 
-  public void setCollocatedServer(java.lang.Boolean collocatedServer)
-  {
+  public void setCollocatedServer(java.lang.Boolean collocatedServer) {
     collocated = collocatedServer.booleanValue();
   }
 
-  public void setHostName(java.lang.String hostName)
-  {
+  public void setHostName(java.lang.String hostName) {
     this.hostName = hostName;
   }
 
-  public void setServerPort(java.lang.Integer serverPort)
-  {
+  public void setServerPort(java.lang.Integer serverPort) {
     this.serverPort = serverPort.intValue();
   }
   
@@ -1212,28 +1211,23 @@ public class JoramAdapter
     this.cnxPendingTimer = cnxPendingTimer.intValue();
   }
 
-  public java.lang.String getPlatformConfigDir()
-  {
+  public java.lang.String getPlatformConfigDir() {
     return platformConfigDir;
   }
 
-  public java.lang.Boolean getPersistentPlatform()
-  {
+  public java.lang.Boolean getPersistentPlatform() {
     return new Boolean(persistentPlatform);
   }
 
-  public Short getServerId()
-  {
+  public Short getServerId() {
     return new Short(serverId);
   }
 
-  public java.lang.String getServerName()
-  {
+  public java.lang.String getServerName() {
     return serverName;
   }
 
-  public java.lang.String getAdminFile()
-  {
+  public java.lang.String getAdminFile() {
     return adminFile;
   }
 
@@ -1241,18 +1235,15 @@ public class JoramAdapter
     return adminFileXML;
   }
 
-  public java.lang.Boolean getCollocatedServer()
-  {
+  public java.lang.Boolean getCollocatedServer() {
     return new Boolean(collocated);
   }
 
-  public java.lang.String getHostName()
-  {
+  public java.lang.String getHostName() {
     return hostName;
   }
 
-  public java.lang.Integer getServerPort()
-  {
+  public java.lang.Integer getServerPort() {
     return new Integer(serverPort);
   }
 
