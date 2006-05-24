@@ -385,16 +385,29 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     synchronized (this) {
       if (status == Status.CLOSE) 
         return;
+      // The status must be changed before
+      // the call to Session.closeConsumer
+      // in order to enable Session.preReceive
+      // to check if the consumer has been closed.
+      setStatus(Status.CLOSE);
     }
     
     if (! queueMode) {
       // For a topic, remove the subscription.
       if (durableSubscriber) {
-        sess.syncRequest(
-          new ConsumerCloseSubRequest(targetName));
+        try {
+          sess.syncRequest(new ConsumerCloseSubRequest(targetName));
+        } catch (JMSException exc) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+        }
       } else {
-        sess.syncRequest(
-          new ConsumerUnsubRequest(targetName));
+        try {
+          sess.syncRequest(new ConsumerUnsubRequest(targetName));
+        } catch (JMSException exc) {
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+        }
       }
     }
     
@@ -404,8 +417,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       // Stop the listener.
       sess.removeMessageListener(mcl, false);
     }
-    
-    setStatus(Status.CLOSE);
   }
 
   void activateMessageInput() throws JMSException {
