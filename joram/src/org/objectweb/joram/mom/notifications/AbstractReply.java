@@ -61,8 +61,20 @@ public abstract class AbstractReply extends AbstractNotification
     return correlationId;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ", correlationId=" + correlationId + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(", correlationId=").append(correlationId);
+    output.append(')');
+
+    return output;
   }
 }

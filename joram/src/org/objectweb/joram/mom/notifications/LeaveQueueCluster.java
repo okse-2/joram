@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
@@ -31,13 +32,20 @@ public class LeaveQueueCluster extends QueueClusterNot {
     this.removeQueue = removeQueue;
   }
 
-  public String toString() {
-    StringBuffer str = new StringBuffer();
-    str.append("LeaveQueueCluster (");
-    str.append(super.toString());
-    str.append(", removeQueue");
-    str.append(removeQueue);
-    str.append(")");
-    return str.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(", removeQueue=").append(removeQueue);
+    output.append(')');
+
+    return output;
   }
 }

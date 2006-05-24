@@ -64,8 +64,20 @@ public abstract class AbstractRequest extends AbstractNotification
     return requestId;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      "requestId=" + requestId + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",requestId=").append(requestId);
+    output.append(')');
+
+    return output;
   }
 }

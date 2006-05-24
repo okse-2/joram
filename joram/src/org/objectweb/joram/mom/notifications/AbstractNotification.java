@@ -70,8 +70,20 @@ public abstract class AbstractNotification
     return persistent;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ", clientContext=" + clientContext + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(", clientContext=").append(clientContext);
+    output.append(')');
+
+    return output;
   }
 }
