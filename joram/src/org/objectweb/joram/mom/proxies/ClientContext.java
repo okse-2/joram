@@ -65,6 +65,10 @@ class ClientContext implements java.io.Serializable
   private transient Vector activeSubs;
   /** Pending replies waiting for the context to be activated. */
   private transient Vector repliesBuffer;
+  /** Contexts waiting for the replies from some local agents*/
+  private transient Hashtable commitTable;
+  
+  private transient ProxyAgentItf proxy;
 
   /**
    * Constructs a <code>ClientContext</code> instance.
@@ -85,7 +89,10 @@ class ClientContext implements java.io.Serializable
     activeSubs = new Vector();
     repliesBuffer = new Vector();
   }
-
+  
+  void setProxyAgent(ProxyAgentItf px) {
+    proxy = px;
+  }
  
   /** Returns the identifier of the context. */
   int getId()
@@ -113,6 +120,7 @@ class ClientContext implements java.io.Serializable
   void addTemporaryDestination(AgentId destId)
   {
     tempDestinations.add(destId);
+    proxy.setSave();
   }
    
   /** Returns the temporary destinations' identifiers. */
@@ -126,6 +134,7 @@ class ClientContext implements java.io.Serializable
   {
     deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
+    proxy.setSave();
   }
 
   /** Adds a pending delivery. */
@@ -189,12 +198,72 @@ class ClientContext implements java.io.Serializable
   void addDeliveringQueue(AgentId queueId)
   {
     deliveringQueues.put(queueId, queueId);
+    proxy.setSave();
   }
 
   /** Returns the identifiers of the delivering queues. */
   Enumeration getDeliveringQueues()
   {
     return deliveringQueues.keys();
+  }
+  
+  /**
+   * Some requests may require to wait for several
+   * SendReplyNot notifications before replying to the client.
+   * 
+   * @param requestId
+   * @param asyncReplyCount
+   */
+  void addMultiReplyContext(int requestId, int asyncReplyCount) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
+    if (commitTable == null) commitTable = new Hashtable();
+    commitTable.put(
+        new Integer(requestId), 
+        new MultiReplyContext(asyncReplyCount));
+    proxy.setSave();
+  }
+  
+  /**
+   * Called by UserAgent when a SendReplyNot
+   * arrived.
+   * 
+   * @param requestId
+   * @return
+   * > 0 if there are still some pending replies
+   * 0 if all the replies arrived (the context is removed)
+   * or if the context doesn't exist
+   */
+  int setReply(int requestId) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].setReply(" + requestId + ')');
+    if (commitTable == null) return 0;
+    Integer ctxKey = (Integer)new Integer(requestId);
+    MultiReplyContext ctx = 
+      (MultiReplyContext)commitTable.get(ctxKey);
+    if (ctx == null) return 0;
+    else {
+      ctx.counter--;
+      if (ctx.counter == 0) {
+        commitTable.remove(ctxKey);
+        proxy.setSave();
+      }
+      return ctx.counter;
+    }
+  }
+  
+  static class MultiReplyContext {
+    public int counter;
+    
+    MultiReplyContext(int c) {
+      counter = c;
+    }
   }
 
   /** Registers a given transaction "prepare". */
@@ -203,9 +272,10 @@ class ClientContext implements java.io.Serializable
     if (transactionsTable == null)
       transactionsTable = new Hashtable();
 
-    if (! transactionsTable.containsKey(key))
+    if (! transactionsTable.containsKey(key)) {
       transactionsTable.put(key, prepare);
-    else
+      proxy.setSave();
+    } else
       throw new Exception("Prepare request already received by "
                           + "TM for this transaction.");
   }
@@ -214,8 +284,10 @@ class ClientContext implements java.io.Serializable
   XACnxPrepare getTxPrepare(Object key)
   {
     XACnxPrepare prepare = null;
-    if (transactionsTable != null)
+    if (transactionsTable != null) {
       prepare = (XACnxPrepare) transactionsTable.remove(key);
+      proxy.setSave();
+    }
     return prepare;
   }
 

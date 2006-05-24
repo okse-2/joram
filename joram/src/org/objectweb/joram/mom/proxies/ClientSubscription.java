@@ -110,6 +110,8 @@ class ClientSubscription implements java.io.Serializable {
 
   /** string proxy agent id */
   private transient String proxyStringId;
+  
+  private transient ProxyAgentItf proxy;
 
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -283,6 +285,10 @@ class ClientSubscription implements java.io.Serializable {
     return res;
   }
   
+  void setProxyAgent(ProxyAgentItf px) {
+    proxy = px;
+  }
+  
   /**
    * Re-initializes the client subscription.
    * 
@@ -371,6 +377,9 @@ class ClientSubscription implements java.io.Serializable {
     active = true;
     requestId = -1;
     toListener = false;
+    
+    // Some updated attributes are persistent
+    save();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -390,6 +399,9 @@ class ClientSubscription implements java.io.Serializable {
     // Denying all delivered messages:
     deny(deliveredIds.keys());
     deliveredIds.clear();
+    
+    // deliveredIds is persistent
+    save();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -460,12 +472,14 @@ class ClientSubscription implements java.io.Serializable {
   void setDMQId(AgentId dmqId)
   {
     this.dmqId = dmqId;
+    save();
   }
 
   /** Sets the subscription's threshold value. */
   void setThreshold(Integer threshold)
   {
     this.threshold = threshold;
+    save();
   }
 
   
@@ -502,11 +516,13 @@ class ClientSubscription implements java.io.Serializable {
         // It's the first delivery, adds the message to the proxy's table
         if (message.acksCounter == 0)
           messagesTable.put(msgId, message);
-        
+
         message.acksCounter++;
-        if (durable) message.durableAcksCounter++;
+        if (durable)
+          message.durableAcksCounter++;
 
         messageIds.add(msgId);
+        save();
 
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -551,11 +567,16 @@ class ClientSubscription implements java.io.Serializable {
     Vector deliverables = new Vector();
     ClientMessages deadMessages = null;
 
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+          " -> messageIds.size() = " + messageIds.size());
+    
     // Delivering to a listener.
     if (toListener) {
       // Browsing the identifiers of the messages to deliver.
       while (! messageIds.isEmpty()) {
         id = (String) messageIds.remove(0);
+        save();
         message = (Message) messagesTable.get(id);
 
         // Message still exists.
@@ -656,6 +677,7 @@ class ClientSubscription implements java.io.Serializable {
               MomTracing.dbgProxy.log(
                 BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
+            save();
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
@@ -675,10 +697,11 @@ class ClientSubscription implements java.io.Serializable {
         // Message has already been deleted.
         else {
           if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(
-              BasicLevel.DEBUG, " -> deleted message");
+            MomTracing.dbgProxy.log( 
+              BasicLevel.DEBUG, " -> deleted message " + id);
           messageIds.remove(id);
           deniedMsgs.remove(id);
+          save();
         }
       }
 
@@ -686,6 +709,7 @@ class ClientSubscription implements java.io.Serializable {
       if (keptMsg != null) {
         messageIds.remove(keptMsg.getIdentifier());
         deliveredIds.put(keptMsg.getIdentifier(), keptMsg.getIdentifier());
+        save();
 
         // Setting the message's deliveryCount and denied fields.
         deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getIdentifier());
@@ -741,6 +765,7 @@ class ClientSubscription implements java.io.Serializable {
     
     deliveredIds.remove(id);
     deniedMsgs.remove(id);
+    save();
     Message msg = (Message) messagesTable.get(id);
     
     // Message may be null if it is not valid anymore
@@ -784,6 +809,7 @@ class ClientSubscription implements java.io.Serializable {
 
         continue denyLoop;
       }
+      save();
       
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
@@ -865,7 +891,8 @@ class ClientSubscription implements java.io.Serializable {
   {
     for (Enumeration e = deliveredIds.keys(); e.hasMoreElements();)
       messageIds.add(e.nextElement());
-
+    save();
+    
     String id;
     Message msg;
     for (Enumeration allMessageIds = messageIds.elements();
@@ -931,6 +958,7 @@ class ClientSubscription implements java.io.Serializable {
 
   void deleteMessage(String msgId) {
     messageIds.remove(msgId);
+    save();
     Message msg = removeMessage(msgId);
     if (msg != null) {
       ClientMessages deadMessages = new ClientMessages();
@@ -955,6 +983,7 @@ class ClientSubscription implements java.io.Serializable {
       sendToDMQ(deadMessages);
     }
     messageIds.clear();
+    save();
   }
 
   /**
@@ -976,6 +1005,10 @@ class ClientSubscription implements java.io.Serializable {
       }
     }
     return msg;
+  }
+  
+  private void save() {
+    if (durable) proxy.setSave();
   }
 
   public void readBag(ObjectInputStream in) 
