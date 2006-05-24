@@ -324,8 +324,11 @@ public class ReliableTcpClient {
         BasicLevel.DEBUG, 
         "ReliableTcpClient[" + name + ',' + key + 
         "].send(" + request + ')');
-    if (status != CONNECT) 
-      throw new IOException("Closed connection");
+    if (status == CLOSE) throw new IOException("Closed connection");
+    if (status != CONNECT) {
+      if (reconnect) waitForReconnection();
+      else throw new IOException("Closed connection");
+    }
     while (true) {
       try {
         connection.send(request);
