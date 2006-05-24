@@ -254,6 +254,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         subsTable.remove(subName);
       // Reinitializing the durable ones.
       else {
+        cSub.setProxyAgent(proxyAgent);
         cSub.reinitialize(getStringId(), 
                           messagesTable, 
                           messages,
@@ -299,7 +300,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                 + " with id: " + request.getRequestId()
                                 + " through activeCtx: " + key);
       }
-      // Requests directly processed:
       if (request instanceof ProducerMessages)
         reactToClientRequest(key, (ProducerMessages) request);
       else if (request instanceof ConsumerReceiveRequest)
@@ -307,8 +307,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       else if (request instanceof ConsumerSetListRequest)
         reactToClientRequest(key, (ConsumerSetListRequest) request);
       else if (request instanceof QBrowseRequest)
-        reactToClientRequest(key, (QBrowseRequest) request);      
-      // Other requests are forwarded to the proxy:
+        reactToClientRequest(key, (QBrowseRequest) request);
+      else if (request instanceof JmsRequestGroup)
+        reactToClientRequest(key, (JmsRequestGroup) request);
       else {
         doReact(key, request);   
       }
@@ -343,29 +344,36 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       req.getRequestId(),
       req.getMessages());
 
-    // Setting the producer's DMQ identifier field: 
+    setDmq(not);
+    
+    
+    if (destId.getTo() == proxyAgent.getId().getTo()) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> local sending");
+      not.setPersistent(false);
+      if (req.getAsyncSend()) {
+        not.setAsyncSend(true);
+      }
+    } else {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> remote sending");
+      if (!req.getAsyncSend()) {
+        proxyAgent.sendNot(proxyAgent.getId(), new SendReplyNot(key, req
+            .getRequestId()));
+      }
+    }
+    
+    proxyAgent.sendNot(destId, not);
+  }
+  
+  private void setDmq(ClientMessages not) {
+    //  Setting the producer's DMQ identifier field: 
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
       not.setDMQId(DeadMQueueImpl.getId());
     }
-    
-    if (destId.getTo() == proxyAgent.getId().getTo()) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                " -> local sending");
-      not.setPersistent(false);
-      proxyAgent.sendNot(destId, not);
-    } else {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                " -> remote sending");
-      proxyAgent.sendNot(destId, not);
-      proxyAgent.sendNot(proxyAgent.getId(), 
-                         new SendReplyNot(key, req.getRequestId()));
-    }
   }
-  
 
   /**
    * Either forwards the <code>ConsumerReceiveRequest</code> request as a
@@ -439,7 +447,22 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                        new BrowseRequest(key,
                                          req.getRequestId(),
                                          req.getSelector()));
-  }  
+  }
+  
+  private void reactToClientRequest(int key, JmsRequestGroup request) {
+    AbstractJmsRequest[] requests = request.getRequests();
+    RequestBuffer rm = new RequestBuffer(proxyAgent);
+    for (int i = 0; i < requests.length; i++) {
+      if (requests[i] instanceof ProducerMessages) {
+        ProducerMessages pm =(ProducerMessages) requests[i];
+        rm.put(key, pm);
+      } else {
+        reactToClientRequest(key, requests[i]);
+      }
+    }
+    
+    rm.flush();
+  }
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -456,8 +479,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <li><code>AdminReply</code> administration replies,</li>
    * <li><code>fr.dyade.aaa.agent.UnknownAgent</code>.</li>
    * </ul>
-   * @exception UnknownNotificationException  If the notification is not
-   *              expected.
+   * 
+   * @exception UnknownNotificationException
+   *              If the notification is not expected.
    */ 
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException
@@ -577,6 +601,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         doReact(key, (CnxCloseRequest) request);
       else if (request instanceof ActivateConsumerRequest)
         doReact(key, (ActivateConsumerRequest) request);
+      else if (request instanceof CommitRequest)
+        doReact(key, (CommitRequest)request);
     }
     catch (MomException mE) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
@@ -627,6 +653,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     setActiveCtxId(key);
     activeCtx = new ClientContext(proxyAgent.getId(), key);
+    activeCtx.setProxyAgent(proxyAgent);
     contexts.put(new Integer(key), activeCtx);
     
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -793,6 +820,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                     dmqId,
                                     threshold,
                                     messagesTable);
+      cSub.setProxyAgent(proxyAgent);
      
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         MomTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -1494,14 +1522,181 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     doReply(not.key, not.reply);
   }
 
+  /**
+   * The method closes a given context by denying the non acknowledged messages
+   * delivered to this context, and deleting its temporary subscriptions and
+   * destinations.
+   */
   private void doReact(int key, CnxCloseRequest req) {
-    closeConnection(key);
+    // state change, so save.
+    proxyAgent.setSave();
+
+    //setCtx(cKey);
+
+    // Denying the non acknowledged messages:
+    AgentId id;
+    for (Enumeration ids = activeCtx.getDeliveringQueues(); ids
+        .hasMoreElements();) {
+      id = (AgentId) ids.nextElement();
+      proxyAgent.sendNot(id, new DenyRequest(key));
+    }
+
+    // Removing or deactivating the subscriptions:
+    String subName = null;
+    ClientSubscription sub;
+    Vector topics = new Vector();
+    for (Enumeration subs = activeCtx.getActiveSubs(); subs.hasMoreElements();) {
+      subName = (String) subs.nextElement();
+      sub = (ClientSubscription) subsTable.get(subName);
+
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deactivate subscription "
+            + subName + ", topic id = " + sub.getTopicId());
+
+      if (sub.getDurable()) {
+        sub.deactivate();
+
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
+              + subName + " de-activated.");
+      } else {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> topicsTable = "
+              + topicsTable);
+
+        sub.delete();
+        subsTable.remove(subName);
+        TopicSubscription tSub = (TopicSubscription) topicsTable.get(sub
+            .getTopicId());
+        tSub.removeSubscription(subName);
+
+        if (!topics.contains(sub.getTopicId()))
+          topics.add(sub.getTopicId());
+
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
+              + subName + " deleted.");
+      }
+    }
+    // Browsing the topics which at least have one subscription removed.
+    for (Enumeration topicIds = topics.elements(); topicIds.hasMoreElements();)
+      updateSubscriptionToTopic((AgentId) topicIds.nextElement(), -1, -1);
+
+    // Deleting the temporary destinations:
+    AgentId destId;
+    for (Enumeration dests = activeCtx.getTempDestinations(); dests
+        .hasMoreElements();) {
+      destId = (AgentId) dests.nextElement();
+      activeCtx.removeTemporaryDestination(destId);
+      deleteTemporaryDestination(destId);
+
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
+            + " destination " + destId.toString());
+    }
+
+    // Saving the prepared transactions.
+    Enumeration xids = activeCtx.getTxIds();
+    Xid xid;
+    XACnxPrepare recoveredPrepare;
+    XACnxPrepare prepare;
+    while (xids.hasMoreElements()) {
+      if (recoveredTransactions == null)
+        recoveredTransactions = new Hashtable();
+
+      xid = (Xid) xids.nextElement();
+
+      recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
+      prepare = activeCtx.getTxPrepare(xid);
+
+      if (recoveredPrepare == null)
+        recoveredTransactions.put(xid, prepare);
+      else {
+        recoveredPrepare.getSendings().addAll(prepare.getSendings());
+        recoveredPrepare.getAcks().addAll(prepare.getAcks());
+      }
+    }
+
+    // Finally, deleting the context:
+    contexts.remove(new Integer(key));
+    activeCtx = null;
+    setActiveCtxId(-1);
+
+    CnxCloseReply reply = new CnxCloseReply();
+    reply.setCorrelationId(req.getRequestId());
+    proxyAgent.sendToClient(key, reply);
   }
 
   private void doReact(int key, ActivateConsumerRequest req) {
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
     sub.setActive(req.getActivate());
+  }
+  
+  private void doReact(int key, CommitRequest req) {
+    // The commit may involve some local agents
+    int asyncReplyCount = 0;
+    
+    Enumeration pms = req.getProducerMessages();
+    if (pms != null) {
+      while (pms.hasMoreElements()) {
+        ProducerMessages pm = (ProducerMessages) pms.nextElement();
+        AgentId destId = AgentId.fromString(pm.getTarget());
+        ClientMessages not = new ClientMessages(key, 
+            req.getRequestId(), pm.getMessages());
+        setDmq(not);    
+        if (destId.getTo() == proxyAgent.getId().getTo()) {
+          // local sending
+          not.setPersistent(false);
+          if (req.getAsyncSend()) {
+            not.setAsyncSend(true);
+          } else {
+            asyncReplyCount++;
+          }
+        }
+        proxyAgent.sendNot(destId, not);
+      }
+    }
+    
+    Enumeration acks = req.getAckRequests();
+    if (acks != null) {
+      while (acks.hasMoreElements()) {
+        SessAckRequest sar = (SessAckRequest) acks.nextElement();
+        if (sar.getQueueMode()) {
+          AgentId qId = AgentId.fromString(sar.getTarget());
+          Vector ids = sar.getIds();
+          AcknowledgeRequest not = new AcknowledgeRequest(activeCtxId, req
+              .getRequestId(), ids);
+          if (qId.getTo() == proxyAgent.getId().getTo()) {
+            // local sending
+            not.setPersistent(false);
+            // No reply to wait for
+          }
+
+          proxyAgent.sendNot(qId, not);
+        } else {
+          String subName = sar.getTarget();
+          ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+          if (sub != null) {
+            sub.acknowledge(sar.getIds().elements());
+            proxyAgent.setSave();
+          }
+        }
+      }
+    }
+   
+    if (!req.getAsyncSend()) {
+      if (asyncReplyCount == 0) {
+        proxyAgent.sendNot(proxyAgent.getId(), new SendReplyNot(key, req
+            .getRequestId()));
+      } else {
+        // we need to wait for the replies
+        // from the local agents
+        // before replying to the client.
+        activeCtx.addMultiReplyContext(req.getRequestId(), asyncReplyCount);
+      }
+    }
+    // else the client doesn't expect any ack
   }
 
   /**
@@ -1646,8 +1841,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * destination as a <code>QBrowseReply</code> destinated to the
    * requesting client.
    */
-  private void doFwd(BrowseReply rep)
-  {
+  private void doFwd(BrowseReply rep) {
     try {
       // Updating the active context:
       setCtx(rep.getClientContext());
@@ -1662,8 +1856,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * Forwards the topic's <code>SubscribeReply</code> as a
    * <code>ServerReply</code>.
    */
-  private void doFwd(SubscribeReply rep)
-  {
+  private void doFwd(SubscribeReply rep) {
     try {
       setCtx(rep.getClientContext());
       doReply(new ServerReply(rep.getCorrelationId()));
@@ -1705,6 +1898,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                   " -> save message " + message);
         proxyAgent.setSave();
         message.save(proxyAgent.getId().toString());
+        proxyAgent.setSave();
       }
     } 
 
@@ -1716,6 +1910,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       // If the subscription is active, lauching a delivery sequence.
       if (sub.getActive()) {
         ConsumerMessages consM = sub.deliver();
+        
         if (consM != null) {
           try {
             setCtx(sub.getContextId());
@@ -2249,7 +2444,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       throw new StateException("Context " + key + " is closed or broken.");
     }
   }
-
  
   /**
    * Method used for sending an <code>AbstractJmsReply</code> back to an
@@ -2259,6 +2453,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doReply(AbstractJmsReply reply) {
     doReply(activeCtxId, reply);
+  }
+
+  ClientContext getClientContext(int ctxId) {
+    return (ClientContext)contexts.get(
+      new Integer(ctxId));
   }
 
   /**
@@ -2284,113 +2483,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(dmqId, messages);
     else if (DeadMQueueImpl.getId() != null)
       proxyAgent.sendNot(DeadMQueueImpl.getId(), messages);
-  }
-
-  
-  /**
-   * The method closes a given context by denying the non acknowledged
-   * messages delivered to this context, and deleting its temporary
-   * subscriptions and destinations.
-   */
-  private void closeConnection(int key) {
-    // state change, so save.
-    proxyAgent.setSave();
-    
-      //setCtx(cKey);
-
-      // Denying the non acknowledged messages:
-      AgentId id;
-      for (Enumeration ids = activeCtx.getDeliveringQueues();
-           ids.hasMoreElements();) {
-        id = (AgentId) ids.nextElement();
-        proxyAgent.sendNot(id, new DenyRequest(key));
-      }
-
-      // Removing or deactivating the subscriptions:
-      String subName = null;
-      ClientSubscription sub;
-      Vector topics = new Vector();
-      for (Enumeration subs = activeCtx.getActiveSubs();
-           subs.hasMoreElements();) {
-        subName = (String) subs.nextElement();
-        sub = (ClientSubscription) subsTable.get(subName);
-
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(
-            BasicLevel.DEBUG, 
-            "Deactivate subscription " + subName +
-            ", topic id = " + sub.getTopicId());
-        
-        if (sub.getDurable()) {
-          sub.deactivate();
-  
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
-                                    + subName + " de-activated.");
-        }
-        else {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(
-              BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
-
-          sub.delete();
-          subsTable.remove(subName);
-          TopicSubscription tSub =
-            (TopicSubscription) topicsTable.get(sub.getTopicId());
-          tSub.removeSubscription(subName);
-
-          if (! topics.contains(sub.getTopicId()))
-            topics.add(sub.getTopicId());
-
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
-                                    + subName + " deleted.");
-        }
-      }
-      // Browsing the topics which at least have one subscription removed.
-      for (Enumeration topicIds = topics.elements();
-           topicIds.hasMoreElements();)
-         updateSubscriptionToTopic((AgentId) topicIds.nextElement(), -1, -1);
-
-      // Deleting the temporary destinations:
-      AgentId destId;
-      for (Enumeration dests = activeCtx.getTempDestinations();
-           dests.hasMoreElements();) {
-        destId = (AgentId) dests.nextElement();
-        activeCtx.removeTemporaryDestination(destId);
-        deleteTemporaryDestination(destId);
-    
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
-                                  + " destination " + destId.toString());
-      }
-
-      // Saving the prepared transactions.
-      Enumeration xids = activeCtx.getTxIds();
-      Xid xid;
-      XACnxPrepare recoveredPrepare;
-      XACnxPrepare prepare;
-      while (xids.hasMoreElements()) {
-        if (recoveredTransactions == null)
-          recoveredTransactions = new Hashtable();
-
-        xid = (Xid) xids.nextElement();
-
-        recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
-        prepare = activeCtx.getTxPrepare(xid);
-
-        if (recoveredPrepare == null)
-          recoveredTransactions.put(xid, prepare);
-        else {
-          recoveredPrepare.getSendings().addAll(prepare.getSendings());
-          recoveredPrepare.getAcks().addAll(prepare.getAcks());
-        }
-      }
-     
-      // Finally, deleting the context: 
-      contexts.remove(new Integer(key));
-      activeCtx = null;
-      setActiveCtxId(-1);
   }
 
   /**
@@ -2522,12 +2614,16 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     Enumeration elements = contexts.elements();
     while (elements.hasMoreElements()) {
-      ((ClientContext)elements.nextElement()).readBag(in);
+      ClientContext cc = (ClientContext)elements.nextElement();
+      cc.setProxyAgent(proxyAgent);
+      cc.readBag(in);
     }
 
     elements = subsTable.elements();
     while (elements.hasMoreElements()) {
-      ((ClientSubscription)elements.nextElement()).readBag(in);
+      ClientSubscription cs = (ClientSubscription)elements.nextElement();
+      cs.setProxyAgent(proxyAgent);
+      cs.readBag(in);
     }
 
     activeCtx = (ClientContext)contexts.get(

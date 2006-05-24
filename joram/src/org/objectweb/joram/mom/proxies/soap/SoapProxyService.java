@@ -104,13 +104,15 @@ public class SoapProxyService {
       false, heartBeat);	
     ocn.invoke(proxyId);
 
-    ConnectionContext ctx = new ConnectionContext(
+    StandardConnectionContext cc = 
+      (StandardConnectionContext)ocn.getConnectionContext();
+    ProxyConnectionContext pcc = new ProxyConnectionContext(
       proxyId,
-      (Queue)ocn.getReplyQueue());
+      (Queue)cc.getQueue());
     connections.put(new ConnectionKey(
-      userName, ocn.getKey()), ctx);
+      userName, cc.getKey()), pcc);
     
-    return ocn.getKey();
+    return cc.getKey();
   }
   
   /**
@@ -142,17 +144,17 @@ public class SoapProxyService {
                               + " passes request " + request + " with id "
                               + request.getRequestId() + " to proxy's cnx "
                               + cnxId);
-    ConnectionContext ctx = 
-      (ConnectionContext)connections.get(
+    ProxyConnectionContext ctx = 
+      (ProxyConnectionContext)connections.get(
         new ConnectionKey(name, cnxId));
     if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
-      Channel.sendTo(ctx.proxyId,
-                     new RequestNot(cnxId, request));
-    }
-    if (request instanceof ProducerMessages) {
-      FlowControl.flowControl();
+      ConnectionManager.sendToProxy(
+          ctx.proxyId,
+          cnxId,
+          request, 
+          request);
     }
   }
 
@@ -168,8 +170,8 @@ public class SoapProxyService {
   public java.util.Hashtable getReply(String name, int cnxId) throws Exception
   {
     ConnectionKey ckey = new ConnectionKey(name, cnxId);
-    ConnectionContext ctx = 
-      (ConnectionContext)connections.get(ckey);
+    ProxyConnectionContext ctx = 
+      (ProxyConnectionContext)connections.get(ckey);
     if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
@@ -213,11 +215,11 @@ public class SoapProxyService {
     }
   }
 
-  static class ConnectionContext {
+  static class ProxyConnectionContext {
     AgentId proxyId;    
     Queue replyQueue;
 
-    ConnectionContext(AgentId proxyId,
+    ProxyConnectionContext(AgentId proxyId,
                       Queue replyQueue) {
       this.proxyId = proxyId;
       this.replyQueue = replyQueue;

@@ -160,6 +160,16 @@ public class ConsumerMessages extends AbstractJmsReply
     message = msg;
   }
 
+  public int getMessageCount() {
+    if (messages == null) {
+      if (message == null)
+        return 0;
+      else
+        return 1;
+    } else
+      return messages.size();
+  }
+  
   /**
    * Transforms this reply into a hashtable of primitive values that can
    * be vehiculated through the SOAP protocol.

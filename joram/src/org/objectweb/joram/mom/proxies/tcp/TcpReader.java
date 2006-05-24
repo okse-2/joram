@@ -27,9 +27,12 @@ import java.io.IOException;
 
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
+import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.FlowControl;
+import org.objectweb.joram.mom.proxies.MultiCnxSync;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
-import org.objectweb.joram.mom.proxies.ProxyMessageNot;
+import org.objectweb.joram.mom.proxies.RequestNot;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -83,14 +86,12 @@ public class TcpReader extends Daemon {
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
               + msg);
-
-        Channel.sendTo(proxyId,
-            new ProxyMessageNot(tcpConnection.getKey(), msg));
-
+        ConnectionManager.sendToProxy(
+            proxyId,
+            tcpConnection.getKey(),
+            (AbstractJmsRequest)msg.getObject(), 
+            msg);
         canStop = true;
-        if (msg.getObject() instanceof ProducerMessages) {
-          FlowControl.flowControl();
-        }
       }
     } catch (Throwable error) {
       canStop = false;

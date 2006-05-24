@@ -40,7 +40,13 @@ public class ProducerMessages extends AbstractJmsRequest
   /** The wrapped messages. */
   private Vector messages = null;
 
-
+  /**
+   * Indicates whether the produced messages
+   * are asynchronously send or not
+   * (without or with an acknowledgement).
+   */
+  private boolean asyncSend = false;
+  
   /**
    * Constructs a <code>ProducerMessages</code> instance.
    *
@@ -94,7 +100,14 @@ public class ProducerMessages extends AbstractJmsRequest
     }
     return messages;
   }
- 
+  
+  public void setAsyncSend(boolean b) {
+    asyncSend = b;
+  }
+  
+  public final boolean getAsyncSend() {
+    return asyncSend;
+  }
  
   /**
    * Transforms this request into a hashtable of primitive values that can
@@ -143,6 +156,7 @@ public class ProducerMessages extends AbstractJmsRequest
   public String toString() {
     return '(' + super.toString() +
       ",message=" + message + 
-      ",messages=" + messages + ')';
+      ",messages=" + messages +
+      ",asyncSend=" + asyncSend + ')';
   }
 }
