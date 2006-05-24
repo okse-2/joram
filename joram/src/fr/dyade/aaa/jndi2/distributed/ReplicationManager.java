@@ -21,21 +21,41 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import fr.dyade.aaa.jndi2.msg.*;
-import fr.dyade.aaa.jndi2.impl.*;
-import fr.dyade.aaa.jndi2.server.*;
-import fr.dyade.aaa.jndi2.server.Trace;
-import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.*;
-//import fr.dyade.aaa.agent.conf.*;
+import javax.naming.CompositeName;
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.jndi2.impl.BindEvent;
+import fr.dyade.aaa.jndi2.impl.CreateSubcontextEvent;
+import fr.dyade.aaa.jndi2.impl.DestroySubcontextEvent;
+import fr.dyade.aaa.jndi2.impl.MissingContextException;
+import fr.dyade.aaa.jndi2.impl.MissingRecordException;
+import fr.dyade.aaa.jndi2.impl.NamingContext;
+import fr.dyade.aaa.jndi2.impl.NamingContextInfo;
+import fr.dyade.aaa.jndi2.impl.NotOwnerException;
+import fr.dyade.aaa.jndi2.impl.RebindEvent;
+import fr.dyade.aaa.jndi2.impl.UnbindEvent;
+import fr.dyade.aaa.jndi2.impl.UpdateEvent;
+import fr.dyade.aaa.jndi2.impl.UpdateListener;
+import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
+import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.JndiError;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import fr.dyade.aaa.jndi2.server.JndiReplyNot;
+import fr.dyade.aaa.jndi2.server.JndiScriptReplyNot;
+import fr.dyade.aaa.jndi2.server.JndiScriptRequestNot;
+import fr.dyade.aaa.jndi2.server.RequestContext;
+import fr.dyade.aaa.jndi2.server.RequestManager;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class ReplicationManager 
     extends RequestManager implements UpdateListener {
@@ -144,7 +164,7 @@ public class ReplicationManager
         AgentId aid = DistributedJndiServer.getDefault(serverIds[i]);
         servers.addElement(aid);
         sendTo(aid, new InitJndiServerNot(
-          null, null));
+          null, null, true));
       }
       saveServers();
     }
@@ -339,37 +359,48 @@ public class ReplicationManager
                        "ReplicationManager.doReact(" +
                        from + ',' + not + ')');
     AgentId[] jndiServerIds = not.getJndiServerIds();
-    Vector newServers = new Vector();
+    Vector initServers = new Vector();
     if (jndiServerIds != null) {
       for (int i = 0; i < jndiServerIds.length; i++) {
         if (servers.indexOf(jndiServerIds[i]) < 0) {
-          newServers.addElement(jndiServerIds[i]);
+          initServers.addElement(jndiServerIds[i]);
         }
       }
     }
     
-    if (servers.indexOf(from) < 0) {      
-      newServers.addElement(from);
+    // Send back an init notif if:
+    // - the init notif is a request
+    // - or the server 'from' is unknown
+    if (not.isRequest() || servers.indexOf(from) < 0) {
+      initServers.addElement(from);
     }
 
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       " -> newServers = " + newServers);
+                       " -> initServers = " + initServers);
 
-    if (newServers.size() > 0) {
+    if (initServers.size() > 0) {
       AgentId[] localJndiServerIds = new AgentId[servers.size()];
       servers.copyInto(localJndiServerIds);
       NamingContextInfo[] localContexts = 
         getServerImpl().copyNamingContexts(getId());
-      for (int i = 0; i < newServers.size(); i++) {
+      int serversInitialLength = servers.size();
+      for (int i = 0; i < initServers.size(); i++) {
         AgentId newServerId = 
-          (AgentId)newServers.elementAt(i);
+          (AgentId)initServers.elementAt(i);
         sendTo(newServerId, new InitJndiServerNot(
           localJndiServerIds, 
-          localContexts));
-        servers.addElement(newServerId);
+          localContexts,
+          (!from.equals(newServerId))));
+        if (servers.indexOf(newServerId) < 0) {
+          servers.addElement(newServerId);
+        }
+        // else the server has already been registered.
+        // (it is a recovering server)
       }
-      saveServers();
+      if (servers.size() > serversInitialLength) {
+        saveServers();
+      }
     }
 
     NamingContextInfo[] contexts = not.getContexts();
