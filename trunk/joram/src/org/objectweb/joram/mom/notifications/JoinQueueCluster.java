@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
@@ -43,19 +44,23 @@ public class JoinQueueCluster extends QueueClusterNot {
     this.freeWriting = freeWriting;
   }
   
-  public String toString() {
-    StringBuffer str = new StringBuffer();
-    str.append("JoinQueueCluster (");
-    str.append(super.toString());
-    str.append(", clusters=");
-    str.append(clusters);
-    str.append(", clients=");
-    str.append(clients);
-    str.append(", freeReading=");
-    str.append(freeReading);
-    str.append(", freeWriting=");
-    str.append(freeWriting);
-    str.append(")");
-    return str.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",clusters=").append(clusters);
+    output.append(",clients=").append(clients);
+    output.append(",freeReading=").append(freeReading);
+    output.append(",freeWriting=").append(freeWriting);
+    output.append(')');
+
+    return output;
   }
 }

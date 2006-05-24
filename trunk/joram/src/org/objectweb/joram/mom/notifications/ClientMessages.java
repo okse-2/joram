@@ -40,6 +40,8 @@ public class ClientMessages extends AbstractRequest
   private Vector messages = null;
   /** Identifier of the producer's dead message queue, if any. */
   private AgentId producerDMQId = null;
+  
+  private boolean asyncSend;
 
 
   /**
@@ -108,6 +110,14 @@ public class ClientMessages extends AbstractRequest
     }
     return messages;
   }
+  
+  public void setAsyncSend(boolean b) {
+    asyncSend = b;
+  }
+  
+  public final boolean getAsyncSend() {
+    return asyncSend;
+  }
 
   /** Returns the identifier of the producer's dead message queue, if any. */
   public AgentId getDMQId()
@@ -115,10 +125,23 @@ public class ClientMessages extends AbstractRequest
     return producerDMQId;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ",message=" + message +
-      ",messages=" + messages + 
-      ",producerDMQId=" + producerDMQId + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",message=").append(message);
+    output.append(",messages=").append(messages);
+    output.append(",producerDMQId=").append(producerDMQId);
+    output.append(",asyncSend=").append(asyncSend);
+    output.append(')');
+
+    return output;
   }
 } 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
@@ -53,10 +53,22 @@ public class RegisteredDestNot
     return reply;
   }
   
-  public String toString() {
-    return '(' +
-      ",name=" + name +
-      ",dest=" + dest + 
-      ",reply=" + reply + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",name=").append(name);
+    output.append(",dest=").append(dest);
+    output.append(",reply=").append(reply);
+    output.append(')');
+
+    return output;
   }
 }

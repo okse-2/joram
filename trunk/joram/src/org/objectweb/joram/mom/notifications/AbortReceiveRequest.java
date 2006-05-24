@@ -39,8 +39,20 @@ public class AbortReceiveRequest extends AbstractRequest {
     return abortedRequestId;
   }
 
-  public String toString() {
-    return '(' + super.toString()
-      + ",abortedRequestId=" + abortedRequestId + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",abortedRequestId=").append(abortedRequestId);
+    output.append(')');
+
+    return output;
   }
 }

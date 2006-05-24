@@ -86,10 +86,22 @@ public class DenyRequest extends AbstractRequest
     return msgIds.elements();
   }
 
-  public String toString() {
-    return '(' + super.toString() +
-      ",msgId=" + msgId +
-      ",msgIds=" + msgIds + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",msgId=").append(msgId);
+    output.append(",msgIds=").append(msgIds);
+    output.append(')');
+
+    return output;
   }
 } 
 

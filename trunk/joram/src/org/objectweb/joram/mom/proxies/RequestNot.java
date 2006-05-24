@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -44,9 +44,21 @@ public class RequestNot extends Notification {
     return msg;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ",cKey=" + cKey + 
-      ",msg=" + msg + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",cKey=").append(cKey);
+    output.append(",msg=").append(msg);
+    output.append(')');
+
+    return output;
   }
 }

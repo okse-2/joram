@@ -38,18 +38,23 @@ public class AckJoinQueueCluster extends JoinQueueCluster {
           freeWriting);
   }
   
-  public String toString() {
-    StringBuffer str = new StringBuffer();
-    str.append("AckJoinQueueCluster (");
-    str.append("clusters=");
-    str.append(clusters);
-    str.append(", clients=");
-    str.append(clients);
-    str.append(", freeReading=");
-    str.append(freeReading);
-    str.append(", freeWriting=");
-    str.append(freeWriting);
-    str.append(")");
-    return str.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",clusters=").append(clusters);
+    output.append(",clients=").append(clients);
+    output.append(",freeReading=").append(freeReading);
+    output.append(",freeWriting=").append(freeWriting);
+    output.append(')');
+
+    return output;
   }
 }
