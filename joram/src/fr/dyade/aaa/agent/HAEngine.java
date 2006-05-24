@@ -213,10 +213,13 @@ final class HAEngine extends Engine {
       oos.writeObject(AgentIdStamp.stamp);
       for (Enumeration e = agents.elements(); e.hasMoreElements();) {
         Agent agent = (Agent) e.nextElement();
-        oos.writeObject(agent.getId());
-        oos.writeObject(agent);
-        if (agent instanceof BagSerializer) {
-          ((BagSerializer) agent).writeBag(oos);
+        // Don't put the agent factory
+        if (! (agent instanceof AgentFactory)) {
+          oos.writeObject(agent.getId());
+          oos.writeObject(agent);
+          if (agent instanceof BagSerializer) {
+            ((BagSerializer) agent).writeBag(oos);
+          }
         }
       }
       oos.flush();
@@ -305,4 +308,5 @@ final class HAEngine extends Engine {
     } catch (IOException exc) {}
     return obj;
   }
+  
 }
