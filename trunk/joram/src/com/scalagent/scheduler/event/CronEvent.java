@@ -115,10 +115,9 @@ public class CronEvent extends ScheduleEvent {
    *
    * @return	a string image for this object
    */
-  public String toString() {
-    StringBuffer output = new StringBuffer();
-    output.append("(");
-    output.append(super.toString());
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    output.append(super.toString(output));
     for (int i = 0; i < CRON_MAX; i ++) {
       output.append(",");
       output.append(values[i]);
@@ -126,7 +125,7 @@ public class CronEvent extends ScheduleEvent {
       output.append(ranges[i]);
     }
     output.append(")");
-    return output.toString();
+    return output;
   }
 
   /**
