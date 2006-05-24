@@ -28,21 +28,17 @@ public class ReturnConnectionNot extends Notification {
   
   private OpenConnectionNot not;
 
-  private int key;
-
-  private Object queue;
+  private ConnectionContext ctx;
 
   public ReturnConnectionNot(
     OpenConnectionNot not,
-    int key,
-    Object queue) {
+    ConnectionContext ctx) {
     persistent = false;
     this.not = not;
-    this.key = key;
-    this.queue = queue;
+    this.ctx = ctx;
   }
 
   public void Return() {
-    not.Return(key, queue);
+    not.Return(ctx);
   }
 }
