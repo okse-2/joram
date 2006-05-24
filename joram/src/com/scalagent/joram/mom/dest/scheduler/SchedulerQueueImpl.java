@@ -1,105 +1,112 @@
 package com.scalagent.joram.mom.dest.scheduler;
 
-import java.util.*;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.util.Date;
+import java.util.Enumeration;
 
-import fr.dyade.aaa.agent.*;
+import javax.jms.JMSException;
+import javax.jms.MessageFormatException;
 
-import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.mom.dest.QueueImpl;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import com.scalagent.scheduler.*;
+import com.scalagent.scheduler.AddConditionListener;
+import com.scalagent.scheduler.Condition;
+import com.scalagent.scheduler.RemoveConditionListener;
+import com.scalagent.scheduler.ScheduleEvent;
+import com.scalagent.scheduler.Scheduler;
 
-import org.objectweb.util.monolog.api.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
 
 public class SchedulerQueueImpl extends QueueImpl {
-    public static Logger logger = Debug.getLogger(
-      "com.scalagent.joram.scheduler.SchedulerQueueImpl");
+  public static Logger logger = Debug
+      .getLogger("com.scalagent.joram.scheduler.SchedulerQueueImpl");
 
-    public static final String SCHEDULE_DATE = "scheduleDate";
+  public static final String SCHEDULE_DATE = "scheduleDate";
 
-    public static final String SCHEDULED = "scheduled";
-    
-    public SchedulerQueueImpl(AgentId destId, AgentId adminId) {
-	super(destId, adminId);
-	if (logger.isLoggable(BasicLevel.DEBUG))
-	    logger.log(BasicLevel.DEBUG, 
-		       "SchedulerQueueImpl.<init>(" + destId + ',' + adminId + ')');
+  public SchedulerQueueImpl(AgentId destId, AgentId adminId) {
+    super(destId, adminId);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.<init>(" + destId + ','
+          + adminId + ')');
+  }
+
+  protected void doProcess(ClientMessages not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.doProcess(" + not + ')');
+    super.doProcess(not);
+    Message msg;
+    for (Enumeration msgs = not.getMessages().elements(); msgs
+        .hasMoreElements();) {
+      msg = (Message) msgs.nextElement();
+      long scheduleDate = getScheduleDate(msg);
+      if (scheduleDate < 0) return;
+      //DF: to improve
+      // two notifs are necessary to subscribe
+      Channel.sendTo(Scheduler.getDefault(), new AddConditionListener(msg
+          .getIdentifier()));
+      Channel.sendTo(Scheduler.getDefault(), new ScheduleEvent(msg
+          .getIdentifier(), new Date(scheduleDate)));
     }
-
-    protected void doProcess(ClientMessages not) {
-	if (logger.isLoggable(BasicLevel.DEBUG))
-	    logger.log(BasicLevel.DEBUG, 
-		       "SchedulerQueueImpl.doProcess(" + not + ')');
-	super.doProcess(not);
-	Message msg;
-	for (Enumeration msgs = not.getMessages().elements();
-	     msgs.hasMoreElements();) {
-	    msg = (Message) msgs.nextElement();
-	    try {
-		long scheduleDate = msg.getLongProperty("scheduleDate");
-		//DF: to improve
-		// two notifs are necessary to subscribe
-		Channel.sendTo(Scheduler.getDefault(),
-			       new AddConditionListener(msg.getIdentifier()));
-		Channel.sendTo(Scheduler.getDefault(),
-			       new ScheduleEvent(msg.getIdentifier(),
-						 new Date(scheduleDate)));
-	    } catch (Exception exc) {
-		logger.log(BasicLevel.ERROR, "", exc);
-	    }
-	}
+  }
+  
+  private static long getScheduleDate(Message msg) {
+    Object scheduleDateValue = msg.getObjectProperty(SCHEDULE_DATE);
+    if (scheduleDateValue == null) return -1;
+    try {
+      return ((Long)scheduleDateValue).longValue();
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, 
+          "Scheduled message error", exc);
+      return -1;
     }
+  }
 
-    public void react(AgentId from, Notification not)
-	throws UnknownNotificationException {
-	if (logger.isLoggable(BasicLevel.DEBUG))
-	    logger.log(BasicLevel.DEBUG, 
-		       "SchedulerQueueImpl.react(" + 
-		       from + ',' + not + ')');
-	if (not instanceof Condition) {
-	    doReact((Condition) not);
-	} else super.react(from, not);
-    }
+  public void react(AgentId from, Notification not)
+      throws UnknownNotificationException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.react(" + from + ','
+          + not + ')');
+    if (not instanceof Condition) {
+      doReact((Condition) not);
+    } else
+      super.react(from, not);
+  }
 
-    private void doReact(Condition not) {
-	String msgId = not.name;
-	for (int i = 0; i < messages.size(); i++) {
-	    Message msg = (Message)messages.elementAt(i);
-	    if (msg.getIdentifier().equals(msgId)) {
-		msg.resetPropertiesRO();
-		try {
-		    msg.setStringProperty(SCHEDULED, "" + System.currentTimeMillis());
-		} catch (Exception exc) {}
-		msg.setReadOnly();
-		// The message is scheduled.
-		// Save it again in order to make the scheduling persistent.
-		// Only the header is saved.
-		// The body should not be saved again.
-		msg.save(getDestinationId());
-		break;
-	    }
-	}
-	deliverMessages(0);
+  private void doReact(Condition not) {
+    String msgId = not.name;
+    for (int i = 0; i < messages.size(); i++) {
+      Message msg = (Message) messages.elementAt(i);
+      if (msg.getIdentifier().equals(msgId)) {
+        // Must remove the condition
+        Channel.sendTo(
+            Scheduler.getDefault(), 
+            new RemoveConditionListener(msg.getIdentifier()));
+        break;
+      }
     }
+    deliverMessages(0);
+  }
 
-    protected boolean checkDelivery(Message msg) {
-	if (logger.isLoggable(BasicLevel.DEBUG))
-	    logger.log(BasicLevel.DEBUG, 
-		       "SchedulerQueueImpl.checkDelivery(" + msg + ')');
-	Object scheduleDate = msg.getObjectProperty(SCHEDULE_DATE);
-	if (scheduleDate == null) {
-	    if (logger.isLoggable(BasicLevel.DEBUG))
-		logger.log(BasicLevel.DEBUG, "no schedule date");
-	    return true;
-	} else {
-	    Object scheduledDate = msg.getObjectProperty(SCHEDULED);
-	    if (logger.isLoggable(BasicLevel.DEBUG))
-		logger.log(BasicLevel.DEBUG, "scheduledDate = " + scheduledDate);
-	    return (scheduledDate != null);
-	}
+  protected boolean checkDelivery(Message msg) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.checkDelivery(" + msg
+          + ')');
+    long scheduleDate = getScheduleDate(msg);
+    if (scheduleDate < 0) {
+      return true;
+    } else {
+      long currentTime = System.currentTimeMillis();
+      return !(scheduleDate > currentTime);
     }
+  }
 }
+
