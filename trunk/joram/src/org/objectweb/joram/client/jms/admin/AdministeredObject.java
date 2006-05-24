@@ -25,6 +25,7 @@ package org.objectweb.joram.client.jms.admin;
 
 import fr.dyade.aaa.jndi2.soap.SoapObjectItf;
 import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import javax.naming.NamingException;
 import javax.naming.Reference;
@@ -44,8 +45,10 @@ public abstract class AdministeredObject implements java.io.Serializable,
 {
 
   /** Sets the naming reference of an administered object. */
-  public Reference getReference() throws NamingException
-  {
+  public Reference getReference() throws NamingException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "AdministeredObject.getReference()");
     Reference ref =
       new Reference(this.getClass().getName(),
                     "org.objectweb.joram.client.jms.admin.ObjectFactory",
