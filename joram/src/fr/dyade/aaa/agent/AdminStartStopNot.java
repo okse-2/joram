@@ -38,15 +38,21 @@ public class AdminStartStopNot extends Notification {
   /** stop script vector */
   public StopScript stopScript = null;
 
-  public String toString() {
-    StringBuffer strBuf = new StringBuffer();
-    strBuf.append("AdminStartStopNot");
-    strBuf.append("(");
-    strBuf.append("startScript=");
-    strBuf.append(startScript);
-    strBuf.append(",stopScript=");
-    strBuf.append(stopScript);
-    strBuf.append(")");
-    return strBuf.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",startScript=").append(startScript);
+    output.append(",stopScript=").append(stopScript);
+    output.append(')');
+
+    return output;
   }
 }

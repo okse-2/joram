@@ -77,13 +77,20 @@ public class FlowControlNot extends Notification {
   }
 
   /**
-   * Provides a string image for this object.
+   * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @return	printable image of this object
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",driverKey=" + driverKey +
-      ",driverId=" + driverId + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",driverKey=").append(driverKey);
+    output.append(",driverId=").append(driverId);
+    output.append(')');
+
+    return output;
   }
 }

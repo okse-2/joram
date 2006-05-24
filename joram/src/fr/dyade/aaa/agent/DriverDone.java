@@ -75,11 +75,20 @@ public class DriverDone extends Notification {
   }
 
   /**
-   * Provides a string image for this object.
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",driver=" + driver + 
-      ",driverKey=" + driverKey + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",driver=").append(driver);
+    output.append(",driverKey=").append(driverKey);
+    output.append(')');
+
+    return output;
   }
 }

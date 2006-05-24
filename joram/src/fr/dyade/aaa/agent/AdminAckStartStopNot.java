@@ -48,17 +48,21 @@ public class AdminAckStartStopNot extends Notification {
     this.exc = exc;
   }
 
-  public String toString() {
-    if (exc != null)
-      return exc.toString();
-    StringBuffer strBuf = new StringBuffer();
-    strBuf.append("AdminAckStartStopNot");
-    strBuf.append("(");
-    strBuf.append("startScript=");
-    strBuf.append(startScript);
-    strBuf.append(",stopScript=");
-    strBuf.append(stopScript);
-    strBuf.append(")");
-    return strBuf.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",startScript=").append(startScript);
+    output.append(",stopScript=").append(stopScript);
+    output.append(')');
+
+    return output;
   }
 }

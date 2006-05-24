@@ -48,9 +48,20 @@ public class AdminReplyNot extends Notification {
     this.exc = exc;
   }
 
-  public String toString() {
-    if (exc != null)
-      return exc.toString();
-    return "";
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",exc=").append(exc);
+    output.append(')');
+
+    return output;
   }
 }

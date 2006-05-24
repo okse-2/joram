@@ -99,24 +99,32 @@ public class ScheduleEvent extends Notification {
    *
    * @return	a string image for this object
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",name=" + name +
-      ",date=" + date +
-      ",duration=" + duration +
-      ",outdatedRestart=" + outdatedRestart + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    output.append(super.toString(output));
+    output.append(",name=");
+    output.append(name);
+    output.append(",date=");
+    output.append(date);
+    output.append(",duration=");
+    output.append(duration);
+    output.append(",outdatedRestart=");
+    output.append(outdatedRestart);
+    output.append(')');
+    return output;
   }
 
   /**
-   * Returns the next scheduling date after current date given as parameter.
-   * The new date must be strictly greater than the current date.
-   * A <code>null</code> date leads to the scheduler deleting the event.
+   * Returns the next scheduling date after current date given as parameter. The
+   * new date must be strictly greater than the current date. A
+   * <code>null</code> date leads to the scheduler deleting the event.
    * <p>
    * This function should be overloaded in derived classes to actually implement
    * recurrent scheduling.
-   *
-   * @param now		current date
-   * @return		next scheduling date after now
+   * 
+   * @param now
+   *          current date
+   * @return next scheduling date after now
    */
   Date nextDate(Date now) {
     if (date == null)

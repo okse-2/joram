@@ -49,8 +49,12 @@ public class RemoveConditionListener extends Notification {
    *
    * @return	a string image for this object
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",name=" + name + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    output.append(super.toString(output));
+    output.append(",name=");
+    output.append(name);
+    output.append(')');
+    return output;
   }
 }
