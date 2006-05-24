@@ -23,8 +23,8 @@
  */
 package fr.dyade.aaa.jndi2.soap;
 
-import fr.dyade.aaa.jndi2.server.Trace;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import java.util.Hashtable;
 
@@ -42,6 +42,10 @@ import javax.naming.NamingException;
  */
 public class JndiSoapService
 {
+  
+  public static final Logger logger = fr.dyade.aaa.util.Debug.getLogger(
+      JndiSoapService.class.getName());
+  
   /** The service's <code>Context</code>. */
   private Context ctx;
 
@@ -100,7 +104,13 @@ public class JndiSoapService
    */
   public Hashtable lookup(String name) throws NamingException
   {
+    try {
     return SoapObjectHelper.soapCode(ctx.lookup(name));
+    } catch (Throwable exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
+      throw new NamingException(exc.toString());
+    }
   }
 
   /**

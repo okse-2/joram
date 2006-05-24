@@ -25,7 +25,13 @@ package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 public class LookupReply extends JndiReply {
+  
+  public static final Logger logger = fr.dyade.aaa.util.Debug.getLogger(
+      LookupReply.class.getName());
   
   private Object obj;
 
@@ -43,6 +49,8 @@ public class LookupReply extends JndiReply {
         return javax.naming.spi.NamingManager.getObjectInstance(
           obj, null, null, null);
       } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", e);
         NamingException ne = new NamingException(e.getMessage());
         ne.setRootCause(e);
         throw ne;
