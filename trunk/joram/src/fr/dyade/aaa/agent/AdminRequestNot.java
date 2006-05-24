@@ -57,16 +57,22 @@ public class AdminRequestNot extends Notification {
     this.script = script;
   }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer();
-    buf.append("AdminRequestNot(");
-    buf.append("autoStart=");
-    buf.append(autoStart);
-    buf.append(",silence=");
-    buf.append(silence);
-    buf.append(",script=");
-    buf.append(script);
-    buf.append(")");
-    return buf.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",autoStart=").append(autoStart);
+    output.append(",silence=").append(silence);
+    output.append(",script=").append(script);
+    output.append(')');
+
+    return output;
   }
 }

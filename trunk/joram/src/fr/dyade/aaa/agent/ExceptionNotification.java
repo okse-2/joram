@@ -53,14 +53,21 @@ public class ExceptionNotification extends Notification {
   }
 
   /**
-   * Returns a string representation of this notification.
+   * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @return	A string representation of this notification. 
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",agent=" + agent +
-      ",not=" + not +
-      ",exc=" + exc + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",agent=").append(agent);
+    output.append(",not=").append(not);
+    output.append(",exc=").append(exc);
+    output.append(')');
+
+    return output;
   }
 }
