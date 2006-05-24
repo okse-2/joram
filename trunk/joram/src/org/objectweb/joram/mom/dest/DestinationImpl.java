@@ -31,6 +31,8 @@ import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Agent;
+
+import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.*;
@@ -192,6 +194,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         doReact(from, (UnknownAgent) not);
       else if (not instanceof DeleteNot)
         doReact(from, (DeleteNot) not);
+      else if (not instanceof RequestGroupNot)
+        doReact(from, (RequestGroupNot)not);
       else
         throw new UnknownNotificationException(not.getClass().getName());
     }
@@ -524,7 +528,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // for topic performance :
     // must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if (! not.getPersistent()) {
+    if (! not.getPersistent() && !not.getAsyncSend()) {
       Channel.sendTo(
         from, 
         new SendReplyNot(
@@ -625,6 +629,37 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+  }
+  
+  protected void doReact(AgentId from, RequestGroupNot not) {
+    Enumeration en = not.getClientMessages();
+    ClientMessages theCM = (ClientMessages) en.nextElement();
+    Vector replies = new Vector();
+    replies.addElement(new SendReplyNot(
+        theCM.getClientContext(), 
+        theCM.getRequestId()));
+    while (en.hasMoreElements()) {
+      ClientMessages cm = (ClientMessages) en.nextElement();
+      Vector msgs = cm.getMessages();
+      for (int i = 0; i < msgs.size(); i++) {
+        theCM.addMessage((Message) msgs.elementAt(i));
+      }
+      replies.addElement(new SendReplyNot(
+          cm.getClientContext(), 
+          cm.getRequestId()));
+    }
+    
+    specialProcess(theCM);
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // NT :
+    // for topic performance :
+    // must send reply after process ClientMessage
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (! not.getPersistent()) {
+      Channel.sendTo(
+        from, new SendRepliesNot(replies));
+    }
   }
   
   protected Object specialAdminProcess(SpecialAdminRequest not) 

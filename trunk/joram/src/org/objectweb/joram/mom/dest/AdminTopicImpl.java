@@ -366,7 +366,7 @@ public class AdminTopicImpl extends TopicImpl {
       not.setDestination(destDesc.getId());
     Channel.sendTo(not.getReply(), not);
   }
-
+  
   /**
    * Processes a <code>Monit_GetUsersRep</code> notification holding a
    * destination's readers' or writers' identifiers.
@@ -471,6 +471,20 @@ public class AdminTopicImpl extends TopicImpl {
                                     "Unexpected request: " + request);
   }
 
+  protected void doReact(AgentId from, RequestGroupNot not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+          "AdminTopicImpl.doReact(" + not + ')');
+    Enumeration en = not.getClientMessages();
+    while (en.hasMoreElements()) {
+      ClientMessages cm = (ClientMessages) en.nextElement();
+      try {
+        doReact(from, cm);
+      } catch (Exception exc) {
+      }
+    }
+  }
+  
   /**
    * Overrides this <code>DestinationImpl</code> method;
    * <code>ClientMessages</code> notifications hold requests sent by an
@@ -481,7 +495,10 @@ public class AdminTopicImpl extends TopicImpl {
    */
   protected void doReact(AgentId from, ClientMessages not)
                  throws AccessException {
-    if (! not.getPersistent()) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+          "AdminTopicImpl.doReact(" + not + ')');
+    if (! not.getPersistent() && !not.getAsyncSend()) {
       // Means that this notification has been sent by a local
       // proxy (optimization). Must acknowledge it.
       Channel.sendTo(

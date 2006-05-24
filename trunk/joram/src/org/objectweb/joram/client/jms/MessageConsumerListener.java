@@ -31,6 +31,7 @@ import org.objectweb.joram.shared.client.ActivateConsumerRequest;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.StoppedQueueException;
 
 import javax.jms.MessageListener;
@@ -38,6 +39,7 @@ import javax.jms.JMSException;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * This class listens to replies 
@@ -45,6 +47,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * a message consumer.
  */
 class MessageConsumerListener implements ReplyListener {
+  
+  public static Logger logger = 
+    Debug.getLogger(MessageConsumerListener.class.getName());
+  
   /**
    * This property allows to set the maximum number of messages get by
    * each request, its default value is 1.
@@ -83,6 +89,21 @@ class MessageConsumerListener implements ReplyListener {
       return names[status];
     }
   }
+  
+  private static class ReceiveStatus {
+    public static final int INIT = 0;
+    
+    public static final int WAIT_FOR_REPLY = 1;
+
+    public static final int CONSUMING_REPLY = 2;
+
+    private static final String[] names = { 
+        "INIT", "WAIT_FOR_REPLY", "CONSUMING_REPLY" };
+
+    public static String toString(int status) {
+      return names[status];
+    }
+  }
 
   /**
    * The message consumer listening to the replies.
@@ -97,14 +118,38 @@ class MessageConsumerListener implements ReplyListener {
   /**
    * The identifier of the subscription request.
    */ 
-  private int requestId;
+  private volatile int requestId;
 
   private int status;
 
   private MessageListener listener;
 
   private Vector messagesToAck;
-
+  
+  /**
+   * The number of messages which
+   * are in queue (Session.qin)
+   * waiting for being consumed.
+   */
+  private volatile int messageCount;
+  
+  /**
+   * The receve status of this message
+   * listener:
+   * WAIT_FOR_REPLY if a reply is expected
+   * from the destination
+   * CONSUMING_REPLY if a reply is being
+   * consumed and no new request has been
+   * sent
+   */
+  private volatile int receiveStatus;
+  
+  /**
+   * Indicates whether the topic message
+   * input has been passivated or not.
+   */
+  private boolean topicMsgInputPassivated;
+  
   MessageConsumerListener(MessageConsumer consumer,
                           Session session,
                           MessageListener listener) {
@@ -113,23 +158,46 @@ class MessageConsumerListener implements ReplyListener {
     this.listener = listener;
     messagesToAck = new Vector(0);
     requestId = -1;
+    messageCount = 0;
+    topicMsgInputPassivated = false;
     setStatus(Status.INIT);
+    setReceiveStatus(ReceiveStatus.INIT);
   }
 
   private void setStatus(int status) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.setStatus(" +
         Status.toString(status) + ')');
     this.status = status;
   }
-
+  
+  private void setReceiveStatus(int s) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.setReceiveStatus(" +
+        ReceiveStatus.toString(s) + ')');
+    receiveStatus = s;
+  }
+  
+  /**
+   * Decrease the message count.
+   * Synchronized with the method replyReceived()
+   * that increments the 
+   * messageCount += cm.getMessageCount();
+   * 
+   * @return the decreased value
+   */
+  private synchronized int decreaseMessageCount() {
+    return --messageCount;
+  }
+ 
   /**
    * Called by Session.
    */
   synchronized void start() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.start()");
     if (status == Status.INIT) {
       subscribe();
@@ -141,11 +209,18 @@ class MessageConsumerListener implements ReplyListener {
   }
 
   private void subscribe() throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.subscribe()");
     String[] toAck = null;
-    if (lazyAck && messagesToAck.size() > 0) {
-      toAck = new String[messagesToAck.size()];
-      messagesToAck.copyInto(toAck);
-      messagesToAck.clear();
+    if (session.getAckMode() == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
+      synchronized (messagesToAck) {
+        if (messagesToAck.size() > 0) {
+          toAck = new String[messagesToAck.size()];
+          messagesToAck.copyInto(toAck);
+          messagesToAck.clear();
+        }
+      }
     }
     ConsumerSetListRequest req = 
       new ConsumerSetListRequest(
@@ -153,7 +228,13 @@ class MessageConsumerListener implements ReplyListener {
         consumer.selector, 
         consumer.queueMode,
         toAck,
-        queueMsgCount);
+        session.getQueueMessageReadMax());
+    
+    // Change the receive status before sending
+    // the request. subscribe() is not synchronized
+    // so the reply can be received before the end
+    // of this method.
+    setReceiveStatus(ReceiveStatus.WAIT_FOR_REPLY);
     session.getRequestMultiplexer().sendRequest(req, this);
     requestId = req.getRequestId();
   }
@@ -162,8 +243,8 @@ class MessageConsumerListener implements ReplyListener {
    * Called by Session.
    */
   void close() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.close()");
 
     synchronized (this) {
@@ -180,7 +261,7 @@ class MessageConsumerListener implements ReplyListener {
       
       session.getRequestMultiplexer().abortRequest(requestId);
 
-      if (lazyAck) {
+      if (session.getAckMode() == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
         acknowledge(0);
       }
 
@@ -204,20 +285,21 @@ class MessageConsumerListener implements ReplyListener {
 
   private void acknowledge(int threshold) {
     try {
-      if (messagesToAck.size() > threshold) {
-        ConsumerAckRequest ack = new ConsumerAckRequest(
-          consumer.targetName, 
-          consumer.queueMode);
-        for (int i = 0; i < messagesToAck.size(); i ++) {
-          String msgId = (String)messagesToAck.elementAt(i);
-          ack.addId(msgId);
+      synchronized (messagesToAck) {
+        if (messagesToAck.size() > threshold) {
+          ConsumerAckRequest ack = new ConsumerAckRequest(consumer.targetName,
+              consumer.queueMode);
+          for (int i = 0; i < messagesToAck.size(); i++) {
+            String msgId = (String) messagesToAck.elementAt(i);
+            ack.addId(msgId);
+          }
+          session.getRequestMultiplexer().sendRequest(ack);
+          messagesToAck.clear();
         }
-        session.getRequestMultiplexer().sendRequest(ack);
-        messagesToAck.clear();
       }
     } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(
           BasicLevel.ERROR, "", exc); 
     }
   }
@@ -227,25 +309,33 @@ class MessageConsumerListener implements ReplyListener {
    */
   public synchronized boolean replyReceived(AbstractJmsReply reply) 
     throws AbortedRequestException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
         reply + ')');
+    
+    
 
     if (status == Status.CLOSE) {
       throw new AbortedRequestException();
     } else {
+      if (consumer.queueMode) {
+        // 1- Change the status before pushing the 
+        // messages into the session queue.
+        setReceiveStatus(ReceiveStatus.CONSUMING_REPLY);
+      }
       try {
-        session.pushMessages(this, (ConsumerMessages)reply);
+        ConsumerMessages cm = (ConsumerMessages)reply;
+        // 2- increment messageCount (synchronized)
+        messageCount += cm.getMessageCount();
+        
+        session.pushMessages(this, cm);
       } catch (StoppedQueueException exc) {
         throw new AbortedRequestException();
       }
       if (consumer.queueMode) {
         return true;
       } else {
-        if (lazyAck && session.isAutoAck()) {
-          acknowledge(topicAckCount);
-        }
         return false;
       }
     }
@@ -271,39 +361,64 @@ class MessageConsumerListener implements ReplyListener {
    * Called by Session.
    */
   public void onMessage(Message msg) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + 
         msg + ')');
-
-    if (consumer.queueMode) {
-      // Consume one message in advance.
-      subscribe();
-    } 
-
+    
     synchronized (this) {
       if (status == Status.RUN) {
         setStatus(Status.ON_MSG);
       } else {
-        throw new javax.jms.IllegalStateException("Status error");
+        throw new javax.jms.IllegalStateException("Message listener closed");
       }
     }
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, " -> consumer.onMessage(" + 
-        msg + ')');
+    
+    // Consume one message
+    decreaseMessageCount();
+    
+    if (consumer.queueMode) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
+          BasicLevel.DEBUG, " -> messageCount = " + messageCount);
+      // Consume in advance (default is one message in advance)
+      // Don't need to be synchronized, volatile receiveStatus
+      // and messageCount are enough.
+      if (messageCount < session.getQueueMessageReadMax() &&
+          receiveStatus == ReceiveStatus.CONSUMING_REPLY) { 
+        subscribe();
+      }
+    } else {
+      if (topicMsgInputPassivated) {
+        if (messageCount < session.getTopicActivationThreshold()) {
+          activateMessageInput();
+          topicMsgInputPassivated = false;
+        }
+      } else {
+        if (messageCount > session.getTopicPassivationThreshold()) {
+          passivateMessageInput();
+          topicMsgInputPassivated = true;
+        }
+      }
+    }
+    
+    if (session.getAckMode() == javax.jms.Session.DUPS_OK_ACKNOWLEDGE
+        && messageCount == 0) {
+      // Need to acknowledge the received messages
+      // if we are in lazy mode (DUPS_OK)
+      acknowledge(0);
+    }
 
     try {
       listener.onMessage(msg);
 
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> consumer.onMessage(" + 
           msg + ") returned");
     } catch (RuntimeException re) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, "", re);
       JMSException exc = new JMSException(re.toString());
       exc.setLinkedException(re);
@@ -318,16 +433,17 @@ class MessageConsumerListener implements ReplyListener {
     }
   }
 
-  void ack(String targetName,
-	   String msgId,
-	   boolean queueMode) throws JMSException {
-    if (lazyAck) {
-      synchronized (this) {
-	messagesToAck.addElement(msgId);
+  void ack(String targetName, String msgId, boolean queueMode)
+      throws JMSException {
+    if (session.getAckMode() == javax.jms.Session.DUPS_OK_ACKNOWLEDGE) {
+      // All the operations on messagesToAck are synchronized
+      // on the vector (see subscribe() and acknowledge()).
+      messagesToAck.addElement(msgId);
+      if (! consumer.queueMode) {
+        acknowledge(session.getTopicAckBufferMax());
       }
     } else {
-      ConsumerAckRequest ack = new ConsumerAckRequest(
-        targetName, queueMode);
+      ConsumerAckRequest ack = new ConsumerAckRequest(targetName, queueMode);
       ack.addId(msgId);
       session.getRequestMultiplexer().sendRequest(ack);
     }
