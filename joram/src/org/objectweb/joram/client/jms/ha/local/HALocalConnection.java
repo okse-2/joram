@@ -126,6 +126,7 @@ public class HALocalConnection
   
   public void connect() throws Exception {
     localConnection = new LocalConnection(userName, password);
+    localConnection.connect();
   }
   
   public void send(AbstractJmsRequest request) 
