@@ -147,6 +147,10 @@ public class Connection implements javax.jms.Connection {
     mtpx = new RequestMultiplexer(this,
                                   requestChannel,
                                   factoryParameters.cnxPendingTimer);
+    if (factoryParameters.multiThreadSync) {
+      mtpx.setMultiThreadSync(factoryParameters.multiThreadSyncDelay);
+    }
+    
     requestor = new Requestor(mtpx);
     sessions = new Vector();
     cconsumers = new Vector();
@@ -188,7 +192,27 @@ public class Connection implements javax.jms.Connection {
   final long getTxPendingTimer() {
     return factoryParameters.txPendingTimer;
   }
+  
+  final boolean getAsyncSend() {
+    return factoryParameters.asyncSend;
+  }
+  
+  final int getQueueMessageReadMax() {
+    return factoryParameters.queueMessageReadMax;
+  }
+  
+  final int getTopicAckBufferMax() {
+    return factoryParameters.topicAckBufferMax;
+  }
+  
+  final int getTopicActivationThreshold() {
+    return factoryParameters.topicActivationThreshold;
+  }
 
+  final int getTopicPassivationThreshold() {
+    return factoryParameters.topicPassivationThreshold;
+  }
+  
   /**
    * Specializes this Object method; returns <code>true</code> if the
    * parameter is a <code>Connection</code> instance sharing the same

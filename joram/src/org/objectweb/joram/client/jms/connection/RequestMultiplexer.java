@@ -38,6 +38,7 @@ import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
@@ -75,7 +76,7 @@ public class RequestMultiplexer {
   private DemultiplexerDaemon demtpx;
 
   private Timer timer;
-
+  
   /**
    * The task responsible for keeping
    * the connection alive.
@@ -87,7 +88,7 @@ public class RequestMultiplexer {
   /**
    * The date of the last request
    */
-  private long lastRequestDate;
+  private volatile long lastRequestDate;
   
   public RequestMultiplexer(Connection cnx,
                             RequestChannel channel,
@@ -97,7 +98,6 @@ public class RequestMultiplexer {
     this.cnxId = cnx.toString();
     requestsTable = new Hashtable();
     requestCounter = 0;
-    
     timer = new Timer();
     channel.setTimer(timer);
     try {
@@ -152,40 +152,42 @@ public class RequestMultiplexer {
     throws JMSException {
     sendRequest(request, null);
   }
+  
+  public void sendRequest(AbstractJmsRequest request, ReplyListener listener)
+      throws JMSException {
 
-  public synchronized void sendRequest(
-    AbstractJmsRequest request,
-    ReplyListener listener) 
-    throws JMSException {
-    if (status == Status.CLOSE) 
-      throw new IllegalStateException("Connection closed");
+    synchronized (this) {
+      if (status == Status.CLOSE)
+        throw new IllegalStateException("Connection closed");
 
-    if (requestCounter == Integer.MAX_VALUE) {
-      requestCounter = 0;
-    }
+      if (requestCounter == Integer.MAX_VALUE) {
+        requestCounter = 0;
+      }
 
-   request.setRequestId(requestCounter++);
+      request.setRequestId(requestCounter++);
 
-    if (listener != null) {
-      requestsTable.put(
-        new Integer(request.getRequestId()), 
-        listener);
+      if (listener != null) {
+        requestsTable.put(new Integer(request.getRequestId()), listener);
+      }
+
+      if (heartBeatTask != null) {
+        lastRequestDate = System.currentTimeMillis();
+      }
     }
 
     try {
       channel.send(request);
     } catch (Exception exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
-          BasicLevel.DEBUG, "", exc);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
       JMSException jmsExc = new JMSException(exc.toString());
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     }
-
-    if (heartBeatTask != null) {
-      lastRequestDate = System.currentTimeMillis();
-    }
+  }
+  
+  public void setMultiThreadSync(int delay) {
+    channel = new MultiThreadSyncChannel(channel, delay);
   }
 
   /**
@@ -530,4 +532,7 @@ public class RequestMultiplexer {
       timer.schedule(this, heartBeat, heartBeat);
     }
   }
+
+  
+
 }

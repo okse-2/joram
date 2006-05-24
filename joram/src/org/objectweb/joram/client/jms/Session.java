@@ -286,7 +286,43 @@ public class Session implements javax.jms.Session {
    * method close()
    */
   private Closer closer;
+  
+  /**
+   * Indicates whether the messages produced are asynchronously
+   * sent or not (without or with acknowledgement)
+   */
+  private boolean asyncSend;
 
+  /**
+   * Maximum number of messages that can be
+   * read at once from a queue.
+   */
+  private int queueMessageReadMax;
+  
+  /**
+   * Maximum number of acknowledgements
+   * that can be buffered in
+   * Session.DUPS_OK_ACKNOWLEDGE mode.
+   * Default is 0.
+   */
+  private int topicAckBufferMax;
+  
+  /**
+   * This threshold is the maximum messages 
+   * number over
+   * which the subscription is passivated.
+   * 
+   */
+  private int topicPassivationThreshold;
+  
+  /**
+   * This threshold is the minimum 
+   * messages number below which
+   * the subscription is activated.
+   * 
+   */
+  private int topicActivationThreshold;
+  
   /**
    * Opens a session.
    *
@@ -337,6 +373,12 @@ public class Session implements javax.jms.Session {
       closingTask = new SessionCloseTask(
         cnx.getTxPendingTimer() * 1000);
     }
+    
+    asyncSend = cnx.getAsyncSend();
+    queueMessageReadMax = cnx.getQueueMessageReadMax();
+    topicAckBufferMax = cnx.getTopicAckBufferMax();
+    topicActivationThreshold = cnx.getTopicActivationThreshold();
+    topicPassivationThreshold = cnx.getTopicPassivationThreshold();
 
     setStatus(Status.STOP);
     setSessionMode(SessionMode.NONE);
@@ -434,9 +476,13 @@ public class Session implements javax.jms.Session {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public final int getAcknowledgeMode() throws JMSException
-  {
-    if (getTransacted())
+  public final int getAcknowledgeMode() throws JMSException {
+    checkClosed();
+    return getAckMode();
+  }
+  
+  int getAckMode() {
+    if (transacted)
       return Session.SESSION_TRANSACTED;
     return acknowledgeMode;
   }
@@ -918,16 +964,36 @@ public class Session implements javax.jms.Session {
 
     // Sending client messages:
     try {
-      Enumeration dests = sendings.keys();
-      String dest;
-      ProducerMessages pM;
-      while (dests.hasMoreElements()) {
-        dest = (String) dests.nextElement();
-        pM = (ProducerMessages) sendings.remove(dest);
-        requestor.request(pM);
+      CommitRequest commitReq= new CommitRequest();
+      
+      Enumeration producerMessages = sendings.elements();
+      while (producerMessages.hasMoreElements()) {
+        ProducerMessages pM = 
+          (ProducerMessages) producerMessages.nextElement();
+        commitReq.addProducerMessages(pM);
       }
+      sendings.clear();
+      
       // Acknowledging the received messages:
-      doAcknowledge();
+      Enumeration targets = deliveries.keys();
+      while (targets.hasMoreElements()) {
+        String target = (String) targets.nextElement();
+        MessageAcks acks = (MessageAcks) deliveries.get(target);
+        commitReq.addAckRequest(
+          new SessAckRequest(
+            target, 
+            acks.getIds(),
+            acks.getQueueMode()));
+      }
+      deliveries.clear();
+      
+      if (asyncSend) {
+        // Asynchronous sending
+        commitReq.setAsyncSend(true);
+        mtpx.sendRequest(commitReq);
+      } else {
+        requestor.request(commitReq);
+      }
 
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": committed.");
@@ -1487,7 +1553,11 @@ public class Session implements javax.jms.Session {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "Session.preReceive(" + mc + ')');
-    
+    // The message consumer may have been closed
+    // after the first check (in MessageConsumer.receive())
+    // and before preReceive.
+    mc.checkClosed();
+
     checkClosed();
     checkThreadOfControl();
     
@@ -1687,17 +1757,6 @@ public class Session implements javax.jms.Session {
     repliesIn.push(
       new MessageListenerContext(
         consumerListener, messages));
-
-    if (! passiveMsgInput && repliesIn.size() >
-	pendingMsgMax) {
-      try {
-        passivateMessageInput();
-      } catch (JMSException exc) {
-	if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-	  JoramTracing.dbgClient.log(
-	    BasicLevel.ERROR, "", exc);
-      }
-    }
   }
 
   /**
@@ -1713,9 +1772,6 @@ public class Session implements javax.jms.Session {
   /**
    * Called by:
    * - method run (application server thread) synchronized
-   * - method onMessage (SessionDaemon thread) not synchronized
-   * but no concurrent call except a close which first stops
-   * SessionDaemon.
    */
   private void ackMessage(String targetName, 
                           String msgId,
@@ -1838,10 +1894,8 @@ public class Session implements javax.jms.Session {
       }
     } else {
       if (autoAck) {
-	consumerListener.ack(
-	  consumer.targetName, 
-	  momMsg.getIdentifier(), 
-	  consumer.queueMode);
+        consumerListener.ack(consumer.targetName, momMsg.getIdentifier(),
+            consumer.queueMode);
       }
     }
   }
@@ -1925,7 +1979,13 @@ public class Session implements javax.jms.Session {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending " + momMsg);
       
-      requestor.request(pM);
+      if (asyncSend || (! momMsg.getPersistent())) {
+        // Asynchronous sending
+        pM.setAsyncSend(true);     
+        mtpx.sendRequest(pM);
+      } else {
+        requestor.request(pM);
+      }
     }
   }
 
@@ -1977,6 +2037,52 @@ public class Session implements javax.jms.Session {
   }
 
   /**
+   * Set asyncSend for this Session.
+   * 
+   * @param b
+   */
+  public void setAsyncSend(boolean b) {
+    asyncSend = b;
+  }
+  
+  /**
+   * Set queueMessageReadMax for this Session.
+   * 
+   * @param i
+   */
+  public void setQueueMessageReadMax(int i) {
+    queueMessageReadMax = i;
+  }
+  
+  public final int getQueueMessageReadMax() {
+    return queueMessageReadMax;
+  }
+  
+  public final int getTopicAckBufferMax() {
+    return topicAckBufferMax;
+  }
+  
+  public void setTopicAckBufferMax(int i) {
+    topicAckBufferMax = i;
+  }
+  
+  public final int getTopicActivationThreshold() {
+    return topicActivationThreshold;
+  }
+  
+  public void setTopicActivationThreshold(int i) {
+    topicActivationThreshold = i;
+  }
+  
+  public final int getTopicPassivationThreshold() {
+    return topicPassivationThreshold;
+  }
+  
+  public void setTopicPassivationThreshold(int i) {
+    topicPassivationThreshold = i;
+  }
+  
+  /**
    * The <code>SessionCloseTask</code> class is used by non-XA transacted
    * sessions for taking care of closing them if they tend to be pending,
    * and if a transaction timer has been set.
@@ -2025,16 +2131,6 @@ public class Session implements javax.jms.Session {
             JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
           return;
         }
-
-	if (passiveMsgInput && repliesIn.size() <
-	    pendingMsgMin) {
-	  try {
-	    activateMessageInput();
-	  } catch (JMSException exc) {
-	    if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-              JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
-	  }
-	}
 
         canStop = false;
         try {
