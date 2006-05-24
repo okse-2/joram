@@ -487,7 +487,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
     // Launching a delivery sequence for this request:
     int reqIndex = requests.size() - 1;
-    deliverMessages(reqIndex, not.getMessageCount());
+    deliverMessages(reqIndex);
     
     // If the request has not been answered and if it is an immediate
     // delivery request, sending a null:
@@ -1137,10 +1137,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  protected void deliverMessages(int index) {
-    deliverMessages(index, 1);
-  }
-
   /**
    * Actually tries to answer the pending "receive" requests.
    * <p>
@@ -1148,12 +1144,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @param index  Index where starting to "browse" the requests.
    */
-  private void deliverMessages(int index,
-                               int msgCount) {
+  protected void deliverMessages(int index) {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(
         BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + 
-        index + ',' + msgCount + ')');
+        index + ')');
 
     ReceiveRequest notRec = null;
     boolean replied;
@@ -1220,7 +1215,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
             deliveredMsgs.put(msg.getIdentifier(), msg);
           }
               
-          if (notMsg.getSize() == msgCount) {
+          if (notMsg.getSize() == notRec.getMessageCount()) {
             break;
           }
         }
