@@ -153,9 +153,15 @@ public class AdminModule
       localServer = requestor.getLocalServerId();
     }
     catch (JMSSecurityException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
       throw new AdminException(exc.getMessage());
     }
     catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
       throw new ConnectException("Connecting failed: " + exc);
     }
   }
