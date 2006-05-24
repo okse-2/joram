@@ -25,6 +25,7 @@
 package org.objectweb.joram.client.jms.admin;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.XAConnectionFactory;
@@ -52,6 +53,7 @@ import org.objectweb.joram.client.jms.soap.QueueSoapConnectionFactory;
 import org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.ClusterDestination;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -103,12 +105,16 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
   String deadMQueue = "org.objectweb.joram.client.jms.admin.DeadMQueue";
   String user = "org.objectweb.joram.client.jms.admin.User";
 
-
   /** Returns an instance of an object given its reference. */
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context ctx,
                                   java.util.Hashtable env) throws Exception {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "ObjectFactory.getObjectInstance(" +
+        obj + ',' + name + ',' + ctx + ',' + env + ')');
+    
     Reference ref = (Reference) obj;
 
     String id = null;
@@ -117,92 +123,56 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
     if (ref.getClassName().equals(tcpCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       ConnectionFactory cnxFact =
         new TcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       QueueConnectionFactory cnxFact =
         new QueueTcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpTCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       TopicConnectionFactory cnxFact =
         new TopicTcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXACF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XAConnectionFactory cnxFact =
         new XATcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXAQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XAQueueConnectionFactory cnxFact =
         new XAQueueTcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(tcpXATCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String cnxPendingTimer = (String) ref.get("cFactory.cnxPT").getContent();
       XATopicConnectionFactory cnxFact =
         new XATopicTcpConnectionFactory(host, (new Integer(port)).intValue());
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
-      params.cnxPendingTimer = (new Integer(cnxPendingTimer)).intValue();
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(localCF)) {
       return new LocalConnectionFactory();
@@ -219,50 +189,29 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
     } else if (ref.getClassName().equals(soapCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String soapCnxTimeout =
-        (String) ref.get("cFactory.soapCnxT").getContent();
-      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
         new SoapConnectionFactory(host,
                                   (new Integer(port)).intValue(),
-                                  timer); 
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
+                                  -1);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(soapQCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String soapCnxTimeout =
-        (String) ref.get("cFactory.soapCnxT").getContent();
-      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
         new QueueSoapConnectionFactory(host,
                                        (new Integer(port)).intValue(),
-                                       timer); 
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
+                                       -1);
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(soapTCF)) {
       String host = (String) ref.get("cFactory.host").getContent();
       String port = (String) ref.get("cFactory.port").getContent();
-      String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-      String txTimer = (String) ref.get("cFactory.txT").getContent();
-      String soapCnxTimeout =
-        (String) ref.get("cFactory.soapCnxT").getContent();
-      int timer = new Integer(soapCnxTimeout).intValue() / 1000;
       ConnectionFactory cnxFact =
         new TopicSoapConnectionFactory(host,
                                        (new Integer(port)).intValue(),
-                                       timer); 
-      FactoryParameters params = cnxFact.getParameters();
-      params.connectingTimer = (new Integer(cnxTimer)).intValue();
-      params.txPendingTimer = (new Integer(txTimer)).intValue();
+                                       -1); 
+      cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(queue)) {
       String destName = (String) ref.get("dest.name").getContent();
@@ -310,7 +259,11 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
             return dest;
           }
         }
-      } catch (Exception exc) {exc.printStackTrace();}
+      } catch (Exception exc) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgClient.log(
+            BasicLevel.ERROR, "", exc);
+      }
     }
     return null;
   }
