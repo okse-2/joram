@@ -22,27 +22,35 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.management.MXWrapper;
-import fr.dyade.aaa.util.Queue;
-
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.mom.proxies.ProxyImpl;
-import org.objectweb.joram.mom.proxies.SendReplyNot;
-import org.objectweb.joram.mom.proxies.ProxyAgentItf;
-import org.objectweb.joram.mom.notifications.*;
-
+import org.objectweb.joram.mom.dest.AdminTopicImpl;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.JmsRequestGroup;
+import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /** 
  * Class of a user proxy agent.
  */
-public class UserAgent extends Agent 
-    implements BagSerializer, ProxyAgentItf {
+public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
   /**
    * All the user requests are delegated
@@ -94,8 +102,8 @@ public class UserAgent extends Agent
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "UserAgent.agentInitialize(" +  firstTime + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.agentInitialize("
+          + firstTime + ')');
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
     MXWrapper.registerMBean(proxyImpl, "Joram", getMBeanName());
@@ -107,17 +115,14 @@ public class UserAgent extends Agent
       MXWrapper.unregisterMBean("Joram", getMBeanName());
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, "", exc);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
     }
     super.agentFinalize(lastTime);
   }
 
   private String getMBeanName() {
-    return new StringBuffer()
-      .append("type=User")
-      .append(",name=").append((name==nullName)?getId().toString():name)
-      .toString();
+    return new StringBuffer().append("type=User").append(",name=").append(
+        (name == nullName) ? getId().toString() : name).toString();
   }
 
   /**
@@ -128,32 +133,34 @@ public class UserAgent extends Agent
    * <ul>
    * <li><code>OpenConnectionNot</code></li>
    * </ul>
-   */ 
+   */
   public void react(AgentId from, Notification not) throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "UserAgent.react(" + 
-        from + ',' + not + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.react(" + from + ','
+          + not + ')');
 
-    // set agent no save (this is the default).
+    // set agent no save:
+    // the default behavior is transient
     setNoSave();
-    
+
     if (not instanceof OpenConnectionNot) {
-      doReact((OpenConnectionNot)not);
+      doReact((OpenConnectionNot) not);
     } else if (not instanceof GetConnectionNot) {
-      doReact((GetConnectionNot)not);
-    } else if (not instanceof ProxyMessageNot) {
-      doReact((ProxyMessageNot)not);
+      doReact((GetConnectionNot) not);
     } else if (not instanceof CloseConnectionNot) {
-      doReact((CloseConnectionNot)not);
+      doReact((CloseConnectionNot) not);
     } else if (not instanceof ResetCollocatedConnectionsNot) {
-      doReact((ResetCollocatedConnectionsNot)not);
+      doReact((ResetCollocatedConnectionsNot) not);
     } else if (not instanceof SendReplyNot) {
-      doReact((SendReplyNot)not);
+      doReact((SendReplyNot) not);
     } else if (not instanceof RequestNot) {
-      doReact((RequestNot)not);
+      doReact((RequestNot) not);
     } else if (not instanceof ReturnConnectionNot) {
-      doReact((ReturnConnectionNot)not);
+      doReact((ReturnConnectionNot) not);
+    } else if (not instanceof SendRepliesNot) {
+      doReact((SendRepliesNot) not);
+    } else if (not instanceof ProxyRequestGroupNot) {
+      doReact((ProxyRequestGroupNot) not);
     } else {
       try {
         proxyImpl.react(from, not);
@@ -162,7 +169,7 @@ public class UserAgent extends Agent
       }
     }
   }
-  
+
   /**
    * Registers and starts the <code>UserConnection</code>.
    */
@@ -174,111 +181,77 @@ public class UserAgent extends Agent
       connections = new Hashtable();
       heartBeatTasks = new Hashtable();
     }
-    
-    Integer objKey = new Integer(keyCounter);    
-    Object queue;
+
+    Integer objKey = new Integer(keyCounter);
+    ConnectionContext ctx;
     if (not.getReliable()) {
-      ReliableConnectionContext ctx = 
-	new ReliableConnectionContext(
-          keyCounter,
+      ctx = new ReliableConnectionContext(
+          proxyImpl, keyCounter,
           not.getHeartBeat());
       connections.put(objKey, ctx);
-      queue = ctx.queue;
     } else {
-      ConnectionContext ctx = 
-	new ConnectionContext(keyCounter);
+      ctx = new StandardConnectionContext(
+          proxyImpl, keyCounter);
       connections.put(objKey, ctx);
-      queue = ctx.queue;
     }
 
     if (not.getHeartBeat() > 0) {
-      HeartBeatTask heartBeatTask = new HeartBeatTask(
-        2 * not.getHeartBeat(), objKey);
+      HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(),
+          objKey);
       heartBeatTasks.put(objKey, heartBeatTask);
       heartBeatTask.start();
     }
 
     // Differs the reply because the connection key counter
     // must be saved before the OpenConnectionNot returns.
-    sendTo(getId(), new ReturnConnectionNot(
-      not, keyCounter, queue));
+    sendTo(getId(), new ReturnConnectionNot(not, ctx));
     keyCounter++;
   }
-  
+
   /**
    * Differs the reply because the connection key counter
    * must be saved before the OpenConnectionNot returns.
    */
   private void doReact(ReturnConnectionNot not) {
-    setNoSave();
     not.Return();
   }
-  
+
   private void doReact(GetConnectionNot not) {
-    int key = not.getKey();    
+    int key = not.getKey();
     if (connections == null) {
-      not.Throw(new Exception(
-        "Connection " + key + " not found"));
+      not.Throw(new Exception("Connection " + key + " not found"));
     } else {
       Integer objKey = new Integer(key);
-      ReliableConnectionContext ctx = 
-        (ReliableConnectionContext)connections.get(objKey);      
+      ReliableConnectionContext ctx = (ReliableConnectionContext) connections
+          .get(objKey);
       if (ctx == null) {
-	not.Throw(new Exception(
-          "Connection " + key + " not found"));
+        not.Throw(new Exception("Connection " + key + " not found"));
       } else {
-        not.Return(
-          ctx.inputCounter,
-          ctx.queue,
-          ctx.heartBeat);
+        not.Return(ctx);
       }
     }
   }
 
-  /**
-   * This saving policy should be coded in ProxyImpl.
-   */
-  private void save(AbstractJmsRequest request) {
-    if (request instanceof ProducerMessages ||
-        request instanceof QBrowseRequest) {
-      setNoSave();
-    } else if (request instanceof ConsumerReceiveRequest) {
-      ConsumerReceiveRequest crr = (ConsumerReceiveRequest)request;
-      if (crr.getQueueMode()) setNoSave();
-    } else if (request instanceof ConsumerSetListRequest) {
-      ConsumerSetListRequest cslr = (ConsumerSetListRequest)request;
-      if (cslr.getQueueMode()) setNoSave();
-    }
-  }
-
   private void doReact(RequestNot not) {
-    save((AbstractJmsRequest)not.getMessage());
     Integer key = new Integer(not.getConnectionKey());
     if (connections != null) {
-      ConnectionContext ctx = 
-        (ConnectionContext)connections.get(key);
+      ConnectionContext ctx = (ConnectionContext) connections.get(key);
       if (ctx != null) {
-        HeartBeatTask heartBeatTask = 
-          (HeartBeatTask)heartBeatTasks.get(key);
+        HeartBeatTask heartBeatTask = (HeartBeatTask) heartBeatTasks.get(key);
         if (heartBeatTask != null) {
           heartBeatTask.touch();
         }
         
-        proxyImpl.reactToClientRequest(
-          ctx.key, 
-          (AbstractJmsRequest)not.getMessage());
-        if (not.getMessage() instanceof CnxCloseRequest) {
-          // state change, so save.
-          setSave();
-          CnxCloseRequest request = (CnxCloseRequest)not.getMessage();
+        AbstractJmsRequest request = ctx.getRequest(not.getMessage());  
+        proxyImpl.reactToClientRequest(key.intValue(), request);
+        
+        if (ctx.isClosed()) {
+          //CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
           connections.remove(key);
-          HeartBeatTask hbt = 
-            (HeartBeatTask)heartBeatTasks.remove(key);
-          if (hbt != null)
+          HeartBeatTask hbt = (HeartBeatTask) heartBeatTasks.remove(key);
+          if (hbt != null) {
             hbt.cancel();
-          CnxCloseReply reply = new CnxCloseReply();
-          reply.setCorrelationId(request.getRequestId());
-          ctx.queue.push(reply);
+          }
         }
       }
     }
@@ -287,69 +260,49 @@ public class UserAgent extends Agent
     // - RequestNot always follows an OpenConnection or
     // a GetConnection
   }
-
-  private void doReact(ProxyMessageNot not) {
-    ProxyMessage msg = not.getMessage();
-    save((AbstractJmsRequest)msg.getObject());
-    Integer key = new Integer(not.getConnectionKey());
-    if (connections != null) {
-      ReliableConnectionContext ctx = 
-        (ReliableConnectionContext)connections.get(key);
-
+  
+  private void doReact(ProxyRequestGroupNot not) {
+    RequestNot[] requests = not.getRequests();
+    RequestBuffer rm = new RequestBuffer(this);
+    for (int i = 0; i < requests.length; i++) {
+      RequestNot req = requests[i];
+      Integer key = new Integer(req.getConnectionKey());
+      HeartBeatTask heartBeatTask = (HeartBeatTask) heartBeatTasks.get(key);
+      if (heartBeatTask != null) {
+        heartBeatTask.touch();
+      }
+      ConnectionContext ctx = (ConnectionContext) connections.get(key);
       if (ctx != null) {
-        HeartBeatTask heartBeatTask = 
-          (HeartBeatTask)heartBeatTasks.get(key);
-        if (heartBeatTask != null) {
-          heartBeatTask.touch();
-        }
-        
-        receiveReliableMessage(ctx, not.getMessage());
-        
-        if (msg.getObject() instanceof CnxCloseRequest) {
-          // state change, so save.
-          setSave();
-          CnxCloseRequest request = (CnxCloseRequest)msg.getObject();
-          connections.remove(key);
-          HeartBeatTask hbt = 
-            (HeartBeatTask)heartBeatTasks.remove(key);
-          if (hbt != null)
-            hbt.cancel();
-          CnxCloseReply reply = new CnxCloseReply();
-          reply.setCorrelationId(request.getRequestId());
-          push(ctx, reply);
+        AbstractJmsRequest request = ctx.getRequest(req.getMessage());
+        if (request instanceof ProducerMessages) {
+          ProducerMessages pm = (ProducerMessages) request;
+          rm.put(req.getConnectionKey(), pm);
+        } else if (request instanceof JmsRequestGroup) {
+          JmsRequestGroup jrg = (JmsRequestGroup)request;
+          AbstractJmsRequest[] groupedRequests = jrg.getRequests();
+          for (int j = 0; j < groupedRequests.length; j++) {
+            if (groupedRequests[i] instanceof ProducerMessages) {
+              ProducerMessages pm = (ProducerMessages) groupedRequests[i];
+              rm.put(req.getConnectionKey(), pm);
+            } else {
+              proxyImpl.reactToClientRequest(key.intValue(), groupedRequests[i]);
+            }
+          }
+        } else {
+          proxyImpl.reactToClientRequest(key.intValue(), request);
         }
       }
     }
-    // else should not happen because:
-    // - ProxyMessageNot is transient
-    // - ProxyMessageNot always follows an OpenConnection or
-    // a GetConnection
-  }
-
-  private void receiveReliableMessage(
-    ReliableConnectionContext ctx,
-    ProxyMessage msg) {
-    if (msg != null) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, " -> msg = " + msg + ')');
-      ctx.inputCounter = msg.getId();	
-      proxyImpl.reactToClientRequest(
-        ctx.key, (AbstractJmsRequest)msg.getObject());
-    }
-    ctx.queue.ack(msg.getAckId());
+    rm.flush();
   }
 
   private void doReact(CloseConnectionNot not) {
     if (connections != null) {
-      // state change, so save.
-      setSave();
       Integer key = new Integer(not.getKey());
       // The connection may have already been 
       // explicitely closed by a CnxCloseRequest.
       if (connections.remove(key) != null) {
-        proxyImpl.reactToClientRequest(
-          not.getKey(), new CnxCloseRequest());        
+        proxyImpl.reactToClientRequest(not.getKey(), new CnxCloseRequest());
         heartBeatTasks.remove(key);
       }
     }
@@ -365,22 +318,47 @@ public class UserAgent extends Agent
       Iterator iterator = values.iterator();
       while (iterator.hasNext()) {
         Object obj = iterator.next();
-        if (obj instanceof ConnectionContext) {
-          ConnectionContext cc = (ConnectionContext)obj;
+        // Standard connections must be dropped.
+        // Only reliable connections can be recovered.
+        if (obj instanceof StandardConnectionContext) {
+          ConnectionContext cc = (ConnectionContext) obj;
           proxyImpl.reactToClientRequest(
-            cc.key, new CnxCloseRequest());
+              cc.getKey(), new CnxCloseRequest());
           iterator.remove();
         }
       }
     }
   }
 
-  private void doReact(SendReplyNot not) {
-    setNoSave();
-    sendToClient(
-      not.getKey(), new ServerReply(not.getRequestId()));
+  private void doReact(SendRepliesNot not) {
+    Enumeration en = not.getReplies();
+    while (en.hasMoreElements()) {
+      SendReplyNot sr = (SendReplyNot) en.nextElement();
+      doReact(sr);
+    }
   }
-  
+
+  /**
+   * Notification sent by local agents (destinations)
+   * indicating that the proxy can reply to a client.
+   * @param not
+   */
+  private void doReact(SendReplyNot not) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
+    ClientContext cc = proxyImpl.getClientContext(not.getKey());
+    if (cc != null) {
+      if (cc.setReply(not.getRequestId()) == 0) {
+        sendToClient(not.getKey(), new ServerReply(not.getRequestId()));
+      }
+    } else if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
+      // Can happen if the connection is closed before the SendReplyNot
+      // arrives.
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+          "UserAgent: client context not found for " + not);
+    }
+  }
+
   /**
    * Sends a notification to the specified agent.
    *
@@ -389,9 +367,8 @@ public class UserAgent extends Agent
    */
   public void sendNot(AgentId to, Notification not) {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "UserAgent.sendNot(" + to + ',' + not + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.sendNot(" + to + ','
+          + not + ')');
     sendTo(to, not);
   }
 
@@ -405,73 +382,28 @@ public class UserAgent extends Agent
    */
   public void sendToClient(int key, AbstractJmsReply reply) {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "UserAgent.sendToClient(" + key + ',' + reply + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.sendToClient(" + key
+          + ',' + reply + ')');
     Integer objKey = new Integer(key);
     if (connections != null) {
-      Object ctx = connections.get(objKey);
+      ConnectionContext ctx = (ConnectionContext)connections.get(objKey);
       if (ctx != null) {
-        if (ctx instanceof ReliableConnectionContext) {
-          push((ReliableConnectionContext)ctx, reply);
-        } else if (ctx instanceof ConnectionContext) {
-          ((ConnectionContext)ctx).queue.push(reply);
-      } else {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgProxy.log(
-              BasicLevel.ERROR, "Unexpected connection context: " + ctx);
-        }
+        ctx.pushReply(reply);
       }
     }
     // else may happen. Drop the reply.
-  }
-
-  private static void push(ReliableConnectionContext ctx, 
-			   AbstractJmsReply reply) {
-    ProxyMessage msg = new ProxyMessage(
-      ctx.outputCounter, ctx.inputCounter, reply);
-    ctx.queue.push(msg);
-    ctx.outputCounter++;
-  }
-
-  static class ReliableConnectionContext 
-      implements java.io.Serializable {
-    public int key;
-    public long inputCounter;
-    public long outputCounter;
-    public AckedQueue queue;
-    public int heartBeat;
-
-    ReliableConnectionContext(int key,
-                              int heartBeat) {
-      this.key = key;
-      this.heartBeat = heartBeat;
-      inputCounter = -1;
-      outputCounter = 0;
-      queue = new AckedQueue();
-    }
-  }
-
-  static class ConnectionContext 
-      implements java.io.Serializable {
-    public int key;
-    public Queue queue;
-
-    ConnectionContext(int key) {
-      this.key = key;
-      queue = new Queue();
-    }
   }
 
   /**
    * Timer task responsible for closing the connection if 
    * it has not sent any requests for the duration 'timeout'.
    */
-  class HeartBeatTask  
-      extends fr.dyade.aaa.util.TimerTask
-    implements java.io.Serializable {
+  class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements
+      java.io.Serializable {
     private int timeout;
+
     private Integer key;
+
     private long lastRequestDate;
 
     HeartBeatTask(int timeout, Integer key) {
@@ -483,25 +415,15 @@ public class UserAgent extends Agent
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(
-            BasicLevel.DEBUG,
-            "HeartBeatTask: close connection");
-        Object ctx = connections.remove(key);
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+              "HeartBeatTask: close connection");
+        ConnectionContext ctx = 
+          (ConnectionContext)connections.remove(key);
         heartBeatTasks.remove(key);
-        proxyImpl.reactToClientRequest(
-          key.intValue(), new CnxCloseRequest());
-        Exception exc = new Exception(
-          "Connection " + getId() + ':' + key + " closed");
-        if (ctx instanceof ReliableConnectionContext) {
-          ((ReliableConnectionContext)ctx).queue.push(
-            new ProxyMessage(-1, -1, exc));
-        } else if (ctx instanceof ConnectionContext) {
-          ((ConnectionContext)ctx).queue.push(exc);
-        } else {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgProxy.log(
-              BasicLevel.ERROR, "Unexpected context: " + ctx);
-        }
+        proxyImpl.reactToClientRequest(key.intValue(), new CnxCloseRequest());
+        Exception exc = new Exception("Connection " + getId() + ':' + key
+            + " closed");
+        ctx.pushError(exc);
       } else {
         start();
       }
@@ -509,8 +431,7 @@ public class UserAgent extends Agent
 
     public void start() {
       try {
-        ConnectionManager.getTimer().schedule(
-          this, timeout);
+        ConnectionManager.getTimer().schedule(this, timeout);
       } catch (Exception exc) {
         throw new Error(exc.toString());
       }
@@ -523,30 +444,28 @@ public class UserAgent extends Agent
 
   public void setNoSave() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "setNoSave()");
-    
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
+
     super.setNoSave();
   }
 
   public void setSave() {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "UserAgent.setSave()");
-    
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.setSave()");
+
     super.setSave();
   }
 
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
-    connections = (Hashtable)in.readObject();
-    heartBeatTasks = (Hashtable)in.readObject();
+  public void readBag(ObjectInputStream in) throws IOException,
+      ClassNotFoundException {
+    connections = (Hashtable) in.readObject();
+    heartBeatTasks = (Hashtable) in.readObject();
 
     if (heartBeatTasks != null) {
       // Start the tasks
       Enumeration tasks = heartBeatTasks.elements();
       while (tasks.hasMoreElements()) {
-        HeartBeatTask task = (HeartBeatTask)tasks.nextElement();
+        HeartBeatTask task = (HeartBeatTask) tasks.nextElement();
         task.start();
       }
     }
@@ -554,8 +473,7 @@ public class UserAgent extends Agent
     proxyImpl.readBag(in);
   }
 
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
+  public void writeBag(ObjectOutputStream out) throws IOException {
     out.writeObject(connections);
     out.writeObject(heartBeatTasks);
     proxyImpl.writeBag(out);

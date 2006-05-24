@@ -23,19 +23,23 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.*;
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.mom.dest.AdminTopicImpl;
-import org.objectweb.joram.mom.notifications.*;
-
+import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.proxies.AckedQueue;
+import org.objectweb.joram.mom.proxies.GetConnectionNot;
+import org.objectweb.joram.mom.proxies.OpenConnectionNot;
+import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * Listens to the TCP connections from the JMS clients.
@@ -44,14 +48,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Opens the <code>UserConnection</code> with the
  * right user's proxy.
  */
-public class TcpConnectionListener 
-    extends Daemon {
-
-  
-
+public class TcpConnectionListener extends Daemon {
   /**
-   * The server socket listening to connections
-   * from the JMS clients.
+   * The server socket listening to connections from the JMS clients.
    */
   private ServerSocket serverSocket;
 
@@ -73,10 +72,9 @@ public class TcpConnectionListener
    * @param proxyService the TCP proxy service of this
    * connection listener
    */
-  public TcpConnectionListener(
-    ServerSocket serverSocket,
-    TcpProxyService proxyService,
-    int timeout) {
+  public TcpConnectionListener(ServerSocket serverSocket,
+                               TcpProxyService proxyService,
+                               int timeout) {
     super("TcpConnectionListener");
     this.serverSocket = serverSocket;
     this.proxyService = proxyService;
@@ -119,107 +117,94 @@ public class TcpConnectionListener
    * right user's proxy, creates and starts 
    * the <code>TcpConnection</code>.
    */
-  private void acceptConnection() 
-    throws Exception {
+  private void acceptConnection() throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpConnectionListener.acceptConnection()");
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+          "TcpConnectionListener.acceptConnection()");
 
     Socket sock = serverSocket.accept();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        " -> accept connection");
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> accept connection");
 
     try {
       sock.setTcpNoDelay(true);
-      
+
       // Fix bug when the client doesn't
       // use the right protocol (e.g. Telnet)
       // and blocks this listener.
       sock.setSoTimeout(timeout);
-      
-      dis = new DataInputStream(
-        sock.getInputStream());
-      dos = new DataOutputStream(
-        sock.getOutputStream());
-      
+
+      dis = new DataInputStream(sock.getInputStream());
+      dos = new DataOutputStream(sock.getOutputStream());
+
       String userName = dis.readUTF();
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, 
-          " -> read userName = " + userName);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read userName = "
+            + userName);
       String userPassword = dis.readUTF();
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, 
-          " -> read userPassword = " + userPassword);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read userPassword = "
+            + userPassword);
       int key = dis.readInt();
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, 
-          " -> read key = " + key);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
       int heartBeat = 0;
       if (key == -1) {
-	heartBeat = dis.readInt();
-	if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, 
-          " -> read heartBeat = " + heartBeat);
+        heartBeat = dis.readInt();
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read heartBeat = "
+              + heartBeat);
       }
 
-      GetProxyIdNot gpin = new GetProxyIdNot(
-        userName, userPassword);
+      GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(),
-                                AgentServer.getServerId(),
-                                AgentId.JoramAdminStamp));
+        gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer
+            .getServerId(), AgentId.JoramAdminStamp));
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	  MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
         dos.writeInt(1);
-	dos.writeUTF(exc.toString());
-	return;
+        dos.writeUTF(exc.toString());
+        return;
       }
-      
+
       IOControl ioctrl;
       AckedQueue replyQueue;
       if (key == -1) {
-        OpenConnectionNot ocn = new OpenConnectionNot(
-          true, heartBeat);	
+        OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat);
         ocn.invoke(proxyId);
-	dos.writeInt(0);
-	dos.writeInt(ocn.getKey());
-	dos.flush();
-	key = ocn.getKey();
-	replyQueue = (AckedQueue)ocn.getReplyQueue();
-	ioctrl = new IOControl(sock);
+        dos.writeInt(0);
+        ReliableConnectionContext ctx =
+          (ReliableConnectionContext)ocn.getConnectionContext();
+        key = ctx.getKey();
+        dos.writeInt(ctx.getKey());
+        dos.flush();
+        replyQueue = (AckedQueue) ctx.getQueue();
+        ioctrl = new IOControl(sock);
       } else {
-	GetConnectionNot gcn = new GetConnectionNot(key);
+        GetConnectionNot gcn = new GetConnectionNot(key);
         try {
-          gcn.invoke(proxyId);          
+          gcn.invoke(proxyId);
         } catch (Exception exc) {
-	  if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(
-              BasicLevel.DEBUG, "", exc);
-	  dos.writeInt(1);
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+          dos.writeInt(1);
           dos.writeUTF(exc.getMessage());
-	  dos.flush();
+          dos.flush();
           return;
         }
-        replyQueue = gcn.getQueue();
-        heartBeat = gcn.getHeartBeat();
+        ReliableConnectionContext ctx =
+          (ReliableConnectionContext)gcn.getConnectionContext();
+        replyQueue = ctx.getQueue();
+        heartBeat = ctx.getHeartBeat();
         dos.writeInt(0);
         dos.flush();
-        ioctrl = new IOControl(
-          sock, gcn.getInputCounter());
+        ioctrl = new IOControl(sock, ctx.getInputCounter());
 
-        TcpConnection tcpConnection = 
-          proxyService.getConnection(proxyId, key);
+        TcpConnection tcpConnection = proxyService.getConnection(proxyId, key);
         if (tcpConnection != null) {
           tcpConnection.close();
         }
@@ -229,20 +214,13 @@ public class TcpConnectionListener
       // to enable the server to indefinitely
       // wait for requests.
       sock.setSoTimeout(0);
-      
-      TcpConnection tcpConnection = 
-	new TcpConnection(
-	  ioctrl, 
-	  proxyId,
-	  replyQueue,
-	  key,          
-	  proxyService,
-          heartBeat == 0);
+
+      TcpConnection tcpConnection = new TcpConnection(ioctrl, proxyId,
+          replyQueue, key, proxyService, heartBeat == 0);
       tcpConnection.start();
     } catch (Exception exc) {
       if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
-          BasicLevel.DEBUG, "", exc);
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       sock.close();
       throw exc;
     }

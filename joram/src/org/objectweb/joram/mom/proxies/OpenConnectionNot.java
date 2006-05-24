@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -36,10 +36,8 @@ public class OpenConnectionNot extends SyncNotification {
     this.heartBeat = heartBeat;
   }
   
-  public void Return(int key, Object queue) {
-    Return(new Object[]{
-      new Integer(key),
-      queue});
+  public void Return(ConnectionContext ctx) {
+    Return(new Object[]{ctx});
   }
 
   public final boolean getReliable() {
@@ -50,17 +48,25 @@ public class OpenConnectionNot extends SyncNotification {
     return heartBeat;
   }
 
-  public final int getKey() {
-    return ((Integer)getValue(0)).intValue();
+  public final Object getConnectionContext() {
+    return getValue(0);
   }
 
-  public final Object getReplyQueue() {
-    return getValue(1);
-  }
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",reliable=").append(reliable);
+    output.append(",heartBeat=").append(heartBeat);
+    output.append(')');
 
-  public String toString() {
-    return '(' + super.toString() +
-      ",reliable=" + reliable + 
-      ",heartBeat=" + heartBeat + ')';
+    return output;
   }
 }

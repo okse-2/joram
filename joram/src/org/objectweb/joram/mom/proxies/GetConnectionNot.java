@@ -36,29 +36,28 @@ public class GetConnectionNot extends SyncNotification {
     return key;
   }
 
-  public void Return(long inputCounter,
-                     AckedQueue queue,
-                     int heartBeat) {
-    Return(new Object[] {
-      new Long(inputCounter),
-      queue,
-      new Integer(heartBeat)});
+  public void Return(ConnectionContext ctx) {
+    Return(new Object[] {ctx});
   }
 
-  public long getInputCounter() {
-    return ((Long)getValue(0)).longValue();
+  public ConnectionContext getConnectionContext() {
+    return (ConnectionContext)getValue(0);
   }
 
-  public AckedQueue getQueue() {
-    return (AckedQueue)getValue(1);
-  }
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",key=").append(key);
+    output.append(')');
 
-  public int getHeartBeat() {
-    return ((Integer)getValue(2)).intValue();
-  }
-
-  public String toString() {
-    return '(' + super.toString() + 
-      ",key=" + key + ')';
+    return output;
   }
 }
