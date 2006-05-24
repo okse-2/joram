@@ -38,8 +38,20 @@ public class JndiUpdateNot extends Notification {
     return updateEvent;
   }
 
-  public String toString() {
-    return '(' + super.toString() + 
-      ",updateEvent=" + updateEvent + ')';
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",updateEvent=").append(updateEvent);
+    output.append(')');
+
+    return output;
   }
 }

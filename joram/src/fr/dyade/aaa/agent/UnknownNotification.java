@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -16,6 +17,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): Bull
+ * Contributor(s): INRIA
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 
 package fr.dyade.aaa.agent;
@@ -44,13 +49,20 @@ public class UnknownNotification extends Notification {
   }
 
   /**
-   * Returns a string representation of this notification.
+   * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @return	A string representation of this notification. 
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
-  public String toString() {
-    return "(" + super.toString() +
-      ",agent=" + agent +
-      ",not=" + not + ")";
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",agent=").append(agent);
+    output.append(",not=").append(not);
+    output.append(')');
+
+    return output;
   }
 }

@@ -22,23 +22,30 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.impl.*;
-import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.jndi2.impl.NamingContextInfo;
 import fr.dyade.aaa.util.Strings;
-
-import javax.naming.*;
 
 public class InitJndiServerNot extends Notification {
   
   private AgentId[] jndiServerIds;
 
   private NamingContextInfo[] contexts;
+  
+  /**
+   * Indicates whether this notification is
+   * a request (spontaneously sent)
+   * or a reply to a request.
+   */
+  private boolean isRequest;
 
   public InitJndiServerNot(AgentId[] jndiServerIds,
-                           NamingContextInfo[] contexts) {
+                           NamingContextInfo[] contexts,
+                           boolean isRequest) {
     this.jndiServerIds = jndiServerIds;
     this.contexts = contexts;
+    this.isRequest = isRequest;
   }
 
   public final AgentId[] getJndiServerIds() {
@@ -48,14 +55,28 @@ public class InitJndiServerNot extends Notification {
   public final NamingContextInfo[] getContexts() {
     return contexts;
   }
+  
+  public final boolean isRequest() {
+    return isRequest;
+  }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer();
-    buf.append('(' + super.toString());
-    buf.append(",jndiServerIds=");
-    Strings.toString(buf, jndiServerIds);
-    buf.append(",contexts=");
-    Strings.toString(buf, contexts);
-    return buf.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",jndiServerIds=");
+    Strings.toString(output, jndiServerIds);
+    output.append(",contexts=");
+    Strings.toString(output, contexts);
+    output.append(",isRequest=" + isRequest);
+    output.append(')');
+    return output;
   }
 }

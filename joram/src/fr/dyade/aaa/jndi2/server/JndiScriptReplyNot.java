@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Sofiane Chibani
- * Contributor(s): David Feliot, Nicolas Tachker
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.server;
 
@@ -39,11 +39,21 @@ public class JndiScriptReplyNot extends Notification {
     return replies;
   }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer();
-    buf.append('(' + super.toString());
-    buf.append(",replies=");
-    Strings.toString(buf, replies);
-    return buf.toString();
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",replies=");
+    Strings.toString(output, replies);
+    output.append(')');
+
+    return output;
   }
 } 

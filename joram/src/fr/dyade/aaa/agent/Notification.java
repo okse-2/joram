@@ -147,10 +147,26 @@ public class Notification implements Serializable, Cloneable {
     return persistent;
   }
 
-  public String toString() {
+  /**
+   * Provides a string image for this object.
+   *
+   * @return	a string representation for this object.
+   */
+  public final String toString() {
     StringBuffer output = new StringBuffer();
+    return toString(output).toString();
+  }
 
-    output.append("(");
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   *
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
     output.append(super.toString());
     output.append(",messageId=").append(messageId);
     output.append(",persistent=").append(persistent);
@@ -158,9 +174,9 @@ public class Notification implements Serializable, Cloneable {
     output.append(",detached=").append(detached);
     output.append(",context=").append(context);
     output.append(",expiration=").append(expiration);
-    output.append(")");
+    output.append(')');
 
-    return output.toString();
+    return output;
   }
 
 }
