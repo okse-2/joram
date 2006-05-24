@@ -24,6 +24,9 @@ package com.scalagent.scheduler;
 import java.io.*;
 import java.util.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.agent.*;
 
 /**
@@ -75,6 +78,9 @@ import fr.dyade.aaa.agent.*;
  * @see		SchedulerProxy
  */
 public class Scheduler extends ProxyAgent {
+  
+  public static Logger logger = Debug.getLogger(Scheduler.class.getName());
+  
   /** initializes service only once */
   private static boolean initialized = false;
 
@@ -131,7 +137,6 @@ public class Scheduler extends ProxyAgent {
 
   /** object in charge of waking up this agent */
   transient SchedulerAlarm alarm;
-
 
   /**
    * Creates a local agent with unknown port.
@@ -320,6 +325,8 @@ public class Scheduler extends ProxyAgent {
    * @param not		notification to react to
    */
   public void react(AgentId from, Notification not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Scheduler.react(" + from + ',' + not + ')');
     if (not instanceof ScheduleEvent) {
       doReact(from, (ScheduleEvent) not);
     } else if (not instanceof ScheduleNotification) {
@@ -459,6 +466,8 @@ public class Scheduler extends ProxyAgent {
    * @param restart	<code>true</code> if called on restart
    */
   protected void checkItems(boolean restart) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Scheduler.checkItems(" + restart + ')');
     Date now = new Date();
 
     checkLoop:
@@ -521,8 +530,9 @@ public class Scheduler extends ProxyAgent {
     }
 
     // sets next wake-up time
-    if (items != null)
+    if (items != null) {
       alarm.setTime(items.date.getTime() - now.getTime());
+    }
   }
 
   /**
@@ -606,5 +616,16 @@ public class Scheduler extends ProxyAgent {
     if (condition == null)
       return;
     sendTo(condition.listeners, new Condition(item.event.name, item.status));
+  }
+  
+  /**
+   * Overrides the ProxyAgent behavior in order not 
+   * to react to DriverDone notifications.
+   * Useless for the Scheduler.
+   * Moreover it may stop the scheduler when restarting
+   * the agent server after a stop.
+   */
+  protected void driverDone(DriverDone not) throws IOException { 
+
   }
 }
