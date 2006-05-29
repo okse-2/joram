@@ -383,11 +383,14 @@ public class AdminController
   	Destination dest = null;
 
   	if ("Q".equals(type))
-  	  dest = org.objectweb.joram.client.jms.Queue.create(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.Queue.create(
+  	      serverNode.getServerId(), name);
   	if ("T".equals(type))
-  	  dest = org.objectweb.joram.client.jms.Topic.create(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.Topic.create(
+  	      serverNode.getServerId(), name);
   	if ("DMQ".equals(type))
-  	  dest = org.objectweb.joram.client.jms.admin.DeadMQueue.create(serverNode.getServerId());
+  	  dest = org.objectweb.joram.client.jms.admin.DeadMQueue.create(
+  	      serverNode.getServerId(), name);
 
     ctx.bind(name, dest);
 
