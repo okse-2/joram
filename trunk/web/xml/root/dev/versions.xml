@@ -11,6 +11,27 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.18 (May 31, 2006)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_18. This maintenance release provides the following
+      fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Changes NTransaction to expose a repository interface; provides a File and DB implementation.</li>
+	  <li>Adds a DBTransaction implementation of Transaction interface.</li>
+	  <li>Adds multi-threading support in HttpNetwork.</li>
+	  <li>Adds configuration for SO_TIMEOUT TCP parameter in JNDI.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Fix for redeployment of JCA connector.</li>
+	  <li>Run onException in a separate thread to avoid deadlock in
+connector onException method.</li>
+	  <li>Many fixes to improve connection closure.</li>
+	</ul>
+      </s2>
+    </s1>
 
     <s1 name="JORAM maintenance release 4.3.14 (March 19, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
