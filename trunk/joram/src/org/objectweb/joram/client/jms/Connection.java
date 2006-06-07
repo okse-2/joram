@@ -41,12 +41,19 @@ import org.objectweb.joram.shared.client.CnxConnectReply;
 import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
+import org.objectweb.joram.shared.client.ConsumerSubRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
  */
 public class Connection implements javax.jms.Connection {
+  
+  public static Logger logger = 
+    Debug.getLogger(Connection.class.getName());
   
   /**
    * Status of the connection.
@@ -138,8 +145,8 @@ public class Connection implements javax.jms.Connection {
   public Connection(FactoryParameters factoryParameters,
                     RequestChannel requestChannel) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Connection.<init>(" + 
         factoryParameters + ',' + requestChannel + ')');
@@ -165,6 +172,8 @@ public class Connection implements javax.jms.Connection {
       (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
+    
+    mtpx.setDemultiplexerDaemonName(toString());
   }
 
   private String newTrace(String trace) {
@@ -172,8 +181,8 @@ public class Connection implements javax.jms.Connection {
   }
 
   private void setStatus(int status) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".setStatus(" + 
                  Status.toString(status) + ')'));
@@ -251,18 +260,15 @@ public class Connection implements javax.jms.Connection {
         javax.jms.ServerSessionPool sessionPool,
         int maxMessages) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".createConnectionConsumer(" + 
                  dest + ',' + selector + ',' + 
                  sessionPool + ',' + maxMessages + ')'));
     checkClosed();
-    ConnectionConsumer cc = new ConnectionConsumer(
-      this, (Destination) dest, selector,
-      sessionPool, maxMessages, mtpx);
-    cconsumers.addElement(cc);
-    return cc;
+    return createConnectionConsumer(
+        dest, selector, null, sessionPool, maxMessages);
   }
 
   /**
@@ -274,19 +280,89 @@ public class Connection implements javax.jms.Connection {
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public synchronized javax.jms.ConnectionConsumer
-      createDurableConnectionConsumer(javax.jms.Topic topic, String subName,
+  public javax.jms.ConnectionConsumer
+      createDurableConnectionConsumer(javax.jms.Topic topic, 
+                                      String subName,
                                       String selector,
                                       javax.jms.ServerSessionPool sessPool,
                                       int maxMessages) 
     throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".createDurableConnectionConsumer(" + 
+                 topic + ',' + subName + ',' + selector + ',' + 
+                 sessPool + ',' + maxMessages + ')'));
     checkClosed();
-    ConnectionConsumer cc = new ConnectionConsumer(
-      this, (Topic) topic, subName, selector,
-      sessPool, maxMessages, mtpx);
-    cconsumers.addElement(cc);
-    return cc;
+    return createDurableConnectionConsumer(
+        (Topic) topic, selector, subName, sessPool, maxMessages);
   }
+  
+  private synchronized javax.jms.ConnectionConsumer
+    createConnectionConsumer(
+        javax.jms.Destination dest, 
+        String selector,
+        String subName,
+        javax.jms.ServerSessionPool sessionPool,
+        int maxMessages) 
+    throws JMSException {
+    checkClosed();
+    
+    try {
+      org.objectweb.joram.shared.selectors.Selector.checks(selector);
+    }
+    catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
+      throw new InvalidSelectorException("Invalid selector syntax: " + sE);
+    }
+
+    if (sessionPool == null)
+      throw new JMSException("Invalid ServerSessionPool parameter: "
+                             + sessionPool);
+    if (maxMessages <= 0)
+      throw new JMSException("Invalid maxMessages parameter: " + maxMessages);
+    
+    boolean queueMode;
+    String targetName;
+    boolean durable;
+    
+    if (dest instanceof Queue) {
+      queueMode = true;
+      targetName = ((Destination) dest).getName();
+      durable = false;
+    } else {
+      queueMode = false;
+      if (subName == null) {
+        targetName = nextSubName();
+        durable = false;
+      } else {
+        targetName = subName;
+        durable = true;
+      }
+      requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
+          targetName, selector, false, durable));
+    }
+    
+    MultiSessionConsumer msc =
+      new MultiSessionConsumer(
+          queueMode,
+          durable,
+          selector,
+          targetName,
+          sessionPool,
+          factoryParameters.queueMessageReadMax,
+          factoryParameters.topicActivationThreshold,
+          factoryParameters.topicPassivationThreshold,
+          factoryParameters.topicAckBufferMax,
+          mtpx,
+          this,
+          maxMessages);
+    
+    msc.start();
+    
+    cconsumers.addElement(msc);
+    
+    return msc;
+  }  
 
   /** 
    * API method.
@@ -298,8 +374,8 @@ public class Connection implements javax.jms.Connection {
       createSession(boolean transacted, 
                     int acknowledgeMode)
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         newTrace(".createSession(" + 
                  transacted + ',' +  
@@ -388,8 +464,8 @@ public class Connection implements javax.jms.Connection {
    * @exception IllegalStateException  If the connection is closed or broken.
    */
   public synchronized void start() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".start()")); 
     checkClosed();
@@ -398,8 +474,8 @@ public class Connection implements javax.jms.Connection {
     if (status == Status.START)
       return;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": starting..."); 
 
     // Starting the sessions:
@@ -422,8 +498,8 @@ public class Connection implements javax.jms.Connection {
    * @exception IllegalStateException  If the connection is closed or broken.
    */
   public void stop() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".stop()"));
     checkClosed();
@@ -465,8 +541,8 @@ public class Connection implements javax.jms.Connection {
    * @exception JMSException  Actually never thrown.
    */
   public void close() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".close()"));
     
@@ -502,8 +578,8 @@ public class Connection implements javax.jms.Connection {
       try {
         session.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -512,13 +588,13 @@ public class Connection implements javax.jms.Connection {
     cconsumers.clear();
     
     for (int i = 0; i < consumersToClose.size(); i++) {
-      ConnectionConsumer consumer = 
-        (ConnectionConsumer) consumersToClose.elementAt(i);
+      MultiSessionConsumer consumer = 
+        (MultiSessionConsumer) consumersToClose.elementAt(i);
       try {
         consumer.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -528,8 +604,8 @@ public class Connection implements javax.jms.Connection {
       CnxCloseRequest closeReq = new CnxCloseRequest();
       requestor.request(closeReq);
     } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, "", exc);
     }
     
@@ -547,8 +623,8 @@ public class Connection implements javax.jms.Connection {
    * it must be cleaned up.
    */
   public void cleanup() {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, newTrace(".cleanup()"));
     
     // Closing the sessions:
@@ -562,8 +638,8 @@ public class Connection implements javax.jms.Connection {
       try {
         session.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -602,25 +678,26 @@ public class Connection implements javax.jms.Connection {
    * Called by Session.
    */
   synchronized void closeSession(Session session) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".closeSession(" + session + ')'));
     sessions.removeElement(session);
   }
 
   /**
-   * Called by ConnectionConsumer.
+   * Called by MultiSessionConsumer.
+   * Synchronized with run().
    */
   synchronized void closeConnectionConsumer(
-    ConnectionConsumer cc) {
+    MultiSessionConsumer cc) {
     cconsumers.removeElement(cc);
   }
 
   synchronized AbstractJmsReply syncRequest(
     AbstractJmsRequest request) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         newTrace(".syncRequest(" + request + ')'));
     return requestor.request(request);
