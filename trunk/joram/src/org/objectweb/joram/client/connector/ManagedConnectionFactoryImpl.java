@@ -24,6 +24,7 @@
  */
 package org.objectweb.joram.client.connector;
 
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
@@ -103,6 +104,30 @@ public class ManagedConnectionFactoryImpl
    * considered as dead and processed as required.
    */
   public int cnxPendingTimer = 0;
+  
+  /**
+   * Determines whether the produced messages are asynchronously
+   * sent or not (without or with acknowledgement)
+   * Default is false (with ack).
+   */
+  public boolean asyncSend;
+  
+  /**
+   * Determines whether client threads 
+   * which are using the same connection
+   * are synchronized
+   * in order to group together the requests they
+   * send.
+   */
+  public boolean multiThreadSync;
+  
+  /**
+   * The maximum time the threads hang if 'multiThreadSync' is true.
+   * Either they wake up (wait time out) or they are notified (by the 
+   * first woken up thread).
+   *  
+   */
+  public int multiThreadSyncDelay = -1;
 
   /**
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
@@ -123,18 +148,29 @@ public class ManagedConnectionFactoryImpl
   }
 
   protected void setParameters(Object factory) {
+    FactoryParameters fp = null;
     if (factory instanceof org.objectweb.joram.client.jms.ConnectionFactory) {
       org.objectweb.joram.client.jms.ConnectionFactory f =
         (org.objectweb.joram.client.jms.ConnectionFactory) factory;
-      f.getParameters().connectingTimer = connectingTimer;
-      f.getParameters().cnxPendingTimer = cnxPendingTimer;
-      f.getParameters().txPendingTimer = txPendingTimer;
+      fp = f.getParameters();
     } else if (factory instanceof org.objectweb.joram.client.jms.XAConnectionFactory) {
       org.objectweb.joram.client.jms.XAConnectionFactory f =
         (org.objectweb.joram.client.jms.XAConnectionFactory) factory;
-      f.getParameters().connectingTimer = connectingTimer;
-      f.getParameters().cnxPendingTimer = cnxPendingTimer;
-      f.getParameters().txPendingTimer = txPendingTimer;
+      fp = f.getParameters();
+    }
+    if (fp != null) {
+      fp.connectingTimer = connectingTimer;
+      fp.cnxPendingTimer = cnxPendingTimer;
+      fp.txPendingTimer = txPendingTimer;
+      if (asyncSend) {
+        fp.asyncSend = asyncSend;
+      }
+      if (multiThreadSync) {
+        fp.multiThreadSync = multiThreadSync;
+      }
+      if (multiThreadSyncDelay > 0) {
+        fp.multiThreadSyncDelay = multiThreadSyncDelay;
+      }
     }
   }
 
@@ -443,6 +479,9 @@ public class ManagedConnectionFactoryImpl
     connectingTimer = ((JoramAdapter) ra).connectingTimer;
     txPendingTimer = ((JoramAdapter) ra).txPendingTimer;
     cnxPendingTimer = ((JoramAdapter) ra).cnxPendingTimer;
+    asyncSend = ((JoramAdapter) ra).asyncSend;
+    multiThreadSync = ((JoramAdapter) ra).multiThreadSync;
+    multiThreadSyncDelay = ((JoramAdapter) ra).multiThreadSyncDelay;
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
