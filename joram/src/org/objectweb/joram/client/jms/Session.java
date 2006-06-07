@@ -35,29 +35,24 @@ import javax.jms.IllegalStateException;
 import javax.jms.MessageFormatException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
  */
 public class Session implements javax.jms.Session {
 
+  public static Logger logger = 
+    Debug.getLogger(Session.class.getName());
+  
+  
   public static final String RECEIVE_ACK =
       "org.objectweb.joram.client.jms.receiveAck";
 
   public static boolean receiveAck =
       Boolean.getBoolean(RECEIVE_ACK);
-
- public static final String PENDING_MSG_MAX =
-     "org.objectweb.joram.client.jms.pendingMsgMax";
-
-  public static final String PENDING_MSG_MIN =
-      "org.objectweb.joram.client.jms.pendingMsgMin";
-
-  private static int pendingMsgMax = 
-      Integer.getInteger(PENDING_MSG_MAX, Integer.MAX_VALUE).intValue();
-
-  private static int pendingMsgMin = 
-      Integer.getInteger(PENDING_MSG_MIN, 0).intValue();
 
   /**
    * Status of the session
@@ -212,9 +207,6 @@ public class Session implements javax.jms.Session {
    */
   Hashtable deliveries;
 
-  /** The connection consumer delivering messages to the session, if any. */
-  private ConnectionConsumer connectionConsumer;
-
   /**
    * The request multiplexer used to communicate
    * with the user proxy.
@@ -323,6 +315,8 @@ public class Session implements javax.jms.Session {
    */
   private int topicActivationThreshold;
   
+  private MessageConsumerListener messageConsumerListener;
+  
   /**
    * Opens a session.
    *
@@ -389,8 +383,8 @@ public class Session implements javax.jms.Session {
    * Sets the status of the session.
    */
   private void setStatus(int status) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.setStatus(" + 
         Status.toString(status) + ')');
@@ -405,8 +399,8 @@ public class Session implements javax.jms.Session {
    * Sets the session mode.
    */
   private void setSessionMode(int sessionMode) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.setSessionMode(" + 
         SessionMode.toString(sessionMode) + ')');
@@ -417,8 +411,8 @@ public class Session implements javax.jms.Session {
    * Sets the request status.
    */
   private void setRequestStatus(int requestStatus) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.setRequestStatus(" + 
         RequestStatus.toString(requestStatus) + ')');
@@ -748,8 +742,8 @@ public class Session implements javax.jms.Session {
                               String selector,
                               boolean noLocal) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.createDurableSubscriber(" + 
         topic + ',' + name + ',' + 
@@ -773,8 +767,8 @@ public class Session implements javax.jms.Session {
       createDurableSubscriber(javax.jms.Topic topic, 
                               String name)
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.createDurableSubscriber(" + 
         topic + ',' + name + ')');
@@ -870,8 +864,8 @@ public class Session implements javax.jms.Session {
   public synchronized void run() {
     int load = repliesIn.size();
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "-- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "-- " + this
                                  + ": loaded with " + load
                                  + " message(s) and started.");
     try {
@@ -881,56 +875,20 @@ public class Session implements javax.jms.Session {
           (org.objectweb.joram.shared.messages.Message) repliesIn.pop();
         String msgId = momMsg.getIdentifier();
         
-        if (messageListener == null) {
-          // If no message listener has been set for the session, denying the
-          // processed message:
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgClient.log(BasicLevel.ERROR, this + ": an"
-                                       + " asynchronous delivery arrived for"
-                                       + " a non existing session listener:"
-                                       + " denying the message.");
-          denyMessage(connectionConsumer.getTargetName(), 
-                      msgId, 
-                      connectionConsumer.getQueueMode());
-        } else {
-          Message msg = prepareMessage(
-            momMsg, 
-            connectionConsumer.getTargetName(),
-            connectionConsumer.getQueueMode());
-          
-          if (msg == null) return;
-          
-          try {
-            messageListener.onMessage(msg);
-          } catch (RuntimeException exc) {
-            if (autoAck) {
-              denyMessage(connectionConsumer.getTargetName(), 
-                          momMsg.getIdentifier(), 
-                          connectionConsumer.getQueueMode());
-            }
-            return;
-          }
-          
-          if (autoAck) {
-            ackMessage(connectionConsumer.getTargetName(), 
-                       momMsg.getIdentifier(), 
-                       connectionConsumer.getQueueMode());
-          }
-        }
+        onMessage(momMsg, messageConsumerListener);
       }
     } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
     }
   }
-
+  
   /**
-   * Called by ConnectionConsumer on a Session
-   * from a server session pool.
+   * Called by MultiSessionConsumer
+   * ASF mode
    */
-  synchronized void setConnectionConsumer(
-    ConnectionConsumer connectionConsumer) {
-    this.connectionConsumer = connectionConsumer;
+  void setMessageConsumerListener(MessageConsumerListener mcl) {
+    messageConsumerListener = mcl;
   }
       
   /**
@@ -940,8 +898,8 @@ public class Session implements javax.jms.Session {
    *              transacted, or if the connection is broken.
    */
   public synchronized void commit() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.commit()");
 
@@ -952,8 +910,8 @@ public class Session implements javax.jms.Session {
       throw new IllegalStateException("Can't commit a non transacted"
                                       + " session.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
     // If the transaction was scheduled: cancelling.
@@ -995,20 +953,20 @@ public class Session implements javax.jms.Session {
         requestor.request(commitReq);
       }
 
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": committed.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ": committed.");
     }
     // Catching an exception if the sendings or acknowledgement went wrong:
     catch (JMSException jE) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "", jE);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", jE);
       TransactionRolledBackException tE = 
         new TransactionRolledBackException("A JMSException was thrown during"
                                            + " the commit.");
       tE.setLinkedException(jE);
 
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "Exception: " + tE);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Exception: " + tE);
 
       rollback();
       throw tE;
@@ -1022,8 +980,8 @@ public class Session implements javax.jms.Session {
    *              transacted.
    */
   public synchronized void rollback() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.rollback()");
 
@@ -1034,8 +992,8 @@ public class Session implements javax.jms.Session {
       throw new IllegalStateException("Can't rollback a non transacted"
                                       + " session.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
 
     // If the transaction was scheduled: cancelling.
@@ -1049,8 +1007,8 @@ public class Session implements javax.jms.Session {
     // Deleting the produced messages:
     sendings.clear();
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": rolled back.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": rolled back.");
   }
 
   /** 
@@ -1059,8 +1017,8 @@ public class Session implements javax.jms.Session {
    * @exception IllegalStateException  If the session is closed, or transacted.
    */
   public synchronized void recover() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.recover()");
 
@@ -1070,8 +1028,8 @@ public class Session implements javax.jms.Session {
     if (transacted)
       throw new IllegalStateException("Can't recover a transacted session.");
     
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                                  + " recovering...");
 
     if (daemon != null &&  
@@ -1081,13 +1039,13 @@ public class Session implements javax.jms.Session {
       doRecover();
     }
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": recovered.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": recovered.");
   }
   
   private void doRecover() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Session.doRecover()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Session.doRecover()");
     deny();
   }
 
@@ -1102,8 +1060,8 @@ public class Session implements javax.jms.Session {
    */
   public synchronized void unsubscribe(String name)
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.unsubscribe(" + name + ')');
 
@@ -1128,8 +1086,8 @@ public class Session implements javax.jms.Session {
    * @exception JMSException
    */
   public void close() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.close()");
     closer.close();
@@ -1166,8 +1124,8 @@ public class Session implements javax.jms.Session {
       try {
         mc.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -1178,10 +1136,10 @@ public class Session implements javax.jms.Session {
       QueueBrowser qb = 
         (QueueBrowser)browsersToClose.elementAt(i);
       try {
-      qb.close();
+        qb.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -1192,10 +1150,10 @@ public class Session implements javax.jms.Session {
       MessageProducer mp = 
         (MessageProducer)producersToClose.elementAt(i);
       try {
-      mp.close();
+        mp.close();
       } catch (JMSException exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgClient.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, "", exc);
       }
     }
@@ -1234,8 +1192,8 @@ public class Session implements javax.jms.Session {
    * This method is called by a started connection.
    */
   synchronized void start() {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.start()");
 
@@ -1249,8 +1207,8 @@ public class Session implements javax.jms.Session {
   }
 
   private void doStart() {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.doStart()");
     repliesIn.start();
@@ -1275,8 +1233,8 @@ public class Session implements javax.jms.Session {
    * session's deliveries and forbid any further push.
    */
   synchronized void stop() {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.stop()");
     if (status == Status.STOP ||
@@ -1318,8 +1276,8 @@ public class Session implements javax.jms.Session {
     Destination dest, 
     org.objectweb.joram.shared.messages.Message msg) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.prepareSend(" + dest + ',' + msg + ')');
     checkClosed();
@@ -1354,8 +1312,8 @@ public class Session implements javax.jms.Session {
   private void prepareAck(String name, 
                           String id, 
                           boolean queueMode) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.prepareAck(" + 
         name + ',' + id + ',' + queueMode + ')');
@@ -1371,8 +1329,8 @@ public class Session implements javax.jms.Session {
     }
     acks.addId(id);
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, " -> acks = " + acks);
 
     // If the transaction must be scheduled, scheduling it:
@@ -1431,16 +1389,16 @@ public class Session implements javax.jms.Session {
    * - onMessage -> not synchronized session daemon (see above).
    */
   private void deny() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.deny()");
     Enumeration targets = deliveries.keys();
     while (targets.hasMoreElements()) {
       String target = (String) targets.nextElement();
       MessageAcks acks = (MessageAcks) deliveries.remove(target);
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, 
           " -> acks = " + acks + ')');
       SessDenyRequest deny = new SessDenyRequest(
@@ -1469,8 +1427,8 @@ public class Session implements javax.jms.Session {
     String selector,
     boolean queueMode) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.receive(" + 
         requestTimeToLive + ',' + 
@@ -1493,8 +1451,8 @@ public class Session implements javax.jms.Session {
           request,
           waitTimeOut);
 
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, 
           " -> reply = " + reply);
         
@@ -1549,8 +1507,8 @@ public class Session implements javax.jms.Session {
    */
   private synchronized void preReceive(
     MessageConsumer mc) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.preReceive(" + mc + ')');
     // The message consumer may have been closed
@@ -1587,8 +1545,8 @@ public class Session implements javax.jms.Session {
    * thread to call it.
    */
   private synchronized void postReceive() {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.postReceive()");
 
@@ -1611,8 +1569,8 @@ public class Session implements javax.jms.Session {
    * Called by MessageConsumer.
    */
   synchronized void closeConsumer(MessageConsumer mc) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.closeConsumer(" + mc + ')');
     consumers.removeElement(mc);
@@ -1679,8 +1637,8 @@ public class Session implements javax.jms.Session {
    */
   synchronized MessageConsumerListener addMessageListener(
     MessageConsumerListener mcl) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.addMessageListener(" + mcl + ')');
     checkClosed();
@@ -1707,8 +1665,8 @@ public class Session implements javax.jms.Session {
   void removeMessageListener(
     MessageConsumerListener mcl,
     boolean check) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.removeMessageListener(" + 
         mcl + ',' + check + ')');
@@ -1747,10 +1705,10 @@ public class Session implements javax.jms.Session {
    *
    * @exception 
    */
-  void pushMessages(MessageConsumerListener consumerListener, 
+  void pushMessages(SingleSessionConsumer consumerListener, 
                    ConsumerMessages messages) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.pushMessages(" + 
         consumerListener + ',' + messages + ')');
@@ -1766,6 +1724,8 @@ public class Session implements javax.jms.Session {
    * (session mode is APP_SERVER)
    */
   void onMessage(org.objectweb.joram.shared.messages.Message momMsg) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Session.onMessage(" + momMsg + ')');
     repliesIn.push(momMsg);
   }
 
@@ -1794,8 +1754,8 @@ public class Session implements javax.jms.Session {
                            String msgId,
                            boolean queueMode) 
     throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "Session.denyMessage(" + 
         targetName + ',' + 
@@ -1858,25 +1818,30 @@ public class Session implements javax.jms.Session {
   void onMessage(
     org.objectweb.joram.shared.messages.Message momMsg,
     MessageConsumerListener consumerListener) throws JMSException {
-    MessageConsumer consumer = consumerListener.getMessageConsumer();
     
     Message msg = prepareMessage(
       momMsg, 
-      consumer.targetName,
-      consumer.queueMode);
+      consumerListener.getTargetName(),
+      consumerListener.getQueueMode());
     
     if (msg == null) return;
     
     try {
-      consumerListener.onMessage(msg);
+      if (messageListener == null) {
+        // Standard JMS (MessageConsumer)
+        consumerListener.onMessage(msg, acknowledgeMode);
+      } else {
+        // ASF (ConnectionConsumer)
+        consumerListener.onMessage(msg, messageListener, acknowledgeMode);
+      }
     } catch (JMSException exc) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, "", exc);
       if (autoAck || consumerListener.isClosed()) {
-        denyMessage(consumer.targetName, 
+        denyMessage(consumerListener.getTargetName(), 
                     momMsg.getIdentifier(), 
-                    consumer.queueMode);
+                    consumerListener.getQueueMode());
       }
       return;
     }
@@ -1885,17 +1850,18 @@ public class Session implements javax.jms.Session {
       // The session has been recovered by the
       // listener thread.
       if (autoAck) {
-        denyMessage(consumer.targetName, 
+        denyMessage(consumerListener.getTargetName(), 
                     momMsg.getIdentifier(), 
-                    consumer.queueMode);
+                    consumerListener.getQueueMode());
       } else {
         doRecover();
         recover = false;
       }
     } else {
       if (autoAck) {
-        consumerListener.ack(consumer.targetName, momMsg.getIdentifier(),
-            consumer.queueMode);
+        consumerListener.ack(
+            momMsg.getIdentifier(), 
+            acknowledgeMode);
       }
     }
   }
@@ -1909,8 +1875,8 @@ public class Session implements javax.jms.Session {
                          int priority,
                          long timeToLive,
                          boolean timestampDisabled) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "Session.send(" + 
         dest + ',' +
@@ -1965,8 +1931,8 @@ public class Session implements javax.jms.Session {
     }
 
     if (transacted) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Buffering the message.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Buffering the message.");
       // If the session is transacted, keeping the request for later delivery:
       prepareSend(
         dest,
@@ -1976,8 +1942,8 @@ public class Session implements javax.jms.Session {
         new ProducerMessages(dest.getName(),
                              (org.objectweb.joram.shared.messages.Message) momMsg.clone());
       
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Sending " + momMsg);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Sending " + momMsg);
       
       if (asyncSend || (! momMsg.getPersistent())) {
         // Asynchronous sending
@@ -2097,8 +2063,8 @@ public class Session implements javax.jms.Session {
     /** Method called when the timer expires, actually closing the session. */
     public void run() {
       try {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
-          JoramTracing.dbgClient.log(BasicLevel.WARN, "Session closed "
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "Session closed "
                                      + "because of pending transaction");
         close();
       } catch (Exception e) {}
@@ -2127,8 +2093,8 @@ public class Session implements javax.jms.Session {
           ctx = (MessageListenerContext)repliesIn.get();
           repliesIn.pop();
         } catch (InterruptedException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", exc);
           return;
         }
 
@@ -2136,8 +2102,8 @@ public class Session implements javax.jms.Session {
         try {
           onMessages(ctx);
         } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", exc);
         }
       }
     }
@@ -2156,11 +2122,11 @@ public class Session implements javax.jms.Session {
    * a set of messages to consume.
    */
   private static class MessageListenerContext {
-    MessageConsumerListener consumerListener;
+    SingleSessionConsumer consumerListener;
     ConsumerMessages messages;
 
     MessageListenerContext(
-      MessageConsumerListener consumerListener, 
+      SingleSessionConsumer consumerListener, 
       ConsumerMessages messages) {
       this.consumerListener = consumerListener;
       this.messages = messages;
