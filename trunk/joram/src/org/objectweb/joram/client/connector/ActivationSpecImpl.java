@@ -38,6 +38,18 @@ public class ActivationSpecImpl
                   javax.resource.spi.ResourceAdapterAssociation,
                   java.io.Serializable
 {
+  /**
+   * Value for the property <code>acknowledgeMode</code>
+   * defined in the MDB deployment descriptor.
+   */
+  public static final String AUTO_ACKNOWLEDGE = "Auto-acknowledge";
+  
+  /**
+   * Value for the property <code>acknowledgeMode</code>
+   * defined in the MDB deployment descriptor.
+   */
+  public static final String DUPS_OK_ACKNOWLEDGE = "Dups-ok-acknowledge";
+  
   /** The type of the destination to get messages from. */
   private String destinationType;
   /** The name of the destination to get messages from. */
@@ -56,10 +68,17 @@ public class ActivationSpecImpl
   private String subscriptionName;
 
   /** Acknowledgement mode. */
-  private String acknowledgeMode = null;
+  private String acknowledgeMode = AUTO_ACKNOWLEDGE;
 
   /** Maximum number of work instances to be submitted (0 for infinite). */
   private String maxNumberOfWorks = "0";
+  
+  /**
+   * The maximum number of messages that can be assigned 
+   * to a server session at one time
+   * Default is 10.
+   */
+  private String maxMessages = "10";
 
   /** Resource adapter central authority. */
   private transient ResourceAdapter ra = null;
@@ -91,8 +110,8 @@ public class ActivationSpecImpl
       throw new InvalidPropertyException("Missing destination property.");
 
     if (acknowledgeMode != null
-        && ! acknowledgeMode.equals("Auto-acknowledge")
-        && ! acknowledgeMode.equals("Dups-ok-acknowledge"))
+        && ! acknowledgeMode.equals(AUTO_ACKNOWLEDGE)
+        && ! acknowledgeMode.equals(DUPS_OK_ACKNOWLEDGE))
       throw new InvalidPropertyException("Invalid acknowledge mode: " 
                                          + acknowledgeMode);
 
@@ -197,6 +216,10 @@ public class ActivationSpecImpl
   {
     this.maxNumberOfWorks = maxNumberOfWorks;
   }
+  
+  public void setMaxMessages(String maxMessages) {
+    this.maxMessages = maxMessages;
+  }
 
   /** Returns the destination type. */
   public String getDestinationType()
@@ -250,5 +273,9 @@ public class ActivationSpecImpl
   public String getMaxNumberOfWorks()
   {
     return maxNumberOfWorks;
+  }
+  
+  public String getMaxMessages() {
+    return maxMessages;
   }
 }
