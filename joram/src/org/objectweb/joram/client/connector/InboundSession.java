@@ -74,14 +74,16 @@ class InboundSession implements javax.jms.ServerSession,
                  WorkManager workManager,
                  MessageEndpointFactory endpointFactory,
                  XAConnection cnx,
-                 boolean transacted) {
+                 boolean transacted,
+                 int ackMode) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     "InboundSession(" + consumer +
                                     "," + workManager +
                                     "," + endpointFactory +
                                     "," + cnx +
-                                    "," + transacted + ")");
+                                    "," + transacted + 
+                                    "," + ackMode + ")");
     
     this.consumer = consumer;
     this.workManager = workManager;
@@ -95,8 +97,9 @@ class InboundSession implements javax.jms.ServerSession,
           AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                         "InboundSession xaResource = " + xaResource);
       }
-      else
-        session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      else {
+        session = cnx.createSession(false, ackMode);
+      }
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
@@ -138,8 +141,12 @@ class InboundSession implements javax.jms.ServerSession,
   }
 
   /** <code>javax.resource.spi.Work</code> method, not effective. */
-  public void release()
-  {}
+  public void release() {
+    try {
+      session.close();
+    } catch (JMSException exc) {
+    }
+  }
 
   /** Runs the wrapped session for processing the messages. */
   public void run()
