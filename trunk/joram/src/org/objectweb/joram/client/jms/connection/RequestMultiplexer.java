@@ -63,8 +63,6 @@ public class RequestMultiplexer {
 
   private Connection cnx;
 
-  private String cnxId;
-
   private volatile int status;
 
   private RequestChannel channel;
@@ -95,7 +93,6 @@ public class RequestMultiplexer {
                             long heartBeat) throws JMSException {
     this.channel = channel;
     this.cnx = cnx; 
-    this.cnxId = cnx.toString();
     requestsTable = new Hashtable();
     requestCounter = 0;
     timer = new Timer();
@@ -410,10 +407,21 @@ public class RequestMultiplexer {
       }
     }
   }
+  
+  public void setDemultiplexerDaemonName(String name) {
+    demtpx.setName(name);
+  }
+  
+  public String getDemultiplexerDaemonName() {
+    return demtpx.getName();
+  }
 
   private class DemultiplexerDaemon extends fr.dyade.aaa.util.Daemon {
     DemultiplexerDaemon() {
-      super("Connection#" + cnxId);
+      // The real name is set later when
+      // the proxy id and connection id are known
+      // see setDemultiplexerDaemonName()
+      super("Connection#?");
     }
 
     public void run() {
