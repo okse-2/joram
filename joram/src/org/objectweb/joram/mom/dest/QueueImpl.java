@@ -37,6 +37,8 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.util.Debug;
+
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.notifications.AdminReply;
@@ -47,12 +49,17 @@ import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>QueueImpl</code> class implements the MOM queue behaviour,
  * basically storing messages and delivering them upon clients requests.
  */
 public class QueueImpl extends DestinationImpl implements QueueImplMBean {
+  
+  public static Logger logger = 
+    Debug.getLogger(QueueImpl.class.getName());
+  
   /**
    * Threshold above which messages are considered as undeliverable because
    * constantly denied; 0 stands for no threshold, <code>null</code> for value
@@ -179,8 +186,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           deadMessages = new ClientMessages();
         deadMessages.addMessage(message);
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Expired message"
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Expired message"
                                         + message.getIdentifier()
                                         + " removed.");
       } else {
@@ -271,8 +278,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "QueueImpl.react(" + from + ',' + not + ')');
 
@@ -280,8 +287,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                                     + ": got " + not.getClass().getName()
                                     + " with id: " + reqId
                                     + " from: " + from.toString());
@@ -314,8 +321,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
     // MOM Exceptions are sent to the requester.
     catch (MomException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, exc);
 
       if (not instanceof AbstractRequest) {
         AbstractRequest req = (AbstractRequest) not;
@@ -348,8 +355,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(req, true, info));
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -372,8 +379,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(req, true, info));
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -481,8 +488,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
     requests.add(not);
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, " -> requests count = " + requests.size());
 
     // Launching a delivery sequence for this request:
@@ -499,8 +506,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       }
       Channel.sendTo(from, reply);
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
                                       "Receive answered by a null.");
     }
   }
@@ -545,8 +552,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // Delivering the reply:
     Channel.sendTo(from, rep);
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Request answered.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Request answered.");
   }
 
   /**
@@ -571,12 +578,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (msg != null) {
       msg.delete();
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG)) {
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG,
                                       "Message " + msgId + " acknowledged.");
       }
-    } else if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN)) {
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    } else if (logger.isLoggable(BasicLevel.WARN)) {
+      logger.log(BasicLevel.WARN,
                                     "Message " + msgId
                                     + " not found for acknowledgement.");
     }
@@ -590,8 +597,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * Messages considered as undeliverable are sent to the DMQ.
    */
   protected void doReact(AgentId from, DenyRequest not) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "QueueImpl.doReact(" + from + ',' + not + ')');
     
@@ -616,8 +623,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         consId = (AgentId) consumers.get(msgId);
         consCtx = ((Integer) contexts.get(msgId)).intValue();
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
 
         // If the current message has been consumed by the denier in the same
@@ -645,8 +652,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           else
             storeMessage(msg);
 
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Message "
                                           + msgId + " denied.");
         }
       }
@@ -663,8 +670,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       // the message from the queue - and in that case it also sends an
       // individual denying.
       if (msg == null) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgDestination.log(
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(
             BasicLevel.ERROR, " -> already denied message " + msgId);
         break;
       }
@@ -672,8 +679,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       msg.denied = true;
 
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG, " -> deny " + msgId);
 
       // state change, so save.
@@ -696,8 +703,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       else
         storeMessage(msg);
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Message "
                                       + msgId + " denied.");
     }
     // Sending the dead messages to the DMQ, if needed:
@@ -847,8 +854,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         new ClientMessages(-1, -1, messages);
       Channel.sendTo(replyTo, clientMessages);
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        MomTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
       throw new Error(exc.getMessage());
     }
   }
@@ -1005,8 +1012,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         else
           storeMessage(msg);
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-          MomTracing.dbgDestination.log(BasicLevel.WARN, "Message "
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "Message "
                                         + msg.getIdentifier() + " denied.");
       }
     }
@@ -1038,8 +1045,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       rec = (ReceiveRequest) requests.elementAt(i);
 
       excRep = new ExceptionReply(rec, exc);
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Requester "
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Requester "
                                       + rec.requester
                                       + " notified of the queue deletion.");
       Channel.sendTo(rec.requester, excRep);
@@ -1071,8 +1078,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // Persisting the message.
     message.save(getDestinationId());
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Message "
                                     + message.getIdentifier() + " stored.");
   }
 
@@ -1145,8 +1152,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @param index  Index where starting to "browse" the requests.
    */
   protected void deliverMessages(int index) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + 
         index + ')');
 
@@ -1157,8 +1164,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     QueueMsgReply notMsg;
     ClientMessages deadMessages = null;
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, " -> requests = " + requests + ')');
 
     long current = System.currentTimeMillis();
@@ -1192,8 +1199,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           // use in sub class see ClusterQueueImpl
           messageDelivered(msg.getIdentifier());
 
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Message "
                                           + msg.getIdentifier()
                                           + " sent to "
                                           + notRec.requester
@@ -1274,8 +1281,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /** Deserializes a <code>QueueImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
                throws IOException, ClassNotFoundException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "QueueImpl.readObject()");
     in.defaultReadObject();
 
@@ -1295,8 +1302,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (consId == null) {
           addMessage(persistedMsg);
         } else if (isLocal(consId)) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(
               BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
