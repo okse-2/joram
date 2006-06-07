@@ -26,6 +26,8 @@ package org.objectweb.joram.shared.client;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
+import fr.dyade.aaa.util.Strings;
+
 /**
  * A <code>ConsumerSetListRequest</code> is sent by a
  * <code>MessageConsumer</code> on which a message listener is set.
@@ -126,6 +128,8 @@ public class ConsumerSetListRequest extends AbstractJmsRequest
   public String toString() {
     return '(' + super.toString() +
       ",selector=" + selector + 
-      ",queueMode=" + queueMode + ')';
+      ",queueMode=" + queueMode +
+      ",msgIdsToAck=" + Strings.toString(msgIdsToAck) + 
+      ",msgCount=" + msgCount + ')';
   }
 }
