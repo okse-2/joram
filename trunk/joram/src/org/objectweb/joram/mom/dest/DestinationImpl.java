@@ -29,8 +29,7 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.util.Debug;
 
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
@@ -47,6 +46,7 @@ import java.util.Vector;
 import java.io.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>DestinationImpl</code> class implements the common behaviour of
@@ -54,6 +54,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public abstract class DestinationImpl implements java.io.Serializable, DestinationImplMBean {
 
+  public static Logger logger = 
+    Debug.getLogger(DestinationImpl.class.getName());
+  
   /**
    * <code>true</code> if the destination successfully processed a deletion
    * request.
@@ -119,14 +122,14 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       creationDate = System.currentTimeMillis();
 
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   void setNoSave() {
     if (agent != null) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
                                       this + ": setNoSave().");
       agent.setNoSave();
     }
@@ -134,8 +137,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
   void setSave() {
     if (agent != null) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
                                       this + ": setSave().");
       agent.setSave();
     }
@@ -166,8 +169,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "DestinationImpl.react(" + from + ',' + not + ')');
 
@@ -201,8 +204,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
     // MOM Exceptions are sent to the requester.
     catch (MomException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, exc);
 
       AbstractRequest req = (AbstractRequest) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
@@ -249,8 +252,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       Channel.sendTo(from, new AdminReply(not, false, info));
     }
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
 
   /** set user right. */
@@ -332,8 +335,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(not, true, info));
     
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -548,8 +551,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   protected void doReact(AgentId from, UnknownAgent not)
   {
     if (isAdministrator(not.agent)) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+      if (logger.isLoggable(BasicLevel.ERROR))
+            logger.log(BasicLevel.ERROR,
                                           "Admin of dest "
                                           + destId
                                           + " does not exist anymore.");
@@ -574,8 +577,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   protected void doReact(AgentId from, DeleteNot not)
   {
     if (! isAdministrator(from)) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, "Deletion request"
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "Deletion request"
                                       + " received from non administrator"
                                       + " client " + from);
     } else {
@@ -600,8 +603,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     try {
       if (!isAdministrator(from)) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-          MomTracing.dbgDestination.log(BasicLevel.WARN, 
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, 
                                         "SpecialAdminRequest request" +
                                         " received from non administrator" +
                                         " client " + from);
@@ -627,8 +630,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       Channel.sendTo(from, 
                      new AdminReply(not, false, info, obj));
     }
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
   
   protected void doReact(AgentId from, RequestGroupNot not) {
@@ -644,9 +647,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       for (int i = 0; i < msgs.size(); i++) {
         theCM.addMessage((Message) msgs.elementAt(i));
       }
-      replies.addElement(new SendReplyNot(
-          cm.getClientContext(), 
-          cm.getRequestId()));
+      if (! cm.getAsyncSend()) {
+        replies.addElement(new SendReplyNot(
+            cm.getClientContext(), 
+            cm.getRequestId()));
+      }
     }
     
     specialProcess(theCM);
@@ -656,7 +661,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // for topic performance :
     // must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if (! not.getPersistent()) {
+    if (! not.getPersistent() && replies.size() > 0) {
       Channel.sendTo(
         from, new SendRepliesNot(replies));
     }
