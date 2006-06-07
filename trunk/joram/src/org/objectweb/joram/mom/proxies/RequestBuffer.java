@@ -59,6 +59,9 @@ public class RequestBuffer {
     if (to.getTo() == proxyAgent.getId().getTo()) {
       cm.setPersistent(false);
     }
+    if (req.getAsyncSend()) {
+      cm.setAsyncSend(true);
+    }
     not.addClientMessages(cm);
   }
 
