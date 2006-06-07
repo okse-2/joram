@@ -271,8 +271,18 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     } else {
       if (messageListener != null) {
         mcl = sess.addMessageListener(
-          new MessageConsumerListener(
-            this, sess, messageListener));
+          new SingleSessionConsumer(
+            queueMode,
+            durableSubscriber,
+            selector,
+            targetName,
+            sess,
+            messageListener,
+            sess.getQueueMessageReadMax(),
+            sess.getTopicActivationThreshold(),
+            sess.getTopicPassivationThreshold(),
+            sess.getTopicAckBufferMax(),
+            sess.getRequestMultiplexer()));
       }
       // else idempotent
     }
@@ -392,7 +402,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       setStatus(Status.CLOSE);
     }
     
-    if (! queueMode) {
+    if (!queueMode) {
       // For a topic, remove the subscription.
       if (durableSubscriber) {
         try {
