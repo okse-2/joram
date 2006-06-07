@@ -89,7 +89,27 @@
          <config-property-name>TxPendingTimer</config-property-name>
          <config-property-type>java.lang.Integer</config-property-type>
          <config-property-value>0</config-property-value>
+      </config-property>    
+      <config-property>
+         <config-property-name>queueMessageReadMax</config-property-name>
+         <config-property-type>java.lang.Integer</config-property-type>
+         <config-property-value>2</config-property-value>
       </config-property>
+      <config-property>
+         <config-property-name>topicAckBufferMax</config-property-name>
+         <config-property-type>java.lang.Integer</config-property-type>
+         <config-property-value>1</config-property-value>
+      </config-property>
+      <config-property>
+         <config-property-name>multiThreadSync</config-property-name>
+         <config-property-type>java.lang.Boolean</config-property-type>
+         <config-property-value>false</config-property-value>
+      </config-property>
+      <config-property>
+         <config-property-name>multiThreadSyncDelay</config-property-name>
+         <config-property-type>java.lang.Integer</config-property-type>
+         <config-property-value>1</config-property-value>
+      </config-property>    
       <outbound-resourceadapter>
          <connection-definition>
             <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</managedconnectionfactory-class>
