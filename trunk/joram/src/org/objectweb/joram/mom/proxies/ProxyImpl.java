@@ -33,20 +33,20 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Debug;
+
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.dest.*;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.util.MessagePersistenceModule;
-import org.objectweb.joram.shared.admin.DeleteUser;
-import org.objectweb.joram.shared.admin.UpdateUser;
 import org.objectweb.joram.shared.admin.GetSubscriptions;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
@@ -70,6 +70,9 @@ import javax.management.openmbean.CompositeDataSupport;
  * destinations replies to clients.
  */ 
 public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
+  
+  public static Logger logger = 
+    Debug.getLogger(ProxyImpl.class.getName());
 
   /**
    * Identifier of this proxy dead message queue, <code>null</code> for DMQ
@@ -140,8 +143,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     contexts = new Hashtable();
     subsTable = new Hashtable();
     this.proxyAgent = proxyAgent;
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /**
@@ -164,8 +167,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   public void initialize(boolean firstTime)
     throws Exception
   {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "--- " + this + " (re)initializing...");
  
     topicsTable = new Hashtable();
@@ -187,8 +190,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         destId = (AgentId) queueIds.nextElement();
         proxyAgent.sendNot(destId, new DenyRequest(activeCtx.getId()));
 
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   "Denies messages on queue "
                                   + destId.toString());
       }
@@ -221,8 +224,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         destId = (AgentId) tempDests.nextElement();
         deleteTemporaryDestination(destId);
   
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   "Deletes temporary destination "
                                   + destId.toString());
       }
@@ -274,8 +277,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   }
 
   private void setActiveCtxId(int activeCtxId) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "ProxyImpl.setActiveCtxId(" + activeCtxId + ')');
     this.activeCtxId = activeCtxId;
@@ -293,8 +296,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   public void reactToClientRequest(int key, AbstractJmsRequest request)
   {
     try {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG,
                                 "--- " + this
                                 + " got " + request.getClass().getName()
                                 + " with id: " + request.getRequestId()
@@ -333,8 +336,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * a <code>ServerReply</code> back.
    */
   private void reactToClientRequest(int key, ProducerMessages req) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "ProxyImpl.reactToClientRequest(" + 
                               key + ',' + req + ')');
 
@@ -348,15 +351,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     
     
     if (destId.getTo() == proxyAgent.getId().getTo()) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> local sending");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> local sending");
       not.setPersistent(false);
       if (req.getAsyncSend()) {
         not.setAsyncSend(true);
       }
     } else {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> remote sending");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> remote sending");
       if (!req.getAsyncSend()) {
         proxyAgent.sendNot(proxyAgent.getId(), new SendReplyNot(key, req
             .getRequestId()));
@@ -393,8 +396,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         1);
       AgentId to = AgentId.fromString(req.getTarget());
       if (to.getTo() == proxyAgent.getId().getTo()) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   " -> local receiving");
         not.setPersistent(false);
         proxyAgent.sendNot(to, not);
@@ -411,8 +414,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <code>ReceiveRequest</code> directly to the target queue, or wraps it
    * and sends it to the proxy if destinated to a subscription.
    */
-  private void reactToClientRequest(int key, ConsumerSetListRequest req)
-  {
+  private void reactToClientRequest(int key, ConsumerSetListRequest req) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+          "ProxyImp.reactToClientRequest(" + key + ',' + req + ')');
     if (req.getQueueMode()) {
       ReceiveRequest not = new ReceiveRequest(key,
                                               req.getRequestId(),
@@ -423,8 +428,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                               req.getMessageCount());    
       AgentId to = AgentId.fromString(req.getTarget());
       if (to.getTo() == proxyAgent.getId().getTo()) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   " -> local sending");
         not.setPersistent(false);
         proxyAgent.sendNot(to, not);
@@ -605,8 +610,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         doReact(key, (CommitRequest)request);
     }
     catch (MomException mE) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgProxy.log(BasicLevel.WARN, mE);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, mE);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
@@ -656,8 +661,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     activeCtx.setProxyAgent(proxyAgent);
     contexts.put(new Integer(key), activeCtx);
     
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Connection " + key
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Connection " + key
                               + " opened.");
 
     doReply(new CnxConnectReply(req, key, proxyAgent.getId().toString()));
@@ -727,8 +732,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(AdminTopic.getDefault(),
                          new RegisterTmpDestNot(qId, false, true));
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary queue "
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Temporary queue "
                                 + qId + " created.");
     }
     catch (java.io.IOException iE) {
@@ -768,8 +773,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(AdminTopic.getDefault(),
                          new RegisterTmpDestNot(tId, true, true));
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary topic"
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Temporary topic"
                                 + tId + " created.");
     }
     catch (java.io.IOException iE) {
@@ -822,8 +827,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                     messagesTable);
       cSub.setProxyAgent(proxyAgent);
      
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
                                 "Subscription " + subName + " created.");
 
       subsTable.put(subName, cSub);
@@ -864,8 +869,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                       req.getSelector(),
                       req.getNoLocal());
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
                                 "Subscription " + subName + " reactivated.");
 
       // Updated subscription: updating subscription to topic.  
@@ -933,24 +938,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                 req.getRequestId(),
                                 req.getCancelledRequestId()));
     }
-    
-      // This never happens. Useless for a topic because
-      // the subscription is deleted before.
-    /* else {
-      // If the listener was listening to a topic, unsetting the listener.
-      String subName = req.getTarget();
-      ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-
-      if (sub == null)
-        throw new DestinationException(
-          "Can't unset a listener on the non existing subscription: " + subName);
-
-      sub.unsetListener();
-    }
-    */
-    
-    // Acknowledging the request:
-    doReply(new ServerReply(req));
   }
 
   /**
@@ -995,8 +982,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (sub == null)
       throw new DestinationException("Can't unsubscribe non existing subscription: " + subName);
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "Deleting subscription " + subName);
 
     // Updating the proxy's subscription to the topic.
@@ -1026,8 +1013,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doReact(ConsumerReceiveRequest req) 
     throws DestinationException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "ProxyImpl.doReact(" + req + ')');
     
     String subName = req.getTarget();
@@ -1051,8 +1038,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // Nothing to deliver but immediate delivery request: building an empty
     // reply.
     if (consM == null && req.getTimeToLive() == -1) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
                                 " -> immediate delivery");
       sub.unsetReceiver();
       consM = new ConsumerMessages(
@@ -1085,8 +1072,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                req.getRequestId(),
                                ids);
       if (qId.getTo() == proxyAgent.getId().getTo()) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   " -> local acking");
         not.setPersistent(false);
       }
@@ -1151,8 +1138,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                                       req.getRequestId(),
                                                       req.getIds());
       if (qId.getTo() == proxyAgent.getId().getTo()) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   " -> local acking");
         not.setPersistent(false);
         proxyAgent.sendNot(qId, not);
@@ -1549,19 +1536,19 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       subName = (String) subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deactivate subscription "
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Deactivate subscription "
             + subName + ", topic id = " + sub.getTopicId());
 
       if (sub.getDurable()) {
         sub.deactivate();
 
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Durable subscription"
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Durable subscription"
               + subName + " de-activated.");
       } else {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> topicsTable = "
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> topicsTable = "
               + topicsTable);
 
         sub.delete();
@@ -1573,8 +1560,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         if (!topics.contains(sub.getTopicId()))
           topics.add(sub.getTopicId());
 
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Temporary subscription"
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Temporary subscription"
               + subName + " deleted.");
       }
     }
@@ -1590,8 +1577,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       activeCtx.removeTemporaryDestination(destId);
       deleteTemporaryDestination(destId);
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Deletes temporary"
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Deletes temporary"
             + " destination " + destId.toString());
     }
 
@@ -1713,8 +1700,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doFwd(AgentId from, AbstractReply rep)
   {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "--- " + this + " got " +
                               rep.getClass().getName() +
                               " with id: " + rep.getCorrelationId() +
@@ -1731,8 +1718,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     else if (rep instanceof ExceptionReply)
       doReact(from, (ExceptionReply) rep);
     else {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgProxy.log(BasicLevel.WARN, "Unexpected reply!");
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "Unexpected reply!");
     }
   }
 
@@ -1746,8 +1733,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doFwd(AgentId from, QueueMsgReply rep)
   {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "ProxyImpl.doFwd(" + from + ',' + rep + ')');
     
     try {
@@ -1757,8 +1744,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       // If the receive request being replied has been cancelled, denying
       // the message.
       if (rep.getCorrelationId() == activeCtx.getCancelledReceive()) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(
             BasicLevel.DEBUG,
             " -> cancelled receive: id=" + 
             activeCtx.getCancelledReceive());
@@ -1769,8 +1756,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             Message msg = (Message)msgList.elementAt(i);
             String msgId = msg.getIdentifier();
             
-            if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-              MomTracing.dbgProxy.log(BasicLevel.WARN,
+            if (logger.isLoggable(BasicLevel.WARN))
+              logger.log(BasicLevel.WARN,
                                       " -> denying message: " + msgId);
             
             proxyAgent.sendNot(
@@ -1782,8 +1769,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           }
         }
       } else {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> reply");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> reply");
 
         ConsumerMessages jRep;
 
@@ -1808,23 +1795,23 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         if (activeCtx.getActivated()) {
           doReply(jRep);
         } else {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> buffer the reply");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> buffer the reply");
           activeCtx.addPendingDelivery(jRep);
         }
       }
     } catch (StateException pE) {
       // The context is lost: denying the message:
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", pE);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", pE);
       if (rep.getMessages().size() > 0) {
         Vector msgList = rep.getMessages();
         for (int i = 0; i < msgList.size(); i++) {
           Message msg = (Message)msgList.elementAt(i);
           String msgId = msg.getIdentifier();
           
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-            MomTracing.dbgProxy.log(BasicLevel.WARN, 
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, 
                                     "Denying message: " + msgId);
           
           proxyAgent.sendNot(
@@ -1893,14 +1880,14 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       
       if ((message.durableAcksCounter > 0) ||
           (message instanceof MessageSoftRef)) {
-        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+        
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
                                   " -> save message " + message);
-        proxyAgent.setSave();
         message.save(proxyAgent.getId().toString());
         proxyAgent.setSave();
       }
-    } 
+    }
 
     for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
       subName = (String) names.nextElement();
@@ -1935,15 +1922,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * removing the corresponding subscriptions.
    */
   private void doReact(AgentId from, ExceptionReply rep) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "ProxyImpl.doReact(" + from + ',' + rep + ')');
     MomException exc = rep.getException();
 
     // The exception comes from a topic refusing the access: deleting the subs.
     if (exc instanceof AccessException) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> topicsTable.remove(" + from + ')');
       TopicSubscription tSub = (TopicSubscription) topicsTable.remove(from);
       if (tSub != null) {
@@ -1992,20 +1979,20 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * to null.
    */
   private void doReact(UnknownAgent uA) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "ProxyImpl.doReact(" + uA + ')');
     Notification not = uA.not;
     AgentId agId = uA.agent;
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgProxy.log(BasicLevel.WARN, "--- " + this
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN, "--- " + this
                               + " notified of invalid destination: "
                               + agId.toString());
     
     // The deleted destination is a topic: deleting its subscriptions.
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
                                 " -> topicsTable.remove(" + agId + ')');
     TopicSubscription tSub = (TopicSubscription) topicsTable.remove(agId);
     if (tSub != null) {
@@ -2065,8 +2052,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           // connection is not started.
           doReply(mer);
         } catch (StateException se) {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", se);          
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", se);          
           // Do nothing (the context doesn't exist any more).
         }
       } else if (req instanceof ReceiveRequest) {
@@ -2082,13 +2069,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             activeCtx.addPendingDelivery(mer);
           }
         } catch (StateException se) {
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", se);          
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", se);          
           // Do nothing (the contexte doesn't exist any more).
         }
       }
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgProxy.log(BasicLevel.WARN, "Connection "
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "Connection "
                                 + req.getClientContext() + " notified of"
                                 + " the deletion of destination " + agId);
     }
@@ -2307,8 +2294,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   public CompositeDataSupport getSubscriptionMessage(
     String subName,
     String msgId) throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, "ProxyImpl.getSubscriptionMessage(" + 
           subName + ',' + msgId + ')');
     ClientSubscription cs = 
@@ -2424,8 +2411,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *              lost.
    */
   private void setCtx(int key) throws StateException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "ProxyImpl.setCtx(" + key + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.setCtx(" + key + ')');
 
     if (key < 0) throw new StateException("Invalid context: " + key);
 
@@ -2468,8 +2455,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @param rep  The reply to send.
    */
   private void doReply(int key, AbstractJmsReply reply) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
                               "ProxyImpl.doReply(" + key + ',' + reply + ')');
     proxyAgent.sendToClient(key, reply);
   }
@@ -2494,8 +2481,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   public void deleteProxy(AgentId from) throws Exception
   {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this
                               + " notified to be deleted.");
 
     if (! from.equals(AdminTopicImpl.getReference().getId()))
@@ -2526,8 +2513,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           destId = (AgentId) dests.nextElement();
           deleteTemporaryDestination(destId);
   
-          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "Sending DeleteNot to"
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Sending DeleteNot to"
                                     + " temporary destination "
                                     + destId.toString());
         }
@@ -2538,8 +2525,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     AgentId destId;
     for (Enumeration topics = topicsTable.keys(); topics.hasMoreElements();) {
       destId = (AgentId) topics.nextElement();
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> topicsTable.remove(" + destId + ')');
       topicsTable.remove(destId);
       updateSubscriptionToTopic(destId, -1, -1);
@@ -2561,8 +2548,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                             int contextId,
                                             int requestId)
   {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG, 
         "ProxyImpl.updateSubscriptionToTopic(" +
         topicId + ',' + contextId + ',' + requestId + ')');
@@ -2570,8 +2557,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // No more subs to this topic: unsubscribing.
     if (tSub == null || tSub.isEmpty()) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> topicsTable.remove(" + topicId + ')');
       topicsTable.remove(topicId);
       proxyAgent.sendNot(topicId,
@@ -2603,8 +2590,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   public void readBag(ObjectInputStream in) 
     throws IOException, ClassNotFoundException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "ProxyImpl[" + 
         proxyAgent.getId() + 
@@ -2631,8 +2618,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     Vector messages = (Vector)in.readObject();
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         " -> messages = " + messages);
     
@@ -2645,8 +2632,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
          subNames.hasMoreElements();) {
       String subName = (String) subNames.nextElement();
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> subName = " + subName);
       
       ClientSubscription cSub = (ClientSubscription) subsTable.get(subName);
@@ -2658,8 +2645,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                         messages,
                         false);
 
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> destId = " + destId + ')');
       
       tSub = (TopicSubscription) topicsTable.get(destId);
@@ -2670,8 +2657,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       tSub.putSubscription(subName, cSub.getSelector());
     }
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(
           BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
 
     // DF: seems not useful here
@@ -2683,8 +2670,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   public void writeBag(ObjectOutputStream out)
     throws IOException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         "ProxyImpl[" + 
         proxyAgent.getId() + 
@@ -2708,8 +2695,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       messages.addElement(elements.nextElement());
     }
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
         BasicLevel.DEBUG,
         " -> messages = " + messages + ')');
 
