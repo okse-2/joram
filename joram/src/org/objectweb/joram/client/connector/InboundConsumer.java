@@ -57,6 +57,8 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
   /** Maximum number of Work instances to be submitted (0 for infinite). */
   private int maxWorks;
+  
+  private int ackMode;
 
   /** Wrapped <code>ConnectionConsumer</code> instance. */
   private ConnectionConsumer cnxConsumer;
@@ -98,7 +100,9 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                   boolean durable,
                   String subName,
                   boolean transacted,
-                  int maxWorks) throws ResourceException {
+                  int maxWorks,
+                  int maxMessages,
+                  int ackMode) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager + 
                                     ", " + endpointFactory +
@@ -108,19 +112,20 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                     ", " + durable +
                                     ", " + subName +
                                     ", " + transacted +
-                                    ", " + maxWorks + ")");
+                                    ", " + maxWorks +
+                                    ", " + maxMessages + 
+                                    "," + ackMode + ")");
     
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
     this.cnx = cnx;
     this.transacted = transacted;
+    this.ackMode = ackMode;
 
     if (maxWorks < 0) maxWorks = 0;
     this.maxWorks = maxWorks;
 
-    if (maxWorks != 0) {
-      pool = new Vector(maxWorks);
-    }
+    pool = new Vector(maxWorks);
 
     try {
       if (durable) {
@@ -139,12 +144,13 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                               subName,
                                               selector,
                                               this,
-                                              1);
-      } else
+                                              maxMessages);
+      } else {
         cnxConsumer = cnx.createConnectionConsumer(dest,
                                                    selector,
                                                    this,
-                                                   1);
+                                                   maxMessages);
+      }
       
       cnx.start();
     }
@@ -171,60 +177,55 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getServerSession()");
-    
-    if (maxWorks <= 0) {
-      // No limit to the number of allocated session and concurrent threads 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      "ServerSessionPool provides new ServerSession.");
-      return new InboundSession(this,
-                                workManager,
-                                endpointFactory,
-                                cnx,
-                                transacted);
-    }
 
     try {
       synchronized (pool) {
-        if (pool.isEmpty() && (serverSessions < maxWorks)) {
-          // Allocates a new ServerSession
-          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                          "ServerSessionPool provides "
-                                          + "new ServerSession.");
-          serverSessions++;
-          return new InboundSession(this,
-                                    workManager,
-                                    endpointFactory,
-                                    cnx,
-                                    transacted);
-        } else if (pool.isEmpty()) {
-          // Wait for a free ServerSession
-          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                          "ServerSessionPool waits for "
-                                          + "a free ServerSession.");
-          pool.wait();
+        if (pool.isEmpty()) {
+          if (maxWorks > 0) {
+            if (serverSessions < maxWorks) {
+              // Allocates a new ServerSession
+              return newSession();
+            } else {
+              // Wait for a free ServerSession
+              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                              "ServerSessionPool waits for "
+                                              + "a free ServerSession.");
+              pool.wait();
+              return (ServerSession) pool.remove(0);
+            }
+          } else {
+            // Allocates a new ServerSession
+            return newSession();
+          }
+        } else {
+          return (ServerSession) pool.remove(0);
         }
-
-        return (ServerSession) pool.remove(0);
       }
     } catch (Exception exc) {
       throw new JMSException("Error while getting server session from pool: "
                              + exc);
     }
   }
-
+  
+  private InboundSession newSession() {
+    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+                                    "ServerSessionPool provides "
+                                    + "new ServerSession.");
+    serverSessions++;
+    return new InboundSession(this,
+                              workManager,
+                              endpointFactory,
+                              cnx,
+                              transacted,
+                              ackMode);
+  }
 
   /** Releases an <code>InboundSession</code> instance. */
   void releaseSession(InboundSession session) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " releaseSession(" + session + ")");
-
-    if (maxWorks == 0) {
-      // Let GC do its work.
-      return;
-    }
 
     try {
       synchronized (pool) {
