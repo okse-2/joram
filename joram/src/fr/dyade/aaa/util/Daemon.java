@@ -279,4 +279,8 @@ public abstract class Daemon implements Runnable {
   public synchronized boolean isCurrentThread() {
     return ((thread != null) && (thread == Thread.currentThread()));
   }
+  
+  public void setName(String name) {
+    thread.setName(name);
+  }
 }
