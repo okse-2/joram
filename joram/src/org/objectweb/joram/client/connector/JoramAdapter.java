@@ -58,6 +58,7 @@ import java.util.Vector;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.Session;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
@@ -180,6 +181,63 @@ public class JoramAdapter
    */
   public int cnxPendingTimer = 0;
 
+  /**
+   * The maximum number of messages that can be
+   * read at once from a queue.
+   *
+   * Default value is 2 in order to compensate
+   * the former subscription mechanism.
+   */
+  public int queueMessageReadMax = 2;
+  
+  /**
+   * The maximum number of acknowledgements
+   * that can be buffered in
+   * Session.DUPS_OK_ACKNOWLEDGE mode when listening to a topic.
+   * Default is 0.
+   */
+  public int topicAckBufferMax = 0;
+  
+  /**
+   * This threshold is the maximum messages 
+   * number over
+   * which the subscription is passivated.
+   * Default is Integer.MAX_VALUE.
+   */
+  public int topicPassivationThreshold = Integer.MAX_VALUE;
+  
+  /**
+   * This threshold is the minimum 
+   * messages number below which
+   * the subscription is activated.
+   * Default is 0.
+   */
+  public int topicActivationThreshold = 0;
+  
+  /**
+   * Determines whether the produced messages are asynchronously
+   * sent or not (without or with acknowledgement)
+   * Default is false (with ack).
+   */
+  public boolean asyncSend = false;
+  
+  /**
+   * Determines whether client threads 
+   * which are using the same connection
+   * are synchronized in order to group 
+   * together the requests they send.
+   * Default is false.
+   */
+  public boolean multiThreadSync = false;
+  
+  /**
+   * The maximum time the threads hang if 'multiThreadSync' is true.
+   * Either they wake up (wait time out) or they are notified (by the 
+   * first woken up thread).
+   * 
+   * Default is 1 ms.
+   */
+  public int multiThreadSyncDelay = 1;
 
   public JMXServer jmxServer;
 
@@ -546,6 +604,29 @@ public class JoramAdapter
                                   + "number: " + exc);
     }
 
+    int maxMessages = 10;
+    try {
+      maxMessages = Integer.parseInt(specImpl.getMaxMessages());
+    } catch (Exception exc) {
+      throw new ResourceException("Invalid max messages "
+                                  + "number: " + exc);
+    }
+    
+    int ackMode;
+    try {
+      if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl
+          .getAcknowledgeMode())) {
+        ackMode = Session.AUTO_ACKNOWLEDGE;
+      } else if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl
+          .getAcknowledgeMode())) {
+        ackMode = Session.DUPS_OK_ACKNOWLEDGE;
+      } else {
+        ackMode = Session.AUTO_ACKNOWLEDGE;
+      }
+    }  catch (Exception exc) {
+      throw new ResourceException("Invalid acknowledge mode: " + exc);
+    }
+
     String destType = specImpl.getDestinationType();
     String destName = specImpl.getDestination();
 
@@ -578,6 +659,26 @@ public class JoramAdapter
       ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
       ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
 
+      if (queueMessageReadMax > 0) {
+        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
+            .getParameters().queueMessageReadMax = queueMessageReadMax;
+      }
+      
+      if (topicAckBufferMax > 0) {
+        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
+            .getParameters().topicAckBufferMax = topicAckBufferMax;
+      }
+      
+      if (topicPassivationThreshold > 0) {
+        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
+            .getParameters().topicPassivationThreshold = topicPassivationThreshold;
+      }
+      
+      if (topicActivationThreshold > 0) {
+        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
+            .getParameters().topicActivationThreshold = topicActivationThreshold;
+      }
+
       XAConnection cnx =
         connectionFactory.createXAConnection(userName, password);
 
@@ -595,7 +696,9 @@ public class JoramAdapter
                             durable,
                             specImpl.getSubscriptionName(),
                             transacted,
-                            maxWorks);
+                            maxWorks,
+                            maxMessages,
+                            ackMode);
 
       consumers.put(specImpl, consumer);
     }
@@ -1211,6 +1314,34 @@ public class JoramAdapter
     this.cnxPendingTimer = cnxPendingTimer.intValue();
   }
 
+  public void setQueueMessageReadMax(java.lang.Integer queueMessageReadMax) {
+    this.queueMessageReadMax = queueMessageReadMax.intValue();
+  }
+  
+  public void setTopicAckBufferMax(java.lang.Integer topicAckBufferMax) {
+    this.topicAckBufferMax = topicAckBufferMax.intValue();
+  }
+  
+  public void setTopicPassivationThreshold(java.lang.Integer topicPassivationThreshold) {
+    this.topicPassivationThreshold = topicPassivationThreshold.intValue();
+  }
+  
+  public void setTopicActivationThreshold(java.lang.Integer topicActivationThreshold) {
+    this.topicActivationThreshold = topicActivationThreshold.intValue();
+  }
+  
+  public void setAsyncSend(java.lang.Boolean asyncSend) {
+    this.asyncSend = asyncSend.booleanValue();
+  }
+  
+  public void setMultiThreadSync(java.lang.Boolean multiThreadSync) {
+    this.multiThreadSync = multiThreadSync.booleanValue();
+  }
+  
+  public void setMultiThreadSyncDelay(java.lang.Integer multiThreadSyncDelay) {
+    this.multiThreadSyncDelay = multiThreadSyncDelay.intValue();
+  }
+
   public java.lang.String getPlatformConfigDir() {
     return platformConfigDir;
   }
@@ -1257,5 +1388,33 @@ public class JoramAdapter
 
   public java.lang.Integer getCnxPendingTimer() {
     return new Integer(cnxPendingTimer);
+  }
+
+  public java.lang.Integer getQueueMessageReadMax() {
+    return new Integer(queueMessageReadMax);
+  }
+  
+  public java.lang.Integer getTopicAckBufferMax() {
+    return new Integer(topicAckBufferMax);
+  }
+  
+  public java.lang.Integer getTopicPassivationThreshold() {
+    return new Integer(topicPassivationThreshold);
+  }
+  
+  public java.lang.Integer getTopicActivationThreshold() {
+    return new Integer(topicActivationThreshold);
+  }
+  
+  public java.lang.Boolean getAsyncSend() {
+    return new Boolean(asyncSend);
+  }
+  
+  public java.lang.Boolean getMultiThreadSync() {
+    return new Boolean(multiThreadSync);
+  }
+  
+  public java.lang.Integer getMultiThreadSyncDelay() {
+    return new Integer(multiThreadSyncDelay);
   }
 }
