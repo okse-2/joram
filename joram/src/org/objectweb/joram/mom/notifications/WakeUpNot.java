@@ -25,4 +25,7 @@ package org.objectweb.joram.mom.notifications;
 import fr.dyade.aaa.agent.Notification;
 
 public class WakeUpNot extends Notification {
+  public WakeUpNot() {
+    persistent = false;
+  }
 }
