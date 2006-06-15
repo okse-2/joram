@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -47,21 +47,12 @@ public class DeadMQueue extends Queue {
   public DeadMQueue() {}
 
   /**
-   * Constructs a <code>DeadMQueue</code> agent. 
-   *
-   * @param adminId  Identifier of the agent which will be the administrator
-   *          of the dead message queue.
-   */ 
-  public DeadMQueue(AgentId adminId) {
-    super(adminId);
-  }
-
-  /**
    * Creates the dead message queue.
    *
    * @param adminId  Identifier of the queue administrator.
+   * @param prop     The initial set of properties.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
-    return new DeadMQueueImpl(getId(), adminId);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    return new DeadMQueueImpl(getId(), adminId, prop);
   }
 }

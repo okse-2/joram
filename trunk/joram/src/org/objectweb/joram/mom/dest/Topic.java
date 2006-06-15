@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -51,25 +51,9 @@ public class Topic extends Destination {
   public Topic() {}
 
   /**
-   * Constructs a <code>Topic</code> agent. 
-   * 
-   * @param adminId  Identifier of the agent which will be the administrator
-   *          of the topic.
-   */ 
-  public Topic(AgentId adminId) {
-    super(adminId);
-  }
-
-  /**
-   * Constructor with parameters for fixing the topic.
-   */
-  protected Topic(boolean fixed) {
-    super(fixed);
-  }
-
-  /**
-   * Constructor with parameters for fixing the topic and specifying its
+   *  Constructor with parameters for fixing the topic and specifying its
    * identifier.
+   *  It is uniquely used by the AdminTopic agent.
    */
   protected Topic(String name, boolean fixed, int stamp) {
     super(name, fixed, stamp);
@@ -79,8 +63,9 @@ public class Topic extends Destination {
    * Creates the <tt>TopicImpl</tt>.
    *
    * @param adminId  Identifier of the topic administrator.
+   * @param prop     The initial set of properties.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
-    return new TopicImpl(getId(), adminId);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    return new TopicImpl(getId(), adminId, prop);
   }
 }
