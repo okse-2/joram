@@ -109,22 +109,19 @@ public class BridgeUnifiedModule implements javax.jms.ExceptionListener,
    * @exception IllegalArgumentException  If the provided properties are
    *              invalid.
    */
-  public void init(AgentId agentId, Properties prop)
-  {
+  public void init(AgentId agentId, Properties prop) {
     this.agentId = agentId;
 
     jndiFactory = prop.getProperty("jndiFactory");
     jndiUrl = prop.getProperty("jndiUrl");
     
     cnxFactName = prop.getProperty("connectionFactoryName");
-    destName = prop.getProperty("destinationName");
-
     if (cnxFactName == null)
-      throw new IllegalArgumentException("Missing ConnectionFactory "
-                                         + "JNDI name.");
-    else if (destName == null)
-      throw new IllegalArgumentException("Missing Destination "
-                                         + "JNDI name.");
+      throw new IllegalArgumentException("Missing ConnectionFactory JNDI name.");
+
+    destName = prop.getProperty("destinationName");
+    if (destName == null)
+      throw new IllegalArgumentException("Missing Destination JNDI name.");
 
     String userName = prop.getProperty("userName");
     String password = prop.getProperty("password");

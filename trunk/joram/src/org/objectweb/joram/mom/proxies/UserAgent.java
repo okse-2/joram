@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.objectweb.joram.mom.MomTracing;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.util.management.MXWrapper;
+import fr.dyade.aaa.util.Queue;
+
 import org.objectweb.joram.mom.dest.AdminTopicImpl;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -38,20 +45,14 @@ import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
-import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.util.management.MXWrapper;
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
  * Class of a user proxy agent.
  */
 public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
-
   /**
    * All the user requests are delegated
    * to the proxy
