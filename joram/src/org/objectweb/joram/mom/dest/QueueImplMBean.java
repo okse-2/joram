@@ -24,16 +24,32 @@ package org.objectweb.joram.mom.dest;
 
 public interface QueueImplMBean extends DestinationImplMBean {
   /**
+   * Returns  the period value of this queue, -1 if not set.
+   *
+   * @return the period value of this queue; -1 if not set.
+   */
+  long getPeriod();
+
+  /**
+   * Sets or unsets the period for this queue.
+   *
+   * @param period The period value to be set or -1 for unsetting previous
+   *               value.
+   */
+  void setPeriod(long period);
+
+  /**
    * Returns  the threshold value of this queue, -1 if not set.
    *
-   * @return the threshold value of this queue; -1 if not set.
+   * @return the threshold valcdue of this queue; -1 if not set.
    */
   int getThreshold();
 
   /**
    * Sets or unsets the threshold for this queue.
    *
-   * @param The threshold value to be set (-1 for unsetting previous value).
+   * @param threshold The threshold value to be set or -1 for unsetting
+   *                  previous value.
    */
   void setThreshold(int threshold);
 
@@ -51,12 +67,22 @@ public interface QueueImplMBean extends DestinationImplMBean {
    */
   int getWaitingRequestCount();
 
+//   /**
+//    * Removes all request that the expiration time is expired.
+//    */
+//   void cleanWaitingRequest();
+
   /**
    * Returns the number of pending messages in the queue.
    *
    * @return The number of pending messages.
    */
   int getPendingMessageCount();
+
+//   /**
+//    * Removes all messages that the time-to-live is expired.
+//    */
+//   void cleanPendingMessage();
 
   /**
    * Returns the number of messages delivered and waiting for acknowledge.
