@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,33 +34,24 @@ import java.util.Properties;
  * @see BridgeQueueImpl
  */
 public class BridgeQueue extends Queue {
-  /** The bridge queue's properties. */
-  private transient Properties prop;
-
   /**
    * Constructs a <code>BridgeQueue</code> agent. 
    */ 
   public BridgeQueue() {
-    super(true);
+    super();
+    fixed = true;
   }
 
   /**
    * Creates the bridge queue.
    *
    * @param adminId  Identifier of the bridge queue administrator.
+   * @param prop     The initial set of properties.
    *
    * @exception IllegalArgumentException  If the JMS properties are invalid.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
-    BridgeQueueImpl queueImpl = new BridgeQueueImpl(getId(), adminId);
-    queueImpl.init(prop);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    BridgeQueueImpl queueImpl = new BridgeQueueImpl(getId(), adminId, prop);
     return queueImpl;
-  }
-
-  /**
-   * Sets the bridge properties.
-   */
-  public void setProperties(Properties prop) {
-    this.prop = prop;
   }
 }

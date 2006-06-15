@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,26 +41,20 @@ public class BridgeTopic extends Topic {
    * Constructs a <code>BridgeTopic</code> agent. 
    */ 
   public BridgeTopic() {
-    super(true);
+    super();
+    fixed = true;
   }
 
   /**
    * Creates the bridge topic.
    *
    * @param adminId  Identifier of the bridge topic administrator.
+   * @param prop     The initial set of properties.
    *
    * @exception IllegalArgumentException  If the JMS properties are invalid.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
-    BridgeTopicImpl topicImpl = new BridgeTopicImpl(getId(), adminId);
-    topicImpl.init(prop);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    BridgeTopicImpl topicImpl = new BridgeTopicImpl(getId(), adminId, prop);
     return topicImpl;
-  }
-
-  /**
-   * Sets the bridge properties.
-   */
-  public void setProperties(Properties prop) {
-    this.prop = prop;
   }
 }
