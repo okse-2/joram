@@ -3,7 +3,7 @@
 <JoramAdmin>
   
   <AdminModule>
-    <connect hostName="localhost"
+    <connect host="localhost"
              port="16010"
              name="root"
              password="root"/>
