@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2003        Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,6 +24,11 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
@@ -31,7 +36,7 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import org.objectweb.joram.mom.MomTracing;
+
 import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.notifications.AdminReply;
@@ -39,10 +44,7 @@ import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.*;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -58,9 +60,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
-public class TopicImpl extends DestinationImpl
-    implements TopicImplMBean
-{
+public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
   /** Vector of cluster fellows, if any. */
@@ -79,9 +79,10 @@ public class TopicImpl extends DestinationImpl
    *
    * @param destId  Identifier of the agent hosting the topic.
    * @param adminId  Identifier of the administrator of the topic.
+   * @param prop     The initial set of properties.
    */
-  public TopicImpl(AgentId destId, AgentId adminId) {
-    super(destId, adminId);
+  public TopicImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
     subscribers = new Vector();
     selectors = new Hashtable();
   }
