@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -38,15 +40,16 @@ public class AdminTopic extends Topic {
    */ 
   public AdminTopic() {
     super("JoramAdminTopic", true, AgentId.JoramAdminStamp);
-    init(null);
+    init(null, null);
   }
 
   /**
    * Creates the <tt>TopicImpl</tt>.
    *
    * @param adminId  Identifier of the topic administrator.
+   * @param prop     The initial set of properties.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
     return new AdminTopicImpl(getId());
   }
 
