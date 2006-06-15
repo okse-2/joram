@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
 
+import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.util.TimerTask;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
@@ -49,35 +59,57 @@ public class Queue extends Destination implements BagSerializer {
     return QUEUE_TYPE;
   }
 
+  protected void scheduleTask() {
+    long period = ((QueueImpl) destImpl).getPeriod();
+
+    if (period != -1) {
+      try {
+        Timer timer = ConnectionManager.getTimer();        
+        timer.schedule(new Task(getId()), period);
+      } catch (Exception exc) {
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                        "--- " + this + " Queue(...)", exc);
+      }
+    }
+  }
+
   /**
    * Empty constructor for newInstance(). 
    */ 
-  protected Queue() {}
-
-  /**
-   * Constructs a <code>Queue</code> agent. 
-   *
-   * @param adminId  Identifier of the agent which will be the administrator
-   *          of the queue.
-   */ 
-  public Queue(AgentId adminId) {
-    super(adminId);
-  }
-
-  /**
-   * Constructor with parameter for fixing the queue or not.
-   */ 
-  protected Queue(boolean fixed) {
-    super(fixed);
-  }
+  public Queue() {}
 
   /**
    * Creates the <tt>QueueImpl</tt>.
    *
    * @param adminId  Identifier of the queue administrator.
+   * @param prop     The initial set of properties.
    */
-  public DestinationImpl createsImpl(AgentId adminId) {
-    return new QueueImpl(getId(), adminId);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    return new QueueImpl(getId(), adminId, prop);
+  }
+
+  /**
+   * Gives this agent an opportunity to initialize after having been deployed,
+   * and each time it is loaded into memory.
+   *
+   * @param firstTime		true when first called by the factory
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
+    scheduleTask();
+  }
+
+  public void react(AgentId from, Notification not) throws Exception {
+    if (not instanceof WakeUpNot) {
+      scheduleTask();
+      ((QueueImpl) destImpl).react(from, not);
+    } else {
+      super.react(from, not);
+    }
   }
 
   public void readBag(ObjectInputStream in) 
@@ -88,5 +120,20 @@ public class Queue extends Destination implements BagSerializer {
   public void writeBag(ObjectOutputStream out)
     throws IOException {
     ((QueueImpl) destImpl).writeBag(out);
+  }
+
+  private class Task extends TimerTask {
+    private AgentId to;
+
+    private Task(AgentId to) {
+      this.to = to;
+    }
+    
+    /** Method called when the timer expires. */
+    public void run() {
+      try {
+        Channel.sendTo(to, new WakeUpNot());
+      } catch (Exception e) {}
+    }
   }
 }
