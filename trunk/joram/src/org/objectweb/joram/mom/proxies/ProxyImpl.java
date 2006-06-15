@@ -694,8 +694,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <p>
    * This method sends a <code>ServerReply</code> back.
    */
-  private void doReact(CnxStopRequest req)
-  {
+  private void doReact(CnxStopRequest req) {
     activeCtx.setActivated(false);
     doReply(new ServerReply(req));
   }
@@ -712,10 +711,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception RequestException  If the queue could not be deployed.
    */
-  private void doReact(SessCreateTQRequest req) throws RequestException
-  {
+  private void doReact(SessCreateTQRequest req) throws RequestException {
     try {
-      Queue queue = new Queue(proxyAgent.getId());
+      Queue queue = new Queue();
+      queue.init(proxyAgent.getId(), null);
       AgentId qId = queue.getId();
 
       queue.deploy();
@@ -753,9 +752,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception RequestException  If the topic could not be deployed.
    */
-  private void doReact(SessCreateTTRequest req) throws RequestException
-  {
-    Topic topic = new Topic(proxyAgent.getId());
+  private void doReact(SessCreateTTRequest req) throws RequestException {
+    Topic topic = new Topic();
+    topic.init(proxyAgent.getId(), null);
     AgentId tId = topic.getId();
 
     try {
@@ -776,8 +775,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Temporary topic"
                                 + tId + " created.");
-    }
-    catch (java.io.IOException iE) {
+    } catch (java.io.IOException iE) {
       topic = null;
       throw new RequestException("Could not deploy temporary topic "
                                  + tId + ": " + iE);
