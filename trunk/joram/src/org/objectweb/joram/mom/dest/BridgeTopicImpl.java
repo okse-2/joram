@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,24 +23,23 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.DeleteNot;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.util.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.Message;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.mom.util.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.Message;
 
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>BridgeTopicImpl</code> class implements a specific topic which
@@ -57,6 +56,7 @@ public class BridgeTopicImpl extends TopicImpl {
 
   /** Counter for keeping the original delivery order. */
   private long arrivalsCounter = 0;
+
   /**
    * Table persisting the outgoing messages until acknowledgement by the
    * bridge module.
@@ -71,27 +71,12 @@ public class BridgeTopicImpl extends TopicImpl {
    *
    * @param destId  Identifier of the agent hosting the topic.
    * @param adminId  Identifier of the administrator of the topic.
+   * @param prop     The initial set of properties.
    */
-  public BridgeTopicImpl(AgentId destId, AgentId adminId)
-  {
-    super(destId, adminId);
+  public BridgeTopicImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
     outTable = new Hashtable();
-  }
 
-
-  public String toString()
-  {
-    return "BridgeTopicImpl:" + destId.toString();
-  }
-
-
-  /**
-   * Initiales the topic's JMS module.
-   *
-   * @exception IllegalStateException  If the provided JMS properties are
-   *            invalid.
-   */
-  public void init(Properties prop) {
     String jmsMode = (String) prop.get("jmsMode");
 
     if (jmsMode == null)
@@ -110,13 +95,16 @@ public class BridgeTopicImpl extends TopicImpl {
     jmsModule.init(destId, prop);
   }
 
+  public String toString() {
+    return "BridgeTopicImpl:" + destId.toString();
+  }
+
   /**
    * Specializes this <code>TopicImpl</code> method for processing the
    * specific bridge notifications.
    */
   public void react(AgentId from, Notification not)
-              throws UnknownNotificationException
-  {
+              throws UnknownNotificationException {
     if (not instanceof BridgeDeliveryNot)
       doReact((BridgeDeliveryNot) not);
     else if (not instanceof BridgeAckNot)
@@ -129,8 +117,7 @@ public class BridgeTopicImpl extends TopicImpl {
    * Reacts to <code>BridgeDeliveryNot</code> notifications holding a message
    * received from the foreign JMS server.
    */
-  protected void doReact(BridgeDeliveryNot not)
-  {
+  protected void doReact(BridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
     clientMessages.addMessage(not.getMessage());
     super.doProcess(clientMessages);
@@ -140,8 +127,7 @@ public class BridgeTopicImpl extends TopicImpl {
    * Reacts to <code>BridgeAckNot</code> notifications holding the identifier
    * of a message successfuly delivered to the foreign JMS server.
    */
-  protected void doReact(BridgeAckNot not)
-  {
+  protected void doReact(BridgeAckNot not) {
     outTable.remove(not.getIdentifier());
   }
   
@@ -154,16 +140,14 @@ public class BridgeTopicImpl extends TopicImpl {
    * @exception AccessException  If the sender is not a READER.
    */
   protected void doReact(AgentId from, SubscribeRequest not)
-                 throws AccessException
-  {
+                 throws AccessException {
     super.doReact(from, not);
 
     // First subscription: setting a listener on the foreign JMS consumer.
     try {
       if (subscribers.size() == 1) 
         jmsModule.setMessageListener();
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
         MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                       "Failing subscribe request on remote "
@@ -179,8 +163,7 @@ public class BridgeTopicImpl extends TopicImpl {
    * JMS consumer.
    *
    */
-  protected void doReact(AgentId from, UnsubscribeRequest not)
-  {
+  protected void doReact(AgentId from, UnsubscribeRequest not) {
     // Last subscription: removing the JMS listener.
     if (subscribers.isEmpty())
       jmsModule.unsetMessageListener();
@@ -196,8 +179,7 @@ public class BridgeTopicImpl extends TopicImpl {
    * This method forwards the messages, if needed, to the hierarchical father,
    * and to the foreign JMS destination.
    */
-  protected void doReact(AgentId from, TopicForwardNot not)
-  {
+  protected void doReact(AgentId from, TopicForwardNot not) {
     // If the forward comes from a son, forwarding it to the father, if any.
     if (not.toFather && fatherId != null)
       Channel.sendTo(fatherId, not);
@@ -217,8 +199,7 @@ public class BridgeTopicImpl extends TopicImpl {
 
       try  {
         jmsModule.send(msg);
-      }
-      catch (Exception exc) {
+      } catch (Exception exc) {
         outTable.remove(msg.getIdentifier());
         ClientMessages deadM = new ClientMessages();
         deadM.addMessage(msg);
@@ -234,8 +215,7 @@ public class BridgeTopicImpl extends TopicImpl {
    * This method may forward the messages to the topic father if any, or
    * to the cluster fellows if any, and to the foreign JMS destination.
    */
-  protected void doProcess(ClientMessages not)
-  {
+  protected void doProcess(ClientMessages not) {
     // Forwarding the messages to the father or the cluster fellows, if any:
     forwardMessages(not);
 
@@ -254,8 +234,7 @@ public class BridgeTopicImpl extends TopicImpl {
 
       try {
         jmsModule.send(msg);
-      }
-      catch (Exception exc) {
+      } catch (Exception exc) {
         outTable.remove(msg.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
@@ -272,16 +251,14 @@ public class BridgeTopicImpl extends TopicImpl {
    * This method closes the JMS resources used for connecting to the foreign
    * JMS server.
    */
-  protected void doProcess(DeleteNot not)
-  {
+  protected void doProcess(DeleteNot not) {
     jmsModule.close(); 
     super.doProcess(not);
   }
 
   /** Deserializes a <code>BridgeTopicImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
-               throws java.io.IOException, ClassNotFoundException
-  {
+               throws java.io.IOException, ClassNotFoundException {
     in.defaultReadObject();
 
     // Re-launching the JMS module.
@@ -314,8 +291,7 @@ public class BridgeTopicImpl extends TopicImpl {
         msg = (Message) outMessages.remove(0);
         jmsModule.send(msg);
       }
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
         MomTracing.dbgDestination.log(BasicLevel.ERROR, "" + exc);
     }

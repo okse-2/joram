@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -23,24 +23,24 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.DeleteNot;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.util.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.shared.selectors.Selector;
-
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.mom.util.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.selectors.Selector;
+
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -69,27 +69,12 @@ public class BridgeQueueImpl extends QueueImpl {
    *
    * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
+   * @param prop     The initial set of properties.
    */
-  public BridgeQueueImpl(AgentId destId, AgentId adminId)
-  {
-    super(destId, adminId);
+  public BridgeQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
     outTable = new Hashtable();
-  }
 
-
-  public String toString()
-  {
-    return "BridgeQueueImpl:" + destId.toString();
-  }
-
-
-  /**
-   * Initiales the queue's JMS module.
-   *
-   * @exception IllegalStateException  If the provided JMS properties are
-   *            invalid.
-   */
-  public void init(Properties prop) {
     String jmsMode = (String) prop.get("jmsMode");
 
     if (jmsMode == null)
@@ -102,11 +87,14 @@ public class BridgeQueueImpl extends QueueImpl {
     else if (jmsMode.equalsIgnoreCase("Unified"))
       jmsModule = new BridgeUnifiedModule();
     else
-      throw new IllegalArgumentException("Invalid 'jmsMode' value: "
-                                         + jmsMode);
+      throw new IllegalArgumentException("Invalid jmsMode value: " + jmsMode);
 
     // Initializing the JMS module.
     jmsModule.init(destId, prop);
+  }
+
+  public String toString() {
+    return "BridgeQueueImpl:" + destId.toString();
   }
 
   /**
@@ -114,8 +102,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * specific bridge notifications.
    */
   public void react(AgentId from, Notification not)
-              throws UnknownNotificationException
-  {
+              throws UnknownNotificationException {
     if (not instanceof BridgeDeliveryNot) {
       doReact((BridgeDeliveryNot) not);
     }
@@ -129,8 +116,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * Reacts to <code>BridgeDeliveryNot</code> notifications holding a message
    * received from the foreign JMS server.
    */
-  protected void doReact(BridgeDeliveryNot not)
-  {
+  protected void doReact(BridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
     clientMessages.addMessage(not.getMessage());
     super.doProcess(clientMessages);
@@ -140,8 +126,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * Reacts to <code>BridgeAckNot</code> notifications holding the identifier
    * of a message successfuly delivered to the foreign JMS server.
    */
-  protected void doReact(BridgeAckNot not)
-  {
+  protected void doReact(BridgeAckNot not) {
     outTable.remove(not.getIdentifier());
   }
   
@@ -155,8 +140,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * @exception AccessException  If the sender is not a reader.
    */
   protected void doReact(AgentId from, ReceiveRequest not)
-                 throws AccessException
-  {
+                 throws AccessException {
     // If client is not a reader, sending an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
@@ -181,9 +165,8 @@ public class BridgeQueueImpl extends QueueImpl {
 
         try {
           msg = jmsModule.receiveNoWait();
-        }
-        // JMS module not properly initialized.
-        catch (Exception exc) {
+        } catch (Exception exc) {
+          // JMS module not properly initialized.
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
             MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                           "Failing receive request on remote "
@@ -201,14 +184,12 @@ public class BridgeQueueImpl extends QueueImpl {
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                         "Receive answered.");
-      }
-      // Else, requesting the foreign JMS destination for a delivery: 
-      else {
+      } else {
+        // Else, requesting the foreign JMS destination for a delivery: 
         try {
           jmsModule.receive();
-        }
-        // JMS module not properly initialized.
-        catch (Exception exc) {
+        } catch (Exception exc) {
+          // JMS module not properly initialized.
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
             MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                           "Failing receive request on remote "
@@ -224,8 +205,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * <p>
    * This method sends the messages to the foreign JMS destination.
    */
-  protected void doProcess(ClientMessages not)
-  {
+  protected void doProcess(ClientMessages not) {
     // Sending each message:
     Message msg;
     for (Enumeration msgs = not.getMessages().elements();
@@ -241,8 +221,7 @@ public class BridgeQueueImpl extends QueueImpl {
 
       try {
         jmsModule.send(msg);
-      }
-      catch (Exception exc) {
+      } catch (Exception exc) {
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
           MomTracing.dbgDestination.log(BasicLevel.ERROR,
                                         "Failing sending to remote "
@@ -265,8 +244,7 @@ public class BridgeQueueImpl extends QueueImpl {
    * This method closes the JMS resources used for connecting to the foreign
    * JMS server.
    */
-  protected void doProcess(DeleteNot not)
-  {
+  protected void doProcess(DeleteNot not) {
     jmsModule.close(); 
     super.doProcess(not);
   }
@@ -274,8 +252,7 @@ public class BridgeQueueImpl extends QueueImpl {
 
   /** Deserializes a <code>BridgeQueueImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
-               throws IOException, ClassNotFoundException
-  {
+               throws IOException, ClassNotFoundException {
     in.defaultReadObject();
 
     messages = new Vector();
@@ -338,8 +315,7 @@ public class BridgeQueueImpl extends QueueImpl {
         msg = (Message) outMessages.remove(0);
         jmsModule.send(msg);
       }
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
         MomTracing.dbgDestination.log(BasicLevel.ERROR, "" + exc);
     }

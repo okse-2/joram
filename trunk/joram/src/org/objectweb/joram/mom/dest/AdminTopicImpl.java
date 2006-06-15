@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -123,8 +123,8 @@ public class AdminTopicImpl extends TopicImpl {
    * @param topicId  Identifier of the agent hosting the AdminTopicImpl.
    */
   public AdminTopicImpl(AgentId topicId) {
-    super(topicId, topicId);
-    serverId = (new Short(AgentServer.getServerId())).intValue();
+    super(topicId, topicId, null);
+    serverId = AgentServer.getServerId();
     destinationsTable = new Hashtable();
     usersTable = new Hashtable();
     proxiesTable = new Hashtable();
@@ -911,9 +911,8 @@ public class AdminTopicImpl extends TopicImpl {
           .append("], successful [true]: destination [")
           .append(destName).append("] has been retrieved").toString();
         strbuf.setLength(0);
-      }
-      // Instanciating the destination class.
-      else {
+      } else {
+        // Instanciating the destination class.
         String className = request.getClassName();
         Class clazz;
         String destType;
@@ -923,10 +922,7 @@ public class AdminTopicImpl extends TopicImpl {
           if (destName != null) {
             dest.name = destName;
           }
-          if (properties != null) {
-            ((AdminDestinationItf) dest).setProperties(properties);
-          }
-          ((AdminDestinationItf) dest).init(this.destId);
+          ((AdminDestinationItf) dest).init(this.destId, properties);
           
           Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
           destType = (String)getTypeM.invoke(null, new Object[0]);

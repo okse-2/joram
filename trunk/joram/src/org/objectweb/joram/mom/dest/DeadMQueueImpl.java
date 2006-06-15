@@ -23,19 +23,20 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
-import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.Selector;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -54,9 +55,10 @@ public class DeadMQueueImpl extends QueueImpl {
    *
    * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
+   * @param prop     The initial set of properties.
    */
-  public DeadMQueueImpl(AgentId destId, AgentId adminId) {
-    super(destId, adminId);
+  public DeadMQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
   }
 
 
