@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,11 +23,9 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-import org.objectweb.joram.mom.MomTracing;
+import java.io.*;
+import java.util.*;
+
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.*;
@@ -35,11 +33,15 @@ import org.objectweb.joram.shared.selectors.*;
 import org.objectweb.joram.mom.dest.*;
 import org.objectweb.joram.shared.admin.*;
 
-import java.io.*;
-import java.util.*;
 import org.objectweb.joram.shared.messages.Message;
 
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>ClusterQueueImpl</code> class implements the MOM queue behaviour,
@@ -47,17 +49,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * delivering to an other cluster queue.
  */
 public class ClusterQueueImpl extends QueueImpl {
-
   /** 
    * key = agentId of ClusterQueue 
    * value = rateOfFlow (Float)
    */
   protected Hashtable clusters;
-
-  /** period to eval the loading factor */
-  protected long period;
-  /** waiting after a cluster request */
-  protected long waitAfterClusterReq;
 
   /** to calcul the loading factor, overloaded, ... */
   protected LoadingFactor loadingFactor;
@@ -75,34 +71,60 @@ public class ClusterQueueImpl extends QueueImpl {
   /** number of message send to cluster */
   private long clusterDeliveryCount;
 
+  /** waiting after a cluster request */
+  private long waitAfterClusterReq = -1;
+
   /**
    * Constructs a <code>ClusterQueueImpl</code> instance.
    *
    * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    */
-  public ClusterQueueImpl(AgentId destId, 
-                          AgentId adminId,
-                          long period,
-                          int producThreshold,
-                          int consumThreshold,
-                          boolean autoEvalThreshold,
-                          long waitAfterClusterReq) {
-    super(destId, adminId);
+  public ClusterQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
+
+    /** producer threshold */
+    int producThreshold = -1;
+    /** consumer threshold */
+    int consumThreshold = -1;
+    /** automatic eval threshold */
+    boolean autoEvalThreshold = false;
+
+    if (prop != null) {
+      try {
+        waitAfterClusterReq = 
+          Long.valueOf(prop.getProperty("waitAfterClusterReq")).longValue();
+      } catch (NumberFormatException exc) {
+        waitAfterClusterReq = 60000;
+      }
+      try {
+        producThreshold = 
+          Integer.valueOf(prop.getProperty("producThreshold")).intValue();
+      } catch (NumberFormatException exc) {
+        producThreshold = 10000;
+      }
+      try {
+        consumThreshold = 
+          Integer.valueOf(prop.getProperty("consumThreshold")).intValue();
+      } catch (NumberFormatException exc) {
+        consumThreshold = 10000;
+      }
+      autoEvalThreshold =
+        Boolean.valueOf(prop.getProperty("autoEvalThreshold")).booleanValue();
+    }
+
     clusters = new Hashtable();
     clusters.put(destId, new Float(1));
-
-    this.period = period;
-    this.waitAfterClusterReq = waitAfterClusterReq;
 
     loadingFactor = new LoadingFactor(this,
                                       producThreshold,
                                       consumThreshold,
                                       autoEvalThreshold,
-                                      this.waitAfterClusterReq);
+                                      waitAfterClusterReq);
     timeTable = new Hashtable();
     visitTable = new Hashtable();
     clusterDeliveryCount = 0;
+
   }
 
   public String toString() {
@@ -344,6 +366,8 @@ public class ClusterQueueImpl extends QueueImpl {
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "--- " + this +
                                     " ClusterQueueImpl.doReact(" + not + ")");
+
+    super.doReact(not);
 
     if (clusters.size() > 1)
       loadingFactor.factorCheck(clusters,
