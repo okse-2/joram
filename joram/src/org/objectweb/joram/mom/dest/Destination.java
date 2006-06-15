@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,8 +42,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  *
  * @see DestinationImpl
  */
-public abstract class Destination extends Agent implements AdminDestinationItf
-{
+public abstract class Destination extends Agent implements AdminDestinationItf {
 
   /**
    * The reference of the <code>DestinationImpl</code> instance providing this
@@ -57,25 +56,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf
   public Destination() {}
 
   /**
-   * Constructs a <code>Destination</code> agent. 
-   * 
-   * @param adminId  Identifier of the agent which will be the administrator
-   *          of the topic.
-   */ 
-  public Destination(AgentId adminId) {
-    init(adminId);
-  }
-
-  /**
-   * Constructor with parameters for fixing the destination.
-   */
-  protected Destination(boolean fixed) {
-    super(fixed);
-  }
-
-  /**
-   * Constructor with parameters for fixing the destination and specifying its
+   *  Constructor with parameters for fixing the destination and specifying its
    * identifier.
+   *  It is uniquely used by the AdminTopic agent.
    */
   protected Destination(String name, boolean fixed, int stamp) {
     super(name, fixed, stamp);
@@ -86,9 +69,10 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    * object.
    *
    * @param adminId  Identifier of the destination administrator.
+   * @param prop     The initial set of properties.
    */
-  public final void init(AgentId adminId) {
-    destImpl = createsImpl(adminId);
+  public final void init(AgentId adminId, Properties properties) {
+    destImpl = createsImpl(adminId, properties);
     destImpl.setAgent(this);
   }
 
@@ -96,15 +80,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    * Creates the specific implementation.
    *
    * @param adminId  Identifier of the topic administrator.
+   * @param prop     The initial set of properties.
    */
-  public abstract DestinationImpl createsImpl(AgentId adminId);
-  
-  /**
-   * Sets properties for the destination.
-   * <p>
-   * Empty method as no properties may be set for the generic destination.
-   */
-  public void setProperties(Properties prop) {}
+  public abstract DestinationImpl createsImpl(AgentId adminId, Properties prop);
 
   /**
    * Gives this agent an opportunity to initialize after having been deployed,
@@ -142,8 +120,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf
    * Reactions to notifications are implemented by the
    * <tt>DestinationImpl</tt> class.
    */
-  public void react(AgentId from, Notification not) 
-    throws Exception {
+  public void react(AgentId from, Notification not) throws Exception {
 
     // set agent no save (this is the default).
     setNoSave();
