@@ -29,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.Properties;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
@@ -56,10 +57,30 @@ import org.objectweb.util.monolog.api.Logger;
  * basically storing messages and delivering them upon clients requests.
  */
 public class QueueImpl extends DestinationImpl implements QueueImplMBean {
-  
-  public static Logger logger = 
-    Debug.getLogger(QueueImpl.class.getName());
-  
+  public static Logger logger = Debug.getLogger(QueueImpl.class.getName());
+
+  /** period to run task at regular interval: cleaning, load-balancing, etc. */
+  protected long period = -1;
+
+  /**
+   * Returns  the period value of this queue, -1 if not set.
+   *
+   * @return the period value of this queue; -1 if not set.
+   */
+  public long getPeriod() {
+    return period;
+  }
+
+  /**
+   * Sets or unsets the period for this queue.
+   *
+   * @param period The period value to be set or -1 for unsetting previous
+   *               value.
+   */
+  public void setPeriod(long period) {
+    this.period = period;
+  }
+
   /**
    * Threshold above which messages are considered as undeliverable because
    * constantly denied; 0 stands for no threshold, <code>null</code> for value
@@ -132,9 +153,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (! ((ReceiveRequest) requests.get(index)).isValid(currentTime)) {
         // Request expired: removing it
         requests.remove(index);
-        // State change, so save.
-        // AF: It's not really necessary to save its state
-        // setSave();
+        // It's not really necessary to save its state, in case of failure
+        // a similar work will be done at restart.
       } else {
         index++;
       }
@@ -187,9 +207,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         deadMessages.addMessage(message);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Expired message"
-                                        + message.getIdentifier()
-                                        + " removed.");
+          logger.log(BasicLevel.DEBUG,
+                     "Removes expired message " + message.getIdentifier());
       } else {
         index++;
       }
@@ -252,12 +271,20 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /**
    * Constructs a <code>QueueImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the queue.
+   * @param destId   Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
+   * @param prop     The initial set of properties.
    */
-  public QueueImpl(AgentId destId, AgentId adminId)
-  {
-    super(destId, adminId);
+  public QueueImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
+
+    try {
+      if (prop != null)
+        period = Long.valueOf(prop.getProperty("period")).longValue();
+    } catch (NumberFormatException exc) {
+      period = -1L;
+    }
+
     consumers = new Hashtable();
     contexts = new Hashtable();
     requests = new Vector();
@@ -279,19 +306,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "QueueImpl.react(" + from + ',' + not + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "QueueImpl.react(" + from + ',' + not + ')');
 
     int reqId = -1;
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this
-                                    + ": got " + not.getClass().getName()
-                                    + " with id: " + reqId
-                                    + " from: " + from.toString());
     try {
       if (not instanceof SetThreshRequest)
         doReact(from, (SetThreshRequest) not);
@@ -315,6 +336,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         doReact(from, (AbortReceiveRequest) not);
       else if (not instanceof DestinationAdminRequestNot)
         doReact(from, (DestinationAdminRequestNot) not);
+      else if (not instanceof WakeUpNot)
+        doReact((WakeUpNot) not);
       else
         super.react(from, not);
 
@@ -331,7 +354,19 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  
+  /**
+   * wake up, and cleans the queue.
+   */
+  protected void doReact(WakeUpNot not) {
+    long current = System.currentTimeMillis();
+    cleanWaitingRequest(current);
+     // Cleaning the possible expired messages.
+    ClientMessages deadMessages = cleanPendingMessage(current);
+    // If needed, sending the dead messages to the DMQ:
+    if (deadMessages != null)
+      sendToDMQ(deadMessages, null);
+  }
+
   /**
    * Method implementing the reaction to a <code>SetThreshRequest</code>
    * instance setting the threshold value for this queue.
@@ -489,8 +524,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     requests.add(not);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, " -> requests count = " + requests.size());
+      logger.log(BasicLevel.DEBUG, " -> requests count = " + requests.size());
 
     // Launching a delivery sequence for this request:
     int reqIndex = requests.size() - 1;
@@ -507,8 +541,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       Channel.sendTo(from, reply);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                      "Receive answered by a null.");
+        logger.log(BasicLevel.DEBUG, "Receive answered by a null.");
     }
   }
 
@@ -579,13 +612,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       msg.delete();
 
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG,
-                                      "Message " + msgId + " acknowledged.");
+        logger.log(BasicLevel.DEBUG, "Message " + msgId + " acknowledged.");
       }
     } else if (logger.isLoggable(BasicLevel.WARN)) {
       logger.log(BasicLevel.WARN,
-                                    "Message " + msgId
-                                    + " not found for acknowledgement.");
+                 "Message " + msgId + " not found for acknowledgement.");
     }
   }
 
@@ -598,9 +629,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   protected void doReact(AgentId from, DenyRequest not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "QueueImpl.doReact(" + from + ',' + not + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "QueueImpl.doReact(" + from + ',' + not + ')');
     
     Enumeration ids = not.getIds();
 
@@ -624,8 +654,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         consCtx = ((Integer) contexts.get(msgId)).intValue();
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, " -> deny msg " + msgId + "(consId = " + consId + ')');
+          logger.log(BasicLevel.DEBUG,
+                     " -> deny msg " + msgId + "(consId = " + consId + ')');
 
         // If the current message has been consumed by the denier in the same
         // context: denying it.
@@ -647,14 +677,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
             if (deadMessages == null)
               deadMessages = new ClientMessages();
             deadMessages.addMessage(msg);
-          }
-          // Else, putting the message back into the deliverables vector:
-          else
+          } else {
+            // Else, putting the message back into the deliverables vector:
             storeMessage(msg);
+          }
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Message "
-                                          + msgId + " denied.");
+            logger.log(BasicLevel.DEBUG, "Message " + msgId + " denied.");
         }
       }
     }
@@ -671,8 +700,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       // individual denying.
       if (msg == null) {
         if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(
-            BasicLevel.ERROR, " -> already denied message " + msgId);
+          logger.log(BasicLevel.ERROR, " -> already denied message " + msgId);
         break;
       }
 
@@ -680,8 +708,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, " -> deny " + msgId);
+          logger.log(BasicLevel.DEBUG, " -> deny " + msgId);
 
       // state change, so save.
       setSave();
@@ -704,8 +731,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         storeMessage(msg);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message "
-                                      + msgId + " denied.");
+        logger.log(BasicLevel.DEBUG, "Message " + msgId + " denied.");
     }
     // Sending the dead messages to the DMQ, if needed:
     if (deadMessages != null)
@@ -865,8 +891,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * notifications which have been partly processed, so that they are
    * specifically processed by the <code>QueueImpl</code> class.
    */
-  protected void specialProcess(Notification not)
-  {
+  protected void specialProcess(Notification not) {
     if (not instanceof SetRightRequest)
       doProcess((SetRightRequest) not);
     else if (not instanceof ClientMessages)
@@ -1013,8 +1038,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           storeMessage(msg);
 
         if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "Message "
-                                        + msg.getIdentifier() + " denied.");
+          logger.log(BasicLevel.WARN,
+                     "Message " + msg.getIdentifier() + " denied.");
       }
     }
     // Sending dead messages to the DMQ, if needed:
@@ -1046,9 +1071,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
       excRep = new ExceptionReply(rec, exc);
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Requester "
-                                      + rec.requester
-                                      + " notified of the queue deletion.");
+        logger.log(BasicLevel.DEBUG,
+                   "Requester " + rec.requester +
+                   " notified of the queue deletion.");
       Channel.sendTo(rec.requester, excRep);
     }
     // Sending the remaining messages to the DMQ, if needed:
@@ -1079,8 +1104,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     message.save(getDestinationId());
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message "
-                                    + message.getIdentifier() + " stored.");
+      logger.log(BasicLevel.DEBUG,
+                 "Message " + message.getIdentifier() + " stored.");
   }
 
   protected final synchronized void addMessage(Message message) {
@@ -1153,9 +1178,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   protected void deliverMessages(int index) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + 
-        index + ')');
+      logger.log(BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + index + ')');
 
     ReceiveRequest notRec = null;
     boolean replied;
@@ -1165,8 +1188,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     ClientMessages deadMessages = null;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, " -> requests = " + requests + ')');
+      logger.log(BasicLevel.DEBUG, " -> requests = " + requests + ')');
 
     long current = System.currentTimeMillis();
     cleanWaitingRequest(current);
@@ -1200,13 +1222,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           messageDelivered(msg.getIdentifier());
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Message "
-                                          + msg.getIdentifier()
-                                          + " sent to "
-                                          + notRec.requester
-                                          + " as a reply to "
-                                          + notRec.getRequestId());
-
+            logger.log(BasicLevel.DEBUG,
+                       "Message " + msg.getIdentifier() + " to " +
+                       notRec.requester + " as reply to " + notRec.getRequestId());
+                                          
           // Removing the message if request in auto ack mode:
           if (notRec.getAutoAck())
             msg.delete();
@@ -1225,9 +1244,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           if (notMsg.getSize() == notRec.getMessageCount()) {
             break;
           }
-        }
-        // If message delivered or selector does not match: going on
-        else {
+        } else {
+          // If message delivered or selector does not match: going on
           j++;
         }
       }
@@ -1282,8 +1300,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   private void readObject(java.io.ObjectInputStream in)
                throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "QueueImpl.readObject()");
+      logger.log(BasicLevel.DEBUG, "QueueImpl.readObject()");
     in.defaultReadObject();
 
     receiving = false;
@@ -1303,8 +1320,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           addMessage(persistedMsg);
         } else if (isLocal(consId)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(
-              BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
+            logger.log(BasicLevel.DEBUG,
+                       " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
           addMessage(persistedMsg);
