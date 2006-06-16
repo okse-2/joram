@@ -63,6 +63,7 @@ public class RAConfig {
   private static boolean debug = false;
   private static boolean verbose = false;
   private static String confDir = null;
+  private static String tmpDir = null;
 
 
   private RAConfig() {
@@ -138,6 +139,9 @@ public class RAConfig {
       e.printStackTrace();
       System.exit(1);
     }
+
+    //  Get the temp directory
+    tmpDir = System.getProperty("java.io.tmpdir") + "/";
 
     switch (command) {
     case 1: // createRaProperties
@@ -314,7 +318,7 @@ public class RAConfig {
         }
       }
       // extract the fileName from InputStream
-      // in the current directory.
+      // in the tmp directory.
       if (res != null) 
         createFile(fileName,res);
       zipFile.close();
@@ -371,7 +375,7 @@ public class RAConfig {
     ZipEntry entry = jar.getEntry(fileName);
     if (debug)
       System.out.println("RAConfig.extractFromJAR : entry = " + entry);
-    // extract the fileName from jar in the current directory.
+    // extract the fileName from jar in the tmp directory.
     if (entry != null) 
       createFile(fileName,jar.getInputStream(entry));
     jar.close();
@@ -405,7 +409,7 @@ public class RAConfig {
   }
 
   /**
-   * create the filename in the current directory,
+   * create the filename in the tmp directory
    * by writing the input stream in the file name.
    * @param path        new file
    * @param is          input stream
@@ -415,7 +419,7 @@ public class RAConfig {
     if (debug)
       System.out.println("RAConfig.createFile(" + path + "," + is + ")");
 
-    String fileName = getFileName(path);
+    String fileName = tmpDir + getFileName(path);
     if (debug)
       System.out.println("RAConfig.createFile : fileName = " + fileName);
     else if (verbose)
@@ -431,7 +435,7 @@ public class RAConfig {
   }
 
   /**
-   * create the filename in the current directory,
+   * create the filename in the tmp directory,
    * by writing the input in the file name.
    * @param path        new file
    * @param input       string to write
@@ -440,7 +444,7 @@ public class RAConfig {
   private void createFile(String path, String input) throws Exception {
     if (debug)
       System.out.println("RAConfig.createFile(" + path + "," + input + ")");
-    String fileName = getFileName(path);
+    String fileName = tmpDir + getFileName(path);
     if (debug)
       System.out.println("RAConfig.createFile : fileName = " + fileName);
     else if (verbose)
@@ -537,8 +541,8 @@ public class RAConfig {
     // create temporary raProperty file
     String tempFile = "ra.properties_tmp";
     createFile(tempFile,buff.toString());
-    updateRAR(tempFile);
-    new File(tempFile).delete();
+    updateRAR(tmpDir + tempFile);
+    new File(tmpDir + tempFile).delete();
   }
 
   /**
@@ -564,20 +568,29 @@ public class RAConfig {
                          " port=" + port + 
                          " serverId=" + serverId);
 
-    // extract the joram-config.jar file from RAR
+    // extract the joram-config.jar file from RAR in the temp dir
     extractFromRAR(rarName,JORAM_CONFIG_JAR);
-    // extract the a3servers.xml file from joram-config.jar
-    extractFromJAR(JORAM_CONFIG_JAR,A3SERVERS_XML);
+    // extract the a3servers.xml file from joram-config.jar in the tmp dir
+    extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
+
+    // if present the a3server.xml source is the confdir one
+    // otherwise, we take the RAR one
+    if (confDir != null) {
+        File f = new File(confDir, A3SERVERS_XML);
+        if (f.exists()) {
+            copy(f.getPath(), tmpDir + A3SERVERS_XML);
+        }
+    }
 
     // update A3SERVERS_XML
-    A3CMLConfig conf = A3CML.getXMLConfig(A3SERVERS_XML);
+    A3CMLConfig conf = A3CML.getXMLConfig(tmpDir + A3SERVERS_XML);
     A3CMLServer server = conf.getServer(serverId);
     server.hostname = hostName;
     A3CMLService service = 
       server.getService("org.objectweb.joram.mom.proxies.tcp.TcpProxyService");
     service.args = port;
     // write changes to A3SERVERS_XML file
-    A3CML.toXML(conf,null,A3SERVERS_XML);
+    A3CML.toXML(conf,null, tmpDir + A3SERVERS_XML);
 
     if (debug)
       System.out.println("RAConfig.updateA3Servers : confDir=" + confDir);
@@ -585,7 +598,7 @@ public class RAConfig {
     if (confDir != null) {
       File f = new File(confDir, A3SERVERS_XML);
       if (f.exists())
-        copy(A3SERVERS_XML, f.getPath());
+        copy(tmpDir + A3SERVERS_XML, f.getPath());
       if (new File(confDir, JORAMADMIN_CFG).exists())
         updateJoramAdminCfg(hostName, port);
       if (new File(confDir, JORAMADMIN_XML).exists())
@@ -593,13 +606,13 @@ public class RAConfig {
     }
 
     // update jar 
-    updateZIP(JORAM_CONFIG_JAR,A3SERVERS_XML,A3SERVERS_XML,A3SERVERS_XML);
+    updateZIP(tmpDir + JORAM_CONFIG_JAR,A3SERVERS_XML,tmpDir + A3SERVERS_XML,A3SERVERS_XML);
     // update rar
-    updateZIP(rarName,JORAM_CONFIG_JAR,JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
+    updateZIP(rarName,JORAM_CONFIG_JAR,tmpDir +JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
 
     // remove temporary file
-    new File(JORAM_CONFIG_JAR).delete();
-    new File(A3SERVERS_XML).delete();
+    new File(tmpDir + JORAM_CONFIG_JAR).delete();
+    new File(tmpDir + A3SERVERS_XML).delete();
   }
 
   private boolean copy(String file1, String file2) 
@@ -833,7 +846,7 @@ public class RAConfig {
     }
 
     // update rar 
-    updateZIP(rarName,RA_XML,"ra.xml",RA_XML);
+    updateZIP(rarName,RA_XML, tmpDir + "ra.xml",RA_XML);
 
     // update a3servers.xml (host and port).
     prop = (Hashtable) map.get("org.objectweb.joram.client.connector.JoramAdapter");
@@ -856,7 +869,7 @@ public class RAConfig {
         updateA3Servers(rarName,host,port,serverId);
       }
     }
-    new File("ra.xml").delete();
+    new File(tmpDir + "ra.xml").delete();
   }
 
   /**
