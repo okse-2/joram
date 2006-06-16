@@ -268,7 +268,7 @@ public class Connection implements javax.jms.Connection {
                  sessionPool + ',' + maxMessages + ')'));
     checkClosed();
     return createConnectionConsumer(
-        dest, selector, null, sessionPool, maxMessages);
+        dest, null, selector, sessionPool, maxMessages);
   }
 
   /**
@@ -294,15 +294,17 @@ public class Connection implements javax.jms.Connection {
                  topic + ',' + subName + ',' + selector + ',' + 
                  sessPool + ',' + maxMessages + ')'));
     checkClosed();
-    return createDurableConnectionConsumer(
-        (Topic) topic, selector, subName, sessPool, maxMessages);
+    if (subName == null) 
+      throw new JMSException("Invalid subscription name: " + subName);
+    return createConnectionConsumer(
+        (Destination) topic, subName, selector, sessPool, maxMessages);
   }
   
   private synchronized javax.jms.ConnectionConsumer
     createConnectionConsumer(
         javax.jms.Destination dest, 
-        String selector,
         String subName,
+        String selector,
         javax.jms.ServerSessionPool sessionPool,
         int maxMessages) 
     throws JMSException {
@@ -691,6 +693,10 @@ public class Connection implements javax.jms.Connection {
    */
   synchronized void closeConnectionConsumer(
     MultiSessionConsumer cc) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".closeConnectionConsumer(" + cc + ')'));
     cconsumers.removeElement(cc);
   }
 
