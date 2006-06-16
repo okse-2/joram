@@ -276,7 +276,7 @@ public abstract class Daemon implements Runnable {
   /**
    * Tests if the daemon's thread is the current one.
    */
-  public synchronized boolean isCurrentThread() {
+  public boolean isCurrentThread() {
     return ((thread != null) && (thread == Thread.currentThread()));
   }
   
