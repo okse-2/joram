@@ -128,20 +128,32 @@ public class MultiSessionConsumer extends MessageConsumerListener
   }
   
   public void close() throws JMSException {
-    System.out.println("MultiSessionConsumer.close");
-    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MultiSessionConsumer.close()");
     msgDispatcher.stop();
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+          "MultiSessionConsumer -> dispatcher stopped");
     
     super.close();
     
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+          "MultiSessionConsumer -> close connection consumer");
+    
     cnx.closeConnectionConsumer(this);
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+          "MultiSessionConsumer -> connection consumer closed");
   }
   
   public void onMessage(
       Message msg, MessageListener listener, int ackMode)
       throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + msg + ')');
+      logger.log(BasicLevel.DEBUG, "MultiSessionConsumer.onMessage(" + msg + ')');
     try {
       synchronized (this) {
         if (getStatus() == Status.CLOSE) {
@@ -193,7 +205,9 @@ public class MultiSessionConsumer extends MessageConsumerListener
      * Enables the daemon to stop itself.
      */
     public void stop() {
-      if (isCurrentThread()) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "MessageDispatcher.stop()");
+      if (isCurrentThread()) { 
         finish();
       } else {
         super.stop();
@@ -239,15 +253,18 @@ public class MultiSessionConsumer extends MessageConsumerListener
           serverSess.start();
           repliesIn.pop();
         }
-      } catch (Exception exc) {
+      } catch (InterruptedException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-          canStop = false;
           logger.log(BasicLevel.DEBUG, "", exc);
         }
-        canStop = true;
+      } catch (Exception exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "", exc);
+        }
         try {
           MultiSessionConsumer.this.close();
-        } catch (JMSException exc2) {}
+        } catch (JMSException exc2) {
+        }
       } finally {
         finish();
       }
