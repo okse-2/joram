@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): David Feliot (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  * Contributor(s): Alex Porras (MediaOcean)
  */
 package org.objectweb.joram.mom.proxies.tcp;
@@ -109,9 +109,8 @@ public class TcpProxyService {
   public static void init(String args, boolean firstTime) 
     throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "TcpProxyService.init(" + 
-        args + ',' + firstTime + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "TcpProxyService.init(" + args + ',' + firstTime + ')');
 
     port =  DEFAULT_PORT;;
     address = DEFAULT_BINDADDRESS;
@@ -123,32 +122,28 @@ public class TcpProxyService {
       }
     }
     
-    int backlog = Integer.getInteger(
-      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+    int backlog = Integer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket;
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "SSLTcpProxyService.init() - binding to " +
+                              address + ':' + port);
 
     if (address.equals("0.0.0.0")) {
-      serverSocket = new ServerSocket(port);
-    }
-    else {
+      serverSocket = new ServerSocket(port, backlog);
+    } else {
       serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
     }
 
-    int poolSize = Integer.getInteger(
-      POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = Integer.getInteger(
-      SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
-    proxyService = new TcpProxyService(
-      serverSocket, poolSize, timeout);
+    proxyService = new TcpProxyService(serverSocket, poolSize, timeout);
     proxyService.start();
   }
 

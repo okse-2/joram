@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Alex Porras (MediaOcean)
  */
 package org.objectweb.joram.mom.proxies.tcp;
@@ -78,8 +78,7 @@ public class SSLTcpProxyService extends TcpProxyService {
       }
     }
     
-    int backlog = Integer.getInteger(
-      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+    int backlog = Integer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
@@ -89,21 +88,12 @@ public class SSLTcpProxyService extends TcpProxyService {
       MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
 
-    if (address.equals("0.0.0.0")) {
-      serverSocket = new ServerSocket(port);
-    }
-    else {
-      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
-    }
+    serverSocket = createServerSocket(port, backlog, address);
+    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int poolSize = Integer.getInteger(
-      POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
-
-    int timeout = Integer.getInteger(
-      SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
     
-    proxyService = new SSLTcpProxyService(
-      serverSocket, poolSize, timeout);
+    proxyService = new SSLTcpProxyService(serverSocket, poolSize, timeout);
     proxyService.start();
   }
   
@@ -115,18 +105,18 @@ public class SSLTcpProxyService extends TcpProxyService {
 
   private static ServerSocketFactory createServerSocketFactory() 
     throws Exception {
-    char[] keyStorePass =  System.getProperty(KS_PASS,"jorampass").toCharArray();
-    String keystoreFile = System.getProperty(KS,"./joram_ks");
-    String sslContext = System.getProperty(SSLCONTEXT,"SSL");
-    String ksType = System.getProperty(KS_TYPE,"JKS");
+    char[] keyStorePass =  System.getProperty(KS_PASS, "jorampass").toCharArray();
+    String keystoreFile = System.getProperty(KS, "./joram_ks");
+    String sslContext = System.getProperty(SSLCONTEXT, "SSL");
+    String ksType = System.getProperty(KS_TYPE, "JKS");
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "SSLTcpProxyService.createServerSocketFactory : keystoreFile=" + 
-        keystoreFile);
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "SSLTcpProxyService.createServerSocketFactory:" +
+                              keystoreFile + ':' + keyStorePass);
 
     KeyStore keystore = KeyStore.getInstance(ksType);
-    keystore.load(new FileInputStream(keystoreFile),keyStorePass);
+    keystore.load(new FileInputStream(keystoreFile), keyStorePass);
     
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
     kmf.init(keystore,keyStorePass);
@@ -143,15 +133,17 @@ public class SSLTcpProxyService extends TcpProxyService {
     return (ServerSocketFactory) ctx.getServerSocketFactory();
   }
 
-  private static ServerSocket createServerSocket(int port) throws Exception {
+  private static ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
     ServerSocketFactory serverSocketFactory = createServerSocketFactory();
-    
-    int backlog = Integer.getInteger(
-      BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
-    SSLServerSocket serverSocket = 
-      (SSLServerSocket) serverSocketFactory.createServerSocket(port, backlog);
-    // requie mutual authentification
+    SSLServerSocket serverSocket = null;
+    if (address.equals("0.0.0.0")) {
+      serverSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port, backlog);
+    } else {
+      serverSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port, backlog, InetAddress.getByName(address));
+    }
+
+    // require mutual authentification
     serverSocket.setNeedClientAuth(true);
     // request mutual authentification
     //serverSocket.setWantClientAuth(true);
