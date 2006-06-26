@@ -38,6 +38,12 @@
       <include name="com/scalagent/jmx/*.java"/>
       <include name="com/scalagent/scheduler/**/*.java"/>
       <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
+
+      <include name="com/scalagent/joram/osgi/server/Activator.java"/>
+      <include name="com/scalagent/joram/osgi/client/Activator.java"/>
+      <include name="com/scalagent/joram/osgi/test/Activator.java"/>
+      <include name="com/scalagent/joram/osgi/test2/Activator.java"/>
+
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
@@ -424,6 +430,64 @@
     </jar>
     <delete file="${build.dir}/META-INF/ra.xml"/>
     <delete file="${build.dir}/META-INF/jonas-ra.xml"/>
+  </target>
+
+  <target name="ship.osgi" depends="ship.joram"
+          description="--> Builds a Joram OSGI bundle.">
+    <jar jarfile="${ship.dir}/lib/joram-mom-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/server/manifest.mf">
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/server">
+        <include name="a3servers.xml"/>
+        <include name="a3server.prop"/>
+        <include name="a3debug.cfg"/>
+      </fileset>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/server/**/*.class"/>
+      </fileset>
+      <fileset dir="${build.dir}">
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+     <fileset dir="${lib.dir}">
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+        <include name="jakarta-regexp-1.2.jar"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-client-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/client/manifest.mf">
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/client">
+        <include name="a3debug.cfg"/>
+      </fileset>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/client/**/*.class"/>
+      </fileset>
+      <fileset dir="${build.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+     <fileset dir="${lib.dir}">
+        <include name="jms.jar"/>
+        <include name="JCup.jar"/>
+        <include name="jakarta-regexp-1.2.jar"/>
+        <include name="ow_monolog.jar"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test2-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test2/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test2/*.class"/>
+      </fileset>
+    </jar>
   </target>
 
   <!-- JAVADOC --> 
