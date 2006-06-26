@@ -25,6 +25,10 @@ package org.objectweb.joram.client.connector.utils;
 import java.io.*;
 import java.util.*;
 
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -127,29 +131,17 @@ public class Wrapper {
       Node node = nl.item(i);
       browse(node);
     }
-    StringBuffer buff = new StringBuffer();
-    buff.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    buff.append("<!--\n");
-    buff.append(" JORAM: Java(TM) Open Reliable Asynchronous Messaging\n");
-    buff.append(" Copyright (C) 2004 - Bull SA\n\n");
 
-    buff.append(" This library is free software; you can redistribute it and/or\n");
-    buff.append(" modify it under the terms of the GNU Lesser General Public\n");
-    buff.append(" License as published by the Free Software Foundation; either\n");
-    buff.append(" version 2.1 of the License, or any later version.\n\n");
+    Transformer transformer =
+      TransformerFactory.newInstance().newTransformer();
+    Source source = new DOMSource(doc);
 
-    buff.append(" This library is distributed in the hope that it will be useful,\n");
-    buff.append(" but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-    buff.append(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\n");
-    buff.append(" Lesser General Public License for more details.\n\n");
+    CharArrayWriter writer = new CharArrayWriter();
+    Result output = new StreamResult(writer);
+    transformer.transform(source, output);
+    writer.flush();
 
-    buff.append(" You should have received a copy of the GNU Lesser General Public\n");
-    buff.append(" License along with this library; if not, write to the Free Software\n");
-    buff.append(" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307\n");
-    buff.append(" USA.\n");
-    buff.append("-->\n");
-    buff.append(doc.getDocumentElement().toString());
-    return buff.toString();
+    return writer.toString();
   }
 
   public void browse(Node node) throws Exception {
