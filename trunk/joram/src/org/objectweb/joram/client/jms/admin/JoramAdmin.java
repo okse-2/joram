@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -22,6 +22,9 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -46,12 +49,18 @@ public class JoramAdmin
   public long timeOut = 1000;
   public PlatformAdmin platformAdmin;
 
-  public JoramAdmin() 
+  /**
+   * Path to the file containing a description of the exported administered objects (destination)
+   */
+  private String adminFileExportXML = null;
+
+
+  public JoramAdmin()
     throws UnknownHostException, ConnectException, AdminException {
     platformAdmin = new PlatformAdmin();
     registerMBean();
   }
-  
+
   public JoramAdmin(String hostName,
                     int port,
                     String name,
@@ -74,13 +83,13 @@ public class JoramAdmin
   }
 
   public JoramAdmin(String name,
-                    String password) 
+                    String password)
     throws ConnectException, AdminException {
     platformAdmin = new PlatformAdmin(name,password);
     registerMBean();
   }
 
-  public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact, 
+  public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
                     String name,
                     String password)
     throws ConnectException, AdminException {
@@ -139,7 +148,7 @@ public class JoramAdmin
    * (<code>null</code> for unsetting previous DMQ).
    * <p>
    * The request fails if the target server does not belong to the platform.
-   * 
+   *
    * @param serverId  The identifier of the server.
    * @param dmq  The dmq to be set as the default one.
    *
@@ -151,7 +160,7 @@ public class JoramAdmin
     AdminModule.setDefaultDMQ(serverId,dmq);
   }
 
-  /** 
+  /**
    * Returns the default dead message queue for a given server, null if not
    * set.
    * <p>
@@ -165,7 +174,7 @@ public class JoramAdmin
     return AdminModule.getDefaultDMQ(serverId);
   }
 
-  /** 
+  /**
    * Returns the default dead message queue for the local server, null if not
    * set.
    *
@@ -187,7 +196,7 @@ public class JoramAdmin
       List destList = AdminModule.getDestinations(serverId,timeOut);
       Iterator destIt = destList.iterator();
       while (destIt.hasNext()) {
-        org.objectweb.joram.client.jms.Destination dest = 
+        org.objectweb.joram.client.jms.Destination dest =
           (org.objectweb.joram.client.jms.Destination) destIt.next();
         destinations.add(new String("type=" + dest.getType() +
                                     ", name=" + dest.getAdminName() +
@@ -203,7 +212,7 @@ public class JoramAdmin
    */
   public List getDestinations() {
     Vector destinations = new Vector();
-    
+
     List list = platformAdmin.getServersIds();
     if (list != null) {
       Iterator it = list.iterator();
@@ -213,7 +222,7 @@ public class JoramAdmin
           List destList = AdminModule.getDestinations(sid.intValue(),timeOut);
           Iterator destIt = destList.iterator();
           while (destIt.hasNext()) {
-            org.objectweb.joram.client.jms.Destination dest = 
+            org.objectweb.joram.client.jms.Destination dest =
               (org.objectweb.joram.client.jms.Destination) destIt.next();
             destinations.add(new String("type=" + dest.getType() +
                                         ", name=" + dest.getAdminName() +
@@ -287,7 +296,7 @@ public class JoramAdmin
    *
    * @exception AdminException   If the creation fails.
    */
-  public void createUser(String name, String password, int serverId) 
+  public void createUser(String name, String password, int serverId)
     throws AdminException {
     try {
       User.create(name,password,serverId);
@@ -329,12 +338,12 @@ public class JoramAdmin
    */
   public Destination createQueue(int serverId, String name)
     throws AdminException {
-    return createQueue(serverId, 
-                       name, 
-                       "org.objectweb.joram.mom.dest.Queue", 
+    return createQueue(serverId,
+                       name,
+                       "org.objectweb.joram.mom.dest.Queue",
                        null);
   }
-  
+
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Queue</code> instance.
@@ -355,7 +364,7 @@ public class JoramAdmin
       Queue queue = Queue.create(serverId,
                                  name,
                                  className,
-                                 prop); 
+                                 prop);
       return queue;
     } catch (ConnectException exc) {
       throw new AdminException("createQueue() failed: admin connection "
@@ -382,7 +391,7 @@ public class JoramAdmin
                                + "has been lost.");
     }
   }
-  
+
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Topic</code> instance.
@@ -394,12 +403,12 @@ public class JoramAdmin
    */
   public Destination createTopic(int serverId, String name)
     throws AdminException {
-    return createTopic(serverId, 
-                       name, 
-                       "org.objectweb.joram.mom.dest.Topic", 
+    return createTopic(serverId,
+                       name,
+                       "org.objectweb.joram.mom.dest.Topic",
                        null);
   }
-  
+
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
    * (re)binds the corresponding <code>Topic</code> instance.
@@ -429,13 +438,105 @@ public class JoramAdmin
   }
 
   public static boolean executeXMLAdmin(String cfgDir,
-                                        String cfgFileName) 
+                                        String cfgFileName)
     throws Exception {
     return AdminModule.executeXMLAdmin(cfgDir, cfgFileName);
   }
 
-  public static boolean executeXMLAdmin(String path) 
+  public static boolean executeXMLAdmin(String path)
     throws Exception {
     return AdminModule.executeXMLAdmin(path);
+  }
+
+
+  /**
+   * Export the repository content to an XML file
+   * - only the destinations objects are retrieved in this version
+   * - xml script format of the admin objects (joramAdmin.xml)
+   * @param exportDir target directory where the export file will be put
+   * @throws AdminException if an error occurs
+   */
+  public void exportRepositoryToFile(String exportDir) throws AdminException {
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "export repository to " + exportDir.toString());
+      }
+
+      StringBuffer strbuf = new StringBuffer();
+      int indent = 0;
+      strbuf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+      strbuf.append("<!--\n");
+      strbuf.append(" Exported JMS objects : \n");
+      strbuf.append(" - destinations : Topic/Queue \n");
+      strbuf.append(" The file can be reloaded through the admin interface (joramAdmin.executeXMLAdmin())\n");
+      strbuf.append("-->\n");
+      strbuf.append("<JoramAdmin>\n");
+      indent += 2;
+
+      // Get the srv list
+      List srvList = platformAdmin.getServersIds();
+      if (srvList != null) {
+
+          // For each server
+          Iterator it = srvList.iterator();
+          while (it.hasNext()) {
+                try {
+                    Integer sid = (Integer) it.next();
+
+                    // Export the JMS destinations
+                    List destList = AdminModule.getDestinations(sid.intValue(), timeOut);
+                    Iterator destIt = destList.iterator();
+                    while (destIt.hasNext()) {
+                        org.objectweb.joram.client.jms.Destination dest = (org.objectweb.joram.client.jms.Destination) destIt
+                                .next();
+
+                        strbuf.append(dest.toXml(indent, sid.intValue()));
+                    }
+
+                } catch (Exception exc) {
+                    throw new AdminException("exportRepositoryToFile() failed - " + exc);
+                }
+          }
+
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "exported objects : \n" + strbuf.toString());
+          }
+      }
+
+      indent -= 2;
+      strbuf.append("</JoramAdmin>");
+
+      // Flush the file in the specified directory
+      File exportFile = null;
+      FileOutputStream fos = null;
+
+      try {
+          exportFile = new File(exportDir, getAdminFileExportXML());
+          fos = new FileOutputStream(exportFile);
+          fos.write(strbuf.toString().getBytes());
+      } catch(Exception ioe) {
+          throw new AdminException("exportRepositoryToFile() failed - " + ioe);
+      } finally {
+          try {
+              exportFile = null;
+              fos.close();
+          } catch (Exception e) {
+              if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+                  JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unable to close the file  : " + fos);
+              }
+          }
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "File : " + exportDir + "/" + getAdminFileExportXML() + " created");
+          }
+      }
+  }
+
+
+  public String getAdminFileExportXML() {
+      return adminFileExportXML;
+  }
+
+  public void setAdminFileExportXML(String adminFileExportXML) {
+      this.adminFileExportXML = adminFileExportXML;
   }
 }
