@@ -6,19 +6,19 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
  * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Contributor(s):
  */
 package org.objectweb.joram.client.connector;
 
@@ -27,7 +27,7 @@ import org.objectweb.joram.client.jms.admin.JoramAdminMBean;
 
 import java.util.List;
 
-public interface JoramAdapterMBean 
+public interface JoramAdapterMBean
   extends JoramAdminMBean {
 
   /** Platform servers identifiers. */
@@ -59,6 +59,8 @@ public interface JoramAdapterMBean
 
   public java.lang.String getAdminFileXML();
 
+  public java.lang.String getAdminFileExportXML();
+
   public java.lang.Boolean getCollocatedServer();
 
   public java.lang.String getHostName();
@@ -79,7 +81,7 @@ public interface JoramAdapterMBean
    */
   public java.lang.Integer getTxPendingTimer();
 
-  /** 
+  /**
    * Period in milliseconds between two ping requests sent by the client
    * connection to the server; if the server does not receive any ping
    * request during more than 2 * cnxPendingTimer, the connection is

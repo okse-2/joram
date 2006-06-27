@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -41,6 +41,7 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.XmlSerializer;
 import org.objectweb.joram.shared.admin.*;
 
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -107,6 +108,66 @@ public abstract class Destination
   }
 
   /**
+   * Format the destination properties in a XML format
+   * @param indent use this indent for prexifing XML representation.
+   * @param serverId server id hosting the destination object
+   * @return returns a XML view of the queue (admin format)
+   * @throws ConnectException if the server is unreachable
+   * @throws AdminException if an error occurs
+   */
+  public String toXml(int indent, int serverId)  throws ConnectException, AdminException {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append(XmlSerializer.indent(indent));
+
+    if (getType().equals("queue")) {
+        strbuf.append("<Queue ");
+    } else if (getType().equals("topic")) {
+        strbuf.append("<Topic ");
+    } else {
+        return "";
+    }
+    strbuf.append(XmlSerializer.xmlAttribute(getAdminName(), "name"));
+    strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(serverId), "serverId"));
+    DeadMQueue dmq = getDMQ();
+    if (dmq != null) {
+        strbuf.append(XmlSerializer.xmlAttribute(dmq.getAdminName(), "dmq"));
+        strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(dmq.getThreshold()), "threshold"));
+    }
+
+    strbuf.append(">\n");
+
+    indent+=2;
+
+    if (isFreelyReadable()) {
+        strbuf.append(XmlSerializer.indent(indent));
+        strbuf.append("<freeReader/>\n");
+    }
+
+    if (isFreelyWriteable()) {
+        strbuf.append(XmlSerializer.indent(indent));
+        strbuf.append("<freeWriter/>\n");
+    }
+
+    strbuf.append(XmlSerializer.indent(indent));
+    strbuf.append("<jndi ");
+    strbuf.append(XmlSerializer.xmlAttribute(getAdminName(), "name"));
+    strbuf.append("/>\n");
+
+    indent-=2;
+
+    strbuf.append(XmlSerializer.indent(indent));
+
+    if (getType().equals("queue")) {
+        strbuf.append("</Queue>\n");
+    } else if (getType().equals("topic")) {
+        strbuf.append("</Topic>\n");
+    }
+
+    return strbuf.toString();
+  }
+
+  /**
    * Returns <code>true</code> if the destination is a queue.
    */
   public boolean isQueue() {
@@ -123,7 +184,7 @@ public abstract class Destination
     h.put("type", type);
     return h;
   }
-  
+
   public void decode(Hashtable h) {
     agentId = (String) h.get("agentId");
     type = (String) h.get("type");
@@ -155,24 +216,24 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   protected static void doCreate(
-    int serverId, 
-    String name, 
-    String className, 
+    int serverId,
+    String name,
+    String className,
     Properties props,
     Destination dest,
     String expectedType)
     throws ConnectException, AdminException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "Destination.doCreate(" + 
-        serverId + ',' + name + ',' + 
-        className + ',' + props + ',' + 
+        BasicLevel.DEBUG,
+        "Destination.doCreate(" +
+        serverId + ',' + name + ',' +
+        className + ',' + props + ',' +
         dest + ',' + expectedType + ')');
 
     CreateDestinationRequest cdr =
-      new CreateDestinationRequest(serverId, 
-                                   name, 
+      new CreateDestinationRequest(serverId,
+                                   name,
                                    className,
                                    props,
                                    expectedType);
@@ -230,7 +291,7 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setFreeWriting() throws ConnectException, AdminException 
+  public void setFreeWriting() throws ConnectException, AdminException
   {
     AdminModule.doRequest(new SetWriter(null, getName()));
   }
@@ -271,7 +332,7 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setReader(User user) throws ConnectException, AdminException 
+  public void setReader(User user) throws ConnectException, AdminException
   {
     AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
   }
@@ -313,7 +374,7 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetReader(User user) 
+  public void unsetReader(User user)
     throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetReader(user.getProxyId(), getName()));
   }
@@ -334,7 +395,7 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetWriter(User user) 
+  public void unsetWriter(User user)
     throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetWriter(user.getProxyId(), getName()));
   }
@@ -354,7 +415,7 @@ public abstract class Destination
    * @param dmq  The dead message queue to be set (<code>null</code> for
    *             unsetting current DMQ).
    *
-   * @exception IllegalArgumentException  If the DMQ is not a valid 
+   * @exception IllegalArgumentException  If the DMQ is not a valid
    *              JORAM destination.
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
@@ -462,7 +523,7 @@ public abstract class Destination
     throws ConnectException, AdminException {
     if (b)
       setFreeReading();
-    else 
+    else
       unsetFreeReading();
   }
 
@@ -485,7 +546,7 @@ public abstract class Destination
   }
 
   /** used by MBean */
-  public void setFreelyWriteable(boolean b) 
+  public void setFreelyWriteable(boolean b)
     throws ConnectException, AdminException {
     if (b)
       setFreeWriting();
@@ -493,7 +554,7 @@ public abstract class Destination
       unsetFreeWriting();
   }
 
-  /** 
+  /**
    * Monitoring method returning the dead message queue of this destination,
    * null if not set.
    * <p>
@@ -507,7 +568,7 @@ public abstract class Destination
     Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
     Monitor_GetDMQSettingsRep reply;
     reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
-    
+
     if (reply.getDMQName() == null) {
       return null;
     } else {
@@ -516,13 +577,13 @@ public abstract class Destination
   }
 
   public static Destination newInstance(
-    String id, 
-    String name, 
+    String id,
+    String name,
     String type) throws AdminException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "Destination.newInstance(" + 
+        BasicLevel.DEBUG,
+        "Destination.newInstance(" +
         id + ',' + name + ',' + type + ')');
     Destination dest;
     if (Queue.isQueue(type)) {
@@ -549,7 +610,7 @@ public abstract class Destination
     return realType.startsWith(resultingType);
   }
 
-  public Hashtable getStatistic() 
+  public Hashtable getStatistic()
     throws ConnectException, AdminException {
     Monitor_GetStat request =
       new Monitor_GetStat(agentId);
