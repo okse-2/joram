@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -112,10 +112,8 @@ public class TcpConnectionListener extends Daemon {
   }
 
   /**
-   * Accepts a TCP connection. Opens the 
-   * <code>UserConnection</code> with the
-   * right user's proxy, creates and starts 
-   * the <code>TcpConnection</code>.
+   * Accepts a TCP connection. Opens the <code>UserConnection</code> with the
+   * right user's proxy, creates and starts the <code>TcpConnection</code>.
    */
   private void acceptConnection() throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -123,6 +121,7 @@ public class TcpConnectionListener extends Daemon {
           "TcpConnectionListener.acceptConnection()");
 
     Socket sock = serverSocket.accept();
+    String inaddr = sock.getInetAddress().getHostAddress();
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> accept connection");
@@ -157,11 +156,12 @@ public class TcpConnectionListener extends Daemon {
               + heartBeat);
       }
 
-      GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword);
+      GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, inaddr);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer
-            .getServerId(), AgentId.JoramAdminStamp));
+        gpin.invoke(new AgentId(AgentServer.getServerId(),
+                                AgentServer.getServerId(),
+                                AgentId.JoramAdminStamp));
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
         if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -210,8 +210,7 @@ public class TcpConnectionListener extends Daemon {
         }
       }
 
-      // Reset the timeout in order
-      // to enable the server to indefinitely
+      // Reset the timeout in order to enable the server to indefinitely
       // wait for requests.
       sock.setSoTimeout(0);
 
