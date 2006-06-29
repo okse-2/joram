@@ -92,8 +92,7 @@ public class SoapProxyService {
         userPassword + ',' + 
         heartBeat + ')');
 
-    GetProxyIdNot gpin = new GetProxyIdNot(
-      userName, userPassword);
+    GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, null);
     AgentId proxyId;
     gpin.invoke(new AgentId(AgentServer.getServerId(),
                             AgentServer.getServerId(),
