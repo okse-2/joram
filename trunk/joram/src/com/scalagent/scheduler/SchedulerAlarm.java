@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,12 @@
 package com.scalagent.scheduler;
 
 import fr.dyade.aaa.agent.*;
+
 import java.io.*;
+import java.util.Date;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * This object is the input stream of a <code>Scheduler</code> agent.
@@ -33,6 +38,8 @@ import java.io.*;
  * @see		ScheduleNotification
  */
 public class SchedulerAlarm implements NotificationInputStream {
+  public static Logger logger = Debug.getLogger(SchedulerAlarm.class.getName());
+  
   /** time to sleep in milliseconds */
   long time;
 
@@ -52,38 +59,50 @@ public class SchedulerAlarm implements NotificationInputStream {
    *		timer falls
    */
   public Notification readNotification() throws ClassNotFoundException, IOException {
-    synchronized(this) {
-      waitLoop:
-      while (true) {
-	while (time == 0) {
-	  try {
-	    wait();
-	  } catch (InterruptedException exc) {
-	    // ignores interrupts
-	  }
-	}
+    synchronized (this) {
+      waitLoop: while (true) {
+        while (time == 0) {
+          try {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "SchedulerAlarm indefinitely waits");
+            wait();
+          } catch (InterruptedException exc) {
+            // ignores interrupts
+          }
+        }
 
-	if (time < 0) {
-	  // stops this thread, see close function
-	  throw new EOFException();
-	}
+        if (time < 0) {
+          // stops this thread, see close function
+          throw new EOFException();
+        }
 
-	// waits for time
-	long localTime = time;
-	time = 0;
-	try {
-	  wait(localTime);
-	} catch (InterruptedException exc) {
-	  // ignores interrupts
-	}
-	if (time == 0) {
-	  // timer has fallen
-	  break waitLoop;
-	}
+        // waits for time
+        long localTime = time;
+        time = 0;
+        try {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "SchedulerAlarm waits " + localTime);
+          wait(localTime);
+        } catch (InterruptedException exc) {
+          // ignores interrupts
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "SchedulerAlarm interrupted", exc);
+        }
+        if (time == 0) {
+          // timer has fallen
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "SchedulerAlarm break loop");
+          break waitLoop;
+        } else {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "SchedulerAlarm loops");
+        }
       }
     }
 
     // sends notification
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerAlarm send notif");
     return new ScheduleNotification();
   }
 
@@ -95,6 +114,9 @@ public class SchedulerAlarm implements NotificationInputStream {
    * @param time	time to sleep in milliseconds
    */
   synchronized void setTime(long time) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerAlarm.setTime(" +
+          	time + ')');
     this.time = time;
     notify();
   }
@@ -105,9 +127,12 @@ public class SchedulerAlarm implements NotificationInputStream {
    * This function is called from main scheduler thread.
    */
   public void close() throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SchedulerAlarm.close()");
     synchronized(this) {
       this.time = -1;
       notify();
     }
   }
+  
 }
