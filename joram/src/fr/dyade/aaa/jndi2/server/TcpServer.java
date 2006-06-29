@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,16 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Daemon;
 
 public class TcpServer {
 
@@ -90,21 +92,18 @@ public class TcpServer {
 
     private TcpServer tcpServer;
 
-    protected Monitor(String name,
-                      int timeout,
-                      TcpServer tcpServer) {
+    protected Monitor(String name, int timeout, TcpServer tcpServer) {
       super(name);
       this.timeout = timeout;
       this.tcpServer = tcpServer;
     }
-    
+
     public final void run() {
       Socket socket;
       try {
-        loop:
-	while (running) {
-	  canStop = true;
-	  try {
+        loop: while (running) {
+          canStop = true;
+          try {
             ServerSocket listen = tcpServer.getListen();
             if (listen != null) {
               socket = listen.accept();
@@ -115,46 +114,49 @@ public class TcpServer {
             } else {
               break loop;
             }
-	  } catch (IOException exc) {
-	    if (running) {
-              Trace.logger.log(
-                BasicLevel.DEBUG,
-                this.getName() + 
-                ", error during accept", exc);
+          } catch (IOException exc) {
+            canStop = false;
+            Thread.interrupted();
+            if (running) {
+              Trace.logger.log(BasicLevel.DEBUG, this.getName()
+                  + ", error during accept", exc);
               try {
                 Thread.sleep(1000);
-              } catch (InterruptedException ie) {}
+              } catch (InterruptedException ie) {
+              }
               continue loop;
             } else {
               break loop;
             }
+          } finally {
+            canStop = false;
           }
 
-	  if (! running) break loop;
-          
+          if (!running)
+            break loop;
+
           if (Trace.logger.isLoggable(BasicLevel.DEBUG)) {
-            Trace.logger.log(
-              BasicLevel.DEBUG,
-              this.getName() + ", connection from " +
-              socket.getInetAddress() + ':' +
-              socket.getPort());
+            Trace.logger.log(BasicLevel.DEBUG, this.getName()
+                + ", connection from " + socket.getInetAddress() + ':'
+                + socket.getPort());
           }
 
           try {
             TcpRequestContext ctx = new TcpRequestContext(socket);
             Channel.sendTo(tcpServer.getServerId(), new TcpRequestNot(ctx));
           } catch (Exception exc) {
-            Trace.logger.log(BasicLevel.ERROR,
-                             this.getName() + ", error during send", exc);
+            Trace.logger.log(BasicLevel.ERROR, this.getName()
+                + ", error during send", exc);
             if (socket != null) {
               try {
                 socket.close();
-              } catch (IOException exc2) {}
+              } catch (IOException exc2) {
+              }
             }
           }
         }
       } finally {
-	finish();
+        finish();
       }
     }
 
