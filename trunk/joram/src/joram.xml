@@ -480,6 +480,9 @@
       <fileset dir="${obj.dir}">
         <include name="com/scalagent/joram/osgi/test/*.class"/>
       </fileset>
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/test">
+        <include name="joramAdmin.xml"/>
+      </fileset>
     </jar>
 
     <jar jarfile="${ship.dir}/lib/joram-test2-bundle.jar"

@@ -35,6 +35,13 @@ public class Activator implements BundleActivator {
     Context ictx = jclient.getInitialContext();
     System.err.println("" + ictx.getClass());
 
+    // Admin phase
+    ClassLoader cl = getClass().getClassLoader();
+//    Thread ct = Thread.currentThread();
+//    ClassLoader cl = ct.getContextClassLoader();
+    InputStream is = cl.getResourceAsStream("joramAdmin.xml");
+    jclient.executeAdminXML(new InputStreamReader(is));
+
     Reference refQ = (Reference) ictx.lookup("queue");
 
     System.err.println("" + refQ.getClass());
