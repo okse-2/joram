@@ -130,7 +130,7 @@ public class TcpProxyService {
 
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "SSLTcpProxyService.init() - binding to " +
+                              "TcpProxyService.init() - binding to " +
                               address + ':' + port);
 
     if (address.equals("0.0.0.0")) {
