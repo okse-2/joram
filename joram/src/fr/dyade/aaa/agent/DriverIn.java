@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -171,9 +172,10 @@ class DriverIn extends Driver {
                      getName() + ", error in readNotification", exc);
         }
         break mainLoop;
+      } finally {
+        Thread.interrupted();
+        canStop = false;
       }
-      canStop = false;
-
       if (m != null) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", read " + m);

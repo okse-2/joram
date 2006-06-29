@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -97,13 +98,18 @@ class DriverOut extends Driver {
         canStop = false;
         out.writeNotification(m);
       } catch (IOException exc) {
+        canStop = false;
         if (! proxy.finalizing) {
           logmon.log(BasicLevel.WARN,
                      getName() + ", write failed" + m, exc);
         }
         break mainLoop;
       } catch (InterruptedException exc) {
+        canStop = false;
         break mainLoop;
+      } finally {
+        Thread.interrupted();
+        canStop = false;
       }
       mq.pop();
     }

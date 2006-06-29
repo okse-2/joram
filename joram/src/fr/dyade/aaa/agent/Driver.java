@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -52,16 +53,20 @@ class ThreadFinalizer implements Runnable {
       driver.logmon.log(BasicLevel.DEBUG,
                         driver.getName() + " start");
       driver.run();
+      driver.canStop = false;
     } catch (ThreadDeath death) {
       // the thread has been killed, prints no error message
       throw death;
     } catch (Throwable exc) {
+      driver.canStop = false;
       driver.logmon.log(BasicLevel.ERROR,
                         driver.getName() + " failed", exc);
     } finally {
+      driver.canStop = false;
       driver.reset();
-      driver.logmon.log(BasicLevel.DEBUG,
-                        driver.getName() + "end");
+      if (!Thread.interrupted()) {
+        driver.logmon.log(BasicLevel.DEBUG, driver.getName() + "end");
+      }
       driver.end();
     }
   }
