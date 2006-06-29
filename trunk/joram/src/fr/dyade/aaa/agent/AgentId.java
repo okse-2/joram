@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -235,6 +235,8 @@ public final class AgentId implements Serializable {
   public static int JoramAdminPxStamp = 11;
   /** Reserved stamp for JMS topic <code>AgentId</code> in charge ofsending control events. */
   public static int ControlTopicStamp = 12;
+  /** Reserved stamp for the server reconfiguration agent <code>AgentId</code> . */
+  public static int ServerConfigStamp = 13;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
@@ -266,7 +268,7 @@ public final class AgentId implements Serializable {
    * <code>AgentId</code> for local admin agent.
    * @see AgentAdmin
    */
-  static AgentId adminId;
+  public static AgentId adminId;
 
   /**
    * Returns the <code>AgentId</code> for a remote factory agent.
