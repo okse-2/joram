@@ -1,3 +1,109 @@
++==============================================================================
+| 2006/06/27 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ Adds XML export facilities for Joram's destinations.
++==============================================================================
+| 2006/06/22 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fixes: due to a bad merge since 4.3.12 a simple socket was created
+rather than a SSL one.
++==============================================================================
+| 2006/06/16 | Benoit Pelletier - Bull S.A.
++------------+-----------------------------------------------------------------
+ RAConfig: Adds a temporary directory to extract files in RAR.
+           Fix bug in JDK1.5 about XML generation.
++==============================================================================
+| 2006/06/16 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Fix bugs in:
+1- Connection.createDurableConnectionConsumer()
+2- Daemon.isCurrentThread()
++==============================================================================
+| 2006/06/14 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Changes the creation and initialization process for destination in order
+to obtain more genericity and configuration.
+ Adds periodic cleaning task for queue (shared by ClusterQueue).
++==============================================================================
+| 2006/06/07 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Connector: enable to set the ack mode, maxMessages (ActivationSpecImpl).
+2- Connector: fix a bug in the session pool management (InboundConsumer) 
+              when the pool size is not limited: sessions were not released 
+              after being used.
+              Also changed the way it works: now it uses the pool also in the 
+              unlimited case.
+3- Connector: enable to set the queueMessageReadMax, topicAckBufferMax,
+              topicPassivationThreshold, topicActivationThreshold,
+              asyncSend, multiThreadSync, multiThreadSyncDelay (JoramAdapter).
+4- Merge the standard JMS listener (MessageConsumerListener) and the
+   ASF listener (ConnectionConsumer): new classes SingleSessionConsumer and
+   MultiSessionConsumer.
+5- RequestMultiplexer: set the name of the demultiplexer daemon with
+   the connection and user proxy ids.
+6- ConsumerUnsetListRequest becomes asynchronous.
+7- Fix bug for grouped requests in asyncSend case (RequestBuffer, DestinationImpl).
++==============================================================================
+| 2006/05/29 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Admin tool: set the internal name of the destinations
++==============================================================================
+| 2006/05/24 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bug in Session and MessageConsumer: 
+   Concurrent receive and close on a MessageConsumer leads to a deadlock.
+2- Fix bug in ReliableTcpClient.send(): reconnection not done.
+3- Fix bug in HAEngine: remove AgentFactory from the HAStateReply
+   (the agent factory was initialized several times leading to a JMX exception)
+4- Fix bug in Scheduler: don't react to DriverDone 
+   (the scheduler stops when restarting an agent server)
+5- Fix bug in SchedulerQueueImpl: accepts non-scheduled messages
+6- Fix Bug in Session: make commit atomical.
+7- Optimizes scheduler queue: remove the property SCHEDULED (and the save)
+   from the class SchedulerQueueImpl
+8- Enables a distributed Jndi server to recover from a persistent storage loss.
+9- Implements the feature 'multiThreadSync'
+10- Implements the feature 'topicActivationThreshold'
+11- Implements toReference(), toHashtable() and fromHashtable() into
+    FactoryParameters
+12- Implements the feature 'topicAckBufferMax'
+13- Merges the feature 'lazyAck' and DUPS_OK_ACKNOWLEDGE
+14- Implements the feature 'queueMessageReadMax'
+15- Fix bug in HALocalConnection (connect)
+16- Implements the feature 'multiCnxSync'
+17- Improve the connection management in UserAgent (remove duplicated code)
+18- CloseCnxReply is sent by the ProxyImpl (and not by UserAgent)
+19- Remove the useless calls to setNoSave() in UserAgent
+20- Fix bug in QueueImpl (grouped receive)
+21- Fix persistency in ProxyImpl, ClientSubscription and ClientContext
+22- Changes Notification.toString() signature
+23- Fix Session.commit() atomicity.
+24- Implements the 'asyncSend' feature
++==============================================================================
+| 2006/05/12 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Optimize proxy's behavior with durable subscription (do not save message that
+will be delivered to a non durable even if it exists durable).
+###############################################################################
+# 2005/05/09 | Joram 4.3.18 tag.
+###############################################################################
++==============================================================================
+| 2006/05/09 | Andre Freyssinet - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Changes NTransaction architecture to expose a Repository interface; then
+implements a File and DB repository (using Derby).
+ Implements a DBTransaction (using Derby).
+ Fix: allows the AgentServer to restart after a bad start. Allows the JCA
+connector to be undeployed then redeployed.
+ Implements multi-threading in HttpNetwork server part.
+###############################################################################
+# 2005/04/12 | Joram 4.3.17 tag.
+###############################################################################
++==============================================================================
+| 2006/04/12 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+Bug fix: run onException in a separate thread to avoid deadlock in
+connector onException method (synchronized).
 ###############################################################################
 # 2005/04/11 | Joram 4.3.16 tag.
 ###############################################################################
