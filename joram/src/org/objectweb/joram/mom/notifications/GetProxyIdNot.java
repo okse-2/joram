@@ -34,10 +34,14 @@ public class GetProxyIdNot extends SyncNotification {
 
   private String password;
 
+  private String inaddr;
+
   public GetProxyIdNot(String userName,
-		       String password) {
+		       String password,
+                       String inaddr) {
     this.userName = userName;
     this.password = password;
+    this.inaddr = inaddr;
   }
 
   public final String getUserName() {
@@ -46,6 +50,10 @@ public class GetProxyIdNot extends SyncNotification {
 
   public final String getPassword() {
     return password;
+  }
+
+  public final String getInAddr() {
+    return inaddr;
   }
 
   public void Return(AgentId proxyId) {
