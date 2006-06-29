@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +23,11 @@
  */
 package fr.dyade.aaa.util;
 
+import java.lang.reflect.Method;
+
 import java.util.*;
 import java.io.*;
+
 
 /**
  * This class provides a set of static functions for building string
@@ -71,6 +74,16 @@ public class Strings {
       toString(output, obj, type.getComponentType());
       return;
     }
+
+    try {
+      Class[] argstype = new Class[1];
+      argstype[0] = Class.forName("java.io.StringBuffer");
+      Method method = type.getMethod("toString", argstype);
+      Object[] args = new Object[1];
+      args[0] = output;
+      method.invoke(obj, args);
+      return;
+    } catch (Exception exc) {}
 
     output.append(obj.toString());
   }
