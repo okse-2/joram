@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -108,7 +108,7 @@ public class ConfigController {
                  "ConfigController.beginConfig()");
     while (status != Status.FREE) {
       try {
-	wait();
+        wait();
       } catch (InterruptedException exc) {
       }
     }
@@ -197,6 +197,10 @@ public class ConfigController {
   }
 
   public synchronized void release() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ConfigController.release()");
+    
     if (status == Status.CONFIG) {
       setStatus(Status.FREE);
       notify();
@@ -329,11 +333,11 @@ public class ConfigController {
     // Do nothing
   }
 
-  private void checkStatus(int expectedStatus) 
+  private synchronized void checkStatus(int expectedStatus) 
     throws Exception {
     if (status != expectedStatus) {
-      throw new Exception("Illegal status: " + 
-                          Status.toString(expectedStatus));
+      throw new Exception("Illegal status: " + Status.toString(status)
+          + " expected: " + Status.toString(expectedStatus));
     }
   }
 
@@ -540,12 +544,12 @@ public class ConfigController {
                  "ConfigController.removeDomain(" + domainName + ')');
     checkStatus(Status.CONFIG);
     try {
-      Vector serversToRemove = new Vector();    
+      Vector serversToRemove = new Vector();
       A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
       for (int i = 0; i < domain.servers.size(); i++) {
-        A3CMLServer server = (A3CMLServer)domain.servers.elementAt(i);
+        A3CMLServer server = (A3CMLServer) domain.servers.elementAt(i);
         if (server.networks.size() == 1) {
-        serversToRemove.addElement(server);
+          serversToRemove.addElement(server);
         } else {
           removeNetwork(server.name, domainName);
         }
