@@ -64,7 +64,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>AdminTopicImpl</code> class implements the admin topic behaviour,
  * basically processing administration requests.
  */
-public class AdminTopicImpl extends TopicImpl {
+public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
 
   /** Reference of the server's local AdminTopicImpl instance. */
   private static AdminTopicImpl ref;
@@ -140,11 +140,16 @@ public class AdminTopicImpl extends TopicImpl {
    * Method used by <code>ConnectionManager</code> proxies to check their
    * clients identification.
    *
+   * @param name
+   * @param pass
+   * @param inaddr
    * @exception Exception  If the user does not exist, is wrongly identified,
    *              or does not have any proxy deployed.
    * @see org.objectweb.joram.mom.proxies.ConnectionManager
    */
-  public AgentId getProxyId(String name, String pass) throws Exception {
+  public AgentId getProxyId(String name,
+                            String pass,
+                            String inaddr) throws Exception {
     String userPass = null;
     AgentId userProxId = null;
 
@@ -302,7 +307,8 @@ public class AdminTopicImpl extends TopicImpl {
   protected void doReact(GetProxyIdNot not) {
     try {
       AgentId proxyId = getProxyId(not.getUserName(), 
-				   not.getPassword());
+				   not.getPassword(),
+                                   not.getInAddr());
       not.Return(proxyId);
     } catch (Exception exc) {
       not.Throw(exc);
