@@ -11,6 +11,25 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.19 (July 11, 2006)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_19. This maintenance release provides the following
+      fixes and changes.</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>XML export facilities for Joram's configuration.</li>
+	  <li>Periodic cleaning task for queues.</li>
+	  <li>Many improvments about JCA connector.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Fix for SSL connection.</li>
+	  <li>Fix for JDK1.5 XML generation.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.18 (May 31, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_18. This maintenance release provides the following
