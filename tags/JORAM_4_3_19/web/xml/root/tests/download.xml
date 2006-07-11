@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="test@objectweb.org">JORAM team</author>
+    <title>Test Suite Download</title>
+    <filename>download.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Test Suite Download">
+      <p>You can get the Test Suite either as a package or through
+      CVS.
+      </p>
+      <s2 name="Package">
+	<p>The Test Suite is available as a <a
+	    href="../download/tests.tgz">package</a> (Gzipped Tar file).
+	</p>
+      </s2>
+      <s2 name="CVS Repository">
+	<p>Check the 
+	  <a href="http://forge.objectweb.org/cvs/?group_id=4">
+          CVS repository</a>.
+	</p>
+      </s2>
+    </s1>
+  </body>
+</document>
+
