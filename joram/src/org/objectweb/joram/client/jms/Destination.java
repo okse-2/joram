@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -121,18 +121,18 @@ public abstract class Destination
     strbuf.append(XmlSerializer.indent(indent));
 
     if (getType().equals("queue")) {
-        strbuf.append("<Queue ");
+      strbuf.append("<Queue ");
     } else if (getType().equals("topic")) {
-        strbuf.append("<Topic ");
+      strbuf.append("<Topic ");
     } else {
-        return "";
+      return "";
     }
     strbuf.append(XmlSerializer.xmlAttribute(getAdminName(), "name"));
     strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(serverId), "serverId"));
     DeadMQueue dmq = getDMQ();
     if (dmq != null) {
-        strbuf.append(XmlSerializer.xmlAttribute(dmq.getAdminName(), "dmq"));
-        strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(dmq.getThreshold()), "threshold"));
+      strbuf.append(XmlSerializer.xmlAttribute(dmq.getAdminName(), "dmq"));
+      strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(dmq.getThreshold()), "threshold"));
     }
 
     strbuf.append(">\n");
@@ -140,13 +140,13 @@ public abstract class Destination
     indent+=2;
 
     if (isFreelyReadable()) {
-        strbuf.append(XmlSerializer.indent(indent));
-        strbuf.append("<freeReader/>\n");
+      strbuf.append(XmlSerializer.indent(indent));
+      strbuf.append("<freeReader/>\n");
     }
 
     if (isFreelyWriteable()) {
-        strbuf.append(XmlSerializer.indent(indent));
-        strbuf.append("<freeWriter/>\n");
+      strbuf.append(XmlSerializer.indent(indent));
+      strbuf.append("<freeWriter/>\n");
     }
 
     strbuf.append(XmlSerializer.indent(indent));
@@ -159,9 +159,9 @@ public abstract class Destination
     strbuf.append(XmlSerializer.indent(indent));
 
     if (getType().equals("queue")) {
-        strbuf.append("</Queue>\n");
+      strbuf.append("</Queue>\n");
     } else if (getType().equals("topic")) {
-        strbuf.append("</Topic>\n");
+      strbuf.append("</Topic>\n");
     }
 
     return strbuf.toString();
@@ -192,11 +192,11 @@ public abstract class Destination
 
   /** Sets the naming reference of a destination. */
   public Reference getReference() throws NamingException
-  {
-    Reference ref = super.getReference();
-    ref.add(new StringRefAddr("dest.name", getName()));
-    return ref;
-  }
+    {
+      Reference ref = super.getReference();
+      ref.add(new StringRefAddr("dest.name", getName()));
+      return ref;
+    }
 
 
   /**
@@ -279,9 +279,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void setFreeReading() throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new SetReader(null, getName()));
-  }
+    {
+      AdminModule.doRequest(new SetReader(null, getName()));
+    }
 
   /**
    * Admin method setting free writing access to this destination.
@@ -292,9 +292,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void setFreeWriting() throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new SetWriter(null, getName()));
-  }
+    {
+      AdminModule.doRequest(new SetWriter(null, getName()));
+    }
 
   /**
    * Admin method unsetting free reading access to this destination.
@@ -305,9 +305,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void unsetFreeReading() throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new UnsetReader(null, getName()));
-  }
+    {
+      AdminModule.doRequest(new UnsetReader(null, getName()));
+    }
 
   /**
    * Admin method unsetting free writing access to this destination.
@@ -318,9 +318,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void unsetFreeWriting() throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new UnsetWriter(null, getName()));
-  }
+    {
+      AdminModule.doRequest(new UnsetWriter(null, getName()));
+    }
 
   /**
    * Admin method setting a given user as a reader on this destination.
@@ -333,9 +333,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void setReader(User user) throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
-  }
+    {
+      AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
+    }
 
   /** used by MBean jmx */
   public void addReader(String proxyId)
@@ -354,9 +354,9 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void setWriter(User user) throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
-  }
+    {
+      AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
+    }
 
   /** used by MBean jmx */
   public void addWriter(String proxyId)
@@ -421,12 +421,12 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException
-  {
-    if (dmq == null)
-      AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
-    else
-      AdminModule.doRequest(new SetDestinationDMQ(getName(), dmq.getName()));
-  }
+    {
+      if (dmq == null)
+        AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
+      else
+        AdminModule.doRequest(new SetDestinationDMQ(getName(), dmq.getName()));
+    }
 
   /**
    * Monitoring method returning the list of all users that have a reading
@@ -439,20 +439,20 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public List getReaders() throws ConnectException, AdminException
-  {
-    Monitor_GetReaders request = new Monitor_GetReaders(getName());
-    Monitor_GetUsersRep reply =
-      (Monitor_GetUsersRep) AdminModule.doRequest(request);
+    {
+      Monitor_GetReaders request = new Monitor_GetReaders(getName());
+      Monitor_GetUsersRep reply =
+        (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
-    Vector list = new Vector();
-    Hashtable users = reply.getUsers();
-    String name;
-    for (Enumeration names = users.keys(); names.hasMoreElements();) {
-      name = (String) names.nextElement();
-      list.add(new User(name, (String) users.get(name)));
+      Vector list = new Vector();
+      Hashtable users = reply.getUsers();
+      String name;
+      for (Enumeration names = users.keys(); names.hasMoreElements();) {
+        name = (String) names.nextElement();
+        list.add(new User(name, (String) users.get(name)));
+      }
+      return list;
     }
-    return list;
-  }
 
   /** used by MBean jmx */
   public List getReaderList() throws ConnectException, AdminException {
@@ -475,20 +475,20 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public List getWriters() throws ConnectException, AdminException
-  {
-    Monitor_GetWriters request = new Monitor_GetWriters(getName());
-    Monitor_GetUsersRep reply =
-      (Monitor_GetUsersRep) AdminModule.doRequest(request);
+    {
+      Monitor_GetWriters request = new Monitor_GetWriters(getName());
+      Monitor_GetUsersRep reply =
+        (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
-    Vector list = new Vector();
-    Hashtable users = reply.getUsers();
-    String name;
-    for (Enumeration names = users.keys(); names.hasMoreElements();) {
-      name = (String) names.nextElement();
-      list.add(new User(name, (String) users.get(name)));
+      Vector list = new Vector();
+      Hashtable users = reply.getUsers();
+      String name;
+      for (Enumeration names = users.keys(); names.hasMoreElements();) {
+        name = (String) names.nextElement();
+        list.add(new User(name, (String) users.get(name)));
+      }
+      return list;
     }
-    return list;
-  }
 
   /** used by MBean jmx */
   public List getWriterList() throws ConnectException, AdminException {
@@ -510,13 +510,13 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public boolean isFreelyReadable() throws ConnectException, AdminException
-  {
-    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
-    Monitor_GetFreeAccessRep reply;
-    reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
+    {
+      Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+      Monitor_GetFreeAccessRep reply;
+      reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
-    return reply.getFreeReading();
-  }
+      return reply.getFreeReading();
+    }
 
   /** used by MBean */
   public void setFreelyReadable(boolean b)
@@ -537,13 +537,13 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public boolean isFreelyWriteable() throws ConnectException, AdminException
-  {
-    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
-    Monitor_GetFreeAccessRep reply;
-    reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
+    {
+      Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+      Monitor_GetFreeAccessRep reply;
+      reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
-    return reply.getFreeWriting();
-  }
+      return reply.getFreeWriting();
+    }
 
   /** used by MBean */
   public void setFreelyWriteable(boolean b)
@@ -564,17 +564,17 @@ public abstract class Destination
    * @exception AdminException  If the request fails.
    */
   public DeadMQueue getDMQ() throws ConnectException, AdminException
-  {
-    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
-    Monitor_GetDMQSettingsRep reply;
-    reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
+    {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
 
-    if (reply.getDMQName() == null) {
-      return null;
-    } else {
-      return new DeadMQueue(reply.getDMQName());
+      if (reply.getDMQName() == null) {
+        return null;
+      } else {
+        return new DeadMQueue(reply.getDMQName());
+      }
     }
-  }
 
   public static Destination newInstance(
     String id,
