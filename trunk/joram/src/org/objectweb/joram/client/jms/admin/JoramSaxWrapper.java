@@ -1,24 +1,24 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.jms.admin;
 
@@ -52,7 +52,7 @@ import org.objectweb.joram.client.jms.Destination;
 /**
  * XML SAX Wrapper for Joram Admin configuration file.
  */
-public class JoramSaxWrapper extends DefaultHandler{
+public class JoramSaxWrapper extends DefaultHandler {
 
   public JoramSaxWrapper() {}
 
@@ -182,7 +182,7 @@ public class JoramSaxWrapper extends DefaultHandler{
    *
    */
   public boolean parse(Reader cfgReader,
-                       String cfgName) 
+                       String cfgName)
     throws Exception {
     this.joramAdmName = cfgName;
 
@@ -203,8 +203,8 @@ public class JoramSaxWrapper extends DefaultHandler{
    */
   public void fatalError(SAXParseException e) throws SAXException {
     JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                   "fatal error parsing " + e.getPublicId() +
-                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
+                              "fatal error parsing " + e.getPublicId() +
+                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -218,8 +218,8 @@ public class JoramSaxWrapper extends DefaultHandler{
    */
   public void error(SAXParseException e) throws SAXException {
     JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                   "error parsing " + e.getPublicId() +
-                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
+                              "error parsing " + e.getPublicId() +
+                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -234,8 +234,8 @@ public class JoramSaxWrapper extends DefaultHandler{
    */
   public void warning(SAXParseException e) throws SAXException {
     JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                   "warning parsing " + e.getPublicId() +
-                   " at " + e.getLineNumber() + "." + e.getColumnNumber());
+                              "warning parsing " + e.getPublicId() +
+                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -303,7 +303,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             reliableClass = atts.getValue(ATT_RELIABLECLASS);
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for port: " +
-                                atts.getValue(ATT_PORT) + 
+                                atts.getValue(ATT_PORT) +
                                 " or cnxTimer: " +
                                 atts.getValue(ATT_CNXTIMER));
           }
@@ -312,12 +312,12 @@ public class JoramSaxWrapper extends DefaultHandler{
         }
       } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
         try {
-            name = atts.getValue(ATT_NAME);
-            if (!isSet(name))
-              name = "root";
-            password = atts.getValue(ATT_PASSWORD);
-            if (!isSet(password))
-              password = "root";
+          name = atts.getValue(ATT_NAME);
+          if (!isSet(name))
+            name = "root";
+          password = atts.getValue(ATT_PASSWORD);
+          if (!isSet(password))
+            password = "root";
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
@@ -394,7 +394,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
               serverId =  AdminModule.getLocalServerId();
-            else 
+            else
               serverId = Integer.parseInt(value);
             dmq = atts.getValue(ATT_DMQ);
             value = atts.getValue(ATT_THRESHOLD);
@@ -417,7 +417,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
               serverId = AdminModule.getLocalServerId();
-            else 
+            else
               serverId = Integer.parseInt(value);
             className = atts.getValue(ATT_CLASSNAME);
             dmq = atts.getValue(ATT_DMQ);
@@ -435,7 +435,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
               serverId = AdminModule.getLocalServerId();
-            else 
+            else
               serverId = Integer.parseInt(value);
             className = atts.getValue(ATT_CLASSNAME);
             dmq = atts.getValue(ATT_DMQ);
@@ -463,7 +463,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
               serverId = AdminModule.getLocalServerId();
-            else 
+            else
               serverId = Integer.parseInt(value);
             className = atts.getValue(ATT_CLASSNAME);
             dmq = atts.getValue(ATT_DMQ);
@@ -482,7 +482,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
               serverId = AdminModule.getLocalServerId();
-            else 
+            else
               serverId = Integer.parseInt(value);
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for serverId: " +
@@ -574,8 +574,8 @@ public class JoramSaxWrapper extends DefaultHandler{
           jndi = false;
         } else if (rawName.equals(ELT_TCP)) {
           Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(), 
-                                  Integer.TYPE, 
+          Class [] classParams = {new String().getClass(),
+                                  Integer.TYPE,
                                   new String().getClass()};
           Method methode = clazz.getMethod("create", classParams);
           Object[] objParams = {host, new Integer(port), reliableClass};
@@ -588,10 +588,10 @@ public class JoramSaxWrapper extends DefaultHandler{
 
         } else if (rawName.equals(ELT_HATCP)) {
           Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(), 
+          Class [] classParams = {new String().getClass(),
                                   new String().getClass()};
           Method methode = clazz.getMethod("create",classParams);
-          Object[] objParams = {host,reliableClass};
+          Object[] objParams = {url,reliableClass};
           obj = methode.invoke(null,objParams);
 
         } else if (rawName.equals(ELT_HALOCAL)) {
@@ -601,8 +601,8 @@ public class JoramSaxWrapper extends DefaultHandler{
 
         } else if (rawName.equals(ELT_SOAP)) {
           Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(), 
-                                  Integer.TYPE, 
+          Class [] classParams = {new String().getClass(),
+                                  Integer.TYPE,
                                   Integer.TYPE};
           Method methode = clazz.getMethod("create", classParams);
           Object[] objParams = {host, new Integer(port), new Integer(timeout)};
@@ -623,12 +623,12 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (threshold > 0)
             u.setThreshold(threshold);
 
-          if (dmq != null && 
-              dmq.length() >0 && 
+          if (dmq != null &&
+              dmq.length() >0 &&
               destinations.containsKey(dmq)) {
             u.setDMQ((DeadMQueue) destinations.get(dmq));
           }
-              
+
         } else if (rawName.equals(ELT_DESTINATION)) {
           Destination dest = null;
           if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
@@ -637,7 +637,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Queue";
             if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" + 
+              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" +
                                         serverId + "," +
                                         name + "," +
                                         className + "," +
@@ -650,7 +650,7 @@ public class JoramSaxWrapper extends DefaultHandler{
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Topic";
             if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" + 
+              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" +
                                         serverId + "," +
                                         name + "," +
                                         className + "," +
@@ -664,7 +664,7 @@ public class JoramSaxWrapper extends DefaultHandler{
 
           if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "destination = " + dest);
-          
+
           properties = null;
 
           if (freeReading)
@@ -700,8 +700,8 @@ public class JoramSaxWrapper extends DefaultHandler{
           else
             destinations.put(dest.getName(), dest);
 
-          if (dmq != null && 
-              dmq.length() >0 && 
+          if (dmq != null &&
+              dmq.length() >0 &&
               destinations.containsKey(dmq)) {
             dest.setDMQ((DeadMQueue) destinations.get(dmq));
           }
@@ -710,7 +710,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Queue";
           if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" + 
+            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" +
                                       serverId + "," +
                                       name + "," +
                                       className + "," +
@@ -746,7 +746,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (threshold > 0)
             queue.setThreshold(threshold);
 
-         if (nbMaxMsg > 0)
+          if (nbMaxMsg > 0)
             queue.setNbMaxMsg(nbMaxMsg);
 
           if (cluster != null && queue != null) {
@@ -760,8 +760,8 @@ public class JoramSaxWrapper extends DefaultHandler{
           else
             destinations.put(queue.getName(), queue);
 
-          if (dmq != null && 
-              dmq.length() >0 && 
+          if (dmq != null &&
+              dmq.length() >0 &&
               destinations.containsKey(dmq)) {
             queue.setDMQ((DeadMQueue) destinations.get(dmq));
           }
@@ -770,7 +770,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Topic";
           if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" + 
+            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" +
                                       serverId + "," +
                                       name + "," +
                                       className + "," +
@@ -803,7 +803,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           }
           writers.clear();
 
-          if (parent != null && 
+          if (parent != null &&
               parent.length() > 0 &&
               destinations.containsKey(parent))
             topic.setParent((Topic) destinations.get(parent));
@@ -820,8 +820,8 @@ public class JoramSaxWrapper extends DefaultHandler{
           else
             destinations.put(topic.getName(), topic);
 
-          if (dmq != null && 
-              dmq.length() >0 && 
+          if (dmq != null &&
+              dmq.length() >0 &&
               destinations.containsKey(dmq)) {
             topic.setDMQ((DeadMQueue) destinations.get(dmq));
           }
@@ -829,7 +829,7 @@ public class JoramSaxWrapper extends DefaultHandler{
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.DeadMQueue";
           if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "DeadMQueue.create(" + 
+            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "DeadMQueue.create(" +
                                       serverId + "," +
                                       name + ")");
 
@@ -881,7 +881,7 @@ public class JoramSaxWrapper extends DefaultHandler{
           } catch (NamingException exc) {
             JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",exc);
           }
-          
+
         } else if (rawName.equals(ELT_CLUSTER)) {
           Destination dest0 = null;
           for (int j = 0; j < cluster.size(); j++) {
@@ -953,7 +953,7 @@ public class JoramSaxWrapper extends DefaultHandler{
         jndiCtx.close();
         toBind.clear();
       }
-      
+
       if (!toBind.isEmpty()) {
         jndiCtx = new javax.naming.InitialContext();
         for (Enumeration e = toBind.keys(); e.hasMoreElements();) {

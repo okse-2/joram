@@ -1,25 +1,26 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
+ *                 Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
@@ -35,9 +36,14 @@ import javax.naming.StringRefAddr;
 public class FactoryParameters implements java.io.Serializable
 {
   /** Name of host hosting the server to create connections with. */
-  private String host; 
+  private String host;
   /** Port to be used for accessing the server. */
-  private int port; 
+  private int port;
+
+  /**
+   * url to connect to joram ha
+   */
+  private String url;
 
   /**
    * Duration in seconds during which connecting is attempted (connecting
@@ -51,7 +57,7 @@ public class FactoryParameters implements java.io.Serializable
    * the 0 value means "no timer".
    */
   public int txPendingTimer = 0;
-  /** 
+  /**
    * Period in milliseconds between two ping requests sent by the client
    * connection to the server; if the server does not receive any ping
    * request during more than 2 * cnxPendingTimer, the connection is
@@ -65,14 +71,14 @@ public class FactoryParameters implements java.io.Serializable
    * Default is false (with ack).
    */
   public boolean asyncSend = false;
-  
+
   /**
    * The maximum number of messages that can be
    * read at once from a queue.
    * Default is 1.
    */
   public int queueMessageReadMax = 1;
-  
+
   /**
    * The maximum number of acknowledgements
    * that can be buffered in
@@ -80,40 +86,40 @@ public class FactoryParameters implements java.io.Serializable
    * Default is 0.
    */
   public int topicAckBufferMax = 0;
-  
+
   /**
-   * Determines whether client threads 
+   * Determines whether client threads
    * which are using the same connection
    * are synchronized
    * in order to group together the requests they
    * send.
    */
   public boolean multiThreadSync = false;
-  
+
   /**
    * The maximum time the threads hang if 'multiThreadSync' is true.
-   * Either they wake up (wait time out) or they are notified (by the 
+   * Either they wake up (wait time out) or they are notified (by the
    * first woken up thread).
-   *  
+   *
    */
   public int multiThreadSyncDelay = 1;
 
   /**
-   * This threshold is the maximum messages 
+   * This threshold is the maximum messages
    * number over
    * which the subscription is passivated.
    * Default is Integer.MAX_VALUE.
    */
   public int topicPassivationThreshold = Integer.MAX_VALUE;
-  
+
   /**
-   * This threshold is the minimum 
+   * This threshold is the minimum
    * messages number below which
    * the subscription is activated.
    * Default is 0.
    */
   public int topicActivationThreshold = 0;
-  
+
   /**
    * Constructs a <code>FactoryParameters</code> instance.
    *
@@ -126,6 +132,17 @@ public class FactoryParameters implements java.io.Serializable
     this.port = port;
   }
 
+  /**
+   * Constructs a <code>FactoryParameters</code> instance.
+   *
+   * @param url  joram ha url
+   */
+  public FactoryParameters(String url)
+  {
+    this.url = url;
+    host = "";
+    port = -1;
+  }
 
   /**
    * Returns the name of host hosting the server to create connections with.
@@ -140,11 +157,20 @@ public class FactoryParameters implements java.io.Serializable
   {
     return port;
   }
-  
+
+  /**
+   * Returns the url.
+   */
+  public String getUrl()
+  {
+    return url;
+  }
+
   public void toReference(Reference ref) {
     ref.add(new StringRefAddr("cFactory.host", getHost()));
     ref.add(new StringRefAddr("cFactory.port", new Integer(getPort())
         .toString()));
+    ref.add(new StringRefAddr("cFactory.url", getUrl()));
     ref.add(new StringRefAddr("cFactory.cnxT", new Integer(
         connectingTimer).toString()));
     ref.add(new StringRefAddr("cFactory.txT",
@@ -156,7 +182,7 @@ public class FactoryParameters implements java.io.Serializable
     ref.add(new StringRefAddr("cFactory.queueMessageReadMax", new Integer(
         queueMessageReadMax).toString()));
   }
-  
+
   public void fromReference(Reference ref) {
     String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
     String txTimer = (String) ref.get("cFactory.txT").getContent();
@@ -169,7 +195,7 @@ public class FactoryParameters implements java.io.Serializable
     asyncSend = (new Boolean(asyncSendS)).booleanValue();
     queueMessageReadMax = (new Integer(queueMessageReadMaxS)).intValue();
   }
-  
+
   public Hashtable toHashtable() {
     Hashtable h = new Hashtable();
     h.put("host", getHost());
@@ -181,7 +207,7 @@ public class FactoryParameters implements java.io.Serializable
     h.put("queueMessageReadMax", new Integer(queueMessageReadMax));
     return h;
   }
-  
+
   public static FactoryParameters fromHashtable(Hashtable h) {
     FactoryParameters params = new FactoryParameters((String) h.get("host"),
         ((Integer) h.get("port")).intValue());
@@ -195,12 +221,12 @@ public class FactoryParameters implements java.io.Serializable
 
   public String toString() {
     return '(' + super.toString() +
-      ",host=" + host + 
-      ",port=" + port + 
+      ",host=" + host +
+      ",port=" + port +
       ",connectingTimer=" + connectingTimer +
       ",txPendingTimer=" + txPendingTimer +
-      ",cnxPendingTimer=" + cnxPendingTimer + 
-      ",asyncSend=" + asyncSend + 
+      ",cnxPendingTimer=" + cnxPendingTimer +
+      ",asyncSend=" + asyncSend +
       ",queueMessageReadMax=" + queueMessageReadMax + ')';
   }
 }
