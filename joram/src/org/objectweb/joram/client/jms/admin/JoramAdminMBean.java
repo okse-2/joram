@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.jms.admin;
 
@@ -99,7 +99,8 @@ public interface JoramAdminMBean {
    * @throws AdminException if an error occurs
    */
   public void exportRepositoryToFile(String exportDir)
-      throws AdminException;
+    throws AdminException;
 
-
+  public boolean executeXMLAdminJMX(String path)
+    throws Exception;
 }
