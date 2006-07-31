@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
- *                 ScalAgent Distributed Technologies
+ * Contributor(s): ScalAgent Distributed Technologies
+ *                 Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
@@ -75,6 +78,10 @@ public class ManagedConnectionFactoryImpl
 
   /** <code>true</code> for collocated outbound connectivity. */
   boolean collocated;
+
+  /** <code>true</code> for ha mode */
+  boolean isHa;
+
   /** Underlying JORAM server host name. */
   String hostName;
   /** Underlying JORAM server port number. */
@@ -104,28 +111,28 @@ public class ManagedConnectionFactoryImpl
    * considered as dead and processed as required.
    */
   public int cnxPendingTimer = 0;
-  
+
   /**
    * Determines whether the produced messages are asynchronously
    * sent or not (without or with acknowledgement)
    * Default is false (with ack).
    */
   public boolean asyncSend;
-  
+
   /**
-   * Determines whether client threads 
+   * Determines whether client threads
    * which are using the same connection
    * are synchronized
    * in order to group together the requests they
    * send.
    */
   public boolean multiThreadSync;
-  
+
   /**
    * The maximum time the threads hang if 'multiThreadSync' is true.
-   * Either they wake up (wait time out) or they are notified (by the 
+   * Either they wake up (wait time out) or they are notified (by the
    * first woken up thread).
-   *  
+   *
    */
   public int multiThreadSyncDelay = -1;
 
@@ -268,12 +275,25 @@ public class ManagedConnectionFactoryImpl
     XAConnection cnx = null;
 
     if (collocated) {
-      hostName = "localhost";
-      serverPort = -1;
-      factory = XALocalConnectionFactory.create();
-    } else {
-      factory = XATcpConnectionFactory.create(hostName, serverPort);
+        hostName = "localhost";
+        serverPort = -1;
     }
+
+    if (isHa) {
+        if (collocated) {
+            factory = XAHALocalConnectionFactory.create();
+        } else {
+            String urlHa = "hajoram://" + hostName + ":" + serverPort;
+            factory = XAHATcpConnectionFactory.create(urlHa);
+        }
+    } else {
+        if (collocated) {
+            factory = XALocalConnectionFactory.create();
+        } else {
+            factory = XATcpConnectionFactory.create(hostName, serverPort);
+        }
+    }
+
     setParameters(factory);
 
     try {
@@ -381,7 +401,7 @@ public class ManagedConnectionFactoryImpl
       managedCx.setLogWriter(out);
       return managedCx;
     }
-    
+
     return null;
   }
 
@@ -474,6 +494,7 @@ public class ManagedConnectionFactoryImpl
 
     this.ra = (JoramAdapter) ra;
     collocated = ((JoramAdapter) ra).collocated;
+    isHa = ((JoramAdapter) ra).isHa;
     hostName = ((JoramAdapter) ra).hostName;
     serverPort = ((JoramAdapter) ra).serverPort;
     connectingTimer = ((JoramAdapter) ra).connectingTimer;
@@ -486,6 +507,7 @@ public class ManagedConnectionFactoryImpl
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " setResourceAdapter collocated = " + collocated +
+                                    ", isHa = " + isHa +
                                     ", hostName = " + hostName +
                                     ", serverPort = " + serverPort +
                                     ", connectingTimer = " + connectingTimer +

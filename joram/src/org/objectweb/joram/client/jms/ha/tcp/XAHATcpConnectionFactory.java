@@ -1,25 +1,25 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -42,10 +42,10 @@ public class XAHATcpConnectionFactory
    * Constructs an <code>XATcpConnectionFactory</code> instance.
    */
   public XAHATcpConnectionFactory(String url)
-  {
-    super("", -1);
-    this.url = url;
-  }
+    {
+      super(url);
+      this.url = url;
+    }
 
 
   /**
@@ -56,28 +56,28 @@ public class XAHATcpConnectionFactory
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
     throws javax.jms.JMSException
-  {
-    HATcpConnection lc = new HATcpConnection(
-      url, params, name, password, reliableClass);
-    return new XAConnection(params, lc);
-  }
+    {
+      HATcpConnection lc = new HATcpConnection(
+        url, params, name, password, reliableClass);
+      return new XAConnection(params, lc);
+    }
 
-  
+
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
    * instance for creating tcp connections.
-   */ 
+   */
   public static javax.jms.XAConnectionFactory create(String url)
-  {
-    return create(url,
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
-  }
+    {
+      return create(url,
+                    "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    }
 
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
    * instance for creating tcp connections.
-   */ 
-  public static javax.jms.XAConnectionFactory 
+   */
+  public static javax.jms.XAConnectionFactory
       create(String url, String reliableClass) {
     XAHATcpConnectionFactory cf = new XAHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,11 +19,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
- *                 ScalAgent Distributed Technologies
+ * Contributor(s): ScalAgent Distributed Technologies
+ *                 Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAQueueHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
@@ -171,37 +175,63 @@ public class ManagedQueueConnectionFactoryImpl
 
     XAConnection cnx = null;
 
-    try {
-      if (collocated) {
+    if (collocated) {
         hostName = "localhost";
         serverPort = -1;
-        if (cxRequest instanceof QueueConnectionRequest) {
-          XAQueueConnectionFactory factory =
-            XAQueueLocalConnectionFactory.create();
-          setParameters(factory);
-          cnx = factory.createXAQueueConnection(userName, password);
-        } else {
-          XAConnectionFactory factory = XALocalConnectionFactory.create();
-          setParameters(factory);
-          cnx = factory.createXAConnection(userName, password);
-        }
-      } else {
-        if (cxRequest instanceof QueueConnectionRequest) {
-          XAQueueConnectionFactory factory =
-            XAQueueTcpConnectionFactory.create(hostName, serverPort);
-          setParameters(factory);
-          cnx = factory.createXAQueueConnection(userName, password);
-        } else {
-          XAConnectionFactory factory =
-            XATcpConnectionFactory.create(hostName, serverPort);
-          setParameters(factory);
-          cnx = factory.createXAConnection(userName, password);
-        }
-      }
+    }
 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      this + " createManagedConnection cnx = " + cnx);
+    try {
+
+        if (isHa) {
+            if (collocated) {
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
+            } else {
+                String urlHa = "hajoram://" + hostName + ":" + serverPort;
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
+            }
+        } else {
+            if (collocated) {
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueLocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
+            } else {
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
+            }
+        }
+
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createManagedConnection cnx = " + cnx);
+
     } catch (IllegalStateException exc) {
       out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
