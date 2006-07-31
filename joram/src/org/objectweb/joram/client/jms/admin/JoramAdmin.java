@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.jms.admin;
 
@@ -35,6 +35,7 @@ import java.util.Iterator;
 import javax.jms.Destination;
 
 import fr.dyade.aaa.util.management.MXWrapper;
+import org.objectweb.joram.client.jms.admin.server.*;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.JoramTracing;
@@ -48,6 +49,9 @@ public class JoramAdmin
 
   public long timeOut = 1000;
   public PlatformAdmin platformAdmin;
+  /** <code>true</code> if the underlying a JORAM HA server is defined */
+  static boolean isHa = false;
+
 
   /**
    * Path to the file containing a description of the exported administered objects (destination)
@@ -448,6 +452,17 @@ public class JoramAdmin
     return AdminModule.executeXMLAdmin(path);
   }
 
+  /**
+   * Reload the joramAdmin.xml file
+   * @param the path for the joramAdmin file
+   * @throws AdminException if an error occurs
+   */
+  public boolean executeXMLAdminJMX(String path)
+    throws Exception {
+    throw new Exception("Not implemented yet");
+
+  }
+
 
   /**
    * Export the repository content to an XML file
@@ -458,85 +473,96 @@ public class JoramAdmin
    */
   public void exportRepositoryToFile(String exportDir) throws AdminException {
 
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "export repository to " + exportDir.toString());
+    }
+
+    StringBuffer strbuf = new StringBuffer();
+    int indent = 0;
+    strbuf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    strbuf.append("<!--\n");
+    strbuf.append(" Exported JMS objects : \n");
+    strbuf.append(" - destinations : Topic/Queue \n");
+    strbuf.append(" The file can be reloaded through the admin interface (joramAdmin.executeXMLAdmin())\n");
+    strbuf.append("-->\n");
+    strbuf.append("<JoramAdmin>\n");
+    indent += 2;
+
+    // Get the srv list
+    List srvList = platformAdmin.getServersIds();
+    if (srvList != null) {
+
+      // For each server
+      Iterator it = srvList.iterator();
+      while (it.hasNext()) {
+        try {
+          Integer sid = (Integer) it.next();
+
+          // Export the JMS destinations
+          List destList = AdminModule.getDestinations(sid.intValue(), timeOut);
+          Iterator destIt = destList.iterator();
+          while (destIt.hasNext()) {
+            org.objectweb.joram.client.jms.Destination dest = (org.objectweb.joram.client.jms.Destination) destIt
+              .next();
+
+            strbuf.append(dest.toXml(indent, sid.intValue()));
+          }
+
+        } catch (Exception exc) {
+          throw new AdminException("exportRepositoryToFile() failed - " + exc);
+        }
+      }
+
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
-          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "export repository to " + exportDir.toString());
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "exported objects : \n" + strbuf.toString());
       }
+    }
 
-      StringBuffer strbuf = new StringBuffer();
-      int indent = 0;
-      strbuf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-      strbuf.append("<!--\n");
-      strbuf.append(" Exported JMS objects : \n");
-      strbuf.append(" - destinations : Topic/Queue \n");
-      strbuf.append(" The file can be reloaded through the admin interface (joramAdmin.executeXMLAdmin())\n");
-      strbuf.append("-->\n");
-      strbuf.append("<JoramAdmin>\n");
-      indent += 2;
+    indent -= 2;
+    strbuf.append("</JoramAdmin>");
 
-      // Get the srv list
-      List srvList = platformAdmin.getServersIds();
-      if (srvList != null) {
+    // Flush the file in the specified directory
+    File exportFile = null;
+    FileOutputStream fos = null;
 
-          // For each server
-          Iterator it = srvList.iterator();
-          while (it.hasNext()) {
-                try {
-                    Integer sid = (Integer) it.next();
-
-                    // Export the JMS destinations
-                    List destList = AdminModule.getDestinations(sid.intValue(), timeOut);
-                    Iterator destIt = destList.iterator();
-                    while (destIt.hasNext()) {
-                        org.objectweb.joram.client.jms.Destination dest = (org.objectweb.joram.client.jms.Destination) destIt
-                                .next();
-
-                        strbuf.append(dest.toXml(indent, sid.intValue()));
-                    }
-
-                } catch (Exception exc) {
-                    throw new AdminException("exportRepositoryToFile() failed - " + exc);
-                }
-          }
-
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
-              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "exported objects : \n" + strbuf.toString());
-          }
-      }
-
-      indent -= 2;
-      strbuf.append("</JoramAdmin>");
-
-      // Flush the file in the specified directory
-      File exportFile = null;
-      FileOutputStream fos = null;
-
+    try {
+      exportFile = new File(exportDir, getAdminFileExportXML());
+      fos = new FileOutputStream(exportFile);
+      fos.write(strbuf.toString().getBytes());
+    } catch(Exception ioe) {
+      throw new AdminException("exportRepositoryToFile() failed - " + ioe);
+    } finally {
       try {
-          exportFile = new File(exportDir, getAdminFileExportXML());
-          fos = new FileOutputStream(exportFile);
-          fos.write(strbuf.toString().getBytes());
-      } catch(Exception ioe) {
-          throw new AdminException("exportRepositoryToFile() failed - " + ioe);
-      } finally {
-          try {
-              exportFile = null;
-              fos.close();
-          } catch (Exception e) {
-              if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
-                  JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unable to close the file  : " + fos);
-              }
-          }
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
-              JoramTracing.dbgClient.log(BasicLevel.DEBUG, "File : " + exportDir + "/" + getAdminFileExportXML() + " created");
-          }
+        exportFile = null;
+        fos.close();
+      } catch (Exception e) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "Unable to close the file  : " + fos);
+        }
       }
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG)) {
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "File : " + exportDir + "/" + getAdminFileExportXML() + " created");
+      }
+    }
   }
 
 
   public String getAdminFileExportXML() {
-      return adminFileExportXML;
+    return adminFileExportXML;
   }
 
   public void setAdminFileExportXML(String adminFileExportXML) {
-      this.adminFileExportXML = adminFileExportXML;
+    this.adminFileExportXML = adminFileExportXML;
+  }
+
+
+  public static boolean isHa() {
+    return isHa;
+  }
+
+
+  public static void setHa(boolean isHa) {
+    JoramAdmin.isHa = isHa;
+    AdminModule.setHa(isHa);
   }
 }
