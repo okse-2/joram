@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): ScalAgent Distributed Technologies
+ *                 Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -31,6 +32,15 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.XATopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XATopicHATcpConnectionFactory;
+
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
@@ -122,6 +132,10 @@ public class JoramAdapter
 
   /** <code>true</code> if the underlying JORAM server is collocated. */
   boolean collocated = false;
+
+  /** <code>true</code> if the underlying a JORAM HA server is defined */
+  boolean isHa = false;
+
   /** Host name or IP of the underlying JORAM server. */
   String hostName = "localhost";
   /** Port number of the underlying JORAM server. */
@@ -276,6 +290,9 @@ public class JoramAdapter
   public synchronized void start(BootstrapContext ctx)
                            throws ResourceAdapterInternalException
   {
+      // set HA mode if needed
+      joramAdmin.setHa(isHa);
+
     if (started)
       throw new ResourceAdapterInternalException("Adapter already started.");
     if (stopped)
@@ -674,11 +691,20 @@ public class JoramAdapter
 
       XAConnectionFactory connectionFactory = null;
 
+      if (isHa) {
+          if (collocated)
+              connectionFactory = XAHALocalConnectionFactory.create();
+          else {
+              String urlHa = "hajoram://" + hostName + ":" + serverPort;
+              connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+          }
+      }  else {
+
       if (collocated)
         connectionFactory = XALocalConnectionFactory.create();
       else
-        connectionFactory =
-          XATcpConnectionFactory.create(hostName, serverPort);
+              connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+      }
 
       ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
       ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
@@ -809,11 +835,19 @@ public class JoramAdapter
         if (! connections.containsKey(userName)) {
           password = specImpl.getPassword();
 
+          if (isHa) {
+              if (collocated)
+                  connectionFactory = XAHALocalConnectionFactory.create();
+              else {
+                  String urlHa = "hajoram://" + hostName + ":" + serverPort;
+                  connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+              }
+          }  else {
           if (collocated)
             connectionFactory = XALocalConnectionFactory.create();
           else
-            connectionFactory =
-              XATcpConnectionFactory.create(hostName, serverPort);
+                  connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+          }
 
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
@@ -1032,10 +1066,20 @@ public class JoramAdapter
   {
     try {
       TopicConnectionFactory factory;
+
+      if (isHa) {
+          if (collocated)
+              factory = TopicHALocalConnectionFactory.create();
+          else {
+              String urlHa = "hajoram://" + hostName + ":" + serverPort;
+              factory = TopicHATcpConnectionFactory.create(urlHa);
+          }
+      } else {
       if (collocated)
         factory = TopicLocalConnectionFactory.create();
       else
         factory = TopicTcpConnectionFactory.create(hostName, serverPort);
+      }
 
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
         .getParameters().connectingTimer = 60;
@@ -1301,6 +1345,9 @@ public class JoramAdapter
 
   public void setClusterId(java.lang.Short clusterId) {
     this.clusterId = clusterId.shortValue();
+    if (this.clusterId != AgentServer.NULL_ID){
+        this.isHa = true;
+    }
   }
 
   public void setServerName(java.lang.String serverName) {
@@ -1456,5 +1503,17 @@ public class JoramAdapter
    */
   public void exportRepositoryToFile(String exportDir) throws AdminException {
       joramAdmin.exportRepositoryToFile(exportDir);
+  }
+
+  /**
+   * Reload the joramAdmin.xml file
+   * @param the path for the joramAdmin file
+   * @throws AdminException if an error occurs
+   */
+  public boolean executeXMLAdminJMX(String path)
+    throws Exception {
+      boolean executeAdmin = joramAdmin.executeXMLAdmin(path);
+      adminConnect();
+      return executeAdmin;
   }
 }
