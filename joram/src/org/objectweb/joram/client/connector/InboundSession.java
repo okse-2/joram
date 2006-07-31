@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +19,8 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
+ *                 Benoit Pelletier (Bull SA)
  */
 package org.objectweb.joram.client.connector;
 
@@ -164,15 +166,21 @@ class InboundSession implements javax.jms.ServerSession,
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " onMessage(" + message + ")");
 
+    MessageEndpoint endpoint = null;
     try {
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       "ServerSession passes message to listener.");
-      MessageEndpoint endpoint = endpointFactory.createEndpoint(xaResource);
+      endpoint = endpointFactory.createEndpoint(xaResource);
       ((javax.jms.MessageListener) endpoint).onMessage(message);
       endpoint.release();
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
+      try {
+        // try to clean the context for next invocation
+        if (endpoint != null) endpoint.release();
+      } catch (Exception e) {
+        // ignore the exception
+      }
       throw new java.lang.IllegalStateException("Could not get endpoint "
                                                 + "instance: " + exc);
     }
