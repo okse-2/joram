@@ -11,10 +11,27 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.20 (August 03, 2006)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_20. This version is bundled in Jonas 4.8. This
+      maintenance release provides the following fixes and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Allows activation of HA mode with Joram RA.</li>
+	  <li>Dynamic loading of configuration file through the MBean.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>handling of exception in MDB onMessage method (bug JOnAS #305389).</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.19 (July 11, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
-      with tag JORAM_4_3_19. This maintenance release provides the following
-      fixes and changes.</p>
+      with tag JORAM_4_3_19. This version is bundled in Jonas 4.7.5. This
+      maintenance release provides the following fixes and changes:</p>
       <s2 name="New features and improvments">
 	<ul>
 	  <li>XML export facilities for Joram's configuration.</li>
@@ -33,7 +50,7 @@
     <s1 name="JORAM maintenance release 4.3.18 (May 31, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_18. This maintenance release provides the following
-      fixes and changes.</p>
+      fixes and changes:</p>
       <s2 name="New features and improvments">
 	<ul>
 	  <li>Changes NTransaction to expose a repository interface; provides a File and DB implementation.</li>
