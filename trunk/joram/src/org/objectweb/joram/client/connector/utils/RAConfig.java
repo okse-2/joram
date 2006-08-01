@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -48,7 +48,7 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 
 /**
- * 
+ *
  */
 public class RAConfig {
 
@@ -188,7 +188,7 @@ public class RAConfig {
           raconfig.updateZIP(rarName,path,newFileName,oldFileName);
         if (jarName != null)
           raconfig.updateZIP(jarName,path,newFileName,oldFileName);
-      } else 
+      } else
         usage();
       break;
     default:
@@ -237,7 +237,7 @@ public class RAConfig {
 
 
   /**
-   * create ra.properties 
+   * create ra.properties
    * build from the ra.xml file from RAR.
    * @param rarName  String input RAR file name
    * @throws Exception to throw if an Exception occurs
@@ -308,7 +308,7 @@ public class RAConfig {
           // search fileName in jar file.
           InputStream reader = zipFile.getInputStream(currEntry);
           res = extractFromJAR(fileName,reader);
-          if (res == null) 
+          if (res == null)
             continue;
           else {
             // the fileName found in jar file.
@@ -319,7 +319,7 @@ public class RAConfig {
       }
       // extract the fileName from InputStream
       // in the tmp directory.
-      if (res != null) 
+      if (res != null)
         createFile(fileName,res);
       zipFile.close();
     }
@@ -333,10 +333,10 @@ public class RAConfig {
    */
   private InputStream extractFromJAR(String fileName, InputStream reader)
     throws Exception {
-    
+
     if (debug)
       System.out.println("RAConfig.extractFromJAR(" + fileName +  "," + reader + ")");
-    
+
     ZipInputStream stream = new ZipInputStream(reader);
     ZipEntry currEntry = (ZipEntry) stream.getNextEntry();
     while (stream.available() > 0) {
@@ -370,13 +370,13 @@ public class RAConfig {
       System.out.println("RAConfig.extractFromJAR(" + jarName +  "," + fileName + ")");
     else if (verbose)
       System.out.println("extract \"" + fileName + "\" from \"" + jarName + "\"");
-    
+
     JarFile jar = new JarFile(jarName);
     ZipEntry entry = jar.getEntry(fileName);
     if (debug)
       System.out.println("RAConfig.extractFromJAR : entry = " + entry);
     // extract the fileName from jar in the tmp directory.
-    if (entry != null) 
+    if (entry != null)
       createFile(fileName,jar.getInputStream(entry));
     jar.close();
   }
@@ -511,19 +511,19 @@ public class RAConfig {
    * @param port      new port
    * @param serverId  server Id
    */
-  private void updateHostPort(String rarName, 
-                              String hostName, 
+  private void updateHostPort(String rarName,
+                              String hostName,
                               String port,
                               short serverId) throws Exception {
     if (debug)
-      System.out.println("RAConfig.updateHostPort(" + rarName + 
-                         "," + hostName + 
-                         "," + port + 
+      System.out.println("RAConfig.updateHostPort(" + rarName +
+                         "," + hostName +
+                         "," + port +
                          "," + serverId + ")");
     else if (verbose)
-      System.out.println("update (ra.xml and a3server.xml) in \"" + rarName + 
+      System.out.println("update (ra.xml and a3server.xml) in \"" + rarName +
                          "\" with host=" + hostName +
-                         " port=" + port + 
+                         " port=" + port +
                          " serverId=" + serverId);
 
     // update ra.xml file
@@ -552,20 +552,20 @@ public class RAConfig {
    * @param port      new port
    * @param serverId  server Id
    */
-  private void updateA3Servers(String rarName, 
-                               String hostName, 
+  private void updateA3Servers(String rarName,
+                               String hostName,
                                String port,
-                               short serverId) 
+                               short serverId)
     throws Exception {
     if (debug)
-      System.out.println("RAConfig.updateA3Servers(" + rarName + 
-                         "," + hostName + 
-                         "," + port + 
+      System.out.println("RAConfig.updateA3Servers(" + rarName +
+                         "," + hostName +
+                         "," + port +
                          "," + serverId + ")");
     else if (verbose)
-      System.out.println("update (a3server.xml) in \"" + rarName + 
+      System.out.println("update (a3server.xml) in \"" + rarName +
                          "\" host=" + hostName +
-                         " port=" + port + 
+                         " port=" + port +
                          " serverId=" + serverId);
 
     // extract the joram-config.jar file from RAR in the temp dir
@@ -586,7 +586,7 @@ public class RAConfig {
     A3CMLConfig conf = A3CML.getXMLConfig(tmpDir + A3SERVERS_XML);
     A3CMLServer server = conf.getServer(serverId);
     server.hostname = hostName;
-    A3CMLService service = 
+    A3CMLService service =
       server.getService("org.objectweb.joram.mom.proxies.tcp.TcpProxyService");
     service.args = port;
     // write changes to A3SERVERS_XML file
@@ -605,7 +605,7 @@ public class RAConfig {
         updateJoramAdminXml(hostName, port);
     }
 
-    // update jar 
+    // update jar
     updateZIP(tmpDir + JORAM_CONFIG_JAR,A3SERVERS_XML,tmpDir + A3SERVERS_XML,A3SERVERS_XML);
     // update rar
     updateZIP(rarName,JORAM_CONFIG_JAR,tmpDir +JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
@@ -615,7 +615,7 @@ public class RAConfig {
     new File(tmpDir + A3SERVERS_XML).delete();
   }
 
-  private boolean copy(String file1, String file2) 
+  private boolean copy(String file1, String file2)
     throws Exception {
     if (! new File(file1).exists())
       return false;
@@ -633,8 +633,8 @@ public class RAConfig {
     }
   }
 
-  private void updateJoramAdminCfg(String hostName, 
-                                   String port) 
+  private void updateJoramAdminCfg(String hostName,
+                                   String port)
     throws Exception {
     File file = new File(confDir, JORAMADMIN_CFG);
     FileReader fileReader = new FileReader(file);
@@ -644,7 +644,7 @@ public class RAConfig {
     StringTokenizer tokenizer;
     String firstToken;
     StringBuffer buff = new StringBuffer();
-    
+
     while (! end) {
       line = reader.readLine();
       if (line == null)
@@ -676,8 +676,8 @@ public class RAConfig {
     }
   }
 
-  private void updateJoramAdminXml(String hostName, 
-                                   String port) 
+  private void updateJoramAdminXml(String hostName,
+                                   String port)
     throws Exception {
     File file = new File(confDir, JORAMADMIN_XML);
     FileReader fileReader = new FileReader(file);
@@ -696,7 +696,7 @@ public class RAConfig {
       else {
         if (line.trim().startsWith("<connect")) {
           while (true) {
-            i = line.indexOf("hostName");
+            i = line.indexOf("host");
             if (i > 0) {
               buff.append(line.substring(0,i+10));
               buff.append(hostName);
@@ -845,7 +845,7 @@ public class RAConfig {
       zipFile.close();
     }
 
-    // update rar 
+    // update rar
     updateZIP(rarName,RA_XML, tmpDir + "ra.xml",RA_XML);
 
     // update a3servers.xml (host and port).
@@ -879,25 +879,25 @@ public class RAConfig {
    * @param newFileName add new filename
    * @param oldFileName remove old file from JAR or RAR
    */
-  private void updateZIP(String zipName, 
-                         String path, 
-                         String newFileName, 
+  private void updateZIP(String zipName,
+                         String path,
+                         String newFileName,
                          String oldFileName)
     throws Exception {
-    
+
     if (debug)
       System.out.println("RAConfig.updateZIP(" + zipName +
                          "," + path + "," + newFileName +
                          "," + oldFileName + ")");
     else if (verbose)
       System.out.println("updateZIP \"" + zipName +
-                         "\", path \"" + path + 
+                         "\", path \"" + path +
                          "\", new file \"" + newFileName +
                          "\", old file \"" + oldFileName + "\"");
 
 
     ZipEntry entry = null;
-    
+
     File file = new File(zipName);
     if (file.exists()) {
       ZipFile zipFile = new ZipFile(file.getAbsolutePath());
@@ -905,12 +905,12 @@ public class RAConfig {
       // create your output zip file
       ZipOutputStream newZip = new ZipOutputStream(
         new FileOutputStream(new File(file.getAbsolutePath() + "_TMP")));
-      
+
       // Get all data (except the oldFileName) from zip file and
       // write it to the tmp zip file
       while (zipEntries.hasMoreElements()) {
         entry = (ZipEntry) zipEntries.nextElement();
-        if (entry.getName().equalsIgnoreCase(oldFileName)) 
+        if (entry.getName().equalsIgnoreCase(oldFileName))
           continue;
         newZip.putNextEntry(new ZipEntry(entry.getName()));
         InputStream is = zipFile.getInputStream(entry);
@@ -922,7 +922,7 @@ public class RAConfig {
         }
       }
       zipFile.close();
-      
+
       // Write the new fileName to the zip
       entry = new ZipEntry(path);
       newZip.putNextEntry(entry);
