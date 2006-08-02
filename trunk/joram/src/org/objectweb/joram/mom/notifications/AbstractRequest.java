@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.notifications;
 
@@ -27,8 +27,7 @@ package org.objectweb.joram.mom.notifications;
  * An <code>AbstractRequest</code> is a request sent by a client agent to
  * a destination agent.
  */
-public abstract class AbstractRequest extends AbstractNotification
-{
+public abstract class AbstractRequest extends AbstractNotification {
   /**
    * The <code>requestId</code> field allows a client to identify the request
    * sent to a destination.
@@ -37,40 +36,33 @@ public abstract class AbstractRequest extends AbstractNotification
    */
   private int requestId = -1;
 
-
   /**
    * Constructs an <code>AbstractRequest</code>.
    *
    * @param clientContext  Identifies a client context.
    * @param requestId  Identifies the request.
    */
-  public AbstractRequest(int clientContext, int requestId)
-  {
+  public AbstractRequest(int clientContext, int requestId) {
     super(clientContext);
     this.requestId = requestId;
   }
 
-
   /**
    * Constructs an <code>AbstractRequest</code>.
    */
-  public AbstractRequest()
-  {}
+  public AbstractRequest() {}
 
 
   /** Returns the request identifier. */
-  public int getRequestId()
-  {
+  public int getRequestId() {
     return requestId;
   }
 
   /**
    * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @param output
-   *	buffer to fill in
-   * @return
-	<code>output</code> buffer is returned
+   * @param output	buffer to fill in
+   * @return		<code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
