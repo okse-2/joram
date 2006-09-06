@@ -610,8 +610,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         doReact(key, (CommitRequest)request);
     }
     catch (MomException mE) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, mE);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, mE);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
@@ -1716,8 +1716,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     else if (rep instanceof ExceptionReply)
       doReact(from, (ExceptionReply) rep);
     else {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Unexpected reply!");
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Unexpected reply: " + rep);
     }
   }
 
@@ -1754,9 +1754,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             Message msg = (Message)msgList.elementAt(i);
             String msgId = msg.getIdentifier();
             
-            if (logger.isLoggable(BasicLevel.WARN))
-              logger.log(BasicLevel.WARN,
-                                      " -> denying message: " + msgId);
+            if (logger.isLoggable(BasicLevel.INFO))
+              logger.log(BasicLevel.INFO,
+                         " -> denying message: " + msgId);
             
             proxyAgent.sendNot(
               from,
@@ -1808,9 +1808,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           Message msg = (Message)msgList.elementAt(i);
           String msgId = msg.getIdentifier();
           
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, 
-                                    "Denying message: " + msgId);
+          if (logger.isLoggable(BasicLevel.INFO))
+            logger.log(BasicLevel.INFO, 
+                       "Denying message: " + msgId);
           
           proxyAgent.sendNot(
             from,
@@ -1983,8 +1983,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     Notification not = uA.not;
     AgentId agId = uA.agent;
 
-    if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN, "--- " + this
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "--- " + this
                               + " notified of invalid destination: "
                               + agId.toString());
     
@@ -2072,8 +2072,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           // Do nothing (the contexte doesn't exist any more).
         }
       }
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Connection "
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO, "Connection "
                                 + req.getClientContext() + " notified of"
                                 + " the deletion of destination " + agId);
     }
