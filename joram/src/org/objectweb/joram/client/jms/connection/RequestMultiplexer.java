@@ -24,6 +24,7 @@ package org.objectweb.joram.client.jms.connection;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -226,28 +227,31 @@ public class RequestMultiplexer {
     // The requests table can't be accessed
     // either by an external thread (status CLOSE)
     // or by the internal demultiplexer thread (stopped).
-    Enumeration requestIds = requestsTable.keys();
-    Enumeration listeners = requestsTable.elements();
-    while (listeners.hasMoreElements()) {
-      Integer requestId = (Integer)requestIds.nextElement();
-      ReplyListener rl = (ReplyListener)listeners.nextElement();
-      rl.replyAborted(requestId.intValue());
-    }
-    requestsTable.clear();
+    
+    cleanup();
   }
 
   /**
-   * Used by Connection clean up.
-   * It's a very specific usage linked to
-   * the connector layer.
+   * Used by:
+   * 1- close()
+   * 2- the connector layer (OutboundConnection.cleanup())
    */
   public void cleanup() {
-    Enumeration requestIds = requestsTable.keys();
-    Enumeration listeners = requestsTable.elements();
-    while (listeners.hasMoreElements()) {
-      Integer requestId = (Integer)requestIds.nextElement();
-      ReplyListener rl = (ReplyListener)listeners.nextElement();
-      rl.replyAborted(requestId.intValue());
+    // Create first a copy of the current keys
+    // registered into the requests table.
+    Integer[] requestIds;
+    synchronized (requestsTable) {
+      Set keySet = requestsTable.keySet();
+      requestIds = new Integer[keySet.size()];
+      keySet.toArray(requestIds);
+    }
+    for (int i = 0; i < requestIds.length; i++) {
+      ReplyListener rl = (ReplyListener) requestsTable.get(requestIds[i]);
+      // The listener may be null because the table
+      // may have been modified meanwhile.
+      if (rl != null) {
+        rl.replyAborted(requestIds[i].intValue());
+      }
     }
     requestsTable.clear();
   }
