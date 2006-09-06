@@ -695,6 +695,23 @@ public class ClusterQueueImpl extends QueueImpl {
   public int getNumberOfPendingRequests() {
     return requests.size();
   }
+  
+  public void setWaitAfterClusterReq(long waitAfterClusterReq) {
+    this.waitAfterClusterReq = waitAfterClusterReq;
+    loadingFactor.validityPeriod = waitAfterClusterReq;
+  }
+  
+  public void setProducThreshold(int producThreshold) {
+    loadingFactor.producThreshold = producThreshold;
+  }
+  
+  public void setConsumThreshold(int consumThreshold) {
+    loadingFactor.consumThreshold = consumThreshold;
+  }
+  
+  public void setAutoEvalThreshold(boolean autoEvalThreshold) {
+    loadingFactor.autoEvalThreshold = autoEvalThreshold;
+  }
 
   private void readObject(java.io.ObjectInputStream in)
     throws IOException, ClassNotFoundException {
