@@ -27,6 +27,7 @@ package org.objectweb.joram.mom.proxies;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CnxCloseRequest;
 
 /**
  *
@@ -81,6 +82,9 @@ public class ReliableConnectionContext
     AbstractJmsRequest request = 
       (AbstractJmsRequest) msg.getObject();
     queue.ack(msg.getAckId());
+    if (request instanceof CnxCloseRequest) {
+      closed = true;
+    }
     return request;
   }
   
