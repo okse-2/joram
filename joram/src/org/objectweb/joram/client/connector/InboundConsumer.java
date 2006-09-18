@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -45,7 +45,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   /** Application server's <code>WorkManager</code> instance. */
   private WorkManager workManager;
   /** Application's endpoints factory. */
-  private MessageEndpointFactory endpointFactory; 
+  private MessageEndpointFactory endpointFactory;
 
   /** The provided connection to the underlying JORAM server. */
   private XAConnection cnx;
@@ -57,8 +57,11 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
   /** Maximum number of Work instances to be submitted (0 for infinite). */
   private int maxWorks;
-  
+
   private int ackMode;
+
+  /**  for closing durable subscription */
+  private boolean closeDurSub;
 
   /** Wrapped <code>ConnectionConsumer</code> instance. */
   private ConnectionConsumer cnxConsumer;
@@ -74,7 +77,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    *
    * @param workManager      Application server's <code>WorkManager</code>
    *                         instance.
-   * @param endpointFactory  Application's endpoints factory. 
+   * @param endpointFactory  Application's endpoints factory.
    * @param cnx              Connection to the JORAM server.
    * @param dest             Destination to get messages from.
    * @param selector         Selector for filtering messages.
@@ -102,9 +105,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                   boolean transacted,
                   int maxWorks,
                   int maxMessages,
-                  int ackMode) throws ResourceException {
+                  int ackMode,
+                  boolean closeDurSub) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager + 
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "InboundConsumer(" + workManager +
                                     ", " + endpointFactory +
                                     ", " + cnx +
                                     ", " + dest +
@@ -113,9 +117,10 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                     ", " + subName +
                                     ", " + transacted +
                                     ", " + maxWorks +
-                                    ", " + maxMessages + 
-                                    "," + ackMode + ")");
-    
+                                    ", " + maxMessages +
+                                    ","  + ackMode +
+                                    ","  + closeDurSub + ")");
+
     this.workManager = workManager;
     this.endpointFactory = endpointFactory;
     this.cnx = cnx;
@@ -151,7 +156,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                                                    this,
                                                    maxMessages);
       }
-      
+
       cnx.start();
     }
     catch (JMSSecurityException exc) {
@@ -173,7 +178,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
    *
    * @exception JMSException  Never thrown.
    */
-  public ServerSession getServerSession() 
+  public ServerSession getServerSession()
     throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " getServerSession()");
@@ -207,7 +212,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
                              + exc);
     }
   }
-  
+
   private InboundSession newSession() {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
@@ -237,19 +242,21 @@ class InboundConsumer implements javax.jms.ServerSessionPool
 
   /** Closes the consumer. */
   void close() {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close()");
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " close() unsubscribe subscription: "+ closeDurSub);
 
-    try {
-      cnxConsumer.close();
+      try {
+          cnxConsumer.close();
 
-      if (subName != null) {
-        Session session = cnx.createSession(true, 0);
-        session.unsubscribe(subName);
+          if (closeDurSub) {
+              if (subName != null) {
+                  Session session = cnx.createSession(true, 0);
+                  session.unsubscribe(subName);
+              }
+          }
+
+          cnx.close();
       }
-
-      cnx.close();
-    }
-    catch (JMSException exc) {}
+      catch (JMSException exc) {}
   }
 }
