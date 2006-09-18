@@ -259,6 +259,13 @@ public class JoramAdapter
    */
   public int multiThreadSyncDelay = 1;
 
+  /**
+   * Determine whether  durablesubscription must be deleted or not
+   * at close time of the InboundConsumer.
+   * Default is false.
+   */
+  public boolean deleteDurableSubscription  = false;
+
   public JMXServer jmxServer;
 
   private transient JoramAdmin joramAdmin;
@@ -749,7 +756,8 @@ public class JoramAdapter
                             transacted,
                             maxWorks,
                             maxMessages,
-                            ackMode);
+                            ackMode,
+                            deleteDurableSubscription);
 
       consumers.put(specImpl, consumer);
     }
@@ -1494,7 +1502,24 @@ public class JoramAdapter
     return new Integer(multiThreadSyncDelay);
   }
 
+
   /**
+   * @return the DeleteDurableSubscription
+   */
+  public java.lang.Boolean  getDeleteDurableSubscription() {
+      return new Boolean(deleteDurableSubscription);
+  }
+
+  /**
+   * Set the deleteDurableSubscription flag
+   * @param flg to set deleteDurableSubscription
+   */
+
+  public void setDeleteDurableSubscription(java.lang.Boolean flg) {
+      this.deleteDurableSubscription = flg.booleanValue();
+  }
+
+/**
    * Export the repository content to an XML file
    * - only the destinations objects are retrieved in this version
    * - xml script format of the admin objects (joramAdmin.xml)

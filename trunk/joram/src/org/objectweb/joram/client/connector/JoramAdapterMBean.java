@@ -89,5 +89,12 @@ public interface JoramAdapterMBean
    */
   public java.lang.Integer getCnxPendingTimer();
 
+  /**
+  * @return the DeleteDurableSubscription that indicates whether the durablesubscription
+  * must be deleted at InboundConsumer close time.
+  */
+  public java.lang.Boolean  getDeleteDurableSubscription();
+
   public void removeDestination(String name) throws AdminException;
+
 }
