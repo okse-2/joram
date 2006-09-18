@@ -1058,12 +1058,12 @@ public class Session implements javax.jms.Session {
    *              exist.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized void unsubscribe(String name)
-    throws JMSException {
+  public synchronized void unsubscribe(String name) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "Session.unsubscribe(" + name + ')');
+      logger.log(BasicLevel.DEBUG, "Session.unsubscribe(" + name + ')');
+
+    if (name == null)
+      throw new JMSException("Bad subscription name: null");
 
     checkClosed();
     checkThreadOfControl();
