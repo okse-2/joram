@@ -975,8 +975,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // Getting the subscription.
     String subName = req.getTarget();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-
+    ClientSubscription sub = null;
+    if (subName != null)
+      sub = (ClientSubscription) subsTable.get(subName);
     if (sub == null)
       throw new DestinationException("Can't unsubscribe non existing subscription: " + subName);
 
