@@ -438,9 +438,8 @@ abstract class MessageConsumerListener implements ReplyListener {
       Message msg, MessageListener listener, int ackMode) 
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + 
-        msg + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "MessageConsumerListener.onMessage(" +  msg + ')');
     
     // Consume one message
     decreaseMessageCount(ackMode);
@@ -449,13 +448,11 @@ abstract class MessageConsumerListener implements ReplyListener {
       listener.onMessage(msg);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, " -> consumer.onMessage(" + 
-          msg + ") returned");
+        logger.log(BasicLevel.DEBUG,
+                   " -> consumer.onMessage(" + msg + ") returned");
     } catch (RuntimeException re) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, "", re);
+        logger.log(BasicLevel.DEBUG, "", re);
       JMSException exc = new JMSException(re.toString());
       exc.setLinkedException(re);
       throw exc;
