@@ -128,7 +128,7 @@ public class Channel {
       }
       cons.post(msg);
     } catch (UnknownServerException exc) {
-      channel.logmon.log(BasicLevel.ERROR,
+      channel.logmon.log(BasicLevel.WARN,
                          channel.toString() + ", can't post message: " + msg,
                          exc);
       // TODO: Post an ErrorNotification
