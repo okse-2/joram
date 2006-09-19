@@ -27,8 +27,6 @@ import java.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Debug;
-
 public final class NTransaction implements Transaction, NTransactionMBean {
   // Logging monitor
   private static Logger logmon = null;
@@ -281,7 +279,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   public final void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
+    logmon = Debug.getLogger("fr.dyade.aaa.util.Transaction");
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, init()");
 
@@ -722,7 +720,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     }
   }
 
-
   /**
    *
    */
@@ -1023,6 +1020,17 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
       if (logmon.isLoggable(BasicLevel.INFO))
         logmon.log(BasicLevel.INFO, "NTransaction, exits.");
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    if ("garbage".equals(args[0])) {
+      NTransaction transaction = new NTransaction();
+      transaction.init(args[1]);
+      transaction.stop();
+    } else if ("list".equals(args[0])) {
+    } else {
+      System.err.println("unknown command: " + args[0]);
     }
   }
 }
