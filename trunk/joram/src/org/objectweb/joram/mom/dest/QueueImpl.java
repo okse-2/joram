@@ -294,7 +294,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * Returns a string representation of this destination.
    */
   public String toString() {
-    return "QueueImpl:" + destId.toString();
+    return "QueueImpl:" + (destId == null ? "null" : destId.toString());
   }
 
   /**
