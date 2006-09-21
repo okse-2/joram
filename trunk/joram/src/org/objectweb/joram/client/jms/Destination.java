@@ -149,6 +149,25 @@ public abstract class Destination
       strbuf.append("<freeWriter/>\n");
     }
 
+    List readers = getReaders();
+    for (ListIterator iterator = readers.listIterator(); iterator.hasNext(); ) {
+        User user = (User) (iterator.next());
+        strbuf.append(XmlSerializer.indent(indent));
+        strbuf.append("<reader ");
+        strbuf.append(XmlSerializer.xmlAttribute(user.getName(), "user"));
+        strbuf.append("/>\n");
+    }
+
+    List writers = getWriters();
+    for (ListIterator iterator = writers.listIterator(); iterator.hasNext(); ) {
+        User user = (User) (iterator.next());
+        strbuf.append(XmlSerializer.indent(indent));
+        strbuf.append("<writer ");
+        strbuf.append(XmlSerializer.xmlAttribute(user.getName(), "user"));
+        strbuf.append("/>\n");
+    }
+
+
     strbuf.append(XmlSerializer.indent(indent));
     strbuf.append("<jndi ");
     strbuf.append(XmlSerializer.xmlAttribute(getAdminName(), "name"));
