@@ -1,4 +1,38 @@
 ###############################################################################
+# 2006/09/21 | Joram 4.3.21 tag.
+###############################################################################
++==============================================================================
+| 2006/09/21 | Benoit Pelletier - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Fix Jonas Bug#305882: Get readers and writers in toXml method.
++==============================================================================
+| 2006/09/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds new specific destinations: MailQueue, MailTopic and FTPQueue.
+ Changes log level for Channel.post if server is unknow: Error -> Warn.
++==============================================================================
+| 2006/09/19 | Philippe Coq - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Fix: No longer removes durable subscription on consumer close (MDB undeploy).
++==============================================================================
+| 2006/09/18 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: Avoid NPE on Session.unsubscribe with null subscription name.
++==============================================================================
+| 2006/09/06 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in ObjectMessage: ClassLoader.loadClass seems no longer work
+with JDK1.6.
++==============================================================================
+| 2006/09/06 | David Feliot - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+1- Fix bugs:
+ - Warning "Context is closed or broken" 
+   because of connection closed twice (ReliableConnectionContext.getRequest())
+ - jonas bug 306110: Nullpointer in RequestMultiplexer.cleanup()
+2- Add setters in ClusterQueueImpl (mom.dest).
+3- Change log levels in ProxImpl.
+###############################################################################
 # 2005/08/03 | Joram 4.3.20 tag.
 ###############################################################################
 +==============================================================================
