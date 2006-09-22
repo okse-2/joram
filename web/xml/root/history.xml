@@ -18,6 +18,10 @@
 	<p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060927-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
+	<subtitle>September 20, 2006: JORAM 4.3.21 is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a> and <a href="http://petals.objectweb.org/">Petals 1.0</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_21), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
 	<subtitle>August 04, 2006: JORAM 4.3.20 is released</subtitle>
 	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a>.</p>
 	<p>It is tagged in CVS (JORAM_4_3_20), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
