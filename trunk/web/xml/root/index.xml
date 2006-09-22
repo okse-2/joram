@@ -30,10 +30,15 @@
       distributed MOM (Message Oriented Middleware), built on top of the
       <a href="http://www.scalagent.com/">ScalAgent</a> agents based
       platform.</p>
-      <p> JORAM is an <strong>open source</strong> software released under
+      <p>JORAM is an <strong>open source</strong> software released under
       the <strong>LGPL</strong> license.</p>
+      <p>JORAM is used by JOnAS to undergo the J2EE 1.4 certification, and has passed all tests concerning JMS 1.1 certification in this TCK.</p>
    
       <s2 name="Latest News">
+	<subtitle>September 20, 2006: JORAM 4.3.21 is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a> and <a href="http://petals.objectweb.org/">Petals 1.0</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_21), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
 	<subtitle>September 27th and 28th, 2006: JORAM Training Session, Paris, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
 	<p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
@@ -43,10 +48,6 @@
 	<subtitle>August 04, 2006: JORAM 4.3.20 is released</subtitle>
 	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a>.</p>
 	<p>It is tagged in CVS (JORAM_4_3_20), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
-
-	<subtitle>July 11, 2006: JORAM 4.3.19 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas</a> release (4.7.5).</p>
-	<p>It is tagged in CVS (JORAM_4_3_19), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
         <subtitle>January 18, 2006: </subtitle>
         <p>JORAM is acknowledged as the best open source MOM implementation, according to <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging proprietary products from IBM, Sun and TIBCO.</p>

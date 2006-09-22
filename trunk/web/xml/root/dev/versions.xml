@@ -11,6 +11,20 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.21 (September 20, 2006)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_21. This version is bundled in Jonas 4.8 and Petals 1.0.
+      This maintenance release provides the following fixes and changes:</p>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>No longer removes durable subscription on consumer close (MDB undeploy).</li>
+	  <li>Avoid NPE on Session.unsubscribe with null subscription name.</li>
+	  <li>Work-around for JDK1.6 in ObjectMessage.</li>
+	  <li>Fix NPE in RequestMultiplexer.cleanup (bug JOnAS #306110).</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.20 (August 03, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_20. This version is bundled in Jonas 4.8. This
