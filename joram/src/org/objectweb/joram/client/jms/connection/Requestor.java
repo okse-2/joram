@@ -36,30 +36,22 @@ public class Requestor
 
   private static class Status {
     /**
-     * The requestor is free: it can be
-     * called by a client thread.
+     * The requestor is free: it can be called by a client thread.
      */
     public static final int INIT = 0;
 
     /**
-     * The requestor is busy:
-     * the client thread is waiting.
+     * The requestor is busy: the client thread is waiting.
      * Two threads can make a call:
-     * 1- the demultiplexer thread
-     * can call replyReceived and
-     * replyAborted.
-     * 2- another client thread
-     * can abort the request.
+     *   1- the demultiplexer thread can call replyReceived and replyAborted.
+     *   2- another client thread can abort the request.
      */
     public static final int RUN = 1;
 
     /**
-     * The requestor is either completed
-     * (by the demultiplxer thread) or
-     * aborted (by another client thread 
-     * or a timeout).
-     * This state is transitional. It enables
-     * the requesting client thread to
+     * The requestor is either completed (by the demultiplxer thread) or
+     * aborted (by another client thread  or a timeout).
+     * This state is transitional. It enables the requesting client thread to
      * finalize its request.
      */
     public static final int DONE = 2;
@@ -73,6 +65,12 @@ public class Requestor
       return names[status];
     }
   }
+
+  public static final String DEFAULT_REQUEST_TIMEOUT_PROPERTY = "org.objectweb.joram.client.jms.connection.Requestor.defaultRequestTimeout";
+
+  public static final long DEFAULT_REQUEST_TIMEOUT_VALUE = 0;
+
+  private long defaultRequestTimeout;
 
   private RequestMultiplexer mtpx;
 
@@ -100,6 +98,9 @@ public class Requestor
   }
 
   private void init() {
+   // set the default request timeout
+   defaultRequestTimeout = Long.getLong(DEFAULT_REQUEST_TIMEOUT_PROPERTY,
+                                        DEFAULT_REQUEST_TIMEOUT_VALUE).longValue();
     if (status == Status.DONE) {
       setStatus(Status.INIT);
       reply = null;
@@ -112,7 +113,7 @@ public class Requestor
   public synchronized AbstractJmsReply request(
     AbstractJmsRequest request) 
     throws JMSException {
-    return request(request, 0);
+    return request(request, defaultRequestTimeout);
   }
 
   /**
