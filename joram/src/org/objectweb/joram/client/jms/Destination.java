@@ -210,13 +210,30 @@ public abstract class Destination
   }
 
   /** Sets the naming reference of a destination. */
-  public Reference getReference() throws NamingException
-    {
+  public Reference getReference() throws NamingException {
       Reference ref = super.getReference();
       ref.add(new StringRefAddr("dest.name", getName()));
       return ref;
     }
 
+  public static final String QUEUE =
+      "org.objectweb.joram.mom.dest.Queue";
+  public static final String TOPIC =
+      "org.objectweb.joram.mom.dest.Topic";
+  public static final String DEAD_MQUEUE =
+      "org.objectweb.joram.mom.dest.DeadMQueue";
+  public static final String CLUSTER_QUEUE =
+      "org.objectweb.joram.mom.dest.ClusterQueue";
+  public static final String BRIDGE_QUEUE =
+      "org.objectweb.joram.mom.dest.BridgeQueue";
+  public static final String BRIDGE_TOPIC =
+      "org.objectweb.joram.mom.dest.BridgeTopic";
+  public static final String MAIL_QUEUE =
+      "com.scalagent.joram.mom.dest.mail.JavaMailQueue";
+  public static final String MAIL_TOPIC =
+      "com.scalagent.joram.mom.dest.mail.JavaMailTopic";
+  public static final String SCHEDULER_QUEUE =
+      "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
 
   /**
    * Admin method creating or retrieving a destination with a given name on a

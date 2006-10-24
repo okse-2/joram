@@ -53,12 +53,21 @@ public class DeadMQueue extends org.objectweb.joram.client.jms.Queue {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Queue create(int serverId)
-                throws ConnectException, AdminException
-  {
+  public static Queue create(int serverId) throws ConnectException, AdminException {
     DeadMQueue dmq = new DeadMQueue();
     doCreate(serverId,
              null,
+             "org.objectweb.joram.mom.dest.DeadMQueue",
+             null,
+             dmq,
+             DMQ_TYPE);
+    return dmq;
+  }
+
+  public static Queue create(int serverId, String name) throws ConnectException, AdminException {
+    DeadMQueue dmq = new DeadMQueue();
+    doCreate(serverId,
+             name,
              "org.objectweb.joram.mom.dest.DeadMQueue",
              null,
              dmq,

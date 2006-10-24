@@ -833,7 +833,7 @@ public class JoramSaxWrapper extends DefaultHandler {
                                       serverId + "," +
                                       name + ")");
 
-          DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(serverId);
+          DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(serverId, name);
 
           if (freeReading)
             dmq.setFreeReading();
