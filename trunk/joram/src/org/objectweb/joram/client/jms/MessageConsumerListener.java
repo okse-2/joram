@@ -164,6 +164,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.queueMessageReadMax = queueMessageReadMax;
     this.topicActivationThreshold = topicActivationThreshold;
     this.topicPassivationThreshold = topicPassivationThreshold;
+    this.topicAckBufferMax = topicAckBufferMax;
     rm = reqMultiplexer;
     messagesToAck = new Vector(0);
     requestId = -1;
