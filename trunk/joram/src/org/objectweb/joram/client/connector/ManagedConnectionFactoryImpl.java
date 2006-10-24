@@ -262,7 +262,8 @@ public class ManagedConnectionFactoryImpl
     }
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
-        out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
+        if (out != null)
+            out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
       }
@@ -303,13 +304,16 @@ public class ManagedConnectionFactoryImpl
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
-      out.print("Could not access the JORAM server: " + exc);
+      if (out != null)
+          out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
     } catch (JMSSecurityException exc) {
-      out.print("Invalid user identification: " + exc);
+        if (out != null)
+            out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
     } catch (JMSException exc) {
-      out.print("Failed connecting process: " + exc);
+        if (out != null)
+            out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
 
