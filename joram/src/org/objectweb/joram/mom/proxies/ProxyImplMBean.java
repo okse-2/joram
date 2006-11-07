@@ -26,9 +26,19 @@ import javax.management.openmbean.*;
 
 public interface ProxyImplMBean {
   /**
-   * Returns a string representation of this user's proxy.
+   * Returns  the period value of this queue, -1 if not set.
+   *
+   * @return the period value of this queue; -1 if not set.
    */
-  String toString();
+  long getPeriod();
+
+  /**
+   * Sets or unsets the period for this queue.
+   *
+   * @param period The period value to be set or -1 for unsetting previous
+   *               value.
+   */
+  void setPeriod(long period);
 
   /**
    * Returns the list of subscriptions for this user. Each subscription is
@@ -107,4 +117,9 @@ public interface ProxyImplMBean {
    *		     no limit).
    */
   void setNbMaxMsg(String subName, int nbMaxMsg);
+
+  /**
+   * Returns a string representation of this user's proxy.
+   */
+  String toString();
 }

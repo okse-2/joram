@@ -30,14 +30,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.util.management.MXWrapper;
-import fr.dyade.aaa.util.Queue;
-
+import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.dest.AdminTopicImpl;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -45,6 +38,18 @@ import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
+
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.util.TimerTask;
+
+import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -54,15 +59,14 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /**
-   * All the user requests are delegated
-   * to the proxy
+   * All the user requests are delegated to the proxy
    */
   private ProxyImpl proxyImpl;
 
   /**
-   * Table that contains the user connections
-   * key = <code>Integer</code> (connection key)
-   * value = <code></code>
+   * Table that contains the user connections:
+   *  - key = <code>Integer</code> (connection key)
+   *  - value = <code></code>
    */
   private transient Hashtable connections;
 
@@ -100,13 +104,17 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     keyCounter = 0;
   }
 
+  private transient CleaningTask cleaningTask;
+
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
     if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.agentInitialize("
-          + firstTime + ')');
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "UserAgent.agentInitialize(" + firstTime + ')');
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
+    cleaningTask = new CleaningTask();
+    cleaningTask.schedule();
     MXWrapper.registerMBean(proxyImpl, "Joram", getMBeanName());
   }
 
@@ -162,6 +170,17 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       doReact((SendRepliesNot) not);
     } else if (not instanceof ProxyRequestGroupNot) {
       doReact((ProxyRequestGroupNot) not);
+    } else if (not instanceof WakeUpNot) {
+      try {
+        proxyImpl.cleanPendingMessages(System.currentTimeMillis());
+      } catch (Exception exc) {
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                        "--- " + this + " Proxy(...)", exc);
+      }
+      if (cleaningTask == null)
+        cleaningTask = new CleaningTask();
+      cleaningTask.schedule();
     } else {
       try {
         proxyImpl.react(from, not);
@@ -440,6 +459,31 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     public void touch() {
       lastRequestDate = System.currentTimeMillis();
+    }
+  }
+
+  class CleaningTask extends TimerTask {
+    CleaningTask() {
+    }
+    
+    /** Method called when the timer expires. */
+    public void run() {
+      sendTo(getId(), new WakeUpNot());
+    }
+ 
+    public void schedule() {
+      long period = proxyImpl.getPeriod();
+
+      if (period != -1) {
+        try {
+          Timer timer = ConnectionManager.getTimer();        
+          timer.schedule(this, period);
+        } catch (Exception exc) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Proxy(...)", exc);
+        }
+      }
     }
   }
 

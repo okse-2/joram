@@ -70,9 +70,33 @@ import javax.management.openmbean.CompositeDataSupport;
  * destinations replies to clients.
  */ 
 public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
-  
-  public static Logger logger = 
-    Debug.getLogger(ProxyImpl.class.getName());
+  public static Logger logger = Debug.getLogger(ProxyImpl.class.getName());
+
+  /** period to run the cleaning task, by default 60s. */
+  protected long period = 60000L;
+
+  /**
+   * Returns  the period value of this queue, -1 if not set.
+   *
+   * @return the period value of this queue; -1 if not set.
+   */
+  public long getPeriod() {
+    return period;
+  }
+
+  /**
+   * Sets or unsets the period for this queue.
+   *
+   * @param period The period value to be set or -1 for unsetting previous
+   *               value.
+   */
+  public void setPeriod(long period) {
+    if ((this.period == -1L) && (period != -1L)) {
+      // Schedule the CleaningTask.
+      Channel.sendTo(proxyAgent.getId(), new WakeUpNot());
+    }
+    this.period = period;
+  }
 
   /**
    * Identifier of this proxy dead message queue, <code>null</code> for DMQ
@@ -164,9 +188,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @exception Exception  If the proxy state could not be fully retrieved,
    *              leading to an inconsistent state.
    */
-  public void initialize(boolean firstTime)
-    throws Exception
-  {
+  public void initialize(boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                               "--- " + this + " (re)initializing...");
@@ -2456,7 +2478,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   private void doReply(int key, AbstractJmsReply reply) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                              "ProxyImpl.doReply(" + key + ',' + reply + ')');
+                 "ProxyImpl.doReply(" + key + ',' + reply + ')');
     proxyAgent.sendToClient(key, reply);
   }
 
@@ -2469,6 +2491,41 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       proxyAgent.sendNot(dmqId, messages);
     else if (DeadMQueueImpl.getId() != null)
       proxyAgent.sendNot(DeadMQueueImpl.getId(), messages);
+  }
+
+  void cleanPendingMessages(long currentTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ProxyImpl.cleanPendingMessages(" + messagesTable.size() + ')');
+
+    
+    String id = null;
+    Message msg = null;
+    ClientMessages deadMessages = null;
+
+    for (Enumeration ids = messagesTable.keys(); ids.hasMoreElements(); ) {
+      id = (String) ids.nextElement();
+      msg = (Message) messagesTable.get(id);
+      if ((msg == null) || msg.isValid(currentTime)) continue;
+
+      messagesTable.remove(id);
+      msg.delete();
+      msg.expired = true;
+
+      if (deadMessages == null)
+        deadMessages = new ClientMessages();
+      deadMessages.addMessage(msg);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+                   "ProxyImpl expired message " + msg.getIdentifier());
+    }
+    // If needed, sending the dead messages to the DMQ:
+    if (deadMessages != null) sendToDMQ(deadMessages);
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ProxyImpl.cleanPendingMessages -> " + messagesTable.size());
   }
 
   /**
@@ -2557,8 +2614,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // No more subs to this topic: unsubscribing.
     if (tSub == null || tSub.isEmpty()) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, " -> topicsTable.remove(" + topicId + ')');
+        logger.log(BasicLevel.DEBUG,
+                   " -> topicsTable.remove(" + topicId + ')');
       topicsTable.remove(topicId);
       proxyAgent.sendNot(topicId,
                          new UnsubscribeRequest(contextId, requestId));
