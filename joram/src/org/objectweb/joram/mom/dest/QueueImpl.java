@@ -78,6 +78,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *               value.
    */
   public void setPeriod(long period) {
+    if ((this.period == -1L) && (period != -1L)) {
+      // Schedule the CleaningTask.
+      Channel.sendTo(destId, new WakeUpNot());
+    }
     this.period = period;
   }
 

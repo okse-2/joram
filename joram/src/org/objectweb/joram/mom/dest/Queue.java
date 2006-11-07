@@ -59,21 +59,6 @@ public class Queue extends Destination implements BagSerializer {
     return QUEUE_TYPE;
   }
 
-  protected void scheduleTask() {
-    long period = ((QueueImpl) destImpl).getPeriod();
-
-    if (period != -1) {
-      try {
-        Timer timer = ConnectionManager.getTimer();        
-        timer.schedule(new Task(getId()), period);
-      } catch (Exception exc) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "--- " + this + " Queue(...)", exc);
-      }
-    }
-  }
-
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -89,6 +74,8 @@ public class Queue extends Destination implements BagSerializer {
     return new QueueImpl(getId(), adminId, prop);
   }
 
+  private transient Task task;
+
   /**
    * Gives this agent an opportunity to initialize after having been deployed,
    * and each time it is loaded into memory.
@@ -100,12 +87,15 @@ public class Queue extends Destination implements BagSerializer {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    scheduleTask();
+    task = new Task(getId());
+    task.schedule();
   }
 
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof WakeUpNot) {
-      scheduleTask();
+      if (task == null)
+        task = new Task(getId());
+      task.schedule();
       ((QueueImpl) destImpl).react(from, not);
     } else {
       super.react(from, not);
@@ -134,6 +124,21 @@ public class Queue extends Destination implements BagSerializer {
       try {
         Channel.sendTo(to, new WakeUpNot());
       } catch (Exception e) {}
+    }
+
+    public void schedule() {
+      long period = ((QueueImpl) destImpl).getPeriod();
+
+      if (period != -1) {
+        try {
+          Timer timer = ConnectionManager.getTimer();        
+          timer.schedule(this, period);
+        } catch (Exception exc) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Queue(...)", exc);
+        }
+      }
     }
   }
 }
