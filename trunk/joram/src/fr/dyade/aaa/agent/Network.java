@@ -679,6 +679,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     }
   }
 
+  int last = -1;
+
   /**
    * Try to deliver the received message to the right consumer.
    *
@@ -701,6 +703,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                           " by " + source);
     }
 
+    if ((last != -1) && (msg.getStamp() != (last +1)))
+      logmon.log(BasicLevel.FATAL,
+                 getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
+    last = msg.getStamp();
+
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  getName() + ", recv msg#" + msg.getStamp() +
@@ -708,8 +715,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                  " to " + msg.to +
                  " by " + source);
 
-    AgentServer.getServerDesc(source).active = true;
-    AgentServer.getServerDesc(source).retry = 0;
+    ServerDesc desc = AgentServer.getServerDesc(source);
+    if (! desc.active) {
+      desc.active = true;
+      desc.retry = 0;
+    }
 
     // Start a transaction in order to ensure atomicity of clock updates
     // and queue changes.

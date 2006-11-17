@@ -190,7 +190,6 @@ public class SimpleNetwork extends StreamNetwork {
           return;
         }
 
-        loop:
 	while (running) {
           canStop = true;
           try {
@@ -208,6 +207,8 @@ public class SimpleNetwork extends StreamNetwork {
           if (! running) break;
 
           long currentTimeMillis = System.currentTimeMillis();
+          // Try to send waiting messages
+          watchdog(currentTimeMillis);
 
           if (msg != null) {
             msgto = msg.getDest();
@@ -226,9 +227,9 @@ public class SimpleNetwork extends StreamNetwork {
               
               // Can throw an UnknownServerException...
               server = AgentServer.getServerDesc(msgto);
-              
               try {
-                if (! server.active) {
+                if ((! server.active) ||
+                    (server.last > currentTimeMillis)) {
                   if (this.logmon.isLoggable(BasicLevel.DEBUG))
                     this.logmon.log(BasicLevel.DEBUG,
                                     this.getName() + ", AgentServer#" + msgto + " is down");
@@ -314,7 +315,6 @@ public class SimpleNetwork extends StreamNetwork {
             AgentServer.getTransaction().commit();
             AgentServer.getTransaction().release();
           }
-          watchdog(currentTimeMillis);
         }
       } catch (Exception exc) {
         this.logmon.log(BasicLevel.FATAL,
@@ -327,17 +327,20 @@ public class SimpleNetwork extends StreamNetwork {
       }
     }
 
-    /** The date of the last watchdog execution. */
-    private long last = 0L;
+//     /** The date of the last watchdog execution. */
+//     private long last = 0L;
 
     /*
      *
      * @exception IOException unrecoverable exception during transaction.
      */
     void watchdog(long currentTimeMillis) throws IOException {
-      if (currentTimeMillis < (last + WDActivationPeriod))
-        return;
-      last = currentTimeMillis;
+//       this.logmon.log(BasicLevel.DEBUG,
+//                       this.getName() + " watchdog().");
+
+//       if (currentTimeMillis < (last + WDActivationPeriod))
+//         return;
+//       last = currentTimeMillis;
 
       ServerDesc server = null;
 
@@ -396,6 +399,11 @@ public class SimpleNetwork extends StreamNetwork {
           continue;
         }
 
+        if (server.last > currentTimeMillis) {
+          // The server has already been tested during this round
+          continue;
+        }
+
         if ((server.active) ||
             ((server.retry < WDNbRetryLevel1) && 
              ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
@@ -408,13 +416,14 @@ public class SimpleNetwork extends StreamNetwork {
                               this.getName() +
                               ", send msg#" + msg.getStamp());
 
-            server.last = currentTimeMillis;
-
             // Open the connection.
             Socket socket = createSocket(server);
             // The connection is ok, reset active and retry flags.
             server.active = true;
             server.retry = 0;
+            // Reset last in order to allow sending of following messages
+            // to the same server.
+            server.last = currentTimeMillis;
 
             setSocketOption(socket);
 
@@ -425,8 +434,10 @@ public class SimpleNetwork extends StreamNetwork {
                               this.getName() + ", let msg in watchdog list",
                               exc);
             server.active = false;
-            server.last = currentTimeMillis;
             server.retry += 1;
+            // Set last in order to avoid the sending of following messages to
+            // same server.
+            server.last = currentTimeMillis +1;
             //  There is a connection problem, let the message in the
             // waiting list.
             continue;
@@ -446,6 +457,10 @@ public class SimpleNetwork extends StreamNetwork {
           msg.free();
           AgentServer.getTransaction().commit();
           AgentServer.getTransaction().release();
+        } else {
+          // Set last in order to avoid the sending of following messages to
+          // same server.
+          server.last = currentTimeMillis +1;
         }
       }
     }
