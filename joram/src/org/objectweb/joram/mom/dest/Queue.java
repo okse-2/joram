@@ -131,7 +131,7 @@ public class Queue extends Destination implements BagSerializer {
 
       if (period != -1) {
         try {
-          Timer timer = ConnectionManager.getTimer();        
+          Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
           if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
