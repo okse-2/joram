@@ -1,21 +1,44 @@
 /*
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
 
 import java.util.Properties;
-import fr.dyade.aaa.agent.AgentId;
+
+import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.dest.*;
+
+import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.mom.MomTracing;
 
 /**
- * A <code>JavaMailTopic</code> agent is an agent hosting a MOM queue, and which
- * behaviour is provided by a <code>JavaMailQueueImpl</code> instance.
+ * A <code>JavaMailTopic</code> agent is an agent hosting a MOM queue, and
+ * which behaviour is provided by a <code>JavaMailTopicImpl</code> instance.
  *
  * @see JavaMailTopicImpl
  */
@@ -27,64 +50,75 @@ public class JavaMailTopic extends Topic {
     return MAIL_TOPIC_TYPE;
   }
 
-  private String smtpServer = null;
-  private String to = null;
-  private String cc = null;
-  private String bcc = null;
-  private String from = null;
-  private String subject = null;
-  private String selector = null;
-  private long popPeriod = -1;
-  private String popServer = null;
-  private String popUser = null;
-  private String popPassword = null;
-  private boolean expunge = false;
-
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public JavaMailTopic() {
-    if (popPeriod != -1)
-      new PopTask((JavaMailTopicImpl)destImpl,popPeriod);
-  }
+  public JavaMailTopic() {}
 
-  public DestinationImpl createsImpl(AgentId adminId) {
-    JavaMailTopicImpl topicImpl = new JavaMailTopicImpl(getId(),
-                                                        adminId,
-                                                        smtpServer,
-                                                        to,
-                                                        cc,
-                                                        bcc,
-                                                        from,
-                                                        subject,
-                                                        selector,
-                                                        popPeriod,
-                                                        popServer,
-                                                        popUser, 
-                                                        popPassword,
-                                                        expunge);
-    if (popPeriod != -1)
-      new PopTask(topicImpl,popPeriod);
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    JavaMailTopicImpl topicImpl = new JavaMailTopicImpl(getId(), adminId, prop);
     return topicImpl;
   }
 
-  public void setProperties(Properties prop) {
-    smtpServer = prop.getProperty("smtpServer");
-    to = prop.getProperty("to");
-    cc = prop.getProperty("cc");
-    bcc = prop.getProperty("bcc");
-    from = prop.getProperty("from");
-    subject = prop.getProperty("subject");
-    selector = prop.getProperty("selector");
-    try {
-      popPeriod = Long.valueOf(prop.getProperty("popPeriod")).longValue();
-    } catch (NumberFormatException exc) {
-      popPeriod = 120000;
+  private transient PopTask poptask;
+
+  /**
+   * Gives this agent an opportunity to initialize after having been deployed,
+   * and each time it is loaded into memory.
+   *
+   * @param firstTime		true when first called by the factory
+   *
+   * @exception Exception
+   *	unspecialized exception
+   */
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
+    poptask = new PopTask(getId());
+    poptask.schedule();
+  }
+
+  public void react(AgentId from, Notification not) throws Exception {
+    if (not instanceof WakeUpPopNot) {
+      if (poptask == null)
+        poptask = new PopTask(getId());
+      poptask.schedule();
+      ((JavaMailTopicImpl) destImpl).doPop();
+    } else {
+      super.react(from, not);
     }
-    popServer = prop.getProperty("popServer");
-    popUser = prop.getProperty("popUser");
-    popPassword = prop.getProperty("popPassword");
-    expunge = Boolean.valueOf(prop.getProperty("expunge")).booleanValue();
+  }
+
+  /**
+   * Timer task responsible for doing a pop.
+   */
+  private class PopTask extends TimerTask {    
+    private AgentId to;
+  
+    public PopTask(AgentId to) {
+      this.to = to;
+    }
+  
+    /** Method called when the timer expires. */
+    public void run() {
+      try {
+        Channel.sendTo(to, new WakeUpPopNot());
+      } catch (Exception e) {}
+    }
+
+    public void schedule() {
+      long period = ((JavaMailTopicImpl) destImpl).getPopPeriod();
+
+      if (period > 0) {
+        try {
+          Timer timer = ConnectionManager.getTimer();
+          timer.schedule(this, period);
+        } catch (Exception exc) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Queue(...)", exc);
+        }
+      }
+    }
   }
 }
 
