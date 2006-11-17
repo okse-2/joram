@@ -109,9 +109,9 @@
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="${sid} ./s${sid}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
@@ -122,6 +122,10 @@
       <param name="sid" value="0"/>
     </antcall>
   </target>
+
+  <!-- **************************************************
+       * Classic Samples
+       ************************************************** -->
 
   <!-- Setup the classic configuration -->
   <target name="classic_admin" depends="init"
@@ -239,6 +243,44 @@
     </java>
   </target>
 
+
+  <!-- **************************************************
+       * Mail queue and topic Samples
+       ************************************************** -->
+
+  <!-- Setup the classic configuration -->
+  <target name="mail_admin" depends="init"
+          description="--> Runs administration stuff for incoming mail">
+    <copy file="${src.dir}/mail/smtp.properties" todir="${run.dir}"/>
+    <copy file="${src.dir}/mail/pop.properties" todir="${run.dir}"/>
+    <java classname="mail.MailAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client for mail samples -->
+  <target name="mail_consumer" depends="init"
+    description="--> Starts a Consumer client for mail samples">
+    <java classname="mail.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the producer client for mail samples -->
+  <target name="mail_producer" depends="init"
+    description="--> Starts a Producer client for mail samples">
+    <java classname="mail.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- **************************************************
+       * Chat Samples
+       ************************************************** -->
 
   <!-- Setup the chat administration -->
   <target name="chat_admin" depends="init"
