@@ -1,27 +1,44 @@
 /*
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.notifications.*;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.Hashtable;
+
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.*;
 import org.objectweb.joram.shared.selectors.*;
 import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.mom.notifications.*;
 
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.io.IOException;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>FtpQueueImpl</code> class implements the MOM queue behaviour,
@@ -46,14 +63,14 @@ public class FtpQueueImpl extends QueueImpl {
    *
    * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
+   * @param prop     The initial set of properties.
    */
   public FtpQueueImpl(AgentId destId, 
                       AgentId adminId,
-                      String user,
-                      String pass,
-                      String path) {
-    super(destId, adminId);
-    ftpImplName = System.getProperty("ftpImpl","com.scalagent.joram.mom.dest.ftp.TransferImplRef");
+                      Properties prop) {
+    super(destId, adminId, prop);
+    setProperties(prop);
+
     transferTable = new Hashtable();
     this.path = path;
     if (user != null)
@@ -71,6 +88,13 @@ public class FtpQueueImpl extends QueueImpl {
     if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                     " transfer = "+ transfer);
+  }
+
+  protected void setProperties(Properties prop) {
+    user = prop.getProperty("user", user);
+    pass = prop.getProperty("pass", pass);
+    path = prop.getProperty("path", path);
+    ftpImplName = prop.getProperty("ftpImpl", ftpImplName);
   }
 
   public String toString() {

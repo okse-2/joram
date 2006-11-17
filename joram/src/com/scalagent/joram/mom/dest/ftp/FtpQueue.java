@@ -1,8 +1,24 @@
 /*
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
 
@@ -25,22 +41,18 @@ public class FtpQueue extends Queue {
     return FTP_QUEUE_TYPE;
   }
 
-  private String user;
-  private String pass;
-  private String path;
-
   /**
    * Empty constructor for newInstance(). 
    */ 
   public FtpQueue() {}
 
-  public DestinationImpl createsImpl(AgentId adminId) {
-    return new FtpQueueImpl(getId(),adminId,user,pass,path);
-  }
-
-  public void setProperties(Properties prop) {
-    user = prop.getProperty("user");
-    pass = prop.getProperty("pass");
-    path = prop.getProperty("path");
+  /**
+   * Creates the <tt>FtpQueueImpl</tt>.
+   *
+   * @param adminId  Identifier of the queue administrator.
+   * @param prop     The initial set of properties.
+   */
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    return new FtpQueueImpl(getId(), adminId, prop);
   }
 }
