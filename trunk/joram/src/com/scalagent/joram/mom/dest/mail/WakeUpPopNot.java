@@ -18,26 +18,14 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Contributor(s):
  */
 package com.scalagent.joram.mom.dest.mail;
 
-public class AddSenderInfo extends org.objectweb.joram.shared.admin.SpecialAdmin {
-  public SenderInfo si = null;
-  public int index = -1;
-  
-  public AddSenderInfo(String destId, SenderInfo si, int index) {
-    super(destId);
-    this.si = si;
-    this.index = index;
-  }
-  
-  public AddSenderInfo(String destId, SenderInfo si) {
-    this(destId,si,-1);
-  }
+import fr.dyade.aaa.agent.Notification;
 
-  public String toString() {
-    return "AddSenderInfo (destId=" + getDestId() + 
-      ", index=" + index + ", si=" + si + ")";
+public class WakeUpPopNot extends Notification {
+  public WakeUpPopNot() {
+    persistent = false;
   }
 }
