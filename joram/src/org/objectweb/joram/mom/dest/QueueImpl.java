@@ -834,6 +834,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       Message msg = (Message)messages.elementAt(i);
       if (msg.getIdentifier().equals(request.getMessageId())) {
         messages.removeElementAt(i);
+        msg.delete();
         ClientMessages deadMessages = new ClientMessages();
         deadMessages.addMessage(msg);
         sendToDMQ(deadMessages, null);
@@ -854,6 +855,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       ClientMessages deadMessages = new ClientMessages();
       for (int i = 0; i < messages.size(); i++) {
         Message msg = (Message)messages.elementAt(i);
+        msg.delete();
         deadMessages.addMessage(msg);
       }
       sendToDMQ(deadMessages, null);
