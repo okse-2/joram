@@ -958,8 +958,8 @@ class ClientSubscription implements java.io.Serializable {
 
   void deleteMessage(String msgId) {
     messageIds.remove(msgId);
-    save();
     Message msg = removeMessage(msgId);
+    save();
     if (msg != null) {
       ClientMessages deadMessages = new ClientMessages();
       deadMessages.addMessage(msg);
