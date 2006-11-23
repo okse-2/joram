@@ -107,6 +107,34 @@ public interface NTransactionMBean extends TransactionMBean {
   public int getGarbageRatio();
 
   /**
+   * Returns the maximum time between two garbages, 0 if disable.
+   *
+   * @return The maximum time between two garbages (seconds).
+   */
+  int getGarbageDelay();
+
+  /**
+   *  Sets the maximum time between two garbages, 0 to disable the
+   * asynchronous garbage mechanism.
+   *
+   * @param timeout The maximum time between two garbages (seconds).
+   */
+  void setGarbageDelay(int timeout);
+
+  /**
+   *  Sets asynchronous garbage.
+   *
+   * @param async 	If true activates the asynchronous garbage,
+   *			deasctivates otherwise.
+   */
+  public void garbageAsync(boolean async);
+
+  /**
+   * Garbage the log file.
+   */
+  public void garbage();
+
+  /**
    *
    */
   public int getPhase();
@@ -142,5 +170,4 @@ public interface NTransactionMBean extends TransactionMBean {
    * @return The number of load operation from repository.
    */
   public int getNbLoadedObjects();
-
 }
