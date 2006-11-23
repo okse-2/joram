@@ -50,7 +50,11 @@ public class Message implements javax.jms.Message {
    * <code>null</code> otherwise.
    */
   protected Session sess = null;
-
+  /**
+   *  The JMSDestination field. This field is only use with non Joram
+   * destination.
+   */
+  protected javax.jms.Destination jmsDest = null;
 
   /**
    * Constructs a bright new <code>Message</code>.
@@ -172,9 +176,10 @@ public class Message implements javax.jms.Message {
    */
   public void setJMSDestination(javax.jms.Destination dest) 
     throws JMSException {
+    jmsDest = dest;
     if (dest == null) {
       momMsg.setDestination(null, null);
-    } else {
+    } else if (dest instanceof org.objectweb.joram.client.jms.Destination) {
       momMsg.setDestination(
         ((org.objectweb.joram.client.jms.Destination) dest).getName(), 
         ((org.objectweb.joram.client.jms.Destination) dest).getType());
@@ -309,8 +314,9 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public javax.jms.Destination getJMSDestination() 
-    throws JMSException {
+  public javax.jms.Destination getJMSDestination() throws JMSException {
+    if (jmsDest != null) return jmsDest;
+
     String id = momMsg.getDestinationId();
     String type = momMsg.toType();
     if (id != null) {
@@ -320,7 +326,9 @@ public class Message implements javax.jms.Message {
       } catch (Exception exc) {
         throw new JMSException(exc.getMessage());
       }
-    } else return null;
+    }
+
+    return null;
   }
 
   /**
@@ -829,6 +837,7 @@ public class Message implements javax.jms.Message {
       msg = new Message();
     }
 
+    msg.setJMSDestination(jmsMsg.getJMSDestination());
     msg.setJMSCorrelationID(jmsMsg.getJMSCorrelationID());
     msg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
     msg.setJMSType(jmsMsg.getJMSType());
@@ -843,7 +852,7 @@ public class Message implements javax.jms.Message {
           msg.setObjectProperty(name, jmsMsg.getObjectProperty(name));
         } catch (JMSException e) {
           // Joram not support other Optional JMSX, just ignore.
-          if (! name.startsWith("JMSX"))
+          if (! name.startsWith("JMSX") && ! name.startsWith("JMS_"))
             throw e;
         }
       }
