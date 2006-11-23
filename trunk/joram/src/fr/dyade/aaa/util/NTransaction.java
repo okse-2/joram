@@ -152,6 +152,76 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return logFile.garbageCount;
   }
 
+  /**
+   * Returns the maximum time between two garbages, 0 if disable.
+   *
+   * @return The maximum time between two garbages.
+   */
+  public final int getGarbageDelay() {
+    return (int) (logFile.garbageTimeOut /1000L);
+  }
+
+  /**
+   *  Sets the maximum time between two garbages, 0 to disable the
+   * asynchronous garbage mechanism.
+   *
+   * @param timeout The maximum time between two garbages.
+   */
+  public final void setGarbageDelay(int timeout) {
+    logFile.garbageTimeOut = timeout *1000L;
+  }
+
+  private Timer timer = null;
+  private GarbageTask task = null;
+
+  /**
+   *  Sets asynchronous garbage.
+   *
+   * @param async 	If true activates the asynchronous garbage,
+   *			deasctivates otherwise.
+   */
+  public void garbageAsync(boolean async) {
+    if (async) {
+      if (task == null) {
+        task = new GarbageTask();
+      }
+    } else {
+      if (task != null) task.cancel();
+      task = null;
+      if (timer != null) timer.cancel();
+      timer = null;
+    }
+  }
+
+  private class GarbageTask extends TimerTask {
+    private GarbageTask() {
+      if (timer == null) timer = new Timer();
+      if (logFile.garbageTimeOut > 0) {
+        try {
+          timer.schedule(this, logFile.garbageTimeOut);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR,
+                     "NTransaction, cannot schedule garbage task ", exc);
+        }
+      }
+    }
+    
+    /** Method called when the timer expires. */
+    public void run() {
+      if (logFile.garbageTimeOut > 0) {
+        if (System.currentTimeMillis() > (logFile.lastGarbageTime + logFile.garbageTimeOut)) {
+          garbage();
+        }
+        try {
+          timer.schedule(this, logFile.garbageTimeOut);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR,
+                     "NTransaction, cannot schedule garbage task ", exc);
+        }
+      }
+    }
+  }
+
   long startTime = 0L;
 
   /**
@@ -333,6 +403,11 @@ public final class NTransaction implements Transaction, NTransactionMBean {
           return new Context();
         }
       };
+    
+    // Be careful, setGarbageDelay and garbageAsync use logFile !!
+    setGarbageDelay(Integer.getInteger("NTGarbageDelay",
+                                       getGarbageDelay()).intValue());
+    garbageAsync(Boolean.getBoolean("NTAsyncGarbage"));
 
     startTime = System.currentTimeMillis();
 
@@ -653,6 +728,40 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   /**
+   * Garbage the log file.
+   * It waits all transactions termination, then the log file is garbaged
+   * and all operations are reported to disk.
+   */
+  public final synchronized void garbage() {
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, "NTransaction, stops");
+
+    while (phase != FREE) {
+      // Wait for the transaction subsystem to be free
+      try {
+        wait();
+      } catch (InterruptedException exc) {
+      }
+    }
+
+    setPhase(GARBAGE);
+    try {
+      logFile.garbage();
+    } catch (IOException exc) {
+      logmon.log(BasicLevel.WARN, "NTransaction, can't garbage logfile", exc);
+    }
+    setPhase(FREE);
+
+    if (logmon.isLoggable(BasicLevel.INFO)) {
+      logmon.log(BasicLevel.INFO,
+                 "NTransaction, stopped: " +
+                 "garbage=" + logFile.garbageCount + ", " +
+                 "commit=" + logFile.commitCount + ", " +
+                 "ratio=" + getGarbageRatio());
+    }
+  }
+
+  /**
    * Stops the transaction module.
    * It waits all transactions termination, then the module is kept
    * in a FREE 'ready to use' state.
@@ -747,6 +856,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
      * Cumulated time of garbage operations since starting up.
      */
     long garbageTime = 0l;
+
+    /**
+     * Date of last garbage.
+     */
+    long lastGarbageTime = 0L;
+
+    /**
+     * Maximum delay between 2 garbages.
+     */
+    long garbageTimeOut = 0L;
 
     /** Root directory of transaction storage */
     private File dir = null;
@@ -942,7 +1061,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
       ctxlog.clear();
 
-      if ((current > LogFileSize) || (logMemorySize > MaxLogMemorySize))
+      if ((current > LogFileSize) || (logMemorySize > MaxLogMemorySize) ||
+          ((garbageTimeOut > 0) && (System.currentTimeMillis() > (lastGarbageTime + garbageTimeOut))))
         garbage();
     }
 
@@ -993,6 +1113,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logFile.write(Operation.END);
 
       long end = System.currentTimeMillis();
+      lastGarbageTime = end;
       garbageTime += end - start;
 
       if (logmon.isLoggable(BasicLevel.INFO))
