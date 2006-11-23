@@ -1,3 +1,17 @@
++==============================================================================
+| 2006/11/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to asynchronously garbage the Transaction log file.
++==============================================================================
+| 2006/11/23 | Daniel Patterson -  
++------------+-----------------------------------------------------------------
+ Fixes compatibilty issues with other JMS provider: allow to set JMSDestination
+with non Joram destination, and to convert messages with 'JMS_' properties.
++==============================================================================
+| 2006/11/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes: really remove messages on disk in clear and deleteMessage methods.
+Previously the messages come back after server retart.
 ###############################################################################
 # 2006/11/17 | Joram 4.3.23 tag.
 ###############################################################################
