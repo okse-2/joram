@@ -155,7 +155,8 @@ public class Connection implements javax.jms.Connection {
                                   requestChannel,
                                   factoryParameters.cnxPendingTimer);
     if (factoryParameters.multiThreadSync) {
-      mtpx.setMultiThreadSync(factoryParameters.multiThreadSyncDelay);
+      mtpx.setMultiThreadSync(factoryParameters.multiThreadSyncDelay,
+                              factoryParameters.multiThreadSyncThreshold);
     }
     
     requestor = new Requestor(mtpx);
