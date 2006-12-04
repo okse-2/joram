@@ -33,8 +33,7 @@ import javax.naming.StringRefAddr;
  * A <code>FactoryParameters</code> instance holds a
  * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters.
  */
-public class FactoryParameters implements java.io.Serializable
-{
+public class FactoryParameters implements java.io.Serializable {
   /** Name of host hosting the server to create connections with. */
   private String host;
   /** Port to be used for accessing the server. */
@@ -100,22 +99,26 @@ public class FactoryParameters implements java.io.Serializable
    * The maximum time the threads hang if 'multiThreadSync' is true.
    * Either they wake up (wait time out) or they are notified (by the
    * first woken up thread).
-   *
+   * Default value is 1ms.
    */
   public int multiThreadSyncDelay = 1;
+  
+  /**
+   * The maximum numbers of threads that hang if 'multiThreadSync' is true.
+   * Default value is 10 waiting threads.
+   */
+  public int multiThreadSyncThreshold = 10;
 
   /**
-   * This threshold is the maximum messages
-   * number over
-   * which the subscription is passivated.
+   * This threshold is the maximum messages number over which the
+   * subscription is passivated.
    * Default is Integer.MAX_VALUE.
    */
   public int topicPassivationThreshold = Integer.MAX_VALUE;
 
   /**
-   * This threshold is the minimum
-   * messages number below which
-   * the subscription is activated.
+   * This threshold is the minimum messages number below which the
+   * subscription is activated.
    * Default is 0.
    */
   public int topicActivationThreshold = 0;
@@ -126,8 +129,7 @@ public class FactoryParameters implements java.io.Serializable
    * @param host  Name of host hosting the server to create connections with.
    * @param port  Port to be used for accessing the server.
    */
-  public FactoryParameters(String host, int port)
-  {
+  public FactoryParameters(String host, int port) {
     this.host = host;
     this.port = port;
   }
@@ -137,8 +139,7 @@ public class FactoryParameters implements java.io.Serializable
    *
    * @param url  joram ha url
    */
-  public FactoryParameters(String url)
-  {
+  public FactoryParameters(String url) {
     this.url = url;
     host = "";
     port = -1;
@@ -147,57 +148,68 @@ public class FactoryParameters implements java.io.Serializable
   /**
    * Returns the name of host hosting the server to create connections with.
    */
-  public String getHost()
-  {
+  public String getHost() {
     return host;
   }
 
   /** Returns the port to be used for accessing the server. */
-  public int getPort()
-  {
+  public int getPort() {
     return port;
   }
 
   /**
    * Returns the url.
    */
-  public String getUrl()
-  {
+  public String getUrl() {
     return url;
   }
 
   public void toReference(Reference ref) {
     ref.add(new StringRefAddr("cFactory.host", getHost()));
-    ref.add(new StringRefAddr("cFactory.port", new Integer(getPort())
-        .toString()));
+    ref.add(new StringRefAddr("cFactory.port",
+                              new Integer(getPort()).toString()));
     ref.add(new StringRefAddr("cFactory.url", getUrl()));
-    ref.add(new StringRefAddr("cFactory.cnxT", new Integer(
-        connectingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxT",
+                              new Integer(connectingTimer).toString()));
     ref.add(new StringRefAddr("cFactory.txT",
-        new Integer(txPendingTimer).toString()));
-    ref.add(new StringRefAddr("cFactory.cnxPT", new Integer(
-       cnxPendingTimer).toString()));
-    ref.add(new StringRefAddr("cFactory.asyncSend", new Boolean(
-        asyncSend).toString()));
-    ref.add(new StringRefAddr("cFactory.queueMessageReadMax", new Integer(
-        queueMessageReadMax).toString()));
+                              new Integer(txPendingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.cnxPT", 
+                              new Integer(cnxPendingTimer).toString()));
+    ref.add(new StringRefAddr("cFactory.asyncSend", 
+                              new Boolean(asyncSend).toString()));
+    ref.add(new StringRefAddr("cFactory.queueMessageReadMax", 
+                              new Integer(queueMessageReadMax).toString()));
+    ref.add(new StringRefAddr("cFactory.topicAckBufferMax", 
+                              new Integer(topicAckBufferMax).toString()));
+    ref.add(new StringRefAddr("cFactory.multiThreadSync", 
+                              new Boolean(multiThreadSync).toString()));
+    ref.add(new StringRefAddr("cFactory.multiThreadSyncDelay", 
+                              new Integer(multiThreadSyncDelay).toString()));
+    ref.add(new StringRefAddr("cFactory.multiThreadSyncThreshold", 
+                              new Integer(multiThreadSyncThreshold).toString()));
+    ref.add(new StringRefAddr("cFactory.topicPassivationThreshold", 
+                              new Integer(topicPassivationThreshold).toString()));
+    ref.add(new StringRefAddr("cFactory.topicActivationThreshold", 
+                              new Integer(topicActivationThreshold).toString()));
   }
 
   public void fromReference(Reference ref) {
-    String cnxTimer = (String) ref.get("cFactory.cnxT").getContent();
-    String txTimer = (String) ref.get("cFactory.txT").getContent();
-    String cnxPTimer = (String) ref.get("cFactory.cnxPT").getContent();
-    String asyncSendS= (String) ref.get("cFactory.asyncSend").getContent();
-    String queueMessageReadMaxS = (String) ref.get("cFactory.queueMessageReadMax").getContent();
-    connectingTimer = (new Integer(cnxTimer)).intValue();
-    txPendingTimer = (new Integer(txTimer)).intValue();
-    cnxPendingTimer = (new Integer(cnxPTimer)).intValue();
-    asyncSend = (new Boolean(asyncSendS)).booleanValue();
-    queueMessageReadMax = (new Integer(queueMessageReadMaxS)).intValue();
+    connectingTimer = new Integer((String) ref.get("cFactory.cnxT").getContent()).intValue();
+    txPendingTimer = new Integer((String) ref.get("cFactory.txT").getContent()).intValue();
+    cnxPendingTimer = new Integer((String) ref.get("cFactory.cnxPT").getContent()).intValue();
+    asyncSend = new Boolean((String) ref.get("cFactory.asyncSend").getContent()).booleanValue();
+    queueMessageReadMax = new Integer((String) ref.get("cFactory.queueMessageReadMax").getContent()).intValue();
+    topicAckBufferMax = new Integer((String) ref.get("cFactory.topicAckBufferMax").getContent()).intValue();
+    multiThreadSync = new Boolean((String) ref.get("cFactory.multiThreadSync").getContent()).booleanValue();
+    multiThreadSyncDelay = new Integer((String) ref.get("cFactory.multiThreadSyncDelay").getContent()).intValue();
+    multiThreadSyncThreshold = new Integer((String) ref.get("cFactory.multiThreadSyncThreshold").getContent()).intValue();
+    topicPassivationThreshold = new Integer((String) ref.get("cFactory.topicPassivationThreshold").getContent()).intValue();
+    topicActivationThreshold = new Integer((String) ref.get("cFactory.topicActivationThreshold").getContent()).intValue();
   }
 
   public Hashtable toHashtable() {
     Hashtable h = new Hashtable();
+
     h.put("host", getHost());
     h.put("port", new Integer(getPort()));
     h.put("connectingTimer", new Integer(connectingTimer));
@@ -205,6 +217,13 @@ public class FactoryParameters implements java.io.Serializable
     h.put("cnxPendingTimer", new Integer(cnxPendingTimer));
     h.put("asyncSend", new Boolean(asyncSend));
     h.put("queueMessageReadMax", new Integer(queueMessageReadMax));
+    h.put("topicAckBufferMax", new Integer(topicAckBufferMax));
+    h.put("multiThreadSync", new Boolean(multiThreadSync));
+    h.put("multiThreadSyncDelay", new Integer(multiThreadSyncDelay));
+    h.put("multiThreadSyncThreshold", new Integer(multiThreadSyncThreshold));
+    h.put("topicPassivationThreshold", new Integer(topicPassivationThreshold));
+    h.put("topicActivationThreshold", new Integer(topicActivationThreshold));
+
     return h;
   }
 
@@ -216,6 +235,13 @@ public class FactoryParameters implements java.io.Serializable
     params.cnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
     params.asyncSend = ((Boolean) h.get("asyncSend")).booleanValue();
     params.queueMessageReadMax = ((Integer) h.get("queueMessageReadMax")).intValue();
+    params.topicAckBufferMax = ((Integer) h.get("topicAckBufferMax")).intValue();
+    params.multiThreadSync = ((Boolean) h.get("multiThreadSync")).booleanValue();
+    params.multiThreadSyncDelay = ((Integer) h.get("multiThreadSyncDelay")).intValue();
+    params.multiThreadSyncThreshold = ((Integer) h.get("multiThreadSyncThreshold")).intValue();
+    params.topicPassivationThreshold = ((Integer) h.get("topicPassivationThreshold")).intValue();
+    params.topicActivationThreshold = ((Integer) h.get("topicActivationThreshold")).intValue();
+
     return params;
   }
 
@@ -227,6 +253,11 @@ public class FactoryParameters implements java.io.Serializable
       ",txPendingTimer=" + txPendingTimer +
       ",cnxPendingTimer=" + cnxPendingTimer +
       ",asyncSend=" + asyncSend +
-      ",queueMessageReadMax=" + queueMessageReadMax + ')';
+      ",topicAckBufferMax=" + topicAckBufferMax +
+      ",multiThreadSync=" + multiThreadSync +
+      ",multiThreadSyncDelay=" + multiThreadSyncDelay +
+      ",multiThreadSyncThreshold=" + multiThreadSyncThreshold +
+      ",topicPassivationThreshold=" + topicPassivationThreshold +
+      ",topicActivationThreshold=" + topicActivationThreshold + ')';
   }
 }

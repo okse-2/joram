@@ -19,9 +19,6 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * 
- * Created on 22 mai 2006
- *
  */
 package org.objectweb.joram.client.jms.connection;
 
@@ -33,10 +30,10 @@ import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 
 /**
- *
+ * Class wrapping the <code>RequestChannel</code> in order to group the
+ * requests. It allows best performances with multiples senders.
  */
 public class MultiThreadSyncChannel implements RequestChannel {
-  
   /**
    * Synchronization round.
    */
@@ -47,13 +44,25 @@ public class MultiThreadSyncChannel implements RequestChannel {
    */
   private Vector syncRequests;
   
+  /**
+   * The maximum time the threads hang if 'multiThreadSync' is true.
+   * Either they wake up (wait time out) or they are notified (by the
+   * first woken up thread).
+   */
   private int multiThreadSyncDelay;
+
+  /**
+   * The maximum numbers of threads that hang if 'multiThreadSync' is true.
+   */
+  private int multiThreadSyncThreshold;
   
+  /** The related RequestChannel. */
   private RequestChannel channel;
   
-  MultiThreadSyncChannel(RequestChannel rc, int delay) {
+  MultiThreadSyncChannel(RequestChannel rc, int delay, int threshold) {
     channel = rc;
     multiThreadSyncDelay = delay;
+    multiThreadSyncThreshold = threshold;
     currentRound = new SyncRound();
     syncRequests = new Vector();
   }
@@ -61,9 +70,11 @@ public class MultiThreadSyncChannel implements RequestChannel {
   public synchronized void send(AbstractJmsRequest request) throws Exception {
     SyncRound localRound = currentRound;
     syncRequests.addElement(request);
-    try {
-      wait(multiThreadSyncDelay);
-    } catch (InterruptedException ie) {
+    if (syncRequests.size() < multiThreadSyncThreshold) {
+      try {
+        wait(multiThreadSyncDelay);
+      } catch (InterruptedException ie) {
+      }
     }
     if (!localRound.done) {
       // syncRequests.size() must be > 0

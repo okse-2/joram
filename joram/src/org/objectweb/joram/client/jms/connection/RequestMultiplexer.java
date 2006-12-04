@@ -184,8 +184,8 @@ public class RequestMultiplexer {
     }
   }
   
-  public void setMultiThreadSync(int delay) {
-    channel = new MultiThreadSyncChannel(channel, delay);
+  public void setMultiThreadSync(int delay, int threshold) {
+    channel = new MultiThreadSyncChannel(channel, delay, threshold);
   }
 
   /**
