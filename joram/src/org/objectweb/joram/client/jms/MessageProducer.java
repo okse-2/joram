@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,23 +19,23 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.shared.client.*;
 
 import javax.jms.IllegalStateException;
 import javax.jms.MessageFormatException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.shared.client.*;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.MessageProducer</code> interface.
  */
-public class MessageProducer implements javax.jms.MessageProducer
-{
+public class MessageProducer implements javax.jms.MessageProducer {
   /** Default delivery mode. */
   private int deliveryMode = javax.jms.DeliveryMode.PERSISTENT;
 
@@ -100,6 +100,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Sets the producer's default delivery mode.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -118,6 +119,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Sets the producer's default priority.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -135,6 +137,8 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Sets the default duration of time in milliseconds that a produced
+   * message should be retained by the provider.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -161,6 +165,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Gets the destination associated with this MessageProducer.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -187,6 +192,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Gets the producer's default delivery mode.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -200,6 +206,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Gets the producer's default priority.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -213,6 +220,8 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Gets the default duration in milliseconds that a produced message
+   * should be retained by the provider.
    * API method.
    *
    * @exception IllegalStateException  If the producer is closed.
@@ -338,6 +347,7 @@ public class MessageProducer implements javax.jms.MessageProducer
   }
 
   /**
+   * Closes the message producer.
    * API method.
    *
    * @exception JMSException  Actually never thrown.

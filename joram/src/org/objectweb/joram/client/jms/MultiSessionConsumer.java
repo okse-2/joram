@@ -246,8 +246,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
               sess.setMessageConsumerListener(MultiSessionConsumer.this);
               sessionMsgCounter = 1;
             }
-            sess.onMessage((org.objectweb.joram.shared.messages.Message) msgs
-                .get(i));
+            sess.onMessage((org.objectweb.joram.shared.messages.Message) msgs.get(i));
             sessionMsgCounter++;
           }
           serverSess.start();
