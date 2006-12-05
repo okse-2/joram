@@ -44,6 +44,9 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
 import org.objectweb.joram.shared.admin.*;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
+
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**

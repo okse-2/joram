@@ -25,8 +25,12 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import java.util.Hashtable;
+import java.util.Enumeration;
+
+import javax.naming.*;
+
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.XAConnectionFactory;
@@ -37,6 +41,7 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.TemporaryQueue;
 import org.objectweb.joram.client.jms.TemporaryTopic;
+
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
@@ -70,12 +75,9 @@ import org.objectweb.joram.client.jms.soap.QueueSoapConnectionFactory;
 import org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.ClusterDestination;
+
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import java.util.Hashtable;
-import java.util.Enumeration;
-
-import javax.naming.*;
 
 /**
  * The <code>ObjectFactory</code> class is used by the naming service
