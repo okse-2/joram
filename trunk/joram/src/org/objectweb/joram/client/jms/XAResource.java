@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -29,13 +29,13 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * A <code>XAResource</code> instance is used by a <code>XASession</code> 
  * instance as a delegate to a Transaction Manager.
  */
-public class XAResource implements javax.transaction.xa.XAResource
-{
+public class XAResource implements javax.transaction.xa.XAResource {
   /** <code>true</code> if the resource is enlisted in a transaction. */
   private boolean enlisted = false;
   /** The current transaction identifier. */

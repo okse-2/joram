@@ -31,14 +31,14 @@ import javax.jms.JMSException;
 import javax.naming.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.XAConnectionFactory</code> interface.
  */
 public abstract class XAConnectionFactory
                 extends org.objectweb.joram.client.jms.admin.AdministeredObject
-                implements javax.jms.XAConnectionFactory
-{
+                implements javax.jms.XAConnectionFactory {
   /** Factory's parameters object. */
   protected FactoryParameters params;
 
