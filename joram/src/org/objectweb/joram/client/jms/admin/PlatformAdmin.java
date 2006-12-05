@@ -27,7 +27,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import fr.dyade.aaa.util.management.MXWrapper;
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**

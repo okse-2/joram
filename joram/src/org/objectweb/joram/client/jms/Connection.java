@@ -42,9 +42,9 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -52,8 +52,7 @@ import fr.dyade.aaa.util.Debug;
  */
 public class Connection implements javax.jms.Connection {
   
-  public static Logger logger = 
-    Debug.getLogger(Connection.class.getName());
+  public static Logger logger = Debug.getLogger(Connection.class.getName());
   
   /**
    * Status of the connection.
@@ -146,10 +145,9 @@ public class Connection implements javax.jms.Connection {
                     RequestChannel requestChannel) 
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Connection.<init>(" + 
-        factoryParameters + ',' + requestChannel + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 "Connection.<init>(" + factoryParameters +
+                 ',' + requestChannel + ')');
     this.factoryParameters = factoryParameters;
     mtpx = new RequestMultiplexer(this,
                                   requestChannel,
@@ -169,24 +167,21 @@ public class Connection implements javax.jms.Connection {
 
     // Requesting the connection key and proxy identifier:
     CnxConnectRequest req = new CnxConnectRequest();
-    CnxConnectReply rep = 
-      (CnxConnectReply) requestor.request(req);
+    CnxConnectReply rep = (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
     
     mtpx.setDemultiplexerDaemonName(toString());
   }
 
-  private String newTrace(String trace) {
+  private final String newTrace(String trace) {
     return "Connection[" + proxyId + ':' + key + ']' + trace;
   }
 
   private void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".setStatus(" + 
-                 Status.toString(status) + ')'));
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".setStatus(" + Status.toString(status) + ')'));
     this.status = status;
   }
 
@@ -229,20 +224,16 @@ public class Connection implements javax.jms.Connection {
    * proxy identifier and connection key.
    */
   public boolean equals(Object obj) {
-    return (obj instanceof Connection)
-      && toString().equals(obj.toString());
+    return (obj instanceof Connection) && toString().equals(obj.toString());
   }
   
   /**
    * Checks if the connecion is closed. If true
    * raises an IllegalStateException.
    */
-  final protected synchronized void checkClosed() 
-    throws IllegalStateException {
-    if (status == Status.CLOSE ||
-        mtpx.isClosed()) 
-      throw new IllegalStateException(
-        "Forbidden call on a closed connection.");
+  final protected synchronized void checkClosed() throws IllegalStateException {
+    if (status == Status.CLOSE ||  mtpx.isClosed()) 
+      throw new IllegalStateException("Forbidden call on a closed connection.");
   }
 
   /**
@@ -259,17 +250,14 @@ public class Connection implements javax.jms.Connection {
         javax.jms.Destination dest, 
         String selector,
         javax.jms.ServerSessionPool sessionPool,
-        int maxMessages) 
-    throws JMSException {
+        int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".createConnectionConsumer(" + 
-                 dest + ',' + selector + ',' + 
-                 sessionPool + ',' + maxMessages + ')'));
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".createConnectionConsumer(" + dest +
+                          ',' +selector + ',' + sessionPool +
+                          ',' + maxMessages + ')'));
     checkClosed();
-    return createConnectionConsumer(
-        dest, null, selector, sessionPool, maxMessages);
+    return createConnectionConsumer(dest, null, selector, sessionPool, maxMessages);
   }
 
   /**
@@ -286,19 +274,16 @@ public class Connection implements javax.jms.Connection {
                                       String subName,
                                       String selector,
                                       javax.jms.ServerSessionPool sessPool,
-                                      int maxMessages) 
-    throws JMSException {
+                                      int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".createDurableConnectionConsumer(" + 
-                 topic + ',' + subName + ',' + selector + ',' + 
-                 sessPool + ',' + maxMessages + ')'));
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".createDurableConnectionConsumer(" + 
+                          topic + ',' + subName + ',' + selector + ',' + 
+                          sessPool + ',' + maxMessages + ')'));
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
-    return createConnectionConsumer(
-        (Destination) topic, subName, selector, sessPool, maxMessages);
+    return createConnectionConsumer((Destination) topic, subName, selector, sessPool, maxMessages);
   }
   
   private synchronized javax.jms.ConnectionConsumer
@@ -307,14 +292,12 @@ public class Connection implements javax.jms.Connection {
         String subName,
         String selector,
         javax.jms.ServerSessionPool sessionPool,
-        int maxMessages) 
-    throws JMSException {
+        int maxMessages)  throws JMSException {
     checkClosed();
     
     try {
       org.objectweb.joram.shared.selectors.Selector.checks(selector);
-    }
-    catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
+    } catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
       throw new InvalidSelectorException("Invalid selector syntax: " + sE);
     }
 
@@ -378,11 +361,8 @@ public class Connection implements javax.jms.Connection {
                     int acknowledgeMode)
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        newTrace(".createSession(" + 
-                 transacted + ',' +  
-                 acknowledgeMode + ')'));
+      logger.log(BasicLevel.DEBUG,
+                 newTrace(".createSession(" + transacted + ',' +  acknowledgeMode + ')'));
     checkClosed();
     Session session = new Session(
       this,
@@ -408,9 +388,8 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public synchronized void setExceptionListener(
-    javax.jms.ExceptionListener listener)
-    throws JMSException {
+  public synchronized void
+      setExceptionListener(javax.jms.ExceptionListener listener) throws JMSException {
     checkClosed();
     mtpx.setExceptionListener(listener);
   }
@@ -420,8 +399,7 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.ExceptionListener getExceptionListener() 
-    throws JMSException {
+  public javax.jms.ExceptionListener getExceptionListener() throws JMSException {
     checkClosed();
     return mtpx.getExceptionListener();
   }
@@ -431,8 +409,7 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  Systematically thrown.
    */
-  public void setClientID(String clientID) throws JMSException
-  {
+  public void setClientID(String clientID) throws JMSException {
     throw new IllegalStateException("ClientID is already set by the"
                                     + " provider.");
   }
@@ -442,8 +419,7 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public String getClientID() throws JMSException
-  {
+  public String getClientID() throws JMSException {
     checkClosed();
     return proxyId;
   }
@@ -453,8 +429,7 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.ConnectionMetaData getMetaData() throws JMSException
-  {
+  public javax.jms.ConnectionMetaData getMetaData() throws JMSException {
     checkClosed();
     if (metaData == null)
       metaData = new ConnectionMetaData();
@@ -651,8 +626,7 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new session identifier. */
-  synchronized String nextSessionId()
-  {
+  synchronized String nextSessionId() {
     if (sessionsC == Integer.MAX_VALUE)
       sessionsC = 0;
     sessionsC++;
@@ -660,8 +634,7 @@ public class Connection implements javax.jms.Connection {
   }
  
   /** Returns a new message identifier. */
-  synchronized String nextMessageId()
-  {
+  synchronized String nextMessageId() {
     if (messagesC == Integer.MAX_VALUE)
       messagesC = 0;
     messagesC++;
@@ -669,8 +642,7 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new subscription name. */
-  synchronized String nextSubName()
-  {
+  synchronized String nextSubName() {
     if (subsC == Integer.MAX_VALUE)
       subsC = 0;
     subsC++;
@@ -692,29 +664,25 @@ public class Connection implements javax.jms.Connection {
    * Called by MultiSessionConsumer.
    * Synchronized with run().
    */
-  synchronized void closeConnectionConsumer(
-    MultiSessionConsumer cc) {
+  synchronized void closeConnectionConsumer(MultiSessionConsumer cc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".closeConnectionConsumer(" + cc + ')'));
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".closeConnectionConsumer(" + cc + ')'));
     cconsumers.removeElement(cc);
   }
 
   synchronized AbstractJmsReply syncRequest(
     AbstractJmsRequest request) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".syncRequest(" + request + ')'));
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".syncRequest(" + request + ')'));
     return requestor.request(request);
   }
 
   /**
    * Called by temporary destinations deletion.
    */
-  synchronized void checkConsumers(String agentId) 
-    throws JMSException {
+  synchronized void checkConsumers(String agentId) throws JMSException {
     for (int i = 0; i < sessions.size(); i++) {
       Session sess = (Session) sessions.elementAt(i);
       sess.checkConsumers(agentId);

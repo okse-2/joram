@@ -102,7 +102,7 @@ public class FactoryParameters implements java.io.Serializable {
    * Default value is 1ms.
    */
   public int multiThreadSyncDelay = 1;
-  
+
   /**
    * The maximum numbers of threads that hang if 'multiThreadSync' is true.
    * Default value is 10 waiting threads.

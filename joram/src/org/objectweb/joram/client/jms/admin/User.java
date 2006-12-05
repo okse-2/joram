@@ -1,8 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.admin;
 
@@ -30,21 +29,21 @@ import java.util.List;
 import java.net.ConnectException;
 
 import javax.naming.*;
+
 import javax.jms.JMSException;
 
 import fr.dyade.aaa.util.management.MXWrapper;
 import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.shared.admin.*;
 
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>User</code> class is a utility class needed for administering
  * JORAM users.
  */
-public class User extends AdministeredObject
-  implements UserMBean {
+public class User extends AdministeredObject implements UserMBean {
   /** The name of the user. */
   String name;
   /** Identifier of the user's proxy agent. */
@@ -372,11 +371,10 @@ public class User extends AdministeredObject
     return reply.getMessageIds();
   }
 
-  public Message readMessage(
-    String subName,
-    String msgId) throws AdminException, ConnectException, JMSException {
+  public Message readMessage(String subName,
+                             String msgId) throws AdminException, ConnectException, JMSException {
     GetSubscriptionMessageRep reply = 
-      (GetSubscriptionMessageRep)AdminModule.doRequest(
+      (GetSubscriptionMessageRep) AdminModule.doRequest(
         new GetSubscriptionMessage(proxyId,
                                    subName,
                                    msgId));
