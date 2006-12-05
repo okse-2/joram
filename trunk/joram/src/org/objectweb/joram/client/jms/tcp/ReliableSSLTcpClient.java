@@ -39,7 +39,7 @@ import javax.net.ssl.SSLContext;
 import javax.jms.*;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class ReliableSSLTcpClient extends ReliableTcpClient {

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -43,8 +43,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  * Requests and replies travel through the socket after serialization.
  */
-public class TcpConnection 
-    implements RequestChannel { 
+public class TcpConnection implements RequestChannel { 
   
   private ReliableTcpClient tcpClient = null;
 

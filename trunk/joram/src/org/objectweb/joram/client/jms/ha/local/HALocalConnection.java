@@ -21,20 +21,21 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
+import java.util.*;
+
+import javax.jms.*;
+
 import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.local.*;
 import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import fr.dyade.aaa.agent.*;
 
-import javax.jms.*;
-import java.util.*;
-
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class HALocalConnection 
@@ -50,8 +51,8 @@ public class HALocalConnection
   
   public static void init(String args, boolean firstTime) 
     throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "HALocalConnection.init(" + 
         args + ',' + firstTime + ')');
@@ -63,8 +64,8 @@ public class HALocalConnection
   }
 
   public static void waitForStart() {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "HALocalConnection.waitForStart()");
     synchronized (lock) {
@@ -106,14 +107,14 @@ public class HALocalConnection
 
   public HALocalConnection(
     String userName2, String password2) throws JMSException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "HALocalConnection.<init>(" + 
         userName + ',' + password + ')');
     waitForStart();
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         " -> create the local connection");
     userName = userName2;
