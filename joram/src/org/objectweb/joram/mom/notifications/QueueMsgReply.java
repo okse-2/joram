@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,7 @@ import java.util.*;
  * A <code>QueueMsgReply</code> instance is used by a queue for replying to a
  * <code>ReceiveRequest</code> by sending a message to a client.
  */
-public class QueueMsgReply extends AbstractReply
-{
+public class QueueMsgReply extends AbstractReply {
   /** The message sent by the queue. */
   private Vector messages;
 
@@ -42,8 +41,7 @@ public class QueueMsgReply extends AbstractReply
    * @param req  The <code>ReceiveRequest</code> actually replied.
    * @param message  The message to send.
    */
-  public QueueMsgReply(ReceiveRequest req)
-  {
+  public QueueMsgReply(ReceiveRequest req) {
     super(req.getClientContext(), req.getRequestId());
     messages = new Vector();
   }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,37 +19,32 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.notifications;
 
 import java.util.Vector;
 
-
 /**
  * A <code>TopicMsgsReply</code> instance is used by a topic for sending
  * messages to an agent client which subscribed to it.
  */
-public class TopicMsgsReply extends AbstractReply
-{
+public class TopicMsgsReply extends AbstractReply {
   /** Vector of messages. */
   private Vector messages;
-
 
   /**
    * Constructs a <code>TopicMsgsReply</code>.
    *
    * @param messages  Vector of delivered messages.
    */
-  public TopicMsgsReply(Vector messages)
-  {
+  public TopicMsgsReply(Vector messages) {
     this.messages = messages;
   }
 
 
   /** Returns the messages. */
-  public Vector getMessages()
-  {
+  public Vector getMessages() {
     return messages;
   }
 } 
