@@ -22,13 +22,13 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 
 import javax.jms.JMSException;
 
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class Requestor 

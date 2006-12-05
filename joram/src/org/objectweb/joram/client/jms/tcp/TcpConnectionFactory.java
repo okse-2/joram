@@ -32,7 +32,7 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**

@@ -24,6 +24,23 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import java.io.Reader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
+import java.util.Vector;
+
+import javax.jms.*;
+
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
@@ -35,26 +52,7 @@ import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.shared.admin.*;
 
-import java.net.ConnectException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
-
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.FileNotFoundException;
-
-
-import javax.jms.*;
-
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -62,8 +60,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
  */
-public class AdminModule
-{
+public class AdminModule {
   public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
   public static final String DEFAULT_ADM_NAME = "default";
 
@@ -156,14 +153,12 @@ public class AdminModule
 
       // Getting the id of the local server:
       localServer = requestor.getLocalServerId();
-    }
-    catch (JMSSecurityException exc) {
+    } catch (JMSSecurityException exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, "", exc);
       throw new AdminException(exc.getMessage());
-    }
-    catch (JMSException exc) {
+    } catch (JMSException exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(
           BasicLevel.DEBUG, "", exc);
@@ -252,8 +247,7 @@ public class AdminModule
    *              incorrect.
    */
   public static void connect(String name, String password, int cnxTimer)
-    throws UnknownHostException, ConnectException, AdminException
-    {
+    throws UnknownHostException, ConnectException, AdminException {
       connect("localhost", 16010, name, password, cnxTimer);
     }
 
@@ -291,35 +285,25 @@ public class AdminModule
    *              incorrect.
    */
   public static void collocatedConnect(String name, String password)
-    throws ConnectException, AdminException
-    {
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG,
-        "isHa=" + isHa);
-
-      if (isHa) {
-        connect(TopicHALocalConnectionFactory.create(), name, password);
-
-      } else {
-        connect(TopicLocalConnectionFactory.create(), name, password);
-      }
+         throws ConnectException, AdminException {
+    JoramTracing.dbgClient.log(BasicLevel.DEBUG, "isHa=" + isHa);
+    if (isHa) {
+      connect(TopicHALocalConnectionFactory.create(), name, password);
+    } else {
+      connect(TopicLocalConnectionFactory.create(), name, password);
     }
+  }
 
   /** Closes the administration connection. */
-  public static void disconnect()
-    {
-      try {
-        if (cnx == null)
-          return;
+  public static void disconnect() {
+    try {
+      if (cnx == null) return;
+      
+      cnx.close();
+    } catch (JMSException exc) {}
 
-        cnx.close();
-      }
-      catch (JMSException exc) {}
-
-      cnx = null;
-    }
-
-
+    cnx = null;
+  }
 
   /**
    * Stops a given server of the platform.
@@ -332,22 +316,19 @@ public class AdminModule
    * @exception AdminException  If the request fails.
    */
   public static void stopServer(int serverId)
-    throws ConnectException, AdminException
-    {
-      try {
-        doRequest(new StopServerRequest(serverId));
+    throws ConnectException, AdminException {
+    try {
+      doRequest(new StopServerRequest(serverId));
 
-        if (serverId == localServer)
-          cnx = null;
-      }
-      // ConnectException is intercepted if stopped server is local server.
-      catch (ConnectException exc) {
-        if (serverId != localServer)
-          throw exc;
-
+      if (serverId == localServer)
         cnx = null;
-      }
+    } catch (ConnectException exc) {
+      // ConnectException is intercepted if stopped server is local server.
+      if (serverId != localServer)  throw exc;
+
+      cnx = null;
     }
+  }
 
   /**
    * Stops the platform local server.
@@ -355,10 +336,9 @@ public class AdminModule
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static void stopServer() throws ConnectException, AdminException
-    {
-      stopServer(localServer);
-    }
+  public static void stopServer() throws ConnectException, AdminException {
+    stopServer(localServer);
+  }
 
   /**
    * Adds a server to the platform.
@@ -378,13 +358,9 @@ public class AdminModule
                                int port,
                                String serverName)
     throws ConnectException, AdminException {
-    addServer(
-      sid,
-      hostName,
-      domainName,
-      port,
-      serverName,
-      null, null);
+    addServer(sid,
+              hostName, domainName, port, serverName,
+              null, null);
   }
 
   /**

@@ -33,8 +33,7 @@ import org.apache.soap.util.xml.QName;
  * Utility class allowing to start JORAM SOAP service and the embedded
  * server.
  */
-public class SoapServiceStarter
-{
+public class SoapServiceStarter {
   /**
    * Deploys and starts JORAM SOAP service and the embedded JORAM server.
    *
@@ -45,8 +44,7 @@ public class SoapServiceStarter
    * @exception exception  If the deployment fails because Tomcat is not
    *              started. 
    */
-  public static void main(String[] args) throws Exception
-  {
+  public static void main(String[] args) throws Exception {
     String host = args[0];
     int port = Integer.parseInt(args[1]);
     int serverId = Integer.parseInt(args[2]);
@@ -86,8 +84,7 @@ public class SoapServiceStarter
    * Builds and returns the <code>DeploymentDescriptor</code> of
    * JORAM SOAP service.
    */
-  private static DeploymentDescriptor getDeploymentDescriptor()
-  {
+  private static DeploymentDescriptor getDeploymentDescriptor() {
     DeploymentDescriptor dd = new DeploymentDescriptor();
     
     dd.setID("urn:ProxyService");
@@ -108,8 +105,7 @@ public class SoapServiceStarter
   }
 
   /** Builds and return the type mappings for JORAM SOAP service. */
-  private static TypeMapping[] getTypeMappings()
-  {
+  private static TypeMapping[] getTypeMappings() {
     TypeMapping[] mappings = new TypeMapping[27];
 
     String encoding = "http://schemas.xmlsoap.org/soap/encoding/";

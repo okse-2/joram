@@ -32,7 +32,7 @@ import java.util.Hashtable;
 import javax.naming.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * 
@@ -98,8 +98,7 @@ public abstract class ClusterDestination extends Destination {
    * Returns <code>true</code> if the parameter object is a Joram
    * cluster destination wrapping the same agent identifier.
    */
-  public boolean equals(Object obj)
-  {
+  public boolean equals(Object obj) {
     if (! (obj instanceof org.objectweb.joram.client.jms.admin.ClusterDestination))
       return false;
 

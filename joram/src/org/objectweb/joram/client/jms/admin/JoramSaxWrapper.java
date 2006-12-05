@@ -25,7 +25,7 @@ package org.objectweb.joram.client.jms.admin;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import javax.xml.parsers.SAXParser;

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,21 +19,21 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.admin;
 
-import fr.dyade.aaa.jndi2.soap.SoapObjectItf;
-import org.objectweb.joram.client.jms.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import java.util.Hashtable;
-import java.util.Vector;
+import fr.dyade.aaa.jndi2.soap.SoapObjectItf;
 
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>AdministeredObject</code> class is the parent class of all
@@ -41,14 +41,13 @@ import java.util.Vector;
  */
 public abstract class AdministeredObject implements java.io.Serializable,
                                                     javax.naming.Referenceable,
-                                                    SoapObjectItf
-{
-
+                                                    SoapObjectItf {
   /** Sets the naming reference of an administered object. */
   public Reference getReference() throws NamingException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "AdministeredObject.getReference()");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "AdministeredObject.getReference()");
+
     Reference ref =
       new Reference(this.getClass().getName(),
                     "org.objectweb.joram.client.jms.admin.ObjectFactory",

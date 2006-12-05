@@ -38,7 +38,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
 import org.objectweb.joram.client.jms.admin.server.*;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.JoramTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**

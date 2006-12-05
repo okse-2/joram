@@ -26,27 +26,26 @@ import java.util.Timer;
 
 import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.proxies.StandardConnectionContext;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.FlowControl;
 import org.objectweb.joram.mom.proxies.MultiCnxSync;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.RequestNot;
-import org.objectweb.joram.mom.proxies.StandardConnectionContext;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.ProducerMessages;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 
-public class LocalConnection 
-    implements RequestChannel {
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
+
+public class LocalConnection implements RequestChannel {
   
   private String userName;
   
@@ -56,33 +55,33 @@ public class LocalConnection
 
   private StandardConnectionContext ctx;
 
-  public LocalConnection(
-    String userName2, String password2) throws JMSException {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "LocalConnection.<init>(" + userName2 + ',' + password2 + ')');
-    userName = userName2;
-    password = password2;
+  public LocalConnection(String userName,
+                         String password) throws JMSException {
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "LocalConnection.<init>(" + userName +
+                                ',' + password + ')');
+
+    this.userName = userName;
+    this.password = password;
   }
   
   public void setTimer(Timer timer) {
-    // No timer is useful
+    // Use of timer is useless
   }
   
   public void connect() throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "LocalConnection.connect()");
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "LocalConnection.connect()");
+
     GetProxyIdNot gpin = new GetProxyIdNot(userName, password, null);
     try {
       gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer
           .getServerId(), AgentId.JoramAdminStamp));
       proxyId = gpin.getProxyId();
     } catch (Exception exc) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       throw new JMSException(exc.getMessage());
     }
 
@@ -91,8 +90,8 @@ public class LocalConnection
       ocn.invoke(proxyId);
       ctx = (StandardConnectionContext)ocn.getConnectionContext();
     } catch (Exception exc) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       JMSException jmse = new JMSException(exc.getMessage());
       jmse.setLinkedException(exc);
       throw jmse;
@@ -102,21 +101,16 @@ public class LocalConnection
   public void send(AbstractJmsRequest request) 
     throws Exception {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "LocalConnection.send(" + request + ')');
-    ConnectionManager.sendToProxy(
-        proxyId,
-        ctx.getKey(),
-        request, 
-        request);
+      JoramTracing.dbgClient.log( BasicLevel.DEBUG, 
+                                  "LocalConnection.send(" + request + ')');
+
+    ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request);
   }
 
-  public AbstractJmsReply receive() 
-    throws Exception {
-    AbstractJmsReply reply = 
-      (AbstractJmsReply)ctx.getQueue().get();
+  public AbstractJmsReply receive() throws Exception {
+    AbstractJmsReply reply = (AbstractJmsReply)ctx.getQueue().get();
     ctx.getQueue().pop();
+
     return reply;
   }
 
