@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,11 +19,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 
 import java.util.Vector;
 import java.util.Hashtable;
@@ -32,7 +30,10 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.naming.NamingException;
 
+import org.objectweb.joram.shared.client.TempDestDeleteRequest;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.TemporaryTopic</code> interface.

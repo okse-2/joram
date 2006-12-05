@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -33,12 +33,13 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import org.objectweb.joram.shared.admin.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -48,9 +49,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * object a client uses to specify the destination of messages it is
  * sending and the source of messages it receives.
  */
-public class Topic extends Destination 
-  implements javax.jms.Topic, TopicMBean {
-
+public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   private final static String TOPIC_TYPE = "topic";
 
   public static boolean isTopic(String type) {
