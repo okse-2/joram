@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UnsetDefaultDMQ</code> instance requests to unset the default DMQ
  * of a given server.
  */
-public class UnsetDefaultDMQ extends AdminRequest
-{
+public class UnsetDefaultDMQ extends AdminRequest {
+  private static final long serialVersionUID = 2557580079721564352L;
+
   /** Identifier of the server which default DMQ is unset. */
   private int serverId;
 
@@ -37,15 +38,13 @@ public class UnsetDefaultDMQ extends AdminRequest
    *
    * @param serverId  Identifier of the server which default DMQ is unset.
    */
-  public UnsetDefaultDMQ(int serverId)
-  {
+  public UnsetDefaultDMQ(int serverId) {
     this.serverId = serverId;
   }
 
   
   /** Returns the identifier of the server which default DMQ is unset. */
-  public int getServerId()
-  {
+  public int getServerId() {
     return serverId;
   }
 }

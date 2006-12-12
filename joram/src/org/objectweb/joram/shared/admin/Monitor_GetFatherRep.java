@@ -28,6 +28,7 @@ package org.objectweb.joram.shared.admin;
  */
 public class Monitor_GetFatherRep extends Monitor_Reply
 {
+  private static final long serialVersionUID = 796689495158803046L;
   /** Identifier of the hierarchical father. */
   private String fatherId;
 

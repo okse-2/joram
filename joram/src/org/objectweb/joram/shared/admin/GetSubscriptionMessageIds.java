@@ -23,6 +23,7 @@
 package org.objectweb.joram.shared.admin;
 
 public class GetSubscriptionMessageIds extends SubscriptionAdminRequest {
+  private static final long serialVersionUID = -764113721299133195L;
 
   private String subName;
 

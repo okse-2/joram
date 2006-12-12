@@ -23,6 +23,8 @@
 package org.objectweb.joram.shared.admin;
 
 public class GetSubscription extends SubscriptionAdminRequest {
+  private static final long serialVersionUID = -6182173981820600499L;
+
   private String subName;
 
   public GetSubscription(

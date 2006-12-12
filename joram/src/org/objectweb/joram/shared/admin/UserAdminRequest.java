@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,12 +17,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent DT
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.admin;
 
 public class UserAdminRequest extends AdminRequest {
+  private static final long serialVersionUID = 6081250600824653849L;
 
   private String userId;
 
@@ -35,7 +36,6 @@ public class UserAdminRequest extends AdminRequest {
   }
 
   public String toString() {
-    return '(' + super.toString() + 
-      ",userId=" + userId + ')';
+    return '(' + super.toString() + ",userId=" + userId + ')';
   }
 }

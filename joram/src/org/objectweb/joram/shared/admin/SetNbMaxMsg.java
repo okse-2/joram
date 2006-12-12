@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Nicolas Tachker (Scalagent)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,6 +27,8 @@ package org.objectweb.joram.shared.admin;
  * number max of message in Queue or Subscription.
  */
 public class SetNbMaxMsg extends AdminRequest {
+  private static final long serialVersionUID = -2173959770467329047L;
+
   /** Identifier of the queue or subscription. */
   private String id;
   /** nbMaxMsg value (-1 no limit).*/

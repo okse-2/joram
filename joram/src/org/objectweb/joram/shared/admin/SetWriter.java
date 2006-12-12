@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s):ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,16 +27,16 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetWriter</code> instance requests the authorization for a given
  * user to be a writer on a given destination.
  */
-public class SetWriter extends SetRight
-{
+public class SetWriter extends SetRight {
+  private static final long serialVersionUID = -7885856012576237139L;
+
   /**
    * Constructs a <code>SetWriter</code> instance.
    *
    * @param userProxId  See superclass.
    * @param destId  See superclass.
    */
-  public SetWriter(String userProxId, String destId)
-  {
+  public SetWriter(String userProxId, String destId) {
     super(userProxId, destId);
   }
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UnsetDestinationDMQ</code> instance requests to unset the DMQ of
  * a given destination.
  */
-public class UnsetDestinationDMQ extends AdminRequest
-{
+public class UnsetDestinationDMQ extends AdminRequest {
+  private static final long serialVersionUID = -117929092888904461L;
+
   /** Identifier of the destination which DMQ is unset. */
   private String destId;
 
@@ -37,15 +38,13 @@ public class UnsetDestinationDMQ extends AdminRequest
    *
    * @param destId  Identifier of the destination which DMQ is unset.
    */
-  public UnsetDestinationDMQ(String destId)
-  {
+  public UnsetDestinationDMQ(String destId) {
     this.destId = destId;
   }
 
   
   /** Returns the identifier of the destination which DMQ is unset. */
-  public String getDestId()
-  {
+  public String getDestId() {
     return destId;
   }
 }

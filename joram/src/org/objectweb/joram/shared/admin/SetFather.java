@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre
- * Contributor(s):
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetFather</code> instance is used for linking two topics in a
  * hierarchical relationship.
  */
-public class SetFather extends AdminRequest
-{
+public class SetFather extends AdminRequest {
+  private static final long serialVersionUID = -2356363781080362595L;
+
   /** Identifier of the father. */
   private String father;
   /** Identifier of the son. */
@@ -40,21 +41,18 @@ public class SetFather extends AdminRequest
    * @param father  Identifier of the father.
    * @param son  Identifier of the son.
    */
-  public SetFather(String father, String son)
-  {
+  public SetFather(String father, String son) {
     this.father = father;
     this.son = son;
   }
 
   /** Returns the identifier of the father. */
-  public String getFather()
-  {
+  public String getFather() {
     return father;
   }
 
   /** Returns the identifier of the son. */
-  public String getSon()
-  {
+  public String getSon() {
     return son;
   }
 }

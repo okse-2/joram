@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetDefaultThreshold</code> instance requests to set a given
  * threshold value as the default threshold for a given server.
  */
-public class SetDefaultThreshold extends AdminRequest
-{
+public class SetDefaultThreshold extends AdminRequest {
+  private static final long serialVersionUID = -6410329762916041723L;
+
   /** Identifier of the server the threshold is set for. */
   private int serverId;
   /** Threshold value. */
@@ -40,22 +41,18 @@ public class SetDefaultThreshold extends AdminRequest
    * @param serverId  Identifier of the server the threshold is set for.
    * @param threshold  Threshold value.
    */
-  public SetDefaultThreshold(int serverId, int threshold)
-  {
+  public SetDefaultThreshold(int serverId, int threshold) {
     this.serverId = serverId;
     this.threshold = threshold;
   }
 
-  
   /** Returns the identifier of the server the threshold is set for. */
-  public int getServerId()
-  {
+  public int getServerId() {
     return serverId;
   }
 
   /** Returns the threshold value. */
-  public int getThreshold()
-  {
+  public int getThreshold() {
     return threshold;
   }
 }

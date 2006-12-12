@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre
- * Contributor(s):
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UnsetFather</code> instance is used for notifying a topic to unset
  * its father.
  */
-public class UnsetFather extends AdminRequest
-{
+public class UnsetFather extends AdminRequest {
+  private static final long serialVersionUID = 8501014641100586028L;
+
   /** Identifier of the topic. */
   private String id;
 
@@ -37,14 +38,12 @@ public class UnsetFather extends AdminRequest
    *
    * @param id  Identifier of the topic which has father is unset.
    */
-  public UnsetFather(String id)
-  {
+  public UnsetFather(String id) {
     this.id = id;
   }
 
   /** Returns the identifier of the topic which father is unset. */
-  public String getTopId()
-  {
+  public String getTopId() {
     return id;
   }
 }

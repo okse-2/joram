@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetDefaultDMQ</code> instance requests to set a given DMQ as the
  * default DMQ for a given server.
  */
-public class SetDefaultDMQ extends AdminRequest
-{
+public class SetDefaultDMQ extends AdminRequest {
+  private static final long serialVersionUID = -8486266759300479154L;
+
   /** Identifier of the server the DMQ is set for. */
   private int serverId;
   /** Identifier of the DMQ. */
@@ -40,22 +41,18 @@ public class SetDefaultDMQ extends AdminRequest
    * @param serverId  Identifier of the server the DMQ is set for.
    * @param dmqId  Identifier of the DMQ.
    */
-  public SetDefaultDMQ(int serverId, String dmqId)
-  {
+  public SetDefaultDMQ(int serverId, String dmqId) {
     this.serverId = serverId;
     this.dmqId = dmqId;
   }
 
-  
   /** Returns the identifier of the server the DMQ is set for. */
-  public int getServerId()
-  {
+  public int getServerId() {
     return serverId;
   }
 
   /** Returns the identifier of the DMQ. */
-  public String getDmqId()
-  {
+  public String getDmqId() {
     return dmqId;
   }
 }

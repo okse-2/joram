@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetUserThreshold</code> instance requests to set a given
  * threshold value as the threshold for a given user.
  */
-public class SetUserThreshold extends AdminRequest
-{
+public class SetUserThreshold extends AdminRequest {
+  private static final long serialVersionUID = -9084720544367985150L;
+
   /** Identifier of the user's proxy the threshold is set for. */
   private String userProxId;
   /** Threshold value. */
@@ -41,22 +42,19 @@ public class SetUserThreshold extends AdminRequest
    *          for. 
    * @param threshold  Threshold value.
    */
-  public SetUserThreshold(String userProxId, int threshold)
-  {
+  public SetUserThreshold(String userProxId, int threshold) {
     this.userProxId = userProxId;
     this.threshold = threshold;
   }
 
   
   /** Returns the identifier of the user's proxy the threshold is set for. */
-  public String getUserProxId()
-  {
+  public String getUserProxId() {
     return userProxId;
   }
 
   /** Returns the threshold value. */
-  public int getThreshold()
-  {
+  public int getThreshold() {
     return threshold;
   }
 }

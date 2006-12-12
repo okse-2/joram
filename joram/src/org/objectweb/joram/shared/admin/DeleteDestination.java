@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>DeleteDestination</code> instance requests the deletion of
  * a given destination.
  */
-public class DeleteDestination extends AdminRequest
-{
+public class DeleteDestination extends AdminRequest {
+  private static final long serialVersionUID = -6222589997734342867L;
+
   /** Identifier of the destination to delete. */
   private String id;
 
@@ -37,15 +38,12 @@ public class DeleteDestination extends AdminRequest
    *
    * @param id  The identifier of the destination to delete.
    */
-  public DeleteDestination(String id)
-  {
+  public DeleteDestination(String id) {
     this.id = id;
   }
 
-
   /** Returns the identifier of the destination to delete. */
-  public String getId()
-  {
+  public String getId() {
     return id;
   }
 }

@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -17,19 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.admin;
 
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 
-
 public class ListClusterQueue extends SpecialAdmin {
+  private static final long serialVersionUID = 4897616528464400266L;
 
   /**
    * list the cluster queue.
-   * <p>
    *
    * @param clusterQueue  Queue part of the cluster.
    *
@@ -37,5 +37,4 @@ public class ListClusterQueue extends SpecialAdmin {
   public ListClusterQueue(String clusterQueue) {
     super(clusterQueue);
   }
-
 }
