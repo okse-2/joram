@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,24 +18,22 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
-
-import java.util.Hashtable;
 
 
 /**
  * A <code>Monitor_GetDMQSettingsRep</code> instance holds the dead message
  * queue and threshold settings of a server, a destination or a user.
  */
-public class Monitor_GetDMQSettingsRep extends Monitor_Reply
-{
+public class Monitor_GetDMQSettingsRep extends Monitor_Reply {
+  private static final long serialVersionUID = -2656581907891308694L;
+
   /** DMQ identifier. */
   private String dmqId;
   /** Threshold. */
   private Integer threshold;
-
 
   /**
    * Constructs a <code>Monitor_GetDMQSettingsRep</code> instance.
@@ -43,22 +41,18 @@ public class Monitor_GetDMQSettingsRep extends Monitor_Reply
    * @param dmqId  DMQ identifier.
    * @param threshold  Threshold.
    */
-  public Monitor_GetDMQSettingsRep(String dmqId, Integer threshold)
-  {
+  public Monitor_GetDMQSettingsRep(String dmqId, Integer threshold) {
     this.dmqId = dmqId;
     this.threshold = threshold;
   }
 
-
   /** Returns the DMQ identifier. */
-  public String getDMQName()
-  {
+  public String getDMQName() {
     return dmqId;
   }
   
   /** Returns the threshold. */
-  public Integer getThreshold()
-  {
+  public Integer getThreshold() {
     return threshold;
   }
 }

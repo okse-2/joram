@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,13 +18,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 
 /**
@@ -33,6 +29,7 @@ import java.util.Vector;
  * server.
  */
 public class Monitor_GetDestinationsRep extends Monitor_Reply {
+  private static final long serialVersionUID = 4877382958978003764L;
 
   private String[] ids;
   private String[] names;

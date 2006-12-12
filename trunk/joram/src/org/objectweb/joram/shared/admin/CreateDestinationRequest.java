@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.admin;
@@ -29,8 +29,9 @@ import java.util.Properties;
  * A <code>CreateDestinationRequest</code> instance requests the creation of a
  * destination on a given server.
  */
-public class CreateDestinationRequest extends AdminRequest
-{
+public class CreateDestinationRequest extends AdminRequest {
+  private static final long serialVersionUID = 4956998807717134521L;
+
   /** Id of the server where deploying the destination. */
   private int serverId;
 

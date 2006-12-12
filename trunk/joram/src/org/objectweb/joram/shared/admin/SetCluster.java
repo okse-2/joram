@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre
- * Contributor(s):
+ * Initial developer(s): Frederic Maistre (INRIA)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetCluster</code> instance is used for adding a given topic
  * to a cluster an other topic is part of, or for creating a new cluster.
  */
-public class SetCluster extends AdminRequest
-{
+public class SetCluster extends AdminRequest {
+  private static final long serialVersionUID = 3888475137454407781L;
+
   /**
    * Identifier of the topic already part of a cluster, or chosen as the
    * initiator.
@@ -45,8 +46,7 @@ public class SetCluster extends AdminRequest
    * @param topName  Identifier of the topic joining the cluster, or the
    *          initiator.
    */
-  public SetCluster(String initId, String topId)
-  {
+  public SetCluster(String initId, String topId) {
     this.initId = initId;
     this.topId = topId;
   }
@@ -55,8 +55,7 @@ public class SetCluster extends AdminRequest
    * Returns the identifier of the topic already part of a cluster, or chosen
    * as the initiator.
    */
-  public String getInitId()
-  {
+  public String getInitId() {
     return initId;
   }
 
@@ -64,8 +63,7 @@ public class SetCluster extends AdminRequest
    * Returns the identifier of the topic joining the cluster, or the
    * initiator.
    */
-  public String getTopId()
-  {
+  public String getTopId() {
     return topId;
   }
 }

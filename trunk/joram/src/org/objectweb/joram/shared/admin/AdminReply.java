@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@ package org.objectweb.joram.shared.admin;
  * information destinated to a client administrator.
  */
 public class AdminReply implements java.io.Serializable {
+  private static final long serialVersionUID = 1188608769364211862L;
 
   public final static int NAME_ALREADY_USED = 0;
 

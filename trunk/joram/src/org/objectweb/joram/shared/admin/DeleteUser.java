@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>DeleteUser</code> instance requests the deletion of a user proxy
  * on a given server.
  */
-public class DeleteUser extends AdminRequest
-{
+public class DeleteUser extends AdminRequest {
+  private static final long serialVersionUID = 1914179540965247852L;
+
   /** Name of the user to delete. */
   private String userName;
   /** Identifier of the user's proxy. */
@@ -40,21 +41,18 @@ public class DeleteUser extends AdminRequest
    * @param userName  The name of the user to delete.
    * @param proxId  The identifier of the user's proxy.
    */
-  public DeleteUser(String userName, String proxId)
-  {
+  public DeleteUser(String userName, String proxId) {
     this.userName = userName;
     this.proxId = proxId;
   }
 
   /** Returns the name of the user to delete. */
-  public String getUserName()
-  {
+  public String getUserName() {
     return userName;
   }
 
   /** Returns the identifier of the user's proxy. */
-  public String getProxId()
-  {
+  public String getProxId() {
     return proxId;
   }
 }

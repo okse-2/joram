@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -28,5 +28,4 @@ package org.objectweb.joram.shared.admin;
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for requesting an
  * monitoring operation.
  */
-public abstract class Monitor_Request extends AdminRequest
-{}
+public abstract class Monitor_Request extends AdminRequest {}

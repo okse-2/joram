@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetUserDMQ</code> instance requests to set a given DMQ as the
  * DMQ for a given user.
  */
-public class SetUserDMQ extends AdminRequest
-{
+public class SetUserDMQ extends AdminRequest {
+  private static final long serialVersionUID = 1950998954181292735L;
+
   /** Identifier of the user's proxy the DMQ is set for. */
   private String userProxId;
   /** Identifier of the DMQ. */
@@ -40,22 +41,18 @@ public class SetUserDMQ extends AdminRequest
    * @param userId  Identifier of the user's proxy the DMQ is set for.
    * @param dmqId  Identifier of the DMQ.
    */
-  public SetUserDMQ(String userProxId, String dmqId)
-  {
+  public SetUserDMQ(String userProxId, String dmqId) {
     this.userProxId = userProxId;
     this.dmqId = dmqId;
   }
 
-  
   /** Returns the ProxId of the user the DMQ is set for. */
-  public String getUserProxId()
-  {
+  public String getUserProxId() {
     return userProxId;
   }
 
   /** Returns the identifier of the DMQ. */
-  public String getDmqId()
-  {
+  public String getDmqId() {
     return dmqId;
   }
 }

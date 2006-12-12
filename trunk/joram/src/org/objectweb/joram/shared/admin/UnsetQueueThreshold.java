@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UnsetQueueThreshold</code> instance requests to unset the
  * threshold value of a given queue.
  */
-public class UnsetQueueThreshold extends AdminRequest
-{
+public class UnsetQueueThreshold extends AdminRequest {
+  private static final long serialVersionUID = 3119774639048836306L;
+
   /** Identifier of the queue which threshold is unset. */
   private String queueId;
 
@@ -37,15 +38,13 @@ public class UnsetQueueThreshold extends AdminRequest
    *
    * @param queueId  Identifier of the queue which threshold is unset.
    */
-  public UnsetQueueThreshold(String queueId)
-  {
+  public UnsetQueueThreshold(String queueId) {
     this.queueId = queueId;
   }
 
   
   /** Returns the identifier of the queue which threshold is unset. */
-  public String getQueueId()
-  {
+  public String getQueueId() {
     return queueId;
   }
 }

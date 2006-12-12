@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,35 +18,31 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
-
 
 /**
  * A <code>Monitor_GetNumberRep</code> instance is a reply wrapping an
  * integer value.
  */
-public class Monitor_GetNumberRep extends Monitor_Reply
-{
+public class Monitor_GetNumberRep extends Monitor_Reply {
+  private static final long serialVersionUID = 5217139951879649417L;
+
   /** The integer value. */
   private int number;
-
 
   /**
    * Constructs a <code>Monitor_GetNumberRep</code> instance.
    *
    * @param number  The value to wrap.
    */
-  public Monitor_GetNumberRep(int number)
-  {
+  public Monitor_GetNumberRep(int number) {
     this.number = number;
   }
 
-
   /** Returns the wrapped value. */
-  public int getNumber()
-  {
+  public int getNumber() {
     return number;
   }
 }

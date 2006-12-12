@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -29,26 +29,23 @@ import java.util.Vector;
  * A <code>Monitor_GetClusterRep</code> instance holds the identifiers of
  * a cluster's topics.
  */
-public class Monitor_GetClusterRep extends Monitor_Reply
-{
+public class Monitor_GetClusterRep extends Monitor_Reply {
+  private static final long serialVersionUID = 8073241648201291805L;
+
   /** Identifiers of the cluster's topics. */
   private Vector topics;
-
   
   /**
    * Constructs a <code>Monitor_GetClusterRep</code> instance.
    *
    * @param fatherId  Identifiers of the cluster's topics.
    */
-  public Monitor_GetClusterRep(Vector topics)
-  {
+  public Monitor_GetClusterRep(Vector topics) {
     this.topics = topics;
   }
 
-
   /** Returns the identifiers of the cluster's topics. */
-  public Vector getTopics()
-  {
+  public Vector getTopics() {
     if (topics == null)
       return new Vector();
     return topics;

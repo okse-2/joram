@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,19 +18,17 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
-
-import java.util.Vector;
-
 
 /**
  * A <code>Monitor_GetServersIdsRep</code> instance holds the list of the
  * platform's servers' identifiers.
  */
-public class Monitor_GetServersIdsRep extends Monitor_Reply
-{
+public class Monitor_GetServersIdsRep extends Monitor_Reply {
+  private static final long serialVersionUID = -2432800775262552600L;
+
   /** Servers identifiers. */
   private int[] ids;
 
@@ -41,10 +39,9 @@ public class Monitor_GetServersIdsRep extends Monitor_Reply
   /**
    * Constructs a <code>Monitor_GetServersRep</code> instance.
    */
-  public Monitor_GetServersIdsRep(
-    int[] ids,
-    String[] names,
-    String[] hostNames) {
+  public Monitor_GetServersIdsRep(int[] ids,
+                                  String[] names,
+                                  String[] hostNames) {
     this.ids = ids;
     this.names = names;
     this.hostNames = hostNames;

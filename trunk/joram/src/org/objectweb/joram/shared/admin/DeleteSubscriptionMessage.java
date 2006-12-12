@@ -23,6 +23,8 @@
 package org.objectweb.joram.shared.admin;
 
 public class DeleteSubscriptionMessage extends SubscriptionAdminRequest {
+  private static final long serialVersionUID = -8750145183610238272L;
+
   private String subName;
 
   private String msgId;

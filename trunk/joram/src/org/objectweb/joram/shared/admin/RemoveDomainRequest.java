@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +23,8 @@
 package org.objectweb.joram.shared.admin;
 
 public class RemoveDomainRequest extends AdminRequest {
+  private static final long serialVersionUID = 2448240975188689718L;
+
   private String domainName;
 
   public RemoveDomainRequest(String domainName) {

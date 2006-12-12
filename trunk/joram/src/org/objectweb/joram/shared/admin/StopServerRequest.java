@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,33 +19,30 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
 /**
  * A <code>StopServerRequest</code> instance requests to stop a given server.
  */
-public class StopServerRequest extends AdminRequest
-{
+public class StopServerRequest extends AdminRequest {
+  private static final long serialVersionUID = 899648013719053869L;
+
   /** Id of the server to stop. */
   private int serverId;
-
 
   /**
    * Constructs a <code>StopServerRequest</code> instance.
    *
    * @param serverId  The id of the server to stop.
    */
-  public StopServerRequest(int serverId)
-  {
+  public StopServerRequest(int serverId) {
     this.serverId = serverId;
   }
 
-
   /** Returns the id of the server to stop. */
-  public int getServerId()
-  {
+  public int getServerId() {
     return serverId;
   }
 }

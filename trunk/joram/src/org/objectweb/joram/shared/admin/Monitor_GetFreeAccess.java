@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -26,26 +26,23 @@ package org.objectweb.joram.shared.admin;
  * A <code>Monitor_GetFreeAccess</code> instance checks the free access
  * settings on a given destination.
  */
-public class Monitor_GetFreeAccess extends Monitor_Request
-{
+public class Monitor_GetFreeAccess extends Monitor_Request {
+  private static final long serialVersionUID = 6715594804864458271L;
+
   /** Identifier of the target destination. */
   private String dest;
 
-  
   /**
    * Constructs a <code>Monitor_GetFreeAccess</code> instance.
    *
    * @param dest  Identifier of the target destination.
    */
-  public Monitor_GetFreeAccess(String dest)
-  {
+  public Monitor_GetFreeAccess(String dest) {
     this.dest = dest;
   }
 
-
   /** Returns the identifier of the target destination. */
-  public String getDest()
-  {
+  public String getDest() {
     return dest;
   }
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetDestinationDMQ</code> instance requests to set a given DMQ as
  * the DMQ for a given destination.
  */
-public class SetDestinationDMQ extends AdminRequest
-{
+public class SetDestinationDMQ extends AdminRequest {
+  private static final long serialVersionUID = 9220290918885980583L;
+
   /** Identifier of the destination the DMQ is set for. */
   private String destId;
   /** Identifier of the DMQ. */
@@ -40,22 +41,19 @@ public class SetDestinationDMQ extends AdminRequest
    * @param destId  Identifier of the destination the DMQ is set for.
    * @param dmqId  Identifier of the DMQ.
    */
-  public SetDestinationDMQ(String destId, String dmqId)
-  {
+  public SetDestinationDMQ(String destId, String dmqId) {
     this.destId = destId;
     this.dmqId = dmqId;
   }
 
   
   /** Returns the identifier of the destination the DMQ is set for. */
-  public String getDestId()
-  {
+  public String getDestId() {
     return destId;
   }
 
   /** Returns the identifier of the DMQ. */
-  public String getDmqId()
-  {
+  public String getDmqId() {
     return dmqId;
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,41 +18,36 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
 import java.util.Hashtable;
 
-
 /**
  * A <code>Monitor_GetUsersRep</code> instance replies to a get users,
  * readers or writers monitoring request.
  */
-public class Monitor_GetUsersRep extends Monitor_Reply
-{
+public class Monitor_GetUsersRep extends Monitor_Reply {
+  private static final long serialVersionUID = 1147816939347665384L;
+
   /** Table holding the users identifications. */
   private Hashtable users;
-
 
   /**
    * Constructs a <code>Monitor_GetUsersRep</code> instance.
    */
-  public Monitor_GetUsersRep()
-  {
+  public Monitor_GetUsersRep() {
     users = new Hashtable();
   }
 
-
   /** Adds a user to the table. */
-  public void addUser(String name, String proxyId)
-  {
+  public void addUser(String name, String proxyId) {
     users.put(name, proxyId);
   }
 
   /** Returns the users table. */
-  public Hashtable getUsers()
-  {
+  public Hashtable getUsers() {
     return users;
   }
 }

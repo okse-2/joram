@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UpdateUser</code> instance requests the modification of a
  * user identification
  */
-public class UpdateUser extends AdminRequest
-{
+public class UpdateUser extends AdminRequest {
+  private static final long serialVersionUID = 5991002585349654595L;
+
   /** Name of the user. */
   private String userName;
   /** Identifier of the user's proxy. */
@@ -46,9 +47,10 @@ public class UpdateUser extends AdminRequest
    * @param newName  The new name of the user.
    * @param newPass  The new password of the user.
    */
-  public UpdateUser(String userName, String proxId, String newName,
-                    String newPass)
-  {
+  public UpdateUser(String userName, 
+                    String proxId,
+                    String newName,
+                    String newPass) {
     this.userName = userName;
     this.proxId = proxId;
     this.newName = newName;
@@ -56,26 +58,22 @@ public class UpdateUser extends AdminRequest
   }
 
   /** Returns the name of the user to update. */
-  public String getUserName()
-  {
+  public String getUserName() {
     return userName;
   }
 
   /** Returns the user's proxy identifier. */
-  public String getProxId()
-  {
+  public String getProxId() {
     return proxId;
   }
 
   /** Returns the new name of the user. */
-  public String getNewName()
-  {
+  public String getNewName() {
     return newName;
   }
   
   /** Returns the new password of the user. */
-  public String getNewPass()
-  {
+  public String getNewPass() {
     return newPass;
   }
 }

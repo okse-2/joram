@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.admin;
@@ -28,6 +28,8 @@ package org.objectweb.joram.shared.admin;
  * monitoring request.
  */
 public class Monitor_GetNbMaxMsgRep extends Monitor_Reply {
+  private static final long serialVersionUID = 4583933031253199342L;
+
   /** nbMaxMsg value (-1 no limit).*/
   private int nbMaxMsg;
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -26,26 +26,23 @@ package org.objectweb.joram.shared.admin;
  * A <code>Monitor_GetCluster</code> instance requests the list of the topics
  * part of a cluster.
  */
-public class Monitor_GetCluster extends Monitor_Request
-{
+public class Monitor_GetCluster extends Monitor_Request {
+  private static final long serialVersionUID = 5409152852650175736L;
+
   /** Identifier of a topic part of the target cluster. */
   private String topic;
-
   
   /**
    * Constructs a <code>Monitor_GetCluster</code> instance.
    *
    * @param topic  Identifier of a topic part of the target cluster.
    */
-  public Monitor_GetCluster(String topic)
-  {
+  public Monitor_GetCluster(String topic) {
     this.topic = topic;
   }
 
-
   /** Returns the identifier of a topic part of the target cluster. */
-  public String getTopic()
-  {
+  public String getTopic() {
     return topic;
   }
 }

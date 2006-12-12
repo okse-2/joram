@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * An <code>UnsetUserDMQ</code> instance requests to unset the
  * DMQ of a given user.
  */
-public class UnsetUserDMQ extends AdminRequest
-{
+public class UnsetUserDMQ extends AdminRequest {
+  private static final long serialVersionUID = -9080857791541217603L;
+
   /** Identifier of the user's proxy which DMQ is unset. */
   private String userProxId;
 
@@ -37,15 +38,12 @@ public class UnsetUserDMQ extends AdminRequest
    *
    * @param userProxId  Identifier of the user's proxy which DMQ is unset.
    */
-  public UnsetUserDMQ(String userProxId)
-  {
+  public UnsetUserDMQ(String userProxId) {
     this.userProxId = userProxId;
   }
 
-  
   /** Returns the identifier of the user's proxy which DMQ is unset. */
-  public String getUserProxId()
-  {
+  public String getUserProxId() {
     return userProxId;
   }
 }

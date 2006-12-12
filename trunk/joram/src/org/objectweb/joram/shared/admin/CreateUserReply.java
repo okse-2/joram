@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,9 @@ package org.objectweb.joram.shared.admin;
  * A <code>CreateUserReply</code> instance replies to a user creation request,
  * produced by the AdminTopic.
  */
-public class CreateUserReply extends AdminReply
-{
+public class CreateUserReply extends AdminReply {
+  private static final long serialVersionUID = 2904798747244634284L;
+
   /** Identifier of the user's proxy. */
   private String id;
 
@@ -38,15 +39,13 @@ public class CreateUserReply extends AdminReply
    * @param id  The id of the created proxy.
    * @param info  Related information.
    */
-  public CreateUserReply(String id, String info)
-  {
+  public CreateUserReply(String id, String info) {
     super(true, info);
     this.id = id;
   }
 
   /** Returns the id of the user's proxy. */
-  public String getProxId()
-  {
+  public String getProxId() {
     return id;
   }
 }

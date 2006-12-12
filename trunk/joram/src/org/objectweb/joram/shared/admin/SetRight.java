@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -27,8 +27,7 @@ package org.objectweb.joram.shared.admin;
  * A <code>SetRight</code> instance requests a given right to be granted to a
  * given user.
  */
-public abstract class SetRight extends AdminRequest
-{
+public abstract class SetRight extends AdminRequest {
   /** Identifier of the user's proxy, <code>null</code> for all users. */
   private String userProxId;
   /** Identifier of the destination. */
@@ -41,21 +40,18 @@ public abstract class SetRight extends AdminRequest
    *          for all users.
    * @param destId  The identifier of the destination.
    */
-  public SetRight(String userProxId, String destId)
-  {
+  public SetRight(String userProxId, String destId) {
     this.userProxId = userProxId;
     this.destId = destId;
   }
 
   /** Returns the identifier of the future reader's proxy. */
-  public String getUserProxId()
-  {
+  public String getUserProxId() {
     return userProxId;
   }
   
   /** Returns the identifier of the destination. */
-  public String getDestId()
-  {
+  public String getDestId() {
     return destId;
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
 
@@ -26,26 +26,23 @@ package org.objectweb.joram.shared.admin;
  * A <code>Monitor_GetWriters</code> instance requests the list of
  * the writers on a given destination.
  */
-public class Monitor_GetWriters extends Monitor_Request
-{
+public class Monitor_GetWriters extends Monitor_Request {
+  private static final long serialVersionUID = -2458847160856363315L;
+
   /** Identifier of the target destination. */
   private String dest;
 
-  
   /**
    * Constructs a <code>Monitor_GetWriters</code> instance.
    *
    * @param dest  Identifier of the target destination.
    */
-  public Monitor_GetWriters(String dest)
-  {
+  public Monitor_GetWriters(String dest) {
     this.dest = dest;
   }
 
-
   /** Returns the identifier of the target destination. */
-  public String getDest()
-  {
+  public String getDest() {
     return dest;
   }
 }
