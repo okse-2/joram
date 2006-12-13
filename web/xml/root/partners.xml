@@ -31,21 +31,24 @@
     </tr>
     </table>
     </s1>
-		
-		<s1 name="Sponsors">
-		<table>
-		<tr>
+
+    <s1 name="Thanks">
+        <a href="http://www.yourkit.com/">YourKit</a> for a free license of their YourKit Java Profiler.
+    </s1>
+	
+    <s1 name="Sponsors">
+    <table>
+    <tr>
       <td align="center" valign="middle">
       <a href="http://www.bull.com/">
       <img src="images/partners/bull.jpg" alt="Bull logo" border="0"
            height="67" width="210"/></a>
       </td>
       <td>
-      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included 
-			in Joram since version 4.1.</p>
+      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included in Joram since version 4.1.</p>
       </td>
     </tr>	
-		<tr>
+    <tr>
       <td align="center" valign="middle">
       <a href="http://www.rd.francetelecom.com/">
       <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0"
@@ -58,7 +61,7 @@
       </td>
     </tr>	
     </table>		
-		</s1>
+    </s1>
 
     <s1 name="Initial partners">
     <table>
