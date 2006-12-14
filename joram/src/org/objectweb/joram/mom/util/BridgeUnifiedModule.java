@@ -22,11 +22,6 @@
  */
 package org.objectweb.joram.mom.util;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.util.Daemon;
-import org.objectweb.joram.shared.messages.Message;
-
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -34,6 +29,11 @@ import java.util.Vector;
 import javax.jms.*;
 import javax.jms.IllegalStateException;
 
+import org.objectweb.joram.mom.messages.Message;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * The <code>BridgeUnifiedModule</code> class is a bridge module based on the
@@ -264,7 +264,7 @@ public class BridgeUnifiedModule implements javax.jms.ExceptionListener,
    * @exception javax.jms.MessageFormatException  If the MOM message could not
    *              be converted into a foreign JMS message.
    */
-  public void send(org.objectweb.joram.shared.messages.Message message)
+  public void send(org.objectweb.joram.mom.messages.Message message)
               throws JMSException
   {
     if (! usable)

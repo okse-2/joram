@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.util;
 
-import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.mom.messages.Message;
 
 
 /**
