@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,27 +19,26 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
-
-import java.util.Hashtable;
-import java.util.Enumeration;
 
 /**
  * A <code>ServerReply</code> is used by a JMS proxy for
  * acknowledging the receipt of a synchronous <code>AbstractJmsRequest</code>
  * request.
  */
-public class ServerReply extends AbstractJmsReply
-{
+public final class ServerReply extends AbstractJmsReply {
+  protected int getClassId() {
+    return SERVER_REPLY;
+  }
+
   /**
    * Constructs a <code>ServerReply</code> instance.
    *
    * @param request  The acknowledged JMS request.
    */
-  public ServerReply(AbstractJmsRequest request)
-  {
+  public ServerReply(AbstractJmsRequest request) {
     super(request.getRequestId());
   }
 
@@ -48,24 +47,12 @@ public class ServerReply extends AbstractJmsReply
    *
    * @param correlationId  Correlation identifier.
    */
-  public ServerReply(int correlationId)
-  {
+  public ServerReply(int correlationId) {
     super(correlationId);
   }
 
   /**
    * Constructs a <code>ServerReply</code> instance.
    */
-  public ServerReply()
-  {}
-
-  public Hashtable soapCode() {
-    return super.soapCode();
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    ServerReply req = new ServerReply();
-    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
-    return req;
-  }
+  public ServerReply() {}
 }

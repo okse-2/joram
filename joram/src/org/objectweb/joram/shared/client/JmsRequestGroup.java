@@ -25,11 +25,21 @@
  */
 package org.objectweb.joram.shared.client;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * 
  */
-public class JmsRequestGroup extends AbstractJmsRequest {
-  
+public final class JmsRequestGroup extends AbstractJmsRequest {
+  protected int getClassId() {
+    return JMS_REQUEST_GROUP;
+  }
+
   private AbstractJmsRequest[] requests;
   
   public JmsRequestGroup(AbstractJmsRequest[] ajr) {
@@ -39,10 +49,68 @@ public class JmsRequestGroup extends AbstractJmsRequest {
   public final AbstractJmsRequest[] getRequests() {
     return requests;
   }
-  
-  public String toString() {
-    return '(' + super.toString()+ 
-    ",requests.length=" + requests.length + ')';
+
+  /**
+   * Constructs a <code>JmsRequestGroup</code> instance.
+   */
+  public JmsRequestGroup() {}
+
+  public void toString(StringBuffer strbuf) {
+    super.toString(strbuf);
+    strbuf.append(",requests.length=").append(requests.length);
+    strbuf.append(')');
   }
 
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    if (requests == null) {
+      StreamUtil.writeTo(-1, os);
+    } else {
+      int size = requests.length;
+      StreamUtil.writeTo(size, os);
+      for (int i=0; i<size; i++) {
+        StreamUtil.writeTo(requests[i].getClass().getName(), os);
+        requests[i].writeTo(os);
+      }
+    }
+  }
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    int size = StreamUtil.readIntFrom(is);
+    if (size == -1) {
+      requests = null;
+    } else {
+      requests = new AbstractJmsRequest[size];
+      for (int i=0; i<size; i++) {
+        String cn = StreamUtil.readStringFrom(is);
+        try {
+          requests[i] = (AbstractJmsRequest) Class.forName(cn).newInstance();
+        } catch (ClassNotFoundException exc) {
+          throw new IOException("AbstractJmsRequest.readFrom(), Unknown class " + cn);
+        } catch (InstantiationException exc) {
+          throw new IOException("AbstractJmsRequest.readFrom(), Cannot Instantiate " + cn);
+        } catch (IllegalAccessException exc) {
+          throw new IOException("AbstractJmsRequest.readFrom(), Cannot IllegalAccessException " + cn);
+        }
+        requests[i].readFrom(is);
+      }
+    }
+  }
 }

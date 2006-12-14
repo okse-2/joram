@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,27 +19,16 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
-
-public class PingRequest extends AbstractJmsRequest {
+public final class PingRequest extends AbstractJmsRequest {
+  protected int getClassId() {
+    return PING_REQUEST;
+  }
 
   public PingRequest() {
     super(null);
-  }
-
-  public Hashtable soapCode() {
-    return super.soapCode();
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    PingRequest req = new PingRequest();
-    req.setRequestId(((Integer) h.get("requestId")).intValue());
-    req.setTarget((String) h.get("target"));
-    return req;
   }
 }
