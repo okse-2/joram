@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +17,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.shared.excepts;
+
+import org.objectweb.joram.shared.client.MomExceptionReply;
 
 /**
  * The <code>MomException</code> class is the exception class thrown by the
  * MOM actors.
  */
-public class MomException extends Exception
-{
+public class MomException extends Exception {
+  protected int type;
+
+  public MomException(int type, String info) {
+    super(info);
+    this.type = type;
+  }
+
   /**
    * Constructs a <code>MomException</code> containing a given description.
    */
-  public MomException(String info)
-  {
+  public MomException(String info) {
     super(info);
+    type = MomExceptionReply.MomException;
+  }
+
+  public int getType() {
+    return type;
   }
 }

@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,23 +17,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.excepts;
+
+import org.objectweb.joram.shared.client.MomExceptionReply;
 
 /**
  * A <code>DestinationException</code> is thrown by a destination while
  * deleting if requesters are still active, and in a proxy method when trying
  * to access a non existing destination.
  */
-public class DestinationException extends MomException
-{
+public class DestinationException extends MomException {
   /**
    * Constructs a <code>DestinationException</code> instance.
    */
-  public DestinationException(String info)
-  {
+  public DestinationException(String info) {
     super(info);
+    type = MomExceptionReply.DestinationException;
   }
 }
