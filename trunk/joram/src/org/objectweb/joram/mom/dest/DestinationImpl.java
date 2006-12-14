@@ -45,8 +45,8 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.util.Debug;
 
+import fr.dyade.aaa.util.Debug;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -74,11 +74,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   protected boolean freeWriting = false;
   /** Table of the destination readers and writers. */
   protected Hashtable clients;
-  /**
-   * Identifier of the dead message queue this destination must send its
-   * dead messages to, if any.
-   */
-  protected AgentId dmqId = null;
 
   /** READ access value. */
   public static int READ = 1;
@@ -86,6 +81,12 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   public static int WRITE = 2;
   /** READ and WRITE access value. */
   public static int READWRITE = 3;
+
+  /**
+   * Identifier of the dead message queue this destination must send its
+   * dead messages to, if any.
+   */
+  protected AgentId dmqId = null;
 
   /**
    * Transient <code>StringBuffer</code> used to build message, this buffer
@@ -120,7 +121,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     if (creationDate == -1)
       creationDate = System.currentTimeMillis();
-
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ", created.");
@@ -511,6 +511,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     if (! not.getPersistent() && !not.getAsyncSend()) {
       Channel.sendTo(from, 
                      new SendReplyNot(not.getClientContext(), not.getRequestId()));
@@ -552,7 +553,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (! isAdministrator(from)) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN,
-                   "Unauthorized eletion request from " + from);
+                   "Unauthorized deletion request from " + from);
     } else {
       specialProcess(not);
       // state change, so save.
@@ -630,8 +631,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if (! not.getPersistent() && replies.size() > 0) {
-      Channel.sendTo(
-        from, new SendRepliesNot(replies));
+      Channel.sendTo(from, new SendRepliesNot(replies));
     }
   }
   
@@ -761,7 +761,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @return the unique identifier of the destination.
    */
-  public String getDestinationId() {
+  public final String getDestinationId() {
     return destId.toString();
   }
 
@@ -868,5 +868,26 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   public long getNbMsgsSendToDMQSinceCreation() {
     return nbMsgsSendToDMQSinceCreation;
+  }
+
+  protected void replyToTopic(
+    org.objectweb.joram.shared.admin.AdminReply reply,
+    AgentId replyTo,
+    String requestMsgId,
+    String replyMsgId) {
+    Message message = new Message();
+    message.correlationId = requestMsgId;
+    message.timestamp = System.currentTimeMillis();
+    message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
+    message.id = replyMsgId;;
+    try {
+      message.setObject(reply);
+      ClientMessages clientMessages = new ClientMessages(-1, -1, message);
+      Channel.sendTo(replyTo, clientMessages);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
+      throw new Error(exc.getMessage());
+    }
   }
 }
