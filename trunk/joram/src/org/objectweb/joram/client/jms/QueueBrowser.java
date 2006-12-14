@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,11 +19,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.shared.client.*;
 
 import java.util.*;
 
@@ -32,13 +30,16 @@ import javax.jms.InvalidDestinationException;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 
+import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.shared.selectors.ClientSelector;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.QueueBrowser</code> interface.
  */
-public class QueueBrowser implements javax.jms.QueueBrowser
-{
+public class QueueBrowser implements javax.jms.QueueBrowser {
   /** The session the browser belongs to. */
   private Session sess;
 
@@ -62,15 +63,13 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  QueueBrowser(Session sess, Queue queue, String selector) throws JMSException
-  {
+  QueueBrowser(Session sess, Queue queue, String selector) throws JMSException {
     if (queue == null)
       throw new InvalidDestinationException("Invalid queue: " + queue);
 
     try {
-      org.objectweb.joram.shared.selectors.Selector.checks(selector);
-    }
-    catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
+      ClientSelector.checks(selector);
+    } catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
       throw new InvalidSelectorException("Invalid selector syntax: " + sE);
     }
 
@@ -83,8 +82,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
   }
 
   /** Returns a string view of this browser. */
-  public String toString()
-  {
+  public String toString() {
     return "QueueBrowser:" + sess.getId();
   }
 
@@ -93,8 +91,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception IllegalStateException  If the browser is closed.
    */
-  public synchronized javax.jms.Queue getQueue() throws JMSException
-  {
+  public synchronized javax.jms.Queue getQueue() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
 
@@ -106,8 +103,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception IllegalStateException  If the browser is closed.
    */
-  public synchronized String getMessageSelector() throws JMSException
-  {
+  public synchronized String getMessageSelector() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
 
@@ -123,11 +119,11 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *              queue.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized Enumeration getEnumeration() throws JMSException
-  {
+  public synchronized Enumeration getEnumeration() throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
-                                 + ": requests an enumeration.");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 this + ": requests an enumeration.");
+
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
 
@@ -137,22 +133,13 @@ public class QueueBrowser implements javax.jms.QueueBrowser
     QBrowseReply reply = (QBrowseReply) sess.syncRequest(browReq);
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this
-                                 + ": received an enumeration.");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 this + ": received an enumeration.");
 
-    // Processing the received messages:
-    Vector momMessages = reply.getMessages();
-    Vector messages = null;
-    if (momMessages != null) {
-      messages = new Vector();
-      org.objectweb.joram.shared.messages.Message momMsg;
-      for (int i = 0; i < momMessages.size(); i++) {
-        momMsg = (org.objectweb.joram.shared.messages.Message) momMessages.get(i);
-        messages.add(Message.wrapMomMessage(null, momMsg));
-      }
-    }
+    // Processing the received messages
+    Vector messages = reply.getMessages();
     // Return an enumeration:
-    return new QueueEnumeration(messages);
+    return new QueueEnumeration(reply.getMessages());
   }
 
   /**
@@ -160,8 +147,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    *
    * @exception JMSException  Actually never thrown.
    */
-  public synchronized void close() throws JMSException
-  {
+  public synchronized void close() throws JMSException {
     // Ignoring the call if the browser is already closed:
     if (closed)
       return;
@@ -177,8 +163,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser
    * The <code>QueueEnumeration</code> class is used to enumerate the browses
    * sent by queues.
    */
-  private class QueueEnumeration implements java.util.Enumeration
-  {
+  private class QueueEnumeration implements java.util.Enumeration {
     /** The vector of messages. */
     private Vector messages;
 
@@ -187,26 +172,32 @@ public class QueueBrowser implements javax.jms.QueueBrowser
      *
      * @param messages  The vector of messages to enumerate.
      */
-    private QueueEnumeration(Vector messages)
-    {
+    private QueueEnumeration(Vector messages) {
       this.messages = messages;
     }
 
     /** API method. */
-    public boolean hasMoreElements()
-    {
+    public boolean hasMoreElements() {
       if (messages == null)
         return false;
       return (! messages.isEmpty());
     }
 
     /** API method. */
-    public Object nextElement()
-    {
+    public Object nextElement() {
       if (messages == null || messages.isEmpty())
         throw new NoSuchElementException();
 
-      return messages.remove(0);
+      Message jmsMsg = null;
+      org.objectweb.joram.shared.messages.Message msg = null;
+      try {
+        msg = (org.objectweb.joram.shared.messages.Message) messages.remove(0);
+        jmsMsg = Message.wrapMomMessage(null, msg);
+      } catch (JMSException exc) {
+        JoramTracing.dbgClient.log(BasicLevel.ERROR,
+                                   this + ", bad message: " + msg, exc);
+      }
+      return jmsMsg;
     }
   }
 }
