@@ -24,14 +24,13 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.*;
-
-import org.objectweb.joram.mom.MomTracing;
-
 import java.net.*;
 import java.util.*;
 
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.util.*;
+
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -106,11 +105,10 @@ public class TcpProxyService {
    * @param args stringified listening port
    * @param firstTime <code>true</code>  when the agent server starts.   
    */
-  public static void init(String args, boolean firstTime) 
-    throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "TcpProxyService.init(" + args + ',' + firstTime + ')');
+  public static void init(String args, boolean firstTime) throws Exception {
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "TcpProxyService.init(" + args + ',' + firstTime + ')');
 
     port =  DEFAULT_PORT;;
     address = DEFAULT_BINDADDRESS;
@@ -128,10 +126,10 @@ public class TcpProxyService {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket;
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "TcpProxyService.init() - binding to " +
-                              address + ':' + port);
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "SSLTcpProxyService.init() - binding to " +
+                                address + ", port " + port);
 
     if (address.equals("0.0.0.0")) {
       serverSocket = new ServerSocket(port, backlog);
@@ -151,8 +149,8 @@ public class TcpProxyService {
    * Stops the service.
    */ 
   public static void stopService() {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpProxyService.stop()");
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpProxyService.stop()");
     proxyService.stop();
   }
 
@@ -186,8 +184,8 @@ public class TcpProxyService {
   }
 
   protected void start() {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.start()");
     for (int i = 0; i < connectionListeners.length; i++) {
       connectionListeners[i].start();
@@ -195,16 +193,16 @@ public class TcpProxyService {
   }
 
   void registerConnection(TcpConnection tcpConnection) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.registerConnection(" +
         tcpConnection + ')');
     connections.addElement(tcpConnection);
   }
 
   void unregisterConnection(TcpConnection tcpConnection) {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "TcpProxyService.unregisterConnection(" +
         tcpConnection + ')');
     connections.removeElement(tcpConnection);

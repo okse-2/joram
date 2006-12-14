@@ -27,7 +27,7 @@ package org.objectweb.joram.mom.proxies;
 
 import javax.management.openmbean.*;
 
-import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.mom.messages.Message;
 
 import java.util.Hashtable;
 import java.util.Collection;

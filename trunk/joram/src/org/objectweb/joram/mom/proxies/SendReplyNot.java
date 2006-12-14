@@ -24,8 +24,6 @@ package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.Notification;
 
-import org.objectweb.joram.shared.client.*;
-
 public class SendReplyNot extends Notification {
 
   private int key;

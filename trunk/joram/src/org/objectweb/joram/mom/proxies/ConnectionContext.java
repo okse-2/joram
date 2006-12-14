@@ -25,6 +25,7 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 
@@ -40,7 +41,7 @@ public interface ConnectionContext {
   
   public void pushReply(AbstractJmsReply reply);
   
-  public void pushError(Exception exc);
+  public void pushError(MomException exc);
   
   public boolean isClosed();
   
