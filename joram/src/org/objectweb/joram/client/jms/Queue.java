@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,13 +24,14 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.net.ConnectException;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.net.ConnectException;
+
+import javax.naming.NamingException;
 
 import javax.jms.JMSException;
-import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -38,6 +39,9 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import org.objectweb.joram.shared.admin.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -48,9 +52,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * sending and the source of messages it receives.
  *  
  */
-public class Queue extends Destination 
-  implements javax.jms.Queue, QueueMBean {
-
+public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   private final static String QUEUE_TYPE = "queue";
 
   public static boolean isQueue(String type) {
@@ -320,8 +322,7 @@ public class Queue extends Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public int getPendingRequests() throws ConnectException, AdminException
-  {
+  public int getPendingRequests() throws ConnectException, AdminException {
     Monitor_GetPendingRequests request =
       new Monitor_GetPendingRequests(agentId);
     Monitor_GetNumberRep reply =
@@ -330,8 +331,7 @@ public class Queue extends Destination
     return reply.getNumber();
   }
 
-  public String[] getMessageIds() 
-    throws AdminException, ConnectException {
+  public String[] getMessageIds() throws AdminException, ConnectException {
     GetQueueMessageIdsRep reply = 
       (GetQueueMessageIdsRep)AdminModule.doRequest(
         new GetQueueMessageIds(agentId));
@@ -350,7 +350,7 @@ public class Queue extends Destination
     GetQueueMessageRep reply = 
       (GetQueueMessageRep)AdminModule.doRequest(
         new GetQueueMessage(agentId, msgId));
-    javax.jms.Message msg = Message.wrapMomMessage(null, reply.getMessage());
+    Message msg =  Message.wrapMomMessage(null, reply.getMessage());
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("Message: ").append(msg.getJMSMessageID());
     strbuf.append("\n\tTo: ").append(msg.getJMSDestination());
@@ -370,7 +370,7 @@ public class Queue extends Destination
     GetQueueMessageRep reply = 
       (GetQueueMessageRep)AdminModule.doRequest(
         new GetQueueMessage(agentId, msgId));
-    Message msg = (Message) Message.wrapMomMessage(null, reply.getMessage());
+    Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
     prop.setProperty("JMSMessageID", msg.getJMSMessageID());
@@ -392,9 +392,8 @@ public class Queue extends Destination
     if (msg.getJMSType() != null)
       prop.setProperty("JMSType", msg.getJMSType());
 
-    if (msg.momMsg != null) {
-      msg.momMsg.getOptionalHeader(prop);
-    }
+    // Adds optional header properties
+    msg.getOptionalHeader(prop);
 
     return prop;
   }
@@ -404,12 +403,11 @@ public class Queue extends Destination
     GetQueueMessageRep reply = 
       (GetQueueMessageRep)AdminModule.doRequest(
         new GetQueueMessage(agentId, msgId));
-    Message msg = (Message) Message.wrapMomMessage(null, reply.getMessage());
+    Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
-    if (msg.momMsg != null) {
-      msg.momMsg.getProperties(prop);
-    }
+    msg.getProperties(prop);
+
     return prop;
   }
 
