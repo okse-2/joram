@@ -23,15 +23,15 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.mom.MomTracing;
-
 import java.io.*;
 import java.net.*;
 
+import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.shared.client.MomExceptionReply;
+
 import fr.dyade.aaa.util.*;
 
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -71,15 +71,14 @@ public class TcpWriter extends Daemon {
   }
 
   public void run() {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpWriter.run()");
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
         ProxyMessage msg =  
           (ProxyMessage)replyQueue.get();
-        if (msg.getObject() instanceof Exception) {
+        if ((msg.getObject() instanceof MomExceptionReply) &&
+            (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
           // Exception indicating that the connection
           // has been closed by the heart beat task.
           // (see UserAgent)
@@ -95,8 +94,8 @@ public class TcpWriter extends Daemon {
         }
       }
     } catch (Exception exc) {
-      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgProxy.log(
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(
           BasicLevel.DEBUG, "", exc);
     }
   }
@@ -106,8 +105,8 @@ public class TcpWriter extends Daemon {
   }
     
   protected void close() {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
         "TcpWriter.close()", new Exception());
     if (ioctrl != null)

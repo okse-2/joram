@@ -25,15 +25,18 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.Serializable;
+
+import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 
 /**
  *
  */
-public class ReliableConnectionContext 
-  implements ConnectionContext, java.io.Serializable {
+public class ReliableConnectionContext implements ConnectionContext, Serializable {
 
   private int key;
 
@@ -49,8 +52,7 @@ public class ReliableConnectionContext
   
   private boolean closed;
 
-  ReliableConnectionContext(
-      ProxyImpl proxyImpl, int key, int heartBeat) {
+  ReliableConnectionContext(ProxyImpl proxyImpl, int key, int heartBeat) {
     this.key = key;
     this.heartBeat = heartBeat;
     this.proxyImpl = proxyImpl;
@@ -79,8 +81,7 @@ public class ReliableConnectionContext
   public AbstractJmsRequest getRequest(Object obj) {
     ProxyMessage msg = (ProxyMessage)obj;
     inputCounter = msg.getId();
-    AbstractJmsRequest request = 
-      (AbstractJmsRequest) msg.getObject();
+    AbstractJmsRequest request = (AbstractJmsRequest) msg.getObject();
     queue.ack(msg.getAckId());
     if (request instanceof CnxCloseRequest) {
       closed = true;
@@ -89,18 +90,16 @@ public class ReliableConnectionContext
   }
   
   public void pushReply(AbstractJmsReply reply) {
-    ProxyMessage msg = new ProxyMessage(
-        outputCounter, inputCounter, reply);
+    ProxyMessage msg = new ProxyMessage(outputCounter, inputCounter, reply);
     queue.push(msg);
     outputCounter++;
   }
   
-  public void pushError(Exception exc) {
-    queue.push(new ProxyMessage(-1, -1, exc));
+  public void pushError(MomException exc) {
+    queue.push(new ProxyMessage(-1, -1, new MomExceptionReply(exc)));
   }
   
   public boolean isClosed() {
     return closed;
-  }
-  
+  }  
 }

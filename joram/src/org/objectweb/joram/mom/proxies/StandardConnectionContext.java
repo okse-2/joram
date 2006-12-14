@@ -24,8 +24,10 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 
 import fr.dyade.aaa.util.Queue;
@@ -44,8 +46,7 @@ public class StandardConnectionContext
   
   private boolean closed;
 
-  StandardConnectionContext(
-      ProxyImpl proxyImpl, int key) {
+  StandardConnectionContext(ProxyImpl proxyImpl, int key) {
     this.key = key;
     this.proxyImpl = proxyImpl;
     queue = new Queue();
@@ -69,16 +70,15 @@ public class StandardConnectionContext
   }
   
   public AbstractJmsRequest getRequest(Object req) {
-    AbstractJmsRequest request = 
-      (AbstractJmsRequest) req;
+    AbstractJmsRequest request = (AbstractJmsRequest) req;
     if (request instanceof CnxCloseRequest) {
       closed = true;
     }
     return request;
   }
   
-  public void pushError(Exception exc) {
-    queue.push(exc);
+  public void pushError(MomException exc) {
+    queue.push(new MomExceptionReply(exc));
   }
   
   public boolean isClosed() {

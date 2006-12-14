@@ -38,7 +38,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLContext;
 
-import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -63,8 +63,8 @@ public class SSLTcpProxyService extends TcpProxyService {
    */
   public static void init(String args, boolean firstTime) 
     throws Exception {
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SSLTcpProxyService.init(" + 
         args + ',' + firstTime + ')');
 
@@ -84,8 +84,8 @@ public class SSLTcpProxyService extends TcpProxyService {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket;
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
 
     serverSocket = createServerSocket(port, backlog, address);
@@ -110,10 +110,10 @@ public class SSLTcpProxyService extends TcpProxyService {
     String sslContext = System.getProperty(SSLCONTEXT, "SSL");
     String ksType = System.getProperty(KS_TYPE, "JKS");
 
-    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "SSLTcpProxyService.createServerSocketFactory:" +
-                              keystoreFile + ':' + keyStorePass);
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "SSLTcpProxyService.createServerSocketFactory:" +
+                                keystoreFile + ':' + keyStorePass);
 
     KeyStore keystore = KeyStore.getInstance(ksType);
     keystore.load(new FileInputStream(keystoreFile), keyStorePass);
