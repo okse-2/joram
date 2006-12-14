@@ -53,7 +53,7 @@ public class BridgePtpModule extends BridgeUnifiedModule
    * @exception javax.jms.MessageFormatException  If the MOM message could not
    *              be converted into a foreign JMS message.
    */
-  public void send(org.objectweb.joram.shared.messages.Message message)
+  public void send(org.objectweb.joram.mom.messages.Message message)
               throws JMSException
   {
     if (! usable)
