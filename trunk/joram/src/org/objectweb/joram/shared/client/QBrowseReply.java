@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,113 +19,99 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
 
-import org.objectweb.joram.shared.messages.Message;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Enumeration;
+import java.io.Externalizable;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 import java.util.Vector;
+
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>QBrowseReply</code> instance is used by a JMS client proxy for
  * forwarding a <code>BrowseReply</code> destination notification,
  * actually replying to a client <code>QBrowseRequest</code>.
  */
-public class QBrowseReply extends AbstractJmsReply
-{
-  /** The message carried by this reply. */
-  private Message message = null;
+public final class QBrowseReply extends AbstractJmsReply {
   /** The vector of messages carried by this reply. */
   private Vector messages = null;
 
-  /**
-   * Constructs an empty <code>QBrowseReply</code>.
-   */
-  private QBrowseReply(int correlationId)
-  {
-    super(correlationId);
-  }
-
-  /**
-   * Constructs a <code>QBrowseReply</code>.
-   */
-  private QBrowseReply(int correlationId, Message message)
-  {
-    super(correlationId);
-    this.message = message;
-  }
-
-  /**
-   * Constructs a <code>QBrowseReply</code>.
-   */
-  public QBrowseReply(int correlationId, Vector messages)
-  {
-    super(correlationId);
-    this.messages = messages;
-  }
-
-  public QBrowseReply() {
-    messages = new Vector();
-  }
-
   /** Returns the vector of messages carried by this reply. */
-  public Vector getMessages()
-  {
-    if (message != null) {
-      Vector vec = new Vector();
-      vec.add(message);
-      return vec;
-    }
+  public Vector getMessages() {
+    if (messages == null)
+      messages = new Vector();
     return messages;
   }
 
   public void addMessage(Message msg) {
+    if (messages == null)
+      messages = new Vector();
     messages.addElement(msg);
   }
 
-  public void setMessage(Message msg) {
-    message = msg;
+  protected int getClassId() {
+    return QBROWSE_REPLY;
   }
 
-  public Hashtable soapCode() {
-    Hashtable h = super.soapCode();
-    // Coding and adding the messages into a array:
-    int size = 0;
-    if (messages != null)
-      size = messages.size();
-    if (size > 0) {
-      Hashtable [] arrayMsg = new Hashtable[size];
-      for (int i = 0; i<size; i++) {
-        Message msg = (Message) messages.elementAt(0);
-        messages.removeElementAt(0);
-        arrayMsg[i] = msg.soapCode();
-      }
-      if (arrayMsg != null)
-        h.put("arrayMsg",arrayMsg);
-    } else {
-      if (message != null) {
-        h.put("singleMsg",message.soapCode());
-      }
-    }
-    return h;
-  }
-
-  /** 
-   * Transforms a hashtable of primitive values into a
-   * <code>QBrowseReply</code> reply.
+  /**
+   * Constructs an empty <code>QBrowseReply</code>.
    */
-  public static Object soapDecode(Hashtable h) {
-    QBrowseReply req = new QBrowseReply();
-    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
-    Map [] arrayMsg = (Map []) h.get("arrayMsg");
-    if (arrayMsg != null) {
-      for (int i = 0; i<arrayMsg.length; i++)
-        req.addMessage(Message.soapDecode((Hashtable) arrayMsg[i]));
-    } else
-      req.setMessage(Message.soapDecode((Hashtable) h.get("singleMsg")));
-    return req;
+  private QBrowseReply(int correlationId) {
+    super(correlationId);
+  }
+
+  /**
+   * Constructs a <code>QBrowseReply</code>.
+   */
+  private QBrowseReply(int correlationId, Message message) {
+    super(correlationId);
+    messages = new Vector();
+    messages.addElement(message);
+  }
+
+  /**
+   * Constructs a <code>QBrowseReply</code>.
+   */
+  public QBrowseReply(int correlationId, Vector messages) {
+    super(correlationId);
+    this.messages = messages;
+  }
+
+  /**
+   * Public no-arg constructor needed by Externalizable.
+   */
+  public QBrowseReply() {
+  }
+
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    Message.writeVectorTo(messages, os);
+  }
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    messages = Message.readVectorFrom(is);
   }
 }

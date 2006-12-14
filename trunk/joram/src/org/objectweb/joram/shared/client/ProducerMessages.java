@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,24 +19,26 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
 
-import org.objectweb.joram.shared.messages.Message;
-import java.util.Hashtable;
-import java.util.Map;
+import java.io.Externalizable;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>ProducerMessages</code> instance is sent by a
  * <code>MessageProducer</code> when sending messages.
  */
-public class ProducerMessages extends AbstractJmsRequest
-{
-  /** The wrapped message. */
-  private Message message = null;
+public final class ProducerMessages extends AbstractJmsRequest {
   /** The wrapped messages. */
   private Vector messages = null;
 
@@ -47,15 +49,47 @@ public class ProducerMessages extends AbstractJmsRequest
    */
   private boolean asyncSend = false;
   
+  public void setAsyncSend(boolean b) {
+    asyncSend = b;
+  }
+  
+  public final boolean getAsyncSend() {
+    return asyncSend;
+  }
+
+  /** Returns the produced messages. */
+  public Vector getMessages() {
+    if (messages == null)
+      messages = new Vector();
+    return messages;
+  }
+
+  /** Adds a message to deliver. */
+  public void addMessage(Message msg) {
+    if (messages == null)
+      messages = new Vector();
+    messages.addElement(msg);
+  }
+
+  /** Adds messages to deliver. */
+  public void addMessages(Vector msgs) {
+    if (messages == null)
+      messages = new Vector();
+    for (Enumeration e = msgs.elements(); e.hasMoreElements(); )
+      messages.addElement(e.nextElement());
+  }
+
+  protected int getClassId() {
+    return PRODUCER_MESSAGES;
+  }
+
   /**
    * Constructs a <code>ProducerMessages</code> instance.
    *
    * @param dest  Name of the destination the messages are sent to.
    */
-  public ProducerMessages(String dest)
-  {
+  public ProducerMessages(String dest) {
     super(dest);
-    messages = new Vector();
   }
 
   /**
@@ -65,98 +99,49 @@ public class ProducerMessages extends AbstractJmsRequest
    * @param dest  Name of the destination the messages are sent to.
    * @param msg  Message to carry.
    */
-  public ProducerMessages(String dest, Message msg)
-  {
+  public ProducerMessages(String dest, Message msg) {
     super(dest);
-    message = msg;
-  }
-
-
-  /** Adds a message to deliver. */
-  public void addMessage(Message msg)
-  {
+    messages = new Vector();
     messages.addElement(msg);
   }
 
-  /** set a message to deliver. */
-  public void setMessage(Message msg) {
-    message = msg;
-  }
-
-  /** Adds messages to deliver. */
-  public void addMessages(Vector msgs)
-  {
-    for (Enumeration e = msgs.elements(); e.hasMoreElements(); )
-      messages.addElement(e.nextElement());
-  }
-
-  /** Returns the produced messages. */
-  public Vector getMessages()
-  {
-    if (message != null) {
-      Vector vec = new Vector();
-      vec.add(message);
-      return vec;
-    }
-    return messages;
-  }
-  
-  public void setAsyncSend(boolean b) {
-    asyncSend = b;
-  }
-  
-  public final boolean getAsyncSend() {
-    return asyncSend;
-  }
- 
   /**
-   * Transforms this request into a hashtable of primitive values that can
-   * be vehiculated through the SOAP protocol.
+   * Constructs a <code>ProducerMessages</code> instance.
    */
-  public Hashtable soapCode() {
-    Hashtable h = super.soapCode();
-    // Coding and adding the messages into a array:
-    int size = 0;
-    if (messages != null)
-      size = messages.size();
-    if (size > 0) {
-      Hashtable [] arrayMsg = new Hashtable[size];
-      for (int i = 0; i<size; i++) {
-        Message msg = (Message) messages.elementAt(0);
-        messages.removeElementAt(0);
-        arrayMsg[i] = msg.soapCode();
-      }
-      if (arrayMsg != null)
-        h.put("arrayMsg",arrayMsg);
-    } else {
-      if (message != null) {
-        h.put("singleMsg",message.soapCode());
-      }
-    }
-    return h;
+  public ProducerMessages() {}
+
+  public void toString(StringBuffer strbuf) {
+    super.toString(strbuf);
+    strbuf.append(",messages=").append(messages);
+    strbuf.append(",asyncSend=").append(asyncSend);
+    strbuf.append(')');
   }
 
-  /** 
-   * Transforms a hastable of primitive values into a
-   * <code>ProducerMessages</code> request.
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
    */
-  public static Object soapDecode(Hashtable h) {
-    ProducerMessages req = new ProducerMessages(null);
-    req.setRequestId(((Integer) h.get("requestId")).intValue());
-    req.setTarget((String) h.get("target"));
-    Object [] arrayMsg = (Object []) h.get("arrayMsg");
-    if (arrayMsg != null) {
-      for (int i = 0; i<arrayMsg.length; i++)
-        req.addMessage(Message.soapDecode((Hashtable) arrayMsg[i]));
-    } else
-      req.setMessage(Message.soapDecode((Hashtable) h.get("singleMsg")));
-    return req;
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    Message.writeVectorTo(messages, os);
+    StreamUtil.writeTo(asyncSend, os);
   }
 
-  public String toString() {
-    return '(' + super.toString() +
-      ",message=" + message + 
-      ",messages=" + messages +
-      ",asyncSend=" + asyncSend + ')';
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    messages = Message.readVectorFrom(is);
+    asyncSend = StreamUtil.readBooleanFrom(is);
   }
 }

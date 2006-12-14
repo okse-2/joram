@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,39 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.io.Externalizable;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>SessCreateTDReply</code> is used by a JMS proxy for replying
  * to a <code>SessCreate&lt;TQ/TT&gt;Request</code>.
  */
-public class SessCreateTDReply extends AbstractJmsReply
-{
+public final class SessCreateTDReply extends AbstractJmsReply {
   /** The string identifier of the temporary destination agent. */
   private String agentId;
 
+  /** Sets the destination identifier. */
+  public void setAgentId(String agentId) {
+    this.agentId = agentId;
+  }
+
+  /** Returns the temporary destination's agent identifier. */
+  public String getAgentId() {
+    return agentId;
+  }
+
+  protected int getClassId() {
+    return SESS_CREATE_TDREPLY;
+  }
 
   /**
    * Constructs a <code>SessCreateTDReply</code> instance.
@@ -42,8 +59,7 @@ public class SessCreateTDReply extends AbstractJmsReply
    * @param request  The replied request.
    * @param agentId  String identifier of the destination agent.
    */
-  public SessCreateTDReply(AbstractJmsRequest request, String agentId)
-  {
+  public SessCreateTDReply(AbstractJmsRequest request, String agentId) {
     super(request.getRequestId());
     this.agentId = agentId;
   }
@@ -51,33 +67,31 @@ public class SessCreateTDReply extends AbstractJmsReply
   /**
    * Constructs a <code>SessCreateTDReply</code> instance.
    */
-  public SessCreateTDReply()
-  {}
+  public SessCreateTDReply() {}
 
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
 
-  /** Sets the destination identifier. */
-  public void setAgentId(String agentId)
-  {
-    this.agentId = agentId;
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    StreamUtil.writeTo(agentId, os);
   }
 
-  /** Returns the temporary destination's agent identifier. */
-  public String getAgentId()
-  {
-    return agentId;
-  }
-
-  public Hashtable soapCode() {
-    Hashtable h = super.soapCode();
-    if (agentId != null)
-      h.put("agentId",agentId);
-    return h;
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    SessCreateTDReply req = new SessCreateTDReply();
-    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
-    req.setAgentId((String) h.get("agentId"));
-    return req;
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    agentId = StreamUtil.readStringFrom(is);
   }
 }

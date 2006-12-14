@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,31 +19,20 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
-
-import java.util.Hashtable;
-import java.util.Enumeration;
 
 /**
  * A <code>CnxCloseReply</code> replies to a <code>CnxCloseRequest</code>.
  */
-public class CnxCloseReply extends AbstractJmsReply
-{
+public final class CnxCloseReply extends AbstractJmsReply {
+  protected int getClassId() {
+    return CNX_CLOSE_REPLY;
+  }
+
   /** Constructs a <code>CnxCloseReply</code> instance. */
-  public CnxCloseReply()
-  {
+  public CnxCloseReply() {
     super(-1);
-  }
-
-  public Hashtable soapCode() {
-    return super.soapCode();
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    CnxCloseReply req = new CnxCloseReply();
-    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
-    return req;
   }
 }

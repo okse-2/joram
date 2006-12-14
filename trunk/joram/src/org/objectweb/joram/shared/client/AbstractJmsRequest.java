@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,27 +19,41 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.client;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.io.Externalizable;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * An <code>AbstractJmsRequest</code> is a request sent by a Joram client
  * to its proxy.
  */
-public class AbstractJmsRequest implements java.io.Serializable
-{
+public abstract class AbstractJmsRequest extends AbstractJmsMessage {
   /** 
    * Identifier of the request. 
-   * Declared volatile to allow a thread that is not the
-   * thread sending the request to get the identifier
-   * in order to cancel it during a close.
+   * Declared volatile to allow a thread that is not the thread sending the
+   * request to get the identifier in order to cancel it during a close.
    */
-  private volatile int requestId = -1;
+  protected volatile int requestId = -1;
+
+  /** 
+   * Sets the request identifier. 
+   */
+  public final void setRequestId(int requestId) {
+    this.requestId = requestId;
+  }
+  
+  /** Returns the request identifier. */
+  public final synchronized int getRequestId() {
+    return requestId;
+  }
 
   /**
    * The request target is either a destination agent name, or a subscription 
@@ -47,6 +61,20 @@ public class AbstractJmsRequest implements java.io.Serializable
    */
   protected String target = null;
 
+   /** Sets the request target name. */
+  public final void setTarget(String target) {
+    this.target = target;
+  }
+
+  /** Returns the request target name.  */
+  public final String getTarget() {
+    return target;
+  }
+
+  /**
+   * Constructs an <code>AbstractJmsRequest</code>.
+   */
+  public AbstractJmsRequest() {}
 
   /**
    * Constructs an <code>AbstractJmsRequest</code>.
@@ -54,69 +82,46 @@ public class AbstractJmsRequest implements java.io.Serializable
    * @param target  String identifier of the request target, either a queue
    *          name, or a subscription name.
    */
-  public AbstractJmsRequest(String target)
-  {
+  public AbstractJmsRequest(String target) {
     this.target = target;
+  }
+
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    toString(strbuf);
+    return strbuf.toString();
+  }
+
+  public void toString(StringBuffer strbuf) {
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",requestId=").append(requestId);
+    strbuf.append(",target=").append(target);
+    strbuf.append(')');
+  }
+
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  public void writeTo(OutputStream os) throws IOException {
+    StreamUtil.writeTo(requestId, os);
+    StreamUtil.writeTo(target, os);
   }
 
   /**
-   * Constructs an <code>AbstractJmsRequest</code>.
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
    */
-  public AbstractJmsRequest()
-  {}
-
-
-  /** 
-   * Sets the request identifier. 
-   */
-  public void setRequestId(int requestId)
-  {
-    this.requestId = requestId;
-  }
-
-   /** Sets the request target name. */
-  public void setTarget(String target)
-  {
-    this.target = target;
-  }
-  
-  /** Returns the request identifier. */
-  public synchronized int getRequestId()
-  {
-    return requestId;
-  }
-
-  /** Returns the request target name.  */
-  public String getTarget()
-  {
-    return target;
-  }
-
-  /** Returns the identifier as an hashtable key. */
-  public Integer getKey()
-  {
-    return new Integer(requestId);
-  }
-
-  public Hashtable soapCode() {
-    Hashtable h = new Hashtable();
-    h.put("className",getClass().getName());
-    h.put("requestId",getKey());
-    if (target != null)
-      h.put("target",target);
-    return h;
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    AbstractJmsRequest req = 
-      new AbstractJmsRequest((String) h.get("target"));
-    req.setRequestId(((Integer) h.get("requestId")).intValue());
-    return req;
-  }
-
-  public String toString() {
-    return '(' + super.toString() +
-      ",requestId=" + requestId + 
-      ",target=" + target + ')';
+  public void readFrom(InputStream is) throws IOException {
+    requestId = StreamUtil.readIntFrom(is);
+    target = StreamUtil.readStringFrom(is);
   }
 }

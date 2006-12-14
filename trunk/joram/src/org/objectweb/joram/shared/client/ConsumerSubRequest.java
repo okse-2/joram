@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,31 +17,82 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.io.Externalizable;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>ConsumerSubRequest</code> is sent by a constructing
  * <code>MessageConsumer</code> destinated to consume messages on a topic.
  */
-public class ConsumerSubRequest extends AbstractJmsRequest
-{
+public final class ConsumerSubRequest extends AbstractJmsRequest {
   /** The subscription's name. */
   private String subName;
+
+  /** Sets the subscription name. */
+  public void setSubName(String subName) {
+    this.subName = subName;
+  }
+
+  /** Returns the name of the subscription. */
+  public String getSubName() {
+    return subName;
+  }
+
   /** The selector for filtering messages. */
   private String selector;
+
+  /** Sets the selector. */
+  public void setSelector(String selector) {
+    this.selector = selector;
+  }
+
+  /** Returns the selector for filtering the messages. */
+  public String getSelector() {
+    return selector;
+  }
+
   /**
    * <code>true</code> if the subscriber does not wish to consume messages
    * produced by its connection.
    */
   private boolean noLocal;
+
+  /** Sets the noLocal attribute. */
+  public void setNoLocal(boolean noLocal) {
+    this.noLocal = noLocal;
+  }
+
+  /** Returns <code>true</code> for not consuming the local messages. */
+  public boolean getNoLocal() {
+    return noLocal;
+  }
+
   /** <code>true</code> if the subscription is durable. */
   private boolean durable;
+
+  /** Sets the durable attribute. */
+  public void setDurable(boolean durable) {
+    this.durable = durable;
+  }
+
+  /** Returns <code>true</code> for a durable subscription. */
+  public boolean getDurable() {
+    return durable;
+  }
+
+  protected int getClassId() {
+    return CONSUMER_SUB_REQUEST;
+  }
 
   /**
    * Constructs a <code>ConsumerSubRequest</code>.
@@ -54,8 +104,7 @@ public class ConsumerSubRequest extends AbstractJmsRequest
    * @param durable  <code>true</code> for a durable subscription.
    */
   public ConsumerSubRequest(String topic, String subName, String selector,
-                            boolean noLocal, boolean durable)
-  {
+                            boolean noLocal, boolean durable) {
     super(topic);
     this.subName = subName;
     this.selector = selector;
@@ -66,76 +115,37 @@ public class ConsumerSubRequest extends AbstractJmsRequest
   /**
    * Constructs a <code>ConsumerSubRequest</code>.
    */
-  public ConsumerSubRequest()
-  {}
+  public ConsumerSubRequest() {}
 
-  /** Sets the subscription name. */
-  public void setSubName(String subName)
-  {
-    this.subName = subName;
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    StreamUtil.writeTo(subName, os);
+    StreamUtil.writeTo(selector, os);
+    StreamUtil.writeTo(noLocal, os);
+    StreamUtil.writeTo(durable, os);
   }
 
-  /** Sets the selector. */
-  public void setSelector(String selector)
-  {
-    this.selector = selector;
-  }
-
-  /** Sets the noLocal attribute. */
-  public void setNoLocal(boolean noLocal)
-  {
-    this.noLocal = noLocal;
-  }
-
-  /** Sets the durable attribute. */
-  public void setDurable(boolean durable)
-  {
-    this.durable = durable;
-  }
-
-  /** Returns the name of the subscription. */
-  public String getSubName()
-  {
-    return subName;
-  }
-
-  /** Returns the selector for filtering the messages. */
-  public String getSelector()
-  {
-    return selector;
-  }
-
-  /** Returns <code>true</code> for not consuming the local messages. */
-  public boolean getNoLocal()
-  {
-    return noLocal;
-  }
-
-  /** Returns <code>true</code> for a durable subscription. */
-  public boolean getDurable()
-  {
-    return durable;
-  }
-
-  public Hashtable soapCode() {
-    Hashtable h = super.soapCode();
-    if (subName != null)
-      h.put("subName",subName);
-    if (selector != null)
-      h.put("selector",selector);
-    h.put("noLocal",new Boolean(noLocal));
-    h.put("durable",new Boolean(durable));
-    return h;
-  }
-
-  public static Object soapDecode(Hashtable h) {
-    ConsumerSubRequest req = new ConsumerSubRequest();
-    req.setRequestId(((Integer) h.get("requestId")).intValue());
-    req.setTarget((String) h.get("target"));
-    req.setSubName((String) h.get("subName"));
-    req.setSelector((String) h.get("selector"));
-    req.setNoLocal(((Boolean) h.get("noLocal")).booleanValue());
-    req.setDurable(((Boolean) h.get("durable")).booleanValue());
-    return req;
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    subName = StreamUtil.readStringFrom(is);
+    selector = StreamUtil.readStringFrom(is);
+    noLocal = StreamUtil.readBooleanFrom(is);
+    durable = StreamUtil.readBooleanFrom(is);
   }
 }
