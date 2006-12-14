@@ -25,14 +25,17 @@ package com.scalagent.joram.mom.dest.scheduler;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
+// import java.io.IOException;
+// import java.io.ObjectInputStream;
+// import java.io.ObjectOutputStream;
 
 import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.Message;
+// import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.mom.messages.Message;
 
 import com.scalagent.scheduler.AddConditionListener;
 import com.scalagent.scheduler.Condition;
@@ -50,10 +53,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 public class SchedulerQueueImpl extends QueueImpl {
-  public static Logger logger = Debug.getLogger("com.scalagent.joram.scheduler.SchedulerQueueImpl");
+  public static Logger logger =
+      Debug.getLogger("com.scalagent.joram.scheduler.SchedulerQueueImpl");
 
   public static final String SCHEDULE_DATE = "scheduleDate";
-    
+
+  public static final String SCHEDULED = "scheduled";
+
   /**
    * Constructs a <code>SchedulerQueueImpl</code> instance.
    *
@@ -70,27 +76,24 @@ public class SchedulerQueueImpl extends QueueImpl {
 
   protected void doProcess(ClientMessages not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "SchedulerQueueImpl.doProcess(" + not + ')');
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.doProcess(" + not + ')');
     super.doProcess(not);
-    Message msg;
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
-      msg = (Message) msgs.nextElement();
-        long scheduleDate = getScheduleDate(msg);
-        if (scheduleDate < 0) return;
-        //DF: to improve
-        // two notifs are necessary to subscribe
-        Channel.sendTo(Scheduler.getDefault(),
-                       new AddConditionListener(msg.getIdentifier()));
-        Channel.sendTo(Scheduler.getDefault(),
-                       new ScheduleEvent(msg.getIdentifier(),
-                                         new Date(scheduleDate)));
+    org.objectweb.joram.shared.messages.Message msg;
+    for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
+      msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
+      long scheduleDate = getScheduleDate(msg);
+      if (scheduleDate < 0) return;
+      //DF: to improve
+      // two notifs are necessary to subscribe
+      Channel.sendTo(Scheduler.getDefault(),
+                     new AddConditionListener(msg.id));
+      Channel.sendTo(Scheduler.getDefault(),
+                     new ScheduleEvent(msg.id, new Date(scheduleDate)));
     }
   }
 
-  private static long getScheduleDate(Message msg) {
-    Object scheduleDateValue = msg.getObjectProperty(SCHEDULE_DATE);
+  private static long getScheduleDate(org.objectweb.joram.shared.messages.Message msg) {
+    Object scheduleDateValue = msg.getProperty(SCHEDULE_DATE);
     if (scheduleDateValue == null) return -1;
     try {
       return ((Long)scheduleDateValue).longValue();
@@ -104,8 +107,8 @@ public class SchedulerQueueImpl extends QueueImpl {
   public void react(AgentId from, Notification not)
       throws UnknownNotificationException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.react(" + from + ','
-          + not + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "SchedulerQueueImpl.react(" + from + ',' + not + ')');
     if (not instanceof Condition) {
       doReact((Condition) not);
     } else
@@ -117,6 +120,9 @@ public class SchedulerQueueImpl extends QueueImpl {
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message) messages.elementAt(i);
       if (msg.getIdentifier().equals(msgId)) {
+        try {
+          msg.setObjectProperty(SCHEDULED, "" + System.currentTimeMillis());
+        } catch (Exception exc) {}
         // Must remove the condition
         Channel.sendTo(
             Scheduler.getDefault(), 
@@ -127,7 +133,7 @@ public class SchedulerQueueImpl extends QueueImpl {
     deliverMessages(0);
   }
 
-  protected boolean checkDelivery(Message msg) {
+  protected boolean checkDelivery(org.objectweb.joram.shared.messages.Message msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "SchedulerQueueImpl.checkDelivery(" + msg + ')');
@@ -137,6 +143,7 @@ public class SchedulerQueueImpl extends QueueImpl {
     } else {
       long currentTime = System.currentTimeMillis();
       return !(scheduleDate > currentTime);
+
     }
   }
 }
