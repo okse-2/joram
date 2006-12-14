@@ -43,7 +43,7 @@ import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
@@ -134,9 +134,9 @@ public class Queue extends Destination implements BagSerializer {
           Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "--- " + this + " Queue(...)", exc);
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+                                            "--- " + this + " Queue(...)", exc);
         }
       }
     }
