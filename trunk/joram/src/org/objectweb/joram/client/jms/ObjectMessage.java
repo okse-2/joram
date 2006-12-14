@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s):ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
@@ -34,52 +34,25 @@ import javax.jms.MessageNotWriteableException;
 /**
  * Implements the <code>javax.jms.ObjectMessage</code> interface.
  */
-public class ObjectMessage extends Message implements javax.jms.ObjectMessage
-{
-  /**
-   * The object still coded as a bytes array (decoding will occur during
-   * the <code>getObject()</code> call.
-   */
-  private byte[] codedObject = null;
-
-  /** <code>true</code> if the message body is read-only. */
-  private boolean RObody = false;
-
-
+public final class ObjectMessage extends Message implements javax.jms.ObjectMessage {
   /**
    * Instanciates a bright new <code>ObjectMessage</code>.
    */
-  ObjectMessage()
-  {
+  ObjectMessage() {
     super();
+    momMsg.type = momMsg.OBJECT;
   }
 
   /**
    * Instanciates an <code>ObjectMessage</code> wrapping a
    * consumed MOM message containing an object.
    *
-   * @param sess  The consuming session.
+   * @param session  The consuming session.
    * @param momMsg  The MOM message to wrap.
    */
-  ObjectMessage(Session sess,
-                org.objectweb.joram.shared.messages.Message momMsg)
-  {
-    super(sess, momMsg);
-    codedObject = momMsg.getBytes();
-    RObody = true;
-  }
-
-
-  /** 
-   * API method.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  public void clearBody() throws JMSException
-  {
-    super.clearBody();
-    codedObject = null;
-    RObody = false;
+  ObjectMessage(Session session,
+                org.objectweb.joram.shared.messages.Message momMsg) {
+    super(session, momMsg);
   }
 
   /**
@@ -89,17 +62,24 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
    *              the message body is read-only.
    * @exception MessageFormatException        If object serialization fails.
    */
-  public void setObject(Serializable obj) throws JMSException
-  {
+  public void setObject(Serializable obj) throws JMSException {
     if (RObody)
       throw new MessageNotWriteableException("Can't set an object as the"
                                              + " message body is read-only.");
+
     try {
-      momMsg.clearBody();
-      momMsg.setObject(obj);
-      codedObject = momMsg.getBytes();
-    }
-    catch (Exception exc) {
+      clearBody();
+
+      if (obj == null) return;
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(obj);
+      oos.flush();
+      momMsg.body = baos.toByteArray();
+      oos.close();
+      baos.close();
+    } catch (Exception exc) {
       throw new MessageFormatException("Object serialization failed: " + exc);
     }
   }
@@ -110,15 +90,15 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
    * @exception MessageFormatException  In case of a problem when getting the
    *              body.
    */
-  public Serializable getObject() throws MessageFormatException
-  {
-    if (codedObject == null)
-      return null;
+  public Serializable getObject() throws MessageFormatException {
+    if (momMsg.body == null) return null;
 
+    ByteArrayInputStream bais = null;
+    ObjectInputStream ois = null;
     try {
       try {
-        ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
-        ObjectInputStream ois = new ObjectInputStream(bais);
+        bais = new ByteArrayInputStream(momMsg.body);
+        ois = new ObjectInputStream(bais);
         return (Serializable) ois.readObject();
       } catch (ClassNotFoundException exc) {
         // Could not build serialized object: reason could be linked to 
@@ -134,8 +114,8 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
             return Class.forName(n, false, Thread.currentThread().getContextClassLoader());
           }
         }
-        ByteArrayInputStream bais = new ByteArrayInputStream(codedObject);
-        ObjectInputStream ois = new Specialized_OIS(bais);
+        bais = new ByteArrayInputStream(momMsg.body);
+        ois = new Specialized_OIS(bais);
         return (Serializable) ois.readObject(); 
       }
     } catch (Exception exc) {
@@ -143,22 +123,13 @@ public class ObjectMessage extends Message implements javax.jms.ObjectMessage
         new MessageFormatException("Error while deserializing the wrapped " 
                                    + "object: " + exc);
       throw jE;
+    } finally {
+      try {
+        ois.close();
+      } catch (Exception e) {}
+      try {
+        bais.close();
+      } catch (Exception e) {}
     }
-  }
-
-  /**
-   * Method actually preparing the message for sending by transfering the
-   * local body into the wrapped MOM message.
-   *
-   * @exception Exception  If an error occurs while serializing.
-   */
-  protected void prepare() throws Exception
-  {
-    super.prepare();
-  }
-
-  public String toString() {
-    return '(' + super.toString() +
-      ",codedObject=" + codedObject + ')';
   }
 }
