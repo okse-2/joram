@@ -42,15 +42,21 @@ public class JoramTracing {
   public static Logger dbgClient = null;
   /**
    * Logger used to trace destinations activity, to be set using topic
-   * org.objectweb.joram.shared.Destination
+   * org.objectweb.joram.mom.Destination
    */
   public static Logger dbgDestination = null;
 
   /**
    * Logger used to trace proxies activity, to be set using topic
-   * org.objectweb.joram.shared.Proxy
+   * org.objectweb.joram.mom.Proxy
    */
   public static Logger dbgProxy = null;
+
+  /**
+   * Logger used to trace messages activity, to be set using topic
+   * org.objectweb.joram.shared.Message
+   */
+  public static Logger dbgMessage = null;
 
   /**
    * Initializes the package by setting the various loggers.
@@ -60,5 +66,6 @@ public class JoramTracing {
     dbgClient = Debug.getLogger("org.objectweb.joram.client.jms.Client");
     dbgDestination = Debug.getLogger("org.objectweb.joram.mom.Destination");
     dbgProxy = Debug.getLogger("org.objectweb.joram.mom.Proxy");
+    dbgMessage = Debug.getLogger("org.objectweb.joram.shared.Message");
   }
 }
