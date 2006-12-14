@@ -96,6 +96,7 @@
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/util/management/*.class"/>
+        <include name="org/objectweb/joram/shared/JoramTracing.class"/>
         <include name="org/objectweb/joram/shared/admin/*.class"/>
         <include name="org/objectweb/joram/shared/client/*.class"/>
         <include name="org/objectweb/joram/shared/excepts/*.class"/>
