@@ -23,6 +23,16 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.lang.reflect.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.Properties;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentServer;
@@ -39,25 +49,19 @@ import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLDomain;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
-import org.objectweb.joram.mom.MomTracing;
+
 import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.excepts.*;
+
+import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.UserAgent;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.Properties;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.lang.reflect.*;
-
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -65,7 +69,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * basically processing administration requests.
  */
 public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
-
   /** Reference of the server's local AdminTopicImpl instance. */
   private static AdminTopicImpl ref;
   
@@ -207,8 +210,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   public void react(AgentId from, Notification not)
               throws UnknownNotificationException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
                                     + ": got " + not
                                     + " from: " + from.toString());
 
@@ -249,8 +252,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     clients.put(adminNot.getProxyId(), new Integer(READWRITE));
    
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, name + " successfully"
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, name + " successfully"
                                     + " set as admin client.");
   }
 
@@ -459,8 +462,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   protected void doReact(AgentId from, SetRightRequest request)
                  throws AccessException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
@@ -472,15 +475,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   protected void doReact(AgentId from, SetDMQRequest request)
                  throws AccessException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
   protected void doReact(AgentId from, RequestGroupNot not) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-          "AdminTopicImpl.doReact(" + not + ')');
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                      "AdminTopicImpl.doReact(" + not + ')');
     Enumeration en = not.getClientMessages();
     while (en.hasMoreElements()) {
       ClientMessages cm = (ClientMessages) en.nextElement();
@@ -501,9 +504,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   protected void doReact(AgentId from, ClientMessages not)
                  throws AccessException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
-          "AdminTopicImpl.doReact(" + not + ')');
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                      "AdminTopicImpl.doReact(" + not + ')');
     if (! not.getPersistent() && !not.getAsyncSend()) {
       // Means that this notification has been sent by a local
       // proxy (optimization). Must acknowledge it.
@@ -526,8 +529,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * not accepted by AdminTopics.
    */
   protected void doReact(AgentId from, DeleteNot not) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + not);
   }
 
@@ -540,8 +543,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   protected void doReact(AgentId from, ClusterRequest request)
                  throws AccessException
   {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
@@ -560,8 +563,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * is not expected by an AdminTopic.
    */ 
   protected void doReact(AgentId from, ClusterAck ack) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected notification: " + ack);
   }
 
@@ -571,8 +574,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * fellows are notified to it.
    */
   protected void doReact(AgentId from, ClusterNot not) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected notification: " + not);
   }
 
@@ -584,8 +587,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   protected void doReact(AgentId from, UnclusterRequest request)
                  throws MomException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
@@ -597,8 +600,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   protected void doReact(AgentId from, SetFatherRequest request)
                  throws MomException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
@@ -618,8 +621,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * acknowledges the process of creating a hierarchy of topics.
    */ 
   protected void doReact(AgentId from, FatherAck ack) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected notification: " + ack);
   }
 
@@ -631,8 +634,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   protected void doReact(AgentId from, UnsetFatherRequest request)
                  throws MomException {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      MomTracing.dbgDestination.log(BasicLevel.WARN,
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+      JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                     "Unexpected request: " + request);
   }
 
@@ -691,19 +694,19 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     while (messages.hasMoreElements()) {
       nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + 1;
       msg = (Message) messages.nextElement();
-      msgId = msg.getIdentifier();
+      msgId = msg.id;
       replyTo = AgentId.fromString(msg.getReplyToId());
       request = null;
 
       try {
         request = (AdminRequest) msg.getObject();
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                         "--- " + this + ": got " 
                                         + msg.getObject());
       } catch (ClassCastException exc) {
-        MomTracing.dbgDestination.log(BasicLevel.ERROR,
+        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
                                       "--- " + this + ": got bad object");
         if (request == null) {
           info = strbuf.append("Unexpected request to AdminTopic on server [")
@@ -845,8 +848,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     } catch (MomException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        JoramTracing.dbgDestination.log(BasicLevel.WARN, exc);
 
       if (request == null) {
         info = strbuf.append("Unexpected request to AdminTopic on server [")
@@ -967,8 +970,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           strbuf.setLength(0);
         }
         catch (Exception exc) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
 
 
           throw new RequestException("Error while deploying Destination [" + 
@@ -985,8 +988,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           destDesc.getType(),
           info));
       
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
@@ -1029,8 +1032,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault(destId.getTo()),
@@ -1181,8 +1184,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         }
       }
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
 
       distributeReply(replyTo,
                       msgId,
@@ -1242,8 +1245,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault(proxId.getTo()),
@@ -1286,8 +1289,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       }
       distributeReply(replyTo, msgId, new AdminReply(true, info));
     
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault(proxId.getTo()),
@@ -1359,8 +1362,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
@@ -1436,8 +1439,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
@@ -1538,8 +1541,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
       
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       Channel.sendTo(AdminTopic.getDefault((short) request.getServerId()),
@@ -1613,8 +1616,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                       "Default threshold unset.");
     } else {
       // Forward the request to the right AdminTopic agent.
@@ -1706,8 +1709,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           ids, names, hostNames);
         distributeReply(replyTo, msgId, reply);
       } catch (Exception exc) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
         distributeReply(replyTo, msgId,
                         new AdminReply(false, exc.toString()));
       }
@@ -1729,8 +1732,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                             a3cmlServer.name,
                                             a3cmlServer.hostname));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1750,8 +1753,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       GetDomainNamesRep reply = new GetDomainNamesRep(domainNames);
       distributeReply(replyTo, msgId, reply);
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2080,8 +2083,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     
     if (checkServerId(destId.getTo())) {
       // The destination is local, process the request.
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "AdminTopicImpl.doProcess " +
                                       "SpecialAdminRequest destId=" + destId);
 
@@ -2119,24 +2122,24 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (ServerConfigHelper.NameAlreadyUsedException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
                         false, 
                         AdminReply.NAME_ALREADY_USED, 
                         exc.getMessage(), null));
     } catch (ServerConfigHelper.StartFailureException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
                         false,
                         AdminReply.START_FAILURE, 
                         exc.getMessage(), null));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2158,8 +2161,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2197,16 +2200,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (ServerConfigHelper.ServerIdAlreadyUsedException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
                         false, 
                         AdminReply.SERVER_ID_ALREADY_USED, 
                         exc.getMessage(), null));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2227,16 +2230,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (UnknownServerException exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
                         false, 
                         AdminReply.UNKNOWN_SERVER, 
                         exc.getMessage(), null));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2260,8 +2263,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2284,8 +2287,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2322,8 +2325,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       distributeReply(replyTo, msgId,
                       new AdminReply(true, config));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2355,8 +2358,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       Channel.sendTo(topicId, new DestinationAdminRequestNot(
         request, replyTo, requestMsgId, createMessageId()));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2371,8 +2374,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       Channel.sendTo(queueId, new DestinationAdminRequestNot(
         request, replyTo, requestMsgId, createMessageId()));
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2415,8 +2418,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @param reply  The <code>AdminReply</code> instance to send.
    */
   private void distributeReply(AgentId to, String msgId, AdminReply reply) {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(
+    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgDestination.log(
         BasicLevel.DEBUG,
         "AdminTopicImpl.distributeReply(" + 
         to + ',' + msgId + ',' + reply + ')');
@@ -2424,23 +2427,18 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (to == null)
       return;
     
-    Message message = Message.create();
-    message.setIdentifier(createMessageId());
-    message.setCorrelationId(msgId);
-    message.setTimestamp(System.currentTimeMillis());
-    message.setDestination(destId.toString(), 
-                           Topic.TOPIC_TYPE);
+    Message message = new Message();
+    message.id = createMessageId();
+    message.correlationId = msgId;
+    message.timestamp = System.currentTimeMillis();
+    message.setDestination(destId.toString(), Topic.TOPIC_TYPE);
     try {
       message.setObject(reply);
-
-      Vector messages = new Vector();
-      messages.add(message);
-
-      ClientMessages clientMessages = new ClientMessages(-1, -1, messages);
+      ClientMessages clientMessages = new ClientMessages(-1, -1, message);
       Channel.sendTo(to, clientMessages);
       nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + 1;
     } catch (Exception exc) {
-      MomTracing.dbgDestination.log(
+      JoramTracing.dbgDestination.log(
         BasicLevel.ERROR, "", exc);
     }
   }
@@ -2448,8 +2446,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   /** Serializes an <code>AdminTopicImpl</code> instance. */
   private void writeObject(java.io.ObjectOutputStream out)
-               throws java.io.IOException
-  {
+               throws java.io.IOException {
     defaultDMQId = DeadMQueueImpl.id;
     defaultThreshold = DeadMQueueImpl.threshold;
     out.defaultWriteObject();
@@ -2457,8 +2454,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   /** Deserializes an <code>AdminTopicImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
-               throws java.io.IOException, ClassNotFoundException
-  {
+               throws java.io.IOException, ClassNotFoundException {
     in.defaultReadObject();
     ref = this;
     DeadMQueueImpl.id = defaultDMQId;

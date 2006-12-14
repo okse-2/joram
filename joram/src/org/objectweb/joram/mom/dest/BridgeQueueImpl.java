@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.IOException;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -34,13 +35,15 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.util.*;
+
 import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.Selector;
 
-import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.mom.util.*;
+import org.objectweb.joram.mom.messages.Message;
+
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -118,7 +121,7 @@ public class BridgeQueueImpl extends QueueImpl {
    */
   protected void doReact(BridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
-    clientMessages.addMessage(not.getMessage());
+    clientMessages.addMessage(not.getMessage().msg);
     super.doProcess(clientMessages);
   }
 
@@ -161,28 +164,28 @@ public class BridgeQueueImpl extends QueueImpl {
       if (not.getTimeOut() == -1) {
         requests.remove(reqIndex);
 
-        Message msg = null;
+        Message message = null;
 
         try {
-          msg = jmsModule.receiveNoWait();
+          message = jmsModule.receiveNoWait();
         } catch (Exception exc) {
           // JMS module not properly initialized.
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "Failing receive request on remote "
-                                          + "destination: " + exc);
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+                                            "Failing receive request on remote destination: ", exc);
         }
 
         // If message not null but not selected, setting it to null.
-        if (msg != null && ! Selector.matches(msg, not.getSelector()))
-          msg = null;
+        if ((message != null) &&
+            ! Selector.matches(message.msg, not.getSelector()))
+          message = null;
 
         QueueMsgReply reply = new QueueMsgReply(not);
-        reply.addMessage(msg);
+        reply.addMessage(message.msg);
         Channel.sendTo(from, reply);
 
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                         "Receive answered.");
       } else {
         // Else, requesting the foreign JMS destination for a delivery: 
@@ -190,10 +193,9 @@ public class BridgeQueueImpl extends QueueImpl {
           jmsModule.receive();
         } catch (Exception exc) {
           // JMS module not properly initialized.
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "Failing receive request on remote "
-                                          + "destination: " + exc);
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+                                            "Failing receive request on remote destination: ", exc);
         }
       }
     }
@@ -207,31 +209,26 @@ public class BridgeQueueImpl extends QueueImpl {
    */
   protected void doProcess(ClientMessages not) {
     // Sending each message:
-    Message msg;
+    Message message;
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
+      // AF: TODO it seems not usefull to transform the message !!
+      message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+      message.order = arrivalsCounter++;
 
-      if (arrivalsCounter == Long.MAX_VALUE)
-        arrivalsCounter = 0;
-
-      msg = (Message) msgs.nextElement();
-      msg.order = arrivalsCounter++;
-
-      outTable.put(msg.getIdentifier(), msg);
+      outTable.put(message.getIdentifier(), message);
 
       try {
-        jmsModule.send(msg);
+        jmsModule.send(message);
       } catch (Exception exc) {
-        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Failing sending to remote "
-                                        + "destination: "
-                                        + exc);
+        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "Failing sending to remote  destination: ", exc);
 
-        outTable.remove(msg.getIdentifier());
+        outTable.remove(message.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(msg);
+        deadM.addMessage(message.msg);
         sendToDMQ(deadM, not.getDMQId());
       }
     }
@@ -259,7 +256,9 @@ public class BridgeQueueImpl extends QueueImpl {
     deliveredMsgs = new Hashtable();
 
     // Retrieving the persisted messages, if any.
-    Vector persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
+    // AF: TODO
+    Vector persistedMsgs = null;
+//     persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
 
     // AF: This code is already in QueueImpl, it seems the message are
     // loaded 2 times !!
@@ -272,8 +271,8 @@ public class BridgeQueueImpl extends QueueImpl {
         if (consId == null) {
           addMessage(persistedMsg);
         } else if (isLocal(consId)) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgDestination.log(
               BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
@@ -316,8 +315,8 @@ public class BridgeQueueImpl extends QueueImpl {
         jmsModule.send(msg);
       }
     } catch (Exception exc) {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        MomTracing.dbgDestination.log(BasicLevel.ERROR, "" + exc);
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
     }
   }
 }
