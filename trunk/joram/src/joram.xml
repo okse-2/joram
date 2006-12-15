@@ -96,12 +96,7 @@
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/util/management/*.class"/>
-        <include name="org/objectweb/joram/shared/JoramTracing.class"/>
-        <include name="org/objectweb/joram/shared/admin/*.class"/>
-        <include name="org/objectweb/joram/shared/client/*.class"/>
-        <include name="org/objectweb/joram/shared/excepts/*.class"/>
-        <include name="org/objectweb/joram/shared/messages/*.class"/>
-        <include name="org/objectweb/joram/shared/selectors/*.class"/>
+        <include name="org/objectweb/joram/shared/**/*.class"/>
         <include name="com/scalagent/jmx/*.class"/>
       </fileset>
     </jar>
@@ -128,13 +123,7 @@
         <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
         <include name="fr/dyade/aaa/jndi2/server/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
-        <include name="org/objectweb/joram/mom/*.class"/>
-        <include name="org/objectweb/joram/mom/dest/*.class"/>
-        <include name="org/objectweb/joram/mom/notifications/*.class"/>
-        <include name="org/objectweb/joram/mom/proxies/*.class"/>
-        <include name="org/objectweb/joram/mom/proxies/soap/*.class"/>
-        <include name="org/objectweb/joram/mom/proxies/tcp/*.class"/>
-        <include name="org/objectweb/joram/mom/util/*.class"/>
+        <include name="org/objectweb/joram/mom/**/*.class"/>
         <include name="com/scalagent/joram/mom/dest/scheduler/*.class"/>
         <include name="com/scalagent/joram/mom/dest/ftp/*.class"/>
         <include name="com/scalagent/joram/mom/dest/mail/*.class"/>
