@@ -38,8 +38,8 @@
       <include name="com/scalagent/jmx/*.java"/>
       <include name="com/scalagent/scheduler/**/*.java"/>
       <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
-      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
-      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
+      <!-- include name="com/scalagent/joram/mom/dest/ftp/*.java"/ -->
+      <!-- include name="com/scalagent/joram/mom/dest/mail/*.java"/ -->
 
       <include name="com/scalagent/joram/osgi/server/Activator.java"/>
       <include name="com/scalagent/joram/osgi/client/Activator.java"/>
