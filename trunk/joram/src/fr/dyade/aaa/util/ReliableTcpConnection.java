@@ -25,6 +25,10 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -74,10 +78,8 @@ public class ReliableTcpConnection {
       WINDOW_SIZE_PROP_NAME,
       DEFAULT_WINDOW_SIZE).intValue();
     if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(
-        BasicLevel.INFO, 
-        "ReliableTcpConnection.windowSize=" + 
-        windowSize);
+      logger.log(BasicLevel.INFO, 
+                 "ReliableTcpConnection.windowSize=" + windowSize);
     timer = timer2;
     inputCounter = -1;
     outputCounter = 0;
@@ -91,10 +93,8 @@ public class ReliableTcpConnection {
 
   private synchronized void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "ReliableTcpConnection.setStatus(" + 
-        statusNames[status] + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 "ReliableTcpConnection.setStatus(" + statusNames[status] + ')');
     this.status = status;
   }
 
@@ -102,11 +102,9 @@ public class ReliableTcpConnection {
     return status;
   }
 
-  public void init(Socket sock) 
-    throws IOException {
+  public void init(Socket sock) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection.init()");
+      logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.init()");
     synchronized (this) {
       if (getStatus() != INIT) 
         throw new IOException("Already connected");
@@ -121,8 +119,7 @@ public class ReliableTcpConnection {
         
         synchronized (pendingMessages) {
           for (int i = 0; i < pendingMessages.size(); i++) {
-            TcpMessage pendingMsg = 
-              (TcpMessage)pendingMessages.elementAt(i);
+            TcpMessage pendingMsg = (TcpMessage) pendingMessages.elementAt(i);
             doSend(pendingMsg.id, inputCounter, pendingMsg.object);
           }
         }
@@ -135,18 +132,16 @@ public class ReliableTcpConnection {
       setStatus(CONNECT);
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, "", exc);
       close();
       throw exc;
     }
   }
 
-  public void send(Object request) throws IOException {
+  public void send(AbstractJmsMessage request) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection.send(" + 
-        request + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpConnection.send(" + request + ')');
 
     if (getStatus() != CONNECT) 
       throw new IOException("Connection closed");
@@ -159,65 +154,58 @@ public class ReliableTcpConnection {
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.send()", exc);
       close();
       throw exc;
     }
   }
   
-  private void doSend(long id, long ackId, Object obj) throws IOException {
+  private void doSend(long id, long ackId, AbstractJmsMessage msg) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpConnection.doSend(" + id + 
-                 ',' + ackId + ',' + obj + ')');
+                 "ReliableTcpConnection.doSend(" + id + ',' + ackId + ',' + msg + ')');
     synchronized (outputLock) {
-      nos.send(id, ackId, obj);
+      nos.send(id, ackId, msg);
       unackCounter = 0;
     }
   }
 
-  static class NetOutputStream {
-    private ByteArrayOutputStream baos = null;
-    private ObjectOutputStream oos = null;
+  static class NetOutputStream extends ByteArrayOutputStream {
     private OutputStream os = null;
 
-    static private final byte[] streamHeader = {
-      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-    };
-
     NetOutputStream(Socket sock) throws IOException {
-      baos = new ByteArrayOutputStream(1024);
-      oos = new ObjectOutputStream(baos);
-      baos.reset();
+      super(1024);
+      reset();
       os = sock.getOutputStream();
     }
 
-    void send(long id, long ackId, Object msg) throws IOException {
-      try {
-        baos.write(streamHeader, 0, 4);
-        oos.writeLong(id);
-        oos.writeLong(ackId);
-        oos.writeObject(msg);
-        oos.flush();
+    public void reset() {
+      count = 4;
+    }
 
-        baos.writeTo(os);
+    void send(long id, long ackId, AbstractJmsMessage msg) throws IOException {
+      try {
+        StreamUtil.writeTo(id, this);
+        StreamUtil.writeTo(ackId, this);
+        AbstractJmsMessage.write(msg, this);
+
+        buf[0] = (byte) ((count -4) >>>  24);
+        buf[1] = (byte) ((count -4) >>>  16);
+        buf[2] = (byte) ((count -4) >>>  8);
+        buf[3] = (byte) ((count -4) >>>  0);
+
+        writeTo(os);
         os.flush();
       } finally {
-        oos.reset();
-        baos.reset();
+        reset();
       }
     }
   }
 
   private void addPendingMessage(TcpMessage msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection." + 
-        "addPendingMessage(" + 
-        msg + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpConnection.addPendingMessage(" + msg + ')');
     synchronized (pendingMessages) {
       pendingMessages.addElement(msg);
     }
@@ -225,10 +213,8 @@ public class ReliableTcpConnection {
 
   private void ackPendingMessages(long ackId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection." + 
-        "ackPendingMessages(" + 
-        ackId + ')');
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpConnection.ackPendingMessages(" + ackId + ')');
     synchronized (pendingMessages) {
       while (pendingMessages.size() > 0) {
         TcpMessage pendingMsg = 
@@ -243,11 +229,10 @@ public class ReliableTcpConnection {
     }
   }
 
-  public Object receive() throws Exception {
+  public AbstractJmsReply receive() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection." + 
-        "receive()");
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpConnection.receive()");
     if (getStatus() != CONNECT) 
       throw new IOException("Connection closed");
     loop:
@@ -255,29 +240,25 @@ public class ReliableTcpConnection {
       try {
         long messageId;
         long ackId;
-        Object obj;
+        AbstractJmsReply obj;
 
         synchronized (inputLock) {
-          ObjectInputStream ois = new ObjectInputStream(bis);
-          messageId = ois.readLong();
-          ackId = ois.readLong();
-          obj = ois.readObject();
+          int len = StreamUtil.readIntFrom(bis);
+          messageId = StreamUtil.readLongFrom(bis);
+          ackId = StreamUtil.readLongFrom(bis);
+          obj =  (AbstractJmsReply) AbstractJmsMessage.read(bis);
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, 
-            " -> id = " + messageId);
+          logger.log(BasicLevel.DEBUG, " -> id = " + messageId);
         ackPendingMessages(ackId);
         if (obj != null) {
           if (unackCounter < windowSize) {
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(
-                BasicLevel.DEBUG, " -> unackCounter++");
+              logger.log(BasicLevel.DEBUG, " -> unackCounter++");
             unackCounter++;
           } else {
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(
-                BasicLevel.DEBUG, " -> schedule");
+              logger.log(BasicLevel.DEBUG, " -> schedule");
             AckTimerTask ackTimertask = new AckTimerTask();
             timer.schedule(ackTimertask, 0);
           }
@@ -285,9 +266,8 @@ public class ReliableTcpConnection {
             inputCounter = messageId;
             return obj;
           } else if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(
-              BasicLevel.DEBUG, " -> already received message: " + 
-              messageId + " " + obj);
+            logger.log(BasicLevel.DEBUG,
+                       " -> already received message: " + messageId + " " + obj);
         }        
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -300,9 +280,7 @@ public class ReliableTcpConnection {
 
   public void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, "ReliableTcpConnection." + 
-        "close()");
+      logger.log(BasicLevel.DEBUG, "ReliableTcpConnection.close()");
     if (getStatus() == INIT) 
       return;
 // Remove for SSL (bis.close() ==> lock)
@@ -320,9 +298,9 @@ public class ReliableTcpConnection {
 
   static class TcpMessage {
     long id;
-    Object object;
+    AbstractJmsMessage object;
 
-    TcpMessage(long id, Object object) {
+    TcpMessage(long id, AbstractJmsMessage object) {
       this.id = id;
       this.object = object;
     }
@@ -337,8 +315,7 @@ public class ReliableTcpConnection {
   class AckTimerTask extends java.util.TimerTask {
     public void run() {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, "AckTimerTask.run()");
+        logger.log(BasicLevel.DEBUG, "AckTimerTask.run()");
       try {
         doSend(-1, inputCounter, null);
         cancel();
