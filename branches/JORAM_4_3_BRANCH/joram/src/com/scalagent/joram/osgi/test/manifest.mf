@@ -1,0 +1,8 @@
+Bundle-Activator: com.scalagent.joram.osgi.test.Activator
+Bundle-Name: Joram client test
+Import-Package: com.scalagent.joram.osgi.client.service,javax.jms
+Bundle-Description: A bundle that allows to test the Joram client
+Bundle-Vendor: Scalagent D.T.
+Bundle-Version: 0.0.1
+Manifest-Version: 1.0
+Bundle-ClassPath: .
