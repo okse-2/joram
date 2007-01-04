@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -51,7 +51,6 @@ import fr.dyade.aaa.util.Debug;
  * Implements the <code>javax.jms.Connection</code> interface.
  */
 public class Connection implements javax.jms.Connection {
-  
   public static Logger logger = Debug.getLogger(Connection.class.getName());
   
   /**
@@ -93,7 +92,7 @@ public class Connection implements javax.jms.Connection {
    * with the user proxy.
    */
   private Requestor requestor;
-  
+
   /** Connection meta data. */
   private ConnectionMetaData metaData = null;
 
@@ -126,11 +125,14 @@ public class Connection implements javax.jms.Connection {
 
   /** Vector of the connection's consumers. */
   private Vector cconsumers;
-  
+
   /**
    * Used to synchronize the method close()
    */
   private Closer closer;
+
+  private String stringImage = null;
+  private int hashCode;
 
   /**
    * Creates a <code>Connection</code> instance.
@@ -171,6 +173,9 @@ public class Connection implements javax.jms.Connection {
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
     
+    stringImage = "Cnx:" + proxyId + ':' + key;
+    hashCode = stringImage.hashCode();
+
     mtpx.setDemultiplexerDaemonName(toString());
   }
 
@@ -191,7 +196,20 @@ public class Connection implements javax.jms.Connection {
 
   /** String image of the connection. */
   public String toString() {
-    return "Cnx:" + proxyId + ':' + key;
+    return stringImage;
+  }
+
+  public int hashCode() {
+    return hashCode;
+  }
+  
+  /**
+   * Specializes this Object method; returns <code>true</code> if the
+   * parameter is a <code>Connection</code> instance sharing the same
+   * proxy identifier and connection key.
+   */
+  public boolean equals(Object obj) {
+    return (obj instanceof Connection) && (hashCode() == obj.hashCode()) && toString().equals(obj.toString());
   }
 
   final long getTxPendingTimer() {
@@ -216,15 +234,6 @@ public class Connection implements javax.jms.Connection {
 
   final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
-  }
-  
-  /**
-   * Specializes this Object method; returns <code>true</code> if the
-   * parameter is a <code>Connection</code> instance sharing the same
-   * proxy identifier and connection key.
-   */
-  public boolean equals(Object obj) {
-    return (obj instanceof Connection) && toString().equals(obj.toString());
   }
   
   /**
