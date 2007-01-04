@@ -33,13 +33,12 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-
-import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.util.*;
-import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.Message;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -120,7 +119,7 @@ public class BridgeTopicImpl extends TopicImpl {
    */
   protected void doReact(BridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
-    clientMessages.addMessage(not.getMessage().msg);
+    clientMessages.addMessage(not.getMessage());
     super.doProcess(clientMessages);
   }
 
@@ -149,9 +148,10 @@ public class BridgeTopicImpl extends TopicImpl {
       if (subscribers.size() == 1) 
         jmsModule.setMessageListener();
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Failing subscribe request on remote destination: ", exc);
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                      "Failing subscribe request on remote "
+                                      + "destination: " + exc);
     }
   }
 
@@ -185,22 +185,24 @@ public class BridgeTopicImpl extends TopicImpl {
       Channel.sendTo(fatherId, not);
     
     // Sending the received messages to the foreign JMS destination:
-    Message message;
+    Message msg;
     for (Enumeration msgs = not.messages.getMessages().elements();
          msgs.hasMoreElements();) {
-      // AF: TODO it seems not usefull to transform the message !!
-      message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
-      message.order = arrivalsCounter++;
 
-      outTable.put(message.getIdentifier(), message);
+      if (arrivalsCounter == Long.MAX_VALUE)
+        arrivalsCounter = 0;
 
-      try {
-        jmsModule.send(message);
+      msg = (Message) msgs.nextElement();
+      msg.order = arrivalsCounter++;
+
+      outTable.put(msg.getIdentifier(), msg);
+
+      try  {
+        jmsModule.send(msg);
       } catch (Exception exc) {
-        outTable.remove(message.getIdentifier());
-        ClientMessages deadM;
-        deadM = new ClientMessages();
-        deadM.addMessage(message.msg);
+        outTable.remove(msg.getIdentifier());
+        ClientMessages deadM = new ClientMessages();
+        deadM.addMessage(msg);
         sendToDMQ(deadM, null);
       }
     }
@@ -218,22 +220,25 @@ public class BridgeTopicImpl extends TopicImpl {
     forwardMessages(not);
 
     // Sending the received messages to the foreign JMS destination:
-    Message message;
+    Message msg;
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
-      // AF: TODO it seems not usefull to transform the message !!
-      message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
-      message.order = arrivalsCounter++;
+      
+      if (arrivalsCounter == Long.MAX_VALUE)
+        arrivalsCounter = 0;
 
-      outTable.put(message.getIdentifier(), message);
+      msg = (Message) msgs.nextElement();
+      msg.order = arrivalsCounter++;
+
+      outTable.put(msg.getIdentifier(), msg);
 
       try {
-        jmsModule.send(message);
+        jmsModule.send(msg);
       } catch (Exception exc) {
-        outTable.remove(message.getIdentifier());
+        outTable.remove(msg.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(message.msg);
+        deadM.addMessage(msg);
         sendToDMQ(deadM, not.getDMQId());
       }
     }
@@ -286,10 +291,9 @@ public class BridgeTopicImpl extends TopicImpl {
         msg = (Message) outMessages.remove(0);
         jmsModule.send(msg);
       }
-    }
-    catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR, "" + exc);
     }
   }
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2000 Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,15 +23,14 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import javax.jms.JMSException;
-
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessAckRequest;
@@ -42,7 +41,6 @@ import org.objectweb.joram.shared.client.XACnxRecoverRequest;
 import org.objectweb.joram.shared.client.XACnxRollback;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Utility class used by XA connections for managing XA resources.
@@ -514,7 +512,8 @@ class XAContext
   /**
    * Adds new sendings performed by the resumed transaction.
    */
-  void addSendings(Hashtable newSendings) {
+  void addSendings(Hashtable newSendings)
+  {
     String newDest;
     ProducerMessages newPM;
     ProducerMessages storedPM;
@@ -535,7 +534,8 @@ class XAContext
       else {
         msgs = newPM.getMessages();
         for (int i = 0; i < msgs.size(); i++)
-          storedPM.addMessage(((Message) msgs.get(i)).momMsg);
+          storedPM.addMessage((org.objectweb.joram.shared.messages.Message)
+                              msgs.get(i));
       }
     }
   }
@@ -543,7 +543,8 @@ class XAContext
   /**
    * Adds new deliveries occured within the resumed transaction.
    */
-  void addDeliveries(Hashtable newDeliveries) {
+  void addDeliveries(Hashtable newDeliveries)
+  {
     String newName;
     MessageAcks newAcks;
     MessageAcks storedAcks;

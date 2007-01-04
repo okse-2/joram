@@ -30,20 +30,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.mom.dest.AdminTopicImpl;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
-import org.objectweb.joram.shared.client.MomExceptionReply;
-import org.objectweb.joram.shared.excepts.MomException;
-
-import org.objectweb.joram.mom.proxies.ProxyImpl;
-import org.objectweb.joram.mom.proxies.SendReplyNot;
-import org.objectweb.joram.mom.proxies.ProxyAgentItf;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
-
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
@@ -56,7 +50,8 @@ import fr.dyade.aaa.util.TimerTask;
 
 import fr.dyade.aaa.util.Queue;
 import fr.dyade.aaa.util.management.MXWrapper;
-import org.objectweb.joram.shared.JoramTracing;
+
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
@@ -85,6 +80,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /**
    * Creates a new user proxy.
    *
+   * @see AdminTopicImpl
    * @see ConnectionManager
    */
   public UserAgent() {
@@ -95,6 +91,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /**
    * Creates a new user proxy.
    *
+   * @see AdminTopicImpl
    * @see ConnectionManager
    */
   public UserAgent(int stamp) {
@@ -111,10 +108,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.agentInitialize(" +  firstTime + ')');
-
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "UserAgent.agentInitialize(" + firstTime + ')');
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
     cleaningTask = new CleaningTask();
@@ -127,8 +123,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     try {
       MXWrapper.unregisterMBean("Joram", getMBeanName());
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
     }
     super.agentFinalize(lastTime);
   }
@@ -148,9 +144,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * </ul>
    */
   public void react(AgentId from, Notification not) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.react(" + from + ',' + not + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.react(" + from + ','
+          + not + ')');
 
     // set agent no save:
     // the default behavior is transient
@@ -178,9 +174,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       try {
         proxyImpl.cleanPendingMessages(System.currentTimeMillis());
       } catch (Exception exc) {
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "--- " + this + " Proxy(...)", exc);
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                        "--- " + this + " Proxy(...)", exc);
       }
       if (cleaningTask == null)
         cleaningTask = new CleaningTask();
@@ -368,18 +364,18 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param not
    */
   private void doReact(SendReplyNot not) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
     ClientContext cc = proxyImpl.getClientContext(not.getKey());
     if (cc != null) {
       if (cc.setReply(not.getRequestId()) == 0) {
         sendToClient(not.getKey(), new ServerReply(not.getRequestId()));
       }
-    } else if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
+    } else if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
       // Can happen if the connection is closed before the SendReplyNot
       // arrives.
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent: unknown client context for " + not);
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+          "UserAgent: client context not found for " + not);
     }
   }
 
@@ -390,9 +386,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param not the notification to send
    */
   public void sendNot(AgentId to, Notification not) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.sendNot(" + to + ',' + not + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.sendNot(" + to + ','
+          + not + ')');
     sendTo(to, not);
   }
 
@@ -405,9 +401,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param reply the reply to send to the client.
    */
   public void sendToClient(int key, AbstractJmsReply reply) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "UserAgent.sendToClient(" + key + ',' + reply + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.sendToClient(" + key
+          + ',' + reply + ')');
     Integer objKey = new Integer(key);
     if (connections != null) {
       ConnectionContext ctx = (ConnectionContext)connections.get(objKey);
@@ -438,14 +434,15 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     public void run() {
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                    "HeartBeatTask: close connection");
-        ConnectionContext ctx = (ConnectionContext) connections.remove(key);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+              "HeartBeatTask: close connection");
+        ConnectionContext ctx = 
+          (ConnectionContext)connections.remove(key);
         heartBeatTasks.remove(key);
         proxyImpl.reactToClientRequest(key.intValue(), new CnxCloseRequest());
-        MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
-                                            "Connection " + getId() + ':' + key + " closed");
+        Exception exc = new Exception("Connection " + getId() + ':' + key
+            + " closed");
         ctx.pushError(exc);
       } else {
         start();
@@ -482,25 +479,25 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
           Timer timer = ConnectionManager.getTimer();        
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                            "--- " + this + " Proxy(...)", exc);
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Proxy(...)", exc);
         }
       }
     }
   }
 
   public void setNoSave() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
-    
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
+
     super.setNoSave();
   }
 
   public void setSave() {
-   if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.setSave()");
-    
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.setSave()");
+
     super.setSave();
   }
 
