@@ -679,7 +679,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     }
   }
 
-  int last = -1;
+//   int last = -1;
 
   /**
    * Try to deliver the received message to the right consumer.
@@ -703,10 +703,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                           " by " + source);
     }
 
-    if ((last != -1) && (msg.getStamp() != (last +1)))
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
-    last = msg.getStamp();
+//     if ((last != -1) && (msg.getStamp() != (last +1)))
+//       logmon.log(BasicLevel.FATAL,
+//                  getName() + ", recv msg#" + msg.getStamp() + " should be #" + (last +1));
+//     last = msg.getStamp();
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
