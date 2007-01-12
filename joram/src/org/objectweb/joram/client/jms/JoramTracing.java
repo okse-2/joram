@@ -21,19 +21,40 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package org.objectweb.joram.shared.excepts;
+package org.objectweb.joram.client.jms;
+
+import fr.dyade.aaa.util.Debug;
+
+import org.objectweb.util.monolog.api.Logger;
 
 /**
- * A <code>MessageException</code> is thrown when an error occurs while
- * accessing a message.
+ * The <code>JoramTracing</code> class centralizes the log tracing for joram.
  */
-public class MessageException extends MomException
+public class JoramTracing
 {
   /**
-   * Constructs a <code>MessageException</code> instance.
+   * Logger used to trace joram admin activity, to be set using topic
+   * org.objectweb.joram.client.jms.Admin
    */
-  public MessageException(String info)
+  public static Logger dbgAdmin = null;
+  /**
+   * Logger used to trace joram activity, to be set using topic
+   * org.objectweb.joram.client.jms.Client
+   */
+  public static Logger dbgClient = null;
+
+  /**
+   * <code>true</code> when <code>init</code> has been called.
+   */
+  private static boolean initialized = false;
+
+
+  /**
+   * Initializes the package by setting the various loggers.
+   */
+  static
   {
-    super(info);
+    dbgAdmin = Debug.getLogger("org.objectweb.joram.client.jms.Admin");
+    dbgClient = Debug.getLogger("org.objectweb.joram.client.jms.Client");
   }
 }

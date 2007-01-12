@@ -25,6 +25,7 @@ package org.objectweb.joram.mom.proxies.tcp;
 
 import java.io.IOException;
 
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.FlowControl;
@@ -33,13 +34,11 @@ import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.mom.proxies.RequestNot;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ProducerMessages;
-
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.Daemon;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * The activity responsible for reading the requests from the socket and invoke
@@ -78,14 +77,14 @@ public class TcpReader extends Daemon {
   }
 
   public void run() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.run()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.run()");
     try {
       while (running) {
         ProxyMessage msg = ioctrl.receive();
         canStop = false;
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
               + msg);
         ConnectionManager.sendToProxy(
             proxyId,
@@ -96,8 +95,8 @@ public class TcpReader extends Daemon {
       }
     } catch (Throwable error) {
       canStop = false;
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", error);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", error);
     } finally {
       canStop = false;
       if (closeConnection) {
@@ -117,8 +116,8 @@ public class TcpReader extends Daemon {
   }
 
   protected void close() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.close()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.close()");
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;

@@ -126,6 +126,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    */
   ServerDesc server = null;
 
+  MessageInputStream nis = null;
+  MessageOutputStream nos = null;
+
   /**
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
@@ -141,6 +144,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    */
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
+
+    nis = new MessageInputStream();
+    nos = new MessageOutputStream();
 
     activationPeriod = Long.getLong("ActivationPeriod",
                                     activationPeriod).longValue();
@@ -270,9 +276,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
   
   protected void sendRequest(Message msg,
-                             OutputStream os,
-                             MessageOutputStream nos,
-                             int ack,
+                             OutputStream os, int ack,
                              long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
@@ -319,9 +323,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected short getRequest(InputStream is,
-                             MessageInputStream nis,
-                             byte[] buf) throws Exception {
+  protected short getRequest(InputStream is, byte[] buf) throws Exception {
     String line = null;
 
     line = readLine(is, buf);
@@ -355,9 +357,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
 
   protected void sendReply(Message msg,
-                           OutputStream os,
-                           MessageOutputStream nos,
-                           int ack,
+                           OutputStream os, int ack,
                            long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
@@ -392,9 +392,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected void getReply(InputStream is,
-                          MessageInputStream nis,
-                          byte[] buf) throws Exception {
+  protected void getReply(InputStream is, byte[] buf) throws Exception {
     String line = null;
 
     line = readLine(is, buf);
@@ -420,14 +418,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       logmon.log(BasicLevel.WARN, name + "Bad reply length: " + length);
   }
 
-  protected int handle(Message msgout,
-                       MessageInputStream nis) throws Exception {
+  protected int handle(Message msgout) throws Exception {
     int ack = nis.getAckStamp();
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 this.getName() + ", handle: " + msgout + ", ack=" + ack);
-
     if ((msgout != null) && (msgout.stamp == ack)) {
       AgentServer.getTransaction().begin();
       //  Suppress the processed notification from message queue,
@@ -445,10 +437,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                  this.getName() + ", get: " + msg);
 
     if (msg != null) {
-      ack = msg.stamp;
       testBootTS(msg.getSource(), nis.getBootTS());
       deliver(msg);
-      return ack;
+      return msg.stamp;
     }
 
     return -1;
@@ -473,20 +464,13 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
 
   final class NetServerOut extends Daemon {
     Socket socket = null;
-
     InputStream is = null;
     OutputStream os = null;
 
-    MessageInputStream nis = null;
-    MessageOutputStream nos = null;
-
-    NetServerOut(String name, Logger logmon) throws IOException {
+    NetServerOut(String name, Logger logmon) {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
-
-      nis = new MessageInputStream();
-      nos = new MessageOutputStream();
     }
 
     protected void open() throws IOException {
@@ -598,11 +582,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 break;
               } while (true);
 
-              sendRequest(msgout, os, nos, ack, currentTimeMillis);
-              getReply(is, nis, buf);
+              sendRequest(msgout, os, ack, currentTimeMillis);
+              getReply(is, buf);
 
               canStop = false;
-              ack = handle(msgout, nis);
+              ack = handle(msgout);
               canStop = true;
               // Get next message to send if any
               msgout = qout.get(0);
@@ -640,21 +624,14 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     ServerSocket listen = null;
     
     Socket socket = null;
-
     InputStream is = null;
     OutputStream os = null;
-
-    MessageInputStream nis = null;
-    MessageOutputStream nos = null;
 
     NetServerIn(String name, ServerSocket listen, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
       this.listen = listen;
       // Overload logmon definition in Daemon
       this.logmon = logmon;
-
-      nis = new MessageInputStream();
-      nos = new MessageOutputStream();
     }
 
     protected void open(Socket socket) throws IOException {
@@ -706,11 +683,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
             socket = listen.accept();
             open(socket);
             
-            short from = getRequest(is, nis, buf);
+            short from = getRequest(is, buf);
             long currentTimeMillis = System.currentTimeMillis();
             do {
               canStop = false;
-              ack = handle(msgout, nis);
+              ack = handle(msgout);
               canStop = true;
 
               do {
@@ -743,12 +720,12 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendReply: " + msgout);
 
-              sendReply(msgout, os, nos, ack, currentTimeMillis);
+              sendReply(msgout, os, ack, currentTimeMillis);
 
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": AF WWW " + msgout);
 
-              getRequest(is, nis, buf);
+              getRequest(is, buf);
             } while (running);
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))

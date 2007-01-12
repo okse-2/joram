@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
 
@@ -32,7 +32,8 @@ import java.util.Vector;
  * A <code>ClientMessages</code> instance is used by a client agent for
  * sending one or many messages to a destination.
  */
-public class ClientMessages extends AbstractRequest {
+public class ClientMessages extends AbstractRequest
+{
   /** Message sent by the client. */
   private Message message = null;
   /** Messages sent by the client. */
@@ -42,26 +43,16 @@ public class ClientMessages extends AbstractRequest {
   
   private boolean asyncSend;
 
-  /**
-   * Constructs a <code>ClientMessages</code> instance.
-   *
-   * @param clientContext  Identifies a client context.
-   * @param requestId  Request identifier.
-   */
-  public ClientMessages(int clientContext, int requestId) {
-    super(clientContext, requestId);
-  }
 
   /**
    * Constructs a <code>ClientMessages</code> instance.
    *
    * @param clientContext  Identifies a client context.
    * @param requestId  Request identifier.
-   * @param messages  The message.
    */
-  public ClientMessages(int clientContext, int requestId, Message message) {
+  public ClientMessages(int clientContext, int requestId)
+  {
     super(clientContext, requestId);
-    this.message = message;
   }
 
   /**
@@ -71,7 +62,8 @@ public class ClientMessages extends AbstractRequest {
    * @param requestId  Request identifier.
    * @param messages  Vector of messages.
    */
-  public ClientMessages(int clientContext, int requestId, Vector messages) {
+  public ClientMessages(int clientContext, int requestId, Vector messages)
+  {
     super(clientContext, requestId);
     if (messages.size() == 1)
       message = (Message) messages.get(0);
@@ -82,11 +74,13 @@ public class ClientMessages extends AbstractRequest {
   /**
    * Constructs a <code>ClientMessages</code> instance.
    */
-  public ClientMessages() {} 
+  public ClientMessages()
+  {} 
 
 
   /** Adds a message to deliver. */
-  public void addMessage(Message msg) {
+  public void addMessage(Message msg)
+  {
     if (message == null && messages == null)
       message = msg;
     else {
@@ -100,13 +94,15 @@ public class ClientMessages extends AbstractRequest {
   }
 
   /** Sets the identifier of the producer's dead message queue, if any. */
-  public void setDMQId(AgentId dmqId) {
+  public void setDMQId(AgentId dmqId)
+  {
     producerDMQId = dmqId;
   }
 
   
   /** Returns the messages. */
-  public Vector getMessages() {
+  public Vector getMessages()
+  {
     if (messages == null) {
       messages = new Vector();
       if (message != null)
@@ -124,7 +120,8 @@ public class ClientMessages extends AbstractRequest {
   }
 
   /** Returns the identifier of the producer's dead message queue, if any. */
-  public AgentId getDMQId() {
+  public AgentId getDMQId()
+  {
     return producerDMQId;
   }
 

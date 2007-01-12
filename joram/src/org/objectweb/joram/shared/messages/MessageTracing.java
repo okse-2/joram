@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2005 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +17,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.shared.excepts;
+package org.objectweb.joram.shared.messages;
+
+import org.objectweb.util.monolog.api.Logger;
+import fr.dyade.aaa.util.Debug;
 
 /**
- * A <code>MessageException</code> is thrown when an error occurs while
- * accessing a message.
+ * The <code>MessageTracing</code> class centralizes the log tracing for the Message.
  */
-public class MessageException extends MomException
-{
+public class MessageTracing {
   /**
-   * Constructs a <code>MessageException</code> instance.
+   * Logger used to trace Message activity.
    */
-  public MessageException(String info)
-  {
-    super(info);
+  public static Logger dbgMessage = null;
+
+  /**
+   * <code>true</code> when <code>init</code> has been called.
+   */
+  private static boolean initialized = false;
+
+
+  /**
+   * Initializes the package by setting the various loggers.
+   */
+  static {
+    dbgMessage = Debug.getLogger("org.objectweb.joram.shared.Message");
   }
 }
