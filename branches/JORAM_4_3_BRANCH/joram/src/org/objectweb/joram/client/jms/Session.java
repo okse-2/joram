@@ -877,7 +877,7 @@ public class Session implements javax.jms.Session {
         
         onMessage(momMsg, messageConsumerListener);
       }
-    } catch (JMSException exc) {
+    } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "", exc);
     }
