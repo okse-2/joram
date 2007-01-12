@@ -168,6 +168,9 @@ public class Message implements Cloneable, Serializable {
   }
 
   protected MessageBody getMessageBody() {
+    if (body == null)
+      body = new MessageBody();
+
     return body;
   }
 
@@ -800,8 +803,7 @@ public class Message implements Cloneable, Serializable {
         MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
                                       "Message.clone()");
       Message clone = (Message) super.clone();
-      clone.setMessageBody(
-        (MessageBody) getMessageBody().clone());
+      clone.setMessageBody((MessageBody) getMessageBody().clone());
 
       if (optionalHeader != null) {
         clone.optionalHeader = new Hashtable();
