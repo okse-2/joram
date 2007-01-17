@@ -1055,6 +1055,13 @@ public final class AgentServer {
             // to insert it in the queue of this consumer.
             try {
               getServerDesc(msg.getDest()).domain.insert(msg);
+            } catch (UnknownServerException exc) {
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ", discard message to unknown server id#" +
+                         msg.getDest());
+              msg.delete();
+              msg.free();
+              continue;
             } catch (NullPointerException exc) {
               logmon.log(BasicLevel.ERROR,
                          getName() + ", discard message to unknown server id#" +
