@@ -86,8 +86,6 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
    *              input streams.
    */
   public void clearBody() throws JMSException {
-    super.clearBody();
-
     try {
       if (! RObody) {
         outputStream.close();
@@ -98,6 +96,8 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
 
       outputBuffer = new ByteArrayOutputStream();
       outputStream = new DataOutputStream(outputBuffer);
+
+      super.clearBody();
 
       prepared = false;
     } catch (IOException ioE) {
