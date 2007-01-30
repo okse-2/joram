@@ -877,7 +877,12 @@ public class StreamMessage extends Message implements javax.jms.StreamMessage
       } else if (type == NULL) {
         return null;
       } else if (type == BYTES) {
-        byte[] b = new byte[inputStream.available()];
+        int available = inputStream.readInt();
+
+        if (available == -1) return null;
+        if (available == 0) return new byte[0];
+
+        byte[] b = new byte[available];
         inputStream.read(b);
         return b;
       } else
