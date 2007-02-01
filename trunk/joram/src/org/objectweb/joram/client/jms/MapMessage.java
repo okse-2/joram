@@ -32,6 +32,9 @@ import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
+import org.objectweb.joram.shared.messages.ConversionHelper;
+import org.objectweb.joram.shared.excepts.MessageValueException;
+
 /**
  * Implements the <code>javax.jms.MapMessage</code> interface.
  */
@@ -225,7 +228,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */
   public boolean getBoolean(String name) throws JMSException {
-    return ConversionHelper.toBoolean(map.get(name));
+    try {
+      return ConversionHelper.toBoolean(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -234,7 +241,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public byte getByte(String name) throws JMSException {
-    return ConversionHelper.toByte(map.get(name));
+    try {
+      return ConversionHelper.toByte(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -243,7 +254,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public byte[] getBytes(String name) throws JMSException {
-    return ConversionHelper.toBytes(map.get(name));
+    try {
+      return ConversionHelper.toBytes(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -252,7 +267,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public char getChar(String name) throws JMSException {
-    return ConversionHelper.toChar(map.get(name));
+    try {
+      return ConversionHelper.toChar(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
  
   /**
@@ -261,7 +280,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */   
   public double getDouble(String name) throws JMSException {
-    return ConversionHelper.toDouble(map.get(name));
+    try {
+      return ConversionHelper.toDouble(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -270,7 +293,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public float getFloat(String name) throws JMSException {
-    return ConversionHelper.toFloat(map.get(name));
+    try {
+      return ConversionHelper.toFloat(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -279,7 +306,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public int getInt(String name) throws JMSException {
-    return ConversionHelper.toInt(map.get(name));
+    try {
+      return ConversionHelper.toInt(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -288,7 +319,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */  
   public long getLong(String name) throws JMSException {
-    return ConversionHelper.toLong(map.get(name));
+    try {
+      return ConversionHelper.toLong(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
  
   /**
@@ -306,7 +341,11 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  If the value type is invalid.
    */     
   public short getShort(String name) throws JMSException {
-    return ConversionHelper.toShort(map.get(name));
+    try {
+      return ConversionHelper.toShort(map.get(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**

@@ -38,6 +38,8 @@ import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
 import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.shared.messages.ConversionHelper;
+import org.objectweb.joram.shared.excepts.MessageValueException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
@@ -344,7 +346,7 @@ public class Message implements javax.jms.Message {
   public final byte[] getJMSCorrelationIDAsBytes() throws JMSException {
     try {
       return ConversionHelper.toBytes(momMsg.correlationId);
-    } catch (MessageFormatException mE) {
+    } catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -629,7 +631,12 @@ public class Message implements javax.jms.Message {
       if (name.equals("JMSXGroupID")) {
         momMsg.setOptionalHeader(name, ConversionHelper.toString(value));
       } else if (name.equals("JMSXGroupSeq")) {
-        momMsg.setOptionalHeader(name, new Integer(ConversionHelper.toInt(value)));
+        try {
+          momMsg.setOptionalHeader(name,
+                                   new Integer(ConversionHelper.toInt(value)));
+        } catch (MessageValueException mE) {
+          throw new MessageFormatException(mE.getMessage());
+        }
       } else {
         throw new JMSException("Property names with prefix 'JMSX' are reserved.");
       }
@@ -664,7 +671,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final boolean getBooleanProperty(String name) throws JMSException {
-    return ConversionHelper.toBoolean(doGetProperty(name));
+    try {
+      return ConversionHelper.toBoolean(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
   
   /**
@@ -676,7 +687,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final byte getByteProperty(String name) throws JMSException {
-    return ConversionHelper.toByte(doGetProperty(name));
+    try {
+      return ConversionHelper.toByte(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -688,7 +703,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final short getShortProperty(String name) throws JMSException {
-    return ConversionHelper.toShort(doGetProperty(name));
+    try {
+      return ConversionHelper.toShort(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -700,7 +719,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final int getIntProperty(String name) throws JMSException {
-    return ConversionHelper.toInt(doGetProperty(name));
+    try {
+      return ConversionHelper.toInt(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -712,7 +735,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final long getLongProperty(String name) throws JMSException {
-    return ConversionHelper.toLong(doGetProperty(name));
+    try {
+      return ConversionHelper.toLong(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -724,7 +751,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final float getFloatProperty(String name) throws JMSException {
-    return ConversionHelper.toFloat(doGetProperty(name));
+    try {
+      return ConversionHelper.toFloat(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -736,7 +767,11 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final double getDoubleProperty(String name) throws JMSException {
-    return ConversionHelper.toDouble(doGetProperty(name));
+    try {
+      return ConversionHelper.toDouble(doGetProperty(name));
+    } catch (MessageValueException mE) {
+      throw new MessageFormatException(mE.getMessage());
+    }
   }
 
   /**
@@ -748,7 +783,7 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If the name is invalid.
    */
   public final String getStringProperty(String name) throws JMSException {
-    return ConversionHelper.toString(doGetProperty(name));
+      return ConversionHelper.toString(doGetProperty(name));
   }
 
   /**
