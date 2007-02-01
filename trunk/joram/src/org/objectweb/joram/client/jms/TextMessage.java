@@ -53,6 +53,7 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
   }
 
   /**
+   * Sets a String as the body of the message.
    * API method.
    *
    * @exception MessageNotWriteableException  When trying to set the text
@@ -62,23 +63,16 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
     if (RObody)
       throw new MessageNotWriteableException("Can't set a text as the message body is read-only.");
 
-    if (text == null) {
-      momMsg.body = null;
-    } else {
-      momMsg.body = text.getBytes();
-    }
+    momMsg.setText(text);
   }
 
   /**
+   * Returns the text body of the message.
    * API method.
    *
    * @exception JMSException  Actually never thrown.
    */
   public String getText() throws JMSException {
-    if (momMsg.body == null) {
-      return null;
-    } else {
-      return new String(momMsg.body);
-    }
+    return momMsg.getText();
   }
 }

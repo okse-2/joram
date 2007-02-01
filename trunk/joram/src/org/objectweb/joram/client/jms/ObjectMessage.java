@@ -69,16 +69,7 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
 
     try {
       clearBody();
-
-      if (obj == null) return;
-
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(obj);
-      oos.flush();
-      momMsg.body = baos.toByteArray();
-      oos.close();
-      baos.close();
+      momMsg.setObject(obj);
     } catch (Exception exc) {
       throw new MessageFormatException("Object serialization failed: " + exc);
     }
@@ -93,14 +84,13 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
   public Serializable getObject() throws MessageFormatException {
     if (momMsg.body == null) return null;
 
-    ByteArrayInputStream bais = null;
-    ObjectInputStream ois = null;
     try {
+      return momMsg.getObject();
+    } catch (ClassNotFoundException cnfexc) {
+      ByteArrayInputStream bais = null;
+      ObjectInputStream ois = null;
+
       try {
-        bais = new ByteArrayInputStream(momMsg.body);
-        ois = new ObjectInputStream(bais);
-        return (Serializable) ois.readObject();
-      } catch (ClassNotFoundException exc) {
         // Could not build serialized object: reason could be linked to 
         // class loaders hierarchy in an application server.
         class Specialized_OIS extends ObjectInputStream {
@@ -109,27 +99,32 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
           }
 
           protected Class resolveClass(ObjectStreamClass osc)
-                    throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
             String n = osc.getName();
-            return Class.forName(n, false, Thread.currentThread().getContextClassLoader());
+            return Class.forName(n, false,
+                                 Thread.currentThread().getContextClassLoader());
           }
         }
+
         bais = new ByteArrayInputStream(momMsg.body);
         ois = new Specialized_OIS(bais);
         return (Serializable) ois.readObject(); 
+      } catch (Exception exc) {
+        MessageFormatException jE =
+          new MessageFormatException("Error while deserializing the wrapped object: " + exc);
+        throw jE;
+      } finally {
+        try {
+          ois.close();
+        } catch (Exception e) {}
+        try {
+          bais.close();
+        } catch (Exception e) {}
       }
     } catch (Exception exc) {
       MessageFormatException jE =
-        new MessageFormatException("Error while deserializing the wrapped " 
-                                   + "object: " + exc);
+        new MessageFormatException("Error while deserializing the wrapped object: " + exc);
       throw jE;
-    } finally {
-      try {
-        ois.close();
-      } catch (Exception e) {}
-      try {
-        bais.close();
-      } catch (Exception e) {}
     }
   }
 }
