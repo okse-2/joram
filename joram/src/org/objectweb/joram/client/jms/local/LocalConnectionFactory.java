@@ -32,13 +32,11 @@ import javax.naming.NamingException;
  * local connections.
  */
 public class LocalConnectionFactory
-    extends org.objectweb.joram.client.jms.ConnectionFactory
-{
+    extends org.objectweb.joram.client.jms.ConnectionFactory {
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
    */
-  public LocalConnectionFactory()
-  {
+  public LocalConnectionFactory() {
     super("localhost", -1);
   }
 
@@ -50,8 +48,7 @@ public class LocalConnectionFactory
    */
   public javax.jms.Connection
       createConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+    throws javax.jms.JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new Connection(params, lc);
   }
@@ -61,8 +58,7 @@ public class LocalConnectionFactory
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.ConnectionFactory create()
-  {
+  public static javax.jms.ConnectionFactory create() {
     return new LocalConnectionFactory();
   }
 }
