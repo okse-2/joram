@@ -214,12 +214,33 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public transient  int deliveryCount = 0;
 
   /**
+   * Sets a String as the body of the message.
+   */
+  public void setText(String text) {
+    if (text == null) {
+      body = null;
+    } else {
+      body = text.getBytes();
+    }
+  }
+
+  /**
+   * Returns the text body of the message.
+   */
+  public String getText() {
+    if (body == null) {
+      return null;
+    } else {
+      return new String(body);
+    }
+  }
+
+  /**
    * Sets an object as the body of the message. 
-   * AF: Used to wrap addministration message !!
    *
    * @exception IOException  In case of an error while setting the object.
    */
-  public void setObject(Object object) throws IOException {
+  public void setObject(Serializable object) throws IOException {
     type = Message.OBJECT;
 
     if (object == null) {
@@ -237,21 +258,32 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /**
    * Returns the object body of the message.
-   * AF: Used to wrap addministration message !!
    *
    * @exception IOException  In case of an error while getting the object.
    * @exception ClassNotFoundException  If the object class is unknown.
    */
-  public Object getObject() throws Exception {
+  public Serializable getObject() throws ClassNotFoundException, IOException {
     // AF: May be, we should verify that it is an Object message!!
     if (body == null) return null;
 
-    ByteArrayInputStream bais = new ByteArrayInputStream(body);
-    ObjectInputStream ois = new ObjectInputStream(bais);
-    Object obj = ois.readObject();
-    ois.close();
+    ByteArrayInputStream bais = null;
+    ObjectInputStream ois = null;
+    Object obj = null;
 
-    return obj;
+    try {
+     bais = new ByteArrayInputStream(body);
+     ois = new ObjectInputStream(bais);
+     obj = ois.readObject();
+    } finally {
+      try {
+        ois.close();
+      } catch (Exception e) {}
+      try {
+        bais.close();
+      } catch (Exception e) {}
+    }
+
+    return (Serializable) obj;
   }
 
   public final String toString() {
