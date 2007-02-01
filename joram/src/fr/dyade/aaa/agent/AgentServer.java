@@ -686,7 +686,7 @@ public final class AgentServer {
     }
   }
   
-  static class Status {
+  public static class Status {
     public static final int INSTALLED = 0;
     public static final int INITIALIZING = 0x1;
     public static final int INITIALIZED = 0x2;
