@@ -219,6 +219,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     this.WDRetryPeriod3 = WDRetryPeriod3;
   }
 
+  /**
+   * Gets the number of waiting messages in this engine.
+   *
+   *  return	the number of waiting messages.
+   */
+  public int getNbWaitingMessages() {
+    return qout.size();
+  }
+
   protected Logger logmon = null;
 
   /** Id. of local server. */
