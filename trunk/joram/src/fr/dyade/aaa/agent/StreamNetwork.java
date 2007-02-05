@@ -131,6 +131,9 @@ public abstract class StreamNetwork extends Network {
 
     SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
     SoLinger = Integer.getInteger(name + ".SoLinger", SoLinger).intValue();
+
+    SoTimeout = Integer.getInteger("SoTimeout", SoTimeout).intValue();
+    SoTimeout = Integer.getInteger(name + ".SoTimeout", SoTimeout).intValue();
   }
 
   /**
