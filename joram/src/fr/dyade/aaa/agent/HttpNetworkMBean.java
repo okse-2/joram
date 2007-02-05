@@ -32,4 +32,11 @@ public interface HttpNetworkMBean extends NetworkMBean {
    * @param activationPeriod	the activationPeriod value
    */
   void setActivationPeriod(long activationPeriod);
+
+  /**
+   * Gets the NbDaemon value.
+   *
+   * @return the NbDaemon value
+   */
+  public long getNbDaemon();
 }
