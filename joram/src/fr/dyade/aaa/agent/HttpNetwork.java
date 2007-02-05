@@ -186,7 +186,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
         ServerSocket listen = createServerSocket();
 
         for (int i=0; i<NbDaemon; i++) {
-          dmon[i] = new NetServerIn(getName(), listen, logmon);
+          dmon[i] = new NetServerIn(getName() + '.' + i, listen, logmon);
         }
       } else {
         dmon = new Daemon[1];
