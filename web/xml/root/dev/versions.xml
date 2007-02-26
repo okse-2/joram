@@ -11,6 +11,20 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.22 (February 26, 2007)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_22. This version is bundled in Jonas 4.8.4.
+      This maintenance release provides the following fixes and changes:</p>
+      <s2 name="Bug fixes">
+	<ul>
+	  <li>Take in account topicAckBufferMax parameter in MessageConsumerListener.</li>
+	  <li>Fix Jonas Bug#306288: Avoid NPE if the LogWriter of JCA connector is null.</li>
+	  <li>Adds DeadMQueue.create methods allowing to internally name the queue. It fixes an issue with Jonas. </li>
+	  <li>Apply a patch from Mark Anderson to add a timeout in Requestor.request.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.21 (September 20, 2006)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_21. This version is bundled in Jonas 4.8 and Petals 1.0.
