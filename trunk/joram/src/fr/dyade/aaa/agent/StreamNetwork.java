@@ -193,6 +193,8 @@ public abstract class StreamNetwork extends Network {
     try {
       return createSocket(addr.getAddress(), addr.getPort());
     } catch (IOException exc) {
+      this.logmon.log(BasicLevel.DEBUG,
+                      this.getName() + ", connection refused, reset addr");
       addr.resetAddr();
       return createSocket(addr.getAddress(), addr.getPort());
     }
