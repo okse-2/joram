@@ -492,31 +492,20 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     protected void open() throws IOException {
       // Open the connection.
       socket = null;
-      boolean phase1 = true;
-      while (true) {
-        if (proxy == null) {
-          try {
-            socket = createSocket(server);
-            break;
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.WARN,
-                       this.getName() + ", connection refused", exc);
-            if (! phase1) throw exc;
-            phase1 = false;
-            server.resetAddr();
-          }
-        } else {
-          try {
-            socket = createTunnelSocket(server.getAddr(), server.getPort(),
-                                        proxy, proxyport);
-            break;
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.WARN,
-                       this.getName() + ", connection refused", exc);
-            if (! phase1) throw exc;
-            phase1 = false;
-            proxy = InetAddress.getByName(proxyhost);
-          }
+
+      if (proxy == null) {
+        socket = createSocket(server);
+      } else {
+        try {
+          socket = createTunnelSocket(server.getAddr(), server.getPort(),
+                                      proxy, proxyport);
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.WARN,
+                     this.getName() + ", connection refused, reset addr");
+          server.resetAddr();
+          proxy = InetAddress.getByName(proxyhost);
+          socket = createTunnelSocket(server.getAddr(), server.getPort(),
+                                      proxy, proxyport);
         }
       }
       setSocketOption(socket);
