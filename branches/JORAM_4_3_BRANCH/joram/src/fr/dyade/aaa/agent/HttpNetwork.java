@@ -70,7 +70,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   * command, or in <code>a3servers.xml</code> configuration file. By default,
+   * its value is 10000 (10s).
    */
   protected long activationPeriod = 10000L;
 
@@ -126,9 +127,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    */
   ServerDesc server = null;
 
-  MessageInputStream nis = null;
-  MessageOutputStream nos = null;
-
   /**
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
@@ -144,9 +142,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    */
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
-
-    nis = new MessageInputStream();
-    nos = new MessageOutputStream();
 
     activationPeriod = Long.getLong("ActivationPeriod",
                                     activationPeriod).longValue();
@@ -192,7 +187,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
         ServerSocket listen = createServerSocket();
 
         for (int i=0; i<NbDaemon; i++) {
-          dmon[i] = new NetServerIn(getName(), listen, logmon);
+          dmon[i] = new NetServerIn(getName() + '.' + i, listen, logmon);
         }
       } else {
         dmon = new Daemon[1];
@@ -276,7 +271,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
   
   protected void sendRequest(Message msg,
-                             OutputStream os, int ack,
+                             OutputStream os,
+                             MessageOutputStream nos,
+                             int ack,
                              long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
@@ -323,7 +320,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected short getRequest(InputStream is, byte[] buf) throws Exception {
+  protected short getRequest(InputStream is,
+                             MessageInputStream nis,
+                             byte[] buf) throws Exception {
     String line = null;
 
     line = readLine(is, buf);
@@ -357,7 +356,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
 
   protected void sendReply(Message msg,
-                           OutputStream os, int ack,
+                           OutputStream os,
+                           MessageOutputStream nos,
+                           int ack,
                            long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
@@ -392,7 +393,9 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     os.flush();
   }
 
-  protected void getReply(InputStream is, byte[] buf) throws Exception {
+  protected void getReply(InputStream is,
+                          MessageInputStream nis,
+                          byte[] buf) throws Exception {
     String line = null;
 
     line = readLine(is, buf);
@@ -418,8 +421,14 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       logmon.log(BasicLevel.WARN, name + "Bad reply length: " + length);
   }
 
-  protected int handle(Message msgout) throws Exception {
+  protected int handle(Message msgout,
+                       MessageInputStream nis) throws Exception {
     int ack = nis.getAckStamp();
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 this.getName() + ", handle: " + msgout + ", ack=" + ack);
+
     if ((msgout != null) && (msgout.stamp == ack)) {
       AgentServer.getTransaction().begin();
       //  Suppress the processed notification from message queue,
@@ -437,9 +446,10 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                  this.getName() + ", get: " + msg);
 
     if (msg != null) {
+      ack = msg.stamp;
       testBootTS(msg.getSource(), nis.getBootTS());
       deliver(msg);
-      return msg.stamp;
+      return ack;
     }
 
     return -1;
@@ -464,43 +474,39 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
 
   final class NetServerOut extends Daemon {
     Socket socket = null;
+
     InputStream is = null;
     OutputStream os = null;
 
-    NetServerOut(String name, Logger logmon) {
+    MessageInputStream nis = null;
+    MessageOutputStream nos = null;
+
+    NetServerOut(String name, Logger logmon) throws IOException {
       super(name + ".NetServerOut");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+
+      nis = new MessageInputStream();
+      nos = new MessageOutputStream();
     }
 
     protected void open() throws IOException {
       // Open the connection.
       socket = null;
-      boolean phase1 = true;
-      while (true) {
-        if (proxy == null) {
-          try {
-            socket = createSocket(server);
-            break;
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.WARN,
-                       this.getName() + ", connection refused", exc);
-            if (! phase1) throw exc;
-            phase1 = false;
-            server.resetAddr();
-          }
-        } else {
-          try {
-            socket = createTunnelSocket(server.getAddr(), server.getPort(),
-                                        proxy, proxyport);
-            break;
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.WARN,
-                       this.getName() + ", connection refused", exc);
-            if (! phase1) throw exc;
-            phase1 = false;
-            proxy = InetAddress.getByName(proxyhost);
-          }
+
+      if (proxy == null) {
+        socket = createSocket(server);
+      } else {
+        try {
+          socket = createTunnelSocket(server.getAddr(), server.getPort(),
+                                      proxy, proxyport);
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.WARN,
+                     this.getName() + ", connection refused, reset addr");
+          server.resetAddr();
+          proxy = InetAddress.getByName(proxyhost);
+          socket = createTunnelSocket(server.getAddr(), server.getPort(),
+                                      proxy, proxyport);
         }
       }
       setSocketOption(socket);
@@ -582,11 +588,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 break;
               } while (true);
 
-              sendRequest(msgout, os, ack, currentTimeMillis);
-              getReply(is, buf);
+              sendRequest(msgout, os, nos, ack, currentTimeMillis);
+              getReply(is, nis, buf);
 
               canStop = false;
-              ack = handle(msgout);
+              ack = handle(msgout, nis);
               canStop = true;
               // Get next message to send if any
               msgout = qout.get(0);
@@ -624,14 +630,21 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     ServerSocket listen = null;
     
     Socket socket = null;
+
     InputStream is = null;
     OutputStream os = null;
+
+    MessageInputStream nis = null;
+    MessageOutputStream nos = null;
 
     NetServerIn(String name, ServerSocket listen, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
       this.listen = listen;
       // Overload logmon definition in Daemon
       this.logmon = logmon;
+
+      nis = new MessageInputStream();
+      nos = new MessageOutputStream();
     }
 
     protected void open(Socket socket) throws IOException {
@@ -683,11 +696,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
             socket = listen.accept();
             open(socket);
             
-            short from = getRequest(is, buf);
+            short from = getRequest(is, nis, buf);
             long currentTimeMillis = System.currentTimeMillis();
             do {
               canStop = false;
-              ack = handle(msgout);
+              ack = handle(msgout, nis);
               canStop = true;
 
               do {
@@ -720,12 +733,12 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendReply: " + msgout);
 
-              sendReply(msgout, os, ack, currentTimeMillis);
+              sendReply(msgout, os, nos, ack, currentTimeMillis);
 
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": AF WWW " + msgout);
 
-              getRequest(is, buf);
+              getRequest(is, nis, buf);
             } while (running);
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
