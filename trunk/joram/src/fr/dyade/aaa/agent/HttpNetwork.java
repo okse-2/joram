@@ -70,7 +70,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   * command, or in <code>a3servers.xml</code> configuration file. By default,
+   * its value is 10000 (10s).
    */
   protected long activationPeriod = 10000L;
 
