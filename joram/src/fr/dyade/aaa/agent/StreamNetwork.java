@@ -89,6 +89,18 @@ public abstract class StreamNetwork extends Network {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int SoLinger = -1;
+  /**
+   *  Enable/disabl SO_TIMEOUT with the specified timeout in milliseconds.
+   * The timeout must be > 0. A timeout of zero is interpreted as an infinite
+   * timeout.
+   *  This value can be adjusted for all network components by setting
+   * <code>SoTimeout</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.SoTimeout</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int SoTimeout = 0;
 
   /** Creates a new Network component */
   public StreamNetwork() {
@@ -119,6 +131,9 @@ public abstract class StreamNetwork extends Network {
 
     SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
     SoLinger = Integer.getInteger(name + ".SoLinger", SoLinger).intValue();
+
+    SoTimeout = Integer.getInteger("SoTimeout", SoTimeout).intValue();
+    SoTimeout = Integer.getInteger(name + ".SoTimeout", SoTimeout).intValue();
   }
 
   /**
@@ -178,6 +193,8 @@ public abstract class StreamNetwork extends Network {
     try {
       return createSocket(addr.getAddress(), addr.getPort());
     } catch (IOException exc) {
+      this.logmon.log(BasicLevel.DEBUG,
+                      this.getName() + ", connection refused, reset addr");
       addr.resetAddr();
       return createSocket(addr.getAddress(), addr.getPort());
     }
@@ -256,7 +273,7 @@ public abstract class StreamNetwork extends Network {
     // TCP data coalescing - ie Nagle's algorithm
     sock.setTcpNoDelay(TcpNoDelay);
     // Read operation will block indefinitely until requested data arrives
-    sock.setSoTimeout(0);
+    sock.setSoTimeout(SoTimeout);
     // Linger-on-Close timeout.
     if (SoLinger >= 0)
       sock.setSoLinger(true, SoLinger);
