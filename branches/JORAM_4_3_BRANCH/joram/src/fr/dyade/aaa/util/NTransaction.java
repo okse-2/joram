@@ -75,7 +75,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * @param size The maximum size of memory log in Kb.
    */
   public void setMaxLogMemorySize(int size) {
-    if (size > 0) MaxLogMemorySize = size *Kb;
+    if (size > 0) MaxLogMemorySize = size *Mb;
   }
 
   /**
