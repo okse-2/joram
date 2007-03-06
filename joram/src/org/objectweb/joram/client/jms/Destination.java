@@ -82,6 +82,9 @@ public abstract class Destination
     return adminName;
   }
 
+  public final void setAdminName(String adminName) {
+    this.adminName = adminName;
+  }
   public final String getType() {
     return type;
   }
@@ -216,6 +219,7 @@ public abstract class Destination
   public Reference getReference() throws NamingException {
       Reference ref = super.getReference();
       ref.add(new StringRefAddr("dest.name", getName()));
+      ref.add(new StringRefAddr("dest.adminName", getAdminName()));
       return ref;
     }
 

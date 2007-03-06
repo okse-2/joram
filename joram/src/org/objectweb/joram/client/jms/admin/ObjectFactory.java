@@ -229,15 +229,15 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(haTcpQCF)) {
-      String url = (String) ref.get("cFactory.url").getContent();        QueueConnectionFactory cnxFact =
-                                                                           new QueueHATcpConnectionFactory(url);
+      String url = (String) ref.get("cFactory.url").getContent();
+      QueueConnectionFactory cnxFact = new QueueHATcpConnectionFactory(url);
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       cnxFact.getParameters().fromReference(ref);
       return cnxFact;
     } else if (ref.getClassName().equals(haTcpTCF)) {
-      String url = (String) ref.get("cFactory.url").getContent();        TopicConnectionFactory cnxFact =
-                                                                           new TopicHATcpConnectionFactory(url);
+      String url = (String) ref.get("cFactory.url").getContent();
+      TopicConnectionFactory cnxFact = new TopicHATcpConnectionFactory(url);
       String reliableClass = (String) ref.get("reliableClass").getContent();
       cnxFact.setReliableClass(reliableClass);
       cnxFact.getParameters().fromReference(ref);
@@ -316,19 +316,34 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       return cnxFact;
     } else if (ref.getClassName().equals(queue)) {
       String destName = (String) ref.get("dest.name").getContent();
-      return new Queue(destName);
+      String adminName = (String) ref.get("dest.adminName").getContent();
+      Queue queue = new Queue(destName);
+      queue.setAdminName(adminName);
+      return queue;
     } else if (ref.getClassName().equals(topic)) {
       String destName = (String) ref.get("dest.name").getContent();
-      return new Topic(destName);
+      String adminName = (String) ref.get("dest.adminName").getContent();
+      Topic topic = new Topic(destName);
+      topic.setAdminName(adminName);
+      return topic;
     } else if (ref.getClassName().equals(tempQueue)) {
       String destName = (String) ref.get("dest.name").getContent();
-      return new TemporaryQueue(destName, null);
+      String adminName = (String) ref.get("dest.adminName").getContent();
+      Queue queue = new TemporaryQueue(destName, null);
+      queue.setAdminName(adminName);
+      return queue;
     } else if (ref.getClassName().equals(tempTopic)) {
       String destName = (String) ref.get("dest.name").getContent();
-      return new TemporaryTopic(destName, null);
+      String adminName = (String) ref.get("dest.adminName").getContent();
+      Topic topic = new TemporaryTopic(destName, null);
+      topic.setAdminName(adminName);
+      return topic;
     } else if (ref.getClassName().equals(deadMQueue)) {
       String destName = (String) ref.get("dest.name").getContent();
-      return new DeadMQueue(destName);
+      String adminName = (String) ref.get("dest.adminName").getContent();
+      Queue queue = new DeadMQueue(destName);
+      queue.setAdminName(adminName);
+      return queue;
     } else if (ref.getClassName().equals(user)) {
       String userName = (String) ref.get("user.name").getContent();
       String userId = (String) ref.get("user.id").getContent();
