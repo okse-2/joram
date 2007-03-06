@@ -26,7 +26,7 @@ import org.objectweb.joram.mom.proxies.*;
 import java.net.*;
 import java.io.*;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -105,8 +105,8 @@ public class TcpConnection {
    * Starts the connection reader and writer threads.
    */
   void start() throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
         "TcpConnection.start()");
     try {

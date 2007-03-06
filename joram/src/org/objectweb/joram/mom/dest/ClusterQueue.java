@@ -32,7 +32,7 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>ClusterQueue</code> agent is an agent hosting a MOM queue, and which

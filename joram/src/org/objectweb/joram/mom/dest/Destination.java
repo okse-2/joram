@@ -31,7 +31,7 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.util.management.MXWrapper;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -95,12 +95,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    try {
-      MXWrapper.registerMBean(destImpl, "Joram", getMBeanName());
-    } catch (Exception exc) {
-      JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                      this + " jmx failed", exc);
-    }
+    MXWrapper.registerMBean(destImpl, "Joram", getMBeanName());
   }
 
   /** Finalizes the agent before it is garbaged. */
@@ -108,8 +103,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     try {
       MXWrapper.unregisterMBean("Joram", getMBeanName());
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
     }
     super.agentFinalize(lastTime);
   }
@@ -144,15 +139,15 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   }
 
   protected void setNoSave() {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      this + ": setNoSave().");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    this + ": setNoSave().");
     super.setNoSave();
   }
 
   protected void setSave() {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     this + ": setSave().");
     super.setSave();
   }

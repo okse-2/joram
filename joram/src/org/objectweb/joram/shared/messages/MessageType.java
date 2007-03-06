@@ -18,22 +18,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Jeff Mesnil (INRIA)
  * Contributor(s):
  */
-package org.objectweb.joram.shared.excepts;
+package org.objectweb.joram.shared.messages;
 
 /**
- * A <code>MessageException</code> is thrown when an error occurs while
- * accessing a message.
+ * The <code>MessageType</code> interface defines the various types of
+ * MOM messages.
+ * <p>
+ * MOM messages are defined by the type of data they actually carry.
  */
-public class MessageException extends MomException
+public interface MessageType
 {
-  /**
-   * Constructs a <code>MessageException</code> instance.
-   */
-  public MessageException(String info)
-  {
-    super(info);
-  }
+  /** A simple message carries an empty body. */
+  public static final int SIMPLE = 0;
+
+  /** A text message carries a String body. */
+  public static final int TEXT = 1;
+
+  /** An object message carries a serializable object. */
+  public static final int OBJECT = 2;
+
+  /** A map message carries an hashtable. */
+  public static final int MAP = 3;
+
+  /** A stream message carries a bytes stream. */
+  public static final int STREAM = 4;
+
+  /** A bytes message carries an array of bytes. */
+  public static final int BYTES = 5;
 }

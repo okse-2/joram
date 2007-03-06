@@ -21,19 +21,40 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
-package org.objectweb.joram.shared.excepts;
+package org.objectweb.joram.mom;
+
+import org.objectweb.util.monolog.api.Logger;
+import fr.dyade.aaa.agent.Debug;
 
 /**
- * A <code>MessageException</code> is thrown when an error occurs while
- * accessing a message.
+ * The <code>MomTracing</code> class centralizes the log tracing for the MOM.
  */
-public class MessageException extends MomException
+public class MomTracing
 {
   /**
-   * Constructs a <code>MessageException</code> instance.
+   * Logger used to trace destinations activity, to be set using topic
+   * org.objectweb.joram.shared.Destination
    */
-  public MessageException(String info)
+  public static Logger dbgDestination = null;
+
+  /**
+   * Logger used to trace proxies activity, to be set using topic
+   * org.objectweb.joram.shared.Proxy
+   */
+  public static Logger dbgProxy = null;
+
+  /**
+   * <code>true</code> when <code>init</code> has been called.
+   */
+  private static boolean initialized = false;
+
+
+  /**
+   * Initializes the package by setting the various loggers.
+   */
+  static
   {
-    super(info);
+    dbgDestination = Debug.getLogger("org.objectweb.joram.mom.Destination");
+    dbgProxy = Debug.getLogger("org.objectweb.joram.mom.Proxy");
   }
 }
