@@ -12,6 +12,10 @@
 
   <body>
     <s1 name="JORAM History">
+	<subtitle>March 08, 2007: JORAM 4.3.25 is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.objectweb.org/">Jonas 4.8.5</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_25), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
 	<subtitle>February 26, 2007: JORAM 4.3.22 is released</subtitle>
 	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.objectweb.org/">Jonas 4.8.4</a>.</p>
 	<p>It is tagged in CVS (JORAM_4_3_22), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
