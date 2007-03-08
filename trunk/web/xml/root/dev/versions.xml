@@ -11,6 +11,28 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.25 (March 08, 2007)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_25. This version is bundled in Jonas 4.8.5.
+      This maintenance release provides the following fixes and changes:</p>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Avoid useless socket creation on connection error (HttpNetwork component).</li>
+          <li>Bug fix in handling of byte array as object in BytesMessage.</li>
+          <li>Allow to fix SO_TIMEOUT on StreamNetwork.</li>
+          <li>Fixes in JMS message handling: avoid NPE if message's body is null, and catch NPE in Session.run to avoid MDB blocking.</li>
+          <li>Bug fixes in acknowledge handling of HttpNetwork.</li>
+          <li>toString and hashcode opttimization in Connection object.</li>
+          <li>Allows to asynchronously garbage the Transaction log file.</li>
+          <li>Fixes compatibilty issues with other JMS provider: allow to set JMSDestination with non Joram destination, and to convert messages with 'JMS_' properties.</li>
+          <li>Bug fixes: really remove messages on disk in clear and deleteMessage methods. Previously the messages come back after server retart.</li>
+          <li>Enhancements in mail destinations.</li>
+          <li>Bug fixes in SimpleNetwork. A synchronization issue may result in a message lost in case of network failures.</li>
+          <li>Adds periodic cleaning task for subscriptions.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.22 (February 26, 2007)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_22. This version is bundled in Jonas 4.8.4.
