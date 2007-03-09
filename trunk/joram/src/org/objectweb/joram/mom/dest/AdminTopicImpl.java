@@ -2404,7 +2404,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
  
   private String createMessageId() {
-    if (msgCounter == Long.MAX_VALUE) msgCounter = 0;
     msgCounter++;
     return "ID:" + destId.toString() + ":" + msgCounter;
   }

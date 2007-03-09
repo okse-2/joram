@@ -281,10 +281,6 @@ public class ClusterQueueImpl extends QueueImpl {
     // Storing each received message:
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
-
-      if (arrivalsCounter == Long.MAX_VALUE)
-        arrivalsCounter = 0;
-
       msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
       msg.order = arrivalsCounter++;
       storeMessage(msg);
