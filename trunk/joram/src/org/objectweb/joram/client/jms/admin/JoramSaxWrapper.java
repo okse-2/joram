@@ -945,24 +945,27 @@ public class JoramSaxWrapper extends DefaultHandler {
     AdminModule.disconnect();
 
     try {
-      if (jndiCtx != null) {
-        for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
-          String name = (String) e.nextElement();
-          jndiCtx.rebind(name, toBind.get(name));
-        }
-        jndiCtx.close();
-        toBind.clear();
-      }
-
-      if (!toBind.isEmpty()) {
+      if (jndiCtx != null)
         jndiCtx = new javax.naming.InitialContext();
+      
         for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
           String name = (String) e.nextElement();
+          StringTokenizer st = new StringTokenizer(name, "/");
+          StringBuffer buff = new StringBuffer((String) st.nextToken());
+          while (st.hasMoreTokens()) {
+            try {
+              jndiCtx.createSubcontext(buff.toString());
+            } catch (NamingException exc) {
+              if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.WARN))
+                JoramTracing.dbgAdmin.log(BasicLevel.WARN, "createSubcontext", exc);
+            }
+            buff.append("/");
+            buff.append((String) st.nextToken());
+          }
           jndiCtx.rebind(name, toBind.get(name));
         }
         jndiCtx.close();
         toBind.clear();
-      }
     } catch (NamingException exc) {
       JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",exc);
     }
