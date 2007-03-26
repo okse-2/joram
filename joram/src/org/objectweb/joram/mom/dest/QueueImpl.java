@@ -345,9 +345,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       else
         super.react(from, not);
 
-    }
-    // MOM Exceptions are sent to the requester.
-    catch (MomException exc) {
+    } catch (MomException exc) {
+      // MOM Exceptions are sent to the requester.
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
 
@@ -965,8 +964,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * <p>
    * This method stores the messages and launches a delivery sequence.
    */
-  protected void doProcess(ClientMessages not)
-  {
+  protected void doProcess(ClientMessages not) {
     receiving = true;
 
     Message msg;
@@ -974,12 +972,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
 
-      if (arrivalsCounter == Long.MAX_VALUE)
-        arrivalsCounter = 0;
-
       msg = (Message) msgs.nextElement();
       if (not.isPersistent()) {
-        // state change, so save.
+        // state change, so save. AF: is it really needed ??
         setSave();
       }
       msg.order = arrivalsCounter++;
