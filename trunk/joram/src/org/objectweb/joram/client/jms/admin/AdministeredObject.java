@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,17 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.util.Hashtable;
-import java.util.Vector;
-
 import javax.naming.NamingException;
 import javax.naming.Reference;
-import javax.naming.StringRefAddr;
 
 import fr.dyade.aaa.jndi2.soap.SoapObjectItf;
 
@@ -39,19 +35,17 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>AdministeredObject</code> class is the parent class of all
  * JORAM administered objects.
  */
-public abstract class AdministeredObject implements java.io.Serializable,
-                                                    javax.naming.Referenceable,
-                                                    SoapObjectItf {
-  /** Sets the naming reference of an administered object. */
-  public Reference getReference() throws NamingException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "AdministeredObject.getReference()");
-
-    Reference ref =
-      new Reference(this.getClass().getName(),
-                    "org.objectweb.joram.client.jms.admin.ObjectFactory",
-                    null);
+public abstract class  AdministeredObject implements javax.naming.Referenceable {
+  public final Reference getReference() throws NamingException {
+    Reference ref = null;
+    ref = new Reference(this.getClass().getName(), ObjectFactory.class.getName(), null);
+    toReference(ref);
     return ref;
   }
+
+  /** Sets the naming reference of an administered object. */
+  public abstract void toReference(Reference ref) throws NamingException;
+
+  /** Restores the administered object from a naming reference. */
+  public abstract void fromReference(Reference ref) throws NamingException;
 }
