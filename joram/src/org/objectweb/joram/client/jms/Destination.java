@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -66,6 +66,10 @@ public abstract class Destination
 
   // Used by jndi2 SoapObjectHelper
   public Destination() {}
+
+  public Destination(String type) {
+    this.type = type;
+  }
 
   protected Destination(String name, String type) {
     agentId = name;
@@ -193,31 +197,8 @@ public abstract class Destination
    * Returns <code>true</code> if the destination is a queue.
    */
   public boolean isQueue() {
-    return (this instanceof Queue);
+    return (this instanceof javax.jms.Queue);
   }
-
-  /**
-   * Codes a <code>Destination</code> as a Hashtable for travelling through the
-   * SOAP protocol.
-   */
-  public Hashtable code() {
-    Hashtable h = new Hashtable();
-    h.put("agentId", getName());
-    h.put("type", type);
-    return h;
-  }
-
-  public void decode(Hashtable h) {
-    agentId = (String) h.get("agentId");
-    type = (String) h.get("type");
-  }
-
-  /** Sets the naming reference of a destination. */
-  public Reference getReference() throws NamingException {
-      Reference ref = super.getReference();
-      ref.add(new StringRefAddr("dest.name", getName()));
-      return ref;
-    }
 
   public static final String QUEUE =
       "org.objectweb.joram.mom.dest.Queue";
@@ -620,10 +601,9 @@ public abstract class Destination
     String name,
     String type) throws AdminException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG,
-        "Destination.newInstance(" +
-        id + ',' + name + ',' + type + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "Destination.newInstance(" +
+                                 id + ',' + name + ',' + type + ')');
     Destination dest;
     if (Queue.isQueue(type)) {
       if (TemporaryQueue.isTemporaryQueue(type)) {
@@ -656,5 +636,33 @@ public abstract class Destination
     Monitor_GetStatRep reply =
       (Monitor_GetStatRep) AdminModule.doRequest(request);
     return  reply.getStats();
+  }
+
+  /** Sets the naming reference of a connection factory. */
+  public void toReference(Reference ref) throws NamingException {
+    ref.add(new StringRefAddr("dest.agentId", agentId));
+    ref.add(new StringRefAddr("dest.adminName", adminName));
+  }
+
+  /** Restores the administered object from a naming reference. */
+  public void fromReference(Reference ref) throws NamingException {
+    agentId = (String) ref.get("dest.agentId").getContent();
+    adminName = (String) ref.get("dest.adminName").getContent();
+  }
+
+  /**
+   * Codes a <code>Destination</code> as a Hashtable for travelling through the
+   * SOAP protocol.
+   */
+  public Hashtable code() {
+    Hashtable h = new Hashtable();
+    h.put("agentId", getName());
+    h.put("type", type);
+    return h;
+  }
+
+  public void decode(Hashtable h) {
+    agentId = (String) h.get("agentId");
+    type = (String) h.get("type");
   }
 }
