@@ -514,9 +514,11 @@
   <target name="queue_cluster_adminxml" depends="init"
     description="--> Runs queue cluster administration xml">
     <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="cluster.queue.ClusterAdminXML" failonerror="no" fork="yes"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
