@@ -1,95 +1,83 @@
 <?xml version="1.0"?>
 
 <JoramAdmin>
-  
-  
   <AdminModule>
-    <connect host="localhost"
-             port="16010"
-             name="root"
-             password="root"/>
+    <connect host="localhost" port="16010" name="root" password="root"/>
   </AdminModule>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
-    <tcp host="localhost"
-         port="16010"/>
-    <jndi name="qcf0"/>
-  </ConnectionFactory>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
-    <tcp host="localhost"
-         port="16011"/>
-    <jndi name="qcf1"/>
-  </ConnectionFactory>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
-    <tcp host="localhost"
-         port="16012"/>
-    <jndi name="qcf2"/>
-  </ConnectionFactory>
-  
-  <User name="user0"
-        password="user0"
-        serverId="0"/>
-  <User name="user1"
-        password="user1"
-        serverId="1"/>
-  <User name="user2"
-        password="user2"
-        serverId="2"/>
-  
-  <Cluster>
-    <Queue name="queue0"
-           serverId="0"
-           className="org.objectweb.joram.mom.dest.ClusterQueue">
-      <freeReader/>
-      <freeWriter/>
-        <property name="period" value="10000"/>
-        <property name="producThreshold" value="50"/>
-        <property name="consumThreshold" value="2"/>
-        <property name="autoEvalThreshold" value="false"/>
-        <property name="waitAfterClusterReq" value="1000"/>
-      <jndi name="queue0"/>
-    </Queue>
-    <Queue name="queue1"
-           serverId="1"
-           className="org.objectweb.joram.mom.dest.ClusterQueue">
-      <freeReader/>
-      <freeWriter/>
-        <property name="period" value="10000"/>
-        <property name="producThreshold" value="50"/>
-        <property name="consumThreshold" value="2"/>
-        <property name="autoEvalThreshold" value="false"/>
-        <property name="waitAfterClusterReq" value="1000"/>
-      <jndi name="queue1"/>
-    </Queue>
-    <Queue name="queue2"
-           serverId="2"
-           className="org.objectweb.joram.mom.dest.ClusterQueue">
-      <freeReader/>
-      <freeWriter/>
-        <property name="period" value="10000"/>
-        <property name="producThreshold" value="50"/>
-        <property name="consumThreshold" value="2"/>
-        <property name="autoEvalThreshold" value="false"/>
-        <property name="waitAfterClusterReq" value="1000"/>
-      <jndi name="queue2"/>
-    </Queue>
-    <freeReader/>
-    <freeWriter/>
-    <reader user="user0"/>
-    <writer user="user0"/>
-    <reader user="user1"/>
-    <writer user="user1"/>
-    <reader user="user2"/>
-    <writer user="user2"/>
-  </Cluster>
-  
+    
   <InitialContext>
     <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
     <property name="java.naming.factory.host" value="localhost"/>
     <property name="java.naming.factory.port" value="16400"/>
   </InitialContext>
+
+  <ConnectionFactory name="cf0">
+    <tcp host="localhost" port="16010"/>
+    <jndi name="cf0"/>
+  </ConnectionFactory>
   
+  <ConnectionFactory name="cf1">
+    <tcp host="localhost" port="16011"/>
+    <jndi name="cf1"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory name="cf2">
+    <tcp host="localhost" port="16012"/>
+    <jndi name="cf2"/>
+  </ConnectionFactory>
+  
+  <User name="user0" login="anonymous" password="anonymous" serverId="0"/>
+  <User name="user1" login="anonymous" password="anonymous" serverId="1"/>
+  <User name="user2" login="anonymous" password="anonymous" serverId="2"/>
+  
+  <Queue name="queue0" serverId="0"
+         className="org.objectweb.joram.mom.dest.ClusterQueue">
+    <freeReader/>
+    <freeWriter/>
+    <property name="period" value="10000"/>
+    <property name="producThreshold" value="50"/>
+    <property name="consumThreshold" value="2"/>
+    <property name="autoEvalThreshold" value="false"/>
+    <property name="waitAfterClusterReq" value="1000"/>
+    <jndi name="queue0"/>
+  </Queue>
+
+  <Queue name="queue1" serverId="1"
+         className="org.objectweb.joram.mom.dest.ClusterQueue">
+    <freeReader/>
+    <freeWriter/>
+    <property name="period" value="10000"/>
+    <property name="producThreshold" value="50"/>
+    <property name="consumThreshold" value="2"/>
+    <property name="autoEvalThreshold" value="false"/>
+    <property name="waitAfterClusterReq" value="1000"/>
+    <jndi name="queue1"/>
+  </Queue>
+
+  <Queue name="queue2" serverId="2"
+         className="org.objectweb.joram.mom.dest.ClusterQueue">
+    <freeReader/>
+    <freeWriter/>
+    <property name="period" value="10000"/>
+    <property name="producThreshold" value="50"/>
+    <property name="consumThreshold" value="2"/>
+    <property name="autoEvalThreshold" value="false"/>
+    <property name="waitAfterClusterReq" value="1000"/>
+    <jndi name="queue2"/>
+  </Queue>
+
+  <ClusterCF>
+    <ClusterElement name="cf0" location="s0"/>
+    <ClusterElement name="cf1" location="s1"/>
+    <ClusterElement name="cf2" location="s2"/>
+    <jndi name="clusterCF"/>
+  </ClusterCF>
+
+  <ClusterQueue>
+    <ClusterElement name="queue0" location="s0"/>
+    <ClusterElement name="queue1" location="s1"/>
+    <ClusterElement name="queue2" location="s2"/>
+    <jndi name="clusterQueue"/>
+  </ClusterQueue>
   
 </JoramAdmin>
