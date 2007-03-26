@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -60,7 +60,9 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   }
 
   // Used by jndi2 SoapObjectHelper
-  public Queue() {}
+  public Queue() {
+    super(QUEUE_TYPE);
+  }
 
   public Queue(String name) {
     super(name, QUEUE_TYPE);

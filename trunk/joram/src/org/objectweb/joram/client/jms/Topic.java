@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -57,7 +57,9 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   }
 
   // Used by jndi2 SoapObjectHelper
-  public Topic() {}
+  public Topic() {
+    super(TOPIC_TYPE);
+  }
 
   public Topic(String name) {
     super(name, TOPIC_TYPE);
@@ -356,8 +358,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void unsetParent()
-         throws ConnectException, AdminException 
-  {
+         throws ConnectException, AdminException  {
     AdminModule.doRequest(new UnsetFather(agentId));
   }
 }
