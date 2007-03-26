@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,11 +25,10 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Vector;
-import java.util.Hashtable;
-
-import javax.jms.JMSException;
 import javax.naming.*;
+import javax.jms.JMSException;
+
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
@@ -37,14 +37,8 @@ import org.objectweb.joram.shared.JoramTracing;
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
  */
 public abstract class ConnectionFactory
-                extends org.objectweb.joram.client.jms.admin.AdministeredObject
+                extends AbstractConnectionFactory
                 implements javax.jms.ConnectionFactory {
-  /** Object containing the factory's parameters. */
-  protected FactoryParameters params;
-
-  /** Reliable class name, for exemple use by ssl. */
-  protected String reliableClass = null;
-
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
@@ -52,10 +46,7 @@ public abstract class ConnectionFactory
    * @param port  Server's listening port.
    */
   public ConnectionFactory(String host, int port) {
-    params = new FactoryParameters(host, port);
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    super(host, port);
   }
 
   /**
@@ -64,24 +55,19 @@ public abstract class ConnectionFactory
    * @param url  joram ha url.
    */
   public ConnectionFactory(String url) {
-    params = new FactoryParameters(url);
-
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    super(url);
   }
 
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
    */
-  public ConnectionFactory() {}
+  public ConnectionFactory() {
+    super();
+  }
 
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "CF:" + params.getHost() + "-" + params.getPort();
-  }
-
-  public void setReliableClass(String reliableClass) {
-    this.reliableClass = reliableClass;
   }
 
   /**
@@ -91,38 +77,7 @@ public abstract class ConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public abstract javax.jms.Connection
-      createConnection(String name, String password)
-    throws JMSException;
-
-  /**
-   * Default login name for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltLogin</tt> property.
-   */
-  final static String dfltLogin = "anonymous";
-  /**
-   * Default login password for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltPassword</tt>
-   * property.
-   */
-  final static String dfltPassword = "anonymous";
-
-  /**
-   * Returns default login name for connection.
-   * Default value "anonymous" can be adjusted by setting the
-   * <tt>JoramDfltLogin</tt> property.
-   */
-  public static String getDefaultLogin() {
-    return System.getProperty("JoramDfltLogin", dfltLogin);
-  }
-
-  /**
-   * Returns the default login password for connection.
-   * Default value "anonymous" can be adjusted by setting the
-   * <tt>JoramDfltPassword</tt> property.
-   */
-  public static String getDefaultPassword() {
-    return System.getProperty("JoramDfltPassword", dfltPassword);
-  }
+      createConnection(String name, String password) throws JMSException;
 
   /**
    * API method.
@@ -133,39 +88,5 @@ public abstract class ConnectionFactory
    */
   public javax.jms.Connection createConnection() throws JMSException {
     return createConnection(getDefaultLogin(), getDefaultPassword());
-  }
-
-
-  /** Returns the factory's configuration parameters. */
-  public FactoryParameters getParameters() {
-    return params;
-  }
-
-
-  /** Sets the naming reference of a connection factory. */
-  public Reference getReference() throws NamingException {
-    Reference ref = super.getReference();
-    params.toReference(ref);
-    ref.add(new StringRefAddr("reliableClass", reliableClass));
-    return ref;
-  }
-
-  /**
-   * Codes a <code>ConnectionFactory</code> as a Hashtable for travelling
-   * through the SOAP protocol.
-   */
-  public Hashtable code() {
-    return params.toHashtable();
-  }
-
-  /**
-   * Implements the <code>decode</code> abstract method defined in the
-   * <code>fr.dyade.aaa.jndi2.soap.SoapObjectItf</code> interface.
-   * <p>
-   * Actual implementation of the method is located in the
-   * tcp and soap sub classes.
-   */
-  public void decode(Hashtable h) {
-    params = FactoryParameters.fromHashtable(h);
   }
 }
