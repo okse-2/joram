@@ -1,7 +1,7 @@
   
 <!-- ====================================== -->
 <!-- ====================================== -->
-<!-- ==        All possibility           == -->
+<!-- ==    Different possibilities       == -->
 <!-- ==       see JoramAdmin.dtd         == -->
 <!-- ====================================== -->
 <!-- ====================================== -->
@@ -9,12 +9,9 @@
   
 <JoramAdmin>
   <AdminModule>
-    <connect hostName=""
-             port=""
-             name=""
-             password=""
-             cnxTimer=""
-             reliableClass=""/>
+    <connect hostName="" port=""
+             name="" password=""
+             cnxTimer="" reliableClass=""/>
   </AdminModule>
   
   <AdminModule>
@@ -22,7 +19,7 @@
   </AdminModule>
   
   
-  <ConnectionFactory className="">
+  <ConnectionFactory name="" className="">
     <tcp host=""
          port=""
          reliableClass=""/>
@@ -36,9 +33,7 @@
     <jndi name=""/>
   </ConnectionFactory>
   
-  <User name=""
-        password=""
-        serverId=""/>
+  <User name="" login="" password="" serverId=""/>
   
   <Destination type=""
                serverId=""
