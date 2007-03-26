@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<JoramAdmin>
+  
+  <AdminModule>
+    <connect host="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="cf0"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16011"/>
+    <jndi name="cf1"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16012"/>
+    <jndi name="cf2"/>
+  </ConnectionFactory>
+  
+  <User name="publisher00"
+        password="publisher00"
+        serverId="0"/>
+  <User name="subscriber10"
+        password="subscriber10"
+        serverId="1"/>
+  <User name="subscriber20"
+        password="subscriber20"
+        serverId="2"/>
+  <User name="subscriber21"
+        password="subscriber21"
+        serverId="2"/>
+  
+  <Cluster>
+    <Topic name="top0"
+           serverId="0">
+      <jndi name="top0"/>
+    </Topic>
+    <Topic name="top1"
+           serverId="1">
+      <jndi name="top1"/>
+    </Topic>
+    <Topic name="top2"
+           serverId="2">
+      <jndi name="top2"/>
+    </Topic>
+    <freeReader/>
+    <freeWriter/>
+    <reader user="publisher00"/>
+    <writer user="publisher00"/>
+    <reader user="publisher10"/>
+    <writer user="publisher10"/>
+    <reader user="publisher20"/>
+    <writer user="publisher20"/>
+  </Cluster>
+  
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+  
+  
+</JoramAdmin>
