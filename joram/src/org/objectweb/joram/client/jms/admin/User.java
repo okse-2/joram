@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -65,21 +65,18 @@ public class User extends AdministeredObject implements UserMBean {
 
   
   /** Returns a string view of this <code>User</code> instance. */
-  public String toString()
-  {
+  public String toString() {
     return "User[" + name + "]:" + proxyId;
   }
 
 
   /** Returns the user name. */
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
   /** Provides a reliable way to compare <code>User</code> instances. */
-  public boolean equals(Object o)
-  {
+  public boolean equals(Object o) {
     if (! (o instanceof User))
       return false;
 
@@ -137,8 +134,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */ 
   public static User create(String name, String password)
-         throws ConnectException, AdminException
-  {
+         throws ConnectException, AdminException {
     return create(name, password, AdminModule.getLocalServerId());
   }
   
@@ -189,8 +185,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException
-  {
+  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
     AdminModule.doRequest(new SetUserDMQ(proxyId, dmq.getName()));
   }
 
@@ -204,8 +199,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setThreshold(int thresh) throws ConnectException, AdminException
-  {
+  public void setThreshold(int thresh) throws ConnectException, AdminException {
     AdminModule.doRequest(new SetUserThreshold(proxyId, thresh));
   }
 
@@ -217,8 +211,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public DeadMQueue getDMQ() throws ConnectException, AdminException
-  {
+  public DeadMQueue getDMQ() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request;
     request = new Monitor_GetDMQSettings(proxyId);
     Monitor_GetDMQSettingsRep reply;
@@ -238,8 +231,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public int getThreshold() throws ConnectException, AdminException
-  {
+  public int getThreshold() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request;
     request = new Monitor_GetDMQSettings(proxyId);
     Monitor_GetDMQSettingsRep reply;
@@ -400,18 +392,20 @@ public class User extends AdministeredObject implements UserMBean {
 
    
   /** Returns the identifier of the user's proxy. */
-  public String getProxyId()
-  {
+  public String getProxyId() {
     return proxyId;
   }
 
-  /** Sets the naming reference of this user. */
-  public Reference getReference() throws NamingException
-  {
-    Reference ref = super.getReference();
+  /** Sets the naming reference of a connection factory. */
+  public void toReference(Reference ref) throws NamingException {
     ref.add(new StringRefAddr("user.name", name));
     ref.add(new StringRefAddr("user.id", proxyId));
-    return ref;
+  }
+
+  /** Restores the administered object from a naming reference. */
+  public void fromReference(Reference ref) throws NamingException {
+    name = (String) ref.get("user.name").getContent();
+    proxyId = (String) ref.get("user.id").getContent();
   }
 
   /**
