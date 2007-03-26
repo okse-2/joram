@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -25,14 +25,18 @@ package org.objectweb.joram.client.jms.ha.tcp;
 
 import org.objectweb.joram.client.jms.*;
 
+/**
+ * An <code>XATcpConnectionFactory</code> instance is a factory of
+ * tcp connections dedicated to HA communication.
+ */
 public class HATcpConnectionFactory
   extends org.objectweb.joram.client.jms.ConnectionFactory {
 
-  private String url;
-
+  /**
+   * Constructs an <code>HATcpConnectionFactory</code> instance.
+   */
   public HATcpConnectionFactory(String url) {
     super(url);
-    this.url = url;
   }
 
   /**
@@ -43,26 +47,24 @@ public class HATcpConnectionFactory
    */
   public javax.jms.Connection
       createConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
+    throws javax.jms.JMSException {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+        params.getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating HA TCP connections with a given server.
+   * instance for creating HA TCP connections with a given list of servers.
    *
    * @param url URL of the HA Joram server
    */
   public static javax.jms.ConnectionFactory create(String url) {
-    return create(url,
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating HA TCP connections with a given server.
+   * instance for creating HA TCP connections with a given list of servers.
    *
    * @param url URL of the HA Joram server
    * @param reliableClass  Reliable class name.

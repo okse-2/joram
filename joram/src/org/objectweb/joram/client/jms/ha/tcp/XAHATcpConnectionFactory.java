@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -23,29 +23,21 @@
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import org.objectweb.joram.client.jms.XAConnection;
-
-import javax.naming.NamingException;
-
+import org.objectweb.joram.client.jms.*;
 
 /**
  * An <code>XAHATcpConnectionFactory</code> instance is a factory of
  * tcp connections dedicated to XA HA communication.
  */
 public class XAHATcpConnectionFactory
-    extends org.objectweb.joram.client.jms.XAConnectionFactory
-{
-
-  private String url;
+  extends org.objectweb.joram.client.jms.XAConnectionFactory {
 
   /**
-   * Constructs an <code>XATcpConnectionFactory</code> instance.
+   * Constructs an <code>XAHATcpConnectionFactory</code> instance.
    */
-  public XAHATcpConnectionFactory(String url)
-    {
-      super(url);
-      this.url = url;
-    }
+  public XAHATcpConnectionFactory(String url) {
+    super(url);
+  }
 
 
   /**
@@ -55,27 +47,28 @@ public class XAHATcpConnectionFactory
    */
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
+    throws javax.jms.JMSException {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+        params.getUrl(), params, name, password, reliableClass);
       return new XAConnection(params, lc);
     }
 
-
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
-   * instance for creating tcp connections.
+   * instance for creating HA TCP connections with a given list of servers.
+   *
+   * @param url URL of the HA Joram server
    */
-  public static javax.jms.XAConnectionFactory create(String url)
-    {
-      return create(url,
-                    "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
-    }
+  public static javax.jms.XAConnectionFactory create(String url) {
+    return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
 
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
-   * instance for creating tcp connections.
+   * instance for creating HA TCP connections with a given list of servers.
+   *
+   * @param url URL of the HA Joram server
+   * @param reliableClass  Reliable class name.
    */
   public static javax.jms.XAConnectionFactory
       create(String url, String reliableClass) {
