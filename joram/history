@@ -1,4 +1,15 @@
 ###############################################################################
+# 2006/03/26 | Joram 4.3.26 tag.
+###############################################################################
++==============================================================================
+| 2007/03/26 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use an AbstractConnectionFactory factorizing code between connections
+factories.
+ Use of inheritance and reflection for generic handling of JNDI references.
+ Adds clustering facilities in administered objects: connection factories and
+destinations.
+###############################################################################
 # 2006/03/05 | Joram 4.3.25 tag.
 ###############################################################################
 +==============================================================================
