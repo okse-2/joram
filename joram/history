@@ -1,3 +1,50 @@
+###############################################################################
+# 2006/03/26 | Joram 4.3.26 tag.
+###############################################################################
++==============================================================================
+| 2007/03/26 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use an AbstractConnectionFactory factorizing code between connections
+factories.
+ Use of inheritance and reflection for generic handling of JNDI references.
+ Adds clustering facilities in administered objects: connection factories and
+destinations.
+###############################################################################
+# 2006/03/05 | Joram 4.3.25 tag.
+###############################################################################
++==============================================================================
+| 2007/03/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Minor fix, NTransaction.setMaxLogMemorySize use Mb rather than Kb.
++==============================================================================
+| 2007/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Avoid useless socket creation on connection error (HttpNetwork component).
++==============================================================================
+| 2007/01/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in handling of byte array as object.
++==============================================================================
+| 2007/01/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allow to fix SO_TIMEOUT on StreamNetwork.
++==============================================================================
+| 2007/01/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fixes in JMS message handling:
+ -1- Avoid NPE if message's body is null.
+ -2- Catch NPE in Session.run to avoid MDB blocking.
++==============================================================================
+| 2007/01/11 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in acknowledge handling of HttpNetwork.
+###############################################################################
+# 2006/11/23 | Joram 4.3.24 tag.
+###############################################################################
++==============================================================================
+| 2006/10/23 | Helene Joanin - Bull S.A.
++------------+-----------------------------------------------------------------
+ toString and hashcode opttimization in Connection object.
 +==============================================================================
 | 2006/11/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------

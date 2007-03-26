@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 200 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,23 +24,24 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
-import java.io.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import fr.dyade.aaa.agent.AgentId;
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
 
-import org.objectweb.joram.shared.JoramTracing;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.io.*;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable {
+class ClientContext implements java.io.Serializable
+{
   /** The proxy's agent identifier. */
   private AgentId proxyId;
 
@@ -101,8 +102,8 @@ class ClientContext implements java.io.Serializable {
 
   /** Sets the activation status of the context. */
   void setActivated(boolean started) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "ClientContext[" + proxyId + ',' + id + 
         "].setActivated(" + started + ')');
@@ -138,8 +139,8 @@ class ClientContext implements java.io.Serializable {
 
   /** Adds a pending delivery. */
   void addPendingDelivery(AbstractJmsReply reply) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         "ClientContext[" + proxyId + ',' + id + 
         "].addPendingDelivery(" + reply + ')');
@@ -179,8 +180,8 @@ class ClientContext implements java.io.Serializable {
   /** Cancels a "receive" request. */
   void cancelReceive(int cancelledRequestId)
   {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, 
         "ClientContext[" + proxyId + ':' + id + 
         "].cancelReceive(" + cancelledRequestId + ')');
@@ -214,11 +215,11 @@ class ClientContext implements java.io.Serializable {
    * @param asyncReplyCount
    */
   void addMultiReplyContext(int requestId, int asyncReplyCount) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "ClientContext[" + proxyId + ':' + id + 
-                                "].addMultiReplyContext(" + requestId + ',' +
-                                asyncReplyCount + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
     if (commitTable == null) commitTable = new Hashtable();
     commitTable.put(
         new Integer(requestId), 
@@ -237,10 +238,11 @@ class ClientContext implements java.io.Serializable {
    * or if the context doesn't exist
    */
   int setReply(int requestId) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "ClientContext[" + proxyId + ':' + id + 
-                                "].setReply(" + requestId + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].setReply(" + requestId + ')');
     if (commitTable == null) return 0;
     Integer ctxKey = (Integer)new Integer(requestId);
     MultiReplyContext ctx = 
@@ -265,7 +267,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Registers a given transaction "prepare". */
-  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception {
+  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception
+  {
     if (transactionsTable == null)
       transactionsTable = new Hashtable();
 
@@ -278,7 +281,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns and deletes a given transaction "prepare". */
-  XACnxPrepare getTxPrepare(Object key) {
+  XACnxPrepare getTxPrepare(Object key)
+  {
     XACnxPrepare prepare = null;
     if (transactionsTable != null) {
       prepare = (XACnxPrepare) transactionsTable.remove(key);
@@ -288,7 +292,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns the identifiers of the prepared transactions. */
-  Enumeration getTxIds() {
+  Enumeration getTxIds()
+  {
     if (transactionsTable == null)
       return new Hashtable().keys();
     return transactionsTable.keys();
@@ -302,7 +307,8 @@ class ClientContext implements java.io.Serializable {
     repliesBuffer = (Vector)in.readObject();
   }
 
-  public void writeBag(ObjectOutputStream out) throws IOException {
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
     out.writeBoolean(started);
     out.writeInt(cancelledRequestId);
     out.writeObject(activeSubs);

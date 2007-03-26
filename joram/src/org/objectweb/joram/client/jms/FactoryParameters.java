@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -146,6 +146,12 @@ public class FactoryParameters implements java.io.Serializable {
   }
 
   /**
+   * Constructs an empty <code>FactoryParameters</code>.
+   */
+  public FactoryParameters() {
+  }
+
+  /**
    * Returns the name of host hosting the server to create connections with.
    */
   public String getHost() {
@@ -164,47 +170,63 @@ public class FactoryParameters implements java.io.Serializable {
     return url;
   }
 
-  public void toReference(Reference ref) {
-    ref.add(new StringRefAddr("cFactory.host", getHost()));
-    ref.add(new StringRefAddr("cFactory.port",
+//   public void toReference(Reference ref) {
+//     toReference(ref, "cf");
+//   }
+
+  public void toReference(Reference ref, String prefix) {
+//     if (prefix == null) prefix = "cf";
+
+    ref.add(new StringRefAddr(prefix + ".host", getHost()));
+    ref.add(new StringRefAddr(prefix + ".port",
                               new Integer(getPort()).toString()));
-    ref.add(new StringRefAddr("cFactory.url", getUrl()));
-    ref.add(new StringRefAddr("cFactory.cnxT",
+
+    ref.add(new StringRefAddr(prefix + ".url", getUrl()));
+    ref.add(new StringRefAddr(prefix + ".cnxT",
                               new Integer(connectingTimer).toString()));
-    ref.add(new StringRefAddr("cFactory.txT",
+    ref.add(new StringRefAddr(prefix + ".txT",
                               new Integer(txPendingTimer).toString()));
-    ref.add(new StringRefAddr("cFactory.cnxPT", 
+    ref.add(new StringRefAddr(prefix + ".cnxPT", 
                               new Integer(cnxPendingTimer).toString()));
-    ref.add(new StringRefAddr("cFactory.asyncSend", 
+    ref.add(new StringRefAddr(prefix + ".asyncSend", 
                               new Boolean(asyncSend).toString()));
-    ref.add(new StringRefAddr("cFactory.queueMessageReadMax", 
+    ref.add(new StringRefAddr(prefix + ".queueMessageReadMax", 
                               new Integer(queueMessageReadMax).toString()));
-    ref.add(new StringRefAddr("cFactory.topicAckBufferMax", 
+    ref.add(new StringRefAddr(prefix + ".topicAckBufferMax", 
                               new Integer(topicAckBufferMax).toString()));
-    ref.add(new StringRefAddr("cFactory.multiThreadSync", 
+    ref.add(new StringRefAddr(prefix + ".multiThreadSync", 
                               new Boolean(multiThreadSync).toString()));
-    ref.add(new StringRefAddr("cFactory.multiThreadSyncDelay", 
+    ref.add(new StringRefAddr(prefix + ".multiThreadSyncDelay", 
                               new Integer(multiThreadSyncDelay).toString()));
-    ref.add(new StringRefAddr("cFactory.multiThreadSyncThreshold", 
+    ref.add(new StringRefAddr(prefix + ".multiThreadSyncThreshold", 
                               new Integer(multiThreadSyncThreshold).toString()));
-    ref.add(new StringRefAddr("cFactory.topicPassivationThreshold", 
+    ref.add(new StringRefAddr(prefix + ".topicPassivationThreshold", 
                               new Integer(topicPassivationThreshold).toString()));
-    ref.add(new StringRefAddr("cFactory.topicActivationThreshold", 
+    ref.add(new StringRefAddr(prefix + ".topicActivationThreshold", 
                               new Integer(topicActivationThreshold).toString()));
   }
 
-  public void fromReference(Reference ref) {
-    connectingTimer = new Integer((String) ref.get("cFactory.cnxT").getContent()).intValue();
-    txPendingTimer = new Integer((String) ref.get("cFactory.txT").getContent()).intValue();
-    cnxPendingTimer = new Integer((String) ref.get("cFactory.cnxPT").getContent()).intValue();
-    asyncSend = new Boolean((String) ref.get("cFactory.asyncSend").getContent()).booleanValue();
-    queueMessageReadMax = new Integer((String) ref.get("cFactory.queueMessageReadMax").getContent()).intValue();
-    topicAckBufferMax = new Integer((String) ref.get("cFactory.topicAckBufferMax").getContent()).intValue();
-    multiThreadSync = new Boolean((String) ref.get("cFactory.multiThreadSync").getContent()).booleanValue();
-    multiThreadSyncDelay = new Integer((String) ref.get("cFactory.multiThreadSyncDelay").getContent()).intValue();
-    multiThreadSyncThreshold = new Integer((String) ref.get("cFactory.multiThreadSyncThreshold").getContent()).intValue();
-    topicPassivationThreshold = new Integer((String) ref.get("cFactory.topicPassivationThreshold").getContent()).intValue();
-    topicActivationThreshold = new Integer((String) ref.get("cFactory.topicActivationThreshold").getContent()).intValue();
+//   public void fromReference(Reference ref) {
+//     fromReference(ref, "cf");
+//   }
+
+  public void fromReference(Reference ref, String prefix) {
+//     if (prefix == null) prefix = "cf";
+
+    host = (String) ref.get(prefix + ".host").getContent();
+    port = new Integer((String) ref.get(prefix + ".port").getContent()).intValue();
+
+    connectingTimer = new Integer((String) ref.get(prefix + ".cnxT").getContent()).intValue();
+    txPendingTimer = new Integer((String) ref.get(prefix + ".txT").getContent()).intValue();
+    cnxPendingTimer = new Integer((String) ref.get(prefix + ".cnxPT").getContent()).intValue();
+    asyncSend = new Boolean((String) ref.get(prefix + ".asyncSend").getContent()).booleanValue();
+    queueMessageReadMax = new Integer((String) ref.get(prefix + ".queueMessageReadMax").getContent()).intValue();
+    topicAckBufferMax = new Integer((String) ref.get(prefix + ".topicAckBufferMax").getContent()).intValue();
+    multiThreadSync = new Boolean((String) ref.get(prefix + ".multiThreadSync").getContent()).booleanValue();
+    multiThreadSyncDelay = new Integer((String) ref.get(prefix + ".multiThreadSyncDelay").getContent()).intValue();
+    multiThreadSyncThreshold = new Integer((String) ref.get(prefix + ".multiThreadSyncThreshold").getContent()).intValue();
+    topicPassivationThreshold = new Integer((String) ref.get(prefix + ".topicPassivationThreshold").getContent()).intValue();
+    topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
   }
 
   public Hashtable toHashtable() {

@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package org.objectweb.joram.client.jms.admin;
@@ -36,8 +37,12 @@ import javax.jms.JMSException;
 /**
  * this is a sample.
  */
-public class ClusterQueue extends ClusterDestination implements javax.jms.Queue
-{
+public class ClusterQueue extends ClusterDestination implements javax.jms.Queue {
+  /** 
+   * Constructs an empty queue.
+   */
+  public ClusterQueue() {}
+
   /** 
    * Constructs a cluster queue.
    *
@@ -47,28 +52,8 @@ public class ClusterQueue extends ClusterDestination implements javax.jms.Queue
     super(cluster);
   }
 
-  /** 
-   * Constructs an empty queue.
-   */
-  public ClusterQueue() {}
-
-  /** return the appropriate destination of cluster */
-  public Destination getDestination() {
-    String location = System.getProperty("location");
-    Destination dest = null;
-    if (location != null) {
-      dest = (Destination) cluster.get(location);
-    }
-    if (dest == null) {
-      Enumeration e = cluster.keys();
-      dest = (Destination) cluster.get((String) e.nextElement());
-    }
-    return dest;
-  }
-
   /** Returns a String image of the cluster queue. */
-  public String toString()
-  {
+  public String toString() {
     return "ClusterQueue:" + cluster;
   }
 
@@ -77,8 +62,7 @@ public class ClusterQueue extends ClusterDestination implements javax.jms.Queue
    *
    * @exception JMSException  Actually never thrown.
    */
-  public String getQueueName() throws JMSException
-  {
+  public String getQueueName() throws JMSException {
     return getName();
   }
 }
