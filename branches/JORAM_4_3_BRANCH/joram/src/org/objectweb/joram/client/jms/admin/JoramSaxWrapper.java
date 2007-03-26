@@ -25,9 +25,6 @@ package org.objectweb.joram.client.jms.admin;
 import java.io.*;
 import java.util.*;
 
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -43,11 +40,16 @@ import org.xml.sax.SAXParseException;
 
 import java.lang.reflect.Method;
 
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.Destination;
+
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * XML SAX Wrapper for Joram Admin configuration file.
@@ -100,11 +102,20 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_FREEWRITER = "freeWriter";
   /** Syntaxic name for InitialContext element */
   static final String ELT_INITIALCONTEXT = "InitialContext";
+  /** Syntaxic name for Cluster CF */
+  static final String ELT_CLUSTER_CF = "ClusterCF";
+  /** Syntaxic name for Cluster Queue */
+  static final String ELT_CLUSTER_QUEUE = "ClusterQueue";
+  /** Syntaxic name for Cluster Topic */
+  static final String ELT_CLUSTER_TOPIC = "ClusterTopic";
   /** Syntaxic name for Cluster element */
-  static final String ELT_CLUSTER = "Cluster";
+  static final String ELT_CLUSTER_ELEMENT = "ClusterElement";
+
 
   /** Syntaxic name for name attribute */
   static final String ATT_NAME = "name";
+  /** Syntaxic name for login attribute */
+  static final String ATT_LOGIN = "login";
   /** Syntaxic name for password attribute */
   static final String ATT_PASSWORD = "password";
   /** Syntaxic name for value attribute */
@@ -137,10 +148,19 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ATT_PARENT = "parent";
   /** Syntaxic name for threshold attribute */
   static final String ATT_THRESHOLD = "threshold";
+  /** Syntaxic name for location attribute */
+  static final String ATT_LOCATION = "location";
+
+  static final String DFLT_LISTEN_HOST = "localhost";
+  static final int DFLT_LISTEN_PORT = 16010;
+
+  static final String DFLT_CF =
+    "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
   boolean result = true;
   Object obj = null;
   String name = null;
+  String login = null;
   String password = null;
   String value = null;
   String host = null;
@@ -154,17 +174,31 @@ public class JoramSaxWrapper extends DefaultHandler {
   String user = null;
   String type = null;
   Properties properties = null;
+
   String jndiName = null;
-  boolean jndi = false;
   Hashtable toBind = new Hashtable();
+
   Vector readers = new Vector();
   Vector writers = new Vector();
   boolean freeReading = false;
   boolean freeWriting = false;
-  Hashtable users = new Hashtable();
+
   InitialContext jndiCtx = null;
-  Vector cluster = null;
-  Hashtable destinations = new Hashtable();
+
+  /** Contains ConnectionFactory defined in the current script */
+  Hashtable cfs = new Hashtable();
+  /** Contains all users defined in the current script */
+  Hashtable users = new Hashtable();
+  /** Contains all queues defined in the current script */
+  Hashtable queues = new Hashtable();
+  /** Contains all topics defined in the current script */
+  Hashtable topics = new Hashtable();
+  /** Contains all DMQ defined in the current script */
+  Hashtable dmqs = new Hashtable();
+
+  /** Temporary set of cluster's elements */
+  Hashtable cluster = new Hashtable();
+
   String dmq = null;
   int threshold = -1;
   int nbMaxMsg = -1;
@@ -178,13 +212,15 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Working attribute used during configuration's */
   String conf = null;
 
+  Logger logger = null;
+
   /**
-   *
+   * Launches the XML parser.
    */
-  public boolean parse(Reader cfgReader,
-                       String cfgName)
-    throws Exception {
+  public boolean parse(Reader cfgReader, String cfgName) throws Exception {
     this.joramAdmName = cfgName;
+
+    logger = JoramTracing.dbgAdmin;
 
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser parser = factory.newSAXParser();
@@ -202,9 +238,9 @@ public class JoramSaxWrapper extends DefaultHandler {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void fatalError(SAXParseException e) throws SAXException {
-    JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                              "fatal error parsing " + e.getPublicId() +
-                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    logger.log(BasicLevel.FATAL,
+               "fatal error parsing " + e.getPublicId() +
+               " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -217,9 +253,9 @@ public class JoramSaxWrapper extends DefaultHandler {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void error(SAXParseException e) throws SAXException {
-    JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                              "error parsing " + e.getPublicId() +
-                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    logger.log(BasicLevel.ERROR,
+               "error parsing " + e.getPublicId() +
+               " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -233,13 +269,14 @@ public class JoramSaxWrapper extends DefaultHandler {
    *	Any SAX exception, possibly wrapping another exception.
    */
   public void warning(SAXParseException e) throws SAXException {
-    JoramTracing.dbgAdmin.log(BasicLevel.ERROR,
-                              "warning parsing " + e.getPublicId() +
-                              " at " + e.getLineNumber() + "." + e.getColumnNumber());
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "warning parsing " + e.getPublicId() +
+                 " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
-  private boolean isSet(String value) {
+  private final boolean isSet(String value) {
     return value != null && value.length() > 0;
   }
 
@@ -250,8 +287,8 @@ public class JoramSaxWrapper extends DefaultHandler {
    *	unspecialized error
    */
   public void startDocument() throws SAXException {
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "startDocument");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "startDocument");
   }
 
   /**
@@ -270,8 +307,8 @@ public class JoramSaxWrapper extends DefaultHandler {
 			   String rawName,
 			   Attributes atts) throws SAXException {
 
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "startElement: " + rawName);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "startElement: " + rawName);
 
     if (rawName.equals(ELT_JORAMADMIN)) {
       conf = atts.getValue(ATT_NAME);
@@ -281,25 +318,30 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_CONNECT)) {
         try {
           try {
+            // Get the hostname of server for administrator connection.
             host = atts.getValue(ATT_HOST);
-            if (!isSet(host))
-              host = "localhost";
+            if (!isSet(host)) host = DFLT_LISTEN_HOST;
+            // Get the listen port of server for administrator connection.
             String value = atts.getValue(ATT_PORT);
             if (value == null)
-              port = 16010;
+              port = DFLT_LISTEN_PORT;
             else
               port = Integer.parseInt(value);
+            // Get the username for administrator connection.
             name = atts.getValue(ATT_NAME);
             if (!isSet(name))
-              name = "root";
+              name = AbstractConnectionFactory.getDefaultRootLogin();
+            // Get the password for administrator connection.
             password = atts.getValue(ATT_PASSWORD);
             if (!isSet(password))
-              password = "root";
+              password = AbstractConnectionFactory.getDefaultRootPassword();
+            // Get the CnxTimer attribute for administrator connection.
             value = atts.getValue(ATT_CNXTIMER);
             if (value == null)
               cnxTimer = 60;
             else
               cnxTimer = Integer.parseInt(value);
+            // Get the protocol implementation.
             reliableClass = atts.getValue(ATT_RELIABLECLASS);
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for port: " +
@@ -314,18 +356,18 @@ public class JoramSaxWrapper extends DefaultHandler {
         try {
           name = atts.getValue(ATT_NAME);
           if (!isSet(name))
-            name = "root";
+            name = AbstractConnectionFactory.getDefaultRootLogin();
           password = atts.getValue(ATT_PASSWORD);
           if (!isSet(password))
-            password = "root";
+            password = AbstractConnectionFactory.getDefaultRootPassword();
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
       } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
         try {
+          name = atts.getValue(ATT_NAME);
           className = atts.getValue(ATT_CLASSNAME);
-          if (!isSet(className))
-            className = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
+          if (!isSet(className)) className = DFLT_CF;
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
@@ -333,11 +375,10 @@ public class JoramSaxWrapper extends DefaultHandler {
         try {
           try {
             host = atts.getValue(ATT_HOST);
-            if (!isSet(host))
-              host = "localhost";
+            if (!isSet(host)) host = DFLT_LISTEN_HOST;
             String value = atts.getValue(ATT_PORT);
             if (value == null)
-              port = 16010;
+              port = DFLT_LISTEN_PORT;
             else
               port = Integer.parseInt(value);
             reliableClass = atts.getValue(ATT_RELIABLECLASS);
@@ -390,6 +431,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         try {
           try {
             name = atts.getValue(ATT_NAME);
+            login = atts.getValue(ATT_LOGIN);
             password = atts.getValue(ATT_PASSWORD);
             String value = atts.getValue(ATT_SERVERID);
             if (value == null)
@@ -517,8 +559,20 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_FREEWRITER)) {
         freeWriting = true;
       } else if (rawName.equals(ELT_INITIALCONTEXT)) {
-      } else if (rawName.equals(ELT_CLUSTER)) {
-        cluster = new Vector();
+      } else if (rawName.equals(ELT_CLUSTER_ELEMENT)) {
+        try {
+          logger.log(BasicLevel.FATAL, "+++" + atts.getValue(ATT_NAME) + ", " +atts.getValue(ATT_LOCATION));
+          cluster.put(atts.getValue(ATT_NAME),
+                      atts.getValue(ATT_LOCATION));
+        } catch (Exception exc) {
+          throw new SAXException(exc.getMessage(), exc);
+        }
+      } else if (rawName.equals(ELT_CLUSTER_QUEUE)) {
+        cluster.clear();
+      } else if (rawName.equals(ELT_CLUSTER_TOPIC)) {
+        cluster.clear();
+      } else if (rawName.equals(ELT_CLUSTER_CF)) {
+        cluster.clear();
       } else {
 	throw new SAXException("unknown element \"" + rawName + "\"");
       }
@@ -540,8 +594,8 @@ public class JoramSaxWrapper extends DefaultHandler {
 			 String localName,
 			 String rawName) throws SAXException {
 
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "endElement: " + rawName);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "endElement: " + rawName);
 
     if (rawName.equals(ELT_JORAMADMIN)) {
       conf = null;
@@ -549,29 +603,34 @@ public class JoramSaxWrapper extends DefaultHandler {
       try {
         if (rawName.equals(ELT_ADMINMODULE)) {
         } else if (rawName.equals(ELT_CONNECT)) {
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "AdminModule.connect(" +
-                                      host + "," +
-                                      port + "," +
-                                      name + "," +
-                                      password + "," +
-                                      cnxTimer + "," +
-                                      reliableClass + ")");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "AdminModule.connect(" +
+                       host + "," +
+                       port + "," +
+                       name + "," +
+                       password + "," +
+                       cnxTimer + "," +
+                       reliableClass + ")");
           AdminModule.connect(host,port,name,password,cnxTimer,reliableClass);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
-                                      name + "," +
-                                      password + ")");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
+                       name + "," +
+                       password + ")");
           AdminModule.collocatedConnect(name,password);
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "cf = " + obj);
-          if (jndi)
-            toBind.put(jndiName,obj);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
+          // Bind the ConnectionFactory in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
+            toBind.put(jndiName, obj);
+          jndiName = null;
+          // Register the CF in order to handle it later (cluster, etc.)
+          if (isSet(name)) cfs.put(name, obj);
+
           className = null;
           obj = null;
-          jndi = false;
         } else if (rawName.equals(ELT_TCP)) {
           Class clazz = Class.forName(className);
           Class [] classParams = {new String().getClass(),
@@ -580,12 +639,10 @@ public class JoramSaxWrapper extends DefaultHandler {
           Method methode = clazz.getMethod("create", classParams);
           Object[] objParams = {host, new Integer(port), reliableClass};
           obj = methode.invoke(null, objParams);
-
         } else if (rawName.equals(ELT_LOCAL)) {
           Class clazz = Class.forName(className);
           Method methode = clazz.getMethod("create", new Class[0]);
           obj = methode.invoke(null, new Object[0]);
-
         } else if (rawName.equals(ELT_HATCP)) {
           Class clazz = Class.forName(className);
           Class [] classParams = {new String().getClass(),
@@ -593,12 +650,10 @@ public class JoramSaxWrapper extends DefaultHandler {
           Method methode = clazz.getMethod("create",classParams);
           Object[] objParams = {url,reliableClass};
           obj = methode.invoke(null,objParams);
-
         } else if (rawName.equals(ELT_HALOCAL)) {
           Class clazz = Class.forName(className);
           Method methode = clazz.getMethod("create", new Class[0]);
           obj = methode.invoke(null, new Object[0]);
-
         } else if (rawName.equals(ELT_SOAP)) {
           Class clazz = Class.forName(className);
           Class [] classParams = {new String().getClass(),
@@ -607,41 +662,43 @@ public class JoramSaxWrapper extends DefaultHandler {
           Method methode = clazz.getMethod("create", classParams);
           Object[] objParams = {host, new Integer(port), new Integer(timeout)};
           obj = methode.invoke(null, objParams);
-
         } else if (rawName.equals(ELT_JNDI)) {
-          jndi = true;
-
         } else if (rawName.equals(ELT_USER)) {
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "User.create(" +
-                                      name + "," +
-                                      password + "," +
-                                      serverId + ")");
-          User u = User.create(name, password, serverId);
-          users.put(name, u);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "User.create(" +
+                       name + "," +
+                       login + "," +
+                       password + "," +
+                       serverId + ")");
+          if (! isSet(login)) login = name;
+          User user = User.create(login, password, serverId);
+          users.put(name, user);
 
           if (threshold > 0)
-            u.setThreshold(threshold);
+            user.setThreshold(threshold);
 
-          if (dmq != null &&
-              dmq.length() >0 &&
-              destinations.containsKey(dmq)) {
-            u.setDMQ((DeadMQueue) destinations.get(dmq));
+          if (isSet(dmq)) {
+            if (dmqs.containsKey(dmq)) {
+              user.setDMQ((DeadMQueue) dmqs.get(dmq));
+            } else {
+              logger.log(BasicLevel.ERROR,
+                         "User.create(): Unknown DMQ: " + dmq);
+            }
           }
-
         } else if (rawName.equals(ELT_DESTINATION)) {
           Destination dest = null;
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "dest type =" + type);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "dest type =" + type);
+
           if (type.equals("queue")) {
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Queue";
-            if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" +
-                                        serverId + "," +
-                                        name + "," +
-                                        className + "," +
-                                        properties + ")");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "Queue.create(" +
+                         serverId + "," +
+                         name + "," +
+                         className + "," +
+                         properties + ")");
             dest = Queue.create(serverId,
                                 name,
                                 className,
@@ -649,12 +706,12 @@ public class JoramSaxWrapper extends DefaultHandler {
           } else if (type.equals("topic")) {
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Topic";
-            if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" +
-                                        serverId + "," +
-                                        name + "," +
-                                        className + "," +
-                                        properties + ")");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "Topic.create(" +
+                         serverId + "," +
+                         name + "," +
+                         className + "," +
+                         properties + ")");
             dest = Topic.create(serverId,
                                 name,
                                 className,
@@ -662,86 +719,46 @@ public class JoramSaxWrapper extends DefaultHandler {
           } else
             throw new Exception("type " + type + " bad value. (queue or topic)");
 
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "destination = " + dest);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "destination = " + dest);
 
           properties = null;
 
-          if (freeReading)
-            dest.setFreeReading();
-          freeReading = false;
+          configureDestination(dest);
 
-          if (freeWriting)
-            dest.setFreeWriting();
-          freeWriting = false;
-
-          for (int i = 0; i < readers.size(); i++) {
-            User u = (User) users.get(readers.get(i));
-            if (u != null)
-              dest.setReader(u);
-          }
-          readers.clear();
-
-          for (int i = 0; i < writers.size(); i++) {
-            User u = (User) users.get(writers.get(i));
-            if (u != null)
-              dest.setWriter(u);
-          }
-          writers.clear();
-
-          if (cluster != null && dest != null) {
-            cluster.add(dest);
-          }
-          if (jndi)
+          // Bind the destination in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
             toBind.put(jndiName, dest);
-
-          if (dest.getAdminName() != null && dest.getAdminName().length() > 0)
-            destinations.put(dest.getAdminName(), dest);
-          else
-            destinations.put(dest.getName(), dest);
-
-          if (dmq != null &&
-              dmq.length() >0 &&
-              destinations.containsKey(dmq)) {
-            dest.setDMQ((DeadMQueue) destinations.get(dmq));
+          jndiName = null;
+          // Register the destination in order to handle it later.
+          String name = dest.getAdminName();
+          if (! isSet(name))
+            name = dest.getName();
+          if (dest instanceof Queue) {
+            queues.put(name, dest);
+          } else {
+            // It's a Topic
+            topics.put(name, dest);
           }
-
+          // Fix DMQ if any
+          setDestinationDMQ(dest, dmq);
         } else if (rawName.equals(ELT_QUEUE)) {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Queue";
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Queue.create(" +
-                                      serverId + "," +
-                                      name + "," +
-                                      className + "," +
-                                      properties + ")");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Queue.create(" +
+                       serverId + "," +
+                       name + "," +
+                       className + "," +
+                       properties + ")");
           Queue queue = Queue.create(serverId,
                                      name,
                                      className,
                                      properties);
           properties = null;
 
-          if (freeReading)
-            queue.setFreeReading();
-          freeReading = false;
-
-          if (freeWriting)
-            queue.setFreeWriting();
-          freeWriting = false;
-
-          for (int i = 0; i < readers.size(); i++) {
-            User u = (User) users.get(readers.get(i));
-            if (u != null)
-              queue.setReader(u);
-          }
-          readers.clear();
-
-          for (int i = 0; i < writers.size(); i++) {
-            User u = (User) users.get(writers.get(i));
-            if (u != null)
-              queue.setWriter(u);
-          }
-          writers.clear();
+          configureDestination(queue);
 
           if (threshold > 0)
             queue.setThreshold(threshold);
@@ -749,172 +766,144 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (nbMaxMsg > 0)
             queue.setNbMaxMsg(nbMaxMsg);
 
-          if (cluster != null && queue != null) {
-            cluster.add(queue);
-          }
-          if (jndi)
+          // Bind the queue in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
             toBind.put(jndiName, queue);
-
-          if (queue.getAdminName() != null && queue.getAdminName().length() > 0)
-            destinations.put(queue.getAdminName(), queue);
-          else
-            destinations.put(queue.getName(), queue);
-
-          if (dmq != null &&
-              dmq.length() >0 &&
-              destinations.containsKey(dmq)) {
-            queue.setDMQ((DeadMQueue) destinations.get(dmq));
-          }
-
+          jndiName = null;
+          // Register the queue in order to handle it later (cluster, etc.)
+          String name = queue.getAdminName();
+          if (! isSet(name)) name = queue.getName();
+          queues.put(name, queue);
+          // Fix DMQ if any
+          setDestinationDMQ(queue, dmq);
         } else if (rawName.equals(ELT_TOPIC)) {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Topic";
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "Topic.create(" +
-                                      serverId + "," +
-                                      name + "," +
-                                      className + "," +
-                                      properties + ")");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Topic.create(" +
+                       serverId + "," +
+                       name + "," +
+                       className + "," +
+                       properties + ")");
           Topic topic = Topic.create(serverId,
                                      name,
                                      className,
                                      properties);
           properties = null;
 
-          if (freeReading)
-            topic.setFreeReading();
-          freeReading = false;
+          configureDestination(topic);
 
-          if (freeWriting)
-            topic.setFreeWriting();
-          freeWriting = false;
-
-          for (int i = 0; i < readers.size(); i++) {
-            User u = (User) users.get(readers.get(i));
-            if (u != null)
-              topic.setReader(u);
+          if (isSet(parent)) {
+            if (topics.containsKey(parent)) {
+              topic.setParent((Topic) topics.get(parent));
+            } else {
+              logger.log(BasicLevel.ERROR,
+                   "Topic.create(): Unknown parent: " + parent);
+            }
           }
-          readers.clear();
-
-          for (int i = 0; i < writers.size(); i++) {
-            User u = (User) users.get(writers.get(i));
-            if (u != null)
-              topic.setWriter(u);
-          }
-          writers.clear();
-
-          if (parent != null &&
-              parent.length() > 0 &&
-              destinations.containsKey(parent))
-            topic.setParent((Topic) destinations.get(parent));
-
-          if (cluster != null && topic != null) {
-            cluster.add(topic);
-          }
-
-          if (jndi)
+          // Bind the topic in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
             toBind.put(jndiName, topic);
-
-          if (topic.getAdminName() != null && topic.getAdminName().length() > 0)
-            destinations.put(topic.getAdminName(), topic);
-          else
-            destinations.put(topic.getName(), topic);
-
-          if (dmq != null &&
-              dmq.length() >0 &&
-              destinations.containsKey(dmq)) {
-            topic.setDMQ((DeadMQueue) destinations.get(dmq));
-          }
-
+          jndiName = null;
+          // Register the topic in order to handle it later (cluster, etc.)
+          String name = topic.getAdminName();
+          if (! isSet(name)) name = topic.getName();
+          topics.put(name, topic);
+          // Fix DMQ if any
+          setDestinationDMQ(topic, dmq);
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.DeadMQueue";
-          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "DeadMQueue.create(" +
-                                      serverId + "," +
-                                      name + ")");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "DeadMQueue.create(" +
+                       serverId + "," +
+                       name + ")");
 
           DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(serverId, name);
 
-          if (freeReading)
-            dmq.setFreeReading();
-          freeReading = false;
+          configureDestination(dmq);
 
-          if (freeWriting)
-            dmq.setFreeWriting();
-          freeWriting = false;
-
-          for (int i = 0; i < readers.size(); i++) {
-            User u = (User) users.get(readers.get(i));
-            if (u != null)
-              dmq.setReader(u);
-          }
-          readers.clear();
-
-          for (int i = 0; i < writers.size(); i++) {
-            User u = (User) users.get(writers.get(i));
-            if (u != null)
-              dmq.setWriter(u);
-          }
-          writers.clear();
-
-          if (jndi)
+          // Bind the destination in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
             toBind.put(jndiName, dmq);
-
-          if (name != null && name.length() > 0)
-            destinations.put(name, dmq);
-          else
-            destinations.put(dmq.getName(), dmq);
-
+          jndiName = null;
+          // Register the DMQ in order to handle it later.
+          if (isSet(name))
+            dmqs.put(name, dmq);
         } else if (rawName.equals(ELT_PROPERTY)) {
         } else if (rawName.equals(ELT_READER)) {
           readers.add(user);
-
         } else if (rawName.equals(ELT_WRITER)) {
           writers.add(user);
-
         } else if (rawName.equals(ELT_FREEREADER)) {
         } else if (rawName.equals(ELT_FREEWRITER)) {
-
         } else if (rawName.equals(ELT_INITIALCONTEXT)) {
           try {
             jndiCtx = new javax.naming.InitialContext(properties);
           } catch (NamingException exc) {
-            JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",exc);
+            logger.log(BasicLevel.ERROR,"",exc);
           }
+        } else if (rawName.equals(ELT_CLUSTER_ELEMENT)) {
+        } else if (rawName.equals(ELT_CLUSTER_CF)) {
+          Map.Entry entries[] = new Map.Entry [cluster.size()];
+          cluster.entrySet().toArray(entries);
+          ClusterConnectionFactory clusterCF = new ClusterConnectionFactory();
 
-        } else if (rawName.equals(ELT_CLUSTER)) {
-          Destination dest0 = null;
-          for (int j = 0; j < cluster.size(); j++) {
-            Destination dest = (Destination) cluster.get(j);
-            if (j == 0) {
-              dest0 = dest;
-            } else {
-              if (dest instanceof Topic)
-                ((Topic) dest0).addClusteredTopic((Topic) dest);
-              else if (dest instanceof Queue)
-                ((Queue) dest0).addClusteredQueue((Queue) dest);
-            }
-            if (freeReading)
-              dest.setFreeReading();
-            if (freeWriting)
-              dest.setFreeWriting();
-            for (int i = 0; i < readers.size(); i++) {
-              User u = (User) users.get(readers.get(i));
-              if (u != null)
-                dest.setReader(u);
-            }
-            for (int i = 0; i < writers.size(); i++) {
-              User u = (User) users.get(writers.get(i));
-              if (u != null)
-                dest.setWriter(u);
-            }
+          for (int i=0; i<entries.length; i++) {
+            ConnectionFactory cf = (ConnectionFactory) cfs.get(entries[i].getKey());
+            clusterCF.addConnectionFactory((String) entries[i].getValue(), cf);
           }
-          freeWriting = false;
-          freeReading = false;
-          readers.clear();
-          writers.clear();
+          cluster.clear();
 
-          cluster = null;
+          // Bind the destination in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
+            toBind.put(jndiName, clusterCF);
+          jndiName = null;
+        } else if (rawName.equals(ELT_CLUSTER_QUEUE)) {
+          Map.Entry entries[] = new Map.Entry [cluster.size()];
+          cluster.entrySet().toArray(entries);
+          ClusterQueue clusterQueue = new ClusterQueue();
+
+          Queue root = null;
+          for (int i=0; i<entries.length; i++) {
+            Queue queue = (Queue) queues.get(entries[i].getKey());
+            clusterQueue.addDestination((String) entries[i].getValue(), queue);
+            if (i == 0)
+              root = queue;
+            else
+              root.addClusteredQueue(queue);
+          }
+          cluster.clear();
+
+          // Bind the destination in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
+            toBind.put(jndiName, clusterQueue);
+          jndiName = null;
+        } else if (rawName.equals(ELT_CLUSTER_TOPIC)) {
+          Map.Entry entries[] = new Map.Entry [cluster.size()];
+          cluster.entrySet().toArray(entries);
+          ClusterTopic clusterTopic = new ClusterTopic();
+
+          Topic root = null;
+          for (int i=0; i<entries.length; i++) {
+            Topic topic = (Topic) topics.get(entries[i].getKey());
+            clusterTopic.addDestination((String) entries[i].getValue(), topic);
+            if (i == 0)
+              root = topic;
+            else
+              root.addClusteredTopic(topic);
+          }
+          cluster.clear();
+
+          // Bind the destination in JNDI.
+          // Be Careful, currently only one binding is handled.
+          if (isSet(jndiName))
+            toBind.put(jndiName, clusterTopic);
+          jndiName = null;
         } else {
           throw new SAXException("unknown element \"" + rawName + "\"");
         }
@@ -923,12 +912,47 @@ public class JoramSaxWrapper extends DefaultHandler {
       } catch (Exception exc) {
         Exception cause = (Exception) exc.getCause();
         if (cause != null) {
-          JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",cause);
+          logger.log(BasicLevel.ERROR,"",cause);
           throw new SAXException(cause.getMessage(), cause);
         } else {
-          JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",exc);
+          logger.log(BasicLevel.ERROR,"",exc);
           throw new SAXException(exc.getMessage(), exc);
         }
+      }
+    }
+  }
+
+  void configureDestination(Destination dest) throws Exception {
+    if (freeReading)
+      dest.setFreeReading();
+    freeReading = false;
+
+    if (freeWriting)
+      dest.setFreeWriting();
+    freeWriting = false;
+
+    for (int i = 0; i < readers.size(); i++) {
+      User u = (User) users.get(readers.get(i));
+      if (u != null)
+        dest.setReader(u);
+    }
+    readers.clear();
+
+    for (int i = 0; i < writers.size(); i++) {
+      User u = (User) users.get(writers.get(i));
+      if (u != null)
+        dest.setWriter(u);
+    }
+    writers.clear();
+  }
+
+  void setDestinationDMQ(Destination dest, String dmq) throws Exception {
+    if (isSet(dmq)) {
+      if (dmqs.containsKey(dmq)) {
+        dest.setDMQ((DeadMQueue) dmqs.get(dmq));
+      } else  {
+        logger.log(BasicLevel.ERROR,
+                   "Destination.create(): Unknown DMQ: " + dmq);
       }
     }
   }
@@ -940,31 +964,34 @@ public class JoramSaxWrapper extends DefaultHandler {
    *	unspecialized error
    */
   public void endDocument() throws SAXException {
-    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "endDocument");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "endDocument");
     AdminModule.disconnect();
 
     try {
-      if (jndiCtx != null) {
-        for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
-          String name = (String) e.nextElement();
-          jndiCtx.rebind(name, toBind.get(name));
-        }
-        jndiCtx.close();
-        toBind.clear();
-      }
-
-      if (!toBind.isEmpty()) {
+      if (jndiCtx == null)
         jndiCtx = new javax.naming.InitialContext();
-        for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
-          String name = (String) e.nextElement();
-          jndiCtx.rebind(name, toBind.get(name));
+
+      for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
+        String name = (String) e.nextElement();
+        StringTokenizer st = new StringTokenizer(name, "/");
+        StringBuffer buff = new StringBuffer((String) st.nextToken());
+        while (st.hasMoreTokens()) {
+          try {
+            jndiCtx.createSubcontext(buff.toString());
+          } catch (NamingException exc) {
+            if (logger.isLoggable(BasicLevel.WARN))
+              logger.log(BasicLevel.WARN, "createSubcontext", exc);
+          }
+          buff.append("/");
+          buff.append((String) st.nextToken());
         }
-        jndiCtx.close();
-        toBind.clear();
+        jndiCtx.rebind(name, toBind.get(name));
       }
+      jndiCtx.close();
+      toBind.clear();
     } catch (NamingException exc) {
-      JoramTracing.dbgAdmin.log(BasicLevel.ERROR,"",exc);
+      logger.log(BasicLevel.ERROR,"",exc);
     }
   }
 }
