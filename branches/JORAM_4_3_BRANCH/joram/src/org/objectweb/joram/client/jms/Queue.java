@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2004 Bull SA
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -48,9 +48,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * sending and the source of messages it receives.
  *  
  */
-public class Queue extends Destination 
-  implements javax.jms.Queue, QueueMBean {
-
+public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   private final static String QUEUE_TYPE = "queue";
 
   public static boolean isQueue(String type) {
@@ -58,7 +56,9 @@ public class Queue extends Destination
   }
 
   // Used by jndi2 SoapObjectHelper
-  public Queue() {}
+  public Queue() {
+    super(QUEUE_TYPE);
+  }
 
   public Queue(String name) {
     super(name, QUEUE_TYPE);
