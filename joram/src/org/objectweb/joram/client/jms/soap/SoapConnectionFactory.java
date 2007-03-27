@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.soap;
 
@@ -49,8 +49,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
    * @param timeout  Duration in seconds during which a SOAP connection might
    *          be inactive before being considered as dead (0 for never).
    */
-  public SoapConnectionFactory(String host, int port, int timeout)
-  {
+  public SoapConnectionFactory(String host, int port, int timeout) {
     super(host, port);
     params.cnxPendingTimer = timeout * 1000;
   }
@@ -58,8 +57,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
   /**
    * Constructs an empty <code>SoapConnectionFactory</code> instance.
    */
-  public SoapConnectionFactory()
-  {}
+  public SoapConnectionFactory() {}
 
 
   /**
@@ -69,8 +67,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection createConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+         throws javax.jms.JMSException {
     return new Connection(params, new SoapConnection(params, name, password));
   }
 
@@ -84,8 +81,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
    *          be inactive before being considered as dead (0 for never).
    */ 
   public static javax.jms.ConnectionFactory
-                create(String host, int port, int timeout)
-  {
+                create(String host, int port, int timeout) {
     return new SoapConnectionFactory(host, port, timeout);
   }
 
@@ -99,8 +95,7 @@ public class SoapConnectionFactory extends org.objectweb.joram.client.jms.Connec
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
   public static javax.jms.ConnectionFactory create(int timeout)
-                throws java.net.ConnectException
-  {
+                throws java.net.ConnectException {
     return create(AdminModule.getLocalHost(), 
                   AdminModule.getLocalPort(),
                   timeout);
