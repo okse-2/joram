@@ -11,6 +11,19 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.26 (March 27, 2007)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_26.
+      This release provides the following fixes and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+          <li>Adds clustering facilities in administered objects: connection factories and destinations.</li>
+          <li>Use of inheritance and reflection for generic handling of JNDI references.</li>
+          <li>Use an AbstractConnectionFactory factorizing code between connections factories.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.25 (March 08, 2007)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_25. This version is bundled in Jonas 4.8.5.
