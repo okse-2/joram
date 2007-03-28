@@ -1361,7 +1361,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       Enumeration keys = recoveredTransactions.keys();
       Xid xid;
       while (keys.hasMoreElements()) {
-        xid = (Xid) recoveredTransactions.get(keys.nextElement());
+        xid = (Xid) keys.nextElement();
         bqs.add(xid.bq);
         fis.add(new Integer(xid.fi));
         gtis.add(xid.gti);

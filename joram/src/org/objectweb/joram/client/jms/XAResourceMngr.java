@@ -421,6 +421,8 @@ public class XAResourceMngr {
         xids[i] = new XidImpl(reply.getBranchQualifier(i),
                               reply.getFormatId(i),
                               reply.getGlobalTransactionId(i));
+        transactions.put(xids[i], new XAContext());
+        setStatus(xids[i], PREPARED);
       }
       return xids;
     }
