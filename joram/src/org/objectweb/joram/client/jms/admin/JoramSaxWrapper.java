@@ -990,7 +990,6 @@ public class JoramSaxWrapper extends DefaultHandler {
       }
       jndiCtx.close();
       toBind.clear();
-
     } catch (NamingException exc) {
       logger.log(BasicLevel.ERROR,"",exc);
     }

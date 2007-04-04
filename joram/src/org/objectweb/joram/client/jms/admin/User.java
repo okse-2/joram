@@ -414,8 +414,8 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public Hashtable code() {
     Hashtable h = new Hashtable();
-    h.put("name",name);
-    h.put("proxyId",proxyId);
+    h.put("user.name",name);
+    h.put("user.id",proxyId);
     return h;
   }
 
@@ -423,7 +423,7 @@ public class User extends AdministeredObject implements UserMBean {
    * Decodes an <code>User</code> which travelled through the SOAP protocol.
    */
   public void decode(Hashtable h) {
-    name = (String) h.get("name");
-    proxyId = (String) h.get("proxyId");
+    name = (String) h.get("user.name");
+    proxyId = (String) h.get("user.id");
   }
 }

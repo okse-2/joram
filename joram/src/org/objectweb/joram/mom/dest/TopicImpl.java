@@ -44,7 +44,7 @@ import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.*;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -108,8 +108,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
                                     + ": got " + not.getClass().getName()
                                     + " with id: " + reqId
                                     + " from: " + from.toString());
@@ -153,8 +153,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     }
     // MOM exceptions are sent to the requester.
     catch (MomException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgDestination.log(BasicLevel.WARN, exc);
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
 
       AbstractRequest req = (AbstractRequest) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
@@ -240,8 +240,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       strbuf.setLength(0);
       Channel.sendTo(from, new ClusterAck(not, true, info));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
                                       + destId.toString() + " joins cluster"
                                       + "cluster of topic " + from.toString());
     }
@@ -283,8 +283,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(ack.requester, new AdminReply(ack.request, true, info));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -298,8 +298,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     setSave();
     friends.add(not.topicId);
       
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
                                     + not.topicId.toString()
                                     + " set as a fellow.");
   }
@@ -345,8 +345,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(request, true, info));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
  
   /**
@@ -361,8 +361,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     if (friends.isEmpty()) friends = null;
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
                                     + from.toString() + " removed from"
                                     + " cluster.");
   }
@@ -446,8 +446,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(not.requester, new AdminReply(not.request, true, info));
   
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -482,8 +482,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     strbuf.setLength(0);
     Channel.sendTo(from, new AdminReply(request, true, info));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -576,8 +576,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     Channel.sendTo(from, new SubscribeReply(not));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "Client " + from
                                     + " set as a subscriber with selector "
                                     + not.getSelector());
@@ -594,8 +594,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     subscribers.remove(from);
     selectors.remove(from);
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "Client " + from
                                     + " removed from the subscribers.");
   } 
@@ -651,6 +651,31 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       res[i] = aid.toString();
     }
     return res;
+  }
+
+  private void replyToTopic(
+    org.objectweb.joram.shared.admin.AdminReply reply,
+    AgentId replyTo,
+    String requestMsgId,
+    String replyMsgId) {
+    Message message = Message.create();
+    message.setCorrelationId(requestMsgId);
+    message.setTimestamp(System.currentTimeMillis());
+    message.setDestination(replyTo.toString(), 
+                           Topic.TOPIC_TYPE);
+    message.setIdentifier(replyMsgId);
+    try {
+      message.setObject(reply);
+      Vector messages = new Vector();
+      messages.add(message);
+      ClientMessages clientMessages = 
+        new ClientMessages(-1, -1, messages);
+      Channel.sendTo(replyTo, clientMessages);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      throw new Error(exc.getMessage());
+    }
   }
 
   /**
@@ -731,7 +756,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * the deleted client, if any, or sets the father identifier to null if it
    * comes from a deleted father.
    */
-  protected void doProcess(UnknownAgent uA) {
+  protected void doProcess(UnknownAgent uA)
+  {
     AgentId agId = uA.agent;
     Notification not = uA.not;
 
@@ -811,16 +837,17 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
         topicId = (AgentId) friends.get(i);
         Channel.sendTo(topicId, new TopicForwardNot(messages, false));
 
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
                                         + "forwarded to fellow "
                                         + topicId.toString());
       } 
-    } else if (fatherId != null) {
+    }
+    else if (fatherId != null) {
       Channel.sendTo(fatherId, new TopicForwardNot(messages, true));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
                                       + "forwarded to father "
                                       + fatherId.toString());
     }
@@ -831,7 +858,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * valid subscriptions by sending a <code>TopicMsgsReply</code> notification
    * to the valid subscribers.
    */
-  protected void processMessages(ClientMessages not) {
+  protected void processMessages(ClientMessages not)
+  {
     Vector messages = not.getMessages();
     AgentId subscriber;
     boolean local;
@@ -844,18 +872,18 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     setNoSave();
     boolean persistent = false;
 
+    // Browsing the subscribers.
     for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
-      // Browsing the subscribers.
       subscriber = (AgentId) subs.nextElement();
       local = (subscriber.getTo() == AgentServer.getServerId());
       selector = (String) selectors.get(subscriber);
 
+      // Current subscriber does not filter messages: all messages will be
+      // sent.
       if (selector == null || selector.equals("")) {
-        // Current subscriber does not filter messages: all messages
-        // will be sent.
+        // Subscriber not local, or no other sending occured locally: directly
+        // sending the messages.
         if (! local) {
-          // Subscriber not local, or no other sending occured locally:
-          // directly sending the messages.
           deliverables = messages;
           persistent = true;
         } else if (! alreadySentLocally) {
@@ -868,8 +896,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
           for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();)
             deliverables.add(((Message) msgs.nextElement()).clone());
         }
-      } else {
-        // Current subscriber filters messages; sending the matching messages.
+      }
+      // Current subscriber filters messages; sending the matching messages.
+      else {
         deliverables = new Vector();
         for (int i = 0; i < messages.size(); i++) {
           message = (Message) messages.get(i);

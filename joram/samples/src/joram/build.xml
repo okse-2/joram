@@ -151,27 +151,6 @@
   </target>
 
   <!-- Runs the classic sender client -->
-  <target name="synchsubscriber" depends="init"
-    description="--> Starts a SynchReqSubscriber client">
-    <java classname="classic.SynchReqSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-      <arg line="./jndi.properties"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
-  <target name="synchpublisher" depends="init"
-    description="--> Starts a SynchReqPublisher client">
-    <java classname="classic.SynchReqPublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="./jndi.properties"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
   <target name="sender" depends="init"
     description="--> Starts a Sender client">
     <java classname="classic.Sender" failonerror="no" fork="yes"
@@ -232,7 +211,6 @@
     description="--> Starts a Consumer client">
     <java classname="classic.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -415,7 +393,6 @@
     <java classname="archi.ArchiAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
@@ -537,9 +514,11 @@
   <target name="queue_cluster_adminxml" depends="init"
     description="--> Runs queue cluster administration xml">
     <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="cluster.queue.ClusterAdminXML" failonerror="no" fork="yes"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
