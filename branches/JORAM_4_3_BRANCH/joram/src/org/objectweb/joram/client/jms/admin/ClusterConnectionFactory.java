@@ -153,31 +153,48 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
 
+    StringBuffer strbuf = new StringBuffer(15);
     for (int i=0; i<entries.length; i++) {
-      ref.add(new StringRefAddr("CF#" + i + ".key",
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".key");
+      ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
-      ref.add(new StringRefAddr("CF#" + i + ".class",
-                                cf.getClass().getName()));
-      cf.toReference(ref, "CF#" + i);
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".class");
+      ref.add(new StringRefAddr(strbuf.toString(), cf.getClass().getName()));
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i);
+      cf.toReference(ref, strbuf.toString());
     }
   }
 
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
-    if (cluster == null) {
-      cluster = new Hashtable();
-    }
+    if (cluster == null) cluster = new Hashtable();
+
     int i = 0;
+    StringBuffer strbuf = new StringBuffer(15);
+
     while (true) {
-      RefAddr refAddr = ref.get("CF#" + i + ".key");
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".key");
+      RefAddr refAddr = ref.get(strbuf.toString());
       if (refAddr == null) break;
       String key = (String) refAddr.getContent();
-      String classname = (String) ref.get("CF#" + i + ".class").getContent();
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".class");
+      String classname = (String) ref.get(strbuf.toString()).getContent();
       try {
         Class clazz = Class.forName(classname);
         ConnectionFactory cf = (ConnectionFactory) clazz.newInstance();
-        cf.fromReference(ref, "CF#" + i);
+        strbuf.setLength(0);
+        strbuf.append("CF#").append(i);
+        cf.fromReference(ref, strbuf.toString());
 
         cluster.put(key, cf);
       } catch (Exception exc) {
@@ -196,7 +213,29 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
    * through the SOAP protocol.
    */
   public Hashtable code() {
-    return null;
+    Hashtable h = new Hashtable();
+
+    Map.Entry entries[] = new Map.Entry [cluster.size()];
+    cluster.entrySet().toArray(entries);
+
+    StringBuffer strbuf = new StringBuffer(15);
+    for (int i=0; i<entries.length; i++) {
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".key");
+      h.put(strbuf.toString(), (String) entries[i].getKey());
+
+      ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".class");
+      h.put(strbuf.toString(), cf.getClass().getName());
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i);
+      cf.code(h, strbuf.toString());
+    }
+
+    return h;
   }
 
   /**
@@ -207,7 +246,34 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
    * tcp and soap sub classes.
    */
   public void decode(Hashtable h) {
-    cluster = null;
-  }
+    if (cluster == null) cluster = new Hashtable();
 
+    int i = 0;
+    StringBuffer strbuf = new StringBuffer(15);
+
+    while (true) {
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".key");
+      String key = (String) h.get(strbuf.toString());
+      if (key == null) break;
+
+      strbuf.setLength(0);
+      strbuf.append("CF#").append(i).append(".class");
+      String classname = (String) h.get(strbuf.toString());
+      try {
+        Class clazz = Class.forName(classname);
+        ConnectionFactory cf = (ConnectionFactory) clazz.newInstance();
+
+        strbuf.setLength(0);
+        strbuf.append("CF#").append(i);
+        cf.decode(h, strbuf.toString());
+
+        cluster.put(key, cf);
+      } catch (Exception exc) {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+      }
+      i++;
+    }
+  }
 }

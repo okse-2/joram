@@ -35,7 +35,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * The <code>AdministeredObject</code> class is the parent class of all
  * JORAM administered objects.
  */
-public abstract class  AdministeredObject implements javax.naming.Referenceable {
+public abstract class  AdministeredObject implements javax.naming.Referenceable, SoapObjectItf {
   public final Reference getReference() throws NamingException {
     Reference ref = null;
     ref = new Reference(this.getClass().getName(), ObjectFactory.class.getName(), null);
