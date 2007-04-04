@@ -656,13 +656,13 @@ public abstract class Destination
    */
   public Hashtable code() {
     Hashtable h = new Hashtable();
-    h.put("agentId", getName());
-    h.put("type", type);
+    h.put("dest.agentId", getName());
+    h.put("dest.adminName", getName());
     return h;
   }
 
   public void decode(Hashtable h) {
-    agentId = (String) h.get("agentId");
-    type = (String) h.get("type");
+    agentId = (String) h.get("dest.agentId");
+    adminName = (String) h.get("dest.adminName");
   }
 }
