@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,28 +24,46 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
+import org.objectweb.joram.mom.notifications.AbstractRequest;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.ExceptionReply;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetReaders;
+import org.objectweb.joram.mom.notifications.Monit_GetStat;
+import org.objectweb.joram.mom.notifications.Monit_GetWriters;
+import org.objectweb.joram.mom.notifications.RequestGroupNot;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
-
-import org.objectweb.joram.shared.JoramTracing;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>Destination</code> agent is an agent hosting a MOM destination,
  * for example a <tt>Queue</tt> or a <tt>Topic</tt>.
  * Its behaviour is provided by a <code>DestinationImpl</code> instance.
  *
- * @see DestinationImpl
+ * @see DestinationItf
  */
 public abstract class Destination extends Agent implements AdminDestinationItf {
 
+  public static Logger logger = Debug.getLogger(Destination.class.getName());
+  
   /**
-   * The reference of the <code>DestinationImpl</code> instance providing this
+   * The reference of the <code>DestinationItf</code> instance providing this
    * this agent with its <tt>Destination</tt> behaviour.
    */
   protected DestinationImpl destImpl;
@@ -65,7 +83,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   }
 
   /**
-   * Initializes the destination by creating the <tt>DestinationImpl</tt>
+   * Initializes the destination by creating the <tt>DestinationItf</tt>
    * object.
    *
    * @param adminId  Identifier of the destination administrator.
@@ -122,27 +140,62 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   }
 
   /**
-   * Reactions to notifications are implemented by the
-   * <tt>DestinationImpl</tt> class.
+   * Distributes the received notifications to the appropriate reactions.
+   * @throws Exception 
    */
   public void react(AgentId from, Notification not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Destination.react(" + from + ',' + not + ')');
 
     // set agent no save (this is the default).
     setNoSave();
-
+    
     try {
-      destImpl.react(from, not);
-
-      // A DeleteNot notification is finally processed at the
-      // Agent level when its processing went successful in
-      // the DestinationImpl instance.
-      if (not instanceof DeleteNot && destImpl.canBeDeleted()) 
+      if (not instanceof SetRightRequest)
+        destImpl.setRightRequest(from, (SetRightRequest) not);
+      else if (not instanceof SetDMQRequest)
+        destImpl.setDMQRequest(from, (SetDMQRequest) not);
+      else if (not instanceof Monit_GetReaders)
+        destImpl.monitGetReaders(from, (Monit_GetReaders) not);
+      else if (not instanceof Monit_GetWriters)
+        destImpl.monitGetWriters(from, (Monit_GetWriters) not);
+      else if (not instanceof Monit_FreeAccess)
+        destImpl.monitFreeAccess(from, (Monit_FreeAccess) not);
+      else if (not instanceof Monit_GetDMQSettings)
+        destImpl.monitGetDMQSettings(from, (Monit_GetDMQSettings) not);
+      else if (not instanceof Monit_GetStat)
+        destImpl.monitGetStat(from, (Monit_GetStat) not);
+      else if (not instanceof SpecialAdminRequest)
+        destImpl.specialAdminRequest(from, (SpecialAdminRequest) not);
+      else if (not instanceof ClientMessages)
+        destImpl.clientMessages(from, (ClientMessages) not);
+      else if (not instanceof UnknownAgent)
+        destImpl.unknownAgent(from, (UnknownAgent) not);
+      else if (not instanceof DeleteNot)
+        destImpl.deleteNot(from, (DeleteNot) not);
+      else if (not instanceof RequestGroupNot)
+        destImpl.requestGroupNot(from, (RequestGroupNot)not);
+      else if (not instanceof DeleteNot && destImpl.canBeDeleted()) 
+        // A DeleteNot notification is finally processed at the
+        // Agent level when its processing went successful in
+        // the DestinationItf instance.
         super.react(from, not);
+      else
+        throw new UnknownNotificationException(not.getClass().getName());
+    } catch (MomException exc) {
+      // MOM Exceptions are sent to the requester.
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, this + ".react()", exc);
+
+      AbstractRequest req = (AbstractRequest) not;
+      Channel.sendTo(from, new ExceptionReply(req, exc));
     } catch (UnknownNotificationException exc) {
       super.react(from, not);
     }
   }
-
+  
+  
   protected void setNoSave() {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 

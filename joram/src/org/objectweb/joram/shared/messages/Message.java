@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,7 +107,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /** The message identifier. */
   public transient String id = null;
   
-  /** <code>true</code> if the message must be persisted. **/
+  /** <code>true</code> if the message must be persisted. */
   public transient boolean persistent = true;
  
   /** A simple message carries an empty body. */
