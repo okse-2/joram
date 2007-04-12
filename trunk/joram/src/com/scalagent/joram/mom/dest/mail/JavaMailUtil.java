@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,26 +17,39 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
 
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.*;
-import org.objectweb.joram.shared.selectors.*;
-import org.objectweb.joram.mom.dest.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
-
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.Debug;
 
 /**
  * The <code>JavaMailUtil</code> class giv utils to get, send, ...
@@ -44,19 +57,22 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class JavaMailUtil {
 
+  public static Logger logger =
+    Debug.getLogger("com.scalagent.joram.mom.dest.mail.JavaMailUtil");
+  
   private Store store = null;
   private Folder folder = null;
 
-  public void sendJavaMail(SenderInfo si, Message message)
+  public void sendJavaMail(SenderInfo si, MailMessage message)
     throws Exception {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
                                     "--- " + this +
                                     " sendJavaMail(" + si +
                                     "," + message + ")");
     
     if (si.smtpServer == null || si.smtpServer.length() < 0) {
-      MomTracing.dbgDestination.log(BasicLevel.ERROR, 
+      logger.log(BasicLevel.ERROR, 
                                     "--- " + this +
                                     " sendJavaMail : smtpServer is empty.");
       throw new Exception("sendJavaMail : smtpServer is empty.");
@@ -79,7 +95,7 @@ public class JavaMailUtil {
                           InternetAddress.parse(st.nextToken(),false));
       }
     } else {
-      MomTracing.dbgDestination.log(BasicLevel.ERROR, 
+      logger.log(BasicLevel.ERROR, 
                                     "--- " + this +
                                     " sendJavaMail : to is null.");
       throw new Exception("sendJavaMail : to is null.");
@@ -103,23 +119,23 @@ public class JavaMailUtil {
     
     msg.setSubject(si.subject);
     
-    if (message.getBooleanProperty("showProperties")) {
+    if (ConversionHelper.toBoolean(message.getProperty("showProperties"))) {
       try {
         mimeMultiPart.addBodyPart(getMultipartProp(message));
       } catch (Exception exc) {
-        MomTracing.dbgDestination.log(BasicLevel.WARN,
+        logger.log(BasicLevel.WARN,
                                       "--- " + this +
                                       " sendJavaMail: setMultipartProp", 
                                       exc);
       }
     }
     
-    if (message.getType() == MessageType.TEXT) {
+    if (message.getType() == Message.TEXT) {
       mimeBodyPart.setText("JoramMessage :\n" + message.getText());
       mimeMultiPart.addBodyPart(mimeBodyPart);
     } else {
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG,"not yet impl.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,"not yet impl.");
       //message.getBytes()
     }
     
@@ -131,29 +147,28 @@ public class JavaMailUtil {
   }
 
 
-  private MimeBodyPart getMultipartProp(Message msg) throws Exception {
+  private MimeBodyPart getMultipartProp(MailMessage msg) throws Exception {
     MimeBodyPart mbp = new MimeBodyPart();
 
     StringBuffer buf = new StringBuffer();
     buf.append("type=" + msg.getType() + "\n");
     buf.append("id=" + msg.getIdentifier() + "\n");
     buf.append("persistent=" + msg.getPersistent() + "\n");
-    buf.append("priority=" + msg.getPriority() + "\n");
-    buf.append("expiration=" + msg.getExpiration() + "\n");
+    buf.append("priority=" + msg.getJMSPriority() + "\n");
+    buf.append("expiration=" + msg.getJMSExpiration() + "\n");
     buf.append("timestamp=" + msg.getTimestamp() + "\n");
     buf.append("toId=" + msg.getDestinationId() + "\n");
-    buf.append("destType=" + msg.toType() + "\n");
+    buf.append("destType=" + msg.getToType() + "\n");
     buf.append("correlationId=" + msg.getCorrelationId() + "\n");
     buf.append("replyToId=" + msg.getReplyToId() + "\n");
     buf.append("replyDestType=" + msg.replyToType() + "\n");
-    buf.append("deliveryCount=" + msg.deliveryCount + "\n");
-    buf.append("denied=" + msg.denied + "\n");
-    buf.append("deletedDest=" + msg.deletedDest + "\n");
-    buf.append("expired=" + msg.expired + "\n");
-    buf.append("notWriteable=" + msg.notWriteable + "\n");
-    buf.append("undeliverable=" + msg.undeliverable + "\n");
-    // Enumeration getPropertyNames()
-
+    buf.append("deliveryCount=" + msg.getDeliveryCount() + "\n");
+    buf.append("denied=" + msg.getDenied() + "\n");
+    buf.append("deletedDest=" + msg.getDeletedDest() + "\n");
+    buf.append("expired=" + msg.getExpired() + "\n");
+    buf.append("notWriteable=" + msg.getNotWriteable() + "\n");
+    buf.append("undeliverable=" + msg.getUndeliverable() + "\n");
+ 
     mbp.setText(buf.toString());
     return mbp;
   }
@@ -163,8 +178,8 @@ public class JavaMailUtil {
                                                    String popPassword,
                                                    boolean expunge) {
     
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
                                     "--- " + this +
                                     " popMail : " +
                                     "popServer=" + popServer +
@@ -195,7 +210,7 @@ public class JavaMailUtil {
       }
       return msgs;
     } catch (Exception exc) {
-      MomTracing.dbgDestination.log(BasicLevel.ERROR,
+      logger.log(BasicLevel.ERROR,
                                     "JavaMailUtil.popMail", 
                                     exc);
       return msgs;
@@ -215,19 +230,19 @@ public class JavaMailUtil {
       if (folder != null) folder.close(expunge);
       if (store != null) store.close();
     } catch (Exception exc) {
-      MomTracing.dbgDestination.log(BasicLevel.ERROR,
+      logger.log(BasicLevel.ERROR,
                                     "JavaMailUtil.closeFolder", 
                                     exc);
     } 
   }
 
-  protected Message createMessage(Properties prop, 
+  protected MailMessage createMessage(Properties prop, 
                                   String mailId,
                                   String destType,
                                   String toId,
                                   String replyDestType) 
     throws Exception {
-    Message msg = new Message();
+    MailMessage msg = new MailMessage();
     
     msg.setIdentifier(mailId);
     msg.setPersistent(ConversionHelper.toBoolean(prop.getProperty("persistent","true")));
@@ -242,15 +257,15 @@ public class JavaMailUtil {
     if (prop.containsKey("replyToId"))
       msg.setReplyTo(prop.getProperty("replyToId"),
                      prop.getProperty("replyDestType",replyDestType));
-    msg.deliveryCount = ConversionHelper.toInt(prop.getProperty("deliveryCount","0"));
-    msg.denied = ConversionHelper.toBoolean(prop.getProperty("denied","false"));
-    msg.deletedDest = ConversionHelper.toBoolean(prop.getProperty("deletedDest","false"));
-    msg.expired = ConversionHelper.toBoolean(prop.getProperty("expired","false"));
-    msg.notWriteable = ConversionHelper.toBoolean(prop.getProperty("notWriteable","false"));
-    msg.undeliverable = ConversionHelper.toBoolean(prop.getProperty("undeliverable","false"));
+    msg.setDeliveryCount(ConversionHelper.toInt(prop.getProperty("deliveryCount","0")));
+    msg.setDenied(ConversionHelper.toBoolean(prop.getProperty("denied","false")));
+    msg.setDeletedDest(ConversionHelper.toBoolean(prop.getProperty("deletedDest","false")));
+    msg.setExpired(ConversionHelper.toBoolean(prop.getProperty("expired","false")));
+    msg.setNotWriteable(ConversionHelper.toBoolean(prop.getProperty("notWriteable","false")));
+    msg.setUndeliverable(ConversionHelper.toBoolean(prop.getProperty("undeliverable","false")));
     
-//        msg.optionalHeader = (Hashtable) h.getProperty("optionalHeader");
-//        msg.properties = (Hashtable) h.getProperty("properties");
+//        msg.setOptionalHeader((Hashtable) h.getProperty("optionalHeader"));
+//        msg.setProperties((Hashtable) h.getProperty("properties"));
     
     msg.setText((String) prop.getProperty("mailMessage"));
     
@@ -284,8 +299,8 @@ public class JavaMailUtil {
         if (currentLine.length() > 1) {
           String[] buf = currentLine.split("=");
           prop.setProperty(buf[0],buf[1]);
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            MomTracing.dbgDestination.log(BasicLevel.DEBUG,buf[0] + "=" + buf[1]);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,buf[0] + "=" + buf[1]);
         }
         currentLine = reader.readLine();
       }
@@ -321,8 +336,8 @@ public class JavaMailUtil {
       }
     }
 
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
                                     "--- " + this +
                                     " getMOMProperties : prop=" + prop);
     return prop;

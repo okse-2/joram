@@ -1,26 +1,48 @@
 /*
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
  *
  * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URL;
+import java.util.Enumeration;
+
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
-import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.mom.notifications.ClientMessages;
-import java.util.Enumeration;
-import java.net.*;
-
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.agent.Debug;
 
 public class FtpThread extends Thread {
 
+  public static Logger logger =
+    Debug.getLogger("com.scalagent.joram.mom.dest.ftp.FtpThread");
+  
   private TransferItf transfer;
   private AgentId destId;
-  private Message ftpMsg;
+  private FtpMessage ftpMsg;
   private AgentId dmqId;
   private int clientContext;
   private int requestId;
@@ -31,7 +53,7 @@ public class FtpThread extends Thread {
   public String ftpImplName;
 
   public FtpThread(TransferItf transfer,
-                   Message ftpMsg,
+                   FtpMessage ftpMsg,
                    AgentId destId,
                    AgentId dmqId,
                    int clientContext,
@@ -48,18 +70,18 @@ public class FtpThread extends Thread {
     this.user = user;
     this.pass = pass;
     this.path = path;
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this);
   }
 
   public void run() {
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- run()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- run()");
     doFtp(ftpMsg);
   }
 
 
-  protected void doFtp(Message msg) {
+  protected void doFtp(FtpMessage msg) {
     String urlName = null;
     long crc = -1;
     boolean ack = false;
@@ -75,10 +97,9 @@ public class FtpThread extends Thread {
       String type = null;
       String remotePath = null;
       
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      "--- doFtp : url host = " + url.getHost() + 
-                                      ", urlFileName = " + urlFileName);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "--- doFtp : url host = " + url.getHost() + 
+                                     ", urlFileName = " + urlFileName);
 
       if (urlFileName.indexOf(";") > 1) {
         fileName = urlFileName.substring(
@@ -105,8 +126,8 @@ public class FtpThread extends Thread {
       String protocol = url.getProtocol();
       int port = url.getPort();
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
                                       "doFtp : remoteUser = " + remoteUser + 
                                       ", protocol = " + protocol + 
                                       ", port = " + port);
@@ -130,8 +151,8 @@ public class FtpThread extends Thread {
       URI uri = new URI("file",null,file,null,null);
       uri = uri.normalize();
 
-      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- doFtp : uri = " + uri);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "--- doFtp : uri = " + uri);
       
 //          StringBuffer sb = new StringBuffer();
 //          sb.append(protocol + "://");
@@ -152,26 +173,26 @@ public class FtpThread extends Thread {
 //          sb.append(type);
  
 
-      Message clone = (Message) msg.clone();
+      FtpMessage clone = (FtpMessage) msg.clone();
       clone.clearProperties();
       for (Enumeration e = msg.getPropertyNames(); e.hasMoreElements(); ) {
         String key = (String) e.nextElement();
-        clone.setObjectProperty(key,msg.getObjectProperty(key));
+        clone.setObjectProperty(key, msg.getObjectProperty(key));
       }
-      clone.setStringProperty("url",uri.toString());
+      clone.setStringProperty("url", uri.toString());
       
-      Channel.sendTo(destId,new FtpNot(clientContext, 
+      Channel.sendTo(destId, new FtpNot(clientContext, 
                                        requestId,
-                                       clone));
+                                       clone.getSharedMessage()));
       
     } catch (Exception exc) {
       ClientMessages deadM = 
         new ClientMessages(clientContext, 
                            requestId);
-      msg.notWriteable = true;
-      deadM.addMessage(msg);
+      msg.setNotWriteable(true);
+      deadM.addMessage(msg.getSharedMessage());
       if (dmqId != null)
-        Channel.sendTo(dmqId,deadM);
+        Channel.sendTo(dmqId, deadM);
     }
   }
 

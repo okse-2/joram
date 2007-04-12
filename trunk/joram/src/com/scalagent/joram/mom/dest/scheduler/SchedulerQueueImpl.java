@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,17 +25,12 @@ package com.scalagent.joram.mom.dest.scheduler;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
-// import java.io.IOException;
-// import java.io.ObjectInputStream;
-// import java.io.ObjectOutputStream;
-
-import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
-import org.objectweb.joram.mom.notifications.ClientMessages;
-// import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import com.scalagent.scheduler.AddConditionListener;
 import com.scalagent.scheduler.Condition;
@@ -44,13 +39,7 @@ import com.scalagent.scheduler.ScheduleEvent;
 import com.scalagent.scheduler.Scheduler;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 public class SchedulerQueueImpl extends QueueImpl {
   public static Logger logger =
@@ -74,10 +63,10 @@ public class SchedulerQueueImpl extends QueueImpl {
                  "SchedulerQueueImpl.<init>(" + destId + ',' + adminId + ')');
   }
 
-  protected void doProcess(ClientMessages not) {
+  public void postProcess(ClientMessages not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.doProcess(" + not + ')');
-    super.doProcess(not);
+      logger.log(BasicLevel.DEBUG, "SchedulerQueueImpl.postProcess(" + not + ')');
+    
     org.objectweb.joram.shared.messages.Message msg;
     for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
       msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
@@ -85,10 +74,8 @@ public class SchedulerQueueImpl extends QueueImpl {
       if (scheduleDate < 0) return;
       //DF: to improve
       // two notifs are necessary to subscribe
-      Channel.sendTo(Scheduler.getDefault(),
-                     new AddConditionListener(msg.id));
-      Channel.sendTo(Scheduler.getDefault(),
-                     new ScheduleEvent(msg.id, new Date(scheduleDate)));
+      forward(Scheduler.getDefault(), new AddConditionListener(msg.id));
+      forward(Scheduler.getDefault(), new ScheduleEvent(msg.id, new Date(scheduleDate)));
     }
   }
 
@@ -104,18 +91,7 @@ public class SchedulerQueueImpl extends QueueImpl {
     }
   }
 
-  public void react(AgentId from, Notification not)
-      throws UnknownNotificationException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "SchedulerQueueImpl.react(" + from + ',' + not + ')');
-    if (not instanceof Condition) {
-      doReact((Condition) not);
-    } else
-      super.react(from, not);
-  }
-
-  private void doReact(Condition not) {
+  public void condition(Condition not) {
     String msgId = not.name;
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message) messages.elementAt(i);
@@ -124,9 +100,8 @@ public class SchedulerQueueImpl extends QueueImpl {
           msg.setObjectProperty(SCHEDULED, "" + System.currentTimeMillis());
         } catch (Exception exc) {}
         // Must remove the condition
-        Channel.sendTo(
-            Scheduler.getDefault(), 
-            new RemoveConditionListener(msg.getIdentifier()));
+        forward(Scheduler.getDefault(), 
+                new RemoveConditionListener(msg.getIdentifier()));
         break;
       }
     }
