@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,34 +17,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Vector;
 
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.*;
-import org.objectweb.joram.shared.selectors.*;
-import org.objectweb.joram.mom.dest.*;
 import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.dest.QueueImpl;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.selectors.Selector;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.Notification;
-
 import fr.dyade.aaa.util.Debug;
-import org.objectweb.util.monolog.api.Logger;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>JavaMailQueueImpl</code> class implements the MOM queue behaviour,
@@ -358,13 +353,6 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     return "JavaMailQueueImpl:" + destId.toString();
   }
 
-  protected void specialProcess(Notification not) {
-    if (not instanceof ClientMessages)
-      doProcess((ClientMessages) not);
-    else
-      super.specialProcess(not);
-  }
-
   protected Object specialAdminProcess(SpecialAdminRequest not) 
     throws RequestException {
 
@@ -429,7 +417,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     return true;
   }
 
-  protected void doProcess(ClientMessages not) {
+  public ClientMessages preProcess(AgentId from, ClientMessages not) {
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
       Message msg = (Message) msgs.nextElement();
@@ -441,7 +429,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
                    " match=" + (si!=null));
       if (si != null) {
         try {
-          javaMailUtil.sendJavaMail(si,msg);
+          javaMailUtil.sendJavaMail(si, new MailMessage(msg));
         } catch (Exception exc) {
           ClientMessages deadM = 
             new ClientMessages(not.getClientContext(), 
@@ -454,11 +442,13 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
                      "JavaMailQueueImpl.sendJavaMail", 
                      exc);
         }
-      } else {
-        storeMessage(msg);
-        deliverMessages(0);
+        not.getMessages().remove(msg);
       }
     }
+    if (not.getMessages().size() > 0) {
+      return not;
+    }
+    return null;
   }
   
   protected SenderInfo match(Message msg) {
@@ -487,13 +477,13 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
-          Message m = 
+          MailMessage m = 
             javaMailUtil.createMessage(prop,
                                        destId.toString()+"mail_"+count,
                                        Queue.getDestinationType(),
                                        destId.toString(),
                                        Queue.getDestinationType());
-          storeMessage(m);
+          storeMessage(new org.objectweb.joram.mom.messages.Message(m.getSharedMessage()));
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 

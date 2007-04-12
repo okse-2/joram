@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,22 +22,16 @@
  */
 package com.scalagent.joram.mom.dest.scheduler;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.*;
-import org.objectweb.joram.shared.admin.*;
+import org.objectweb.joram.mom.dest.DestinationImpl;
+import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.AgentServer;
+import com.scalagent.scheduler.Condition;
+
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
-import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.UnknownNotificationException;
 
 public class SchedulerQueue extends Queue {
   public static final String QUEUE_SCHEDULER_TYPE = "queue_scheduler";
@@ -63,6 +57,17 @@ public class SchedulerQueue extends Queue {
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
     return new SchedulerQueueImpl(getId(), adminId, prop);
+  }
+  
+  public void react(AgentId from, Notification not)
+  throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+          "SchedulerQueue.react(" + from + ',' + not + ')');
+    if (not instanceof Condition) {
+      ((SchedulerQueueImpl) destImpl).condition((Condition) not);
+    } else
+      super.react(from, not);
   }
 }
 

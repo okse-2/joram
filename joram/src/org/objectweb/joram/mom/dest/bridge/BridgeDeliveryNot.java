@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - Bull SA
+ * Copyright (C) 2007 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,20 +18,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
-package com.scalagent.joram.mom.dest.ftp;
+package org.objectweb.joram.mom.dest.bridge;
 
-import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.messages.Message;
 
-public class FtpNot extends ClientMessages {
 
-  public FtpNot(int clientContext, 
-                int requestId,
-                Message msg) {
-    super(clientContext, requestId);
-    addMessage(msg);
+/**
+ * A <code>BridgeDeliveryNot</code> notification carries a message obtained
+ * by a JMS module from a foreign JMS server.
+ */
+public class BridgeDeliveryNot extends fr.dyade.aaa.agent.Notification {
+  /** Message obtained from the foreign JMS server. */
+  private Message message;
+
+
+  /**
+   * Constructs a <code>BridgeDeliveryNot</code> wrapping a given message
+   * obtained from a foreign JMS server.
+   */
+  public BridgeDeliveryNot(Message message) {
+    this.message = message;
+  }
+
+
+  /** Returns the message obtained from the foreign JMS server. */
+  public Message getMessage() {
+    return message;
   }
 }
