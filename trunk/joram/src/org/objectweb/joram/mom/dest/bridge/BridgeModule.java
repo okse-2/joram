@@ -103,6 +103,12 @@ public class BridgeModule implements javax.jms.ExceptionListener,
   /** Daemon used for the reconnection process. */
   protected transient ReconnectionDaemon reconnectionDaemon;
 
+  /** 
+   * Automatic receive for a bridge Queue.
+   * The foreign messages are transfer in bridge queue, 
+   * without client request.
+   */
+  private boolean automaticRequest = false;
 
   /** Constructs a <code>BridgeUnifiedModule</code> module. */
   public BridgeModule()
@@ -143,6 +149,8 @@ public class BridgeModule implements javax.jms.ExceptionListener,
 
     clientID = prop.getProperty("clientId");
     selector = prop.getProperty("selector");
+    automaticRequest = Boolean.valueOf(
+          prop.getProperty("automaticRequest","false")).booleanValue();
   }
 
   /**
@@ -448,6 +456,9 @@ public class BridgeModule implements javax.jms.ExceptionListener,
           }
           cnxFact = (ConnectionFactory) jndiCtx.lookup(cnxFactName);
           dest = (Destination) jndiCtx.lookup(destName);
+          
+          if (dest instanceof Topic)
+            automaticRequest = false;
         }
         try {
           doConnect();
@@ -647,10 +658,8 @@ public class BridgeModule implements javax.jms.ExceptionListener,
 
         setConsumer();
         cnx.start();
-
-        while (requests > 0 && running) {
+        while ((requests > 0 || automaticRequest) && running) {
           canStop = true; 
-
           // Expecting a message:
           try {
             org.objectweb.joram.client.jms.Message clientMessage = 
@@ -667,7 +676,8 @@ public class BridgeModule implements javax.jms.ExceptionListener,
           canStop = false;
           notif = new BridgeDeliveryNot(momMessage);
           Channel.sendTo(agentId, notif);
-          requests--;
+          if (!automaticRequest)
+            requests--;
         }
       }
       // Connection loss?
