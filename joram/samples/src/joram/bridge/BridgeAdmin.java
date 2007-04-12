@@ -44,10 +44,12 @@ public class BridgeAdmin {
     Queue foreignQueue = Queue.create(1, "foreignQueue");
     foreignQueue.setFreeReading();
     foreignQueue.setFreeWriting();
+    System.out.println("foreign queue = " + foreignQueue);
     
     Topic foreignTopic = Topic.create(1, "foreignTopic");
     foreignTopic.setFreeReading();
     foreignTopic.setFreeWriting();
+    System.out.println("foreign topic = " + foreignTopic);
     
     javax.jms.ConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
     
@@ -63,6 +65,8 @@ public class BridgeAdmin {
     prop.setProperty("connectionFactoryName", "foreignCF");
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignQueue");
+    // automaticRequest
+    prop.setProperty("automaticRequest", "false");
 
     // Creating a Queue bridge on server 0:
     Queue joramQueue = Queue.create(0,
@@ -70,6 +74,7 @@ public class BridgeAdmin {
                                  prop);
     joramQueue.setFreeReading();
     joramQueue.setFreeWriting();
+    System.out.println("joram queue = " + joramQueue);
     
     // Setting the bridge properties
     prop = new Properties();
@@ -84,10 +89,7 @@ public class BridgeAdmin {
                                  prop);
     joramTopic.setFreeReading();
     joramTopic.setFreeWriting();
-    
-    System.out.println("foreign queue = " + foreignQueue);
-    System.out.println("foreign topic = " + foreignTopic);
-    System.out.println("joram dest = " + joramQueue);
+    System.out.println("joram topic = " + joramTopic);
 
     javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create();
 
