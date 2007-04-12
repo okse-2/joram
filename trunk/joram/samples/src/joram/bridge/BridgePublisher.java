@@ -22,25 +22,36 @@
  */
 package bridge;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 /**
- * Consumes messages on a foreign destination through the JORAM bridge.
+ * Produces messages on the foreign destination.
  */
-public class BridgeConsumer {
+public class BridgePublisher {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
+    Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
     ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
     jndiCtx.close();
 
     Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer joramCons = joramSess.createConsumer(joramDest);
-    joramCons.setMessageListener(new MsgListener("joram"));
-    joramCnx.start();  
-    
-    System.in.read();
+    Session joramSess = joramCnx.createSession(true, 0);
+    MessageProducer joramSender = joramSess.createProducer(joramDest);
+
+    TextMessage msg = joramSess.createTextMessage();
+
+    for (int i = 1; i < 11; i++) {
+      msg.setText("Joram message number " + i);
+      System.out.println("send msg = " + msg.getText());
+      joramSender.send(msg);
+    }
+
+    joramSess.commit();
 
     joramCnx.close();
   }

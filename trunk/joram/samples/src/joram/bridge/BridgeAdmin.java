@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent DT
+ * Copyright (C) 2007 - ScalAgent DT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): 
  */
 package bridge;
 
@@ -33,40 +32,71 @@ import java.util.Properties;
 /**
  * Administers an agent server for the bridge sample.
  */
-public class BridgeAdmin
-{
-  public static void main(String[] args) throws Exception
-  {
+public class BridgeAdmin {
+  public static void main(String[] args) throws Exception {
     System.out.println();
     System.out.println("Bridge administration...");
 
     AdminModule.connect("root", "root", 60);
-
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    
+    // create The foreign destination and connectionFactory
+    Queue foreignQueue = Queue.create(1, "foreignQueue");
+    foreignQueue.setFreeReading();
+    foreignQueue.setFreeWriting();
+    
+    Topic foreignTopic = Topic.create(1, "foreignTopic");
+    foreignTopic.setFreeReading();
+    foreignTopic.setFreeWriting();
+    
+    javax.jms.ConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
+    
+    // bind foreign destination and connectionFactory
+    jndiCtx.rebind("foreignQueue", foreignQueue);
+    jndiCtx.rebind("foreignTopic", foreignTopic);
+    jndiCtx.rebind("foreignCF", foreignCF);
+    
+    
     // Setting the bridge properties
     Properties prop = new Properties();
-    // Communication mode: PTP
-    prop.setProperty("jmsMode", "ptp");
     // Foreign QueueConnectionFactory JNDI name: foreignCF
     prop.setProperty("connectionFactoryName", "foreignCF");
     // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("destinationName", "foreignDest");
+    prop.setProperty("destinationName", "foreignQueue");
 
-    // Creating a Topic bridge on server 0:
-    Topic bridgeD = Topic.create(0,
-                                 "org.objectweb.joram.mom.dest.BridgeTopic",
+    // Creating a Queue bridge on server 0:
+    Queue joramQueue = Queue.create(0,
+                                 "org.objectweb.joram.mom.dest.bridge.BridgeQueue",
                                  prop);
+    joramQueue.setFreeReading();
+    joramQueue.setFreeWriting();
+    
+    // Setting the bridge properties
+    prop = new Properties();
+    // Foreign QueueConnectionFactory JNDI name: foreignCF
+    prop.setProperty("connectionFactoryName", "foreignCF");
+    // Foreign Queue JNDI name: foreignDest
+    prop.setProperty("destinationName", "foreignTopic");
+    
+    // Creating a Topic bridge on server 0:
+    Topic joramTopic = Topic.create(0,
+                                 "org.objectweb.joram.mom.dest.bridge.BridgeTopic",
+                                 prop);
+    joramTopic.setFreeReading();
+    joramTopic.setFreeWriting();
+    
+    System.out.println("foreign queue = " + foreignQueue);
+    System.out.println("foreign topic = " + foreignTopic);
+    System.out.println("joram dest = " + joramQueue);
 
-    bridgeD.setFreeReading();
-    bridgeD.setFreeWriting();
+    javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create();
 
-    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create();
+    User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 1);
 
-    User user = User.create("anonymous", "anonymous", 0);
-
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-
-    jndiCtx.bind("bridgeD", bridgeD);
-    jndiCtx.bind("cf", cf);
+    jndiCtx.rebind("joramQueue", joramQueue);
+    jndiCtx.rebind("joramTopic", joramTopic);
+    jndiCtx.rebind("joramCF", joramCF);
     
     jndiCtx.close();
 

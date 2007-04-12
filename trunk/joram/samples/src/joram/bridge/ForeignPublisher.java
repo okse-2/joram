@@ -32,27 +32,28 @@ import javax.jms.TextMessage;
 /**
  * Produces messages on the foreign destination.
  */
-public class BridgeProducer {
+public class ForeignPublisher {
   public static void main(String[] args) throws Exception {
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
-    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
+    Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
+    ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
 
-    Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(true, 0);
-    MessageProducer joramSender = joramSess.createProducer(joramDest);
+    Connection foreignCnx = foreignCF.createConnection();
+    Session foreignSess = foreignCnx.createSession(true, 0);
+    MessageProducer foreignSender = foreignSess.createProducer(foreignDest);
 
-    TextMessage msg = joramSess.createTextMessage();
+    TextMessage foreignMsg = foreignSess.createTextMessage();
 
     for (int i = 1; i < 11; i++) {
-      msg.setText("Joram message number " + i);
-      System.out.println("send msg = " + msg.getText());
-      joramSender.send(msg);
+      foreignMsg.setText("topic Foreign message number " + i);
+      System.out.println("send msg = " + foreignMsg.getText());
+      foreignSender.send(foreignMsg);
     }
 
-    joramSess.commit();
-
-    joramCnx.close();
+    foreignSess.commit();
+    
+    
+    foreignCnx.close();
   }
 }

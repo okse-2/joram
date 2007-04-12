@@ -27,21 +27,20 @@ import javax.jms.*;
 /**
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
-public class BridgeConsumer {
+public class ForeignConsumer {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
-    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+    Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
+    ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
 
-    Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer joramCons = joramSess.createConsumer(joramDest);
-    joramCons.setMessageListener(new MsgListener("joram"));
-    joramCnx.start();  
-    
-    System.in.read();
+    Connection foreignCnx = foreignCF.createConnection();
+    Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
+    foreignCons.setMessageListener(new MsgListener("foreign"));
+    foreignCnx.start();
 
-    joramCnx.close();
+    System.in.read();
+    foreignCnx.close();
   }
 }
