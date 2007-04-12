@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,32 +23,42 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 import java.util.Properties;
+import java.util.Vector;
 
-import java.io.*;
-
+import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccessRep;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
+import org.objectweb.joram.mom.notifications.Monit_GetReaders;
+import org.objectweb.joram.mom.notifications.Monit_GetStat;
+import org.objectweb.joram.mom.notifications.Monit_GetStatRep;
+import org.objectweb.joram.mom.notifications.Monit_GetUsersRep;
+import org.objectweb.joram.mom.notifications.Monit_GetWriters;
+import org.objectweb.joram.mom.notifications.RequestGroupNot;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-
 import fr.dyade.aaa.util.Debug;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>DestinationImpl</code> class implements the common behaviour of
@@ -142,13 +152,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
   }
 
-  void setAgent(Destination agent) {
+  public void setAgent(Destination agent) {
     // state change, so save.
     setSave();
     this.agent = agent;
   }
 
-  boolean isLocal(AgentId id) {
+  protected boolean isLocal(AgentId id) {
     return (destId.getTo() == id.getTo());
   }
 
@@ -157,64 +167,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return deletable;
   }
 
-  
-  /**
-   * Distributes the received notifications to the appropriate reactions.
-   *
-   * @exception UnknownNotificationException  If a received notification is
-   *              unexpected by the destination.
-   */
-  public void react(AgentId from, Notification not)
-              throws UnknownNotificationException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "DestinationImpl.react(" + from + ',' + not + ')');
-
-    try {
-      if (not instanceof SetRightRequest)
-        doReact(from, (SetRightRequest) not);
-      else if (not instanceof SetDMQRequest)
-        doReact(from, (SetDMQRequest) not);
-      else if (not instanceof Monit_GetReaders)
-        doReact(from, (Monit_GetReaders) not);
-      else if (not instanceof Monit_GetWriters)
-        doReact(from, (Monit_GetWriters) not);
-      else if (not instanceof Monit_FreeAccess)
-        doReact(from, (Monit_FreeAccess) not);
-      else if (not instanceof Monit_GetDMQSettings)
-        doReact(from, (Monit_GetDMQSettings) not);
-      else if (not instanceof Monit_GetStat)
-        doReact(from, (Monit_GetStat) not);
-      else if (not instanceof SpecialAdminRequest)
-        doReact(from, (SpecialAdminRequest) not);
-      else if (not instanceof ClientMessages)
-        doReact(from, (ClientMessages) not);
-      else if (not instanceof UnknownAgent)
-        doReact(from, (UnknownAgent) not);
-      else if (not instanceof DeleteNot)
-        doReact(from, (DeleteNot) not);
-      else if (not instanceof RequestGroupNot)
-        doReact(from, (RequestGroupNot)not);
-      else
-        throw new UnknownNotificationException(not.getClass().getName());
-    } catch (MomException exc) {
-      // MOM Exceptions are sent to the requester.
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, this + ".react()", exc);
-
-      AbstractRequest req = (AbstractRequest) not;
-      Channel.sendTo(from, new ExceptionReply(req, exc));
-    }
-  }
-
   /**
    * Method implementing the reaction to a <code>SetRightRequest</code>
    * notification requesting rights to be set for a user.
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, SetRightRequest not)
-                 throws AccessException {
+  public void setRightRequest(AgentId from, SetRightRequest not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -224,7 +183,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     try {
       processSetRight(user,right);
-      specialProcess(not);
+      doRightRequest(not);
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
         .append("], sent to Destination [")
@@ -233,7 +192,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         .append(user)
         .append("] set with right [" + right +"]").toString();
       strbuf.setLength(0);
-      Channel.sendTo(from, new AdminReply(not, true, info)); 
+      forward(from, new AdminReply(not, true, info)); 
     } catch (RequestException exc) {
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
@@ -242,7 +201,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         .append("], successful [false]: ")
         .append(exc.getMessage()).toString();
       strbuf.setLength(0);
-      Channel.sendTo(from, new AdminReply(not, false, info));
+      forward(from, new AdminReply(not, false, info));
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -302,8 +261,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, SetDMQRequest not)
-                 throws AccessException {
+  public void setDMQRequest(AgentId from, SetDMQRequest not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -320,7 +278,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       .append(dmqId)
       .append("] set").toString();
     strbuf.setLength(0);
-    Channel.sendTo(from, new AdminReply(not, true, info));
+    forward(from, new AdminReply(not, true, info));
     
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, info);
@@ -332,8 +290,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetReaders not)
-                 throws AccessException {
+  public void monitGetReaders(AgentId from, Monit_GetReaders not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -347,7 +304,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       if (right == READ || right == READWRITE)
         readers.add(key);
     }
-    Channel.sendTo(from, new Monit_GetUsersRep(not, readers));
+    forward(from, new Monit_GetUsersRep(not, readers));
   }
 
   /**
@@ -356,8 +313,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetWriters not)
-                 throws AccessException {
+  public void monitGetWriters(AgentId from, Monit_GetWriters not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -371,7 +327,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       if (right == WRITE || right == READWRITE)
         writers.add(key);
     }
-    Channel.sendTo(from, new Monit_GetUsersRep(not, writers));
+    forward(from, new Monit_GetUsersRep(not, writers));
   }
 
   public static String[] _rights = {":R;", ";W;", ":RW;"};
@@ -425,13 +381,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_FreeAccess not)
-                 throws AccessException {
+  public void monitFreeAccess(AgentId from, Monit_FreeAccess not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    Channel.sendTo(from,
-                   new Monit_FreeAccessRep(not, freeReading, freeWriting));
+    forward(from, new Monit_FreeAccessRep(not, freeReading, freeWriting));
   }
 
   /**
@@ -440,8 +394,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetDMQSettings not)
-                 throws AccessException {
+  public void monitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -449,7 +402,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (dmqId != null)
       id = dmqId.toString();
 
-    Channel.sendTo(from, new Monit_GetDMQSettingsRep(not, id, null));
+    forward(from, new Monit_GetDMQSettingsRep(not, id, null));
   }
 
   /**
@@ -458,8 +411,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetStat not)
-    throws AccessException {
+  public void monitGetStat(AgentId from, Monit_GetStat not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -469,7 +421,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     stats.put("nbMsgsSendToDMQSinceCreation", new Long(nbMsgsSendToDMQSinceCreation));
     stats.put("creationDate", new Long(creationDate));
 
-    Channel.sendTo(from, new Monit_GetStatRep(not, stats));
+    forward(from, new Monit_GetStatRep(not, stats));
   }
 
   /**
@@ -483,11 +435,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @exception AccessException  If the sender is not a WRITER on the
    *              destination.
    */
-  protected void doReact(AgentId from, ClientMessages not)
-                 throws AccessException {
+  protected void clientMessages(AgentId from, ClientMessages not) throws AccessException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "DestinationImpl.doReact(" + from + ',' + not + ')');
+                 "DestinationImpl.clientMessages(" + from + ',' + not + ')');
 
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
@@ -506,15 +457,14 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       throw new AccessException("WRITE right not granted");
     }
 
-    specialProcess(not);
+    doClientMessages(from, not);
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     if (! not.getPersistent() && !not.getAsyncSend()) {
-      Channel.sendTo(from, 
-                     new SendReplyNot(not.getClientContext(), not.getRequestId()));
+      forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
   } 
 
@@ -526,7 +476,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * is a client of the destination, it is removed. Specific processing is
    * also done in subclasses.
    */
-  protected void doReact(AgentId from, UnknownAgent not) {
+  public void unknownAgent(AgentId from, UnknownAgent not) {
     if (isAdministrator(not.agent)) {
       if (logger.isLoggable(BasicLevel.ERROR))
             logger.log(BasicLevel.ERROR,
@@ -539,7 +489,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       // state change, so save.
       setSave();
       clients.remove(from);
-      specialProcess(not);
+      doUnknownAgent(not);
     }
   }
 
@@ -549,13 +499,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * <p>
    * The processing is done in subclasses if the sender is an administrator.
    */
-  protected void doReact(AgentId from, DeleteNot not) {
+  public void deleteNot(AgentId from, DeleteNot not) {
     if (! isAdministrator(from)) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN,
                    "Unauthorized deletion request from " + from);
     } else {
-      specialProcess(not);
+      doDeleteNot(not);
       // state change, so save.
       setSave();
       deletable = true;
@@ -567,7 +517,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * notification requesting the special administration of the destination.
    * <p>
    */
-  protected void doReact(AgentId from, SpecialAdminRequest not) {
+  public void specialAdminRequest(AgentId from, SpecialAdminRequest not) {
     String info;
     Object obj = null;
 
@@ -588,8 +538,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         .append(destId)
         .append("], successful [true] ").toString();
       strbuf.setLength(0);
-      Channel.sendTo(from, 
-                     new AdminReply(not, true, info, obj)); 
+      forward(from, new AdminReply(not, true, info, obj)); 
     } catch (RequestException exc) {
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
@@ -598,14 +547,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         .append("], successful [false]: ")
         .append(exc.getMessage()).toString();
       strbuf.setLength(0);
-      Channel.sendTo(from, 
-                     new AdminReply(not, false, info, obj));
+      forward(from, new AdminReply(not, false, info, obj));
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, info);
   }
   
-  protected void doReact(AgentId from, RequestGroupNot not) {
+  public void requestGroupNot(AgentId from, RequestGroupNot not) {
     Enumeration en = not.getClientMessages();
     ClientMessages theCM = (ClientMessages) en.nextElement();
     Vector replies = new Vector();
@@ -625,13 +573,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       }
     }
     
-    specialProcess(theCM);
+    doClientMessages(from, theCM);
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if (! not.getPersistent() && replies.size() > 0) {
-      Channel.sendTo(from, new SendRepliesNot(replies));
+      forward(from, new SendRepliesNot(replies));
     }
   }
   
@@ -709,18 +657,35 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     if (destDmqId != null &&
         ! destDmqId.equals(destId)) {
-      Channel.sendTo(destDmqId, deadMessages);
+      forward(destDmqId, deadMessages);
     }
     // Else it means that the dead message queue is
     // the queue itself: drop the messages.
   }
 
-  /**
-   * Abstract method to be implemented by subclasses for specifically
-   * processing notifications.
-   */
-  protected abstract void specialProcess(Notification not);
-
+  abstract protected void doRightRequest(SetRightRequest not);
+  abstract protected void doClientMessages(AgentId from, ClientMessages not);
+  abstract protected void doUnknownAgent(UnknownAgent not);
+  abstract protected void doDeleteNot(DeleteNot not);
+  
+  public SetRightRequest preProcess(SetRightRequest req) {
+    // nothing to do
+    return req;
+  }
+  
+  public void postProcess(SetRightRequest req) {
+    // nothing to do
+  }
+  
+  public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
+    // nothing to do.
+    return msgs;
+  }
+  
+  public void postProcess(ClientMessages msgs) {
+    // nothing to do.
+  }
+  
   private void writeObject(java.io.ObjectOutputStream out)
     throws IOException {
     out.writeBoolean(deletable);
@@ -883,11 +848,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     try {
       message.setObject(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
-      Channel.sendTo(replyTo, clientMessages);
+      forward(replyTo, clientMessages);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "", exc);
       throw new Error(exc.getMessage());
     }
+  }
+  
+  public final void forward(AgentId to, Notification not) {
+    Channel.sendTo(to, not);
   }
 }

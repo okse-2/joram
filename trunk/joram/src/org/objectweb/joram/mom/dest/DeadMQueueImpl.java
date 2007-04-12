@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@ import java.util.Vector;
 import java.util.Properties;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 
@@ -84,7 +83,7 @@ public class DeadMQueueImpl extends QueueImpl {
    *
    * @exception AccessException  Not thrown.
    */
-  protected void doReact(AgentId from, SetDMQRequest req)
+  public void setDMQRequest(AgentId from, SetDMQRequest req)
                  throws AccessException {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
       JoramTracing.dbgDestination.log(BasicLevel.WARN,
@@ -95,11 +94,8 @@ public class DeadMQueueImpl extends QueueImpl {
    * Overrides this <code>DestinationImpl</code> method; the messages carried 
    * by the <code>ClientMessages</code> instance are stored in their arrival
    * order, WRITE right is not checked.
-   *
-   * @exception AccessException  Never thrown.
    */
-  protected void doReact(AgentId from, ClientMessages not)
-                 throws AccessException {
+  public ClientMessages preProcess(AgentId from, ClientMessages not) {
     // Getting and persisting the messages:
     Message msg;
     // Storing each received message:
@@ -113,17 +109,16 @@ public class DeadMQueueImpl extends QueueImpl {
       setMsgTxName(msg);
       msg.save();
     }
-    // Lauching a delivery sequence:
-    deliverMessages(0);
+    return null;
   }
-
+  
   /**
    * Overrides this <code>QueueImpl</code> method; this request is
    * not expected by a dead message queue.
    *
    * @exception AccessException  Not thrown.
    */
-  protected void doReact(AgentId from, SetThreshRequest req)
+  public void setThreshRequest(AgentId from, SetThreshRequest req)
                  throws AccessException {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
       JoramTracing.dbgDestination.log(BasicLevel.WARN,
@@ -137,7 +132,7 @@ public class DeadMQueueImpl extends QueueImpl {
    *
    * @exception AccessException  If the requester is not a reader.
    */
-  protected void doReact(AgentId from, BrowseRequest not)
+  public void browseRequest(AgentId from, BrowseRequest not)
                  throws AccessException {
     // If client is not a reader, throwing an exception.
     if (! isReader(from))
@@ -155,7 +150,7 @@ public class DeadMQueueImpl extends QueueImpl {
         rep.addMessage(message.msg);
     }
     // Delivering the reply:
-    Channel.sendTo(from, rep);
+    forward(from, rep);
 
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Request answered.");
@@ -166,21 +161,21 @@ public class DeadMQueueImpl extends QueueImpl {
    * <code>AcknowledgeRequest</code> requests are actually not processed
    * in dead message queues.
    */
-  protected void doReact(AgentId from, AcknowledgeRequest not) {}
+  public void acknowledgeRequest(AgentId from, AcknowledgeRequest not) {}
  
   /**
    * Overrides this <code>QueueImpl</code> method;
    * <code>DenyRequest</code> requests are actually not processed
    * in dead message queues.
    */
-  protected void doReact(AgentId from, DenyRequest not) {}
+  public void denyRequest(AgentId from, DenyRequest not) {}
 
   /**
    * Overrides this <code>QueueImpl</code> method; if the sent notification
    * was a <code>QueueMsgReply</code> instance, putting the sent message back
    * in queue.
    */
-  protected void doProcess(UnknownAgent uA) {
+  protected void doUnknownAgent(UnknownAgent uA) {
     AgentId client = uA.agent;
     Notification not = uA.not;
 
@@ -251,7 +246,7 @@ public class DeadMQueueImpl extends QueueImpl {
       }
 
       if (notMsg.getSize() > 0) {
-        Channel.sendTo(notRec.requester, notMsg);
+        forward(notRec.requester, notMsg);
       }
 
       // Next request:

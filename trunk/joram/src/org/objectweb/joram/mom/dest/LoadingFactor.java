@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,16 +23,17 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import org.objectweb.joram.mom.messages.Message;
-import org.objectweb.joram.mom.notifications.*;
+import java.io.Serializable;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
-import java.io.Serializable;
+
+import org.objectweb.joram.mom.notifications.LBMessageGive;
+import org.objectweb.joram.mom.notifications.LBMessageHope;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
 
 public class LoadingFactor implements Serializable {
 
@@ -193,6 +194,10 @@ public class LoadingFactor implements Serializable {
    * else if rateOfFlow < 1 the queue are more pending messages 
    * than pending requests.
    * This value is set in all QueueClusterNot notification.
+   * 
+   * @param pendingMessages
+   * @param pendingRequests
+   * @return
    */
   public float evalRateOfFlow(int pendingMessages,
                               int pendingRequests) {
@@ -226,6 +231,10 @@ public class LoadingFactor implements Serializable {
    * this method eval the rate of flow and activity.
    * if necessary send "give or hope" messages, and
    * update threshol.
+   * 
+   * @param clusters
+   * @param pendingMessages
+   * @param pendingRequests
    */
   public void factorCheck(Hashtable clusters,
                           int pendingMessages,
@@ -267,9 +276,11 @@ public class LoadingFactor implements Serializable {
                                     + this);
   }
 
-  /** 
-   * return true if cluster queue is overloaded.
+  /**
+   * true if cluster queue is overloaded.
    * depends on activity.
+   * 
+   * @return  true if cluster queue is overloaded.
    */
   public boolean isOverloaded() {
     overLoaded = false;
@@ -289,6 +300,10 @@ public class LoadingFactor implements Serializable {
   /**
    * use to dispatch request hope or give messages
    * in clusters.
+   * 
+   * @param clusters
+   * @param nbOfPendingMessages
+   * @param nbOfPendingRequests
    */
   private void dispatchAndSendTo(Hashtable clusters,
                                  int nbOfPendingMessages,
@@ -326,7 +341,10 @@ public class LoadingFactor implements Serializable {
   }
 
   /**
-   * send  nb messages on clusters.
+   * send nb messages on clusters.
+   * 
+   * @param nbMsgGive
+   * @param clusters  Hashtable of cluster Queue
    */
   private void processGive(int nbMsgGive, Hashtable clusters) {
     if (nbMsgGive < 1) return;
@@ -336,72 +354,46 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() >= 1 && 
-          !id.equals(clusterQueueImpl.getDestId()))
+          !id.equals(clusterQueueImpl.destId))
         selected.add(id);
     }
     
     if (selected.size() == 0) return;
     
-    int givePerQueue = nbMsgGive / selected.size();
+    int nbGivePerQueue = nbMsgGive / selected.size();
+    LBMessageGive msgGive = new LBMessageGive(validityPeriod, rateOfFlow);
     
-    LBMessageGive msgGive = new LBMessageGive(validityPeriod,rateOfFlow);
-    ClientMessages cm = new ClientMessages();
-    
-    if (givePerQueue == 0 && nbMsgGive > 0) {
+    if (nbGivePerQueue == 0 && nbMsgGive > 0) {
+      // send all to the first element of clusterQueue.
       AgentId id = (AgentId) selected.get(0);
-
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processGive" +
                                       " nbMsgGive = " + nbMsgGive +
                                       ", id = " + id);
-
-      for (int i = 0; i < givePerQueue; i++) {
-        if (! clusterQueueImpl.messagesIsEmpty()) {
-          Message message = clusterQueueImpl.removeMessage(0);
-          cm.addMessage(message.msg);
-        } else 
-          break;
-      }
-      msgGive.setClientMessages(cm);
-      Channel.sendTo(id,msgGive);
-      
-      for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
-        Message message = (Message) e.nextElement();
-        clusterQueueImpl.messageSendToCluster(message.getIdentifier());
-        message.delete();
-      }
+      msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbMsgGive, null, true));
+      clusterQueueImpl.forward(id,msgGive);
     } else {
+      // dispatch to cluster.
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processGive" +
-                                      " givePerQueue = " + givePerQueue +
+                                      " givePerQueue = " + nbGivePerQueue +
                                       ", selected = " + selected);
-      
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
-        
-        for (int i = 0; i < givePerQueue; i++) {
-          if (clusterQueueImpl.messagesIsEmpty()) break;
-          Message message = clusterQueueImpl.removeMessage(0);
-          cm.addMessage(message.msg);
-        }
-        msgGive.setClientMessages(cm);
-        Channel.sendTo(id,msgGive);
-
-        for (Enumeration e2 = cm.getMessages().elements(); e2.hasMoreElements(); ) {
-          Message message = (Message) e2.nextElement();
-          clusterQueueImpl.messageSendToCluster(message.getIdentifier());
-          message.delete();
-        }
-        cm = new ClientMessages();
+        msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbGivePerQueue, null, true));
+        clusterQueueImpl.forward(id,msgGive);
       }
     }
   }
 
-  /**
-   * 
-   */
+ /**
+  * send a hope request on a cluster queue.
+  * 
+  * @param nbMsgHope
+  * @param clusters   Hashtable of cluster Queue
+  */
   private void processHope(int nbMsgHope, Hashtable clusters) {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
@@ -413,14 +405,15 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() <= 1 && 
-          !id.equals(clusterQueueImpl.getDestId()))
+          !id.equals(clusterQueueImpl.destId))
         selected.add(id);
     }
 
     if (selected.size() == 0) return;
 
-    int hopePerQueue = nbMsgHope / selected.size();
-    if (hopePerQueue == 0 && nbMsgHope > 0) {
+    int nbHopePerQueue = nbMsgHope / selected.size();
+    if (nbHopePerQueue == 0 && nbMsgHope > 0) {
+      // send the hope request to the first element of clusterQueue.
       AgentId id = (AgentId) selected.get(0);
       
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
@@ -430,37 +423,22 @@ public class LoadingFactor implements Serializable {
                                       ", id = " + id);
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       msgHope.setNbMsg(nbMsgHope);
-      Channel.sendTo(id,msgHope);
+      clusterQueueImpl.forward(id,msgHope);
       
     } else {
+      // dispatch the hope request to clusterQueue.
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processHope" +
-                                      " hopePerQueue = " + hopePerQueue +
+                                      " hopePerQueue = " + nbHopePerQueue +
                                       ", selected = " + selected);
       
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
-        msgHope.setNbMsg(hopePerQueue);
-        Channel.sendTo(id,msgHope);
+        msgHope.setNbMsg(nbHopePerQueue);
+        clusterQueueImpl.forward(id,msgHope);
       }
-    }
-  }
-
-  public void processGive(AgentId to, LBCycleLife cycle) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                    "LoadingFactor.processGive" +
-                                    " to = " + to +
-                                    ", cycle = " + cycle);
-    Channel.sendTo(to,cycle);
-
-    ClientMessages cm = cycle.getClientMessages();
-    for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
-      Message message = (Message) e.nextElement();
-      clusterQueueImpl.messageSendToCluster(message.getIdentifier());
-      message.delete();
     }
   }
 

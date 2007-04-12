@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,31 +26,54 @@ package org.objectweb.joram.mom.dest;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
+
+import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
+import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
+import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.BrowseReply;
+import org.objectweb.joram.mom.notifications.BrowseRequest;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DenyRequest;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
+import org.objectweb.joram.mom.notifications.ExceptionReply;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsgRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNumberRep;
+import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
+import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
+import org.objectweb.joram.mom.notifications.QueueMsgReply;
+import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SetThreshRequest;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.admin.ClearQueue;
+import org.objectweb.joram.shared.admin.DeleteQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessageIds;
+import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
+import org.objectweb.joram.shared.admin.GetQueueMessageRep;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.DestinationException;
+import org.objectweb.joram.shared.selectors.Selector;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
-import fr.dyade.aaa.agent.UnknownNotificationException;
-
-import org.objectweb.joram.shared.admin.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.selectors.*;
-
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.notifications.AdminReply;
-import org.objectweb.joram.mom.messages.Message;
-
 import fr.dyade.aaa.util.Debug;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>QueueImpl</code> class implements the MOM queue behaviour,
@@ -80,7 +103,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   public void setPeriod(long period) {
     if ((this.period == -1L) && (period != -1L)) {
       // Schedule the CleaningTask.
-      Channel.sendTo(destId, new WakeUpNot());
+      forward(destId, new WakeUpNot());
     }
     this.period = period;
   }
@@ -302,65 +325,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
 
   /**
-   * Distributes the received notifications to the appropriate reactions.
-   *
-   * @exception UnknownNotificationException  When receiving an unexpected
-   *              notification.
-   */
-  public void react(AgentId from, Notification not)
-              throws UnknownNotificationException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "QueueImpl.react(" + from + ',' + not + ')');
-
-    int reqId = -1;
-    if (not instanceof AbstractRequest)
-      reqId = ((AbstractRequest) not).getRequestId();
-
-    try {
-      if (not instanceof SetThreshRequest)
-        doReact(from, (SetThreshRequest) not);
-      else if (not instanceof SetNbMaxMsgRequest)
-        doReact(from, (SetNbMaxMsgRequest) not);
-      else if (not instanceof Monit_GetPendingMessages)
-        doReact(from, (Monit_GetPendingMessages) not);
-      else if (not instanceof Monit_GetPendingRequests)
-        doReact(from, (Monit_GetPendingRequests) not);
-      else if (not instanceof Monit_GetNbMaxMsg)
-        doReact(from, (Monit_GetNbMaxMsg) not);
-      else if (not instanceof ReceiveRequest)
-        doReact(from, (ReceiveRequest) not);
-      else if (not instanceof BrowseRequest)
-        doReact(from, (BrowseRequest) not);
-      else if (not instanceof AcknowledgeRequest)
-        doReact(from, (AcknowledgeRequest) not);
-      else if (not instanceof DenyRequest)
-        doReact(from, (DenyRequest) not);
-      else if (not instanceof AbortReceiveRequest)
-        doReact(from, (AbortReceiveRequest) not);
-      else if (not instanceof DestinationAdminRequestNot)
-        doReact(from, (DestinationAdminRequestNot) not);
-      else if (not instanceof WakeUpNot)
-        doReact((WakeUpNot) not);
-      else
-        super.react(from, not);
-
-    } catch (MomException exc) {
-      // MOM Exceptions are sent to the requester.
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, exc);
-
-      if (not instanceof AbstractRequest) {
-        AbstractRequest req = (AbstractRequest) not;
-        Channel.sendTo(from, new ExceptionReply(req, exc));
-      }
-    }
-  }
-
-  /**
    * wake up, and cleans the queue.
    */
-  protected void doReact(WakeUpNot not) {
+  public void wakeUpNot(WakeUpNot not) {
     long current = System.currentTimeMillis();
     cleanWaitingRequest(current);
      // Cleaning the possible expired messages.
@@ -376,8 +343,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, SetThreshRequest req)
-    throws AccessException {
+  public void setThreshRequest(AgentId from, SetThreshRequest req) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -391,7 +357,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       .append("], successful [true]: threshold [")
       .append(threshold).append("] set").toString();
     strbuf.setLength(0);
-    Channel.sendTo(from, new AdminReply(req, true, info));
+    forward(from, new AdminReply(req, true, info));
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, info);
@@ -403,8 +369,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, SetNbMaxMsgRequest req)
-    throws AccessException {
+  public void setNbMaxMsgRequest(AgentId from, SetNbMaxMsgRequest req) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -415,7 +380,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       .append("], successful [true]: nbMaxMsg [")
       .append(nbMaxMsg).append("] set").toString();
     strbuf.setLength(0);
-    Channel.sendTo(from, new AdminReply(req, true, info));
+    forward(from, new AdminReply(req, true, info));
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, info);
@@ -427,15 +392,14 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetDMQSettings not)
-                 throws AccessException {
+  public void MonitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     String id = null;
     if (dmqId != null)
       id = dmqId.toString();
-    Channel.sendTo(from, new Monit_GetDMQSettingsRep(not, id, threshold));
+    forward(from, new Monit_GetDMQSettingsRep(not, id, threshold));
   }
 
   /**
@@ -445,8 +409,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetPendingMessages not)
-                 throws AccessException {
+  public void monitGetPendingMessages(AgentId from, Monit_GetPendingMessages not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -456,7 +419,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
 
-    Channel.sendTo(from, new Monit_GetNumberRep(not, messages.size()));
+    forward(from, new Monit_GetNumberRep(not, messages.size()));
   }
 
   /**
@@ -466,14 +429,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetPendingRequests not)
-                 throws AccessException {
+  public void monitGetPendingRequests(AgentId from, Monit_GetPendingRequests not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
 
-    Channel.sendTo(from,
-                   new Monit_GetNumberRep(not, getWaitingRequestCount()));
+    forward(from, new Monit_GetNumberRep(not, getWaitingRequestCount()));
   }
 
   /**
@@ -483,12 +444,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  protected void doReact(AgentId from, Monit_GetNbMaxMsg not)
-    throws AccessException {
+  public void monitGetNbMaxMsg(AgentId from, Monit_GetNbMaxMsg not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    Channel.sendTo(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
+    forward(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
   }
 
   /**
@@ -499,8 +459,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the sender is not a reader.
    */
-  protected void doReact(AgentId from, ReceiveRequest not)
-                 throws AccessException {
+  public void receiveRequest(AgentId from, ReceiveRequest not) throws AccessException {
     // If client is not a reader, sending an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
@@ -538,7 +497,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (isLocal(from)) {
         reply.setPersistent(false);
       }
-      Channel.sendTo(from, reply);
+      forward(from, reply);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Receive answered by a null.");
@@ -554,8 +513,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not a reader.
    */
-  protected void doReact(AgentId from, BrowseRequest not)
-                 throws AccessException {
+  public void browseRequest(AgentId from, BrowseRequest not) throws AccessException {
     // If client is not a reader, sending an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
@@ -582,7 +540,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       sendToDMQ(deadMessages, null);
 
     // Delivering the reply:
-    Channel.sendTo(from, rep);
+    forward(from, rep);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Request answered.");
@@ -592,7 +550,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * Method implementing the reaction to an <code>AcknowledgeRequest</code>
    * instance, requesting messages to be acknowledged.
    */
-  protected void doReact(AgentId from, AcknowledgeRequest not) {
+  public void acknowledgeRequest(AgentId from, AcknowledgeRequest not) {
     for (Enumeration ids = not.getIds(); ids.hasMoreElements();) {
       String msgId = (String) ids.nextElement();
       acknowledge(msgId);
@@ -626,10 +584,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * This method denies the messages and launches a delivery sequence.
    * Messages considered as undeliverable are sent to the DMQ.
    */
-  protected void doReact(AgentId from, DenyRequest not) {
+  public void denyRequest(AgentId from, DenyRequest not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "QueueImpl.doReact(" + from + ',' + not + ')');
+                 "QueueImpl.DenyRequest(" + from + ',' + not + ')');
     
     Enumeration ids = not.getIds();
 
@@ -739,7 +697,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     deliverMessages(0);
   }
 
-  protected void doReact(AgentId from, 
+  public void abortReceiveRequest(AgentId from, 
                          AbortReceiveRequest not) {
     for (int i = 0; i < requests.size(); i++) {
       ReceiveRequest request = (ReceiveRequest) requests.get(i);
@@ -756,37 +714,36 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  private void doReact(AgentId from,
-                       DestinationAdminRequestNot not) {
+  public void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not) {
     org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
       not.getRequest();
     if (adminRequest instanceof GetQueueMessageIds) {
-      doReact((GetQueueMessageIds)adminRequest,
+      getQueueMessageIds((GetQueueMessageIds)adminRequest,
               not.getReplyTo(),
               not.getRequestMsgId(),
               not.getReplyMsgId());
     } else if (adminRequest instanceof GetQueueMessage) {
-      doReact((GetQueueMessage)adminRequest,
+      getQueueMessage((GetQueueMessage)adminRequest,
               not.getReplyTo(),
               not.getRequestMsgId(),
               not.getReplyMsgId());
     } else if (adminRequest instanceof DeleteQueueMessage) {
-      doReact((DeleteQueueMessage)adminRequest,
+      deleteQueueMessage((DeleteQueueMessage)adminRequest,
               not.getReplyTo(),
               not.getRequestMsgId(),
               not.getReplyMsgId());
     } else if (adminRequest instanceof ClearQueue) {
-      doReact((ClearQueue)adminRequest,
+      clearQueue((ClearQueue)adminRequest,
               not.getReplyTo(),
               not.getRequestMsgId(),
               not.getReplyMsgId());
     }
   }
 
-  private void doReact(GetQueueMessageIds request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void getQueueMessageIds(GetQueueMessageIds request,
+                                  AgentId replyTo,
+                                  String requestMsgId,
+                                  String replyMsgId) {
     String[] res = new String[messages.size()];
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message)messages.elementAt(i);
@@ -797,7 +754,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
   }
 
-  private void doReact(GetQueueMessage request,
+  private void getQueueMessage(GetQueueMessage request,
                        AgentId replyTo,
                        String requestMsgId,
                        String replyMsgId) {
@@ -819,7 +776,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  private void doReact(DeleteQueueMessage request,
+  private void deleteQueueMessage(DeleteQueueMessage request,
                        AgentId replyTo,
                        String requestMsgId,
                        String replyMsgId) {
@@ -838,7 +795,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                  replyTo, requestMsgId, replyMsgId);
   }
 
-  private void doReact(ClearQueue request,
+  private void clearQueue(ClearQueue request,
                        AgentId replyTo,
                        String requestMsgId,
                        String replyMsgId) {
@@ -855,98 +812,92 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(true, null),
                  replyTo, requestMsgId, replyMsgId);
   }
-
-  /**
-   * The <code>DestinationImpl</code> class calls this method for passing
-   * notifications which have been partly processed, so that they are
-   * specifically processed by the <code>QueueImpl</code> class.
-   */
-  protected void specialProcess(Notification not) {
-    if (not instanceof SetRightRequest)
-      doProcess((SetRightRequest) not);
-    else if (not instanceof ClientMessages)
-      doProcess((ClientMessages) not);
-    else if (not instanceof UnknownAgent)
-      doProcess((UnknownAgent) not);
-    else if (not instanceof DeleteNot)
-      doProcess((DeleteNot) not);
-  }
-
+  
   /**
    * Method specifically processing a <code>SetRightRequest</code> instance.
    * <p>
    * When a reader is removed, and receive requests of this reader are still
    * on the queue, they are replied to by an <code>ExceptionReply</code>.
    */
-  protected void doProcess(SetRightRequest not) {
+  protected void doRightRequest(SetRightRequest not) {
     // If the request does not unset a reader, doing nothing.
     if (not.getRight() != -READ)
       return;
 
-    AgentId user = not.getClient();
+    SetRightRequest rightRequest = preProcess(not);
+    if (rightRequest != null) {
+      AgentId user = rightRequest.getClient();
 
-    ReceiveRequest request;
-    AccessException exc;
-    ExceptionReply reply;
+      ReceiveRequest request;
+      AccessException exc;
+      ExceptionReply reply;
 
-    // Free reading right has been removed; replying to the non readers
-    // requests.
-    if (user == null) {
-      for (int i = 0; i < requests.size(); i++) {
-        request = (ReceiveRequest) requests.get(i);
-        if (! isReader(request.requester)) {
-          exc = new AccessException("Free READ access removed");
-          reply = new ExceptionReply(request, exc);
-          Channel.sendTo(request.requester, reply);
-          // state change, so save.
-          setSave();
-          requests.remove(i);
-          i--;
-        }
-      }
-    } else {
-      // Reading right of a given user has been removed; replying to its
+      // Free reading right has been removed; replying to the non readers
       // requests.
-      for (int i = 0; i < requests.size(); i++) {
-        request = (ReceiveRequest) requests.get(i);
-        if (user.equals(request.requester)) {
-          exc = new AccessException("READ right removed");
-          reply = new ExceptionReply(request, exc);
-          Channel.sendTo(request.requester, reply);
-          // state change, so save.
-          setSave();
-          requests.remove(i);
-          i--;
+      if (user == null) {
+        for (int i = 0; i < requests.size(); i++) {
+          request = (ReceiveRequest) requests.get(i);
+          if (! isReader(request.requester)) {
+            exc = new AccessException("Free READ access removed");
+            reply = new ExceptionReply(request, exc);
+            forward(request.requester, reply);
+            // state change, so save.
+            setSave();
+            requests.remove(i);
+            i--;
+          }
+        }
+      } else {
+        // Reading right of a given user has been removed; replying to its
+        // requests.
+        for (int i = 0; i < requests.size(); i++) {
+          request = (ReceiveRequest) requests.get(i);
+          if (user.equals(request.requester)) {
+            exc = new AccessException("READ right removed");
+            reply = new ExceptionReply(request, exc);
+            forward(request.requester, reply);
+            // state change, so save.
+            setSave();
+            requests.remove(i);
+            i--;
+          }
         }
       }
+      postProcess(rightRequest);
     }
   }
-
+  
   /**
    * Method specifically processing a <code>ClientMessages</code> instance.
    * <p>
    * This method stores the messages and launches a delivery sequence.
    */
-  protected void doProcess(ClientMessages not) {
+  protected void doClientMessages(AgentId from, ClientMessages not) {
     receiving = true;
+    ClientMessages clientMsgs = preProcess(from, not);
+    
+    if (clientMsgs != null) {
+      Message msg;
+      // Storing each received message:
+      for (Enumeration msgs = clientMsgs.getMessages().elements();
+      msgs.hasMoreElements();) {
 
-    Message msg;
-    // Storing each received message:
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
-
-      msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
-      if (not.isPersistent()) {
-        // state change, so save.
-        setSave();
+        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+        if (clientMsgs.isPersistent()) {
+          // state change, so save.
+          setSave();
+        }
+        msg.order = arrivalsCounter++;
+        storeMessage(msg);
       }
-      msg.order = arrivalsCounter++;
-      storeMessage(msg);
     }
-
+    
     // Lauching a delivery sequence:
     deliverMessages(0);
 
+    if (clientMsgs != null)
+      postProcess(clientMsgs);
+    
     receiving = false;
   }
 
@@ -960,7 +911,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * is launched. Messages considered as undeliverable are removed and sent to
    * the DMQ.
    */ 
-  protected void doProcess(UnknownAgent uA) {
+  protected void doUnknownAgent(UnknownAgent uA) {
     AgentId client = uA.agent;
     Notification not = uA.not;
 
@@ -1020,7 +971,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * <code>ExceptionReply</code> replies are sent to the pending receivers,
    * and the remaining messages are sent to the DMQ and deleted.
    */
-  protected void doProcess(DeleteNot not) {
+  protected void doDeleteNot(DeleteNot not) {
     // Building the exception to send to the pending receivers:
     DestinationException exc = new DestinationException("Queue " + destId
                                                         + " is deleted.");
@@ -1036,7 +987,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         logger.log(BasicLevel.DEBUG,
                    "Requester " + rec.requester +
                    " notified of the queue deletion.");
-      Channel.sendTo(rec.requester, excRep);
+      forward(rec.requester, excRep);
     }
     // Sending the remaining messages to the DMQ, if needed:
     if (! messages.isEmpty()) {
@@ -1072,7 +1023,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @param message  The message to store.
    */
-  protected final synchronized void storeMessage(Message message) {
+  protected final synchronized void storeMessage(Message message) {   
     addMessage(message);
 
     // Persisting the message.
@@ -1082,6 +1033,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Message " + message.getIdentifier() + " stored.");
+    
   }
 
   protected final synchronized void addMessage(Message message) {
@@ -1144,7 +1096,170 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       messages.insertElementAt(message, i);
     }
   }
+  
+  /**
+   *  get a client message contain nb messages.
+   *  
+   * @param nb        number of messages returned in ClientMessage.
+   * @param selector  jms selector
+   * @param remove    delete all messages returned if true
+   * @return ClientMessages (contains nb Messages)
+   */
+  protected ClientMessages getClientMessages(int nb, String selector, boolean remove) {   
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueImpl.getClientMessages(" + nb + ',' + selector + ',' + remove + ')');
 
+    ClientMessages cm = null ;
+    List lsMessages = getMessages(nb, selector, remove);
+    if (lsMessages.size() > 0) {
+     cm = new ClientMessages();
+    }
+    Message message = null;
+    Iterator itMessages = lsMessages.iterator();
+    while (itMessages.hasNext()) {
+      message = (Message) itMessages.next();
+      cm.addMessage(message.msg);
+    }
+    return cm;
+  }
+  
+  protected ClientMessages getClientMessages(List lsMsgId, boolean remove) {   
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueImpl.getClientMessages(" + lsMsgId + ',' + remove + ')');
+
+    ClientMessages cm = new ClientMessages();
+    Message message = null;
+    String msgId = null;
+    Iterator itMsgId = lsMsgId.iterator();
+    // Checking the deliverable messages:
+    while (itMsgId.hasNext()) {
+      msgId = (String) itMsgId.next();
+      message = getMessage(msgId, remove);
+
+      if (checkDelivery(message)) {
+        message.msg.deliveryCount++;
+        nbMsgsDeliverSinceCreation++;
+        
+        // use in sub class see ClusterQueueImpl
+        messageDelivered(message.getIdentifier());
+
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Message " + msgId);
+
+        cm.addMessage(message.msg);
+      }
+    }
+    return cm;
+  }
+
+  /**
+   * List of message to be removed.
+   * 
+   * @param msgIds  List of message id.
+   */
+  protected void removeMessages(List msgIds) {
+    String id = null;
+    Iterator itMessages = msgIds.iterator();
+    while (itMessages.hasNext()) {
+      id = (String) itMessages.next();
+      int i = 0;
+      Message message = null;
+      while (i < messages.size()) {
+        message = (Message) messages.get(i);
+        if (id.equals(message.getIdentifier())) {
+          messages.remove(i);
+          message.delete();
+          break;
+        }
+      }
+    }
+  }
+  
+  /**
+   * get nb messages, if it's possible.
+   * 
+   * @param nb        -1 return all messages.
+   * @param selector  jms selector.
+   * @return  List of mom messages.
+   */
+  private List getMessages(int nb, String selector, boolean remove) {   
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + nb + ',' + selector + ',' + remove +')');
+
+    List lsMessages = new ArrayList();
+    Message message;
+    int j = 0;
+    // Checking the deliverable messages:
+    while ((lsMessages.size() < nb || nb == -1) &&  j < messages.size()) {
+      message = (Message) messages.get(j);
+
+      // If selector matches, sending the message:
+      if (Selector.matches(message.msg, selector) &&
+          checkDelivery(message)) {
+        message.msg.deliveryCount++;
+        nbMsgsDeliverSinceCreation++;
+        
+        // use in sub class see ClusterQueueImpl
+        messageDelivered(message.getIdentifier());
+
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Message " + message.msg.id);
+
+        lsMessages.add(message);
+        
+        if (remove) {
+          messages.remove(message);
+          message.delete();
+        }
+        
+      } else {
+        // If message delivered or selector does not match: going on
+        j++;
+      }
+    }
+    return lsMessages;
+  }
+  
+  private Message getMomMessage(String msgId) {
+    Message msg = null;
+    for (Enumeration e = messages.elements(); e.hasMoreElements(); ) {
+      msg = (Message) e.nextElement();
+      if (msgId.equals(msg.getIdentifier()))
+        return msg;
+    }
+    return msg;
+  }
+  
+  /**
+   * get mom message, delete if remove = true.
+   * 
+   * @param msgId   message identification
+   * @param remove  if true delete message
+   * @return mom message
+   */
+  protected Message getMessage(String msgId, boolean remove) {   
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
+
+    Message message =  getMomMessage(msgId);
+      if (checkDelivery(message)) {
+        message.msg.deliveryCount++;
+        nbMsgsDeliverSinceCreation++;
+        
+        // use in sub class see ClusterQueueImpl
+        messageDelivered(message.getIdentifier());
+
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Message " + msgId);
+        
+        if (remove) {
+          messages.remove(message);
+          message.delete();
+        } 
+      }
+    return message;
+  }
+  
   /**
    * Actually tries to answer the pending "receive" requests.
    * <p>
@@ -1157,11 +1272,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       logger.log(BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + index + ')');
 
     ReceiveRequest notRec = null;
-    boolean replied;
-    int j = 0;
     Message message;
     QueueMsgReply notMsg;
     ClientMessages deadMessages = null;
+    List lsMessages = null;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> requests = " + requests + ')');
@@ -1174,78 +1288,152 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // Processing each request as long as there are deliverable messages:
     while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
-      replied = false;
       notMsg = new QueueMsgReply(notRec);
 
-      // Checking the deliverable messages:
-      while (j < messages.size()) {
-        message = (Message) messages.get(j);
+      lsMessages = getMessages(notRec.getMessageCount(), notRec.getSelector(), notRec.getAutoAck());
 
-        // If selector matches, sending the message:
-        if (Selector.matches(message.msg, notRec.getSelector()) &&
-            checkDelivery(message)) {
-          messages.remove(j);
-          message.msg.deliveryCount++;
+      if (!notRec.getAutoAck()) {
+        Iterator itMessages = lsMessages.iterator();
+        while (itMessages.hasNext()) {
+          message = (Message) itMessages.next();
           notMsg.addMessage(message.msg);
-              
-          if (isLocal(notRec.requester))
-            notMsg.setPersistent(false);
-
-          nbMsgsDeliverSinceCreation++;
-
-          // use in sub class see ClusterQueueImpl
-          messageDelivered(message.getIdentifier());
-
+          // putting the message in the delivered messages table:
+          consumers.put(message.getIdentifier(), notRec.requester);
+          contexts.put(message.getIdentifier(),
+              new Integer(notRec.getClientContext()));
+          deliveredMsgs.put(message.getIdentifier(), message);
+          messages.remove(message);
+          
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
-                       "Message " + message.msg.id + " to " + notRec.requester +
-                       " as reply to " + notRec.getRequestId());
-                                          
-          if (notRec.getAutoAck()) {
-            // Removing the message if request in auto ack mode:
-            message.delete();
-          } else {
-            // Else, putting the message in the delivered messages table:
-            if (notMsg.isPersistent()) {
-              // state change, so save.
-              setSave();
-            }
-            consumers.put(message.getIdentifier(), notRec.requester);
-            contexts.put(message.getIdentifier(),
-                         new Integer(notRec.getClientContext()));
-            deliveredMsgs.put(message.getIdentifier(), message);
-          }
-              
-          if (notMsg.getSize() == notRec.getMessageCount()) {
-            break;
-          }
-        } else {
-          // If message delivered or selector does not match: going on
-          j++;
+                "Message " + message.msg.id + " to " + notRec.requester +
+                " as reply to " + notRec.getRequestId());
         }
+      }
+
+      if (isLocal(notRec.requester)) {
+        notMsg.setPersistent(false);
+      }
+
+      if (notMsg.isPersistent() && !notRec.getAutoAck()) {
+        // state change, so save.
+        setSave();
       }
 
       // Next request:
       if (notMsg.getSize() > 0) {
         requests.remove(index);
-        Channel.sendTo(notRec.requester, notMsg);
+        forward(notRec.requester, notMsg);
       } else {
         index++;
       }
-
-      j = 0;
     }
     // If needed, sending the dead messages to the DMQ:
     if (deadMessages != null)
       sendToDMQ(deadMessages, null);
   }
+  
+//  /**
+//   * Actually tries to answer the pending "receive" requests.
+//   * <p>
+//   * The method may send <code>QueueMsgReply</code> replies to clients.
+//   *
+//   * @param index  Index where starting to "browse" the requests.
+//   */
+//  protected void deliverMessages(int index) {
+//    if (logger.isLoggable(BasicLevel.DEBUG))
+//      logger.log(BasicLevel.DEBUG, "QueueImpl.deliverMessages(" + index + ')');
+//
+//    ReceiveRequest notRec = null;
+//    boolean replied;
+//    int j = 0;
+//    Message message;
+//    QueueMsgReply notMsg;
+//    ClientMessages deadMessages = null;
+//
+//    if (logger.isLoggable(BasicLevel.DEBUG))
+//      logger.log(BasicLevel.DEBUG, " -> requests = " + requests + ')');
+//
+//    long current = System.currentTimeMillis();
+//    cleanWaitingRequest(current);
+//    // Cleaning the possible expired messages.
+//    deadMessages = cleanPendingMessage(current);
+//   
+//    // Processing each request as long as there are deliverable messages:
+//    while (! messages.isEmpty() && index < requests.size()) { 
+//      notRec = (ReceiveRequest) requests.get(index);
+//      replied = false;
+//      notMsg = new QueueMsgReply(notRec);
+//
+//      // Checking the deliverable messages:
+//      while (j < messages.size()) {
+//        message = (Message) messages.get(j);
+//
+//        // If selector matches, sending the message:
+//        if (Selector.matches(message.msg, notRec.getSelector()) &&
+//            checkDelivery(message)) {
+//          messages.remove(j);
+//          message.msg.deliveryCount++;
+//          notMsg.addMessage(message.msg);
+//              
+//          if (isLocal(notRec.requester))
+//            notMsg.setPersistent(false);
+//
+//          nbMsgsDeliverSinceCreation++;
+//
+//          // use in sub class see ClusterQueueImpl
+//          messageDelivered(message.getIdentifier());
+//
+//          if (logger.isLoggable(BasicLevel.DEBUG))
+//            logger.log(BasicLevel.DEBUG,
+//                       "Message " + message.msg.id + " to " + notRec.requester +
+//                       " as reply to " + notRec.getRequestId());
+//                                          
+//          if (notRec.getAutoAck()) {
+//            // Removing the message if request in auto ack mode:
+//            message.delete();
+//          } else {
+//            // Else, putting the message in the delivered messages table:
+//            if (notMsg.isPersistent()) {
+//              // state change, so save.
+//              setSave();
+//            }
+//            consumers.put(message.getIdentifier(), notRec.requester);
+//            contexts.put(message.getIdentifier(),
+//                         new Integer(notRec.getClientContext()));
+//            deliveredMsgs.put(message.getIdentifier(), message);
+//          }
+//              
+//          if (notMsg.getSize() == notRec.getMessageCount()) {
+//            break;
+//          }
+//        } else {
+//          // If message delivered or selector does not match: going on
+//          j++;
+//        }
+//      }
+//
+//      // Next request:
+//      if (notMsg.getSize() > 0) {
+//        requests.remove(index);
+//        forward(notRec.requester, notMsg);
+//      } else {
+//        index++;
+//      }
+//
+//      j = 0;
+//    }
+//    // If needed, sending the dead messages to the DMQ:
+//    if (deadMessages != null)
+//      sendToDMQ(deadMessages, null);
+//  }
 
   protected boolean checkDelivery(Message msg) {
     return true;
   }
 
   /** 
-   * call in deliverMessages just after channel.sendTo(msg),
+   * call in deliverMessages just after forward(msg),
    * overload this methode to process a specific treatment.
    */
   protected void messageDelivered(String msgId) {}

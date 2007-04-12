@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,18 +23,12 @@
 package org.objectweb.joram.mom.messages;
 
 import java.io.Serializable;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.io.ObjectOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.util.Properties;
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.agent.AgentServer;
