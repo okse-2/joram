@@ -79,6 +79,19 @@
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
+	
+  <!-- Initializes the bridge configuration -->
+  <target name="bridge_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/bridge_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
 
   <!-- Initializes the soap configuration -->
   <target name="soap_init" depends="init">
@@ -756,6 +769,20 @@
     </java>
   </target>
 
+  <!-- BRIDGE TESTS -->
+  <target name="bridge_server0" depends="bridge_init"
+          description="--> Starts a server 0 for bridge">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="bridge_server1" depends="bridge_init"
+          description="--> Starts a server 1 for bridge">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+	
   <!-- Runs the bridge administration -->
   <target name="bridge_admin" depends="init"
     description="--> Runs the BRIDGE sample administration">
@@ -778,6 +805,24 @@
   <target name="bridge_consumer" depends="init"
     description="--> Runs the BRIDGE sample consumer">
     <java classname="bridge.BridgeConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+	
+  <!-- Runs the foreign sender -->
+  <target name="foreign_producer" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.ForeignProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="foreign_consumer" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.ForeignConsumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
