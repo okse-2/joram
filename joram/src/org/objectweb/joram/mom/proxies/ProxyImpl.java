@@ -2629,21 +2629,37 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                  "ProxyImpl[" + proxyAgent.getId() + "].readbag()");
 
     activeCtxId = in.readInt();
-
-    Enumeration elements = contexts.elements();
-    while (elements.hasMoreElements()) {
-      ClientContext cc = (ClientContext)elements.nextElement();
-      cc.setProxyAgent(proxyAgent);
-      cc.readBag(in);
+    /* // Orders elements is unknown, not use read bag in the same order
+       Enumeration elements = contexts.elements();
+       while (elements.hasMoreElements()) {
+          ClientContext cc = (ClientContext)elements.nextElement();
+          cc.setProxyAgent(proxyAgent);
+          cc.readBag(in);
+       }
+       elements = subsTable.elements();
+       while (elements.hasMoreElements()) {
+          ClientSubscription cs = (ClientSubscription)elements.nextElement();
+          cs.setProxyAgent(proxyAgent);
+          cs.readBag(in);
+       }*/
+    /*** part modified */
+    int size = in.readInt();
+    Object obj=null;
+    for(int j=0;j<size;j++){
+	obj=in.readObject();
+	ClientContext cc = (ClientContext) contexts.get((Integer)obj);
+	cc.setProxyAgent(proxyAgent);
+	cc.readBag(in);
     }
-
-    elements = subsTable.elements();
-    while (elements.hasMoreElements()) {
-      ClientSubscription cs = (ClientSubscription)elements.nextElement();
-      cs.setProxyAgent(proxyAgent);
-      cs.readBag(in);
+    size = in.readInt();
+    for(int j=0;j<size;j++){
+	obj=in.readObject();
+	ClientSubscription cs = (ClientSubscription)subsTable.get((String)obj);
+	cs.setProxyAgent(proxyAgent);
+	cs.readBag(in);
     }
-
+    /*** end part modified */  
+    
     activeCtx = (ClientContext)contexts.get(
       new Integer(activeCtxId));
 
@@ -2657,6 +2673,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     Vector topics = new Vector();
     TopicSubscription tSub;
+
+
     for (Enumeration subNames = subsTable.keys();
          subNames.hasMoreElements();) {
       String subName = (String) subNames.nextElement();
@@ -2683,7 +2701,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
       tSub.putSubscription(subName, cSub.getSelector());
     }
-
     if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
 
@@ -2702,15 +2719,33 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     out.writeInt(activeCtxId);
     
-    Enumeration elements = contexts.elements();
+    /*  Enumeration elements = contexts.elements();
+	while (elements.hasMoreElements()) {
+	   ((ClientContext)elements.nextElement()).writeBag(out);
+	}
+	elements = subsTable.elements();
+	while (elements.hasMoreElements()) {
+	   ((ClientSubscription)elements.nextElement()).writeBag(out);
+	}*/
+    /*** part modified */
+    // the number of keys in contexts hashtable
+    out.writeInt(contexts.size());
+    Enumeration elements = contexts.keys();
+    Object obj=null;
     while (elements.hasMoreElements()) {
-      ((ClientContext)elements.nextElement()).writeBag(out);
+	obj=elements.nextElement();
+	out.writeObject(obj);
+	((ClientContext)contexts.get((Integer)obj)).writeBag(out);
     }
-
-    elements = subsTable.elements();
+    // the number of keys in subsTable hashtable
+    out.writeInt(subsTable.size());
+       elements = subsTable.keys();
     while (elements.hasMoreElements()) {
-      ((ClientSubscription)elements.nextElement()).writeBag(out);
+	obj=elements.nextElement();
+	out.writeObject(obj);
+	((ClientSubscription)subsTable.get((String)obj)).writeBag(out);
     }
+    /*** end part modified */
 
     Vector messages = new Vector();
     elements = messagesTable.elements();
@@ -2722,6 +2757,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       logger.log(BasicLevel.DEBUG, " -> messages = " + messages + ')');
 
     out.writeObject(messages);
+  
   }
 }
 
