@@ -704,8 +704,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     }
 
     if ((last != -1) && (msg.getStamp() != (last +1)))
-      logmon.log(BasicLevel.FATAL,
-                 getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
+      if (logmon.isLoggable(BasicLevel.WARN))
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
     last = msg.getStamp();
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
