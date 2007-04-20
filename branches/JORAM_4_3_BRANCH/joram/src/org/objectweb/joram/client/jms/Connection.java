@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -320,7 +320,7 @@ public class Connection implements javax.jms.Connection {
     String targetName;
     boolean durable;
     
-    if (dest instanceof Queue) {
+    if (dest instanceof javax.jms.Queue) {
       queueMode = true;
       targetName = ((Destination) dest).getName();
       durable = false;

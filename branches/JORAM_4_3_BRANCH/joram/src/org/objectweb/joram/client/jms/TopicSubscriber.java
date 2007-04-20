@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -46,9 +46,8 @@ public class TopicSubscriber extends MessageConsumer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  TopicSubscriber(Session sess, Topic topic, String name, String selector,
-                  boolean noLocal) throws JMSException
-  {
+  TopicSubscriber(Session sess, Destination topic, String name, String selector,
+                  boolean noLocal) throws JMSException {
     super(sess, topic, selector, name, noLocal);
   }
 
