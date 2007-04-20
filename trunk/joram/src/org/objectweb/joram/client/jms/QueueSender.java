@@ -42,8 +42,7 @@ public class QueueSender extends MessageProducer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason. 
    */
-  QueueSender(QueueSession sess, Queue queue) throws JMSException
-  {
+  QueueSender(QueueSession sess, Destination queue) throws JMSException {
     super(sess, queue);
   }
 

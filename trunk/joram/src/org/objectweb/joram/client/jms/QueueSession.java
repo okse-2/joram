@@ -65,10 +65,9 @@ public class QueueSession extends Session implements javax.jms.QueueSession
    * @exception JMSException  If the creation fails for any other reason.
    */
   public synchronized javax.jms.QueueSender createSender(javax.jms.Queue queue)
-       throws JMSException
-  {
+       throws JMSException {
     checkClosed();
-    QueueSender qc = new QueueSender(this, (Queue) queue);
+    QueueSender qc = new QueueSender(this, (Destination) queue);
     addProducer(qc);
     return qc;
   }
@@ -82,10 +81,9 @@ public class QueueSession extends Session implements javax.jms.QueueSession
    */
   public javax.jms.QueueReceiver
          createReceiver(javax.jms.Queue queue, String selector)
-         throws JMSException
-  {
+         throws JMSException {
     checkClosed();
-    QueueReceiver qr = new QueueReceiver(this, (Queue) queue, selector);
+    QueueReceiver qr = new QueueReceiver(this, (Destination) queue, selector);
     addConsumer(qr);
     return qr;
   }
@@ -98,10 +96,9 @@ public class QueueSession extends Session implements javax.jms.QueueSession
    * @exception JMSException  If the creation fails for any other reason.
    */
   public javax.jms.QueueReceiver createReceiver(javax.jms.Queue queue)
-         throws JMSException
-  {
+         throws JMSException {
     checkClosed(); 
-    QueueReceiver qr = new QueueReceiver(this, (Queue) queue, null);
+    QueueReceiver qr = new QueueReceiver(this, (Destination) queue, null);
     addConsumer(qr);
     return qr;
   }

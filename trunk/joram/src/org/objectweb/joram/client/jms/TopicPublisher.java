@@ -41,8 +41,7 @@ public class TopicPublisher extends MessageProducer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason. 
    */
-  TopicPublisher(TopicSession sess, Topic topic) throws JMSException
-  {
+  TopicPublisher(TopicSession sess, Destination topic) throws JMSException {
     super(sess, topic);
   }
 

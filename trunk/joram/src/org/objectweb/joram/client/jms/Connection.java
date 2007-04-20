@@ -320,7 +320,7 @@ public class Connection implements javax.jms.Connection {
     String targetName;
     boolean durable;
     
-    if (dest instanceof Queue) {
+    if (dest instanceof javax.jms.Queue) {
       queueMode = true;
       targetName = ((Destination) dest).getName();
       durable = false;
@@ -532,7 +532,7 @@ public class Connection implements javax.jms.Connection {
       logger.log(
         BasicLevel.DEBUG, 
         newTrace(".close()"));
-    
+
     closer.close();
   }
 
