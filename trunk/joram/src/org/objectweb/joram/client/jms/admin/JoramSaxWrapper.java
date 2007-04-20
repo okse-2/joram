@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import javax.naming.InitialContext;
+import javax.naming.NameAlreadyBoundException;
 import javax.naming.NamingException;
 
 import org.xml.sax.InputSource;
@@ -56,6 +57,8 @@ import org.objectweb.util.monolog.api.Logger;
  */
 public class JoramSaxWrapper extends DefaultHandler {
 
+  public static final String SCN = "scn:comp/";
+  
   public JoramSaxWrapper() {}
 
   /** Syntaxic name for JoramAdmin element */
@@ -561,7 +564,6 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_INITIALCONTEXT)) {
       } else if (rawName.equals(ELT_CLUSTER_ELEMENT)) {
         try {
-          logger.log(BasicLevel.FATAL, "+++" + atts.getValue(ATT_NAME) + ", " +atts.getValue(ATT_LOCATION));
           cluster.put(atts.getValue(ATT_NAME),
                       atts.getValue(ATT_LOCATION));
         } catch (Exception exc) {
@@ -974,11 +976,22 @@ public class JoramSaxWrapper extends DefaultHandler {
 
       for (Enumeration e = toBind.keys(); e.hasMoreElements();) {
         String name = (String) e.nextElement();
-        StringTokenizer st = new StringTokenizer(name, "/");
-        StringBuffer buff = new StringBuffer((String) st.nextToken());
+        StringBuffer buff = null;
+        StringTokenizer st = null;
+        if (name.startsWith(SCN)) {
+          buff = new StringBuffer(SCN);
+          st = new StringTokenizer(name.substring(SCN.length(), name.length()), "/");
+        } else {
+          buff = new StringBuffer();
+          st = new StringTokenizer(name, "/");
+        }
+        buff.append((String) st.nextToken());
         while (st.hasMoreTokens()) {
           try {
             jndiCtx.createSubcontext(buff.toString());
+          } catch (NameAlreadyBoundException exc) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "createSubcontext:: NameAlreadyBoundException" + buff.toString());
           } catch (NamingException exc) {
             if (logger.isLoggable(BasicLevel.WARN))
               logger.log(BasicLevel.WARN, "createSubcontext", exc);
@@ -990,7 +1003,6 @@ public class JoramSaxWrapper extends DefaultHandler {
       }
       jndiCtx.close();
       toBind.clear();
-
     } catch (NamingException exc) {
       logger.log(BasicLevel.ERROR,"",exc);
     }
