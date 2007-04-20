@@ -331,7 +331,7 @@ public class scnURLContext implements Context {
    * @throws	NamingException if a naming exception is encountered
    */
   public void rename(String oldName, String newName) throws NamingException {
-    throw new OperationNotSupportedException("Rename not supported in java:comp");
+    throw new OperationNotSupportedException("Rename not supported in scn:comp in " + this.getClass().getName());
   }
 
   /**
@@ -477,7 +477,7 @@ public class scnURLContext implements Context {
    * @throws	NamingException if a naming exception is encountered
    */
   public void destroySubcontext(String name) throws NamingException {
-    throw new OperationNotSupportedException("destroySubcontext not supported in java:comp");
+    throw new OperationNotSupportedException("destroySubcontext not supported in scn:comp in " + this.getClass().getName());
   }
 
   /**
@@ -520,7 +520,13 @@ public class scnURLContext implements Context {
    * @throws	NamingException if a naming exception is encountered
    */
   public Context createSubcontext(String name) throws NamingException {
-    throw new OperationNotSupportedException("createSubcontext not supported in java:comp");
+    // Retrieve the correct context to resolve the reminding name
+    ResolveResult r = findContextFor(name);
+    Context ctx = (Context) r.getResolvedObj();
+    String rname = r.getRemainingName().toString();
+    
+    // create subcontext
+    return ctx.createSubcontext(rname);
   }
 
   /**
@@ -634,7 +640,7 @@ public class scnURLContext implements Context {
    * @throws	NamingException if a naming exception is encountered
    */
   public String composeName(String name, String prefix) throws NamingException {
-    throw new OperationNotSupportedException("composeName not supported in java:comp");
+    throw new OperationNotSupportedException("composeName not supported in scn:comp in " + this.getClass().getName());
   }
 
   /**
@@ -728,7 +734,7 @@ public class scnURLContext implements Context {
    * @throws	NamingException if a naming exception is encountered
    */
   public String getNameInNamespace() throws NamingException {
-    throw new OperationNotSupportedException("getNameInNamespace not implemented in java:comp");
+    throw new OperationNotSupportedException("getNameInNamespace not implemented in scn:comp in " + this.getClass().getName());
   }
 }
 
