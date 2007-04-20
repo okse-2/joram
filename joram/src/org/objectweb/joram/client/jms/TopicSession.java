@@ -68,7 +68,7 @@ public class TopicSession extends Session implements javax.jms.TopicSession
          createPublisher(javax.jms.Topic topic) throws JMSException
   {
     checkClosed();
-    TopicPublisher tp = new TopicPublisher(this, (Topic) topic);
+    TopicPublisher tp = new TopicPublisher(this, (Destination) topic);
     addProducer(tp);
     return tp;
   }
@@ -86,7 +86,7 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   {
     checkClosed();
     TopicSubscriber ts = new TopicSubscriber(
-      this, (Topic) topic, null, selector, noLocal);
+      this, (Destination) topic, null, selector, noLocal);
     addConsumer(ts);
     return ts;
   }
@@ -103,7 +103,7 @@ public class TopicSession extends Session implements javax.jms.TopicSession
   {
     checkClosed();
     TopicSubscriber ts = new TopicSubscriber(
-      this, (Topic) topic, null, null, false);
+      this, (Destination) topic, null, null, false);
     addConsumer(ts);
     return ts;
   }

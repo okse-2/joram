@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -33,20 +33,12 @@ import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XATopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XATopicHATcpConnectionFactory;
 
-import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
@@ -54,19 +46,16 @@ import org.objectweb.joram.client.jms.ConnectionMetaData;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.Session;
 import javax.jms.TopicConnectionFactory;
@@ -77,7 +66,6 @@ import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
@@ -1143,7 +1131,7 @@ public class JoramAdapter
     throws AdminException {
     try {
       Context ctx = new InitialContext();
-      return (Queue) ctx.lookup(name);
+      return (Destination) ctx.lookup(name);
     } catch (javax.naming.NamingException exc) {
       try {
         String shortName = removePrefix(name);
@@ -1221,7 +1209,7 @@ public class JoramAdapter
     throws AdminException {
     try {
       Context ctx = new InitialContext();
-      return (Topic) ctx.lookup(name);
+      return (Destination) ctx.lookup(name);
     } catch (javax.naming.NamingException exc) {
       try {
         String shortName = removePrefix(name);

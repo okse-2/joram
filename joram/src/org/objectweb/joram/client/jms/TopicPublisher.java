@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -41,8 +41,7 @@ public class TopicPublisher extends MessageProducer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason. 
    */
-  TopicPublisher(TopicSession sess, Topic topic) throws JMSException
-  {
+  TopicPublisher(TopicSession sess, Destination topic) throws JMSException {
     super(sess, topic);
   }
 

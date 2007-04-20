@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -43,9 +43,8 @@ public class QueueReceiver extends MessageConsumer
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  QueueReceiver(QueueSession sess, Queue queue,
-                String selector) throws JMSException
-  {
+  QueueReceiver(QueueSession sess, Destination queue,
+                String selector) throws JMSException {
     super(sess, queue, selector);
   }
 
