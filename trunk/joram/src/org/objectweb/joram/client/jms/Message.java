@@ -831,7 +831,7 @@ public class Message implements javax.jms.Message {
    *
    * @exception JMSException  If an error occurs while building the message.
    */
-  static Message convertJMSMessage(javax.jms.Message jmsMsg) throws JMSException {
+  static public Message convertJMSMessage(javax.jms.Message jmsMsg) throws JMSException {
     Message joramMsg = null;
     if (jmsMsg instanceof javax.jms.TextMessage) {
       joramMsg = new TextMessage();
@@ -903,6 +903,14 @@ public class Message implements javax.jms.Message {
     momMsg.expired = false;
     momMsg.notWriteable = false;
     momMsg.undeliverable = false;
+  }
+
+  
+  /**
+   * @return the momMsg
+   */
+  public org.objectweb.joram.shared.messages.Message getMomMsg() {
+    return momMsg;
   }
 
   public void toString(StringBuffer strbuf) {
