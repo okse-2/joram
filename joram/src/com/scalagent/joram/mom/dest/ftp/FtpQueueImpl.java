@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,26 +17,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Hashtable;
 
-import org.objectweb.joram.mom.dest.DeadMQueueImpl;
-import org.objectweb.joram.mom.dest.QueueImpl;
-import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.*;
+import org.objectweb.joram.shared.selectors.*;
+import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.mom.notifications.*;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.agent.Notification;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>FtpQueueImpl</code> class implements the MOM queue behaviour,
@@ -44,11 +46,6 @@ import fr.dyade.aaa.agent.Debug;
  */
 public class FtpQueueImpl extends QueueImpl {
 
-  private static final long serialVersionUID = 2742569589343325791L;
-
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.ftp.FtpQueueImpl");
-  
   private String user = "anonymous";
   private String pass = "no@no.no";
   private String path = null;
@@ -85,11 +82,11 @@ public class FtpQueueImpl extends QueueImpl {
         transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
     } catch (Exception exc) {
       transfer = null;
-      logger.log(BasicLevel.ERROR, 
+      MomTracing.dbgDestination.log(BasicLevel.ERROR, 
                                     "FtpQueueImpl : transfer = null" ,exc);
     }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                     " transfer = "+ transfer);
   }
 
@@ -104,38 +101,47 @@ public class FtpQueueImpl extends QueueImpl {
     return "FtpQueueImpl:" + destId.toString();
   }
 
-  public void ftpNot(FtpNot not) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " ftpNot(" + not + ")\n" +
+  /**
+   * The <code>DestinationImpl</code> class calls this method for passing
+   * notifications which have been partly processed, so that they are
+   * specifically processed by the <code>FtpQueueImpl</code> class.
+   */
+  protected void specialProcess(Notification not) {
+    if (not instanceof FtpNot) {
+      doProcess((FtpNot) not);
+    } else if (not instanceof ClientMessages)
+      doProcess((ClientMessages) not);
+  }
+
+  protected void doProcess(FtpNot not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
+                                    " doProcess(" + not + ")\n" +
                                     "transferTable = " + transferTable);
     Message msg = (Message) ((Vector) not.getMessages()).get(0);
-    storeMessage(new org.objectweb.joram.mom.messages.Message(msg));
+    storeMessage(msg);
     deliverMessages(0);
-    transferTable.remove(new FtpMessage(msg).getIdentifier());
+    transferTable.remove(msg.getIdentifier());
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                     " doProcess : transferTable = " + transferTable);
   }
 
-  public ClientMessages preProcess(AgentId from, ClientMessages not) {
+  protected void doProcess(ClientMessages not) {
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
       Message msg = (Message) msgs.nextElement();
-      if (isFtpMsg(msg)) {
+      if (isFtpMsg(msg))
         doProcessFtp(not,msg);
-        not.getMessages().remove(msg);
+      else {
+        storeMessage(msg);
+        deliverMessages(0);
       }
     }
-    if (not.getMessages().size() > 0) {
-      return not;
-    }
-    return null;
   }
 
-  protected boolean isFtpMsg(Message message) {
-    FtpMessage msg = new FtpMessage(message);
+  protected boolean isFtpMsg(Message msg) {
     return (msg.propertyExists(SharedObj.url) &&
             msg.propertyExists(SharedObj.crc) &&
             msg.propertyExists(SharedObj.ack));
@@ -144,8 +150,8 @@ public class FtpQueueImpl extends QueueImpl {
   protected void doProcessFtp(ClientMessages not,
                               Message msg) {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                     " doProcessFtp(" + not + "," + msg + ")");
 
     if (transfer != null) {
@@ -158,10 +164,10 @@ public class FtpQueueImpl extends QueueImpl {
       clientContext = not.getClientContext();
       requestId = not.getRequestId();
 
-      FtpMessage ftpMsg = new FtpMessage(msg);
-      transferTable.put(ftpMsg.getIdentifier(),ftpMsg);
+      transferTable.put(msg.getIdentifier(),msg);
+
       FtpThread t = new FtpThread(transfer,
-                                  (FtpMessage) ftpMsg.clone(),
+                                  (Message) msg.clone(),
                                   destId,
                                   dmq,
                                   clientContext,
@@ -190,23 +196,22 @@ public class FtpQueueImpl extends QueueImpl {
         transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
     } catch (Exception exc) {
       transfer = null;
-      logger.log(BasicLevel.ERROR, 
+      MomTracing.dbgDestination.log(BasicLevel.ERROR, 
                                     "readObject : transfer = null" ,exc);
     }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                     " readObject transfer = "+ transfer);
 
     if (transfer != null) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- " + this +
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
                                       " readObject : transferTable = " + transferTable);
 
       for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
         Message msg = (Message) e.nextElement();
-        FtpMessage ftpMsg = new FtpMessage(msg);
         FtpThread t = new FtpThread(transfer,
-                                    (FtpMessage) ftpMsg.clone(),
+                                    (Message) msg.clone(),
                                     destId,
                                     dmq,
                                     clientContext,

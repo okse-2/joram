@@ -79,19 +79,6 @@
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
-	
-  <!-- Initializes the bridge configuration -->
-  <target name="bridge_init" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/jndi.properties"
-          tofile="${run.dir}/jndi.properties"
-          overwrite="true"/>
-    <copy file="${conf.dir}/bridge_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
-          overwrite="true"/>
-  </target>
 
   <!-- Initializes the soap configuration -->
   <target name="soap_init" depends="init">
@@ -164,27 +151,6 @@
   </target>
 
   <!-- Runs the classic sender client -->
-  <target name="synchsubscriber" depends="init"
-    description="--> Starts a SynchReqSubscriber client">
-    <java classname="classic.SynchReqSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-      <arg line="./jndi.properties"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
-  <target name="synchpublisher" depends="init"
-    description="--> Starts a SynchReqPublisher client">
-    <java classname="classic.SynchReqPublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="./jndi.properties"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
   <target name="sender" depends="init"
     description="--> Starts a Sender client">
     <java classname="classic.Sender" failonerror="no" fork="yes"
@@ -245,7 +211,6 @@
     description="--> Starts a Consumer client">
     <java classname="classic.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -428,7 +393,6 @@
     <java classname="archi.ArchiAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
@@ -550,9 +514,11 @@
   <target name="queue_cluster_adminxml" depends="init"
     description="--> Runs queue cluster administration xml">
     <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="cluster.queue.ClusterAdminXML" failonerror="no" fork="yes"
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
@@ -769,20 +735,6 @@
     </java>
   </target>
 
-  <!-- BRIDGE TESTS -->
-  <target name="bridge_server0" depends="bridge_init"
-          description="--> Starts a server 0 for bridge">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-    </antcall>
-  </target>
-  <target name="bridge_server1" depends="bridge_init"
-          description="--> Starts a server 1 for bridge">
-    <antcall target="server">
-      <param name="sid" value="1"/>
-    </antcall>
-  </target>
-	
   <!-- Runs the bridge administration -->
   <target name="bridge_admin" depends="init"
     description="--> Runs the BRIDGE sample administration">
@@ -805,24 +757,6 @@
   <target name="bridge_consumer" depends="init"
     description="--> Runs the BRIDGE sample consumer">
     <java classname="bridge.BridgeConsumer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-	
-  <!-- Runs the foreign sender -->
-  <target name="foreign_producer" depends="init"
-    description="--> Runs the foreign sample producer">
-    <java classname="bridge.ForeignProducer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the foreign consumer -->
-  <target name="foreign_consumer" depends="init"
-    description="--> Runs the foreign sample consumer">
-    <java classname="bridge.ForeignConsumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
