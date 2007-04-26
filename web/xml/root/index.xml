@@ -35,6 +35,10 @@
       <p>JORAM is used by JOnAS to undergo the J2EE 1.4 certification, and has passed all tests concerning JMS 1.1 certification in this TCK.</p>
    
       <s2 name="Latest News">
+	<subtitle>April 26, 2007: JORAM 4.3.28 is released</subtitle>
+	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug.</p>
+	<p>It is tagged in CVS (JORAM_4_3_28), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+
 	<subtitle>March 27, 2007: JORAM 4.3.26 is released</subtitle>
 	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it provides somes improvments in the use of clustering destinations.</p>
 	<p>It is tagged in CVS (JORAM_4_3_26), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
