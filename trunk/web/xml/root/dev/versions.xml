@@ -11,6 +11,18 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 4.3.28 (April 26, 2007)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_28.
+      This release provides the following fixes and changes:</p>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Sub-context creation through XML scripts.</li>
+          <li>JNDI binding of clustered objects through SOAP.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.26 (March 27, 2007)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_26.
