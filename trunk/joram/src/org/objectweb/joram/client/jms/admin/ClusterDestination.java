@@ -108,7 +108,7 @@ public class ClusterDestination extends Destination {
     if ((cluster != null) && ! cluster.isEmpty()) {
       Destination dest = null;
       String location = System.getProperty("location");
-      if (location == null) {
+      if (location == null || location.equals("")) {
         int idx = new Random().nextInt(cluster.size());
 
         Object key[] = cluster.keySet().toArray();
