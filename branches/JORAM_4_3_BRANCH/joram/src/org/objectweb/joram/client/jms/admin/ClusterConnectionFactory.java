@@ -89,7 +89,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     if ((cluster != null) && ! cluster.isEmpty()) {
       ConnectionFactory cf = null;
       String location = System.getProperty("location");
-      if (location == null) {
+      if (location == null || location.equals("")) {
         int idx = new Random().nextInt(cluster.size());
 
         Object key[] = cluster.keySet().toArray();
