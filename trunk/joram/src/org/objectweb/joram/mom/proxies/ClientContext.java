@@ -287,6 +287,15 @@ class ClientContext implements java.io.Serializable {
     return prepare;
   }
 
+  /**
+   * 
+   * @param key XID
+   * @return true if prepared transation.
+   */
+  public boolean isPrepared(Object key) {
+    return transactionsTable.containsKey(key);
+  }
+  
   /** Returns the identifiers of the prepared transactions. */
   Enumeration getTxIds() {
     if (transactionsTable == null)
