@@ -30,9 +30,6 @@ import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import java.util.Vector;
-
-import javax.naming.NamingException;
 
 
 /**
@@ -40,8 +37,15 @@ import javax.naming.NamingException;
  * TCP connections for XA Pub/Sub communication.
  */
 public class XATopicTcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XATopicConnectionFactory
-{
+             extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
+  
+  /**
+   * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
+   */
+  public XATopicTcpConnectionFactory() {
+    super();
+  }
+  
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
    *
