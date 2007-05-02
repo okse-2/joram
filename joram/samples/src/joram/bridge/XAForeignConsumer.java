@@ -22,29 +22,51 @@
  */
 package bridge;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.XAConnection;
+import javax.jms.XAConnectionFactory;
+import javax.jms.XASession;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
+import org.objectweb.joram.client.jms.XidImpl;
 
 /**
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
-public class ForeignSubscriber {
+public class XAForeignConsumer {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
-    ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
+    Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
+    XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
-
-    Connection foreignCnx = foreignCF.createConnection();
-    Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    
+    XAConnection foreignCnx = foreignCF.createXAConnection();
+    XASession foreignSess = foreignCnx.createXASession();
     MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
-    foreignCons.setMessageListener(new MsgListener("topic foreign"));
-    foreignCnx.start();
+    XAResource resource = ((XASession) foreignSess).getXAResource();
+    foreignCnx.start();   
+ 
+    Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());
+    resource.start(xid, XAResource.TMNOFLAGS);
+    System.out.println("resource = " + resource);
 
-    System.in.read();
+    for (int i = 1; i < 11; i++) {
+      Message msg = foreignCons.receive();
+      if (msg != null)
+        System.out.println("reiceive : " + ((TextMessage)msg).getText());
+      else
+        System.out.println("msg = null");
+    }
+
+    System.out.println("commit xid = " + xid);
+    resource.end(xid, XAResource.TMSUCCESS);
+    resource.prepare(xid);
+    resource.commit(xid, false);
+
     foreignCnx.close();
   }
 }

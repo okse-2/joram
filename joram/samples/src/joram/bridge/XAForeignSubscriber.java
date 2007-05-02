@@ -23,22 +23,22 @@
 package bridge;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
+import javax.jms.XAConnectionFactory;
 
 /**
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
-public class ForeignSubscriber {
+public class XAForeignSubscriber {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
-    ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
+    XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
 
-    Connection foreignCnx = foreignCF.createConnection();
+    Connection foreignCnx = foreignCF.createXAConnection();
     Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
     foreignCons.setMessageListener(new MsgListener("topic foreign"));

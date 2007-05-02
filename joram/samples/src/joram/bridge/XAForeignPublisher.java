@@ -23,28 +23,37 @@
 package bridge;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.XAConnectionFactory;
 
 /**
- * Consumes messages on a foreign destination through the JORAM bridge.
+ * Produces messages on the foreign destination.
  */
-public class ForeignSubscriber {
+public class XAForeignPublisher {
   public static void main(String[] args) throws Exception {
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
     Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
-    ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
+    XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
 
-    Connection foreignCnx = foreignCF.createConnection();
-    Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
-    foreignCons.setMessageListener(new MsgListener("topic foreign"));
-    foreignCnx.start();
+    Connection foreignCnx = foreignCF.createXAConnection();
+    Session foreignSess = foreignCnx.createSession(true, 0);
+    MessageProducer foreignSender = foreignSess.createProducer(foreignDest);
 
-    System.in.read();
+    TextMessage foreignMsg = foreignSess.createTextMessage();
+
+    for (int i = 1; i < 11; i++) {
+      foreignMsg.setText("topic Foreign message number " + i);
+      System.out.println("send msg = " + foreignMsg.getText());
+      foreignSender.send(foreignMsg);
+    }
+
+    foreignSess.commit();
+    
+    
     foreignCnx.close();
   }
 }
