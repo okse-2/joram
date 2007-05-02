@@ -23,13 +23,11 @@
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.Externalizable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**

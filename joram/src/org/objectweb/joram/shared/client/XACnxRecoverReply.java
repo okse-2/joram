@@ -152,7 +152,6 @@ public final class XACnxRecoverReply extends AbstractJmsReply {
         StreamUtil.writeTo(((Integer) fis.elementAt(i)).intValue(), os);
       }
     }
-    writeVectorOfByteArrayTo(fis, os);
     writeVectorOfByteArrayTo(gtis, os);
   }
 
