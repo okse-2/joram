@@ -1241,8 +1241,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
       activeCtx.registerTxPrepare(xid, req);
       doReply(new ServerReply(req));
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       throw new StateException(exc.getMessage());
     }
   }
@@ -1522,10 +1521,20 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // Denying the non acknowledged messages:
     AgentId id;
-    for (Enumeration ids = activeCtx.getDeliveringQueues(); ids
-        .hasMoreElements();) {
+    boolean prepared = false;
+    for (Enumeration ids = activeCtx.getDeliveringQueues(); ids.hasMoreElements();) {
       id = (AgentId) ids.nextElement();
-      proxyAgent.sendNot(id, new DenyRequest(key));
+
+      for (Enumeration xids = activeCtx.getTxIds(); xids.hasMoreElements();) {
+        Xid xid = (Xid) xids.nextElement(); 
+        if (activeCtx.isPrepared(xid)) {
+          prepared = true;
+          break;
+        }
+      }
+      if (!prepared)
+        proxyAgent.sendNot(id, new DenyRequest(key));
+      prepared = false;
     }
 
     // Removing or deactivating the subscriptions:
