@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -400,8 +402,7 @@ public class XAResourceMngr {
    * @exception XAException  If the specified flag is invalid, or if the
    *                         request fails.
    */
-  synchronized Xid[] recover(int flag) throws XAException
-  {
+  synchronized Xid[] recover(int flag) throws XAException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  "--- "
@@ -414,7 +415,11 @@ public class XAResourceMngr {
     try {
       XACnxRecoverReply reply =
         (XACnxRecoverReply) cnx.syncRequest(new XACnxRecoverRequest());
-
+     
+      if (reply == null) {
+        return new Xid[0];  
+      }
+      
       Xid[] xids = new Xid[reply.getSize()];
 
       for (int i = 0; i < reply.getSize(); i++) {
@@ -425,8 +430,7 @@ public class XAResourceMngr {
         setStatus(xids[i], PREPARED);
       }
       return xids;
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       throw new XAException("Recovery request failed: " + exc.getMessage());
     }
   }
