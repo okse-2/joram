@@ -22,7 +22,11 @@
  */
 package bridge;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
 
 /**
  * Consumes messages on a foreign destination through the JORAM bridge.

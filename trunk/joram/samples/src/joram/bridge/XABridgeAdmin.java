@@ -29,21 +29,23 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 
 
 /**
  * Administers an agent server for the bridge sample.
  */
-public class BridgeAdmin {
+public class XABridgeAdmin {
   public static void main(String[] args) throws Exception {
     System.out.println();
-    System.out.println("Bridge administration...");
+    System.out.println("XA Bridge administration...");
 
     AdminModule.connect("root", "root", 60);
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     
     User.create("anonymous", "anonymous", 0);
     User.create("anonymous", "anonymous", 1);
+    
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     
     // create The foreign destination and connectionFactory
     Queue foreignQueue = Queue.create(1, "foreignQueue");
@@ -56,7 +58,7 @@ public class BridgeAdmin {
     foreignTopic.setFreeWriting();
     System.out.println("foreign topic = " + foreignTopic);
     
-    javax.jms.ConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
+    javax.jms.XAConnectionFactory foreignCF = XATcpConnectionFactory.create("localhost", 16011);
     
     // bind foreign destination and connectionFactory
     jndiCtx.rebind("foreignQueue", foreignQueue);

@@ -22,7 +22,10 @@
  */
 package bridge;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
