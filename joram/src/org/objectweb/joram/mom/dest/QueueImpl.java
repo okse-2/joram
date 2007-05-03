@@ -880,15 +880,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       Message msg;
       // Storing each received message:
       for (Enumeration msgs = clientMsgs.getMessages().elements();
-      msgs.hasMoreElements();) {
+           msgs.hasMoreElements();) {
 
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
-        if (clientMsgs.isPersistent()) {
-          // state change, so save.
-          setSave();
-        }
+
         msg.order = arrivalsCounter++;
         storeMessage(msg);
+        setSave();
       }
     }
     
