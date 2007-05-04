@@ -32,6 +32,7 @@ import java.util.Vector;
 
 import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
 import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
 import org.objectweb.joram.mom.notifications.Monit_FreeAccessRep;
 import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
@@ -859,4 +860,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   public final void forward(AgentId to, Notification not) {
     Channel.sendTo(to, not);
   }
+  
+  public abstract void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not);
 }

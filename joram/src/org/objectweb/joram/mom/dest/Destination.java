@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.AbstractRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
 import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
@@ -181,6 +182,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
         // Agent level when its processing went successful in
         // the DestinationItf instance.
         super.react(from, not);
+      else if (not instanceof DestinationAdminRequestNot)
+        destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
         throw new UnknownNotificationException(not.getClass().getName());
     } catch (MomException exc) {

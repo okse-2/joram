@@ -131,8 +131,8 @@ public class Topic extends Destination {
         ((TopicImpl)destImpl).unsubscribeRequest(from, (UnsubscribeRequest) not);
       else if (not instanceof TopicForwardNot)
         ((TopicImpl)destImpl).topicForwardNot(from, (TopicForwardNot) not);
-      else if (not instanceof DestinationAdminRequestNot)
-        ((TopicImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
+//      else if (not instanceof DestinationAdminRequestNot)
+//        ((TopicImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
         super.react(from, not);
     } catch (MomException exc) {
