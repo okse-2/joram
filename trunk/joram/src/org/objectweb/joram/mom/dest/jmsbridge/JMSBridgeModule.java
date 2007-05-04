@@ -1091,7 +1091,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "run()");
       
-      Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());
+      Xid xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
       try {
         resource.start(xid, XAResource.TMNOFLAGS);
       } catch (XAException exc) {
