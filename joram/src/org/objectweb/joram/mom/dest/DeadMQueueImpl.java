@@ -59,6 +59,7 @@ public class DeadMQueueImpl extends QueueImpl {
    */
   public DeadMQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
     super(destId, adminId, prop);
+    setFreeWriting(true);
   }
 
 
