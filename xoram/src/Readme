@@ -12,7 +12,7 @@ ant clean ship
         II - Compilation de Xoram
         =========================
 
-cd <JORAM_DIR>/xoram
+cd <JORAM_DIR>/xoram/src
 make clean xoram
 
         III - Test de Xoram
@@ -21,7 +21,7 @@ make clean xoram
 1) Compilation des tests
 ------------------------
 
-Window#1: cd <JORAM_DIR>/xoram
+Window#1: cd <JORAM_DIR>/xoram/src
 Window#1: make clean tests
 
 
@@ -45,9 +45,9 @@ Window#3: ant classic_admin
 4) Lancement des exemples
 -------------------------
 
-Window#1: cd <JORAM_DIR>/xoram/tests/base
+Window#1: cd <JORAM_DIR>/xoram/src
 
-Window#1: ./test1.exe
+Window#1: ../tests/base/test1.exe
 connected -> 0
 ##### Cnx state(1): 1
 ##### Cnx state(0): 0
@@ -55,24 +55,24 @@ connected -> 0
 ##### Cnx state(0): 0
 ##### bye
 
-Window#1: ./test2.exe
+Window#1: ../tests/base/test2.exe
 connected -> 1
 ##### Message sent on queue: ID:0.0.1028c1m1
 ##### Message received: ID:0.0.1028c1m1
 
-Window#1: ./test3.exe
+Window#1: ../tests/base/test3.exe
 connected -> 2
 ##### Message sent on topic: ID:0.0.1028c2m1
 ##### Message received: ID:0.0.1028c2m1
 
-Window#1: ./test5.exe
+Window#1: ../tests/base/test5.exe
 connected -> 4
 ##### Message sent on queue: ID:0.0.1028c4m1
 ##### Message sent on topic: ID:0.0.1028c4m2
 ##### Message received: ID:0.0.1028c4m1
 ##### Message received: ID:0.0.1028c4m2
 
-Window#1: ./test6.exe
+Window#1: ../tests/base/test6.exe
 connected -> 5
 ##### Message sent on queue: ID:0.0.1028c5m1
 ##### Message sent on queue: ID:0.0.1028c5m2
@@ -87,7 +87,7 @@ connected -> 5
 ##### Message received: ID:0.0.1028c5m4
 ##### Message received: ID:0.0.1028c5m5
 
-Window#1: ./test7.exe
+Window#1: ../tests/base/test7.exe
 connected -> 6
 ##### Message sent on queue: ID:0.0.1028c6m1
 ##### Message sent on queue: ID:0.0.1028c6m2
