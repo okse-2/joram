@@ -1,15 +1,17 @@
 ###############################
 # i86-cygwin
-# CCOPT = -g
-# LDFLAGS = -fPIC -shared
+CCOPT = -g
+LDFLAGS = -fPIC -shared
 ###############################
 # i86-linux
-CCOPT = -g -fPIC
-LDFLAGS = -fPIC -shared
+# CCOPT = -g -fPIC
+# LDFLAGS = -fPIC -shared
 ###############################
 
 CC = g++ $(CCOPT)
 LD = g++ $(CCOPT) $(LDFLAGS)
+
+TESTS = ../tests/common ../tests/base
 
 LIBXORAMOBJS = \
 	Synchronized.o \
@@ -19,9 +21,6 @@ LIBXORAMOBJS = \
 	AbstractMessage.o \
 	Message.o \
 	Xoram.o
-
-TESTS = \
-	tests/base
 
 clean:
 	rm -f *.o *~ libxoram.so
