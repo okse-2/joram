@@ -1,11 +1,16 @@
+LIBDIR = ../../src
+INCDIR = ../../src
+
 ###############################
 # i86-cygwin
 CCOPT = -g
-LDFLAGS = -fPIC -shared
+LDFLAGS = -shared
+LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
 # CCOPT = -g -fPIC
 # LDFLAGS = -fPIC -shared
+# LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
@@ -23,16 +28,16 @@ LIBXORAMOBJS = \
 	Xoram.o
 
 clean:
-	rm -f *.o *~ libxoram.so
+	rm -f *.o *~ $(LIBXORAM)
 	for TD in $(TESTS);\
 		do cd $$TD; make clean ; cd - ; done
 
-xoram: libxoram.so
+xoram: $(LIBXORAM)
 
-libxoram.so:	$(LIBXORAMOBJS)
-		$(LD) -o libxoram.so $(LIBXORAMOBJS)
+$(LIBXORAM):	$(LIBXORAMOBJS)
+		$(LD) -o $(LIBXORAM) $(LIBXORAMOBJS)
 
-tests:	libxoram.so
+tests:	$(LIBXORAM)
 	for TD in $(TESTS);\
 		do cd $$TD; make tests ; cd - ; done
 
