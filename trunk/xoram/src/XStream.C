@@ -375,4 +375,6 @@ Properties* InputStream::readProperties() throw(IOException) {
 
   Properties* properties = new Properties(((4*count)/3) +1);
   properties->readPropertiesFrom(this, count);
+
+  return properties;
 }

@@ -88,6 +88,8 @@ class Properties {
 
   Properties();
 
+  void init(int capacity, float loadFactor);
+
   ~Properties();
 
   int size();
