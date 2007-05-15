@@ -31,27 +31,30 @@
 // Properties Class
 // ######################################################################
 
-Properties::Properties(int capacity, float loadFactor) {
+void Properties::init(int capacity, float loadFactor) {
   if (capacity < 0)
     throw IllegalArgumentException();
   if (loadFactor <= 0)
-    /*     if (loadFactor <= 0 || Float.isNaN(loadFactor)) */
     throw IllegalArgumentException();
 
   count = 0;
   length = capacity;
-  if (length==0) length = 1;
+  if (length == 0) length = 1;
   table = new Entry* [length];
   this->loadFactor = loadFactor;
   threshold = (int) (length * loadFactor);
 }
 
+Properties::Properties(int capacity, float loadFactor) {
+  init(capacity, loadFactor);
+}
+
 Properties::Properties(int capacity) {
-  Properties(capacity, 0.75f);
+  init(capacity, 0.75f);
 }
 
 Properties::Properties() {
-  Properties(11, 0.75f);
+  init(11, 0.75f);
 }
 
 Properties::~Properties() {
@@ -108,6 +111,7 @@ void Properties::rehash() {
 
 Properties::Entry* Properties::put(char* key) {
   Entry* entry = get(key);
+
   if (entry == (Entry*) NULL) {
     if (count >= threshold) rehash();
     int hash = hashCode(key);
@@ -117,6 +121,7 @@ Properties::Entry* Properties::put(char* key) {
     table[index] = entry;
     count++;
   }
+
   return entry;
 }
 
@@ -124,13 +129,16 @@ Properties::Entry* Properties::get(char* key) {
   if ((key == (char*) NULL) || (*key == '\0'))
     throw IllegalArgumentException("Bad property name");
 
-  int hash = hashCode(key);
-  int index = (hash & 0x7FFFFFFF) % length;
-  for (Entry* e=table[index]; e!=(Entry*) NULL ; e=e->next) {
-    if ((e->hash == hash) && (strcmp(e->key, key) == 0)) {
-      return e;
+  if  (length > 0) {
+    int hash = hashCode(key);
+    int index = (hash & 0x7FFFFFFF) % length;
+    for (Entry* e=table[index]; e!=(Entry*) NULL ; e=e->next) {
+      if ((e->hash == hash) && (strcmp(e->key, key) == 0)) {
+        return e;
+      }
     }
   }
+
   return (Entry*) NULL;
 }
 
