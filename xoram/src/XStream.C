@@ -162,6 +162,14 @@ int OutputStream::writeByteArray(byte* tab, int len) {
   }
 }
 
+int OutputStream::writeFloat(float f) {
+  return writeInt(* ((int *) &f));
+}
+
+int OutputStream::writeDouble(double d) {
+  return writeLong(* ((long long *) &d));
+}
+
 void OutputStream::writeVectorOfString(Vector<char>* vector) throw(IOException) {
   if (vector == (Vector<char>*) NULL) {
     if (writeInt(-1) == -1) throw IOException();
@@ -342,6 +350,14 @@ int InputStream::readByteArray(byte** tab) {
   }
 
   return len;
+}
+
+int InputStream::readFloat(float *f) {
+  return readInt((int *) f);
+}
+
+int InputStream::readDouble(double *d) {
+  return readLong((long long *) d);
 }
 
 Vector<char>* InputStream::readVectorOfString() throw(IOException) {

@@ -240,6 +240,7 @@ short Properties::getShortProperty(char* name) {
   }
 }
 
+// AF: Be careful to string allocation !!
 char* Properties::getStringProperty(char* name) {
   Entry* entry = get(name);
   if (entry == (Entry*) NULL) {
@@ -247,8 +248,9 @@ char* Properties::getStringProperty(char* name) {
   } else if (entry->type == XStream::S_STRING) {
     return entry->str;
   } else if (entry->type == XStream::S_BOOLEAN) {
-    // TODO
-    throw MessageFormatException("");
+    if (entry->b == TRUE)
+      return "true";
+    return "false";
   } else if (entry->type == XStream::S_BYTE) {
     // TODO
     throw MessageFormatException("");
@@ -372,9 +374,9 @@ void Properties::writePropertiesTo(OutputStream* os) throw (IOException) {
       } else if (entry->type == XStream::S_LONG) {
         os->writeLong(entry->l);
       } else if (entry->type == XStream::S_FLOAT) {
-        throw NotYetImplementedException();
+        os->writeFloat(entry->f);
       } else if (entry->type == XStream::S_DOUBLE) {
-        throw NotYetImplementedException();
+        os->writeDouble(entry->d);
       } else if (entry->type == XStream::S_STRING) {
         os->writeString(entry->str);
       } else if (entry->type == XStream::S_BYTEARRAY) {
@@ -425,10 +427,16 @@ void Properties::readPropertiesFrom(InputStream* is,
       break;
     }
     case XStream::S_FLOAT: {
-      throw IOException("Not yet implemented");
+      float f;
+      if (is->readFloat(&f) == -1) throw IOException();
+      setFloatProperty(key, f);
+      break;
     }
     case XStream::S_DOUBLE: {
-      throw IOException("Not yet implemented");
+      double d;
+      if (is->readDouble(&d) == -1) throw IOException();
+      setDoubleProperty(key, d);
+      break;
     }
     case XStream::S_STRING: {
       char* str;
