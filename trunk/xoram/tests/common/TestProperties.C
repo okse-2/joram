@@ -17,17 +17,17 @@ int main(int argc, char* argv[]) {
   double v3 = 3.1415927;
   float v4 = 3.1415927;
   int v5 = 15;
-/*   long long v6 = 4294967296; */
+  long long v6 = 1234567890123LL;
   short v7 = (short) 15000;
   char* v8 = "abcde";
 
   Properties *p = new Properties();
   p->setBooleanProperty("boolean", v1);
   p->setByteProperty("byte", v2);
-/*   p->setDoubleProperty("double", v3); */
-/*   p->setFloatProperty("float", v4); */
+  p->setDoubleProperty("double", v3);
+  p->setFloatProperty("float", v4);
   p->setIntProperty("int", v5);
-/*   p->setLongProperty("long", v6); */
+  p->setLongProperty("long", v6);
   p->setShortProperty("short", v7);
   p->setStringProperty("string", v8);
 
@@ -41,25 +41,25 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-/*   if (v3 != p->getDoubleProperty("double")) { */
-/*     printf("Double NOK1\n"); */
-/*     exit(-1); */
-/*   } */
+  if (v3 != p->getDoubleProperty("double")) {
+    printf("Double NOK1\n");
+    exit(-1);
+  }
 
-/*   if (v4 != p->getFloatProperty("float")) { */
-/*     printf("Float NOK1\n"); */
-/*     exit(-1); */
-/*   } */
+  if (v4 != p->getFloatProperty("float")) {
+    printf("Float NOK1\n");
+    exit(-1);
+  }
 
   if (v5 != p->getIntProperty("int")) {
     printf("Int NOK1\n");
     exit(-1);
   }
 
-/*   if (v6 != p->getLongProperty("long")) { */
-/*     printf("Boolean NOK1"); */
-/*     exit(-1); */
-/*   } */
+  if (v6 != p->getLongProperty("long")) {
+    printf("Boolean NOK1");
+    exit(-1);
+  }
 
   if (v7 != p->getShortProperty("short")) {
     printf("Short NOK1\n");
@@ -68,10 +68,17 @@ int main(int argc, char* argv[]) {
   
   if (strcmp(v8, p->getStringProperty("string")) != 0) {
     printf("String NOK1: \"%s\" != \"%s\"\n", v8, p->getStringProperty("string"));
-/*     exit(-1); */
+    exit(-1);
   }
 
   printf("Get/Set OK\n");
+
+  if (strcmp(p->getStringProperty("boolean"), "true") != 0) {
+    printf("Boolean -> String NOK\n");
+    exit(-1);
+  }
+
+  printf("Get String properties OK\n");
 
   OutputStream *os = new OutputStream();
   try {
@@ -96,7 +103,9 @@ int main(int argc, char* argv[]) {
   InputStream *is = new InputStream();
   is->readFrom(ifd);
   Properties *p1 = is->readProperties();
+
   close(ifd);
+  unlink("toto");
 
   if (p1 == (Properties*) NULL) {
     printf("Properties NULL\n");
@@ -113,34 +122,37 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-/*   if (v3 != p1->getDoubleProperty("double")) { */
-/*     printf("Double NOK2\n"); */
-/*     exit(-1); */
-/*   } */
+  double xv3 = p1->getDoubleProperty("double");
+  float xv4 = p1->getFloatProperty("float");
 
-/*   if (v4 != p1->getFloatProperty("float")) { */
-/*     printf("Float NOK2\n"); */
-/*     exit(-1); */
-/*   } */
+  if (v3 != p1->getDoubleProperty("double")) {
+    printf("Double NOK2\n");
+    exit(-1);
+  }
+
+  if (v4 != p1->getFloatProperty("float")) {
+    printf("Float NOK2\n");
+    exit(-1);
+  }
 
   if (v5 != p1->getIntProperty("int")) {
     printf("Int NOK2\n");
     exit(-1);
   }
 
-/*   if (v6 != p1->getLongProperty("long")) { */
-/*     printf("Boolean NOK2"); */
-/*     exit(-1); */
-/*   } */
+  if (v6 != p1->getLongProperty("long")) {
+    printf("Boolean NOK2");
+    exit(-1);
+  }
 
   if (v7 != p1->getShortProperty("short")) {
     printf("Short NOK2\n");
-/*     exit(-1); */
+    exit(-1);
   }
   
   if (strcmp(v8, p1->getStringProperty("string")) != 0) {
     printf("String NOK2: \"%s\"\n", p1->getStringProperty("string"));
-/*     exit(-1); */
+    exit(-1);
   }
 
   printf("Marshalling OK\n");

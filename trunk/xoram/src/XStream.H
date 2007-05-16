@@ -78,6 +78,9 @@ class OutputStream : XStream {
   int writeString(char *str);
   int writeByteArray(byte* tab, int len);
 
+  int writeFloat(float f);
+  int writeDouble(double d);
+
   void writeVectorOfString(Vector<char>* vector) throw(IOException);
   void writeProperties(Properties* properties) throw(IOException);
 };
@@ -115,6 +118,9 @@ class InputStream : XStream {
   int readByte(byte *b);
   int readString(char **str);
   int readByteArray(byte** tab);
+
+  int readFloat(float *f);
+  int readDouble(double *d);
 
   Vector<char>* readVectorOfString() throw(IOException);
   Properties* readProperties() throw(IOException);
