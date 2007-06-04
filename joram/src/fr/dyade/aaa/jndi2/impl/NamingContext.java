@@ -65,6 +65,15 @@ public class NamingContext implements Serializable, Cloneable {
     }
     return null;
   } 
+  
+ public Enumeration getEnumRecord() {
+     Vector elt=new Vector();
+    for (int i = 0; i < records.size(); i++) {
+      Record r = (Record)records.elementAt(i);
+      elt.add(r);
+    }
+    return elt.elements();
+  } 
 
   public void addRecord(Record record) {
     records.addElement(record);

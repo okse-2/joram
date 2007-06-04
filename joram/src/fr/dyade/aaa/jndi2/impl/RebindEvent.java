@@ -22,14 +22,16 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
+import javax.naming.CompositeName;
+
 public class RebindEvent extends UpdateEvent {
 
   private Object object;
 
-  public RebindEvent(NamingContextId updatedContextId,
+  public RebindEvent(CompositeName compositeName,NamingContextId updatedContextId,
                      String name,
                      Object object) {
-    super(updatedContextId, name);
+    super(compositeName,updatedContextId, name);
     this.object = object;
   }
 

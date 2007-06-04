@@ -36,6 +36,12 @@ public class ContextRecord extends Record {
     return id;
   }
 
+  
+  public void  setId(NamingContextId id) {
+     this.id = id;
+  }
+
+
   public String toString() {
     return '(' + super.toString() +
       ",id=" + id + ')';

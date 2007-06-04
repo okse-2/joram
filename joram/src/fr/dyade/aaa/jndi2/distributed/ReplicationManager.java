@@ -45,6 +45,8 @@ import fr.dyade.aaa.jndi2.impl.RebindEvent;
 import fr.dyade.aaa.jndi2.impl.UnbindEvent;
 import fr.dyade.aaa.jndi2.impl.UpdateEvent;
 import fr.dyade.aaa.jndi2.impl.UpdateListener;
+import fr.dyade.aaa.jndi2.impl.Record;
+import fr.dyade.aaa.jndi2.impl.ContextRecord;
 import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
 import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
 import fr.dyade.aaa.jndi2.msg.JndiError;
@@ -56,6 +58,7 @@ import fr.dyade.aaa.jndi2.server.JndiScriptRequestNot;
 import fr.dyade.aaa.jndi2.server.RequestContext;
 import fr.dyade.aaa.jndi2.server.RequestManager;
 import fr.dyade.aaa.jndi2.server.Trace;
+
 
 public class ReplicationManager 
     extends RequestManager implements UpdateListener {
@@ -111,6 +114,10 @@ public class ReplicationManager
    */
   private transient Hashtable syncRequestContextLists;
 
+
+    private boolean looseCoupling;
+
+
   public ReplicationManager(short[] serverIds) {
     this.serverIds = serverIds;
   }
@@ -124,14 +131,15 @@ public class ReplicationManager
 
   public void agentInitialize(boolean firstTime) throws Exception {
     if (firstTime) {
-      if (serverIds.length > 0) {
-        rootOwnerId = 
-          DistributedJndiServer.getDefault(serverIds[0]);
-      } else {
-        rootOwnerId = getId();
-      }
+	looseCoupling = Boolean.getBoolean(fr.dyade.aaa.jndi2.impl.ServerImpl.LOOSE_COUPLING);
+	if (serverIds.length > 0 && (!looseCoupling)) {
+	    rootOwnerId = 
+		DistributedJndiServer.getDefault(serverIds[0]);
+	} else {
+	    rootOwnerId = getId();
+	}
     }
-
+   
     super.agentInitialize(firstTime);
 
     writeRequestContextLists = 
@@ -210,53 +218,104 @@ public class ReplicationManager
 
   private void onUpdateEvent(AgentId from, BindEvent evt) 
     throws NamingException {
-    getServerImpl().bind(
-      getServerImpl().getNamingContext(
-        evt.getUpdatedContextId()),
-      evt.getName(), 
-      evt.getObject(),
-      from);
+      if(!looseCoupling){
+	  getServerImpl().bind(
+			       getServerImpl().getNamingContext(
+								evt.getUpdatedContextId()),
+			       evt.getName(), 
+			       evt.getObject(),
+			       from);
+      }else{
+	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+	  getServerImpl().bind(
+			       nc,
+			       evt.getName(), 
+			       evt.getObject(),
+			       from);
+      }
+      
   }
 
   private void onUpdateEvent(AgentId from, RebindEvent evt) 
     throws NamingException {
-    getServerImpl().rebind(
-      getServerImpl().getNamingContext(
-        evt.getUpdatedContextId()),
-      evt.getName(), 
-      evt.getObject(),
-      from);
+      if(!looseCoupling){
+	  getServerImpl().rebind(
+				 getServerImpl().getNamingContext(
+				    evt.getUpdatedContextId()),
+				 evt.getName(), 
+				 evt.getObject(),
+				 from);
+      }else{
+	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+	  getServerImpl().rebind(
+				 nc,
+				 evt.getName(), 
+				 evt.getObject(),
+				 from);
+      }
   }
-
+    
   private void onUpdateEvent(AgentId from, UnbindEvent evt) 
     throws NamingException {
-    getServerImpl().unbind(
-      getServerImpl().getNamingContext(
-        evt.getUpdatedContextId()),
-      evt.getName(),
-      from);
+      if(!looseCoupling){
+	  getServerImpl().unbind(
+				 getServerImpl().getNamingContext(
+				    evt.getUpdatedContextId()),
+				 evt.getName(),
+				 from);
+      }else{
+	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+	  getServerImpl().unbind(
+				 nc,
+				 evt.getName(),
+				 from);
+      }
   }
 
   private void onUpdateEvent(AgentId from, CreateSubcontextEvent evt) 
     throws NamingException {
-    getServerImpl().createSubcontext(
-      getServerImpl().getNamingContext(
-        evt.getUpdatedContextId()),
-      evt.getName(),
-      evt.getPath(),
-      evt.getContextId(),
-      evt.getOwnerId(),
-      from);
+      if(!looseCoupling){
+	  getServerImpl().createSubcontext(
+		  getServerImpl().getNamingContext(	
+						   evt.getUpdatedContextId()),
+		  evt.getName(),
+		  evt.getPath(),
+		  evt.getContextId(),
+		  evt.getOwnerId(),
+		  from);
+      }else{
+	  CompositeName parentPath = (CompositeName) evt.getPath().clone();    
+	  parentPath.remove(parentPath.size() - 1);
+	  NamingContext  nc= getServerImpl().getNamingContext(parentPath);
+	  getServerImpl().createSubcontext(nc,
+					   evt.getName(),
+					   evt.getPath(),
+					   evt.getContextId(),
+					   getId(),
+					   from);
+      }
   }
 
   private void onUpdateEvent(AgentId from, DestroySubcontextEvent evt) 
     throws NamingException {
-    getServerImpl().destroySubcontext(
-      getServerImpl().getNamingContext(
-        evt.getUpdatedContextId()),
-      evt.getName(), 
-      evt.getPath(),
-      from);
+      if(!looseCoupling){
+	  getServerImpl().destroySubcontext(
+			   getServerImpl().getNamingContext(
+					      evt.getUpdatedContextId()),
+			   evt.getName(), 
+			   evt.getPath(),
+			   from);
+      }else{
+	  CompositeName parentPath = (CompositeName) evt.getPath().clone();    
+	  parentPath.remove(parentPath.size() - 1);
+	  NamingContext  nc= getServerImpl().getNamingContext(parentPath);
+	  getServerImpl().destroySubcontext(
+					    nc,
+					    evt.getName(), 
+					    evt.getPath(),
+					    from);
+	 
+      }
   }
 
   // private void onUpdateEvent(AgentId from, ChangeOwnerEvent evt) 
@@ -404,19 +463,68 @@ public class ReplicationManager
     }
 
     NamingContextInfo[] contexts = not.getContexts();
+    
+    Hashtable  record_compositeName= new Hashtable();
+    Hashtable  composite_context= new Hashtable();
     if (contexts != null) {
       Vector newNames = new Vector();
       for (int i = 0; i < contexts.length; i++) {
-        NamingContext nc = getServerImpl().getNamingContext(
-          contexts[i].getNamingContext().getId());
-        if (nc == null) {
-          getServerImpl().addNamingContext(contexts[i]);
-          newNames.addElement(contexts[i].getCompositeName());
-        }
-        // Else the naming context has already been
-        // added by an other server that is the (new)
-        // owner of this context.
+	  if(!looseCoupling){
+	      NamingContext nc = getServerImpl().getNamingContext(
+								  contexts[i].getNamingContext().getId());
+	      if (nc == null) {
+		  getServerImpl().addNamingContext(contexts[i]);
+		  newNames.addElement(contexts[i].getCompositeName());
+	      }
+	      // Else the naming context has already been
+	      // added by an other server that is the (new)
+	      // owner of this context.
+      
+	  }else{
+	      NamingContext nc;
+	      try{
+		  nc = getServerImpl().getNamingContext(contexts[i].getCompositeName());
+              }catch(MissingRecordException mre){
+		  nc=null;
+	      }catch( MissingContextException mce){
+		  nc=null;
+	      }
+	      if(nc == null){
+		  nc = getServerImpl().newNamingContext( getId(),null,contexts[i].getCompositeName());
+		  contexts[i].getNamingContext().setOwnerId(getId());
+	      }
+	     
+	      Enumeration enumRecord = contexts[i].getNamingContext().getEnumRecord();
+	      while (enumRecord.hasMoreElements()) {          
+		  Record record =(Record)  enumRecord.nextElement();
+		  nc.addRecord(record);
+		  if(record instanceof ContextRecord){
+		      CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
+		      record_compositeName.put(record,parentPath);
+		  }
+	      }
+	      composite_context.put(contexts[i].getCompositeName(),nc);
+	 }
       }
+      if(looseCoupling){
+	  Enumeration enumKeyRecord = record_compositeName.keys();
+	  while(enumKeyRecord.hasMoreElements()) { 
+	      Record recor =(Record)enumKeyRecord.nextElement();
+	      CompositeName cn =(CompositeName)((CompositeName)(record_compositeName.get(recor))).clone();
+	      cn.add(recor.getName());
+	      if(composite_context.containsKey(cn)){
+		  NamingContext nc  =(NamingContext)composite_context.get(cn);
+		  ((ContextRecord)recor).setId(nc.getId());
+	      }	      
+          }
+	  Enumeration enumContext = composite_context.elements();
+	  while(enumContext.hasMoreElements()) { 
+	      NamingContext nc  =(NamingContext)enumContext.nextElement();
+	      getServerImpl().storeNamingContext(nc);
+	  }
+      }
+      
+
       
       Vector retryNames = new Vector();
       Vector retryLists = new Vector();
