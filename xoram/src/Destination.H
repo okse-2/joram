@@ -25,6 +25,7 @@
 #define DESTINATION_H
 
 #include <string.h>
+#include "Types.H"
 
 /**
  * A Destination object encapsulates a Joram's specific address.
@@ -36,9 +37,22 @@ class Destination {
   char* name;
 
  public:
-  enum {QUEUE, TOPIC};
+  enum {QUEUE, TOPIC, NOTYPE};
 
   Destination(char* uid, char type, char* name);
+
+  ~Destination() {
+    if(DEBUG)
+      printf("~Destination(): uid = 0x%x, name = 0x%x\n", uid, name);//NTA tmp
+    if (uid != (char*) NULL) {
+      delete[] uid;
+      uid = (char*) NULL;
+    }
+    if (name != (char*) NULL) {
+      delete[] name;
+      name = (char*) NULL;
+    }
+  }
 
   /**
    * Returns the unique internal name of the destination.
@@ -73,18 +87,19 @@ class Destination {
       return "queue";
     else if (type == TOPIC)
       return "topic";
-    return (char*) NULL;
+    return "noType";
   }
 
   /**
    * Non API method, should be hidden.
    */
   static char stringToType(char *type) {
+    if (type == (char*) NULL) return  NOTYPE;
     if (strcasecmp(type, "queue"))
       return QUEUE;
     else if (strcasecmp(type, "topic"))
       return TOPIC;
-    return 0;
+    return NOTYPE;
   }
 
   /**

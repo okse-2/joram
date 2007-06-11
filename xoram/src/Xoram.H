@@ -116,6 +116,8 @@ class Connection {
    */
   Connection(Channel* channel);
 
+  ~Connection();
+
   /**
    *
    */
@@ -243,6 +245,8 @@ class TCPConnectionFactory : public ConnectionFactory {
   int dfltPort;
 
  public:
+   ~TCPConnectionFactory();
+   
   /**
    *  Creates a TCP connection factory with default server parameters
    * ("localhost", 16010) and user identity ("anonymous", "anonymous").
@@ -375,6 +379,8 @@ class RequestMultiplexer : Synchronized, Daemon {
   RequestMultiplexer(Connection* cnx,
                      Channel* channel) throw (XoramException);
   
+  ~RequestMultiplexer();
+
   boolean isClosed();
 
   void setExceptionListener(ExceptionListener* exceptionListener);
@@ -471,7 +477,7 @@ class Session : public Daemon {
   /** The connection the session belongs to. */
   Connection* cnx;
 
-  enum {STOP, START, CLOSE};
+  enum {NONE, STOP, START, CLOSE};
   int status;
 
   /** The identifier of the session. */
@@ -589,6 +595,8 @@ class Session : public Daemon {
           boolean transacted,
           int acknowledgeMode,
           RequestMultiplexer* mtpx) throw (XoramException);
+
+  ~Session();
 
   /**
    * Returns the connection the session belongs to.
@@ -851,6 +859,8 @@ class MessageProducer {
   MessageProducer(Session* session, 
                   Destination* dest) throw (IllegalStateException);
 
+  ~MessageProducer();
+
   /**
    * Sets the producer's default delivery mode.
    * Delivery mode is set to PERSISTENT by default.
@@ -1107,6 +1117,8 @@ class MessageConsumer {
                   char* selector,
                   char* subName, 
                   boolean nolocal) throw (XoramException);
+
+  ~MessageConsumer();
 
   /**
    * Non API method, should be hidden.

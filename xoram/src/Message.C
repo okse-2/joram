@@ -23,6 +23,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "XoramException.H"
 #include "Message.H"
@@ -36,6 +37,8 @@
  * Constructs a bright new <code>Message</code>.
  */
 Message::Message() {
+  if(DEBUG)
+    printf("=> Message():\n");
   session = (Session*) NULL;
 
   type = SIMPLE;
@@ -50,6 +53,30 @@ Message::Message() {
   toId = (char*) NULL;
   replyToId = (char*) NULL;
   correlationId = (char*) NULL;
+  optionalHeader = (Properties*) NULL;
+  properties = (Properties*) NULL;
+  body = (byte*) NULL;
+  replyToType = Destination::NOTYPE;
+  if(DEBUG)
+    printf("<= Message():\n");
+}
+
+Message::~Message() {
+  if(DEBUG)
+    printf("~Message(): properties = 0x%x, optionalHeader = 0x%x\n", properties, optionalHeader);
+  if (properties != NULL) {
+    delete properties;
+    properties = (Properties*) NULL;
+  }
+  if (optionalHeader != NULL) {
+    delete optionalHeader;
+    optionalHeader = (Properties*) NULL;
+  }
+  if (id != (char*) NULL) {
+    delete id;
+    id = (char*) NULL;
+  }
+  return;
 }
 
 void Message::acknowledge() {
@@ -184,7 +211,11 @@ void Message::setTimestamp(long long timestamp) {
 // ==================================================
 
 void Message::clearProperties() {
-  if (properties == (Properties*) NULL) return;
+  if (properties != (Properties*) NULL) { 
+    delete properties;
+    properties = (Properties*) NULL;
+  }
+  return;
 }
 
 void Message::checkPropertyName(char* name) throw (MessageFormatException) {
@@ -328,7 +359,14 @@ Message* Message::clone() {
 
   clone->session = session;
   clone->type = type;
-  clone->id = id;
+  if (id != (char*) NULL) {
+    char* cloneId = new char[strlen(id)+1];
+    strcpy(cloneId, id);
+    cloneId[strlen(id)] = '\0';
+    clone->id = cloneId;
+  } else {
+    clone->id = id;
+  }
   clone->persistent = persistent;
   clone->priority = priority;
   clone->expiration = expiration;

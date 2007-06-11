@@ -47,7 +47,7 @@ class Channel {
  protected:
   enum {INIT, CONNECT, CONNECTING, CLOSE};
 
-  int status ;
+  int status;
   int key;
 
  public:
@@ -72,6 +72,9 @@ class TcpMessage {
   TcpMessage(long long id, AbstractRequest* msg) {
     this->id = id;
     this->msg = msg;
+  }
+
+  ~TcpMessage() {
   }
 };
 
@@ -100,6 +103,8 @@ class TcpChannel : public Channel {
 
  public:
   TcpChannel(char *user, char *pass, char *host, int port) {
+    if(DEBUG)
+      printf("=> TcpChannel():\n");
     this->user = user;
     this->pass = pass;
     this->host = host;
@@ -122,6 +127,25 @@ class TcpChannel : public Channel {
     sock = -1;
     out = NULL;
     in = NULL;
+    if(DEBUG)
+      printf("<= TcpChannel(): pendingMessages = 0x%x\n", pendingMessages);
+  }
+
+  ~TcpChannel() {
+    if(DEBUG)
+      printf("~TcpChannel(): pendingMessages = 0x%x, out = 0x%x, in = 0x%x\n", pendingMessages, out, in);
+    if (pendingMessages != (Vector<TcpMessage>*) NULL) {
+      delete pendingMessages;
+      pendingMessages = (Vector<TcpMessage>*) NULL;
+    }
+    if (out != (OutputStream*) NULL) {
+      delete out;
+      out = (OutputStream*) NULL;
+    }
+    if (in != (InputStream*) NULL) {
+      delete in;
+      in = (InputStream*) NULL;
+    }
   }
 
   virtual void connect()  {
@@ -235,6 +259,7 @@ class TcpChannel : public Channel {
           break;
         } else {
           pendingMessages->removeElementAt(0);
+          delete pendingMsg;
         }
       }
 
@@ -265,8 +290,8 @@ class TcpChannel : public Channel {
 
 void RequestMultiplexer::run() {
   try {
-    AbstractReply* reply;
-      
+    AbstractReply* reply = (AbstractReply*) NULL;
+
     while (running) {
       canStop = true;
       try {
@@ -296,8 +321,11 @@ void RequestMultiplexer::run() {
 
 RequestMultiplexer::RequestMultiplexer(Connection* cnx,
                                        Channel* channel) throw (XoramException) : Synchronized(), Daemon() {
+  if(DEBUG)
+    printf("=> RequestMultiplexer():\n");
   this->channel = channel;
-  this->cnx = cnx; 
+  this->cnx = cnx;
+  exceptionListener = (ExceptionListener*) NULL;
   requestsTable = new Vector<ReplyListener>();
   requestCounter = 0;
   channel->connect();
@@ -305,8 +333,23 @@ RequestMultiplexer::RequestMultiplexer(Connection* cnx,
   status = OPEN;
 
   Daemon::start();
+  if(DEBUG)
+    printf("<= RequestMultiplexer(): requestsTable = 0x%x\n", requestsTable);
 }
   
+RequestMultiplexer::~RequestMultiplexer() {
+  if(DEBUG)
+    printf("~RequestMultiplexer(): requestsTable = 0x%x, exceptionListener = 0x%x\n", requestsTable, exceptionListener);
+  if (requestsTable != (Vector<ReplyListener>*) NULL) {
+    delete requestsTable;
+    requestsTable = (Vector<ReplyListener>*) NULL;
+  }
+  if (exceptionListener != (ExceptionListener*) NULL) {
+    delete exceptionListener;
+    exceptionListener = (ExceptionListener*) NULL;
+  }
+}
+
 boolean RequestMultiplexer::isClosed() {
   return (status == CLOSE);
 }
@@ -439,6 +482,11 @@ void RequestMultiplexer::deny(ConsumerMessages* messages) {
   } catch (Exception exc) {
     // Connection failure, nothing to do
   }
+
+  if (messages != (ConsumerMessages*) NULL) {
+    delete messages;
+    messages = (ConsumerMessages*) NULL;
+  }
 }
 
 // ######################################################################
@@ -450,13 +498,32 @@ void RequestMultiplexer::deny(ConsumerMessages* messages) {
 // ######################################################################
 
 Requestor::Requestor(RequestMultiplexer* mtpx) : Synchronized() {
+  if(DEBUG)
+    printf("=> Requestor()\n");
   this->mtpx = mtpx;
   status = INIT;
   req = (AbstractRequest*) NULL;
   reply = (AbstractReply*) NULL;
+  if(DEBUG)
+    printf("<= Requestor()\n");
 }
 
-Requestor::~Requestor() {}
+Requestor::~Requestor() {
+  if(DEBUG)
+    printf("~Requestor(): req = 0x%x, reply = 0x%x\n", req, reply);
+  if (req != (AbstractRequest*) NULL) {
+    delete req;
+    req = (AbstractRequest*) NULL;
+  }
+  if (reply != (AbstractReply*) NULL) {
+    delete reply;
+    reply = (AbstractReply*) NULL;
+  }
+  if (mtpx != (RequestMultiplexer*) NULL) {
+    delete mtpx;
+    mtpx = (RequestMultiplexer*) NULL;
+  }
+}
 
 AbstractReply* Requestor::request(AbstractRequest* req) {
   return request(req, 0);
@@ -520,7 +587,7 @@ boolean Requestor::replyReceived(AbstractReply* reply) throw (AbortedRequestExce
     this->reply = reply;
     status = DONE;
     notify();
-    sync_end();
+    sync_end();    
     return true;
   }
   sync_end();
@@ -548,6 +615,8 @@ void Requestor::close() {
 // ######################################################################
 
 Connection::Connection(Channel* channel) {
+  if(DEBUG)
+    printf("=> Connection()\n");
   exclist = (ExceptionListener*) NULL;
   clientid = (char*) NULL;
   this->channel =  channel;
@@ -570,6 +639,44 @@ Connection::Connection(Channel* channel) {
   key = reply->getCnxKey();
 
   delete reply;
+  reply = (CnxConnectReply*) NULL;
+
+  if(DEBUG)
+    printf("<= Connection(): clientid = 0x%x, channel = 0x%x, mtpx = 0x%x, requestor = 0x%x, sessions = 0x%x, proxyId = 0x%x\n", clientid, channel, mtpx, requestor, sessions, proxyId);
+}
+
+Connection::~Connection() {
+  if(DEBUG)
+    printf("~Connection(): exclist = 0x%x, clientid = 0x%x, channel = 0x%x, mtpx = 0x%x, requestor = 0x%x, sessions = 0x%x, proxyId = 0x%x\n", exclist, clientid, channel, mtpx, requestor, sessions, proxyId);
+  if (exclist != (ExceptionListener*) NULL) {
+    delete exclist;
+    exclist = (ExceptionListener*) NULL;
+  }
+  if (clientid != (char*) NULL) {
+    delete[] clientid;
+    clientid = (char*) NULL;
+  }
+  if (channel != (TcpChannel*) NULL) {
+    delete (TcpChannel*) channel;
+    channel = (TcpChannel*) NULL;
+  }
+  if (mtpx != (RequestMultiplexer*) NULL) {
+    delete mtpx;
+    mtpx = (RequestMultiplexer*) NULL;
+  }
+  if (requestor != (Requestor*) NULL) {
+    delete requestor;
+    requestor = (Requestor*) NULL;
+  }
+  if (sessions != (Vector<Session>*) NULL) {
+    delete sessions;
+    sessions = (Vector<Session>*) NULL;
+  }
+  if (proxyId != (char*) NULL) {
+    delete[] proxyId;
+    proxyId = (char*) NULL;
+  }
+  
 }
 
 boolean Connection::isStopped() {
@@ -635,8 +742,13 @@ void Connection::stop() {
   if (status != STOP) {
     // Sending a synchronous "stop" request to the server:
     CnxStopRequest* request = new CnxStopRequest();
-    requestor->request(request);
+    AbstractReply* reply = requestor->request(request);
     delete request;
+    request = (CnxStopRequest*) NULL;
+    if (reply != (AbstractReply*) NULL) {
+      delete reply;
+      reply = (AbstractReply*) NULL;
+    }
 
     // Set the status as STOP as the following operations
     // (Session.stop) can't fail.
@@ -655,8 +767,13 @@ void Connection::close() {
   }
 
   CnxCloseRequest* request = new CnxCloseRequest();
-  requestor->request(request);
+  AbstractReply* reply = requestor->request(request);
   delete request;
+  request = (CnxCloseRequest*) NULL;
+  if (reply != (AbstractReply*) NULL) {
+    delete reply;
+    reply = (AbstractReply*) NULL;
+  }
 
   mtpx->close();
 
@@ -671,7 +788,11 @@ char* Connection::nextSessionId() {
 /*     sessionsC = 0; */
   sessionsC++;
   sprintf(buf, "c%ds%d", key, sessionsC);
-  return strdup(buf);
+  char* ret = new char[strlen(buf)+1];
+  strcpy(ret, buf);
+  ret[strlen(buf)] = '\0';
+  return ret;
+  //  return strdup(buf);
 }
  
 /** Returns a new message identifier. */
@@ -681,8 +802,12 @@ char* Connection::nextMessageId() {
 /*   if (messagesC == Integer.MAX_VALUE) */
 /*     messagesC = 0; */
   messagesC++;
-  sprintf(buf, "ID:%sc%dm%d", proxyId+1, key, messagesC);
-  return strdup(buf);
+  sprintf(buf, "ID:%sc%dm%d\0", proxyId+1, key, messagesC);
+  char* ret = new char[strlen(buf)+1];
+  strcpy(ret, buf);
+  ret[strlen(buf)] = '\0';
+  return ret;
+  //return strdup(buf);
 }
 
 /** Returns a new subscription name. */
@@ -693,7 +818,11 @@ char* Connection::nextSubName() {
 /*     subsC = 0; */
   subsC++;
   sprintf(buf, "c%dsub%d", key, subsC);
-  return strdup(buf);
+  char* ret = new char[strlen(buf)+1];
+  strcpy(ret, buf);
+  ret[strlen(buf)] = '\0';
+  return ret;
+  //return strdup(buf);
 }
 
 // ######################################################################
@@ -719,6 +848,12 @@ Connection* ConnectionFactory::createConnection() {
 TCPConnectionFactory::TCPConnectionFactory() {
   this->dfltHost = "localhost";
   this->dfltPort = 16010;
+}
+
+TCPConnectionFactory::~TCPConnectionFactory() {
+  if(DEBUG)
+    printf("~TCPConnectionFactory()\n");
+  delete[] dfltHost;
 }
 
 TCPConnectionFactory::TCPConnectionFactory(char *host, int port) {
@@ -747,9 +882,22 @@ Connection* TCPConnectionFactory::createConnection(char *user, char *pass, char 
 // ######################################################################
 
 Destination::Destination(char* uid, char type, char* name) {
-  this->uid = uid;
+  if (uid != (char*) NULL) {
+    char* newUid = new char[strlen(uid)+1];
+    strcpy(newUid, uid);
+    newUid[strlen(uid)] = '\0';
+    this->uid = newUid;
+  }
+  if (name != (char*) NULL) {
+    char* newName = new char[strlen(name)+1];
+    strcpy(newName, name);
+    newName[strlen(name)] = '\0';
+    this->name = newName;
+  }
+  
+ // this->uid = uid;
+ // this->name = name;
   this->type = type;
-  this->name = name;
 }
 
 char* Destination::getUID() {
@@ -799,6 +947,10 @@ Session::Session(Connection* cnx,
                  boolean transacted,
                  int acknowledgeMode,
                  RequestMultiplexer* mtpx) throw (XoramException) {
+  if(DEBUG)
+    printf("=> Session()\n");
+  this->status = NONE;
+  this->listenerCount = 0;
   this->cnx = cnx;
   this->ident = cnx->nextSessionId();
   this->transacted = transacted;
@@ -814,6 +966,9 @@ Session::Session(Connection* cnx,
   consumers = new Vector<MessageConsumer>();
   producers = new Vector<MessageProducer>();
 
+  if(DEBUG)
+    printf("<= Session(): cnx = 0x%x, ident = 0x%x, consumers = 0x%x, producers = 0x%x, mtpx= 0x%x, requestor = 0x%x, receiveRequestor = 0x%x\n", cnx, ident, consumers, producers, mtpx, requestor, receiveRequestor);
+
 /*   repliesIn = new XQueue<MessageListenerContext>(); */
 /*   sendings = new Hashtable(); */
 /*   deliveries = new Hashtable(); */
@@ -821,6 +976,36 @@ Session::Session(Connection* cnx,
 /*     setStatus(Status.STOP); */
 /*     setSessionMode(SessionMode.NONE); */
 /*     setRequestStatus(RequestStatus.NONE); */
+}
+
+Session::~Session() {
+  if(DEBUG)
+    printf("~Session(): cnx = 0x%x, ident = 0x%x, consumers = 0x%x, producers = 0x%x, pendingMessageConsumer = 0x%x, mtpx= 0x%x, requestor = 0x%x, receiveRequestor = 0x%x\n", cnx, ident, consumers, producers, pendingMessageConsumer, mtpx, requestor, receiveRequestor);
+
+  if (ident != (char*) NULL) {
+    delete[] ident;
+    ident = (char*) NULL;
+  }
+  if (consumers != (Vector<MessageConsumer>*) NULL) {
+    delete consumers;
+    consumers = (Vector<MessageConsumer>*) NULL;
+  }
+  if (producers != (Vector<MessageProducer>*) NULL) {
+    delete producers;
+    producers = (Vector<MessageProducer>*) NULL;
+  }
+  if (pendingMessageConsumer != (MessageConsumer*) NULL) {
+    delete pendingMessageConsumer;
+    pendingMessageConsumer = (MessageConsumer*) NULL;
+  }
+  if (receiveRequestor != (Requestor*) NULL) {
+    delete receiveRequestor;
+    receiveRequestor = (Requestor*) NULL;
+  }
+  if (requestor != (Requestor*) NULL) {
+    delete requestor;
+    requestor = (Requestor*) NULL;
+  }
 }
 
 Connection* Session::getConnection() {
@@ -925,7 +1110,11 @@ void Session::unsubscribe(char* name) {
 /*         throw XoramException(); */
 /*     } */
 /*   } */
-  syncRequest(new ConsumerUnsubRequest(name));
+  AbstractReply* reply = syncRequest(new ConsumerUnsubRequest(name));
+  if (reply != (AbstractReply*) NULL) {
+    delete reply;
+    reply = (AbstractReply*) NULL;
+  }
 }
 
 /**
@@ -1091,7 +1280,7 @@ void Session::close() {
 /* //       repliesIn.stop(); */
 /* //     } catch (InterruptedException iE) {} */
       
-  stop();
+  //stop();
 
 /*     // The requestor must be closed because */
 /*     // it could be used by a concurrent receive */
@@ -1205,10 +1394,17 @@ void Session::send(Message* msg, Destination* dest,
     // If the session is transacted, keeping the request for later delivery:
 /*     prepareSend(dest, msg->clone()); */
   } else {
-    ProducerMessages* pM = new ProducerMessages(dest->getUID(), msg->clone());
-    requestor->request(pM);
+     ProducerMessages* pM = new ProducerMessages(dest->getUID(), msg->clone());
+    AbstractReply* reply = requestor->request(pM);
+    if (reply != (AbstractReply*) NULL) {
+      delete reply;
+      reply = (AbstractReply*) NULL;
+    }
+    if (pM != (ProducerMessages*) NULL) {
+      delete pM;
+      pM = (ProducerMessages*) NULL;
+    }
   }
-
 }
 
 void Session::addProducer(MessageProducer* prod) {
@@ -1245,6 +1441,9 @@ Message* Session::receive(long timeOut1, long timeOut2,
       ConsumerReceiveRequest* request = new ConsumerReceiveRequest(targetName, selector, timeOut1, queueMode);
 /*       if (receiveAck) request.setReceiveAck(true); */
       reply = (ConsumerMessages*) receiveRequestor->request(request, timeOut2);
+
+      delete request;
+      request = (ConsumerReceiveRequest*) NULL;
         
 /*       synchronized (this) { */
 /*         // The session may have been  */
@@ -1259,18 +1458,29 @@ Message* Session::receive(long timeOut1, long timeOut2,
         if (reply != (ConsumerMessages*) NULL) {
           Vector<Message>* msgs = reply->getMessages();
           if ((msgs != (Vector<Message>*) NULL) && (msgs->size() != 0)) {
-            Message* msg = msgs->elementAt(0);
+            Message* msg = msgs->elementAt(0)->clone();
             char* msgId = msg->getMessageID();
             
 /*             // Auto ack: acknowledging the message: */
 /*             if (autoAck && ! receiveAck) { */
               ConsumerAckRequest* req = new ConsumerAckRequest(targetName, queueMode);
+              if (msgId != (char*) NULL) {
+                char* newMsgID = new char[strlen(msgId)+1];
+                strcpy(newMsgID, msgId);
+                newMsgID[strlen(msgId)] = '\0';
+                msgId = newMsgID;
+              }
               req->addId(msgId);
               mtpx->sendRequest(req);
+              delete req;
 /*             } else { */
 /*               prepareAck(targetName, msgId, queueMode); */
 /*             } */
             msg->session = this;
+
+            delete reply;
+            reply = (ConsumerMessages*) NULL;
+
             return msg;
           } else {
             return (Message*) NULL;
@@ -1385,6 +1595,11 @@ MessageProducer::MessageProducer(Session* session,
   this->closed = false;
   this->session = session;
   this->dest = dest;
+}
+
+MessageProducer::~MessageProducer() {
+  if(DEBUG)
+    printf("~MessageProducer()\n");
 }
 
 /**
@@ -1602,6 +1817,9 @@ MessageConsumer::MessageConsumer(Session* session,
   /*       throw new InvalidSelectorException("Invalid selector syntax: " + sE); */
   /*     } */
 
+
+  if(DEBUG)
+    printf("=> MessageConsumer():\n");
   // If the destination is a topic, the consumer is a subscriber:
   if (dest->isQueue()) {
     targetName = dest->getUID();
@@ -1613,10 +1831,14 @@ MessageConsumer::MessageConsumer(Session* session,
     } else {
       durableSubscriber = true;
     }
-    session->syncRequest(new ConsumerSubRequest(dest->getUID(), subName,
+    AbstractReply* reply = session->syncRequest(new ConsumerSubRequest(dest->getUID(), subName,
                                                 selector,
                                                 noLocal,
                                                 durableSubscriber));
+    if (reply != (AbstractReply*) NULL) {
+      delete reply;
+      reply = (AbstractReply*) NULL;
+    }
     targetName = subName;
     this->noLocal = noLocal;
     queueMode = false;
@@ -1628,6 +1850,17 @@ MessageConsumer::MessageConsumer(Session* session,
   this->mcl = (MessageConsumerListener*) NULL;
 
   this->closed = false;
+  if(DEBUG)
+    printf("<= MessageConsumer(): mcl = 0x%x\n", mcl);
+}
+
+MessageConsumer::~MessageConsumer() {
+  if(DEBUG)
+    printf("~MessageConsumer(): mcl = 0x%x\n", mcl);
+  if (mcl != (MessageConsumerListener*) NULL) {
+    delete mcl;
+    mcl = (MessageConsumerListener*) NULL;
+  }
 }
 
 char* MessageConsumer::getTargetName() {
@@ -1764,13 +1997,21 @@ void MessageConsumer::close() {
     // For a topic, remove the subscription.
     if (durableSubscriber) {
       try {
-        session->syncRequest(new ConsumerCloseSubRequest(targetName));
+        AbstractReply* reply = session->syncRequest(new ConsumerCloseSubRequest(targetName));
+        if (reply != (AbstractReply*) NULL) {
+          delete reply;
+          reply = (AbstractReply*) NULL;
+        }
       } catch (XoramException exc) {
         // TODO
       }
     } else {
       try {
-        session->syncRequest(new ConsumerUnsubRequest(targetName));
+        AbstractReply* reply = session->syncRequest(new ConsumerUnsubRequest(targetName));
+        if (reply != (AbstractReply*) NULL) {
+          delete reply;
+          reply = (AbstractReply*) NULL;
+        }
       } catch (XoramException exc) {
         // TODO
       }

@@ -109,6 +109,7 @@ class AbstractRequest : public AbstractMessage {
  public:
   AbstractRequest();
   AbstractRequest(char* target);
+  ~AbstractRequest();
 
   /** 
    * Sets the request identifier. 
@@ -159,6 +160,7 @@ class AbstractReply : public AbstractMessage {
 class CnxConnectRequest : public AbstractRequest {
  public:
   CnxConnectRequest();
+  ~CnxConnectRequest();
 };
 
 class CnxConnectReply : public AbstractReply {
@@ -173,6 +175,8 @@ class CnxConnectReply : public AbstractReply {
   CnxConnectReply();
 
   CnxConnectReply(CnxConnectRequest req, int cnxKey, char*  proxyId);
+
+  ~CnxConnectReply();
 
   /** Sets the connection key. */
   void setCnxKey(int cnxKey);
@@ -197,21 +201,25 @@ class CnxConnectReply : public AbstractReply {
 class CnxStartRequest : public AbstractRequest {
  public:
   CnxStartRequest();
+  ~CnxStartRequest();
 };
 
 class CnxStopRequest : public AbstractRequest {
  public:
   CnxStopRequest();
+  ~CnxStopRequest();
 };
 
 class CnxCloseRequest : public AbstractRequest {
  public:
   CnxCloseRequest();
+  ~CnxCloseRequest();
 };
 
 class CnxCloseReply : public AbstractReply {
  public:
   CnxCloseReply();
+  ~CnxCloseReply();
 };
 
 class Message;
@@ -247,6 +255,8 @@ class ProducerMessages : public AbstractRequest {
    * @param msg  Message to carry.
    */
   ProducerMessages(char* dest, Message* msg);
+
+  ~ProducerMessages();
 
   /** Returns the produced messages. */
   Vector<Message>* getMessages();
@@ -309,6 +319,8 @@ class ConsumerReceiveRequest : public AbstractRequest {
    */
   ConsumerReceiveRequest(char* targetName, char* selector,
                          long long timeToLive, boolean queueMode);
+
+  ~ConsumerReceiveRequest();
 
   /* ***** ***** ***** ***** *****
    * Streamable interface
@@ -381,6 +393,8 @@ class ConsumerMessages : public AbstractReply {
    * @param queueMode  <code>true</code> if it replies to a queue consumer.
    */
    ConsumerMessages(int correlationId, char* comingFrom, boolean queueMode);
+
+   ~ConsumerMessages();
 
   /** Returns the messages to deliver. */
    Vector<Message>* getMessages() ;
@@ -464,6 +478,8 @@ class ConsumerSubRequest : public AbstractRequest {
                      boolean noLocal,
                      boolean durable);
 
+  ~ConsumerSubRequest();
+
   /** Sets the subscription name. */
   void setSubName(char* subName);
 
@@ -527,6 +543,8 @@ class ConsumerUnsubRequest : public AbstractRequest {
    * @param subName  The name of the subscription to delete.
    */
   ConsumerUnsubRequest(char* subName);
+
+  ~ConsumerUnsubRequest();
 };
 
 /**
@@ -556,6 +574,8 @@ class ConsumerAckRequest : public AbstractRequest {
    *          a queue.
    */
   ConsumerAckRequest(char* targetName, boolean queueMode);
+  
+  ~ConsumerAckRequest();
 
   /** Sets the vector of identifiers. */
   void setIds(Vector<char>* ids);
@@ -635,6 +655,8 @@ class ConsumerDenyRequest : public AbstractRequest {
    */
   ConsumerDenyRequest(char* targetName, char* id, boolean queueMode, boolean doNotAck);
 
+  ~ConsumerDenyRequest();
+
   /** Sets the identifier. */
   void setId(char* id);
 
@@ -706,6 +728,8 @@ class SessAckRequest : public AbstractRequest {
   SessAckRequest(char* targetName,
                  Vector<char>* ids,
                  boolean queueMode);
+
+  ~SessAckRequest();
 
   /** Sets the vector of identifiers. */
   void setIds(Vector<char>* ids);
@@ -785,6 +809,8 @@ class SessDenyRequest : public AbstractRequest {
    */
   SessDenyRequest(char* targetName, Vector<char>* ids, boolean queueMode, boolean doNotAck);
 
+  ~SessDenyRequest();
+
   /** Sets the vector of identifiers. */
   void setIds(Vector<char>* ids);
 
@@ -859,6 +885,8 @@ class MomExceptionReply : public AbstractReply {
    */
   MomExceptionReply();
 
+  ~MomExceptionReply();
+
   /** Returns thewrapped exception type. */
   int getType();
 
@@ -889,6 +917,7 @@ class MomExceptionReply : public AbstractReply {
 class ServerReply : public AbstractReply {
  public:
   ServerReply();
+  ~ServerReply();
 };
 
 /**
@@ -916,6 +945,8 @@ class ActivateConsumerRequest : public AbstractRequest {
    */
   ActivateConsumerRequest(char* targetName,
                           boolean queueMode);
+
+  ~ActivateConsumerRequest();
 
   boolean getActivate();
 
@@ -957,6 +988,8 @@ class ConsumerCloseSubRequest : public AbstractRequest {
    * @param subName  The name of the closing durable subscription.
    */
   ConsumerCloseSubRequest(char* subName);
+
+  ~ConsumerCloseSubRequest();
 };
 
 #endif /* ABSTRACT_MESSAGE_H */

@@ -16,7 +16,7 @@ LIBXORAM = libxoram.dll
 CC = g++ $(CCOPT)
 LD = g++ $(CCOPT) $(LDFLAGS)
 
-TESTS = ../tests/common ../tests/base
+TESTS = ../tests/common ../tests/base ../tests/wrapper
 
 LIBXORAMOBJS = \
 	Synchronized.o \
@@ -25,7 +25,8 @@ LIBXORAMOBJS = \
 	XStream.o \
 	AbstractMessage.o \
 	Message.o \
-	Xoram.o
+	Xoram.o \
+	XoramWrapper.o
 
 clean:
 	rm -f *.o *~ $(LIBXORAM)
