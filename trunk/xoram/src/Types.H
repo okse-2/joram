@@ -37,6 +37,10 @@
 #define INTEGER_MAX_VALUE 0x7FFFFFFF
 #endif /* INTEGER_MAX_VALUE */
 
+#ifndef DEBUG
+#define DEBUG    (FALSE)
+#endif /* DEBUG */
+
 typedef char byte;
 typedef byte boolean;
 

@@ -32,6 +32,8 @@
 // ######################################################################
 
 void Properties::init(int capacity, float loadFactor) {
+  if(DEBUG)
+    printf("=> Properties::init()\n");
   if (capacity < 0)
     throw IllegalArgumentException();
   if (loadFactor <= 0)
@@ -41,8 +43,13 @@ void Properties::init(int capacity, float loadFactor) {
   length = capacity;
   if (length == 0) length = 1;
   table = new Entry* [length];
+  for (int i=0; i<length; i++) {
+    table[i] = (Entry*) NULL;
+  } 
   this->loadFactor = loadFactor;
   threshold = (int) (length * loadFactor);
+  if(DEBUG)
+    printf("<= Properties::init() table = 0x%x\n", table);
 }
 
 Properties::Properties(int capacity, float loadFactor) {
@@ -58,8 +65,15 @@ Properties::Properties() {
 }
 
 Properties::~Properties() {
+  if(DEBUG)
+    printf("~Properties(): table = 0x%x\n", table);
   clear();
-  delete table;
+  if (table != (Entry**) NULL) {
+    delete[] table;
+    table = (Entry**) NULL;
+  }
+  count = 0;
+  length = 0;
 }
 
 int Properties::size() {
@@ -72,7 +86,9 @@ boolean Properties::isEmpty() {
 
 void Properties::clear() {
   for (int index = length; --index >= 0; ) {
-    delete table[index];
+    if (table[index] != (Entry*) NULL) {
+      delete table[index];
+    }
     table[index] = (Entry*) NULL;
   }
   count = 0;
@@ -132,6 +148,7 @@ Properties::Entry* Properties::get(char* key) {
   if  (length > 0) {
     int hash = hashCode(key);
     int index = (hash & 0x7FFFFFFF) % length;
+    //printf("index = %i, table[%i]=0x%x\n",index,index,table[index]);//NTA tmp
     for (Entry* e=table[index]; e!=(Entry*) NULL ; e=e->next) {
       if ((e->hash == hash) && (strcmp(e->key, key) == 0)) {
         return e;

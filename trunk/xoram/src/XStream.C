@@ -38,13 +38,14 @@ int OutputStream::writeBuffer(byte* buf, int len) {
     if (newcount > newlength)
       newlength = newcount;
 
-    newbuf = (byte*) malloc(newlength);
+    newbuf = new byte[newlength];//(byte*) malloc(newlength);
     if (newbuf == NULL) {
-      perror("writeBuffer - malloc");
+      //perror("writeBuffer - malloc");
+      perror("writeBuffer - new byte[]");
       return -1;
     }
     memcpy(newbuf, buffer, count);
-    free(buffer);
+    delete[] buffer;
     buffer = newbuf;
     length = newlength;
   }
@@ -55,13 +56,24 @@ int OutputStream::writeBuffer(byte* buf, int len) {
 }
 
 OutputStream::OutputStream() {
+  if(DEBUG)
+    printf("=> OutputStream():\n");
   count = 4;
   length = 256;
-  buffer = (byte*) malloc(length);
+  buffer = new byte[length]; //(byte*) malloc(length);
+  if(DEBUG)
+    printf("<= OutputStream(): buffer = 0x%x\n", buffer);
 }
 
 OutputStream::~OutputStream() {
-  free(buffer);
+  if(DEBUG)
+    printf("~OutputStream(): buffer = 0x%x\n", buffer);
+  //free(buffer);
+  if (buffer != (byte*) NULL) {
+    delete[] buffer;
+    buffer = (byte*) NULL;
+    length = 0;
+  }
 }
 
 void OutputStream::reset() {
@@ -123,13 +135,14 @@ int OutputStream::writeBoolean(boolean b) {
 
 int OutputStream::writeByte(byte b) {
   if ((count + 1) > length) {
-    byte* newbuf = (byte*) malloc(length*2);
+    byte* newbuf = new byte[length*2];//(byte*) malloc(length*2);
     if (newbuf == NULL) {
-      perror("writeByte - malloc");
+      //perror("writeByte - malloc");
+      perror("writeByte - new byte[]");
       return -1;
     }
     memcpy(newbuf, buffer, count);
-    free(buffer);
+    delete[] buffer;
     buffer = newbuf;
     length = length *2;
   }
@@ -207,7 +220,7 @@ int InputStream::readBuffer(byte* buf, int len) {
   return len;
 }
 
-// Attention le buffer doit avoir ete alloue avec malloc
+// Attention le buffer doit avoir ete alloue avec new (pas malloc).
 /* InputStream::InputStream(byte* buffer, int length, int count) { */
 /*   this->buffer = buffer; */
 /*   this->length = length; */
@@ -216,14 +229,25 @@ int InputStream::readBuffer(byte* buf, int len) {
 /* } */
 
 InputStream::InputStream() {
-  buffer = (byte*) malloc(256);
+  if(DEBUG)
+    printf("=> InputStream():\n");
+  buffer = new byte[256];//(byte*) malloc(256);
   length = 256;
   count = 0;
   pos = 0;
+  if(DEBUG)
+    printf("<= InputStream(): buffer = 0x%x\n", buffer);
 }
 
 InputStream::~InputStream() {
-  if (length > 0) free(buffer);
+  if(DEBUG)
+    printf("~InputStream(): buffer = 0x%x\n", buffer);
+  if (length > 0) {
+    //free(buffer);
+    delete[] buffer;
+    buffer = (byte*) NULL;
+    length = 0;
+  }
 }
 
 void InputStream::reset() {
@@ -242,10 +266,12 @@ int InputStream::readFrom(int fd) {
   }
   len = ntohl(buf);
   if (len > length) {
-    free(buffer);
-    buffer = (byte*) malloc(len);
+    //free(buffer);
+    delete[] buffer;
+    buffer = new byte[len];//(byte*) malloc(len);
     if (buffer == NULL) {
-      perror("readFrom - malloc");
+      //perror("readFrom - malloc");
+      perror("readFrom - new byte[]");
       return -1;
     }
     length = len;
@@ -312,7 +338,7 @@ int InputStream::readByte(byte *b) {
 
 int InputStream::readString(char **str) {
   int len;
-  char* buf;
+  char* buf = (char*) NULL;
 
   if (readInt(&len) == -1)
     return -1;
@@ -322,12 +348,14 @@ int InputStream::readString(char **str) {
     return 0;
   }
 
-  buf = (char*) malloc(len+1);
+  buf = new char[len+1];//(char*) malloc(len+1);
   if (readBuffer((byte*) buf, len) == -1) {
-    free(buf);
+    delete[] buf;
     return -1;
   }
   buf[len] = '\0';
+  if(DEBUG)
+    printf("XStream: buf = 0x%x, size = %i\n", buf, strlen(buf));
 
   *str = buf;
   return 0;
@@ -343,9 +371,10 @@ int InputStream::readByteArray(byte** tab) {
     return 0;
   }
 
-  *tab = (byte*) malloc(len);
+  *tab = new byte[len];//(byte*) malloc(len);
   if (readBuffer((byte*) *tab, len) == -1) {
-    free(tab);
+    //free(tab);
+    delete[] *tab;
     return -1;
   }
 
@@ -389,7 +418,8 @@ Properties* InputStream::readProperties() throw(IOException) {
   if (readInt(&count) == -1) throw IOException();
   if (count == -1) return (Properties*) NULL;
 
-  Properties* properties = new Properties(((4*count)/3) +1);
+//Properties* properties = new Properties(((4*count)/3) +1); //NTA comment
+  Properties* properties = new Properties();
   properties->readPropertiesFrom(this, count);
 
   return properties;

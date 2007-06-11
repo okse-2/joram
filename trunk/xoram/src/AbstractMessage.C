@@ -131,8 +131,29 @@ AbstractMessage* AbstractMessage::read(InputStream *is) throw (IOException) {
 AbstractRequest::AbstractRequest() {}
 
 AbstractRequest::AbstractRequest(char* target) : AbstractMessage() {
-  this->target = target;
+  if(DEBUG)
+    printf("=> AbstractRequest: target = 0x%x, target = %s\n", target, target);
+  if (target != (char*) NULL) {
+    char* newTarget = new char[strlen(target)+1];
+    strcpy(newTarget, target);
+    newTarget[strlen(target)] = '\0';
+    this->target = newTarget;
+  }
+  else
+    this->target = target;
+  if(DEBUG)
+    printf("<= AbstractRequest: target = 0x%x, target = %s\n", target, target);
 }
+
+AbstractRequest::~AbstractRequest() {
+  if(DEBUG)
+    printf("~AbstractRequest: target = 0x%x, target = %s\n", target, target);
+  if (target != (char*) NULL) {
+    delete[] target;
+    target = (char*) NULL;
+  }
+}
+
 
 /** 
  * Sets the request identifier. 
@@ -212,6 +233,11 @@ CnxConnectRequest::CnxConnectRequest() : AbstractRequest((char *) NULL) {
   classid = CNX_CONNECT_REQUEST;
 }
 
+CnxConnectRequest::~CnxConnectRequest() {
+  if(DEBUG)
+    printf("~CnxConnectRequest()\n");
+}
+
 // ######################################################################
 // CnxConnectReply Class
 // ######################################################################
@@ -224,6 +250,17 @@ CnxConnectReply::CnxConnectReply(CnxConnectRequest req, int cnxKey, char*  proxy
   classid = CNX_CONNECT_REPLY;
   this->cnxKey = cnxKey;
   this->proxyId = proxyId;
+}
+
+CnxConnectReply::~CnxConnectReply() {
+  if(DEBUG)
+    printf("~CnxConnectReply(): proxyId = 0x%x\n", proxyId);
+  /*
+  if (proxyId != (char*) NULL) {
+    delete[] proxyId;
+    proxyId = (char*) NULL;
+  }
+  */
 }
 
 /** Sets the connection key. */
@@ -270,12 +307,22 @@ CnxStartRequest::CnxStartRequest() : AbstractRequest((char*) NULL) {
   classid = CNX_START_REQUEST;
 }
 
+CnxStartRequest::~CnxStartRequest() {
+  if(DEBUG)
+    printf("~CnxStartRequest()\n");
+}
+
 // ######################################################################
 // CnxStopRequest Class
 // ######################################################################
 
 CnxStopRequest::CnxStopRequest() : AbstractRequest((char*) NULL) {
   classid = CNX_STOP_REQUEST;
+}
+
+CnxStopRequest::~CnxStopRequest() {
+  if(DEBUG)
+    printf("~CnxStopRequest()\n");
 }
 
 // ######################################################################
@@ -286,12 +333,22 @@ CnxCloseRequest::CnxCloseRequest() : AbstractRequest((char*) NULL) {
   classid = CNX_CLOSE_REQUEST;
 }
 
+CnxCloseRequest::~CnxCloseRequest() {
+  if(DEBUG)
+    printf("~CnxCloseRequest()\n");
+}
+
 // ######################################################################
 // CnxCloseReply Class
 // ######################################################################
 
 CnxCloseReply::CnxCloseReply() : AbstractReply() {
   classid = CNX_CLOSE_REPLY;
+}
+
+CnxCloseReply::~CnxCloseReply() {
+  if(DEBUG)
+    printf("~CnxCloseReply()\n");
 }
 
 // ######################################################################
@@ -330,6 +387,15 @@ ProducerMessages::ProducerMessages(char* dest, Message* msg) : AbstractRequest(d
   messages = new Vector<Message>();
   messages->addElement(msg);
   asyncSend = FALSE;
+}
+
+ProducerMessages::~ProducerMessages() {
+  if(DEBUG)
+    printf("~ProducerMessages(): messages = Ox%x\n", messages);
+  if (messages != (Vector<Message>*) NULL) {
+    delete messages;
+    messages = (Vector<Message>*) NULL;
+  }
 }
 
 /** Returns the produced messages. */
@@ -392,6 +458,15 @@ ConsumerReceiveRequest::ConsumerReceiveRequest() : AbstractRequest((char*) NULL)
   timeToLive = 0;
   queueMode = FALSE;
   receiveAck = TRUE;
+}
+
+ConsumerReceiveRequest::~ConsumerReceiveRequest() {
+  if(DEBUG)
+    printf("~ConsumerReceiveRequest(): selector = 0x%x\n", selector);
+  if (selector != (char*) NULL) {
+    delete[] selector;
+    selector = (char*) NULL;
+  }
 }
 
   /**
@@ -514,6 +589,19 @@ ConsumerMessages::ConsumerMessages(int correlationId,
   this->queueMode = queueMode;
 }
 
+ConsumerMessages::~ConsumerMessages() {
+  if(DEBUG)
+    printf("~ConsumerMessages(): messages = 0x%x, comingFrom = 0x%x\n", messages, comingFrom);
+  if (messages != (Vector<Message>*) NULL) {
+    delete messages;
+    messages = (Vector<Message>*) NULL;
+  }
+  if (comingFrom != (char*) NULL) {
+    delete[] comingFrom;
+    comingFrom = (char*) NULL;
+  }
+}
+
 /** Returns the messages to deliver. */
 Vector<Message>* ConsumerMessages::getMessages() {
   return messages;
@@ -612,6 +700,19 @@ ConsumerSubRequest::ConsumerSubRequest(char* topic, char* subName,
   this->durable = durable;
 }
 
+ConsumerSubRequest::~ConsumerSubRequest() {
+  if(DEBUG)
+    printf("~ConsumerSubRequest(): selector = 0x%x, subName = 0x%x\n", selector, subName);
+  if (subName != (char*) NULL) {
+    delete[] subName;
+    subName = (char*) NULL;
+  }
+  if (selector != (char*) NULL) {
+    delete[] selector;
+    selector = (char*) NULL;
+  }
+}
+
 /** Sets the subscription name. */
 void ConsumerSubRequest::setSubName(char* subName) {
   this->subName = subName;
@@ -704,6 +805,11 @@ ConsumerUnsubRequest::ConsumerUnsubRequest(char* subName) : AbstractRequest(subN
   classid = CONSUMER_UNSUB_REQUEST;
 }
 
+ConsumerUnsubRequest::~ConsumerUnsubRequest() {
+  if(DEBUG)
+    printf("~ConsumerUnsubRequest()\n");
+}
+
 // ######################################################################
 // MomExceptionReply Class
 // ######################################################################
@@ -713,6 +819,15 @@ ConsumerUnsubRequest::ConsumerUnsubRequest(char* subName) : AbstractRequest(subN
  */
 MomExceptionReply::MomExceptionReply() : AbstractReply() {
   classid = MOM_EXCEPTION_REPLY;
+}
+
+MomExceptionReply::~MomExceptionReply() {
+  if(DEBUG)
+    printf("~MomExceptionReply(): message = 0x%x\n", message);
+  if (message != (char*) NULL) {
+    delete[] message;
+    message = (char*) NULL;
+  }
 }
 
 /** Returns thewrapped exception type. */
@@ -762,6 +877,15 @@ void MomExceptionReply::readFrom(InputStream *is) throw (IOException) {
  */
 ConsumerAckRequest::ConsumerAckRequest() : AbstractRequest((char*) NULL) {
   classid = CONSUMER_ACK_REQUEST;
+}
+
+ConsumerAckRequest::~ConsumerAckRequest() {
+  if(DEBUG)
+    printf("~ConsumerAckRequest(): ids = 0x%x\n", ids);
+  if (ids != (Vector<char>*) NULL) {
+    delete ids;
+    ids = (Vector<char>*) NULL;
+  }
 }
 
 /**
@@ -880,6 +1004,15 @@ ConsumerDenyRequest::ConsumerDenyRequest(char* targetName,
   this->doNotAck = doNotAck;
 }
 
+ConsumerDenyRequest::~ConsumerDenyRequest() {
+  if(DEBUG)
+    printf("~ConsumerDenyRequest(): id = 0x%x\n", id);
+  if (id != (char*) NULL) {
+    delete[] id;
+    id = (char*) NULL;
+  }
+}
+
 /** Sets the identifier. */
 void ConsumerDenyRequest::setId(char* id) {
   this->id = id;
@@ -968,6 +1101,15 @@ SessAckRequest::SessAckRequest(char* targetName,
   classid = SESS_ACK_REQUEST;
   this->ids = ids;
   this->queueMode = queueMode;
+}
+
+SessAckRequest::~SessAckRequest() {
+  if(DEBUG)
+    printf("~SessAckRequest(): ids = 0x%x\n", ids);
+  if (ids != (Vector<char>*) NULL) {
+    delete ids;
+    ids = (Vector<char>*) NULL;
+  }
 }
 
 /** Sets the vector of identifiers. */
@@ -1071,6 +1213,15 @@ SessDenyRequest::SessDenyRequest(char* targetName,
   this->doNotAck = doNotAck;
 }
 
+SessDenyRequest::~SessDenyRequest() {
+  if(DEBUG)
+    printf("~SessDenyRequest(): ids = 0x%x\n", ids);
+  if (ids != (Vector<char>*) NULL) {
+    delete ids;
+    ids = (Vector<char>*) NULL;
+  }
+}
+
 /** Sets the vector of identifiers. */
 void SessDenyRequest::setIds(Vector<char>* ids) {
   this->ids = ids;
@@ -1147,6 +1298,11 @@ ServerReply::ServerReply() : AbstractReply() {
   classid = SERVER_REPLY;
 }
 
+ServerReply::~ServerReply() {
+  if(DEBUG)
+    printf("~ServerReply()\n");
+}
+
 // ######################################################################
 // ActivateConsumerRequest Class
 // ######################################################################
@@ -1168,6 +1324,11 @@ ActivateConsumerRequest::ActivateConsumerRequest(char* targetName,
                                                  boolean activate) : AbstractRequest(targetName) {
   classid = ACTIVATE_CONSUMER_REQUEST;
   this->activate = activate;
+}
+
+ActivateConsumerRequest::~ActivateConsumerRequest() {
+  if(DEBUG)
+    printf("~ActivateConsumerRequest()\n");
 }
 
 boolean ActivateConsumerRequest::getActivate() {
@@ -1218,4 +1379,9 @@ ConsumerCloseSubRequest::ConsumerCloseSubRequest() : AbstractRequest((char*) NUL
  */
 ConsumerCloseSubRequest::ConsumerCloseSubRequest(char* subName) : AbstractRequest(subName) {
   classid = CONSUMER_CLOSE_SUB_REQUEST;
+}
+
+ConsumerCloseSubRequest::~ConsumerCloseSubRequest() {
+  if(DEBUG)
+    printf("~ConsumerCloseSubRequest()\n");
 }

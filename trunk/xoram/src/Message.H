@@ -91,7 +91,6 @@ class Message : Streamable {
   Session* session;
 
  private:
-
   int type;
  
   /** A simple message carries an empty body. */
@@ -166,6 +165,8 @@ class Message : Streamable {
    * Constructs a bright new <code>Message</code>.
    */
   Message();
+  
+  ~Message();
 
   /**
    * Acknowledges all consumed messages of the session of this message.

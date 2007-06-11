@@ -26,6 +26,8 @@
 
 #include "Types.H"
 #include "XoramException.H"
+#include <stdlib.h>
+#include <string.h>
 
 class ArrayIndexOutOfBoundsException : public Exception {
  public:
@@ -44,8 +46,15 @@ template<class T> class Vector {
 
     data = (T**) NULL;
     if (capacity > 0) {
-      data = new T* [capacity];
+      data = new T* [capacity+1];
+      for (int i=0; i<capacity; i++ ) {
+        data[i] = (T*) NULL;
+      }
     }
+    data[capacity] = '\0';
+
+    if(DEBUG)
+      printf("Vector(): init capacity = %i, data = 0x%x\n", capacity, data);
     length = capacity;
     count = 0;
   }
@@ -60,7 +69,24 @@ template<class T> class Vector {
   }
 
   ~Vector() {
-    if (length > 0) delete data;
+    if(DEBUG)
+      printf("~Vector(): data = 0x%x\n", data);
+    
+    for (int i=0; i<length; i++) {
+      if (data[i] != (T*) NULL) {
+        if(DEBUG)
+          printf("~Vector(): data[%i] = 0x%x, %s\n",i,data[i],data[i]);
+        delete (T*) data[i];
+        data[i] = (T*) NULL;
+      }
+    }
+
+    if (length > 0) {
+      delete[] data;
+      data = (T**) NULL;
+      length = 0;
+      count = 0;
+    }
   }
 
   int capacity() {
@@ -72,22 +98,49 @@ template<class T> class Vector {
   }
 
   void clear() {
+    /*
     for (int i=0; i<count; i++)
       data[i] = (T*) NULL;
     count = 0;
+    */
+    if(DEBUG)
+      printf("Vector::clear(): data = 0x%x\n", data);
+    for (int i=0; i<length; i++) {
+      if (data[i] != (T*) NULL) {
+        if(DEBUG)
+          printf("clear(): data[%i] = 0x%x\n",i,data[i]);
+        delete[] data[i];
+      }
+      data[i] = (T*) NULL;
+    }
+    
+    if (length > 0 && data != (T**) NULL) {
+      delete[] data;
+      data = (T**) NULL;
+      length = 0;
+      count = 0;
+    }
   }
 
   void addElement(T* element) {
     if (length == 0) {
       length = 10;
-      this->data = new T* [length]; 
+      this->data = new T* [length+1];
+      for (int i=0; i<length; i++ ) {
+        data[i] = (T*) NULL;
+      }
+      data[length] = '\0';
     } else if (count == length) {
-      T** newData = new T* [2* length];
+      T** newData = new T* [2* length + 1];
       for (int i=0; i<count; i++)
         newData[i] = data[i];
-      delete data;
+      delete[] data;
       length = 2* length;
+      for (int i=count+1; i<length; i++ ) {
+        data[i] = (T*) NULL;
+      }
       data = newData;
+      data[length] = '\0';
     }
     data[count++] = element;
   }
