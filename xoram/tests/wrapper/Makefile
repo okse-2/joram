@@ -17,10 +17,10 @@ CC = gcc $(CCOPT)
 LD = gcc $(CCOPT) $(LDFLAGS)
 
 clean:
-	rm -f *.exe *.o *~ libxoram.so libxoram.dll
+	rm -f *.exe *.o *~ ${LIBXORAM}
 
 tests: test1
-	cp $(LIBDIR)/libxoram.dll .
+	cp $(LIBDIR)/${LIBXORAM} .
 
 test1:	TestXoramWrapper.o
 	$(LD) -o test1 TestXoramWrapper.o -L$(LIBDIR) -lxoram
