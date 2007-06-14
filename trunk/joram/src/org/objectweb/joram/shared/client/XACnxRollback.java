@@ -184,6 +184,7 @@ public final class XACnxRollback extends AbstractJmsRequest {
       StreamUtil.writeTo(-1, os);
     } else {
       int size = qDenyings.size();
+      StreamUtil.writeTo(size, os);
       for (Enumeration keys = qDenyings.keys(); keys.hasMoreElements(); ) {
         String key = (String) keys.nextElement();
         StreamUtil.writeTo(key, os);
@@ -195,6 +196,7 @@ public final class XACnxRollback extends AbstractJmsRequest {
       StreamUtil.writeTo(-1, os);
     } else {
       int size = subDenyings.size();
+      StreamUtil.writeTo(size, os);
       for (Enumeration keys = subDenyings.keys(); keys.hasMoreElements(); ) {
         String key = (String) keys.nextElement();
         StreamUtil.writeTo(key, os);
