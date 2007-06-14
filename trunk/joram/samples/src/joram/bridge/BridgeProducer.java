@@ -35,7 +35,7 @@ import javax.jms.TextMessage;
 public class BridgeProducer {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
+    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
     ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
     jndiCtx.close();
 
