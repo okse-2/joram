@@ -71,7 +71,7 @@ public class BridgeAdmin {
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignQueue");
     // automaticRequest
-    prop.setProperty("automaticRequest", "true");
+    prop.setProperty("automaticRequest", "false");
 
     // Creating a Queue bridge on server 0:
     Queue joramQueue = Queue.create(0,
