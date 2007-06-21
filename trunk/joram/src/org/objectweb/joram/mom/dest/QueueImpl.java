@@ -1134,7 +1134,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       msgId = (String) itMsgId.next();
       message = getMessage(msgId, remove);
 
-      if (checkDelivery(message)) {
+      if (checkDelivery(message.msg)) {
         message.msg.deliveryCount++;
         nbMsgsDeliverSinceCreation++;
         
@@ -1193,7 +1193,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
       // If selector matches, sending the message:
       if (Selector.matches(message.msg, selector) &&
-          checkDelivery(message)) {
+          checkDelivery(message.msg)) {
         message.msg.deliveryCount++;
         nbMsgsDeliverSinceCreation++;
         
@@ -1240,7 +1240,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
 
     Message message =  getMomMessage(msgId);
-      if (checkDelivery(message)) {
+      if (checkDelivery(message.msg)) {
         message.msg.deliveryCount++;
         nbMsgsDeliverSinceCreation++;
         
@@ -1369,7 +1369,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 //
 //        // If selector matches, sending the message:
 //        if (Selector.matches(message.msg, notRec.getSelector()) &&
-//            checkDelivery(message)) {
+//            checkDelivery(message.msg)) {
 //          messages.remove(j);
 //          message.msg.deliveryCount++;
 //          notMsg.addMessage(message.msg);
@@ -1426,7 +1426,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 //      sendToDMQ(deadMessages, null);
 //  }
 
-  protected boolean checkDelivery(Message msg) {
+  protected boolean checkDelivery(org.objectweb.joram.shared.messages.Message msg) {
     return true;
   }
 
