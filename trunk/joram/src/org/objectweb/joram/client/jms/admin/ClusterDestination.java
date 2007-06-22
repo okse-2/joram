@@ -138,7 +138,6 @@ public class ClusterDestination extends Destination {
   public void setReader(User user) throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
-      System.out.println("reader: dest.getName() = " + dest.getName());//NTA tmp
       AdminModule.doRequest(new SetReader(user.getProxyId(), dest.getName()));
     }
   }
