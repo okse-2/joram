@@ -56,16 +56,16 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
   protected final static int CNX_CLOSE_REQUEST = 4;
   protected final static int CNX_CLOSE_REPLY = 5;
   protected final static int PRODUCER_MESSAGES = 6;
-  protected final static int CONSUMER_RECEIVE_REQUEST = 7;  	// TODO
-  protected final static int CONSUMER_MESSAGES = 8;		// TODO
+  protected final static int CONSUMER_RECEIVE_REQUEST = 7;
+  protected final static int CONSUMER_MESSAGES = 8;
   protected final static int CONSUMER_SUB_REQUEST = 9;
   protected final static int CONSUMER_UNSUB_REQUEST = 10;
-  protected final static int CONSUMER_ACK_REQUEST = 11;      // TODO
-  protected final static int CONSUMER_DENY_REQUEST = 12;     // TODO
+  protected final static int CONSUMER_ACK_REQUEST = 11;
+  protected final static int CONSUMER_DENY_REQUEST = 12;
   protected final static int SESS_ACK_REQUEST = 13;
   protected final static int SESS_DENY_REQUEST = 14;
   protected final static int MOM_EXCEPTION_REPLY = 15;
-  protected final static int SERVER_REPLY = 16;		// TODO
+  protected final static int SERVER_REPLY = 16;
 
   protected final static int ACTIVATE_CONSUMER_REQUEST = 17;
   protected final static int COMMIT_REQUEST = 18;
@@ -139,6 +139,14 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
   public AbstractJmsMessage() {
     classid = getClassId();
   }
+
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    toString(strbuf);
+    return strbuf.toString();
+  }
+
+  public abstract void toString(StringBuffer strbuf);
 
   /** ***** ***** ***** ***** ***** ***** ***** *****
    * Interface needed for soap serialization

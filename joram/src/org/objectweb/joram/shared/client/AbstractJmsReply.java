@@ -63,12 +63,6 @@ public abstract class AbstractJmsReply extends AbstractJmsMessage {
     this.correlationId = correlationId;
   }
 
-  public final String toString() {
-    StringBuffer strbuf = new StringBuffer();
-    toString(strbuf);
-    return strbuf.toString();
-  }
-
   public void toString(StringBuffer strbuf) {
     strbuf.append('(').append(super.toString());
     strbuf.append("correlationId=").append(correlationId);
