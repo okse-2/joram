@@ -257,7 +257,7 @@ public final class AgentServer {
     if (! force) {
       synchronized(status) {
         if (status.value != Status.INSTALLED)
-          throw new Exception("cannot set config, bad status: " + status.value);
+          throw new Exception("cannot set config, bad status: " + getStatusInfo());
       }
     }
     AgentServer.a3config = a3config;
@@ -757,7 +757,7 @@ public final class AgentServer {
       synchronized(status) {
         if (status.value != Status.STOPPED) {
           logmon.log(BasicLevel.WARN,
-                     getName() + ", force status: " + status.value);
+                     getName() + ", force status: " + getStatusInfo());
         }
         status.value = Status.STOPPED;
       }
@@ -773,7 +773,7 @@ public final class AgentServer {
     synchronized(status) {
       if (status.value != Status.STOPPED) {
         logmon.log(BasicLevel.WARN,
-                   getName() + ", cannot reset, bad status: " + status.value);
+                   getName() + ", cannot reset, bad status: " + getStatusInfo());
         return;
       }
       status.value = Status.RESETING;
@@ -880,7 +880,7 @@ public final class AgentServer {
         reset();
       }
       if (status.value != Status.INSTALLED)
-        throw new Exception("cannot initialize, bad status: " + status.value);
+        throw new Exception("cannot initialize, bad status: " + getStatusInfo());
       status.value = Status.INITIALIZING;
     }
 
@@ -1206,7 +1206,7 @@ public final class AgentServer {
     synchronized(status) {
       if ((status.value != Status.INITIALIZED) &&
           (status.value != Status.STOPPED))
-        throw new Exception("cannot start, bad status: " + status.value);
+        throw new Exception("cannot start, bad status: " + getStatusInfo());
       status.value = Status.STARTING;
     }
 
@@ -1359,7 +1359,7 @@ public final class AgentServer {
       if ((status.value != Status.STARTED) &&
           (status.value != Status.STOPPED)) {
         logmon.log(BasicLevel.WARN,
-                   getName() + "cannot stop, bad status: " + status.value);
+                   getName() + "cannot stop, bad status: " + getStatusInfo());
         return;
       }
       status.value = Status.STOPPING;
