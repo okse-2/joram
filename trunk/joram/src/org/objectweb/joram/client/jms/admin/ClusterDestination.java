@@ -30,6 +30,7 @@ import org.objectweb.joram.client.jms.Topic;
 
 import javax.naming.*;
 
+import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Enumeration;
@@ -38,6 +39,8 @@ import java.util.Random;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.admin.SetReader;
+import org.objectweb.joram.shared.admin.SetWriter;
 
 /**
  * A base class for clustered destinations.
@@ -132,6 +135,35 @@ public class ClusterDestination extends Destination {
     return getDestination().getName();
   }
 
+  public void setReader(User user) throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      System.out.println("reader: dest.getName() = " + dest.getName());//NTA tmp
+      AdminModule.doRequest(new SetReader(user.getProxyId(), dest.getName()));
+    }
+  }
+
+  public void setWriter(User user) throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetWriter(user.getProxyId(), dest.getName()));
+    }
+  }
+  
+  public void setFreeReader() throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetReader(null, dest.getName()));
+    }
+  }
+
+  public void setFreeWriter() throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetWriter(null, dest.getName()));
+    }
+  }
+  
 //   /**
 //    * Returns <code>true</code> if the parameter object is a Joram
 //    * cluster destination wrapping the same agent identifier.
