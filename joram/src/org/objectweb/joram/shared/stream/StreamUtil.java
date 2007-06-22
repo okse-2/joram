@@ -433,7 +433,8 @@ public final class StreamUtil {
   }
 
   /**
-   * This  method allows to write a Properties object to the output stream.
+   * This  method allows to write a vector of String objects to the
+   * output stream.
    *
    * @param p 	the Properties object to write
    * @param os 	the stream to write the object to
@@ -451,7 +452,8 @@ public final class StreamUtil {
   }
 
   /**
-   * This method allows to restore a Properties object from the input stream.
+   * This method allows to restore a vector of String objects from the
+   * input stream.
    *
    * @param is	the stream to read data from in order to restore the object
    * @return 	the Properties object or null
