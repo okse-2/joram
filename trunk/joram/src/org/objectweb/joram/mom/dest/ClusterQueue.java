@@ -32,7 +32,6 @@ import org.objectweb.joram.mom.notifications.LBMessageGive;
 import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetRightQueueCluster;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -92,9 +91,8 @@ public class ClusterQueue extends Queue {
     else if (not instanceof WakeUpNot) {
       super.react(from, not);
       ((ClusterQueueImpl) destImpl).wakeUpNot((WakeUpNot) not);
-    } else if (not instanceof SetRightQueueCluster)
-      ((ClusterQueueImpl) destImpl).setRightQueueCluster((SetRightQueueCluster) not);
-    else
+    } else {
       super.react(from, not);
+    }
   }
 }

@@ -41,7 +41,6 @@ import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
 import org.objectweb.joram.mom.notifications.QueueClusterNot;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetRightQueueCluster;
 import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
@@ -144,25 +143,7 @@ public class ClusterQueueImpl extends QueueImpl {
   public String toString() {
     return "ClusterQueueImpl:" + destId.toString();
   }
-  
-  /**
-   * propagate right to all cluster.
-   * 
-   * @param not
-   */
-  public void postProcess(SetRightRequest not) {
-    sendToCluster(
-      new SetRightQueueCluster(
-        loadingFactor.getRateOfFlow(),
-        not,
-        clients));
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.postProcess(" + not + ")" +
-                                    "\nclients=" + clients);
-  }
-
+ 
   /**
    * use to add or remove ClusterQueue to cluster. 
    * 
@@ -319,27 +300,6 @@ public class ClusterQueueImpl extends QueueImpl {
       loadingFactor.evalRateOfFlow(getMessageCounter(),
                                    getWaitingRequestCount());
     receiving = false;
-  }
-
- 
-
-  /**
-   * set the same right to all cluster
-   * 
-   * @param not
-   */
-  public void setRightQueueCluster(SetRightQueueCluster not) {
-    try {
-      AgentId user = not.setRightRequest.getClient();
-      int right = not.setRightRequest.getRight();
-      super.processSetRight(user,right);
-    } catch (RequestException exc) {}
-    super.doRightRequest(not.setRightRequest);
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.setRightQueueCluster(" + not + ")" +
-                                    "\nclients=" + clients);
   }
 
   /**
