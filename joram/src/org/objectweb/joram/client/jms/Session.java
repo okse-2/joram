@@ -255,12 +255,13 @@ public class Session implements javax.jms.Session {
   
   /**
    * Indicates whether the messages produced are asynchronously
-   * sent or not (without or with acknowledgement)
+   * sent or not (without or with acknowledgement).
    */
   private boolean asyncSend;
 
   /**
    * Maximum number of messages that can be read at once from a queue.
+   * Default is 1.
    */
   private int queueMessageReadMax;
   
@@ -1067,9 +1068,7 @@ public class Session implements javax.jms.Session {
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.close()");
+      logger.log(BasicLevel.DEBUG, "Session.close()");
     closer.close();
   }
 
@@ -1089,7 +1088,7 @@ public class Session implements javax.jms.Session {
     synchronized (this) {
       if (status == Status.CLOSE) return;
     }
-    
+   
     // Don't synchronize the consumer closure because
     // it could deadlock with message listeners or
     // client threads still using the session.
@@ -1212,11 +1211,9 @@ public class Session implements javax.jms.Session {
    */
   synchronized void stop() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "Session.stop()");
-    if (status == Status.STOP ||
-        status == Status.CLOSE) return;
+      logger.log(BasicLevel.DEBUG, "Session.stop()");
+
+    if (status == Status.STOP || status == Status.CLOSE) return;
 
     // DF: According to JMS 1.1 java doc
     // the method stop "blocks until receives in progress have completed." 
@@ -1916,6 +1913,8 @@ public class Session implements javax.jms.Session {
 
   /**
    * Set asyncSend for this Session.
+   * Indicates whether the messages produced are asynchronously
+   * sent or not (without or with acknowledgement).
    * 
    * @param b
    */
@@ -1925,37 +1924,104 @@ public class Session implements javax.jms.Session {
   
   /**
    * Set queueMessageReadMax for this Session.
+   *
+   * @see queueMessageReadMax
+   * @see getQueueMessageReadMax
    * 
-   * @param i
+   * @param i	The maximum number of messages that can be read at once from
+   *             a queue.
    */
   public void setQueueMessageReadMax(int i) {
     queueMessageReadMax = i;
   }
   
+  /**
+   * Get queueMessageReadMax for this Session.
+   *
+   * @see queueMessageReadMax
+   * @see setQueueMessageReadMax
+   * 
+   * @return    The maximum number of messages that can be read at once from
+   *            a queue.
+   */
   public final int getQueueMessageReadMax() {
     return queueMessageReadMax;
   }
   
+  /**
+   * Get topicAckBufferMax for this session.
+   *
+   * @see topicAckBufferMax
+   * @see setTopicAckBufferMax
+   *
+   * @return The Maximum number of acknowledgements that can be buffered in
+   *         Session.DUPS_OK_ACKNOWLEDGE mode, default is 0.
+   */
   public final int getTopicAckBufferMax() {
     return topicAckBufferMax;
   }
   
+  /**
+   * Set topicAckBufferMax for this session.
+   *
+   * @see topicAckBufferMax
+   * @see getTopicAckBufferMax
+   *
+   * @param i	 The Maximum number of acknowledgements that can be buffered in
+   *             Session.DUPS_OK_ACKNOWLEDGE mode, default is 0.
+   */
   public void setTopicAckBufferMax(int i) {
     topicAckBufferMax = i;
   }
   
+  /**
+   * Get topicActivationThreshold for this session.
+   *
+   * @see topicActivationThreshold
+   * @see setTopicActivationThreshold
+   *
+   * @return The minimum messages number below which the subscription
+   *         is activated.
+   */
   public final int getTopicActivationThreshold() {
     return topicActivationThreshold;
   }
   
+  /**
+   * Set topicActivationThreshold for this session.
+   *
+   * @see topicActivationThreshold
+   * @see getTopicActivationThreshold
+   *
+   * @param i	The minimum messages number below which the subscription
+   *            is activated.
+   */
   public void setTopicActivationThreshold(int i) {
     topicActivationThreshold = i;
   }
   
+  /**
+   * Get topicPassivationThreshold for this session.
+   *
+   * @see topicPassivationThreshold
+   * @see setTopicPassivationThreshold
+   *
+   * @return The maximum messages number over which the subscription
+   *         is passivated.
+   */
   public final int getTopicPassivationThreshold() {
     return topicPassivationThreshold;
   }
   
+  /**
+   * Set topicPassivationThreshold for this session.
+   *
+   * @see topicPassivationThreshold
+   * @see getTopicPassivationThreshold
+   *
+   * @param i	The maximum messages number over which the subscription
+   *         	is passivated.
+   */
   public void setTopicPassivationThreshold(int i) {
     topicPassivationThreshold = i;
   }
