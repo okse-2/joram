@@ -1232,8 +1232,8 @@ void Session::start() {
 
 void Session::stop() {
   if ((status == STOP) || (status == CLOSE)) return;
+  if (isRunning() == TRUE) Daemon::stop();
 
-  Daemon::stop();
 /*     singleThreadOfControl = null; */
   status = STOP;
 }
