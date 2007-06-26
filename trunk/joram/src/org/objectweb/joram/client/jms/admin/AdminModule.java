@@ -360,7 +360,7 @@ public class AdminModule {
     throws ConnectException, AdminException {
     addServer(sid,
               hostName, domainName, port, serverName,
-              null, null);
+              new String[]{}, new String[]{});
   }
 
   /**
