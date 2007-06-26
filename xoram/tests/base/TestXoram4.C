@@ -1,8 +1,32 @@
+/*
+ * XORAM: Open Reliable Asynchronous Messaging
+ * Copyright (C) 2007 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s):  ScalAgent Distributed Technologies
+ * Contributor(s):
+ */
 #include <unistd.h>
 
 #include "Xoram.H"
 #include "Message.H"
 #include "Destination.H"
+
+#include "BaseTestCase.H"
 
 class MyListener : public MessageListener {
  public:
@@ -13,6 +37,9 @@ class MyListener : public MessageListener {
 
 int main(int argc, char *argv[]) {
   try {
+
+    BaseTestCase::startTest(argv);
+
     ConnectionFactory* cf = new TCPConnectionFactory("localhost", 16010);
     Connection* cnx = cf->createConnection("anonymous", "anonymous");
     Topic* topic = new Topic("#0.0.1027", "topic");
@@ -20,16 +47,15 @@ int main(int argc, char *argv[]) {
     MessageProducer* prod = sess1->createProducer(topic);
 
     printf("##### ##### trace1\n");
-
     Session* sess2 = cnx->createSession();
     MessageConsumer* cons = sess2->createConsumer(topic);
     MessageListener* listener = new MyListener();
     cons->setMessageListener(listener);
 
     printf("##### ##### trace2\n");
-
+    
     cnx->start();
-
+    
     printf("##### ##### trace3\n");
 
     Message* msg1 = sess1->createMessage();
@@ -40,11 +66,17 @@ int main(int argc, char *argv[]) {
     prod->send(msg2);
     printf("##### Message sent on topic: %s\n", msg2->getMessageID());
 
+
+
+
     cnx->close();
   } catch (Exception exc) {
-    printf("##### exception - %s", exc.getMessage());
+    printf("##### exception - %s\n", exc.getMessage());
+    BaseTestCase::error(&exc);
   } catch (...) {
     printf("##### exception\n");
+    BaseTestCase::error(new Exception(" catch ..., unknown exception "));
   }
   printf("##### bye\n");
+  BaseTestCase::endTest();
 }
