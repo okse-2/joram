@@ -171,8 +171,7 @@ public class ReplicationManager
       for (int i = 0; i < serverIds.length; i++) {        
         AgentId aid = DistributedJndiServer.getDefault(serverIds[i]);
         servers.addElement(aid);
-        sendTo(aid, new InitJndiServerNot(
-          null, null, true));
+	sendTo(aid, new InitJndiServerNot(null, null, true));
       }
       saveServers();
     }
@@ -208,11 +207,13 @@ public class ReplicationManager
       Trace.logger.log(BasicLevel.WARN,
                        "Distributed jndi update warn:",
                        exc);
-    } catch (NamingException exc) {       
-      Trace.logger.log(BasicLevel.ERROR, 
-                       "Distributed jndi update error:",
-                       exc);
-      throw new Error(exc.toString());
+    } catch (NamingException exc) { 
+	if(!looseCoupling){
+	    Trace.logger.log(BasicLevel.ERROR, 
+			     "Distributed jndi update error:",
+			     exc);
+	    throw new Error(exc.toString());
+	}
     }
   }  
 
@@ -447,6 +448,8 @@ public class ReplicationManager
       for (int i = 0; i < initServers.size(); i++) {
         AgentId newServerId = 
           (AgentId)initServers.elementAt(i);
+	/** Modif */
+	if(! (rootOwnerId.equals( (AgentId)initServers.elementAt(i))))
         sendTo(newServerId, new InitJndiServerNot(
           localJndiServerIds, 
           localContexts,
@@ -497,7 +500,9 @@ public class ReplicationManager
 	      Enumeration enumRecord = contexts[i].getNamingContext().getEnumRecord();
 	      while (enumRecord.hasMoreElements()) {          
 		  Record record =(Record)  enumRecord.nextElement();
-		  nc.addRecord(record);
+		  Record r = nc.getRecord(record.getName());
+		  if (r == null)  
+		      nc.addRecord(record);
 		  if(record instanceof ContextRecord){
 		      CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
 		      record_compositeName.put(record,parentPath);

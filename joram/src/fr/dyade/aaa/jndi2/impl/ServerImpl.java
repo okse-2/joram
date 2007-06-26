@@ -33,9 +33,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 public class ServerImpl {
-  
-  public final static String LOOSE_COUPLING = "fr.dyade.aaa.jndi2.impl.LooseCoupling";
-  public static boolean looseCoupling;
+
+   public final static String LOOSE_COUPLING = "fr.dyade.aaa.jndi2.impl.LooseCoupling";
+   public static boolean looseCoupling;
 
   /**
    * Identifier of this server.
@@ -61,10 +61,6 @@ public class ServerImpl {
    */
   private ContextManager contextManager;
 
-
-  
-
-  
   /**
    * Constructs a <code>ServerImpl</code>
    *
@@ -84,7 +80,7 @@ public class ServerImpl {
     this.rootOwnerId = rootOwnerId;
     contextManager = new ContextManager(
       transaction, serverId, rootOwnerId);
-
+    
     looseCoupling = Boolean.getBoolean(LOOSE_COUPLING);
   }
 
@@ -100,12 +96,12 @@ public class ServerImpl {
 	if (Trace.logger.isLoggable(BasicLevel.DEBUG))
 	    Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.initialize : create root NamingContext" );
 	NamingContext rootNc = 
-	    contextManager.getRootNamingContext();
-	if (rootNc == null) {
-	    contextManager.newNamingContext(
-					    serverId, 
-					    null, 
-					    new CompositeName());
+        contextManager.getRootNamingContext();
+      if (rootNc == null) {
+        contextManager.newNamingContext(
+          serverId, 
+          null, 
+          new CompositeName());
       }
     }
   }
@@ -143,7 +139,6 @@ public class ServerImpl {
 
     bind(nc, lastName, obj, serverId);
     
-    /** Modif */
     if (updateListener != null) {
       updateListener.onUpdate(
         new BindEvent(path,nc.getId(), lastName, obj));
@@ -161,9 +156,6 @@ public class ServerImpl {
                        lastName + ',' + 
                        obj + ',' + 
                        ownerId + ')');
-     
-   
-    //  boolean looseCoupling =  Boolean.getBoolean(LOOSE_COUPLING);
     if (! nc.getOwnerId().equals(ownerId) && (!looseCoupling) ) {
       throw new NotOwnerException(
         nc.getOwnerId());
@@ -227,10 +219,6 @@ public class ServerImpl {
                        lastName + ',' + 
                        obj + ',' + 
                        ownerId + ')');
-
-    
-    //  boolean looseCoupling =  Boolean.getBoolean(LOOSE_COUPLING);
-
     if (! nc.getOwnerId().equals(ownerId) && (!looseCoupling) ) {
       throw new NotOwnerException(
         nc.getOwnerId());
@@ -419,14 +407,14 @@ public class ServerImpl {
       contextManager.getNamingContext(parentPath);
 
     NamingContextId ncid = createSubcontext(
-					    parentNc, lastName, path, null,
-					    subcontextOwnerId, serverId);
-        
+      parentNc, lastName, path, null,
+      subcontextOwnerId, serverId);
+
     if (updateListener != null) {
-	updateListener.onUpdate(
-	      new CreateSubcontextEvent(
-					parentNc.getId(), lastName, path, ncid, 
-					subcontextOwnerId));
+      updateListener.onUpdate(
+        new CreateSubcontextEvent(
+          parentNc.getId(), lastName, path, ncid, 
+          subcontextOwnerId));
     }
   }
     
@@ -447,7 +435,6 @@ public class ServerImpl {
                        ncid + ',' + 
                        subcontextOwnerId + ',' +
                        ownerId + ')');
-    
     if (! parentNc.getOwnerId().equals(ownerId) && (!looseCoupling) ) {
       throw new NotOwnerException(
         parentNc.getOwnerId());
@@ -537,8 +524,6 @@ public class ServerImpl {
                        lastName + ',' + 
                        path + ',' +
                        ownerId + ')');
-    
-    //  boolean looseCoupling =  Boolean.getBoolean(LOOSE_COUPLING);
     if (! parentNc.getOwnerId().equals(ownerId) && (!looseCoupling)) {
       throw new NotOwnerException(
         parentNc.getOwnerId());
