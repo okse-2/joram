@@ -12,6 +12,9 @@ ant clean ship
         II - Compilation de Xoram
         =========================
 
+Attention, il faut modifier les makefiles pour choisir la cible de compilation,
+Windows/Cygwin ou Linux. 
+
 cd <JORAM_DIR>/xoram/src
 make clean xoram
 
