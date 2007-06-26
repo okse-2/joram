@@ -402,7 +402,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Get the logging monitor from current server MonologLoggerFactory
     // Be careful, logmon is initialized from name and not this.name !!
     logmon = Debug.getLogger(Debug.A3Network + '.' + name);
-    logmon.log(BasicLevel.DEBUG, name + ", initialized");
+    logmon.log(BasicLevel.INFO, name + ", initialized");
 
     WDActivationPeriod = Long.getLong("WDActivationPeriod",
                                       WDActivationPeriod).longValue();
