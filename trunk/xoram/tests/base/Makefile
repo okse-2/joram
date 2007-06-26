@@ -3,14 +3,14 @@ INCDIR = ../../src
 
 ###############################
 # i86-cygwin
-CCOPT = -g -I$(INCDIR)
-LDFLAGS = -g
-LIBXORAM = libxoram.dll
+#CCOPT = -g -I$(INCDIR)
+#LDFLAGS = -g
+#LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
-# CCOPT = -g -I../../src
-# LDFLAGS = -lrt
-# LIBXORAM = libxoram.so
+ CCOPT = -g -I../../src
+ LDFLAGS = -lrt
+ LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
@@ -28,7 +28,7 @@ LD = g++ $(CCOPT) $(LDFLAGS)
 clean:
 	rm -f *.exe *.o *~ libxoram.so
 
-tests: test1 test2 test3 test4 test5 test6 test7
+tests: test1 test2 test3 test4 test5 test6 test7 test8 
 
 test1:	TestXoram1.o $(XORAMOBJS)
 	$(LD) -o test1 TestXoram1.o -L$(LIBDIR) -lxoram
@@ -50,6 +50,9 @@ test6:	TestXoram6.o
 
 test7:	TestXoram7.o 
 	$(LD) -o test7 TestXoram7.o -L$(LIBDIR) -lxoram
+
+test8:  TestXoram8.o
+	$(LD) -o test8 TestXoram8.o -L$(LIBDIR) -lxoram
 
 .C.o:
 		$(CC) -o $*.o -c $*.C

@@ -44,6 +44,7 @@ Window#3: ant classic_admin
 
 4) Lancement des exemples
 -------------------------
+Window#1: export LD_LIBRARY_PATH=<JORAM_DIR>/xoram/src
 
 Window#1: cd <JORAM_DIR>/xoram/src
 
