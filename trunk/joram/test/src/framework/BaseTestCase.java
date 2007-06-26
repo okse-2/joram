@@ -781,11 +781,10 @@ public class BaseTestCase {
 
 
     public void writeIntoFile(String str){
-	current.writer.println(str);
 	if (current.writer != null) {
+	    current.writer.println(str);
 	    current.writer.flush();
 	}
-
     }
 
   /**

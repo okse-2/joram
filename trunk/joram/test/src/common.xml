@@ -69,6 +69,7 @@
       <classpath refid="project.class.path"/>
       <include name="framework/*.java"/>
       <patternset refid="specific"/>
+      <compilerarg value="-g"/>
       <!--<compilerarg value="-Xlint:unchecked"/>-->
     </javac>
   </target>

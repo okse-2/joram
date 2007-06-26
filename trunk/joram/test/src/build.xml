@@ -35,6 +35,8 @@
     <ant dir="." antfile="build.xml" target="tests.xa"/>
     <ant dir="." antfile="build.xml" target="tests.jndi"/>
     <ant dir="." antfile="build.xml" target="tests.nocoupling"/>
+    <ant dir="." antfile="build.xml" target="tests.bridge"/>
+    <ant dir="." antfile="build.xml" target="tests.schedqueue"/>
 </target>
 
 <target name="tests.messages" description=" --> lauch all messages tests">
@@ -168,8 +170,6 @@
     <ant dir="." antfile="build.xml" target="perf.test33"/>
     <ant dir="." antfile="build.xml" target="perf.test34"/>
     <ant dir="." antfile="build.xml" target="perf.test47"/>
-    <ant dir="." antfile="build.xml" target="perf.test52"/>
-    <ant dir="." antfile="build.xml" target="perf.test53"/>
     <ant dir="." antfile="build.xml" target="perf.test54"/>
     <ant dir="." antfile="build.xml" target="perf.asynctest"/>
 </target>
@@ -230,6 +230,41 @@
     <ant dir="." antfile="build.xml" target="nocoupling.test2"/>
     <ant dir="." antfile="build.xml" target="nocoupling.test3"/>
 </target>  
+<target name="tests.bridge" description=" --> lauch all bridge tests">
+    <ant dir="." antfile="build.xml" target="bridge.test1"/>
+    <ant dir="." antfile="build.xml" target="bridge.test2"/>
+    <ant dir="." antfile="build.xml" target="bridge.test3"/>
+    <ant dir="." antfile="build.xml" target="bridge.test4"/>
+    <ant dir="." antfile="build.xml" target="bridge.test5"/>
+    <ant dir="." antfile="build.xml" target="bridge.test6"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest1"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest2"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest3"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest4"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest5"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest6"/>
+</target>  
+<target name="tests.schedqueue" description=" --> lauch all schedqueue tests">
+    <ant dir="." antfile="build.xml" target="schedqueue.test1"/>
+    <ant dir="." antfile="build.xml" target="schedqueue.test2"/>
+</target>  
+<target name="tests.cluster" description=" --> lauch all cluster tests">
+    <ant dir="." antfile="build.xml" target="cluster.test1"/>
+    <ant dir="." antfile="build.xml" target="cluster.testQ1"/>
+    <ant dir="." antfile="build.xml" target="cluster.testQ2"/>
+    <ant dir="." antfile="build.xml" target="cluster.testQ3"/>
+    <ant dir="." antfile="build.xml" target="cluster.testQ4"/>
+    <ant dir="." antfile="build.xml" target="cluster.testQ5"/>
+</target>  
+<target name="tests.hierarchical" description=" --> lauch all hierarchical tests">
+    <ant dir="." antfile="build.xml" target="hierarchical.test1"/>
+</target>   
+<target name="tests.ssl" description=" --> lauch all ssl tests">
+    <ant dir="." antfile="build.xml" target="ssl.test"/>
+</target> 
+
+
+
 
   <target name="init.src">
     <!-- Tests specific sources set -->
@@ -1983,28 +2018,6 @@
   </antcall>
 </target>
 
-<target name="perf.test52">
-  <antcall target="test.start" inheritAll="true">
-    <param name="className" value="perfs.Test52"/>
-    <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <param name="jndiconf" value="perfs/jndi.properties"/>
-    <param name="a3conf" value="perfs/a3servers1.xml"/>
-    <param name="jvmargs" value=""/>
-  </antcall>
-</target>
-
-<target name="perf.test53">
-  <antcall target="test.start" inheritAll="true">
-    <param name="className" value="perfs.Test53"/>
-    <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <param name="jndiconf" value="perfs/jndi.properties"/>
-    <param name="a3conf" value="perfs/a3servers1.xml"/>
-    <param name="jvmargs" value=""/>
-  </antcall>
-</target>
-
 <target name="perf.test54" description=" --> test management memory ">
   <antcall target="test.start" inheritAll="true">
     <param name="className" value="perfs.Test54"/>
@@ -2754,8 +2767,431 @@
   </antcall>
 </target>
 
+<target name="nocoupling.test4" depends="compile" description=" --> test jndi config when start a slave server without master" > 
+  <antcall target="init.test.nocoupling" inheritAll="true"/>
+  <antcall target="client.start" inheritAll="true">
+    <param name="x" value="0"/>
+    <param name="className" value="nocoupling.JndiTest4"/>
+  </antcall>
+</target>
+
+
+
+
+
 
 <!-- end test jndi2 with loose coupling -->
+
+
+<!-- start bridge test -->
+
+<target name="bridge.test1" depends="init" description=" --> producer on foreign queue, consumer on bridge queue ">
+  <parallel>
+     <antcall target="test.start" inheritAll="true">
+        <param name="className" value="bridge.BridgeTest"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+     </antcall>
+     <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.Admin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+     </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.test2" depends="init" description=" --> publisher on foreign topic and subscriber on bridge topic">
+   <parallel>
+      <antcall target="test.start" inheritAll="true">
+            <param name="className" value="bridge.BridgeTest2"/>
+            <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+            <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+            <param name="jndiconf" value="bridge/jndi.properties"/>
+            <param name="a3conf" value="bridge/a3servers.xml"/>
+            <param name="jvmargs" value=""/>
+      </antcall>
+      <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.Admin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+      </sequential>
+   </parallel>
+</target>
+<target name="bridge.test3" depends="init" description=" --> publisher on bridge topic and subscriber on foreign topic">
+  <parallel>
+    <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.BridgeTest3"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+   <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.Admin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+      </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.test4" depends="init" description=" --> producer on bridge queue ans consumer on foreign queue">
+  <parallel>
+    <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.BridgeTest4"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.Admin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.test5" depends="init" description=" --> producer on bridge queue and subscriber on foreign topic">
+  <parallel>
+    <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.BridgeTest5"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.CrossAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.test6" depends="init" description=" --> publisher on bridge queue and consumer on  foreign queue">
+  <parallel>
+    <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.BridgeTest6"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.CrossAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+
+
+
+<target name="bridge.xatest1" depends="init" description=" --> producer on XA foreign queue and consumer on a bridge">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.XAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.xatest2" depends="init" description=" --> publisher on XA foreign topic and subscriber on a bridge">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest2"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.XAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.xatest3" depends="init" description=" --> consumer on XA foreign queue and producer on bridge queue">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest3"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.XAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+<target name="bridge.xatest4" depends="init" description=" --> subscriber on XA foreign topic and publisher on bridge topic">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest4"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.XAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+
+<target name="bridge.xatest5" depends="init" description=" --> consumer on XA foreign queue and publisher on bridge topic">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest5"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.CrossXAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+
+<target name="bridge.xatest6" depends="init" description=" -->  subscriber on XA foreign topic and producer on bridge queue">
+ <parallel>
+   <antcall target="test.start" inheritAll="true">
+      <param name="className" value="bridge.XABridgeTest6"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+    <sequential>
+         <sleep seconds="8"/>
+         <java classname="bridge.CrossXAAdmin" failonerror="no" fork="yes"
+            dir="${test.dir}">
+            <classpath path="${project.class.path}"/>
+         </java>
+    </sequential>
+  </parallel>
+</target>
+
+
+
+
+<!-- end bridge test -->
+
+<!-- start scheduler test -->
+<target name="schedqueue.test1"  description=" --> send message specified schedulerdate : first in futur, second in pass">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="schedqueue.Test1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="schedqueue/jndi.properties"/>
+      <param name="a3conf" value="schedqueue/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="schedqueue.test2"  description=" --> send two message, first with schedulerdate > of second message schedulerdate. check receive the second before the fisrt">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="schedqueue.Test2"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="schedqueue/jndi.properties"/>
+      <param name="a3conf" value="schedqueue/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+
+
+<!-- end scheduler test -->
+
+
+<target name="cluster.test1"  description=" -->  test topic cluster send and receive message">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.Test1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="cluster.testQ1"  description=" --> test simple cluster queue with producer on receiver on the same queue">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.TestQ1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="cluster.testQ2"  description=" --> producer on queue 2, receiver on queue 0 and 1, check two receiver receive messaga">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.TestQ2"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="cluster.testQ3"  description=" -->  fix big period and check no recieve any message ">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.TestQ3"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="cluster.testQ4"  description=" --> check producThreshold property">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.TestQ4"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+
+<target name="cluster.testQ5"  description=" --> check consumThreshold property ">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="cluster.TestQ5"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="hierarchical.test1"  description=" --> test hierarchical topic">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="hierarchical.Test1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="hierarchical/jndi.properties"/>
+      <param name="a3conf" value="hierarchical/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+
+
+
+<target name="sslinit" depends="init">
+    <property name="keystore" location="${test.dir}/joram_ks"/>
+    <property name="keystore_pass" value="jorampass"/>
+  </target>
+
+  <!-- Initializes the ssl centralized configuration -->
+  <target name="sslsimple_init" depends="sslinit">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="a3config.dtd" todir="${test.dir}"/>
+    <copy file="a3debug.cfg" todir="${test.dir}"/>
+    <copy file="ssl/jndi.properties"
+          tofile="${test.dir}/jndi.properties"/>
+    <copy file="ssl/a3servers.xml"
+          tofile="${test.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="ssl/joram_ks" todir="${test.dir}"/>
+  </target>
+
+ 
+  <target name="ssl.test" depends="sslsimple_init,compile">
+ <java classname="ssl.Test" failonerror="no" fork="yes"
+          dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass} -Dframework.TestCase.OutFile=${report.file} "/>
+    </java>
+  </target>
+
+
+
+
+
+
+
+<target name="confha.test" description=" --> ">
+   <antcall target="test.start" inheritAll="true">
+     <param name="className" value="confha.Test"/>  
+     <param name="jndiconf" value="confha/jndi.properties"/>
+     <param name="a3conf" value="confha/a3servers.xml"/>
+     <param name="jvmargs" value=""/>
+     <param name="args" value=""/>
+   </antcall>
+</target>
+
+
+
+
+
+
 
 
 
@@ -2801,5 +3237,7 @@
 
 -->
 <!--end-->
+
+
 
 </project>

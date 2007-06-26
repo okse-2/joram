@@ -87,6 +87,10 @@ public class Test_Multi_Q extends framework.TestCase {
 		for (int i=0; i<NbMsg; i++) {
 		    for (int j=0; j<NbDest; j++) {
 			msg = (TextMessage) cons[j].receive();
+			if(msg==null){
+			    error(new Exception("msg == null"));
+			    break;
+			}
 			assertTrue(msg.getText().startsWith("messagedest"));
 		    }
 		    

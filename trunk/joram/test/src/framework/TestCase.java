@@ -131,6 +131,15 @@ public class TestCase extends BaseTestCase {
 	exception(exc);
     }
  }
+ public static void killAgentServerExt(short sid) {
+    try {
+      getAdmin().killAgentServer(sid);
+    } catch (Exception exc) {
+	exception(exc);
+    }
+ }
+
+
     
   public static void crashAgentServer(short sid) {
     try {
