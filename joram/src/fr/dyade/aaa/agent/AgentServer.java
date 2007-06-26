@@ -1102,7 +1102,7 @@ public final class AgentServer {
         //  Initialize services.
         ServiceManager.init();
 
-        logmon.log(BasicLevel.DEBUG,
+        logmon.log(BasicLevel.INFO,
                    getName() + ", ServiceManager initialized");
 
         /* Actually get Services from A3CML configuration file. */
@@ -1218,7 +1218,7 @@ public final class AgentServer {
           // Be careful, we have to save ServiceManager after start (initialized
           // attribute).
           ServiceManager.save();
-          logmon.log(BasicLevel.DEBUG,
+          logmon.log(BasicLevel.INFO,
                      getName() + ", ServiceManager started");
         }
       } catch (Exception exc) {
