@@ -63,7 +63,6 @@ import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.NotSupportedException;
@@ -165,7 +164,8 @@ public class JoramAdapter
   /** Names of the bound objects. */
   private static Vector boundNames = new Vector();
   /** Standard JMSResource MBean ObjectName. */
-  private static ObjectName jmsResourceON;
+//  private static ObjectName jmsResourceON;
+  
   /** Local MBean server. */
   private static MBeanServer mbs = null;
 
@@ -927,9 +927,24 @@ public class JoramAdapter
     joramAdmin.setDefaultDMQ(serverId,dmq);
   }
 
+  public void setDefaultDMQId(int serverId, String dmqId)
+  throws ConnectException, AdminException {
+    joramAdmin.setDefaultDMQId(serverId,dmqId);
+  }
+  
   public DeadMQueue getDefaultDMQ(int serverId)
     throws ConnectException, AdminException {
     return joramAdmin.getDefaultDMQ(serverId);
+  }
+
+  public String getDefaultDMQId()
+    throws ConnectException, AdminException {
+    return joramAdmin.getDefaultDMQId();
+  }
+
+  public String getDefaultDMQId(int serverId)
+    throws ConnectException, AdminException {
+    return joramAdmin.getDefaultDMQId(serverId);
   }
 
   public DeadMQueue getDefaultDMQ()
