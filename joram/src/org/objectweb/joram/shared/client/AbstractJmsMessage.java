@@ -140,14 +140,6 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
     classid = getClassId();
   }
 
-  public final String toString() {
-    StringBuffer strbuf = new StringBuffer();
-    toString(strbuf);
-    return strbuf.toString();
-  }
-
-  public abstract void toString(StringBuffer strbuf);
-
   /** ***** ***** ***** ***** ***** ***** ***** *****
    * Interface needed for soap serialization
    * ***** ***** ***** ***** ***** ***** ***** ***** */
