@@ -86,6 +86,12 @@ public abstract class AbstractJmsRequest extends AbstractJmsMessage {
     this.target = target;
   }
 
+  public final String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    toString(strbuf);
+    return strbuf.toString();
+  }
+
   public void toString(StringBuffer strbuf) {
     strbuf.append('(').append(super.toString());
     strbuf.append(",requestId=").append(requestId);
