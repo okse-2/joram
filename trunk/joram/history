@@ -1,4 +1,58 @@
 ###############################################################################
+# 2006/03/27 | Joram 5.0.3 tag.
+###############################################################################
++==============================================================================
+| 2007/06/27 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Re-architecture DeadMessageQueue MBean.
++==============================================================================
+| 2007/06/25 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ bug fix : jndi : loose coupling
+ add more test
+ xoram : add framework test 
++==============================================================================
+| 2007/06/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fix: set cluster right.
+==============================================================================
+| 2007/06/21 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  Bug fix: QueueImpl :  checkDelivery was call with wrong signature 
+==============================================================================
+| 2007/06/04 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  add several test (in joram/test/src)
+==============================================================================
+| 2007/06/04 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+  (JNDI) Modification of context's contrainst : loose coupling
++==============================================================================
+| 2007/05/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: The Queue agent was not stored after receiving a message,then the
+arrival counter is not correct after a reload. 
++==============================================================================
+| 2007/05/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ rearchitectureNew architecture for JMS bridge.
+ Add XA transaction handling for JMS bridge.
+ Bug fix: in Joram XA Transaction handling.
++==============================================================================
+| 2007/04/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: scn createSubcontext, JoramAdapter ClassCast with ClusterQueue, ...
+==============================================================================
+| 2007/04/19 | Fabien Badolle - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Correction of problem during the replication of subscriptions.
+ Modification of the readBag and writeBag methods in the class ProxyImpl
++==============================================================================
+| 2007/04/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New architecture for Joram destinations and Implementations.
+ Bug fixes.
+###############################################################################
 # 2006/03/27 | Joram 5.0.2 tag.
 ###############################################################################
 +==============================================================================
@@ -842,3 +896,4 @@ JoramDfltPassword properties.
 ###############################################################################
 # 2004/09/13 | Joram 4.1.0 release.
 ###############################################################################
+
