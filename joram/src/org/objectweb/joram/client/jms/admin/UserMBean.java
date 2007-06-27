@@ -43,9 +43,9 @@ public interface UserMBean {
     throws ConnectException, AdminException;
 
   /**
-   * Admin method setting a given dead message queue for this user.
+   * Admin method setting a given dead message queue Id for this user.
    */
-  public void setDMQ(DeadMQueue dmq)
+  public void setDMQId(String dmqId)
     throws ConnectException, AdminException;
 
   /**
@@ -61,9 +61,9 @@ public interface UserMBean {
     throws ConnectException, AdminException;
 
   /** 
-   * Returns the dead message queue for this user, null if not set.
+   * Returns the dead message queue Id for this user, null if not set.
    */
-  public DeadMQueue getDMQ()
+  public String getDMQId()
     throws ConnectException, AdminException;
 
   /** 

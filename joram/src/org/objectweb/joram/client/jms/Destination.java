@@ -34,8 +34,6 @@ import java.util.Vector;
 
 import javax.naming.*;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.AdministeredObject;
@@ -136,7 +134,7 @@ public abstract class Destination
     }
     strbuf.append(XmlSerializer.xmlAttribute(getAdminName(), "name"));
     strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(serverId), "serverId"));
-    DeadMQueue dmq = getDMQ();
+    Queue dmq = getDMQ();
     if (dmq != null) {
       strbuf.append(XmlSerializer.xmlAttribute(dmq.getAdminName(), "dmq"));
       strbuf.append(XmlSerializer.xmlAttribute(String.valueOf(dmq.getThreshold()), "threshold"));
@@ -440,12 +438,32 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException
-    {
-      if (dmq == null)
+  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
+    if (dmq != null)
+      setDMQId(dmq.getName());
+    else
+      setDMQId(null);
+  }
+  
+  /**
+   * Admin method setting or unsetting a dead message queue for this
+   * destination.
+   * <p>
+   * The request fails if this destination is deleted server side.
+   *
+   * @param dmqId  The dead message queue Id to be set (<code>null</code> for
+   *               unsetting current DMQ).
+   *
+   * @exception IllegalArgumentException  If the DMQ is not a valid
+   *              JORAM destination.
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void setDMQId(String dmqId) throws ConnectException, AdminException {
+      if (dmqId == null)
         AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
       else
-        AdminModule.doRequest(new SetDestinationDMQ(getName(), dmq.getName()));
+        AdminModule.doRequest(new SetDestinationDMQ(getName(), dmqId));
     }
 
   /**
@@ -583,8 +601,7 @@ public abstract class Destination
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public DeadMQueue getDMQ() throws ConnectException, AdminException
-    {
+  public DeadMQueue getDMQ() throws ConnectException, AdminException {
       Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
       Monitor_GetDMQSettingsRep reply;
       reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
@@ -595,6 +612,23 @@ public abstract class Destination
         return new DeadMQueue(reply.getDMQName());
       }
     }
+
+  /**
+   * Monitoring method returning the dead message queue id of this destination,
+   * null if not set.
+   * <p>
+   * The request fails if the destination is deleted server side.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public String getDMQId() throws ConnectException, AdminException {
+    DeadMQueue dmq = getDMQ();
+    if (dmq != null)
+      return dmq.getName();
+    else
+      return null;
+  }
 
   public static Destination newInstance(
     String id,

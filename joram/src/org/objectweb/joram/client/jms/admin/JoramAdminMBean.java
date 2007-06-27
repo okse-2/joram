@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.File;
 import java.net.ConnectException;
 import java.util.List;
 import java.util.Properties;
@@ -30,7 +29,7 @@ import java.util.Properties;
 import javax.jms.Destination;
 
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
+
 
 /**
  *
@@ -42,14 +41,14 @@ public interface JoramAdminMBean {
   public void setTimeOutToAbortRequest(long timeOut);
 
   public long getTimeOutToAbortRequest();
+  
+  public String getDefaultDMQId(int serverId)
+  throws ConnectException, AdminException;
+  
+  public void setDefaultDMQId(int serverId, String dmqId)
+  throws ConnectException, AdminException;
 
-  public DeadMQueue getDefaultDMQ(int serverId)
-    throws ConnectException, AdminException;
-
-  public void setDefaultDMQ(int serverId, DeadMQueue dmq)
-    throws ConnectException, AdminException;
-
-  public DeadMQueue getDefaultDMQ()
+  public String getDefaultDMQId()
     throws ConnectException, AdminException;
 
   public List getDestinations(int serverId);

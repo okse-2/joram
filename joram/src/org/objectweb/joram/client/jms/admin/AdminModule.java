@@ -479,9 +479,27 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static void setDefaultDMQ(int serverId, DeadMQueue dmq)
-    throws ConnectException, AdminException
-    {
+  throws ConnectException, AdminException {
+    if (dmq != null) {
       doRequest(new SetDefaultDMQ(serverId, dmq.getName()));
+    }
+  }
+  
+  /**
+   * Sets a given dead message queue as the default DMQ for a given server
+   * (<code>null</code> for unsetting previous DMQ).
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @param serverId  The identifier of the server.
+   * @param dmqId  The dmqId (AgentId) to be set as the default one.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void setDefaultDMQId(int serverId, String dmqId)
+    throws ConnectException, AdminException {
+      doRequest(new SetDefaultDMQ(serverId, dmqId));
     }
 
   /**
@@ -494,11 +512,24 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static void setDefaultDMQ(DeadMQueue dmq)
-    throws ConnectException, AdminException
-    {
+    throws ConnectException, AdminException {
       setDefaultDMQ(localServer, dmq);
     }
 
+  /**
+   * Sets a given dead message queue as the default DMQ for the local server
+   * (<code>null</code> for unsetting previous DMQ).
+   *
+   * @param dmqId  The dmqId (AgentId) to be set as the default one.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static void setDefaultDMQId(String dmqId)
+    throws ConnectException, AdminException {
+      setDefaultDMQId(localServer, dmqId);
+    }
+  
   /**
    * Sets a given value as the default threshold for a given server (-1 for
    * unsetting previous value).
@@ -626,16 +657,12 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static DeadMQueue getDefaultDMQ(int serverId)
-    throws ConnectException, AdminException
-    {
-      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
-      Monitor_GetDMQSettingsRep reply;
-      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
-
-      if (reply.getDMQName() == null)
+    throws ConnectException, AdminException {
+    String reply = getDefaultDMQId(serverId);
+    if (reply == null)
         return null;
       else
-        return new DeadMQueue(reply.getDMQName());
+        return new DeadMQueue(reply);
     }
 
   /**
@@ -646,9 +673,41 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static DeadMQueue getDefaultDMQ()
-    throws ConnectException, AdminException
-    {
+    throws ConnectException, AdminException {
       return getDefaultDMQ(localServer);
+    }
+  
+  /**
+   * Returns the default dead message queue for the local server, null if not
+   * set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static String getDefaultDMQId()
+    throws ConnectException, AdminException {
+      return getDefaultDMQId(localServer);
+    }
+  
+  /**
+   * Returns the default dead message queue for a given server, null if not
+   * set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static String getDefaultDMQId(int serverId)
+    throws ConnectException, AdminException {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+      if (reply.getDMQName() == null)
+        return null;
+      else
+        return reply.getDMQName();
     }
 
   /**

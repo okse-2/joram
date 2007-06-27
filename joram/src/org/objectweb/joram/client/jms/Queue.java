@@ -25,15 +25,10 @@
 package org.objectweb.joram.client.jms;
 
 import java.util.Vector;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.net.ConnectException;
 
-import javax.naming.NamingException;
-
 import javax.jms.JMSException;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
