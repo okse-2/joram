@@ -24,22 +24,21 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Iterator;
 
 import javax.jms.Destination;
 
-import fr.dyade.aaa.util.management.MXWrapper;
-import org.objectweb.joram.client.jms.admin.server.*;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  *
@@ -165,6 +164,23 @@ public class JoramAdmin
   }
 
   /**
+   * Sets a given dead message queue as the default DMQ for a given server
+   * (<code>null</code> for unsetting previous DMQ).
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @param serverId  The identifier of the server.
+   * @param dmqId  The dmqId (AgentId) to be set as the default one.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setDefaultDMQId(int serverId, String dmqId)
+    throws ConnectException, AdminException {
+    AdminModule.setDefaultDMQId(serverId,dmqId);
+  }
+  
+  /**
    * Returns the default dead message queue for a given server, null if not
    * set.
    * <p>
@@ -179,6 +195,20 @@ public class JoramAdmin
   }
 
   /**
+   * Returns the default dead message queue for a given server, null if not
+   * set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String getDefaultDMQId(int serverId)
+    throws ConnectException, AdminException {
+    return AdminModule.getDefaultDMQId(serverId);
+  }
+  
+  /**
    * Returns the default dead message queue for the local server, null if not
    * set.
    *
@@ -188,6 +218,18 @@ public class JoramAdmin
   public DeadMQueue getDefaultDMQ()
     throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQ();
+  }
+  
+  /**
+   * Returns the default dead message queue for the local server, null if not
+   * set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public String getDefaultDMQId()
+    throws ConnectException, AdminException {
+    return AdminModule.getDefaultDMQId();
   }
 
   /**

@@ -103,18 +103,19 @@ public interface DestinationMBean {
     throws ConnectException, AdminException;
 
   /** 
-   * Monitoring method returning the dead message queue of this destination,
+   * Monitoring method returning the dead message queue id of this destination,
    * null if not set.
    */
-  public DeadMQueue getDMQ()
+  public String getDMQId()
     throws ConnectException, AdminException;
-
+  
   /**
    * Admin method setting or unsetting a dead message queue for this
    * destination.
    */
-  public void setDMQ(DeadMQueue dmq)
+  public void setDMQId(String dmqId)
     throws ConnectException, AdminException;
+
 
   public Hashtable getStatistic() 
     throws ConnectException, AdminException;
