@@ -24,6 +24,8 @@ package fr.dyade.aaa.jndi2.impl;
 
 import javax.naming.*;
 
+import javax.naming.CompositeName;
+
 public class DestroySubcontextEvent extends UpdateEvent {
 
   private CompositeName path;
@@ -31,13 +33,13 @@ public class DestroySubcontextEvent extends UpdateEvent {
   public DestroySubcontextEvent(NamingContextId updatedContextId,
                                 String name,
                                 CompositeName path) {
-    super(updatedContextId, name);    
+    super(path,updatedContextId, name);    
     this.path = path;
   }
 
-  public final CompositeName getPath() {
+    /*  public final CompositeName getPath() {
     return path;
-  }
+    }*/
 
   public String toString() {
     return '(' + super.toString() +

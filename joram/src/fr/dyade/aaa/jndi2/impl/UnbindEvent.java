@@ -22,10 +22,12 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
+import javax.naming.CompositeName;
+
 public class UnbindEvent extends UpdateEvent {
 
-  public UnbindEvent(NamingContextId updatedContextId,
+  public UnbindEvent(CompositeName compositeName,NamingContextId updatedContextId,
                      String name) {
-    super(updatedContextId, name);
+    super(compositeName,updatedContextId, name);
   }
 }

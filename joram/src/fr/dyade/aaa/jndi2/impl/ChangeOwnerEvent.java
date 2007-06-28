@@ -30,7 +30,7 @@ public class ChangeOwnerEvent extends UpdateEvent {
 
   public ChangeOwnerEvent(Object formerOwnerId,
                           NamingContextInfo[] contexts) {
-    super(null, null);
+    super(null,null, null);
     this.formerOwnerId = formerOwnerId;
     this.contexts = contexts;
   }

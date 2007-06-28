@@ -22,15 +22,18 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
+import javax.naming.CompositeName;
+
 public class BindEvent extends UpdateEvent {
 
   private Object object;
 
-  public BindEvent(NamingContextId updatedContextId,
+  public BindEvent(CompositeName compositeName,NamingContextId updatedContextId,
                    String name,
                    Object object) {
-    super(updatedContextId, name);
+    super(compositeName,updatedContextId, name);
     this.object = object;
+   
   }
 
   public final Object getObject() {
