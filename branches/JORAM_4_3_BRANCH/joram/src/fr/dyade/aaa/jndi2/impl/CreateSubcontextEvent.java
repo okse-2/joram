@@ -27,7 +27,7 @@ import javax.naming.*;
 public class CreateSubcontextEvent extends UpdateEvent {
 
   private CompositeName path;
-
+ 
   private NamingContextId contextId;
 
   private Object ownerId;
@@ -37,16 +37,16 @@ public class CreateSubcontextEvent extends UpdateEvent {
                                CompositeName path,
                                NamingContextId contextId,
                                Object ownerId) {
-    super(updatedContextId, name);
+    super(path,updatedContextId, name);
     this.path = path;
     this.contextId = contextId;
     this.ownerId = ownerId;
   }
 
-  public final CompositeName getPath() {
+    /* public final CompositeName getPath() {
     return path;
-  }
-
+    }*/
+ 
   public final NamingContextId getContextId() {
     return contextId;
   }

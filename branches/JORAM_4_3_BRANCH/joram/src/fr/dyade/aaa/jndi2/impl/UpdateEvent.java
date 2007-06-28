@@ -22,16 +22,21 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
+import javax.naming.CompositeName;
+
 public class UpdateEvent implements java.io.Serializable {
 
   private NamingContextId updatedContextId;
 
   private String name;
+  
+  private CompositeName compositeName;
 
-  public UpdateEvent(NamingContextId updatedContextId,
+  public UpdateEvent(CompositeName compositeName, NamingContextId updatedContextId,
                      String name) {
     this.updatedContextId = updatedContextId;
     this.name = name;
+    this.compositeName=compositeName;
   }
 
   public final NamingContextId getUpdatedContextId() {
@@ -42,9 +47,13 @@ public class UpdateEvent implements java.io.Serializable {
     return name;
   }
 
+ public final CompositeName  getPath() {
+    return compositeName;
+  }
   public String toString() {
     return '(' + super.toString() +
-      ",updatedContextId=" + updatedContextId + 
-      ",name=" + name + ')';
+	",updatedCompositeName=" + compositeName + 
+	",updatedContextId=" + updatedContextId + 
+	",name=" + name + ')';
   }
 }
