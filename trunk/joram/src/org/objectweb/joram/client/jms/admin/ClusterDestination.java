@@ -179,13 +179,18 @@ public class ClusterDestination extends Destination {
   public void toReference(Reference ref) throws NamingException {
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
+    StringBuffer strbuf = new StringBuffer(20);
 
     for (int i=0; i<entries.length; i++) {
-      ref.add(new StringRefAddr("cluster#" + i + ".key",
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
       Destination dest = (Destination) entries[i].getValue();
-      ref.add(new StringRefAddr("cluster#" + i + ".destName",
-                                dest.getName()));
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      ref.add(new StringRefAddr(strbuf.toString(), dest.getName()));
     }
   }
 
@@ -193,22 +198,24 @@ public class ClusterDestination extends Destination {
   public void fromReference(Reference ref) throws NamingException {
     cluster = new Hashtable();
     int i = 0;
-    if (isQueue()) {
-      while (true) {
-        RefAddr refAddr = ref.get("cluster#" + i + ".key");
-        if (refAddr == null) break;
-        cluster.put((String) refAddr.getContent(),
-                    new Queue((String) ref.get("cluster#" + i + ".destName").getContent()));
-        i++;
+    Destination dest = null;
+    StringBuffer strbuf = new StringBuffer(20);
+
+    while (true) {
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      RefAddr refAddr = ref.get(strbuf.toString());
+      if (refAddr == null) break;
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      if (isQueue()) {
+        dest = new Queue((String) ref.get(strbuf.toString()).getContent());
+      } else {
+        dest = new Topic((String) ref.get(strbuf.toString()).getContent());
       }
-    } else {
-      while (true) {
-        RefAddr refAddr = ref.get("cluster#" + i + ".key");
-        if (refAddr == null) break;
-        cluster.put((String) refAddr.getContent(),
-                    new Topic((String) ref.get("cluster#" + i + ".destName").getContent()));
-        i++;
-      }
+      cluster.put((String) refAddr.getContent(), dest);
+      i++;
     }
   }
 
@@ -217,12 +224,50 @@ public class ClusterDestination extends Destination {
    * travelling through the SOAP protocol.
    */
   public Hashtable code() {
-    Hashtable h = super.code();
-    h.put("cluster",cluster);
+    Hashtable h = new Hashtable();
+
+    Map.Entry entries[] = new Map.Entry [cluster.size()];
+    cluster.entrySet().toArray(entries);
+    StringBuffer strbuf = new StringBuffer(20);
+
+    for (int i=0; i<entries.length; i++) {
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      h.put(strbuf.toString(), (String) entries[i].getKey());
+
+      Destination dest = (Destination) entries[i].getValue();
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      h.put(strbuf.toString(), dest.getName());
+    }
+
     return h;
   }
 
   public void decode(Hashtable h) {
-    cluster = (Hashtable) h.get("cluster");
+    cluster = new Hashtable();
+
+    int i = 0;
+    Destination dest = null;
+    StringBuffer strbuf = new StringBuffer(20);
+
+    while (true) {
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".key");
+      String key = (String) h.get(strbuf.toString());
+      if (key == null) break;
+
+      strbuf.setLength(0);
+      strbuf.append("cluster#").append(i).append(".destName");
+      if (isQueue()) {
+        dest = new Queue((String) h.get(strbuf.toString()));
+      } else {
+        dest = new Topic((String) h.get(strbuf.toString()));
+      }
+      cluster.put(key, dest);
+      i++;
+    }
+
   }
 }
