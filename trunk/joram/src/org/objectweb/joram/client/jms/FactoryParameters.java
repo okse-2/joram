@@ -229,42 +229,49 @@ public class FactoryParameters implements java.io.Serializable {
     topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
   }
 
-  public Hashtable toHashtable() {
-    Hashtable h = new Hashtable();
+  public Hashtable code(Hashtable h, String prefix) {
+    h.put(prefix + ".host", getHost());
+    h.put(prefix + ".port", new Integer(getPort()));
 
-    h.put("host", getHost());
-    h.put("port", new Integer(getPort()));
-    h.put("connectingTimer", new Integer(connectingTimer));
-    h.put("txPendingTimer", new Integer(txPendingTimer));
-    h.put("cnxPendingTimer", new Integer(cnxPendingTimer));
-    h.put("asyncSend", new Boolean(asyncSend));
-    h.put("queueMessageReadMax", new Integer(queueMessageReadMax));
-    h.put("topicAckBufferMax", new Integer(topicAckBufferMax));
-    h.put("multiThreadSync", new Boolean(multiThreadSync));
-    h.put("multiThreadSyncDelay", new Integer(multiThreadSyncDelay));
-    h.put("multiThreadSyncThreshold", new Integer(multiThreadSyncThreshold));
-    h.put("topicPassivationThreshold", new Integer(topicPassivationThreshold));
-    h.put("topicActivationThreshold", new Integer(topicActivationThreshold));
+    h.put(prefix + ".url", getUrl());
+
+    h.put(prefix + ".connectingTimer", new Integer(connectingTimer));
+    h.put(prefix + ".txPendingTimer", new Integer(txPendingTimer));
+    h.put(prefix + ".cnxPendingTimer", new Integer(cnxPendingTimer));
+    h.put(prefix + ".asyncSend", new Boolean(asyncSend));
+    h.put(prefix + ".queueMessageReadMax", new Integer(queueMessageReadMax));
+    h.put(prefix + ".topicAckBufferMax", new Integer(topicAckBufferMax));
+    h.put(prefix + ".multiThreadSync", new Boolean(multiThreadSync));
+    h.put(prefix + ".multiThreadSyncDelay",
+          new Integer(multiThreadSyncDelay));
+    h.put(prefix + ".multiThreadSyncThreshold",
+          new Integer(multiThreadSyncThreshold));
+    h.put(prefix + ".topicPassivationThreshold",
+          new Integer(topicPassivationThreshold));
+    h.put(prefix + ".topicActivationThreshold",
+          new Integer(topicActivationThreshold));
 
     return h;
   }
 
-  public static FactoryParameters fromHashtable(Hashtable h) {
-    FactoryParameters params = new FactoryParameters((String) h.get("host"),
-        ((Integer) h.get("port")).intValue());
-    params.connectingTimer = ((Integer) h.get("connectingTimer")).intValue();
-    params.txPendingTimer = ((Integer) h.get("txPendingTimer")).intValue();
-    params.cnxPendingTimer = ((Integer) h.get("cnxPendingTimer")).intValue();
-    params.asyncSend = ((Boolean) h.get("asyncSend")).booleanValue();
-    params.queueMessageReadMax = ((Integer) h.get("queueMessageReadMax")).intValue();
-    params.topicAckBufferMax = ((Integer) h.get("topicAckBufferMax")).intValue();
-    params.multiThreadSync = ((Boolean) h.get("multiThreadSync")).booleanValue();
-    params.multiThreadSyncDelay = ((Integer) h.get("multiThreadSyncDelay")).intValue();
-    params.multiThreadSyncThreshold = ((Integer) h.get("multiThreadSyncThreshold")).intValue();
-    params.topicPassivationThreshold = ((Integer) h.get("topicPassivationThreshold")).intValue();
-    params.topicActivationThreshold = ((Integer) h.get("topicActivationThreshold")).intValue();
+  public void decode(Hashtable h, String prefix) {
+    host = (String) h.get(prefix + ".host");
+    port = ((Integer) h.get(prefix + ".port")).intValue();
 
-    return params;
+
+    url = (String) h.get(prefix + ".url");
+
+    connectingTimer = ((Integer) h.get(prefix + ".connectingTimer")).intValue();
+    txPendingTimer = ((Integer) h.get(prefix + ".txPendingTimer")).intValue();
+    cnxPendingTimer = ((Integer) h.get(prefix + ".cnxPendingTimer")).intValue();
+    asyncSend = ((Boolean) h.get(prefix + ".asyncSend")).booleanValue();
+    queueMessageReadMax = ((Integer) h.get(prefix + ".queueMessageReadMax")).intValue();
+    topicAckBufferMax = ((Integer) h.get(prefix + ".topicAckBufferMax")).intValue();
+    multiThreadSync = ((Boolean) h.get(prefix + ".multiThreadSync")).booleanValue();
+    multiThreadSyncDelay = ((Integer) h.get(prefix + ".multiThreadSyncDelay")).intValue();
+    multiThreadSyncThreshold = ((Integer) h.get(prefix + ".multiThreadSyncThreshold")).intValue();
+    topicPassivationThreshold = ((Integer) h.get(prefix + ".topicPassivationThreshold")).intValue();
+    topicActivationThreshold = ((Integer) h.get(prefix + ".topicActivationThreshold")).intValue();
   }
 
   public String toString() {

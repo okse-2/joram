@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import java.util.Hashtable;
+
 import javax.naming.*;
 import javax.jms.JMSException;
 
@@ -168,5 +170,31 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
     params.fromReference(ref, prefix);
+  }
+
+  /**
+   * Codes a <code>ConnectionFactory</code> as a Hashtable for travelling
+   * through the SOAP protocol.
+   */
+  public Hashtable code() {
+    return code(new Hashtable(), "cf");
+  }
+
+  public Hashtable code(Hashtable h, String prefix) {
+    h.put(prefix + ".reliableClass", reliableClass);
+    return params.code(h, prefix);
+  }
+
+  /**
+   * Implements the <code>decode</code> abstract method defined in the
+   * <code>fr.dyade.aaa.jndi2.soap.SoapObjectItf</code> interface.
+   */
+  public void decode(Hashtable h) {
+    decode(h, "cf");
+  }
+
+  public void decode(Hashtable h, String prefix) {
+    reliableClass = (String) h.get(prefix + ".reliableClass");
+    params.decode(h, prefix);
   }
 }
