@@ -76,16 +76,23 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   private Hashtable timeTable;
 
-  /** key = msgId
+  /**
+   * key = msgId
    * value = Vector (alreadyVisit)
    */
   private Hashtable visitTable;
 
-  /** number of message send to cluster */
+  /** Number of message send to cluster */
   private long clusterDeliveryCount;
 
-  /** waiting after a cluster request */
+  /** Waiting after a cluster request */
   private long waitAfterClusterReq = -1;
+
+  /**
+   * Maximum period of time before frowarding a waiting message or request
+   * to other queues of the cluster. By default it is set to period.
+   */
+  private long timeThreshold = -1L;
 
   /**
    * Constructs a <code>ClusterQueueImpl</code> instance.
@@ -124,6 +131,12 @@ public class ClusterQueueImpl extends QueueImpl {
       }
       autoEvalThreshold =
         Boolean.valueOf(prop.getProperty("autoEvalThreshold")).booleanValue();
+      try {
+        timeThreshold = 
+          Long.valueOf(prop.getProperty("timeThreshold")).longValue();
+      } catch (NumberFormatException exc) {
+        timeThreshold = period;
+      }
     }
 
     clusters = new Hashtable();
@@ -321,10 +334,10 @@ public class ClusterQueueImpl extends QueueImpl {
                                 getMessageCounter(),
                                 getWaitingRequestCount());
 
-    // check if message arrived befor "period".
-    // if is true send message to the next (no visited) clusterQueue.
+    // Check if there is message arrived before "timeThreshold".
+    // if is true forwards message to the next (no visited) clusterQueue.
     List toGive = new ArrayList();
-    long oldTime = System.currentTimeMillis() - period;
+    long oldTime = System.currentTimeMillis() - timeThreshold;
     for (Enumeration e = timeTable.keys(); e.hasMoreElements(); ) {
       String msgId = (String) e.nextElement();
       if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
