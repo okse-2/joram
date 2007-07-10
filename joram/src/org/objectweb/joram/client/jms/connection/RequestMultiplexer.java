@@ -316,9 +316,9 @@ public class RequestMultiplexer {
           abortReply(reply);
         }
       } else {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.INFO))
           JoramTracing.dbgClient.log(
-            BasicLevel.WARN, 
+            BasicLevel.INFO, 
             " -> Listener not found for the reply: " + requestId);
         abortReply(reply);
       }
