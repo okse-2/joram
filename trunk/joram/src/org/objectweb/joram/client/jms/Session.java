@@ -464,7 +464,14 @@ public class Session implements javax.jms.Session {
   public void setTransacted(boolean t) {
     if (status != Status.CLOSE) {
       transacted = t;
+//      if (!t) {
+//        autoAck = true;
+//      }
     }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+            "Session.setTransacted transacted = " + transacted +
+            ", autoAck = " + autoAck);
     // else should throw an exception but not expected in
     // the connector.
   }
