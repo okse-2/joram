@@ -1182,7 +1182,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   private List getMessages(int nb, String selector, boolean remove) {   
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + nb + ',' + selector + ',' + remove +')');
+      logger.log(BasicLevel.DEBUG, "QueueImpl.getMessages(" + nb + ',' + selector + ',' + remove +')');
 
     List lsMessages = new ArrayList();
     Message message;
@@ -1208,6 +1208,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (remove) {
           messages.remove(message);
           message.delete();
+        } else {
+          // message not remove: going on.
+          j++;
         }
         
       } else {
@@ -1290,23 +1293,27 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
       lsMessages = getMessages(notRec.getMessageCount(), notRec.getSelector(), notRec.getAutoAck());
 
-      if (!notRec.getAutoAck()) {
-        Iterator itMessages = lsMessages.iterator();
-        while (itMessages.hasNext()) {
-          message = (Message) itMessages.next();
-          notMsg.addMessage(message.msg);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+            "QueueImpl.deliverMessages: notRec.getAutoAck() = " + notRec.getAutoAck()+
+            "lsMessages = " + lsMessages);
+      
+      Iterator itMessages = lsMessages.iterator();
+      while (itMessages.hasNext()) {
+        message = (Message) itMessages.next();
+        notMsg.addMessage(message.msg);
+        if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
           consumers.put(message.getIdentifier(), notRec.requester);
           contexts.put(message.getIdentifier(),
               new Integer(notRec.getClientContext()));
           deliveredMsgs.put(message.getIdentifier(), message);
           messages.remove(message);
-          
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                "Message " + message.msg.id + " to " + notRec.requester +
-                " as reply to " + notRec.getRequestId());
         }
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+              "Message " + message.msg.id + " to " + notRec.requester +
+              " as reply to " + notRec.getRequestId());
       }
 
       if (isLocal(notRec.requester)) {
