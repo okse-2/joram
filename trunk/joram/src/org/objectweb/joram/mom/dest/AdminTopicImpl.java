@@ -760,15 +760,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       request = null;
 
       try {
-        request = (AdminRequest) msg.getObject();
+        request = (AdminRequest) msg.getAdminMessage();
 
         if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
           JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                         "--- " + this + ": got " 
-                                        + msg.getObject());
+                                        + msg.getAdminMessage());
       } catch (ClassCastException exc) {
         JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                      "--- " + this + ": got bad object");
+                                      "--- " + this + ": got bad AdminRequest");
         if (request == null) {
           info = strbuf.append("Unexpected request to AdminTopic on server [")
             .append(serverId).append("]: ").append(exc.getMessage()).toString();
@@ -2492,7 +2492,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     message.timestamp = System.currentTimeMillis();
     message.setDestination(destId.toString(), Topic.TOPIC_TYPE);
     try {
-      message.setObject(reply);
+      message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
       forward(to, clientMessages);
       nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + 1;
