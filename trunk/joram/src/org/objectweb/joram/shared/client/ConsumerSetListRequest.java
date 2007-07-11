@@ -125,15 +125,7 @@ public final class ConsumerSetListRequest extends AbstractJmsRequest {
     super.writeTo(os);
     StreamUtil.writeTo(selector, os);
     StreamUtil.writeTo(queueMode, os);
-    if (msgIdsToAck == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = msgIdsToAck.length;
-      StreamUtil.writeTo(size, os);
-      for (int i=0; i<size; i++) {
-        StreamUtil.writeTo(msgIdsToAck[i], os);
-      }
-    }
+    StreamUtil.writeArrayOfStringTo(msgIdsToAck, os);
     StreamUtil.writeTo(msgCount, os);
   }
 
@@ -147,15 +139,7 @@ public final class ConsumerSetListRequest extends AbstractJmsRequest {
     super.readFrom(is);
     selector = StreamUtil.readStringFrom(is);
     queueMode = StreamUtil.readBooleanFrom(is);
-    int size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      msgIdsToAck = null;
-    } else {
-      msgIdsToAck = new String[size];
-      for (int i=0; i<size; i++) {
-        msgIdsToAck[i] = StreamUtil.readStringFrom(is);
-      }
-    }
+    msgIdsToAck = StreamUtil.readArrayOfStringFrom(is);
     msgCount = StreamUtil.readIntFrom(is);
   }
 }
