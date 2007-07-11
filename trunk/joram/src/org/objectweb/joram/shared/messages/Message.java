@@ -26,6 +26,7 @@ import java.util.*;
 import java.io.*;
 
 import org.objectweb.joram.shared.util.Properties;
+import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
@@ -122,9 +123,11 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public static final int STREAM = 4;
   /** A bytes message carries an array of bytes. */
   public static final int BYTES = 5;
+  /** A admin message carries a streamable object. */
+  public static final int ADMIN = 6;
 
   /**
-   * The client message type: SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES.
+   * The client message type: SIMPLE, TEXT, OBJECT, MAP, STREAM, BYTES, ADMIN.
    * By default, the message type is SIMPLE.
    */
   public transient int type = SIMPLE;
@@ -274,6 +277,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
      bais = new ByteArrayInputStream(body);
      ois = new ObjectInputStream(bais);
      obj = ois.readObject();
+    } catch (Exception e) {
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getObject()", e);
     } finally {
       try {
         ois.close();
@@ -284,6 +290,51 @@ public final class Message implements Cloneable, Serializable, Streamable {
     }
 
     return (Serializable) obj;
+  }
+
+  /**
+   * Sets an AbstractAdminMessage as the body of the message. 
+   *
+   * @exception IOException  In case of an error while setting the object.
+   */
+  public void setAdminMessage(AbstractAdminMessage adminMsg) throws IOException {
+    type = Message.ADMIN;
+
+    if (adminMsg == null) {
+      body = null;
+    } else {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      AbstractAdminMessage.write(adminMsg, baos);
+      baos.flush();
+      body = baos.toByteArray();
+      baos.close();
+    }
+  }
+
+  /**
+   * Returns the AbstractAdminMessage body of the message.
+   *
+   * @exception IOException  In case of an error while getting the object.
+   * @exception ClassNotFoundException  If the object class is unknown.
+   */
+  public AbstractAdminMessage getAdminMessage() throws ClassNotFoundException, IOException {
+    if (body == null) return null;
+
+    ByteArrayInputStream bais = null;
+    AbstractAdminMessage adminMsg = null;
+
+    try {
+     bais = new ByteArrayInputStream(body);
+     adminMsg = AbstractAdminMessage.read(bais);
+    } catch (Exception e) {
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getAdminMessage()", e);
+    } finally {
+      try {
+        bais.close();
+      } catch (Exception e) {}
+    }
+    return adminMsg;
   }
 
   public final String toString() {
@@ -430,13 +481,16 @@ public final class Message implements Cloneable, Serializable, Streamable {
                                    OutputStream os) throws IOException {
     if (messages == null) {
       StreamUtil.writeTo(-1, os);
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: -1");
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: -1");
     } else {
       int size = messages.size();
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: " + size);
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: " + size);
       StreamUtil.writeTo(size, os);
       for (int i=0; i<size; i++) {
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: msg#" + i);
+        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: msg#" + i);
         ((Message) messages.elementAt(i)).writeTo(os);
       }
     }
@@ -451,13 +505,15 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public static Vector readVectorFrom(InputStream is) throws IOException {
     int size = StreamUtil.readIntFrom(is);
-    JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: " + size);
+    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: " + size);
     if (size == -1) {
       return null;
     } else {
       Vector messages = new Vector(size);
       for (int i=0; i<size; i++) {
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
+        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
         Message msg = new Message();
         msg.readFrom(is);
         messages.addElement(msg);
