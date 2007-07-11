@@ -173,16 +173,17 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
         destImpl.clientMessages(from, (ClientMessages) not);
       else if (not instanceof UnknownAgent)
         destImpl.unknownAgent(from, (UnknownAgent) not);
-      else if (not instanceof DeleteNot)
-        destImpl.deleteNot(from, (DeleteNot) not);
       else if (not instanceof RequestGroupNot)
         destImpl.requestGroupNot(from, (RequestGroupNot)not);
-      else if (not instanceof DeleteNot && destImpl.canBeDeleted()) 
-        // A DeleteNot notification is finally processed at the
-        // Agent level when its processing went successful in
-        // the DestinationItf instance.
-        super.react(from, not);
-      else if (not instanceof DestinationAdminRequestNot)
+      else if (not instanceof DeleteNot) {
+        destImpl.deleteNot(from, (DeleteNot) not); 
+        if (destImpl.canBeDeleted()) {
+          // A DeleteNot notification is finally processed at the
+          // Agent level when its processing went successful in
+          // the DestinationItf instance.
+          super.react(from, not);
+        }
+      } else if (not instanceof DestinationAdminRequestNot)
         destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
         throw new UnknownNotificationException(not.getClass().getName());
