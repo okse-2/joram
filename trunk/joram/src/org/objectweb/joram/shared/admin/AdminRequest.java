@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,4 +29,9 @@ package org.objectweb.joram.shared.admin;
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for requesting an
  * admin operation.
  */
-public abstract class AdminRequest implements java.io.Serializable {}
+public abstract class AdminRequest extends AbstractAdminMessage {
+  
+  protected int getClassId() {
+    return ADMIN_REQUEST;
+  }
+}

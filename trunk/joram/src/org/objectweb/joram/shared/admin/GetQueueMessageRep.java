@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,13 +23,13 @@
 package org.objectweb.joram.shared.admin;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.objectweb.joram.shared.messages.Message;
 
 public class GetQueueMessageRep extends AdminReply {
-  private static final long serialVersionUID = -1264423353253035626L;
+  private static final long serialVersionUID = 1L;
 
   private transient Message msg;
 
@@ -38,20 +38,24 @@ public class GetQueueMessageRep extends AdminReply {
     this.msg = msg;
   }
   
+  public GetQueueMessageRep() { }
+  
   public final Message getMessage() {
     return msg;
   }
 
-  /** ***** ***** ***** ***** ***** ***** ***** *****
-   * Serializable interface
-   * ***** ***** ***** ***** ***** ***** ***** ***** */
-
-  private void writeObject(ObjectOutputStream out) throws IOException {
-    msg.writeTo(out);
+  protected int getClassId() {
+    return GET_QUEUE_MESSAGE_REP;
   }
 
-  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
     msg = new Message();
-    msg.readFrom(in);
+    msg.readFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    msg.writeTo(os);
   }
 }
