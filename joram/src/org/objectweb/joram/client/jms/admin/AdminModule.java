@@ -82,10 +82,10 @@ public class AdminModule {
   /** The requestor for sending the synchronous requests. */
   private static AdminRequestor requestor;
 
-  /** ObjectMessage sent to the platform. */
-  private static ObjectMessage requestMsg;
-  /** ObjectMessage received from the platform. */
-  private static ObjectMessage replyMsg;
+  /** AdminMessage sent to the platform. */
+  private static AdminMessage requestMsg;
+  /** AdminMessage received from the platform. */
+  private static AdminMessage replyMsg;
 
   /** Reply object received from the platform. */
   protected static AdminReply reply;
@@ -943,9 +943,9 @@ public class AdminModule {
       timeout = requestTimeout;
 
     try {
-      replyMsg = (ObjectMessage) requestor.request(
+      replyMsg = (AdminMessage) requestor.request(
         request, timeout);
-      reply = (AdminReply) replyMsg.getObject();
+      reply = (AdminReply) replyMsg.getAdminMessage();
 
       if (! reply.succeeded()) {
         switch (reply.getErrorCode()) {
@@ -1009,7 +1009,8 @@ public class AdminModule {
           "AdminModule.AdminRequestor.request(" +
           request + ',' + timeout + ')');
 
-      requestMsg = sess.createObjectMessage(request);
+      requestMsg = new AdminMessage();
+      requestMsg.setAdminMessage(request);
       requestMsg.setJMSReplyTo(tmpTopic);
       producer.send(requestMsg);
       String correlationId = requestMsg.getJMSMessageID();
