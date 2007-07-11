@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * A <code>SetNbMaxMsg</code> instance requests to set a 
  * number max of message in Queue or Subscription.
  */
 public class SetNbMaxMsg extends AdminRequest {
-  private static final long serialVersionUID = -2173959770467329047L;
+  private static final long serialVersionUID = 1L;
 
   /** Identifier of the queue or subscription. */
   private String id;
@@ -47,6 +53,8 @@ public class SetNbMaxMsg extends AdminRequest {
     this.nbMaxMsg = nbMaxMsg;
   }
 
+  public SetNbMaxMsg() { }
+  
   /**
    * Constructs a <code>SetNbMaxMsg</code> instance.
    *
@@ -75,5 +83,21 @@ public class SetNbMaxMsg extends AdminRequest {
   /** Returns SubName */
   public String getSubName() {
     return subName;
+  }
+  
+  protected int getClassId() {
+    return SET_NB_MAX_MSG;
+  }
+  
+  public void readFrom(InputStream is) throws IOException {
+    id = StreamUtil.readStringFrom(is);
+    nbMaxMsg = StreamUtil.readIntFrom(is);
+    subName = StreamUtil.readStringFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    StreamUtil.writeTo(id, os);
+    StreamUtil.writeTo(nbMaxMsg, os);
+    StreamUtil.writeTo(subName, os);
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2003 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * A <code>CreateUserRequest</code> instance requests the creation of a JMS
  * user proxy.
  */
 public class CreateUserRequest extends AdminRequest {
-  private static final long serialVersionUID = 5772076673534562231L;
+  private static final long serialVersionUID = 1L;
 
   /** Name of the user. */
   private String userName;
@@ -50,6 +56,8 @@ public class CreateUserRequest extends AdminRequest {
     this.serverId = serverId;
   }
 
+  public CreateUserRequest() { }
+  
   /** Returns the name of the user to create. */
   public String getUserName() {
     return userName;
@@ -63,5 +71,21 @@ public class CreateUserRequest extends AdminRequest {
   /** Returns the id of the server where deploying its proxy. */
   public int getServerId() {
     return serverId;
+  }
+  
+  protected int getClassId() {
+    return CREATE_USER_REQUEST;
+  }
+  
+  public void readFrom(InputStream is) throws IOException {
+    serverId = StreamUtil.readIntFrom(is);
+    userName = StreamUtil.readStringFrom(is);
+    userPass = StreamUtil.readStringFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    StreamUtil.writeTo(serverId, os);
+    StreamUtil.writeTo(userName, os);
+    StreamUtil.writeTo(userPass, os);
   }
 }

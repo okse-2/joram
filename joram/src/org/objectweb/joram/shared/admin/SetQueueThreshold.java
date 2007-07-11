@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * A <code>SetQueueThreshold</code> instance requests to set a given
  * threshold value as the threshold for a given queue.
  */
 public class SetQueueThreshold extends AdminRequest {
-  private static final long serialVersionUID = -8457079858157139094L;
+  private static final long serialVersionUID = 1L;
 
   /** Identifier of the queue the threshold is set for. */
   private String queueId;
@@ -46,6 +52,7 @@ public class SetQueueThreshold extends AdminRequest {
     this.threshold = threshold;
   }
 
+  public SetQueueThreshold() { }
   
   /** Returns the identifier of the queue the threshold is set for. */
   public String getQueueId() {
@@ -55,5 +62,19 @@ public class SetQueueThreshold extends AdminRequest {
   /** Returns the threshold value. */
   public int getThreshold() {
     return threshold;
+  }
+  
+  protected int getClassId() {
+    return SET_QUEUE_THRESHOLD;
+  }
+  
+  public void readFrom(InputStream is) throws IOException {
+    queueId = StreamUtil.readStringFrom(is);
+    threshold = StreamUtil.readIntFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    StreamUtil.writeTo(queueId, os);
+    StreamUtil.writeTo(threshold, os);
   }
 }

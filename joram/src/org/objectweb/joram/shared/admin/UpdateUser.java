@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * An <code>UpdateUser</code> instance requests the modification of a
  * user identification
  */
 public class UpdateUser extends AdminRequest {
-  private static final long serialVersionUID = 5991002585349654595L;
+  private static final long serialVersionUID = 1L;
 
   /** Name of the user. */
   private String userName;
@@ -57,6 +63,8 @@ public class UpdateUser extends AdminRequest {
     this.newPass = newPass;
   }
 
+  public UpdateUser() { }
+  
   /** Returns the name of the user to update. */
   public String getUserName() {
     return userName;
@@ -75,5 +83,23 @@ public class UpdateUser extends AdminRequest {
   /** Returns the new password of the user. */
   public String getNewPass() {
     return newPass;
+  }
+  
+  protected int getClassId() {
+    return UPDATE_USER;
+  }
+  
+  public void readFrom(InputStream is) throws IOException {
+    userName = StreamUtil.readStringFrom(is);
+    proxId  = StreamUtil.readStringFrom(is);
+    newName  = StreamUtil.readStringFrom(is);
+    newPass  = StreamUtil.readStringFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    StreamUtil.writeTo(userName, os);
+    StreamUtil.writeTo(proxId, os);
+    StreamUtil.writeTo(newName, os);
+    StreamUtil.writeTo(newPass, os);
   }
 }

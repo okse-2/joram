@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+
 /**
  * A <code>Monitor_GetNumberRep</code> instance is a reply wrapping an
  * integer value.
  */
 public class Monitor_GetNumberRep extends Monitor_Reply {
-  private static final long serialVersionUID = 5217139951879649417L;
+  private static final long serialVersionUID = 1L;
 
   /** The integer value. */
   private int number;
@@ -40,9 +46,25 @@ public class Monitor_GetNumberRep extends Monitor_Reply {
   public Monitor_GetNumberRep(int number) {
     this.number = number;
   }
+  
+  public Monitor_GetNumberRep() { }
 
   /** Returns the wrapped value. */
   public int getNumber() {
     return number;
+  }
+  
+  protected int getClassId() {
+    return MONITOR_GET_NUMBER_REP;
+  }
+  
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    number = StreamUtil.readIntFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    StreamUtil.writeTo(number, os);
   }
 }
