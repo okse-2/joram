@@ -37,6 +37,7 @@ import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
+import org.objectweb.joram.client.jms.admin.AdminMessage;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.excepts.MessageValueException;
@@ -51,12 +52,12 @@ import org.objectweb.joram.shared.JoramTracing;
  * for effective MOM transport facility.
  */
 public class Message implements javax.jms.Message {
-  org.objectweb.joram.shared.messages.Message momMsg;
+  protected org.objectweb.joram.shared.messages.Message momMsg;
 
   /**
    * Constructs a bright new <code>Message</code>.
    */
-  Message() {
+  protected Message() {
     momMsg = new org.objectweb.joram.shared.messages.Message();
   }
 
@@ -75,6 +76,8 @@ public class Message implements javax.jms.Message {
       return new StreamMessage(session, momMsg);
     case org.objectweb.joram.shared.messages.Message.BYTES:
       return new BytesMessage(session, momMsg);
+    case org.objectweb.joram.shared.messages.Message.ADMIN:
+      return new AdminMessage(session, momMsg);
     default:
       throw new JMSException("Unknow message type: " + momMsg.type);
     }
@@ -99,8 +102,8 @@ public class Message implements javax.jms.Message {
    * @param session  The consuming session.
    * @param momMsg  The MOM message to wrap.
    */
-  Message(Session session,
-          org.objectweb.joram.shared.messages.Message momMsg) {
+  protected Message(Session session,
+                    org.objectweb.joram.shared.messages.Message momMsg) {
     this.session = session;
     this.momMsg = momMsg;
     setReadOnly();
