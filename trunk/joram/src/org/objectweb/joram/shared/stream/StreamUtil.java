@@ -28,12 +28,10 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.io.InvalidClassException;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.util.Properties;
-
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 public final class StreamUtil {
   // Per-thread buffer for conversion
@@ -445,7 +443,7 @@ public final class StreamUtil {
     } else {
       int size = v.size();
       writeTo(size, os);
-      for (int i=0; i<size; i++) {
+      for (int i=0; i< size; i++) {
         writeTo((String) v.elementAt(i), os);
       }
     }
@@ -470,4 +468,155 @@ public final class StreamUtil {
       return v;
     }
   }
+  
+  /**
+   * This  method allows to write a String array to the output stream.
+   *
+   * @param array   the String array to write
+   * @param os      the stream to write to
+   */
+  public static void writeArrayOfStringTo(String[] array, OutputStream os) throws IOException {
+    if (array == null) {
+      StreamUtil.writeTo(-1, os);
+    } else {
+      int size = array.length;
+      StreamUtil.writeTo(size, os);
+      for (int i=0; i< size; i++) {
+        StreamUtil.writeTo(array[i], os);
+      }
+    }
+  }
+  
+  /**
+   * This method allows to restore a String array from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the String array
+   * @return    the String array or null
+   */
+  public static String[] readArrayOfStringFrom(InputStream is) throws IOException {
+    int size = StreamUtil.readIntFrom(is);
+    String[] array = null;
+    if (size != -1) {
+      array = new String[size];
+      for (int i=0; i< size; i++) {
+        array[i] = StreamUtil.readStringFrom(is);
+      }
+    }
+    return array;
+  }
+
+  /**
+   * This  method allows to write a int array to the output stream.
+   *
+   * @param array   the int array to write
+   * @param os      the stream to write to
+   */
+  public static void writeArrayOfIntTo(int[] array, OutputStream os) throws IOException {
+    if (array == null) {
+      StreamUtil.writeTo(-1, os);
+    } else {
+      int size = array.length;
+      StreamUtil.writeTo(size, os);
+      for (int i=0; i< size; i++) {
+        StreamUtil.writeTo(array[i], os);
+      }
+    }
+  }
+  
+  /**
+   * This method allows to restore a int array from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the int array
+   * @return    the int array or null
+   */
+  public static int[] readArrayOfIntFrom(InputStream is) throws IOException {
+    int size = StreamUtil.readIntFrom(is);
+    int[] array = null;
+    if (size != -1) {
+      array = new int[size];
+      for (int i=0; i< size; i++) {
+        array[i] = StreamUtil.readIntFrom(is);
+      }
+    }
+    return array;
+  }
+  
+  /**
+   * This  method allows to write a boolean array to the output stream.
+   *
+   * @param array   the boolean array to write
+   * @param os      the stream to write to
+   */
+  public static void writeArrayOfBooleanTo(boolean[] array, OutputStream os) throws IOException {
+    if (array == null) {
+      StreamUtil.writeTo(-1, os);
+    } else {
+      int size = array.length;
+      StreamUtil.writeTo(size, os);
+      for (int i=0; i< size; i++) {
+        StreamUtil.writeTo(array[i], os);
+      }
+    }
+  }
+  
+  /**
+   * This method allows to restore a boolean array from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the boolean array
+   * @return    the boolean array or null
+   */
+  public static boolean[] readArrayOfBooleanFrom(InputStream is) throws IOException {
+    int size = StreamUtil.readIntFrom(is);
+    boolean[] array = null;
+    if (size != -1) {
+      array = new boolean[size];
+      for (int i=0; i< size; i++) {
+        array[i] = StreamUtil.readBooleanFrom(is);
+      }
+    }
+    return array;
+  }
+  
+  /**
+   * This  method allows to write a java.util.Properties object to the output stream.
+   *
+   * @param p   the java.util.Properties object to write
+   * @param os  the stream to write the object to
+   */
+  public static void writeTo(java.util.Properties p, OutputStream os) throws IOException {
+    if (p == null) {
+      writeTo(-1, os);
+    } else {
+      writeTo(p.size(), os);
+      for (Enumeration keys = p.keys(); keys.hasMoreElements(); ) {
+        String key = (String) keys.nextElement();
+        StreamUtil.writeTo(key, os);
+        String value = p.getProperty(key);
+        StreamUtil.writeTo(value, os);
+      }
+    }
+  }
+
+  /**
+   * This method allows to restore a java.util.Properties object from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the object
+   * @return  the java.util.Properties object or null
+   */
+  public static java.util.Properties readJPropertiesFrom(InputStream is) throws IOException {
+    int size = StreamUtil.readIntFrom(is);
+    java.util.Properties prop = null;
+    if (size != -1) {
+      prop = new java.util.Properties();
+      String key;
+      String value;
+      for (int i=0; i< size; i++) {
+        key = StreamUtil.readStringFrom(is);
+        value = StreamUtil.readStringFrom(is);
+        prop.put(key, value);
+      }
+    }
+    return prop;
+  }
+
 }
