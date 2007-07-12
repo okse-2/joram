@@ -181,6 +181,11 @@ boolean Message::getRedelivered() {
   return redelivered;
 }
 
+void Message::setReplyTo(Destination* replyTo) {
+  replyToId = replyTo->getUID();
+  replyToType = replyTo->getType();
+}
+
 /**
  * Gets the Destination object to which a reply to this message should
  * be sent.
@@ -379,10 +384,13 @@ Message* Message::clone() {
   clone->correlationId = correlationId;
 
   if (body != (byte*) NULL) {
-    throw NotYetImplementedException();
-/*     // AF: May be we can share the body as it should be RO. */
-/*     clone->body = new byte[body.length]; */
-/*     System.arraycopy(body, 0, clone.body, 0, body.length); */
+    //    throw NotYetImplementedException();
+    // AF: May be we can share the body as it should be RO.
+    //clone->body = new byte[strlen(body)+1];
+    //strcpy(clone->body,body);
+    clone->length = length;
+    clone->body = body;
+    //    System.arraycopy(body, 0, clone.body, 0, body.length);
   }
   if (optionalHeader != (Properties*) NULL) {
     clone->optionalHeader = (Properties*) optionalHeader->clone();

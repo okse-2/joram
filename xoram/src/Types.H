@@ -68,4 +68,6 @@ class IOException : public Exception {
   IOException(char* msg) : Exception(msg) {}
 };
 
+class UnknownClass {};
+
 #endif /* TYPES_H */

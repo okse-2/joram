@@ -38,9 +38,8 @@ int OutputStream::writeBuffer(byte* buf, int len) {
     if (newcount > newlength)
       newlength = newcount;
 
-    newbuf = new byte[newlength];//(byte*) malloc(newlength);
+    newbuf = new byte[newlength];
     if (newbuf == NULL) {
-      //perror("writeBuffer - malloc");
       perror("writeBuffer - new byte[]");
       return -1;
     }
@@ -135,9 +134,8 @@ int OutputStream::writeBoolean(boolean b) {
 
 int OutputStream::writeByte(byte b) {
   if ((count + 1) > length) {
-    byte* newbuf = new byte[length*2];//(byte*) malloc(length*2);
+    byte* newbuf = new byte[length*2];
     if (newbuf == NULL) {
-      //perror("writeByte - malloc");
       perror("writeByte - new byte[]");
       return -1;
     }
@@ -221,12 +219,12 @@ int InputStream::readBuffer(byte* buf, int len) {
 }
 
 // Attention le buffer doit avoir ete alloue avec new (pas malloc).
-/* InputStream::InputStream(byte* buffer, int length, int count) { */
-/*   this->buffer = buffer; */
-/*   this->length = length; */
-/*   this->count = count; */
-/*   pos = 0; */
-/* } */
+InputStream::InputStream(byte* buffer, int length, int count) {
+   this->buffer = buffer;
+   this->length = length;
+   this->count = count;
+   pos = 0;
+}
 
 InputStream::InputStream() {
   if(DEBUG)
@@ -261,23 +259,27 @@ int InputStream::size() {
 int InputStream::readFrom(int fd) {
   int buf, len;
   if (read(fd, &buf, 4) != 4)  {
-    perror("readFrom");
+    if(DEBUG)
+      printf("readFrom");
+    //perror("readFrom");
     return -1;
   }
   len = ntohl(buf);
   if (len > length) {
-    //free(buffer);
     delete[] buffer;
-    buffer = new byte[len];//(byte*) malloc(len);
+    buffer = new byte[len];
     if (buffer == NULL) {
-      //perror("readFrom - malloc");
-      perror("readFrom - new byte[]");
+      if(DEBUG)
+        printf("readFrom - new byte[]");
+      //perror("readFrom - new byte[]");
       return -1;
     }
     length = len;
   }
   if (read(fd, buffer, len) != len)  {
-    perror("readFrom");
+    if(DEBUG)
+      printf("readFrom: len");
+    //perror("readFrom: len");
     count = 0;
     return -1;
   }

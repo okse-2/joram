@@ -31,7 +31,7 @@
 class AbstractRequest;
 class AbstractReply;
 
-class UnknownClass {};
+//class UnknownClass {};
 
 class AbstractMessage : Streamable {
  protected:
@@ -64,16 +64,16 @@ class AbstractMessage : Streamable {
     CONSUMER_CLOSE_SUB_REQUEST = 19,
 //    CONSUMER_SET_LIST_REQUEST = 20,
 //    CONSUMER_UNSET_LIST_REQUEST = 21,
-//    GET_ADMIN_TOPIC_REPLY = 22,
-//    GET_ADMIN_TOPIC_REQUEST = 23,
+    GET_ADMIN_TOPIC_REPLY = 22,
+    GET_ADMIN_TOPIC_REQUEST = 23,
 //    JMS_REQUEST_GROUP = 24,
 //    PING_REQUEST = 25,
 //    QBROWSE_REPLY = 26,
 //    QBROWSE_REQUEST = 27,
-//    SESS_CREATE_TDREPLY = 28,
+    SESS_CREATE_TDREPLY = 28,
 //    SESS_CREATE_TQREQUEST = 29,
-//    SESS_CREATE_TTREQUEST = 30,
-//    TEMP_DEST_DELETE_REQUEST = 31,
+    SESS_CREATE_TTREQUEST = 30,
+    TEMP_DEST_DELETE_REQUEST = 31
 //    XA_CNX_COMMIT = 32,
 //    XA_CNX_PREPARE = 33,
 //    XA_CNX_RECOVER_REPLY = 34,
@@ -990,6 +990,140 @@ class ConsumerCloseSubRequest : public AbstractRequest {
   ConsumerCloseSubRequest(char* subName);
 
   ~ConsumerCloseSubRequest();
+};
+
+/**
+ * A <code>GetAdminTopicRequest</code>
+ */
+class GetAdminTopicRequest : public AbstractRequest {
+ public:
+  /**
+   * Constructs a <code>GetAdminTopicRequest</code>.
+   */
+  GetAdminTopicRequest();
+
+  ~GetAdminTopicRequest();
+};
+
+/**
+ * A <code>GetAdminTopicReply</code>
+ */
+class GetAdminTopicReply : public AbstractReply {
+ private:
+  /** message identifiers. */
+  char* id;
+
+ public:
+  /**
+   * Constructs a <code>GetAdminTopicReply</code>.
+   */
+  GetAdminTopicReply();
+
+  /**
+   * Constructs a <code>GetAdminTopicReply</code>.
+   */
+  GetAdminTopicReply(GetAdminTopicRequest* req, char* id);
+
+  ~GetAdminTopicReply();
+
+  /** Sets the identifier. */
+  void setId(char* id);
+
+  /** Returns the vector of denyed messages identifiers. */
+  char* getId();
+
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
+};
+ 
+/**
+ * A <code>TempDestDeleteRequest</code>
+ */
+class TempDestDeleteRequest : public AbstractRequest {
+ public:
+  /**
+   * Constructs a <code>TempDestDeleteRequest</code>.
+   */
+  TempDestDeleteRequest();
+
+  /**
+   * Constructs a <code>TempDestDeleteRequest</code>.
+   */
+  TempDestDeleteRequest(char* uid);
+
+  ~TempDestDeleteRequest();
+};
+
+
+
+class SessCreateTDReply : public AbstractReply {
+ private:
+  char* agentId;
+
+ public:
+  /**
+   * Constructs a <code>SessCreateTDReply</code> instance.
+   */
+  SessCreateTDReply();
+
+  /**
+   * Constructs a <code>SessCreateTDReply</code> instance.
+   *
+   * @param request  The replied request.
+   * @param agentId  String identifier of the destination agent.
+   */
+  SessCreateTDReply(AbstractRequest* req, char* agentId);
+
+  ~SessCreateTDReply();
+
+  /** Sets the destination identifier. */
+  void setAgentId(char* agentId);
+
+  /** Returns the temporary destination's agent identifier. */
+  char* getAgentId();
+
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
+};
+
+class SessCreateTTRequest : public AbstractRequest {
+ public:
+  SessCreateTTRequest();
+  ~SessCreateTTRequest();
 };
 
 #endif /* ABSTRACT_MESSAGE_H */

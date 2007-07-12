@@ -3,14 +3,14 @@ INCDIR = ../../src
 
 ###############################
 # i86-cygwin
-#CCOPT = -g
-#LDFLAGS = -shared
-#LIBXORAM = libxoram.dll
+CCOPT = -g
+LDFLAGS = -shared
+LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
- CCOPT = -g -fPIC
- LDFLAGS = -fPIC -shared
- LIBXORAM = libxoram.so
+# CCOPT = -g -fPIC
+# LDFLAGS = -fPIC -shared
+# LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
@@ -27,7 +27,9 @@ LIBXORAMOBJS = \
 	Message.o \
 	Xoram.o \
 	XoramWrapper.o \
-	BaseTestCase.o
+	BaseTestCase.o \
+	AbstractAdminMessage.o \
+	XoramAdmin.o
 
 clean:
 	rm -f *.o *~ $(LIBXORAM)

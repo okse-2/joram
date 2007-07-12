@@ -244,7 +244,12 @@ class TcpChannel : public Channel {
     if (status != CONNECT) throw ConnectException();
 
     while (true) {
-      if (in->readFrom(sock) == -1) throw IOException();
+      if (in->readFrom(sock) == -1) {
+        if (status != CLOSE) {
+          printf("receive in->readFrom(sock) ERROR=%s\n", strerror(errno));
+          throw IOException();
+        }
+      }
 
       long long msgid, ackid;
 
@@ -281,6 +286,7 @@ class TcpChannel : public Channel {
 
   virtual void close()  {
     ::close(sock);
+    status = CLOSE;
   }
 };
 
@@ -930,6 +936,27 @@ Destination* Destination::newInstance(char* uid, char type, char* name) {
   }
 }
 
+TemporaryTopic::TemporaryTopic(char* agentId, Requestor* requestor) : Topic(agentId, Destination::typeToString(TMP_TOPIC)) {
+  this->requestor = requestor;
+}
+
+TemporaryTopic::~TemporaryTopic() {
+}
+
+void TemporaryTopic::destroy() {
+  if (requestor != (Requestor*) NULL) {
+    requestor->request(new TempDestDeleteRequest(getUID()));
+  }
+}
+
+Requestor* TemporaryTopic::getRequestor() {
+  return requestor;
+}
+
+boolean TemporaryTopic::isTemporaryTopic() {
+  return (getType() == TMP_TOPIC);
+}
+
 // ######################################################################
 // Session Class
 // ######################################################################
@@ -1014,6 +1041,27 @@ Connection* Session::getConnection() {
 
 RequestMultiplexer* Session::getRequestMultiplexer() {
     return mtpx;
+}
+
+
+Topic* Session::createTopic(char* topicName) {
+  // Checks if the topic to retrieve is the administration topic:
+  if (strcmp(topicName, "#AdminTopic") == 0) {
+    GetAdminTopicReply* reply =  
+      (GetAdminTopicReply*) requestor->request(new GetAdminTopicRequest());
+    if (reply->getId() != (char*) NULL)
+      return new Topic(reply->getId(), topicName);
+    else
+      return (Topic*) NULL;
+  }
+  return new Topic(topicName, topicName);
+}
+
+TemporaryTopic* Session::createTemporaryTopic() {
+  SessCreateTDReply* reply =
+    (SessCreateTDReply*) requestor->request(new SessCreateTTRequest());
+  char* tempDest = reply->getAgentId();
+  return new TemporaryTopic(tempDest, requestor);
 }
 
 /**

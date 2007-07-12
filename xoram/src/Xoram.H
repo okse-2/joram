@@ -31,6 +31,9 @@
 #include "XoramException.H"
 #include "XQueue.H"
 #include "Daemon.H"
+#include "Destination.H"
+
+#include <errno.h>
 
 class Channel;
 class Session;
@@ -403,6 +406,7 @@ class Message;
 class Destination;
 class Queue;
 class Topic;
+class TemporaryTopic;
 class MessageProducer;
 class MessageConsumer;
 class MessageListener;
@@ -679,7 +683,11 @@ class Session : public Daemon {
   MessageConsumer* createDurableSubscriber(Topic* topic, char* subname,
                                            char* selector,
                                            boolean noLocal);
-          
+      
+  Topic* createTopic(char* topicName);
+
+  TemporaryTopic* createTemporaryTopic();
+
   /**
    * Unsubscribes a durable subscription that has been created by a client.
    */
@@ -1224,4 +1232,23 @@ class MessageConsumer {
   void close();
 };
 
+
+class TemporaryTopic : public Topic {
+ private:
+  Requestor* requestor;
+
+ public:
+  /**
+   * Creates a TemporaryTopic object.
+   */
+  TemporaryTopic(char* agentId,  Requestor* requestor);
+
+  ~TemporaryTopic();
+
+  void destroy();
+
+  Requestor* getRequestor();
+
+  boolean isTemporaryTopic();
+};
 #endif /* XORAM_H */

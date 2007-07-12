@@ -41,7 +41,7 @@ boolean AbstractMessage::instanceof(int classid) {
 }
 
 void AbstractMessage::write(AbstractMessage* msg,
-                                   OutputStream* os) throw (IOException) {
+                            OutputStream* os) throw (IOException) {
   if (msg == (AbstractMessage*) NULL) {
     if (os->writeInt(NULL_CLASS_ID) == -1) throw IOException();
   } else {
@@ -114,6 +114,21 @@ AbstractMessage* AbstractMessage::read(InputStream *is) throw (IOException) {
     break;
   case CONSUMER_CLOSE_SUB_REQUEST:
     reply = new ConsumerCloseSubRequest();
+    break;
+  case GET_ADMIN_TOPIC_REPLY:
+    reply = new GetAdminTopicReply();
+    break;
+  case GET_ADMIN_TOPIC_REQUEST:
+    reply = new GetAdminTopicRequest();
+    break;
+  case TEMP_DEST_DELETE_REQUEST:
+    reply = new TempDestDeleteRequest();
+    break;
+  case SESS_CREATE_TDREPLY:
+    reply = new SessCreateTDReply();
+    break;
+  case SESS_CREATE_TTREQUEST:
+    reply = new SessCreateTTRequest();
     break;
 
   default:
@@ -1384,4 +1399,140 @@ ConsumerCloseSubRequest::ConsumerCloseSubRequest(char* subName) : AbstractReques
 ConsumerCloseSubRequest::~ConsumerCloseSubRequest() {
   if(DEBUG)
     printf("~ConsumerCloseSubRequest()\n");
+}
+
+GetAdminTopicRequest::GetAdminTopicRequest() : AbstractRequest((char*) NULL) {
+  classid = GET_ADMIN_TOPIC_REQUEST;
+}
+
+GetAdminTopicRequest::~GetAdminTopicRequest() {
+  if(DEBUG)
+    printf("~GetAdminTopicRequest()\n");
+}
+
+GetAdminTopicReply::GetAdminTopicReply() : AbstractReply() {
+  classid = GET_ADMIN_TOPIC_REPLY;
+}
+
+GetAdminTopicReply::~GetAdminTopicReply() {
+  if(DEBUG)
+    printf("~GetAdminTopicReply()\n");
+}
+
+GetAdminTopicReply::GetAdminTopicReply(GetAdminTopicRequest* req, char* id) : AbstractReply(req->getRequestId()) {
+  classid = GET_ADMIN_TOPIC_REPLY;
+  this->id = id;
+}
+
+/** Sets the identifier. */
+void GetAdminTopicReply::setId(char* id) {
+  this->id = id;
+}
+
+/** Returns the vector of denyed messages identifiers. */
+char* GetAdminTopicReply::getId() {
+  return id;
+}
+
+/* ***** ***** ***** ***** *****
+ * Streamable interface
+ * ***** ***** ***** ***** ***** */
+
+/**
+ *  The object implements the writeTo method to write its contents to
+ *  the output stream.
+ *
+ * @param os the stream to write the object to
+ */
+void GetAdminTopicReply::writeTo(OutputStream* os) throw(IOException) {
+  AbstractReply::writeTo(os);
+  if (os->writeString(id) == -1) throw IOException();
+}
+
+/**
+ *  The object implements the readFrom method to restore its contents from
+ * the input stream.
+ *
+ * @param is the stream to read data from in order to restore the object
+ */
+void GetAdminTopicReply::readFrom(InputStream* is) throw(IOException) {
+  AbstractReply::readFrom(is);
+  if (is->readString(&id) == -1) throw IOException();
+}
+
+
+TempDestDeleteRequest::TempDestDeleteRequest() : AbstractRequest((char*) NULL) {
+  classid = TEMP_DEST_DELETE_REQUEST;
+}
+
+TempDestDeleteRequest::TempDestDeleteRequest(char* uid) : AbstractRequest(uid) {
+  classid = TEMP_DEST_DELETE_REQUEST;
+}
+
+TempDestDeleteRequest::~TempDestDeleteRequest() {
+}
+
+
+/**
+ * Constructs a <code>SessCreateTDReply</code> instance.
+ */
+SessCreateTDReply::SessCreateTDReply() : AbstractReply() {
+  classid = SESS_CREATE_TDREPLY;
+}
+
+/**
+ * Constructs a <code>SessCreateTDReply</code> instance.
+ *
+ * @param request  The replied request.
+ * @param agentId  String identifier of the destination agent.
+ */
+SessCreateTDReply::SessCreateTDReply(AbstractRequest* req, char* agentId)  : AbstractReply(req->getRequestId()) {
+  classid = SESS_CREATE_TDREPLY;
+  this->agentId = agentId;
+}
+
+SessCreateTDReply::~SessCreateTDReply() {
+}
+
+/** Sets the destination identifier. */
+void SessCreateTDReply::setAgentId(char* agentId) {
+  this->agentId = agentId;
+}
+
+/** Returns the temporary destination's agent identifier. */
+char* SessCreateTDReply::getAgentId() {
+  return agentId;
+}
+
+/* ***** ***** ***** ***** *****
+ * Streamable interface
+ * ***** ***** ***** ***** ***** */
+
+/**
+ *  The object implements the writeTo method to write its contents to
+ *  the output stream.
+ *
+ * @param os the stream to write the object to
+ */
+void SessCreateTDReply::writeTo(OutputStream* os) throw(IOException) {
+  AbstractReply::writeTo(os);
+  if (os->writeString(agentId) == -1) throw IOException();
+}
+
+/**
+ *  The object implements the readFrom method to restore its contents from
+ * the input stream.
+ *
+ * @param is the stream to read data from in order to restore the object
+ */
+void SessCreateTDReply::readFrom(InputStream* is) throw(IOException) {
+  AbstractReply::readFrom(is);
+  if (is->readString(&agentId) == -1) throw IOException();
+}
+
+SessCreateTTRequest::SessCreateTTRequest() : AbstractRequest((char*) NULL) {
+  classid = SESS_CREATE_TTREQUEST;
+}
+
+SessCreateTTRequest::~SessCreateTTRequest() {
 }
