@@ -90,8 +90,9 @@ class Message : Streamable {
  public:
   Session* session;
 
- private:
   int type;
+
+  byte* body;
  
   /** A simple message carries an empty body. */
   const static int SIMPLE = 0;
@@ -105,7 +106,13 @@ class Message : Streamable {
   const static int STREAM = 4;
   /** A bytes message carries an array of bytes. */
   const static int BYTES = 5;
+  /** A admin message carries an array of bytes. */
+  const static int ADMIN = 6;
 
+  /** body length */
+  int length;
+
+ private:
   /** The message identifier. */
   char* id;
 
@@ -148,9 +155,6 @@ class Message : Streamable {
   Properties* optionalHeader; // TODO: Useless
 
   void checkPropertyName(char* name) throw (MessageFormatException);
-
-  byte* body;
-  int length;
 
   const static int redeliveredFlag =   0x00000004;
   const static int persistentFlag =    0x00000008;

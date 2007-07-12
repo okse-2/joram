@@ -37,13 +37,13 @@ class Destination {
   char* name;
 
  public:
-  enum {QUEUE, TOPIC, NOTYPE};
+  enum {QUEUE, TOPIC, TMP_TOPIC, NOTYPE};
 
   Destination(char* uid, char type, char* name);
 
   ~Destination() {
     if(DEBUG)
-      printf("~Destination(): uid = 0x%x, name = 0x%x\n", uid, name);//NTA tmp
+      printf("~Destination(): uid = 0x%x, name = 0x%x\n", uid, name);
     if (uid != (char*) NULL) {
       delete[] uid;
       uid = (char*) NULL;
@@ -87,6 +87,8 @@ class Destination {
       return "queue";
     else if (type == TOPIC)
       return "topic";
+    else if (type == TMP_TOPIC)
+      return "topic.tmp";
     return "noType";
   }
 
@@ -99,6 +101,8 @@ class Destination {
       return QUEUE;
     else if (strcasecmp(type, "topic"))
       return TOPIC;
+    else if (strcasecmp(type, "topic.tmp"))
+      return TMP_TOPIC;
     return NOTYPE;
   }
 

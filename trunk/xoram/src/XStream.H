@@ -99,12 +99,13 @@ class InputStream : XStream {
   // The index of the next character to read from the buffer.
   unsigned int pos;
 
-  int readBuffer(byte* buf, int len);
-
  public:
   InputStream();
+  InputStream(byte* buffer, int length, int count);
   ~InputStream();
 
+
+  int readBuffer(byte* buf, int len);
   int readFrom(int fd);
 
   void reset();
