@@ -316,7 +316,11 @@ void Message::setByteProperty(char* name, byte value) {
 }
 
 void Message::setDoubleProperty(char* name, double value) {
-  throw NotYetImplementedException();
+  checkPropertyName(name);
+  if (properties == (Properties*) NULL)
+    properties = new Properties();
+  
+  properties->setDoubleProperty(name, value);
 }
 
 void Message::setFloatProperty(char* name, float value) {

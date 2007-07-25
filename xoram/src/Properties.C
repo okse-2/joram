@@ -69,7 +69,7 @@ Properties::~Properties() {
     printf("~Properties(): table = 0x%x\n", table);
   clear();
   if (table != (Entry**) NULL) {
-    delete[] table;
+    //delete[] table;
     table = (Entry**) NULL;
   }
   count = 0;
@@ -89,7 +89,7 @@ void Properties::clear() {
     if (table[index] != (Entry*) NULL) {
       delete table[index];
     }
-    table[index] = (Entry*) NULL;
+     table[index] = (Entry*) NULL;
   }
   count = 0;
 }
@@ -190,14 +190,14 @@ byte Properties::getByteProperty(char* name) {
 double Properties::getDoubleProperty(char* name) {
   Entry* entry = get(name);
   if (entry == (Entry*) NULL) {
-    throw MessageFormatException("Can't converted to double");
+    throw MessageFormatException("Can't converted to double 1");
   } else if (entry->type == XStream::S_DOUBLE) {
     return entry->d;
   } else if (entry->type == XStream::S_STRING) {
     // TODO
-    throw MessageFormatException("Can't converted to double");
+    throw MessageFormatException("Can't converted to double 2");
   } else {
-    throw MessageFormatException("Can't converted to double");
+    throw MessageFormatException("Can't converted to double 3");
   }
 }
 
