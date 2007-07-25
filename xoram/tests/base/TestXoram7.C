@@ -25,11 +25,30 @@
 #include "Xoram.H"
 #include "Message.H"
 #include "Destination.H"
-
+#include "XoramAdmin.H"
+#include "AbstractAdminMessage.H"
 #include "BaseTestCase.H"
 
 int main(int argc, char *argv[]) {
   try {
+
+    XoramAdmin* admin = new XoramAdmin();
+    admin->connect("root", "root", 60);
+
+    // create destination
+    Queue* queue = admin->createQueue("queue");
+    Topic* topic = admin->createTopic("topic");
+    
+    // set right
+    admin->setFreeReading(queue);
+    admin->setFreeWriting(queue);
+    admin->setFreeReading(topic);
+    admin->setFreeWriting(topic);
+
+    // create "anonymous" user
+    admin->createUser("anonymous", "anonymous");
+    admin->disconnect();
+
     BaseTestCase::startTest(argv);
 
     ConnectionFactory* cf = new TCPConnectionFactory("localhost", 16010);
@@ -37,8 +56,8 @@ int main(int argc, char *argv[]) {
     cnx->start();
     Session* sess1 = cnx->createSession();
     Session* sess2 = cnx->createSession();
-    Queue* queue = new Queue("#0.0.1026", "queue");
-    Topic* topic = new Topic("#0.0.1027", "topic");
+    //Queue* queue = new Queue("#0.0.1026", "queue");
+    //Topic* topic = new Topic("#0.0.1027", "topic");
     MessageProducer* prod1 = sess1->createProducer(queue);
     MessageProducer* prod2 = sess2->createProducer(topic);
     MessageConsumer* cons1 = sess1->createConsumer(queue);

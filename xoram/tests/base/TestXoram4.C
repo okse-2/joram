@@ -25,7 +25,8 @@
 #include "Xoram.H"
 #include "Message.H"
 #include "Destination.H"
-
+#include "XoramAdmin.H"
+#include "AbstractAdminMessage.H"
 #include "BaseTestCase.H"
 
 class MyListener : public MessageListener {
@@ -37,12 +38,28 @@ class MyListener : public MessageListener {
 
 int main(int argc, char *argv[]) {
   try {
+    XoramAdmin* admin = new XoramAdmin();
+    admin->connect("root", "root", 60);
+
+    // create destination
+    Queue* queue = admin->createQueue("queue");
+    Topic* topic = admin->createTopic("topic");
+    
+    // set right
+    admin->setFreeReading(queue);
+    admin->setFreeWriting(queue);
+    admin->setFreeReading(topic);
+    admin->setFreeWriting(topic);
+
+    // create "anonymous" user
+    admin->createUser("anonymous", "anonymous");
+    admin->disconnect();
 
     BaseTestCase::startTest(argv);
 
     ConnectionFactory* cf = new TCPConnectionFactory("localhost", 16010);
     Connection* cnx = cf->createConnection("anonymous", "anonymous");
-    Topic* topic = new Topic("#0.0.1027", "topic");
+    //Topic* topic = new Topic("#0.0.1027", "topic");
     Session* sess1 = cnx->createSession();
     MessageProducer* prod = sess1->createProducer(topic);
 

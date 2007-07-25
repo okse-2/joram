@@ -5,7 +5,7 @@
 #include "Destination.H"
 #include "XoramAdmin.H"
 #include "AbstractAdminMessage.H"
-
+#include "BaseTestCase.H"
 int main(int argc, char *argv[]) {
   try {
 
@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 
     // create "anonymous" user
     admin->createUser("anonymous", "anonymous");
+
+    BaseTestCase::startTest(argv);
 
     ConnectionFactory* cf = new TCPConnectionFactory("localhost", 16010);
     Connection* cnx = cf->createConnection("anonymous", "anonymous");
@@ -64,10 +66,17 @@ int main(int argc, char *argv[]) {
     admin->disconnect();
 
     cnx->close();
-  } catch (Exception exc) {
+
+} catch (Exception exc) {
     printf("##### exception - %s", exc.getMessage());
+    BaseTestCase::error(&exc);
   } catch (...) {
     printf("##### exception\n");
+    BaseTestCase::error(new Exception(" catch ..., unknown exception "));
   }
   printf("##### bye\n");
+  BaseTestCase::endTest();
 }
+
+
+  
