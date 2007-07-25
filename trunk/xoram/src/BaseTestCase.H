@@ -71,8 +71,8 @@ public :
     
     static void setStartDate();
     
-    static void assertTrue(char * message, boolean condition);
-    static void assertTrue(boolean condition);
+    static void assertTrue(char * message,int  condition);
+    static void assertTrue(int condition);
     
     static void assertFalse(char * message, boolean condition);
     static void assertFalse(boolean condition);

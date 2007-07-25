@@ -133,15 +133,15 @@ int BaseTestCase::errorCount() {
 /**
  * Asserts that a condition is true.
  */
-void BaseTestCase::assertTrue(char * message, boolean condition) {
+void BaseTestCase::assertTrue(char * message, int condition) {
   if (!condition) fail(message);
 }
 
 /**
  * Asserts that a condition is true.
  */
-void  BaseTestCase::assertTrue(boolean condition) {
-  assertTrue(NULL, condition);
+void  BaseTestCase::assertTrue(int condition) {
+  assertTrue("erreur", condition);
 }
 
 /**

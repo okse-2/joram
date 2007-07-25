@@ -3,20 +3,20 @@ INCDIR = ../../src
 
 ###############################
 # i86-cygwin
-CCOPT = -g
-LDFLAGS = -shared
-LIBXORAM = libxoram.dll
+#CCOPT = -g
+#LDFLAGS = -shared
+#LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
-# CCOPT = -g -fPIC
-# LDFLAGS = -fPIC -shared
-# LIBXORAM = libxoram.so
+ CCOPT = -g -fPIC
+ LDFLAGS = -fPIC -shared
+ LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
 LD = g++ $(CCOPT) $(LDFLAGS)
 
-TESTS = ../tests/common ../tests/base ../tests/wrapper
+TESTS = ../tests/common ../tests/base ../tests/wrapper ../tests/perfs
 
 LIBXORAMOBJS = \
 	Synchronized.o \
