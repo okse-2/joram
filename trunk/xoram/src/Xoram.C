@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h> 
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 
 #include "Synchronized.H"
@@ -159,6 +160,9 @@ class TcpChannel : public Channel {
 
     addr.sin_family = AF_INET;
     addr.sin_port   = htons(port);
+
+    int opt = 1;
+    setsockopt(sock,SOL_TCP , TCP_NODELAY, &opt, sizeof(opt));
 
     struct hostent *server = gethostbyname(host);
     if (server == NULL) throw ConnectException("Host unknown");
