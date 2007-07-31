@@ -652,7 +652,12 @@ public final class AgentServer {
     if (a3config.properties != null) {
       for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        System.getProperties().put(p.name,p.value);
+        System.getProperties().put(p.name, p.value);
+
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + " : Adds global property: " +
+                     p.name + " = " + p.value);
       }
     }
 
@@ -669,6 +674,11 @@ public final class AgentServer {
         do {
           A3CMLProperty p = (A3CMLProperty) e.nextElement();
           System.getProperties().put(p.name,p.value);
+
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + " : Adds cluster property: " +
+                       p.name + " = " + p.value);
         } while (e.hasMoreElements());
       }
       server = cluster.getServer(cid);
@@ -682,6 +692,11 @@ public final class AgentServer {
       do {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
         System.getProperties().put(p.name,p.value);
+
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+                     getName() + " : Adds server property: " +
+                     p.name + " = " + p.value);
       } while (e.hasMoreElements());
     }
   }
@@ -1316,7 +1331,7 @@ public final class AgentServer {
       // Creates a thread to execute AgentServer.stop in order to
       // avoid deadlock.
       Thread t = new Thread(stopper);
-      t.setDaemon(true);
+      t.setDaemon(false);
       t.start();
     }
   }
@@ -1386,6 +1401,7 @@ public final class AgentServer {
           }
         }
       }
+      new Exception().printStackTrace();
       // Stop all services.
       ServiceManager.stop();
       // Stop all drivers
@@ -1408,13 +1424,12 @@ public final class AgentServer {
                      tab[j]);
         }
         try {
-          Thread.sleep(2500);
+          Thread.sleep(1000);
         } catch (InterruptedException e) {}
       }
 
       // Stop the transaction manager.
       if (transaction != null) transaction.stop();
-
       // Wait for the transaction manager stop
 
       Runtime.getRuntime().gc();
