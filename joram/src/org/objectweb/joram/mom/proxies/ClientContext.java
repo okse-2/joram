@@ -123,9 +123,18 @@ class ClientContext implements java.io.Serializable {
   }
    
   /** Returns the temporary destinations' identifiers. */
+    /* Enumeration getTempDestinations()
+    {
+      return tempDestinations.elements();
+    }*/
   Enumeration getTempDestinations()
   {
-    return tempDestinations.elements();
+    //Creats an enumeration not backed by tempDestinations
+    Vector tempDests = new Vector();
+    for(Enumeration dests = tempDestinations.elements(); dests.hasMoreElements(); ){  
+      tempDests.addElement(dests.nextElement());
+    }
+    return tempDests.elements();
   }
 
   /** Removes a temporary destination identifier. */
