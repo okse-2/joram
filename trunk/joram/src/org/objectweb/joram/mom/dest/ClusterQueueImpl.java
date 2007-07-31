@@ -579,11 +579,14 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   protected ClientMessages getClientMessages(int nb, String selector, boolean remove) {
     ClientMessages cm = super.getClientMessages(nb, selector, remove);
-    // set information in cluster
-    for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
-      org.objectweb.joram.shared.messages.Message message = 
-        (org.objectweb.joram.shared.messages.Message) e.nextElement();
-      monitoringMsgSendToCluster(message.id);
+    if (cm != null) {
+      // set information in cluster
+      for (Enumeration e = cm.getMessages().elements();
+           e.hasMoreElements(); ) {
+        org.objectweb.joram.shared.messages.Message message = 
+          (org.objectweb.joram.shared.messages.Message) e.nextElement();
+        monitoringMsgSendToCluster(message.id);
+      }
     }
     return cm;
   }
