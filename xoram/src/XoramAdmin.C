@@ -96,6 +96,7 @@ void AdminRequestor::close() {
 XoramAdmin::XoramAdmin() {
   if(DEBUG)
     printf("<=> XoramAdmin::XoramAdmin()\n");
+   cnx =  (Connection*) NULL;
 }
 XoramAdmin::~XoramAdmin() {
 }
