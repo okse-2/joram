@@ -31,6 +31,7 @@
 
 int main (int argc, char *argv[]) {
   try {
+    BaseTestCase::startTest(argv);
 
     XoramAdmin* admin = new XoramAdmin();
     admin->connect("root", "root", 60);
@@ -48,8 +49,7 @@ int main (int argc, char *argv[]) {
     // create "anonymous" user
     admin->createUser("anonymous", "anonymous");
     admin->disconnect();
-    BaseTestCase::startTest(argv);
-
+   
     ConnectionFactory* cf = new TCPConnectionFactory("localhost", 16010);
     Connection* cnx = cf->createConnection("anonymous", "anonymous");
     cnx->start();

@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
    
  
   try {
+    BaseTestCase::startTest(argv);
     int nbDest = 20;
     // create Admin and connect
     XoramAdmin* admin = new XoramAdmin();
@@ -61,7 +62,6 @@ int main(int argc, char *argv[]) {
 
     admin->disconnect();
    
-    BaseTestCase::startTest(argv);
     if (argc > 1) {
       if (strcmp(argv[1],"consumer") == 0) {
         cons = TRUE;
