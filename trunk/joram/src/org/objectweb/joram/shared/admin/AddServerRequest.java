@@ -96,7 +96,6 @@ public class AddServerRequest extends AdminRequest {
     hostName = StreamUtil.readStringFrom(is);
     port = StreamUtil.readIntFrom(is);
     serverId = StreamUtil.readIntFrom(is);
-    domainName = StreamUtil.readStringFrom(is);
     serverName = StreamUtil.readStringFrom(is);
     serviceNames = StreamUtil.readArrayOfStringFrom(is);
     serviceArgs = StreamUtil.readArrayOfStringFrom(is);
