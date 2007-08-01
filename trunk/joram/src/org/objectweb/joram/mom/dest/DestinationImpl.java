@@ -847,7 +847,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
     message.id = replyMsgId;;
     try {
-      message.setObject(reply);
+      message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
       forward(replyTo, clientMessages);
     } catch (Exception exc) {

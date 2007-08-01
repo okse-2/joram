@@ -2402,7 +2402,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
     message.id = replyMsgId;;
     try {
-      message.setObject(reply);
+      message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
       Channel.sendTo(replyTo, clientMessages);
     } catch (Exception exc) {
