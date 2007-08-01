@@ -22,7 +22,7 @@
  */
 
 
-package perf;
+package perfs;
 
 import java.io.File;
 

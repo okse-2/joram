@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE project [
     <!ENTITY common SYSTEM "common.xml">
+    <!ENTITY buila3 SYSTEM "buila3.xml">
     ]>
     
 
@@ -37,6 +38,9 @@
     <ant dir="." antfile="build.xml" target="tests.nocoupling"/>
     <ant dir="." antfile="build.xml" target="tests.bridge"/>
     <ant dir="." antfile="build.xml" target="tests.schedqueue"/>
+    <ant dir="." antfile="build.xml" target="tests.cluster"/>
+    <ant dir="." antfile="build.xml" target="tests.hierarchical"/>
+    <ant dir="." antfile="build.xml" target="tests.ssl"/>
 </target>
 
 <target name="tests.messages" description=" --> lauch all messages tests">
@@ -64,6 +68,7 @@
 <target name="tests.temporary" description=" --> lauch all temporary tests">
     <ant dir="." antfile="build.xml" target="base.test_Temp_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_Temp_T"/>
+    <ant dir="." antfile="build.xml" target="base.test_Temp_T2"/>
 </target>
 <target name="tests.ack" description=" --> lauch all acknowledge tests">
     <ant dir="." antfile="build.xml" target="base.test_CAck1_Q"/>
@@ -187,7 +192,6 @@
     <ant dir="." antfile="build.xml" target="noreg.test15"/>
     <ant dir="." antfile="build.xml" target="noreg.test16"/>
     <ant dir="." antfile="build.xml" target="noreg.test17"/>
-    <ant dir="." antfile="build.xml" target="noreg.test18"/>
     <ant dir="." antfile="build.xml" target="noreg.test19"/>
     <ant dir="." antfile="build.xml" target="noreg.test20"/>
     <ant dir="." antfile="build.xml" target="noreg.test21"/>
@@ -269,12 +273,13 @@
   <target name="init.src">
     <!-- Tests specific sources set -->
     <patternset id="specific">
-      <include name="**/*.java"/>
+      <include name="**/**/*.java"/>
     </patternset>
   </target>
 
   <!-- Include generic part -->
-&common;	
+&common;
+&buila3;	
     <target name="init.test.joram" depends="init">
     <antcall target="init.test" inheritAll="true">
       <param name="a3debug" value="a3debug.cfg"/>
@@ -475,6 +480,16 @@
   <antcall target="test.start" inheritAll="true">
     <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
     <param name="className" value="base.Test_Temp_T"/>
+    <param name="jndiconf" value="base/jndi.properties"/>
+    <param name="a3conf" value="base/a3servers1.xml"/>
+    <param name="jvmargs" value=""/>
+    <param name="args" value=""/>
+  </antcall>
+</target>
+<target name="base.test_Temp_T2" description=" --> tests delete temporay topic when connection close">
+  <antcall target="test.start" inheritAll="true">
+    <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+    <param name="className" value="base.Test_Temp_T2"/>
     <param name="jndiconf" value="base/jndi.properties"/>
     <param name="a3conf" value="base/a3servers1.xml"/>
     <param name="jvmargs" value=""/>
@@ -1883,9 +1898,20 @@
     <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <param name="jndiconf" value="perfs/jndi.properties"/>
     <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNbMsg=5000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500/>"/>
+  </antcall>
+</target>
+<target name="perf.test27_bis" description=" --> CarrierIQ Scenario. Measure travel time." >
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test27"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
     <param name="jvmargs" value="-DNbMsg=500000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500/>"/>
   </antcall>
 </target>
+
 
 <target name="perf.test28" description=" --> Test the impact of a durable subscription on the performances of a normal subscription">
   <antcall target="test.start" inheritAll="true">
@@ -1939,7 +1965,7 @@
   </antcall>
 </target>
 
-<target name="perf.test34" description=" --> test : msg/s with different parameter :NbMsg, NTLogMemorySize ">
+<target name="perf.test34_bis" description=" --> test : msg/s with different parameter :NbMsg, NTLogMemorySize ">
   <antcall target="test.start" inheritAll="true">
     <param name="className" value="perfs.Test34"/>
     <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
@@ -2006,6 +2032,79 @@
   </antcall>
 </target>
  
+
+<target name="perf.test34" description=" --> test : msg/s with different parameter :NbMsg, NTLogMemorySize / launch with target all">
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=10000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=500"/>
+  </antcall>
+  <antcall target="test.start" inheritAll="true">
+    <param name="className" value="perfs.Test34"/>
+    <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="jndiconf" value="perfs/jndi.properties"/>
+    <param name="a3conf" value="perfs/a3servers1.xml"/>
+    <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=32 -DNTLogMemorySize=16384 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=800"/>
+  </antcall>
+</target>
+ 
+
+
+
+
+
 <target name="perf.test47" description=" --> Test time to send, to receive.">
   <antcall target="test.start" inheritAll="true">
     <param name="className" value="perfs.Test47"/>
@@ -2067,7 +2166,7 @@
   </antcall>
 </target>
 
-<target name="noreg.test7" description=" --> check system property and create multiple queue" >
+<target name="noreg.test7_bis" description=" --> check system property and create multiple queue" >
   <antcall target="noreg.test7_2" inheritAll="true">
     <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -2076,6 +2175,17 @@
     <param name="NbDest" value="500"/>
     <param name="NbMsg" value="100"/>
     <param name="MsgSize" value="25"/>
+  </antcall>
+</target>
+<target name="noreg.test7" description=" --> check system property and create multiple queue / lazunch with target all" >
+  <antcall target="noreg.test7_2" inheritAll="true">
+    <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
+    <param name="BaseClass" value="noreg.ColocatedBaseTest"/>
+    <param name="NbDest" value="100"/>
+    <param name="NbMsg" value="10"/>
+    <param name="MsgSize" value="5"/>
   </antcall>
 </target>
 <target name="noreg.test7_2" depends="init">
@@ -2334,36 +2444,6 @@
 </target>
 
 
-
-
-
-
-<target name="noreg.test18" depends="test18.noreg,test18b.noreg" description=" --> check close connection"/>
-
-<target name="test18.noreg">
-  <antcall target="test.start" inheritAll="true">
-    <param name="className" value="noreg.Test18"/>
-    <param name="jndiconf" value="noreg/jndi.properties"/>
-    <param name="a3conf" value="noreg/a3servers1.xml"/>
-    <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <param name="jvmargs" value="-Dsid=0"/>
-  </antcall>
-</target>
-
-<target name="test18b.noreg" depends="init">
-  <antcall target="init.test.joram">
-    <param name="jndiconf" value="noreg/jndi.properties"/>
-    <param name="a3conf" value="noreg/a3servers3.xml"/>
-    <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-  </antcall>
-  <antcall target="test.run" inheritAll="true">
-    <param name="className" value="noreg.Test18"/>
-    <param name="jvmargs" value="-Dsid=1"/>
-  </antcall>
-</target>
 
 <target name="noreg.test19" description=" --> test delete temptopic on onMessage()">
   <antcall target="test.start" inheritAll="true">
@@ -3062,6 +3142,7 @@
 <!-- end scheduler test -->
 
 
+<!-- test cluster -->
 <target name="cluster.test1"  description=" -->  test topic cluster send and receive message">
      <antcall target="test.start" inheritAll="true">
       <param name="className" value="cluster.Test1"/>
@@ -3128,6 +3209,9 @@
       <param name="jvmargs" value=""/>
     </antcall>
 </target>
+<!-- end test cluster -->
+
+<!--  test hierarchical -->
 
 <target name="hierarchical.test1"  description=" --> test hierarchical topic">
      <antcall target="test.start" inheritAll="true">
@@ -3140,9 +3224,10 @@
     </antcall>
 </target>
 
+<!-- end  test hierarchical -->
 
 
-
+<!--  test ssl -->
 <target name="sslinit" depends="init">
     <property name="keystore" location="${test.dir}/joram_ks"/>
     <property name="keystore_pass" value="jorampass"/>
@@ -3163,7 +3248,7 @@
   </target>
 
  
-  <target name="ssl.test" depends="sslsimple_init,compile">
+  <target name="ssl.test" depends="sslsimple_init,compile" description=" --> test with ssl conection">
  <java classname="ssl.Test" failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
@@ -3171,13 +3256,10 @@
     </java>
   </target>
 
+<!-- end test ssl -->
 
-
-
-
-
-
-<target name="confha.test" description=" --> ">
+<!--  test confha -->
+<target name="confha.test" description=" --> test dynamic conf with HA">
    <antcall target="test.start" inheritAll="true">
      <param name="className" value="confha.Test"/>  
      <param name="jndiconf" value="confha/jndi.properties"/>
@@ -3187,6 +3269,28 @@
    </antcall>
 </target>
 
+<!-- end test confha -->
+
+<target name="jca.test" depends="jca_init" description=" --> test joram connector">
+   <antcall target="test.run" inheritAll="true">
+    <param name="className" value="connector.Test1"/>  
+    <param name="jvmargs" value=""/>
+     <param name="args" value=""/>
+   </antcall>
+</target>
+ <target name="jca_init" depends="compile,init">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="a3config.dtd" todir="${test.dir}"/>
+    <copy file="a3debug.cfg" todir="${test.dir}"/>
+    <copy file="connector/jndi.properties"
+          tofile="${test.dir}/jndi.properties"/>
+    <copy file="connector/a3servers.xml"
+          tofile="${test.dir}/a3servers.xml"
+      
+    overwrite="true"/>
+    <copy file="connector/joramAdmin.xml" todir="${test.dir}"/>
+  </target>
 
 
 
@@ -3194,6 +3298,34 @@
 
 
 
+
+<!-- use for resolve probleme of with delete temp topic -->
+
+<target name="pb.temptopic" description=" -->">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="pb.TempTopic"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="pb/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+   </antcall>
+</target>
+
+
+
+<target name="pb.Temp" description=" --> ">
+  <antcall target="test.start" inheritAll="true">
+    <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+    <param name="className" value="pb.Test_Temp_T"/>
+    <param name="jndiconf" value="base/jndi.properties"/>
+    <param name="a3conf" value="base/a3servers1.xml"/>
+    <param name="jvmargs" value=""/>
+    <param name="args" value=""/>
+  </antcall>
+</target>
+
+<!--    --> 
 
 <!-- use for resolve probleme of with HA Joram: mixing up the Topics -->
 <!--
