@@ -1401,7 +1401,7 @@ public final class AgentServer {
           }
         }
       }
-      new Exception().printStackTrace();
+      
       // Stop all services.
       ServiceManager.stop();
       // Stop all drivers
