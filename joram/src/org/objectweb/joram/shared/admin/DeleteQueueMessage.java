@@ -50,10 +50,12 @@ public class DeleteQueueMessage extends QueueAdminRequest {
   }
   
   public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
     msgId = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
     StreamUtil.writeTo(msgId, os);
   }
 }
