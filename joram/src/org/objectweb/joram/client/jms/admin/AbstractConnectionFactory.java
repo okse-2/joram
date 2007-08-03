@@ -177,7 +177,8 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   }
 
   public Hashtable code(Hashtable h, String prefix) {
-    h.put(prefix + ".reliableClass", reliableClass);
+    if (reliableClass != null)
+      h.put(prefix + ".reliableClass", reliableClass);
     return params.code(h, prefix);
   }
 
