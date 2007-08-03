@@ -182,6 +182,7 @@ public class FactoryParameters implements java.io.Serializable {
                               new Integer(getPort()).toString()));
 
     ref.add(new StringRefAddr(prefix + ".url", getUrl()));
+
     ref.add(new StringRefAddr(prefix + ".cnxT",
                               new Integer(connectingTimer).toString()));
     ref.add(new StringRefAddr(prefix + ".txT",
@@ -216,6 +217,8 @@ public class FactoryParameters implements java.io.Serializable {
     host = (String) ref.get(prefix + ".host").getContent();
     port = new Integer((String) ref.get(prefix + ".port").getContent()).intValue();
 
+    url = (String) ref.get(prefix + ".url").getContent();
+
     connectingTimer = new Integer((String) ref.get(prefix + ".cnxT").getContent()).intValue();
     txPendingTimer = new Integer((String) ref.get(prefix + ".txT").getContent()).intValue();
     cnxPendingTimer = new Integer((String) ref.get(prefix + ".cnxPT").getContent()).intValue();
@@ -230,10 +233,12 @@ public class FactoryParameters implements java.io.Serializable {
   }
 
   public Hashtable code(Hashtable h, String prefix) {
-    h.put(prefix + ".host", getHost());
+    if (getHost() != null)
+      h.put(prefix + ".host", getHost());
     h.put(prefix + ".port", new Integer(getPort()));
 
-    h.put(prefix + ".url", getUrl());
+    if (getUrl() != null)
+      h.put(prefix + ".url", getUrl());
 
     h.put(prefix + ".connectingTimer", new Integer(connectingTimer));
     h.put(prefix + ".txPendingTimer", new Integer(txPendingTimer));
@@ -258,7 +263,6 @@ public class FactoryParameters implements java.io.Serializable {
     host = (String) h.get(prefix + ".host");
     port = ((Integer) h.get(prefix + ".port")).intValue();
 
-
     url = (String) h.get(prefix + ".url");
 
     connectingTimer = ((Integer) h.get(prefix + ".connectingTimer")).intValue();
@@ -278,6 +282,7 @@ public class FactoryParameters implements java.io.Serializable {
     return '(' + super.toString() +
       ",host=" + host +
       ",port=" + port +
+      ",url" + url +
       ",connectingTimer=" + connectingTimer +
       ",txPendingTimer=" + txPendingTimer +
       ",cnxPendingTimer=" + cnxPendingTimer +
