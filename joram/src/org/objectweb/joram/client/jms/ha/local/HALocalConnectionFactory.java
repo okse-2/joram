@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.ha.local;
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,15 +23,10 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.objectweb.joram.shared.admin.SpecialAdmin;
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 public class RemoveQueueCluster extends SpecialAdmin {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -3584139868682735549L;
 
   public String removeQueue;
 
@@ -47,21 +42,5 @@ public class RemoveQueueCluster extends SpecialAdmin {
                             String removeQueue) {
     super(clusterQueue);
     this.removeQueue = removeQueue;
-  }
-  
-  public RemoveQueueCluster() { }
-  
-  protected int getClassId() {
-    return REMOVE_QUEUE_CLUSTER;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    removeQueue = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(removeQueue, os);
   }
 }

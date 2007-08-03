@@ -23,7 +23,7 @@
 package org.objectweb.joram.mom.proxies;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 
 import java.util.*;
 
@@ -39,8 +39,8 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public void push(ProxyMessage msg) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "AckedQueue.push(" + msg + ')');
     synchronized (list) {
       list.addElement(msg);
@@ -49,8 +49,8 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public ProxyMessage get() throws InterruptedException {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "AckedQueue.get()");
     synchronized (list) { 
       while ((list.size() - current) == 0) {
@@ -64,8 +64,8 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public void ack(long ackId) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "AckedQueue.ack(" + ackId + ')');
     synchronized (list) {
       while (list.size() > 0) {
@@ -75,8 +75,8 @@ public class AckedQueue implements java.io.Serializable {
 	  return;
 	} else {
 	  // acked
-          if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgProxy.log(
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
               BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
 	  list.removeElementAt(0);
           if (current > 0) {
@@ -88,8 +88,8 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public void reset() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
         BasicLevel.DEBUG, "AckedQueue.reset()");
     current = 0;
   }

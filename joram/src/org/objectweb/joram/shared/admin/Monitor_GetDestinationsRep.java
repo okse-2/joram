@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,6 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 
 /**
  * A <code>Monitor_GetDestinationsRep</code> instance replies to a get
@@ -35,7 +29,7 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * server.
  */
 public class Monitor_GetDestinationsRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 4877382958978003764L;
 
   private String[] ids;
   private String[] names;
@@ -50,8 +44,6 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply {
     this.types = types;
   }
 
-  public Monitor_GetDestinationsRep() { }
-  
   public String[] getIds() {
     return ids;
   }
@@ -62,23 +54,5 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply {
 
   public String[] getTypes() {
     return types;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_DESTINATIONS_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    ids = StreamUtil.readArrayOfStringFrom(is);
-    names = StreamUtil.readArrayOfStringFrom(is);
-    types = StreamUtil.readArrayOfStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeArrayOfStringTo(ids, os);
-    StreamUtil.writeArrayOfStringTo(names, os);
-    StreamUtil.writeArrayOfStringTo(types, os);
   }
 }

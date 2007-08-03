@@ -76,7 +76,10 @@ public class NamingContext implements Serializable, Cloneable {
   } 
 
   public void addRecord(Record record) {
-    records.addElement(record);
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	  Trace.logger.log(BasicLevel.DEBUG,"\n\nadd record : "+record +
+			   " vector record : "+records +"\n\n");
+      records.addElement(record);
   }
 
   public boolean removeRecord(String name) {

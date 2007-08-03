@@ -25,10 +25,6 @@ package org.objectweb.joram.client.jms.admin;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.util.management.MXWrapper;
 
 import java.net.ConnectException;
 
@@ -37,7 +33,7 @@ import java.net.ConnectException;
  * The <code>DeadMQueue</code> class allows administrators to manipulate
  * dead message queues.
  */
-public class DeadMQueue extends Queue {
+public class DeadMQueue extends org.objectweb.joram.client.jms.Queue {
 
   private final static String DMQ_TYPE = "queue.dmq";
 
@@ -58,7 +54,14 @@ public class DeadMQueue extends Queue {
    * @exception AdminException  If the request fails.
    */
   public static Queue create(int serverId) throws ConnectException, AdminException {
-    return create(serverId, (String) null);
+    DeadMQueue dmq = new DeadMQueue();
+    doCreate(serverId,
+             null,
+             "org.objectweb.joram.mom.dest.DeadMQueue",
+             null,
+             dmq,
+             DMQ_TYPE);
+    return dmq;
   }
 
   public static Queue create(int serverId, String name) throws ConnectException, AdminException {
@@ -69,16 +72,6 @@ public class DeadMQueue extends Queue {
              null,
              dmq,
              DMQ_TYPE);
-    
-    StringBuffer buff = new StringBuffer();
-    buff.append("type=").append(DMQ_TYPE);
-    buff.append(",name=").append(name);
-    try {
-      MXWrapper.registerMBean((Queue) dmq, "joramClient", buff.toString());
-    } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
-    }
     return dmq;
   }
 

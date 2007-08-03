@@ -30,7 +30,6 @@ import org.objectweb.joram.client.jms.Topic;
 
 import javax.naming.*;
 
-import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Enumeration;
@@ -39,8 +38,6 @@ import java.util.Random;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.admin.SetReader;
-import org.objectweb.joram.shared.admin.SetWriter;
 
 /**
  * A base class for clustered destinations.
@@ -135,34 +132,6 @@ public class ClusterDestination extends Destination {
     return getDestination().getName();
   }
 
-  public void setReader(User user) throws ConnectException, AdminException {
-    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
-      Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetReader(user.getProxyId(), dest.getName()));
-    }
-  }
-
-  public void setWriter(User user) throws ConnectException, AdminException {
-    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
-      Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetWriter(user.getProxyId(), dest.getName()));
-    }
-  }
-  
-  public void setFreeReader() throws ConnectException, AdminException {
-    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
-      Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetReader(null, dest.getName()));
-    }
-  }
-
-  public void setFreeWriter() throws ConnectException, AdminException {
-    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
-      Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetWriter(null, dest.getName()));
-    }
-  }
-  
 //   /**
 //    * Returns <code>true</code> if the parameter object is a Joram
 //    * cluster destination wrapping the same agent identifier.
@@ -186,6 +155,7 @@ public class ClusterDestination extends Destination {
       strbuf.append("cluster#").append(i).append(".key");
       ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       Destination dest = (Destination) entries[i].getValue();
 
       strbuf.setLength(0);
@@ -197,6 +167,7 @@ public class ClusterDestination extends Destination {
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
     cluster = new Hashtable();
+
     int i = 0;
     Destination dest = null;
     StringBuffer strbuf = new StringBuffer(20);

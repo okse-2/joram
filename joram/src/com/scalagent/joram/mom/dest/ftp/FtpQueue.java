@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,19 +17,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.DestinationImpl;
-import org.objectweb.joram.mom.dest.Queue;
-import org.objectweb.util.monolog.api.BasicLevel;
-
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
+import org.objectweb.joram.mom.dest.*;
 
 /**
  * A <code>FtpQueue</code> agent is an agent hosting a MOM queue, and which
@@ -58,16 +54,5 @@ public class FtpQueue extends Queue {
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
     return new FtpQueueImpl(getId(), adminId, prop);
-  }
-  
-  public void react(AgentId from, Notification not)
-  throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-          "FtpQueue.react(" + from + ',' + not + ')');
-    if (not instanceof FtpNot) {
-      ((FtpQueueImpl) destImpl).ftpNot((FtpNot) not);
-    } else
-      super.react(from, not);
   }
 }

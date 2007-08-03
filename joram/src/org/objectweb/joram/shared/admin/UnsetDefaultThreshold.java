@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * An <code>UnsetDefaultThreshold</code> instance requests to unset the
  * default threshold value of a given server.
  */
 public class UnsetDefaultThreshold extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -208749696977909718L;
 
   /** Identifier of the server which threshold is unset. */
   private int serverId;
@@ -48,22 +42,9 @@ public class UnsetDefaultThreshold extends AdminRequest {
     this.serverId = serverId;
   }
 
-  public UnsetDefaultThreshold() { }
   
   /** Returns the identifier of the server which threshold is unset. */
   public int getServerId() {
     return serverId;
-  }
-  
-  protected int getClassId() {
-    return UNSET_DEFAULT_THRESHOLD;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    serverId = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(serverId, os);
   }
 }

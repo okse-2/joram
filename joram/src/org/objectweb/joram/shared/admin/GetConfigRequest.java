@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,19 +23,6 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class GetConfigRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
-  protected int getClassId() {
-    return GET_CONFIG_REQUEST;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-  }
+  private static final long serialVersionUID = 5574793745361541130L;
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,25 +17,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.DestinationImpl;
-import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.joram.mom.dest.*;
 
+import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.util.Timer;
-import fr.dyade.aaa.util.TimerTask;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>JavaMailTopic</code> agent is an agent hosting a MOM queue, and
@@ -44,9 +43,6 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailTopicImpl
  */
 public class JavaMailTopic extends Topic {
-  
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.mail.JavaMailTopic");
   
   public static final String MAIL_TOPIC_TYPE = "topic.mail";
 
@@ -117,8 +113,9 @@ public class JavaMailTopic extends Topic {
           Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (logger.isLoggable(BasicLevel.ERROR))
-            logger.log(BasicLevel.ERROR, "--- " + this + " Queue(...)", exc);
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Queue(...)", exc);
         }
       }
     }

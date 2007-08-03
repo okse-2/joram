@@ -31,15 +31,8 @@ import javax.jms.JMSException;
  */
 public abstract class XAQueueConnectionFactory
                 extends XAConnectionFactory
-                implements javax.jms.XAQueueConnectionFactory {
-  
-  /**
-   * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
-   * given server.
-   */
-  public XAQueueConnectionFactory() {
-  }
-  
+                implements javax.jms.XAQueueConnectionFactory
+{
   /**
    * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
    * given server.

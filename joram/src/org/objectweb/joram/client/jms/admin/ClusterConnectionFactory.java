@@ -150,8 +150,6 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
 
   /** Sets the naming reference of an administered object. */
   public void toReference(Reference ref) throws NamingException {
-    if (cluster == null) return;
-
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
 
@@ -161,6 +159,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       strbuf.append("CF#").append(i).append(".key");
       ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
 
       strbuf.setLength(0);
@@ -175,6 +174,8 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
 
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
+    if (cluster == null) cluster = new Hashtable();
+
     int i = 0;
     StringBuffer strbuf = new StringBuffer(15);
 
@@ -195,7 +196,6 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
         strbuf.append("CF#").append(i);
         cf.fromReference(ref, strbuf.toString());
 
-        if (cluster == null) cluster = new Hashtable();
         cluster.put(key, cf);
       } catch (Exception exc) {
         if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
@@ -215,7 +215,6 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
   public Hashtable code() {
     Hashtable h = new Hashtable();
 
-    if (cluster == null) return h;
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
 
@@ -277,5 +276,4 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       i++;
     }
   }
-
 }

@@ -31,16 +31,8 @@ import javax.jms.JMSException;
  */
 public abstract class XATopicConnectionFactory
                 extends XAConnectionFactory
-                implements javax.jms.XATopicConnectionFactory {
- 
-  /**
-   * Constructs an <code>XATopicConnectionFactory</code> dedicated to a
-   * given server.
-   */
-  public XATopicConnectionFactory() {
-    super();
-  }
-  
+                implements javax.jms.XATopicConnectionFactory
+{
   /**
    * Constructs an <code>XATopicConnectionFactory</code> dedicated to a
    * given server.

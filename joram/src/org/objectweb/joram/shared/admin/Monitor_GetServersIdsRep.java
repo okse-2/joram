@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetServersIdsRep</code> instance holds the list of the
  * platform's servers' identifiers.
  */
 public class Monitor_GetServersIdsRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2432800775262552600L;
 
   /** Servers identifiers. */
   private int[] ids;
@@ -52,8 +46,6 @@ public class Monitor_GetServersIdsRep extends Monitor_Reply {
     this.names = names;
     this.hostNames = hostNames;
   }
-  
-  public Monitor_GetServersIdsRep() { }
 
   /** Returns the servers' identifiers. */
   public final int[] getIds() {
@@ -66,23 +58,5 @@ public class Monitor_GetServersIdsRep extends Monitor_Reply {
 
   public final String[] getHostNames() {
     return hostNames;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_SERVERS_IDS_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    ids = StreamUtil.readArrayOfIntFrom(is);
-    names = StreamUtil.readArrayOfStringFrom(is);
-    hostNames = StreamUtil.readArrayOfStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeArrayOfIntTo(ids, os);
-    StreamUtil.writeArrayOfStringTo(names, os);
-    StreamUtil.writeArrayOfStringTo(hostNames, os);
   }
 }

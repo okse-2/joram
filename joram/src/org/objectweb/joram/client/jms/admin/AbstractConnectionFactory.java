@@ -153,8 +153,6 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /** Sets the clustered naming reference of a connection factory. */
   public void toReference(Reference ref, String prefix) {
-    if (prefix == null) prefix = "cf";
-
     params.toReference(ref, prefix);
     ref.add(new StringRefAddr(prefix + ".reliableClass", reliableClass));
   }
@@ -166,8 +164,6 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /** Restores the administered object from a clustered naming reference. */
   public void fromReference(Reference ref, String prefix) {
-    if (prefix == null) prefix = "cf";
-
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
     params.fromReference(ref, prefix);
   }
