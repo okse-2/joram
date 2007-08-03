@@ -221,10 +221,12 @@ public class FactoryParameters implements java.io.Serializable {
   }
 
   public Hashtable code(Hashtable h, String prefix) {
-    h.put(prefix + ".host", getHost());
+    if (getHost() != null)
+      h.put(prefix + ".host", getHost());
     h.put(prefix + ".port", new Integer(getPort()));
 
-    h.put(prefix + ".url", getUrl());
+    if (getUrl() != null)
+      h.put(prefix + ".url", getUrl());
 
     h.put(prefix + ".connectingTimer", new Integer(connectingTimer));
     h.put(prefix + ".txPendingTimer", new Integer(txPendingTimer));
