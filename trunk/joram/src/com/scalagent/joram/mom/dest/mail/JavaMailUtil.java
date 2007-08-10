@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
@@ -56,9 +56,7 @@ import fr.dyade.aaa.agent.Debug;
  * mail.
  */
 public class JavaMailUtil {
-
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.mail.JavaMailUtil");
+  public static Logger logger = Debug.getLogger(JavaMailUtil.class.getName());
   
   private Store store = null;
   private Folder folder = null;
@@ -67,14 +65,11 @@ public class JavaMailUtil {
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " sendJavaMail(" + si +
-                                    "," + message + ")");
+                 "--- " + this + " sendJavaMail(" + si + "," + message + ")");
     
     if (si.smtpServer == null || si.smtpServer.length() < 0) {
       logger.log(BasicLevel.ERROR, 
-                                    "--- " + this +
-                                    " sendJavaMail : smtpServer is empty.");
+                 "--- " + this + " sendJavaMail : smtpServer is empty.");
       throw new Exception("sendJavaMail : smtpServer is empty.");
     }
     
@@ -96,8 +91,7 @@ public class JavaMailUtil {
       }
     } else {
       logger.log(BasicLevel.ERROR, 
-                                    "--- " + this +
-                                    " sendJavaMail : to is null.");
+                 "--- " + this + " sendJavaMail : to is null.");
       throw new Exception("sendJavaMail : to is null.");
     }
     
@@ -124,9 +118,7 @@ public class JavaMailUtil {
         mimeMultiPart.addBodyPart(getMultipartProp(message));
       } catch (Exception exc) {
         logger.log(BasicLevel.WARN,
-                                      "--- " + this +
-                                      " sendJavaMail: setMultipartProp", 
-                                      exc);
+                   "--- " + this + " sendJavaMail: setMultipartProp", exc);
       }
     }
     
@@ -135,7 +127,7 @@ public class JavaMailUtil {
       mimeMultiPart.addBodyPart(mimeBodyPart);
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,"not yet impl.");
+        logger.log(BasicLevel.DEBUG,"not yet implemented");
       //message.getBytes()
     }
     
@@ -180,11 +172,8 @@ public class JavaMailUtil {
     
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " popMail : " +
-                                    "popServer=" + popServer +
-                                    ", popUser=" + popUser +
-                                    ", expunge=" + expunge);
+                 "--- " + this + " popMail : " + "popServer=" + popServer +
+                 ", popUser=" + popUser +  ", expunge=" + expunge);
 
     javax.mail.Message[] msgs = null;
 
@@ -210,9 +199,7 @@ public class JavaMailUtil {
       }
       return msgs;
     } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR,
-                                    "JavaMailUtil.popMail", 
-                                    exc);
+      logger.log(BasicLevel.ERROR, "JavaMailUtil.popMail", exc);
       return msgs;
     }
   }
@@ -230,17 +217,15 @@ public class JavaMailUtil {
       if (folder != null) folder.close(expunge);
       if (store != null) store.close();
     } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR,
-                                    "JavaMailUtil.closeFolder", 
-                                    exc);
+      logger.log(BasicLevel.ERROR, "JavaMailUtil.closeFolder", exc);
     } 
   }
 
   protected MailMessage createMessage(Properties prop, 
-                                  String mailId,
-                                  String destType,
-                                  String toId,
-                                  String replyDestType) 
+                                      String mailId,
+                                      String destType,
+                                      String toId,
+                                      String replyDestType) 
     throws Exception {
     MailMessage msg = new MailMessage();
     
@@ -338,8 +323,7 @@ public class JavaMailUtil {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " getMOMProperties : prop=" + prop);
+                 "--- " + this + " getMOMProperties : prop=" + prop);
     return prop;
   }
 }

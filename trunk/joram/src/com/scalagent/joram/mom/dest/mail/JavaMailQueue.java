@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
@@ -44,9 +44,7 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailQueueImpl
  */
 public class JavaMailQueue extends Queue {
-
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.mail.JavaMailQueue");
+  public static Logger logger = Debug.getLogger(JavaMailQueue.class.getName());
   
   public static final String MAIL_QUEUE_TYPE = "queue.mail";
 

@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
@@ -44,9 +44,7 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailTopicImpl
  */
 public class JavaMailTopic extends Topic {
-  
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.mail.JavaMailTopic");
+  public static Logger logger = Debug.getLogger(JavaMailTopic.class.getName());
   
   public static final String MAIL_TOPIC_TYPE = "topic.mail";
 
@@ -118,7 +116,7 @@ public class JavaMailTopic extends Topic {
           timer.schedule(this, period);
         } catch (Exception exc) {
           if (logger.isLoggable(BasicLevel.ERROR))
-            logger.log(BasicLevel.ERROR, "--- " + this + " Queue(...)", exc);
+            logger.log(BasicLevel.ERROR, "--- " + this + " JavaMailTopic(...)", exc);
         }
       }
     }

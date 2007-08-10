@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
@@ -82,8 +82,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this +
-                 " JavaMailQueueImpl : " +
+                 "--- " + this + " JavaMailQueueImpl : " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +
@@ -361,9 +360,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this +
-                   " specialAdminProcess : " +
-                   req);
+                   "--- " + this + " specialAdminProcess : " + req);
       if (req instanceof AddSenderInfo)
         addSenderInfo(((AddSenderInfo) req).si,
                       ((AddSenderInfo) req).index);
@@ -378,15 +375,11 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this +
-                   " specialAdminProcess senderInfos=" +
-                   senderInfos);
+                   "--- " + this + " specialAdminProcess senderInfos=" + senderInfos);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, 
-                   "--- " + this +
-                   " specialAdminProcess",
-                   exc);
+                   "--- " + this + " specialAdminProcess", exc);
       throw new RequestException(exc.getMessage());
     }
     return "done";
@@ -425,8 +418,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this +
-                   " match=" + (si!=null));
+                   "--- " + this + " match=" + (si!=null));
       if (si != null) {
         try {
           javaMailUtil.sendJavaMail(si, new MailMessage(msg));
@@ -439,8 +431,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
           sendToDMQ(deadM,not.getDMQId());
           
           logger.log(BasicLevel.WARN,
-                     "JavaMailQueueImpl.sendJavaMail", 
-                     exc);
+                     "JavaMailQueueImpl.sendJavaMail",  exc);
         }
         not.getMessages().remove(msg);
       }
@@ -472,8 +463,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
       for (int i = 0; i < msgs.length; i++) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, 
-                     "--- " + this +
-                     " doPop : msgs[" + i + "] = " + msgs[i]);
+                     "--- " + this + " doPop : msgs[" + i + "] = " + msgs[i]);
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
@@ -487,15 +477,13 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this +
-                       " doPop : storeMessage m = " + m);
+                       "--- " + this + " doPop : storeMessage m = " + m);
           if (expunge)
             toExpunge.add(msgs[i]);
         } catch (Exception exc) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this +
-                       " doPop", exc);
+                       "--- " + this + " doPop", exc);
           continue;
         }
       }
@@ -513,8 +501,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this +
-                 " JavaMailQueueImpl.readObject : " +
+                 "--- " + this + " JavaMailQueueImpl.readObject : " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +

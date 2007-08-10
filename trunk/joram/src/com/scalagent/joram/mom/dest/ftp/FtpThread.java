@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
@@ -36,9 +36,7 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Debug;
 
 public class FtpThread extends Thread {
-
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.ftp.FtpThread");
+  public static Logger logger = Debug.getLogger(FtpThread.class.getName());
   
   private TransferItf transfer;
   private AgentId destId;
@@ -98,8 +96,8 @@ public class FtpThread extends Thread {
       String remotePath = null;
       
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- doFtp : url host = " + url.getHost() + 
-                                     ", urlFileName = " + urlFileName);
+        logger.log(BasicLevel.DEBUG,
+                   "--- doFtp : url host = " + url.getHost() + ", urlFileName = " + urlFileName);
 
       if (urlFileName.indexOf(";") > 1) {
         fileName = urlFileName.substring(
@@ -128,9 +126,9 @@ public class FtpThread extends Thread {
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                                      "doFtp : remoteUser = " + remoteUser + 
-                                      ", protocol = " + protocol + 
-                                      ", port = " + port);
+                   "doFtp : remoteUser = " + remoteUser + 
+                   ", protocol = " + protocol + 
+                   ", port = " + port);
 
       String file = transfer.getFile(protocol,
                                      InetAddress.getByName(url.getHost()).getHostName(),
@@ -182,8 +180,8 @@ public class FtpThread extends Thread {
       clone.setStringProperty("url", uri.toString());
       
       Channel.sendTo(destId, new FtpNot(clientContext, 
-                                       requestId,
-                                       clone.getSharedMessage()));
+                                        requestId,
+                                        clone.getSharedMessage()));
       
     } catch (Exception exc) {
       ClientMessages deadM = 
