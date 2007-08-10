@@ -2465,7 +2465,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
  
   private String createMessageId() {
     msgCounter++;
-    return "ID:" + destId.toString() + ":" + msgCounter;
+    return "ID:" + destId.toString() + '_' + msgCounter;
   }
 
   /** 
