@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
@@ -43,11 +43,9 @@ import fr.dyade.aaa.agent.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class FtpQueueImpl extends QueueImpl {
-
   private static final long serialVersionUID = 2742569589343325791L;
 
-  public static Logger logger =
-    Debug.getLogger("com.scalagent.joram.mom.dest.ftp.FtpQueueImpl");
+  public static Logger logger = Debug.getLogger(FtpQueueImpl.class.getName());
   
   private String user = "anonymous";
   private String pass = "no@no.no";
@@ -86,11 +84,11 @@ public class FtpQueueImpl extends QueueImpl {
     } catch (Exception exc) {
       transfer = null;
       logger.log(BasicLevel.ERROR, 
-                                    "FtpQueueImpl : transfer = null" ,exc);
+                 "FtpQueueImpl : transfer = null" ,exc);
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " transfer = "+ transfer);
+                 " transfer = "+ transfer);
   }
 
   protected void setProperties(Properties prop) {
@@ -107,16 +105,16 @@ public class FtpQueueImpl extends QueueImpl {
   public void ftpNot(FtpNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " ftpNot(" + not + ")\n" +
-                                    "transferTable = " + transferTable);
+                 " ftpNot(" + not + ")\n" +
+                 "transferTable = " + transferTable);
     Message msg = (Message) ((Vector) not.getMessages()).get(0);
     storeMessage(new org.objectweb.joram.mom.messages.Message(msg));
     deliverMessages(0);
     transferTable.remove(new FtpMessage(msg).getIdentifier());
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " doProcess : transferTable = " + transferTable);
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " doProcess : transferTable = " + transferTable);
   }
 
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
@@ -145,8 +143,8 @@ public class FtpQueueImpl extends QueueImpl {
                               Message msg) {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " doProcessFtp(" + not + "," + msg + ")");
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " doProcessFtp(" + not + "," + msg + ")");
 
     if (transfer != null) {
       dmq = not.getDMQId();
@@ -191,16 +189,16 @@ public class FtpQueueImpl extends QueueImpl {
     } catch (Exception exc) {
       transfer = null;
       logger.log(BasicLevel.ERROR, 
-                                    "readObject : transfer = null" ,exc);
+                 "readObject : transfer = null" ,exc);
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " readObject transfer = "+ transfer);
+                 " readObject transfer = "+ transfer);
 
     if (transfer != null) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "--- " + this +
-                                      " readObject : transferTable = " + transferTable);
+                   " readObject : transferTable = " + transferTable);
 
       for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
         Message msg = (Message) e.nextElement();
