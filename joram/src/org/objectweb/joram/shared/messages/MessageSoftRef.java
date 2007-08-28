@@ -64,7 +64,7 @@ public class MessageSoftRef extends Message
     }
   }
 
-  protected MessageBody getMessageBody() {
+  public MessageBody getMessageBody() {
     if (MessageTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
       MessageTracing.dbgMessage.log(BasicLevel.DEBUG,
                                     "MessageSoftRef.getMessageBody() isPin=" + isPin());

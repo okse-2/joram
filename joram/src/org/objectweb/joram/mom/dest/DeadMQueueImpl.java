@@ -104,6 +104,9 @@ public class DeadMQueueImpl extends QueueImpl {
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
       msg = (Message) msgs.nextElement();
+      // Be careful, the message has been saved by its initial destination,
+      // resets the saved flag.
+      msg.getMessageBody().saved = false;
       msg.setExpiration(0L);
       messages.add(msg);
       msg.save(getDestinationId());

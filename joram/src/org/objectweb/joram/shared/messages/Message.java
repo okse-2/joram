@@ -167,7 +167,7 @@ public class Message implements Cloneable, Serializable {
     return saveName;
   }
 
-  protected MessageBody getMessageBody() {
+  public MessageBody getMessageBody() {
     if (body == null)
       body = new MessageBody();
 
