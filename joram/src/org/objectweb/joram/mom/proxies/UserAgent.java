@@ -46,6 +46,7 @@ import org.objectweb.joram.mom.notifications.WakeUpNot;
 
 
 import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
@@ -182,9 +183,12 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
           JoramTracing.dbgDestination.log(BasicLevel.ERROR,
                                           "--- " + this + " Proxy(...)", exc);
       }
+
       if (cleaningTask == null)
         cleaningTask = new CleaningTask();
       cleaningTask.schedule();
+
+
     } else {
       try {
         proxyImpl.react(from, not);
@@ -482,14 +486,16 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
           Timer timer = ConnectionManager.getTimer();        
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                            "--- " + this + " Proxy(...)", exc);
-        }
+	    if( (!AgentServer.isHAServer()) ||
+		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
+		if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+		    JoramTracing.dbgDestination.log(BasicLevel.WARN,
+			 			    "--- " + this + " Proxy(...)", exc);     
+	    }
+	}
       }
     }
   }
-
   public void setNoSave() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
