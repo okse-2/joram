@@ -47,6 +47,7 @@ import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
@@ -181,15 +182,17 @@ public class Queue extends Destination implements BagSerializer {
 
     public void schedule() {
       long period = ((QueueImpl) destImpl).getPeriod();
-
       if (period != -1) {
         try {
           Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+	    if( (!AgentServer.isHAServer()) ||
+		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
+		if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+		    JoramTracing.dbgDestination.log(BasicLevel.WARN,
                                             "--- " + this + " Queue(...)", exc);
+	    }
         }
       }
     }
