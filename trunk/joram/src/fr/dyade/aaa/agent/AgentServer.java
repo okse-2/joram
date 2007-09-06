@@ -199,7 +199,7 @@ public final class AgentServer {
    * 
    * @return true if the server HA is a master.
    */
-  public boolean isMasterHAServer() {
+  public static boolean isMasterHAServer() {
     if (jgroups != null)
       return jgroups.isCoordinator();
     return false;
