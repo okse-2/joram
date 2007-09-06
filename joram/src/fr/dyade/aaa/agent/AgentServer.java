@@ -184,7 +184,27 @@ public final class AgentServer {
 
   private static JGroups jgroups = null;
   private static short clusterId = NULL_ID;
+  
+  /**
+   * Test HA server.
+   * 
+   * @return true if the server is HA.
+   */
+  public static boolean isHAServer() {
+    return (jgroups != null);
+  }
 
+  /**
+   * Test if the server is a master (coordinator).
+   * 
+   * @return true if the server HA is a master.
+   */
+  public boolean isMasterHAServer() {
+    if (jgroups != null)
+      return jgroups.isCoordinator();
+    return false;
+  }
+  
   private static ConfigController configController;
 
   public static ConfigController getConfigController() {
