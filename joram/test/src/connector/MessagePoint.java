@@ -41,11 +41,11 @@ public class MessagePoint implements MessageEndpoint,javax.jms.MessageListener {
    
     public void onMessage(Message m){
      try{
-	 Test1.assertTrue(((TextMessage)m).getText().startsWith("with"));
+	 Connector.assertTrue(((TextMessage)m).getText().startsWith("with"));
 	 //System.out.println(((TextMessage)m).getText());
      }catch(Exception exc){
 	 System.out.println("error");
-	 Test1.error(exc);
+	 Connector.error(exc);
      }
     }
 
