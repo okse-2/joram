@@ -288,6 +288,7 @@
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/connector-1_5.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jgroups-all.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/>
