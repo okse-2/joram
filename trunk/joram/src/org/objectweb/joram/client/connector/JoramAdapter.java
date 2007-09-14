@@ -128,6 +128,11 @@ public class JoramAdapter
   /** Port number of the underlying JORAM server. */
   int serverPort = 16010;
 
+
+  /** Root name. */
+    String rootName = "root";
+    String rootPasswd = "root";
+
   /** Identifier of the JORAM server to start. */
   short serverId = 0;
 
@@ -1095,7 +1100,7 @@ public class JoramAdapter
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
         .getParameters().connectingTimer = 60;
 
-      joramAdmin = new JoramAdmin(factory, "root", "root");
+      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd);
     }
     catch (ConnectException exc) {
       throw new AdminException("Admin connection can't be established: "
@@ -1354,6 +1359,14 @@ public class JoramAdapter
     this.serverId = serverId.shortValue();
   }
 
+    public void setRootName(java.lang.String rn) {
+	rootName = rn;
+    }
+    public void setRootPasswd(java.lang.String rp) { 
+	rootPasswd = rp;
+    }
+
+
   public void setClusterId(java.lang.Short clusterId) {
     this.clusterId = clusterId.shortValue();
     if (this.clusterId != AgentServer.NULL_ID){
@@ -1435,6 +1448,13 @@ public class JoramAdapter
 
   public Short getServerId() {
     return new Short(serverId);
+  }
+
+  public java.lang.String getRootName() {
+      return rootName;
+  }
+  public java.lang.String getRootPasswd() { 
+      return rootPasswd;
   }
 
   public java.lang.String getServerName() {
