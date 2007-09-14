@@ -809,6 +809,28 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+
+ <!-- Runs the bridge sender -->
+  <target name="bridge_publisher" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.BridgePublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="bridge_subscriber" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.BridgeSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
 	
   <!-- Runs the foreign sender -->
   <target name="foreign_producer" depends="init"
@@ -827,6 +849,38 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+
+
+ <!-- Runs the foreign sender -->
+  <target name="foreign_publisher" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.ForeignPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="foreign_subscriber" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.ForeignSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1019,5 +1073,105 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ <!-- BRIDGE TESTS -->
+  <target name="XAbridge_server0" depends="bridge_init"
+          description="--> Starts a server 0 for bridge">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="XAbridge_server1" depends="bridge_init"
+          description="--> Starts a server 1 for bridge">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+	
+  <!-- Runs the bridge administration -->
+  <target name="XAbridge_admin" depends="init"
+    description="--> Runs the BRIDGE sample administration">
+    <java classname="bridge.XABridgeAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge sender -->
+  <target name="XAforeign_publisher" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.XAForeignPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="XAforeign_subscriber" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.XAForeignSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+	
+  <!-- Runs the foreign sender -->
+  <target name="XAforeign_producer" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.XAForeignProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="XAforeign_consumer" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.XAForeignConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+ <target name="jca" depends="init"
+    description="--> Runs the JCA connector">
+    <copy file="${conf.dir}/joramAdmin.xml" todir="${run.dir}"/>
+    <java classname="connector.Connector" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
 
 </project>
