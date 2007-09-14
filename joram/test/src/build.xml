@@ -57,7 +57,7 @@
     <ant dir="." antfile="build.xml" target="base.test_T_MMap"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MStream"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MStream"/>
-    <ant dir="." antfile="build.xml" target="base.Test_DMQ_Body"/>
+    <ant dir="." antfile="build.xml" target="base.test_dmqb"/>
 </target>
 <target name="tests.property" description=" --> lauch all properties tests" >
     <ant dir="." antfile="build.xml" target="base.test_property_Q"/>
