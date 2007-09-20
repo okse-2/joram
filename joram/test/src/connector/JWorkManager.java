@@ -137,7 +137,7 @@ public class JWorkManager implements WorkManager {
 		    doWork(run,INDEFINITE , null,null);
 		
 		} catch (InterruptedException e) {
-		    Connector.error(e);
+		    // exit from thread
 		    return;
 		} catch (WorkException e) {
 		     Connector.error(e);
