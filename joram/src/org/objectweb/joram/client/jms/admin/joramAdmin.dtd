@@ -22,7 +22,7 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | InitialContext)*>
+<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext)*>
 <!ATTLIST JoramAdmin name CDATA "default">
 
 <!ELEMENT AdminModule (connect | collocatedConnect)*>
@@ -71,6 +71,12 @@
 <!ELEMENT jndi EMPTY>
 <!ATTLIST jndi
 	name CDATA #REQUIRED>
+
+<!ELEMENT Server EMPTY>
+<!ATTLIST Server
+        serverId CDATA "0"
+        threshold CDATA "-1"
+        dmq      CDATA "">
 
 <!ELEMENT User EMPTY>
 <!ATTLIST User
