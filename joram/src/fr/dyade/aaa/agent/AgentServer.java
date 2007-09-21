@@ -1166,8 +1166,7 @@ public final class AgentServer {
 
       // Commit all changes.
       transaction.begin();
-      transaction.commit();
-      transaction.release();
+      transaction.commit(true);
 
       try {
         SCServerMBean bean = new SCServer();
@@ -1287,8 +1286,7 @@ public final class AgentServer {
 
       // Commit all changes.
       transaction.begin();
-      transaction.commit();
-      transaction.release();
+      transaction.commit(true);
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
       synchronized(status) {
