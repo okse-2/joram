@@ -207,7 +207,7 @@ public class Channel {
       AgentServer.getTransaction().begin();
       consumer.post(msg);
       consumer.save();
-      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().commit(false);
       // then commit and validate the message.
       consumer.validate();
       AgentServer.getTransaction().release();
