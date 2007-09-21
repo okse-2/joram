@@ -113,33 +113,33 @@ final class FileRepository implements Repository {
     nbsaved += 1;
   }
 
-  /**
-   * Loads the object.
-   *
-   * @return The loaded object or null if it does not exist.
-   */
-  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
-    File file;
-    Object obj;
-    if (dirName == null) {
-      file = new File(dir, name);
-    } else {
-      File parentDir = new File(dir, dirName);
-      file = new File(parentDir, name);
-    }
+//   /**
+//    * Loads the object.
+//    *
+//    * @return The loaded object or null if it does not exist.
+//    */
+//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
+//     File file;
+//     Object obj;
+//     if (dirName == null) {
+//       file = new File(dir, name);
+//     } else {
+//       File parentDir = new File(dir, dirName);
+//       file = new File(parentDir, name);
+//     }
 
-    FileInputStream fis = new FileInputStream(file);
-    ObjectInputStream ois = new ObjectInputStream(fis);
-    try {
-      obj = ois.readObject();
-    } finally {
-      ois.close();
-      fis.close();
-    }
+//     FileInputStream fis = new FileInputStream(file);
+//     ObjectInputStream ois = new ObjectInputStream(fis);
+//     try {
+//       obj = ois.readObject();
+//     } finally {
+//       ois.close();
+//       fis.close();
+//     }
 
-    nbloaded += 1;
-    return obj;
-  }
+//     nbloaded += 1;
+//     return obj;
+//   }
 
   /**
    * Loads the byte array.
