@@ -53,8 +53,7 @@ public class SimpleNetwork extends StreamNetwork {
       //  Deletes the processed notification
       qout.remove(ack.getStamp());
       ack.delete();
-      AgentServer.getTransaction().commit();
-      AgentServer.getTransaction().release();
+      AgentServer.getTransaction().commit(true);
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,
                         this.getName() + ", ackMsg(...) done.");
@@ -312,8 +311,7 @@ public class SimpleNetwork extends StreamNetwork {
               jgroups.send(new JGroupsAckMsg(msg));
             msg.delete();
             msg.free();
-            AgentServer.getTransaction().commit();
-            AgentServer.getTransaction().release();
+            AgentServer.getTransaction().commit(true);
           }
         }
       } catch (Exception exc) {
@@ -372,8 +370,7 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit();
-          AgentServer.getTransaction().release();
+          AgentServer.getTransaction().commit(true);
         }
 
         try {
@@ -393,8 +390,7 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit();
-          AgentServer.getTransaction().release();
+          AgentServer.getTransaction().commit(true);
 
           continue;
         }
@@ -403,6 +399,12 @@ public class SimpleNetwork extends StreamNetwork {
           // The server has already been tested during this round
           continue;
         }
+
+        this.logmon.log(BasicLevel.DEBUG,
+                        this.getName() + server.active + ',' +
+                        server.retry + ',' +
+                        server.last + ',' +
+                        currentTimeMillis);
 
         if ((server.active) ||
             ((server.retry < WDNbRetryLevel1) && 
@@ -455,12 +457,7 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit();
-          AgentServer.getTransaction().release();
-        } else {
-          // Set last in order to avoid the sending of following messages to
-          // same server.
-          server.last = currentTimeMillis +1;
+          AgentServer.getTransaction().commit(true);
         }
       }
     }
