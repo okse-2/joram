@@ -46,7 +46,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @return The initial capacity of global in memory log.
    */
-  public int getLogMemoryCapacity() {
+  public final int getLogMemoryCapacity() {
     return LogMemoryCapacity;
   }
 
@@ -65,7 +65,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @return The maximum size of memory log in Kb.
    */
-  public int getMaxLogMemorySize() {
+  public final int getMaxLogMemorySize() {
     return MaxLogMemorySize/Mb;
   }
 
@@ -74,16 +74,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @param size The maximum size of memory log in Kb.
    */
-  public void setMaxLogMemorySize(int size) {
+  public final void setMaxLogMemorySize(int size) {
     if (size > 0) MaxLogMemorySize = size *Mb;
   }
 
   /**
-   * Returns the size of memory log in byte.
+   * Returns the size of memory log in bytes.
    *
-   * @return The size of memory log in byte.
+   * @return The size of memory log in bytes.
    */
-  public int getLogMemorySize() {
+  public final int getLogMemorySize() {
     return logFile.logMemorySize;
   }
 
@@ -95,24 +95,33 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *  These property can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  static int LogFileSize = 16 * Mb;
+  static int MaxLogFileSize = 16 * Mb;
 
   /**
-   * Returns the size of disk log in Mb, by default 16Mb.
+   * Returns the maximum size of disk log in Mb, by default 16Mb.
    *
-   * @return The size of disk log in Mb.
+   * @return The maximum size of disk log in Mb.
    */
-  public int getLogFileSize() {
-    return LogFileSize/Mb;
+  public final int getMaxLogFileSize() {
+    return MaxLogFileSize/Mb;
   }
 
   /**
-   * Sets the size of disk log in Mb.
+   * Sets the maximum size of disk log in Mb.
    *
-   * @param size The size of disk log in Mb.
+   * @param size The maximum size of disk log in Mb.
    */
-  public void setLogFileSize(int size) {
-    if (size > 0) LogFileSize = size *Mb;
+  public final void setMaxLogFileSize(int size) {
+    if (size > 0) MaxLogFileSize = size *Mb;
+  }
+
+  /**
+   * Returns the size of disk log in Kb.
+   *
+   * @return The size of disk log in Kb.
+   */
+  public final int getLogFileSize() {
+    return (logFile.getLogFileSize() /Kb);
   }
 
   /**
@@ -130,7 +139,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @return The pool size for <code>operation</code> objects.
    */
-  public int getLogThresholdOperation() {
+  public final int getLogThresholdOperation() {
     return LogThresholdOperation;
   }
 
@@ -139,7 +148,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @return The number of commit operation.
    */
-  public int getCommitCount() {
+  public final int getCommitCount() {
     return logFile.commitCount;
   }
 
@@ -148,7 +157,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *
    * @return The number of garbage operation.
    */
-  public int getGarbageCount() {
+  public final int getGarbageCount() {
     return logFile.garbageCount;
   }
 
@@ -169,6 +178,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    */
   public final void setGarbageDelay(int timeout) {
     logFile.garbageTimeOut = timeout *1000L;
+  }
+
+  /**
+   * Returns the status of the garbage thread.
+   *
+   * @return The status of the garbage thread.
+   */
+  public final boolean isGarbageRunning() {
+    // Currently there is no asynchnous garbage.
+    return false;
   }
 
   private Timer timer = null;
@@ -349,16 +368,17 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   public final void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getLogger("fr.dyade.aaa.util.Transaction");
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, init()");
-
     LogMemoryCapacity = Integer.getInteger("NTLogMemoryCapacity",
                                            LogMemoryCapacity).intValue();
-    LogFileSize = Integer.getInteger("NTLogFileSize",
-                                     LogFileSize /Mb).intValue() *Mb;
+    MaxLogFileSize = Integer.getInteger("NTLogFileSize",
+                                        MaxLogFileSize /Mb).intValue() *Mb;
     MaxLogMemorySize = Integer.getInteger("NTLogMemorySize",
                                           MaxLogMemorySize /Kb).intValue() *Kb;
+
+    logmon = Debug.getLogger("fr.dyade.aaa.util.Transaction");
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, "NTransaction, init():" +
+                 (MaxLogFileSize /Mb) + '/' + (MaxLogMemorySize /Kb));
 
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
@@ -518,8 +538,12 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return list;
   }
 
+  public final void create(Serializable obj, String name) throws IOException {
+    save(obj, null, name, true);
+  }
+
   public final void save(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
+    save(obj, null, name, false);
   }
 
   static private final byte[] OOS_STREAM_HEADER = {
@@ -529,10 +553,27 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
   };
 
+  public final void create(Serializable obj,
+                     String dirName, String name) throws IOException {
+    save(obj, dirName, name, true);
+  }
+
   public final void save(Serializable obj,
                          String dirName, String name) throws IOException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, save(" + dirName + ", " + name + ")");
+    save(obj, dirName, name, false);
+  }
+
+  private final void save(Serializable obj,
+                          String dirName, String name,
+                          boolean first) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      if (first)
+        logmon.log(BasicLevel.DEBUG,
+                   "NTransaction, create(" + dirName + '/' + name + ")");
+      else
+        logmon.log(BasicLevel.DEBUG,
+                   "NTransaction, save(" + dirName + '/' + name + ")");
+    }
 
     Context ctx = (Context) perThreadContext.get();
     if (ctx.oos == null) {
@@ -546,7 +587,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     ctx.oos.writeObject(obj);
     ctx.oos.flush();
 
-    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false);
+    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
   }
 
   /**
@@ -558,23 +599,28 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   /**
-   *  Save an object state already serialized. The byte array keeped in log is
-   * a copy, so the original one may be modified.
+   *  Save an object state already serialized. The byte array in parameter
+   * may be modified so we must duplicate it.
    */
   public final void saveByteArray(byte[] buf,
                                   String dirName, String name) throws IOException {
     Context ctx = (Context) perThreadContext.get();
     saveInLog(buf,
               dirName, name,
-              ((Context) perThreadContext.get()).log, true);
+              ((Context) perThreadContext.get()).log, true, false);
   }
 
   private final void saveInLog(byte[] buf,
                                String dirName, String name,
                                Hashtable log,
-                               boolean copy) throws IOException {
+                               boolean copy,
+                               boolean first) throws IOException {
     Object key = OperationKey.newKey(dirName, name);
-    Operation op = Operation.alloc(Operation.SAVE, dirName, name, buf);
+    Operation op = null;
+    if (first)
+      op = Operation.alloc(Operation.CREATE, dirName, name, buf);
+    else
+      op = Operation.alloc(Operation.SAVE, dirName, name, buf);
     Operation old = (Operation) log.put(key, op);
     if (copy) {
       if ((old != null) &&
@@ -596,7 +642,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     // Searchs in the log a new value for the object.
     Operation op = (Operation) log.get(key);
     if (op != null) {
-      if (op.type == Operation.SAVE) {
+      if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
 	return op.value;
       } else if (op.type == Operation.DELETE) {
 	// The object was deleted.
@@ -625,22 +671,29 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
   public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, load(" + dirName + ", " + name + ")");
+      logmon.log(BasicLevel.DEBUG,
+                 "NTransaction, load(" + dirName + '/' + name + ")");
 
     // First searchs in the logs a new value for the object.
     try {
       byte[] buf = getFromLog(dirName, name);
-      if (buf != null) {
-      	ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-	ObjectInputStream ois = new ObjectInputStream(bis);	  
-	return ois.readObject();
+      if (buf == null) {
+        // Gets it from disk.
+        buf = repository.load(dirName, name);
       }
-      
-      // Gets it from disk.      
-      return repository.loadobj(dirName, name);
+
+      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+      ObjectInputStream ois = new ObjectInputStream(bis);	  
+      try {
+        return ois.readObject();
+      } finally {
+        ois.close();
+        bis.close();
+      }
     } catch (FileNotFoundException exc) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction, load(" + dirName + ", " + name + ") NOT FOUND");
+        logmon.log(BasicLevel.DEBUG,
+                   "NTransaction, load(" + dirName + '/' + name + ") not found");
 
       return null;
     }
@@ -653,7 +706,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
   public byte[] loadByteArray(String dirName, String name) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, loadByteArray(" + dirName + ", " + name + ")");
+      logmon.log(BasicLevel.DEBUG,
+                 "NTransaction, loadByteArray(" + dirName + '/' + name + ")");
 
     // First searchs in the logs a new value for the object.
     try {
@@ -664,7 +718,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       return repository.load(dirName, name);
     } catch (FileNotFoundException exc) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "NTransaction, loadByteArray(" + dirName + ", " + name + ") NOT FOUND");
+        logmon.log(BasicLevel.DEBUG,
+                   "NTransaction, loadByteArray(" + dirName + '/' + name + ") not found");
 
       return null;
     }
@@ -683,11 +738,14 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     Hashtable log = ((Context) perThreadContext.get()).log;
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    op = (Operation) log.put(key, op);
-    if (op != null) op.free();
+    Operation old = (Operation) log.put(key, op);
+    if (old != null) {
+      if (old.type == Operation.CREATE) op.type = Operation.NOOP;
+      old.free();
+    }
   }
 
-  public final synchronized void commit() throws IOException {
+  public final synchronized void commit(boolean release) throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
 
@@ -700,22 +758,28 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       log.clear();
     }
 
+    setPhase(COMMIT);
+
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NTransaction, committed");
 
-    setPhase(COMMIT);
+    if (release) {
+      setPhase(FREE);
+      // wake-up an eventually user's thread in begin
+      notify();
+    }
   }
 
-  public final synchronized void rollback() throws IOException {
-    if (phase != RUN)
-      throw new IllegalStateException("Can not rollback.");
+//   public final synchronized void rollback() throws IOException {
+//     if (phase != RUN)
+//       throw new IllegalStateException("Can not rollback.");
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, rollback");
+//     if (logmon.isLoggable(BasicLevel.DEBUG))
+//       logmon.log(BasicLevel.DEBUG, "NTransaction, rollback");
 
-    setPhase(ROLLBACK);
-    ((Context) perThreadContext.get()).log.clear();
-  }
+//     setPhase(ROLLBACK);
+//     ((Context) perThreadContext.get()).log.clear();
+//   }
 
   public final synchronized void release() throws IOException {
     if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
@@ -755,8 +819,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
                  "NTransaction, stopped: " +
-                 "garbage=" + logFile.garbageCount + ", " +
-                 "commit=" + logFile.commitCount + ", " +
+                 "saved=" + getNbSavedObjects() + ", " +
+                 "deleted=" + getNbDeletedObjects() + ", " +
+                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
+                 "loaded=" + getNbLoadedObjects() + ", " +
+                 "garbage=" + getGarbageCount() + ", " +
+                 "commit=" + getCommitCount() + ", " +
+                 "time=" + getGarbageTime() + ", " +
                  "ratio=" + getGarbageRatio());
     }
   }
@@ -790,8 +859,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
                  "NTransaction, stopped: " +
-                 "garbage=" + logFile.garbageCount + ", " +
-                 "commit=" + logFile.commitCount + ", " +
+                 "saved=" + getNbSavedObjects() + ", " +
+                 "deleted=" + getNbDeletedObjects() + ", " +
+                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
+                 "loaded=" + getNbLoadedObjects() + ", " +
+                 "garbage=" + getGarbageCount() + ", " +
+                 "commit=" + getCommitCount() + ", " +
+                 "time=" + getGarbageTime() + ", " +
                  "ratio=" + getGarbageRatio());
     }
   }
@@ -823,8 +897,13 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
                  "NTransaction, closed: " +
-                 "garbage=" + logFile.garbageCount + ", " +
-                 "commit=" + logFile.commitCount + ", " +
+                 "saved=" + getNbSavedObjects() + ", " +
+                 "deleted=" + getNbDeletedObjects() + ", " +
+                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
+                 "loaded=" + getNbLoadedObjects() + ", " +
+                 "garbage=" + getGarbageCount() + ", " +
+                 "commit=" + getCommitCount() + ", " +
+                 "time=" + getGarbageTime() + ", " +
                  "ratio=" + getGarbageRatio());
     }
   }
@@ -840,7 +919,17 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     /** log file */
     RandomAccessFile logFile = null; 
 
+    /** Current file pointer in log */
     int current = -1;
+
+    /**
+     * Returns the size of disk log in bytes.
+     *
+     * @return The size of disk log in bytes.
+     */
+    int getLogFileSize() {
+      return current;
+    }
 
     /**
      * Number of commit operation since starting up.
@@ -911,7 +1000,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
             optype = logFile.read();
  
-            while ((optype == Operation.SAVE) ||
+            while ((optype == Operation.CREATE) ||
+                   (optype == Operation.SAVE) ||
                    (optype == Operation.DELETE)) {
               //  Gets all operations of one committed transaction then
               // adds them to specified log.
@@ -927,17 +1017,22 @@ public final class NTransaction implements Transaction, NTransactionMBean {
                            optype + ", " + name);
 
               Operation op = null;
-              if (optype == Operation.SAVE) {
+              if ((optype == Operation.SAVE) || (optype == Operation.CREATE)) {
                 byte buf[] = new byte[logFile.readInt()];
                 logFile.readFully(buf);
                 op = Operation.alloc(optype, dirName, name, buf);
-                op = (Operation) log.put(key, op);
+                Operation old = (Operation) log.put(key, op);
+                if (old != null) old.free();
               } else {
+                // Operation.DELETE
                 op = Operation.alloc(optype, dirName, name);
-                op = (Operation) log.put(key, op);
+                Operation old = (Operation) log.put(key, op);
+                if (old != null) {
+                  if (old.type == Operation.CREATE) op.type = Operation.NOOP;
+                  old.free();
+                }
               }
-              if (op != null) op.free();
-
+              
               optype = logFile.read();
             }
             if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
@@ -961,7 +1056,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
         garbage();
       } else {
         logFile = new RandomAccessFile(logFilePN, "rwd");
-        logFile.setLength(LogFileSize);
+        logFile.setLength(MaxLogFileSize);
 
         current = 1;
         // Cleans log file
@@ -1017,8 +1112,9 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       Operation op = null;
       for (Enumeration e = ctxlog.elements(); e.hasMoreElements(); ) {
         op = (Operation) e.nextElement();
+        if (op.type == Operation.NOOP) continue;
 
-        // Save the log to disk
+        // Save the operation to the log on disk
         write(op.type);
         if (op.dirName != null) {
           writeUTF(op.dirName);
@@ -1026,20 +1122,22 @@ public final class NTransaction implements Transaction, NTransactionMBean {
           write(emptyUTFString);
         }
         writeUTF(op.name);
-        if (op.type == Operation.SAVE) {
+        if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           logMemorySize += op.value.length;
-
+          
           writeInt(op.value.length);
           write(op.value);
         }
 
-        // Reports all committed operation in clog
-        op = (Operation) log.put(OperationKey.newKey(op.dirName, op.name), op);
-        if (op != null) {
-          if (op.type == Operation.SAVE)
-            logMemorySize -= op.value.length;
+        // Reports all committed operation in current log
+        Operation old = (Operation) log.put(OperationKey.newKey(op.dirName, op.name), op);
+        if (old != null) {
+          if ((old.type == Operation.SAVE) || (old.type == Operation.CREATE))
+            logMemorySize -= old.value.length;
 
-          op.free();
+          if ((old.type == Operation.CREATE) && (op.type == Operation.DELETE))
+            op.type = Operation.NOOP;
+          old.free();
         }
       }
       write(Operation.END);
@@ -1061,7 +1159,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
       ctxlog.clear();
 
-      if ((current > LogFileSize) || (logMemorySize > MaxLogMemorySize) ||
+      if ((current > MaxLogFileSize) || (logMemorySize > MaxLogMemorySize) ||
           ((garbageTimeOut > 0) && (System.currentTimeMillis() > (lastGarbageTime + garbageTimeOut))))
         garbage();
     }
@@ -1082,16 +1180,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
         op = (Operation) e.nextElement();
 
-        if (op.type == Operation.SAVE) {
+        if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "NTransaction, LogFile.Save (" + op.dirName + ',' + op.name + ')');
+                       "NTransaction, LogFile.Save (" + op.dirName + '/' + op.name + ')');
 
           repository.save(op.dirName, op.name, op.value);
         } else if (op.type == Operation.DELETE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "NTransaction, LogFile.Delete (" + op.dirName + ',' + op.name + ')');
+                       "NTransaction, LogFile.Delete (" + op.dirName + '/' + op.name + ')');
 
           repository.delete(op.dirName, op.name);
 //           if (!deleted && file.exists())
@@ -1158,7 +1256,9 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
 final class Operation implements Serializable {
   static final int SAVE = 1;
+  static final int CREATE = 4;
   static final int DELETE = 2;
+  static final int NOOP = 5;	// Create then delete
   static final int COMMIT = 3;
   static final int END = 127;
  
