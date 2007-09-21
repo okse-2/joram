@@ -176,8 +176,7 @@ public class ConfigController {
       transaction.save(
         new Short(serverCounter),
         SERVER_COUNTER);      
-      transaction.commit();
-      transaction.release();
+      transaction.commit(true);
     } catch (Exception exc) {
       throw new Error(exc.toString());
     }
