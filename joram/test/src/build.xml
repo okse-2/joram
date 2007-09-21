@@ -41,7 +41,6 @@
     <ant dir="." antfile="build.xml" target="tests.cluster"/>
     <ant dir="." antfile="build.xml" target="tests.hierarchical"/>
     <ant dir="." antfile="build.xml" target="tests.ssl"/>
-    <ant dir="." antfile="build.xml" target="jca.test"/>
 </target>
 
 <target name="tests.messages" description=" --> lauch all messages tests">
@@ -57,7 +56,6 @@
     <ant dir="." antfile="build.xml" target="base.test_T_MMap"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MStream"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MStream"/>
-    <ant dir="." antfile="build.xml" target="base.test_dmqb"/>
 </target>
 <target name="tests.property" description=" --> lauch all properties tests" >
     <ant dir="." antfile="build.xml" target="base.test_property_Q"/>
@@ -525,17 +523,6 @@
    <antcall target="test.start" inheritAll="true">
      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
      <param name="className" value="base.Test_Exp_Q"/>  
-     <param name="jndiconf" value="base/jndi.properties"/>
-     <param name="a3conf" value="base/a3servers1.xml"/>
-     <param name="jvmargs" value=""/>
-     <param name="args" value=""/>
-   </antcall>
-</target>
-
-<target name="base.test_dmqb" description=" --> test that a message body is not delete on a Dqueue when restart server">
-   <antcall target="test.start" inheritAll="true">
-     <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-     <param name="className" value="base.Test_DMQ_Body"/>  
      <param name="jndiconf" value="base/jndi.properties"/>
      <param name="a3conf" value="base/a3servers1.xml"/>
      <param name="jvmargs" value=""/>
@@ -3271,10 +3258,22 @@
 
 <!-- end test ssl -->
 
+<!--  test confha -->
+<target name="confha.test" description=" --> test dynamic conf with HA">
+   <antcall target="test.start" inheritAll="true">
+     <param name="className" value="confha.Test"/>  
+     <param name="jndiconf" value="confha/jndi.properties"/>
+     <param name="a3conf" value="confha/a3servers.xml"/>
+     <param name="jvmargs" value=""/>
+     <param name="args" value=""/>
+   </antcall>
+</target>
+
+<!-- end test confha -->
 
 <target name="jca.test" depends="jca_init" description=" --> test joram connector">
    <antcall target="test.run" inheritAll="true">
-    <param name="className" value="connector.Connector"/>  
+    <param name="className" value="connector.Test1"/>  
     <param name="jvmargs" value=""/>
      <param name="args" value=""/>
    </antcall>
@@ -3299,10 +3298,10 @@
 
 
 
-<!--
- use for resolve probleme of with delete temp topic 
 
-<target name="pb.temptopic" description=" ">
+<!-- use for resolve probleme of with delete temp topic -->
+
+<target name="pb.temptopic" description=" -->">
    <antcall target="test.start" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="pb.TempTopic"/>
@@ -3315,7 +3314,7 @@
 
 
 
-<target name="pb.Temp" description="  ">
+<target name="pb.Temp" description=" --> ">
   <antcall target="test.start" inheritAll="true">
     <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
     <param name="className" value="pb.Test_Temp_T"/>
@@ -3326,12 +3325,10 @@
   </antcall>
 </target>
 
+<!--    --> 
 
-
-   
-
-use for resolve probleme of with HA Joram: mixing up the Topics
-
+<!-- use for resolve probleme of with HA Joram: mixing up the Topics -->
+<!--
 
 <target name="init.pb" depends="init,compile">
     <delete dir="${test.dir}"/>
@@ -3368,38 +3365,11 @@ use for resolve probleme of with HA Joram: mixing up the Topics
       <classpath path="${project.class.path}"/>
     </java>
 </target>
+</project>
 
-
-
-<target name="testdmq.server"  depends="init" description=" server .">
-
-    <mkdir dir="${test.dir}"/>
- <copy file="base/jndi.properties" tofile="${test.dir}/jndi.properties" />
-   <java classname="testDmq.DMQEmbeddedServer" failonerror="no" fork="yes"
-          dir="${test.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-</target>
-
-<target name="testdmq.admin"  depends="init" description=" server .">
-   <java classname="testDmq.DMQAdmin" failonerror="no" fork="yes"
-          dir="${test.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-</target>
-
-<target name="testdmq.client"  depends="init" description=" server .">
-   <java classname="testDmq.DMQClient" failonerror="no" fork="yes"
-          dir="${test.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-</target>
-
-<target name="testdmq.browser"  depends="init" description=" server .">
-   <java classname="testDmq.DMQBrowser" failonerror="no" fork="yes"
-          dir="${test.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-</target>
 -->
+<!--end-->
+
+
+
 </project>

@@ -57,22 +57,20 @@ public interface Transaction {
 
   boolean isPersistent();
 
-  void create(Serializable obj, String name) throws IOException;
   void save(Serializable obj, String name) throws IOException;
   void saveByteArray(byte[] buf, String name) throws IOException;
   Object load(String name) throws IOException, ClassNotFoundException;
   byte[] loadByteArray(String name) throws IOException, ClassNotFoundException;
   void delete(String name);
 
-  void create(Serializable obj, String dirName, String name) throws IOException;
   void save(Serializable obj, String dirName, String name) throws IOException;
   void saveByteArray(byte[] buf, String dirName, String name) throws IOException;
   Object load(String dirName, String name) throws IOException, ClassNotFoundException;
   byte[] loadByteArray(String dirName, String name) throws IOException;
   void delete(String dirName, String name);
 
-  void commit(boolean release) throws IOException;
-//   void rollback() throws IOException;
+  void commit() throws IOException;
+  void rollback() throws IOException;
 
   void release() throws IOException;
 

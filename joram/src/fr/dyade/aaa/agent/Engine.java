@@ -974,7 +974,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     dispatch();
     // Saves the agent state then commit the transaction.
     if (agent != null) agent.save();
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
@@ -1014,7 +1014,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
          msg.from,
          new ExceptionNotification(msg.to, msg.not, exc));
     dispatch();
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();

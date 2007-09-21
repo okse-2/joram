@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.mail;
@@ -82,7 +82,8 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " JavaMailTopicImpl : " +
+                 "--- " + this +
+                 " JavaMailTopicImpl : " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +
@@ -360,7 +361,9 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess : " + req);
+                   "--- " + this +
+                   " specialAdminProcess : " +
+                   req);
       if (req instanceof AddSenderInfo)
         addSenderInfo(((AddSenderInfo) req).si,
                       ((AddSenderInfo) req).index);
@@ -375,11 +378,15 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
         
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess senderInfos=" + senderInfos);
+                   "--- " + this +
+                   " specialAdminProcess senderInfos=" +
+                   senderInfos);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, 
-                   "--- " + this + " specialAdminProcess", exc);
+                   "--- " + this +
+                   " specialAdminProcess",
+                   exc);
       throw new RequestException(exc.getMessage());
     }
     return "done";
@@ -417,7 +424,8 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " match=" + (si!=null));
+                   "--- " + this +
+                   " match=" + (si!=null));
       if (si != null) {
         try {
           javaMailUtil.sendJavaMail(si, new MailMessage(msg));
@@ -458,7 +466,8 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
       for (int i = 0; i < msgs.length; i++) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, 
-                     "--- " + this + " doPop : msgs[" + i + "] = " + msgs[i]);
+                     "--- " + this +
+                     " doPop : msgs[" + i + "] = " + msgs[i]);
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
@@ -472,13 +481,15 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this + " doPop : publish m = " + m);
+                       "--- " + this +
+                       " doPop : publish m = " + m);
           if (expunge)
             toExpunge.add(msgs[i]);
         } catch (Exception exc) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this + " doPop", exc);
+                       "--- " + this +
+                       " doPop", exc);
           continue;
         }
       }
@@ -491,7 +502,8 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   private void publish(Message msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " publish msg=" + msg);
+                 "--- " + this +
+                 " publish msg=" + msg);
 
     Vector messages = new Vector();
     messages.add(msg);

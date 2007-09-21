@@ -92,21 +92,20 @@ public class Test16 extends BaseTest {
 	    ExcList16 exclst = new ExcList16("Receiver");
 
 	    int nb1 = 0; int nb2 = 0; int idx = 0;
-	    for (int i=0; i<10; i++) {
-		// System.out.println("connecting#" + i);
+	    for (int i=0; i<100; i++) {
+		//       System.out.println("connecting#" + i);
 		cnx1 = cf.createConnection();
 		cnx1.setExceptionListener(exclst);
 		Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		MessageConsumer cons = sess1.createConsumer(dest);
-		//System.out.println("start");
 		cnx1.start();
 		//       System.out.println("connected#" + i);
 		try {
 		    while (true) {
-			Message msg = cons.receive(400);
+			Message msg = cons.receive();
 			if (msg == null) {
 			    // this message consumer is concurrently closed (see JavaDoc)
-			    break;
+			    continue;
 			}
 			nb2 += 1;
 			int index = msg.getIntProperty("index");
@@ -117,14 +116,12 @@ public class Test16 extends BaseTest {
 			idx = index +1;
 		    }
 		} catch (JMSException exc) {
-		    //        System.out.println("end recv#" + i + '/' + nb + ": " + exc.getMessage());
+		    //         System.out.println("end recv#" + i + '/' + nb + ": " + exc.getMessage());
 		}
      
 	    }
-	    if (destclass == "org.objectweb.joram.client.jms.Queue")
-		assertEquals(1000,nb2);
-	    
-	    //System.out.println("Test OK: " + exclst.nbexc + ", " + nb1 + ", " + nb2);
+
+	    System.out.println("Test OK: " + exclst.nbexc + ", " + nb1 + ", " + nb2);
 
 	    sender.waitEnd();
 	}catch(Throwable exc){
@@ -168,12 +165,11 @@ class Sender16 implements Runnable {
 
   public void run() {
     try {
-	for (int i=0; i<500; i++) {
+      for (int i=0; i<5000; i++) {
         Message msg = session.createMessage();
         msg.setIntProperty("index", i);
         producer.send(msg);
-        if ((i%50) == 49 && Test16.cnx1 != null) {
-	  // Trying to close connection during receive
+        if ((i%50) == 49) {
           Test16.cnx1.close();
           Test16.cnx1 = null;
         }
