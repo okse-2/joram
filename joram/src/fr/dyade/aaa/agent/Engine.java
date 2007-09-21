@@ -376,7 +376,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(AgentId.factoryId, factory);
         factory.save();
-        logmon.log(BasicLevel.WARN, getName() + ", factory created");
+        logmon.log(BasicLevel.INFO, getName() + ", factory created");
       }
 
       // loads all fixed agents
@@ -499,8 +499,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (agents.size() < (NbMaxAgents + fixedAgentIdList.size()))
       return;
 
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO,
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
                  getName() + ", garbage: " + agents.size() +
                  '/' + NbMaxAgents + '+' + fixedAgentIdList.size() +
                  ' ' + now);
@@ -521,7 +521,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       }
     }
 
-    logmon.log(BasicLevel.INFO,
+    logmon.log(BasicLevel.DEBUG,
                getName() + ", garbage: " + agents.size());
   }
 
