@@ -277,9 +277,8 @@ public class RequestMultiplexer {
    */
   private void route(AbstractJmsReply reply) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "RequestMultiplexer.route(" + reply + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                 "RequestMultiplexer.route(" + reply + ')');
     int requestId = reply.getCorrelationId();
     Integer requestKey = new Integer(requestId);
     ReplyListener rl = (ReplyListener)requestsTable.get(requestKey);
@@ -316,10 +315,9 @@ public class RequestMultiplexer {
           abortReply(reply);
         }
       } else {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.INFO))
-          JoramTracing.dbgClient.log(
-            BasicLevel.INFO, 
-            " -> Listener not found for the reply: " + requestId);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                     " -> Listener not found for the reply: " + requestId);
         abortReply(reply);
       }
     }
