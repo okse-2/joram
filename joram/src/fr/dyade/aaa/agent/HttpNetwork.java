@@ -436,8 +436,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       qout.removeMessage(msgout);
       msgout.delete();
       msgout.free();
-      AgentServer.getTransaction().commit();
-      AgentServer.getTransaction().release();
+      AgentServer.getTransaction().commit(true);
     }
 
     Message msg = nis.getMessage();

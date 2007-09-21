@@ -749,15 +749,14 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                    getName() + ", deliver msg#" + msg.getStamp());
 
       Channel.save();
-      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().commit(false);
       // then commit and validate the message.
       Channel.validate();
       AgentServer.getTransaction().release();
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).
-      AgentServer.getTransaction().commit();
-      AgentServer.getTransaction().release();
+      AgentServer.getTransaction().commit(true);
     }
   }
 
