@@ -158,8 +158,17 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     return dir.list(new StartWithFilter(prefix));
   }
   
+  public final void create(Serializable obj, String name) throws IOException {
+    save(obj, null, name);
+  }
+
   public void save(Serializable obj, String name) throws IOException {
     save(obj, null, name);
+  }
+
+  public final void create(Serializable obj,
+                     String dirName, String name) throws IOException {
+    save(obj, dirName, name);
   }
 
   public final void save(Serializable obj, String dirName, String name) throws IOException {
@@ -328,7 +337,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
   }
 
-  public synchronized void commit() throws IOException {
+  public synchronized void commit(boolean release) throws IOException {
     if (phase != RUN)
       throw new NotActiveException("Can not commit inexistent transaction.");
     
@@ -352,6 +361,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     setPhase(COMMIT);
     _commit();
     log.clear();
+
+    if (release) {
+      // Change the transaction state and save it.
+      setPhase(FREE);
+      notify();
+    }
   }
 
   private void _commit() throws IOException {    
@@ -390,12 +405,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
   }
 
-  public synchronized void rollback() throws IOException {
-    if (phase != RUN)
-      throw new NotActiveException("Can not rollback inexistent transaction.");
-    setPhase(ROLLBACK);
-    log.clear();
-  }
+//   public synchronized void rollback() throws IOException {
+//     if (phase != RUN)
+//       throw new NotActiveException("Can not rollback inexistent transaction.");
+//     setPhase(ROLLBACK);
+//     log.clear();
+//   }
 
   public synchronized void release() throws IOException {
     if ((phase != COMMIT) && (phase != ROLLBACK))
