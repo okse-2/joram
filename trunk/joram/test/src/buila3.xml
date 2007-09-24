@@ -5,7 +5,7 @@
 ]>
 
 <project default="tests" basedir=".">-->
-  <target name="tests" depends="tests.a3base,tests.a3recovery,tests.a3perf" description=" --> launch test : base,recovery,perf"/>
+  <target name="tests.a3" depends="tests.a3base,tests.a3recovery,tests.a3perf" description=" --> launch test : base,recovery,perf"/>
   <target name="tests.http" depends="tests.http.base,tests.http.recovery" description=" -->  launch all http tests"/>
 
   <!--<target name="init.src">

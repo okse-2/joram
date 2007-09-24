@@ -42,6 +42,8 @@
     <ant dir="." antfile="build.xml" target="tests.hierarchical"/>
     <ant dir="." antfile="build.xml" target="tests.ssl"/>
     <ant dir="." antfile="build.xml" target="jca.test"/>
+    <ant dir="." antfile="build.xml" target="tests.a3"/>
+    <ant dir="." antfile="build.xml" target="tests.dmq"/>
 </target>
 
 <target name="tests.messages" description=" --> lauch all messages tests">
@@ -268,7 +270,14 @@
 <target name="tests.ssl" description=" --> lauch all ssl tests">
     <ant dir="." antfile="build.xml" target="ssl.test"/>
 </target> 
-
+<target name="tests.dmq" description=" --> lauch all dmq tests">
+    <ant dir="." antfile="build.xml" target="dmq.test1"/>
+    <ant dir="." antfile="build.xml" target="dmq.test2"/>
+    <ant dir="." antfile="build.xml" target="dmq.test3"/>
+    <ant dir="." antfile="build.xml" target="dmq.test4"/>
+    <ant dir="." antfile="build.xml" target="dmq.test5"/>
+    <ant dir="." antfile="build.xml" target="dmq.test6"/>
+</target>  
 
 
 
@@ -3294,10 +3303,85 @@
   </target>
 
 
-
-
-
-
+<!--  start dmq tests -->
+<target name="dmq.test1" description=" --> check threshold of specigik queue and user">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq1"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+</target>
+<target name="dmq.test2" description=" --> ">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq2"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+</target>
+<target name="dmq.test3" description=" --> ">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq3"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+</target>
+<target name="dmq.test4" description=" --> ">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq4"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+</target>
+<target name="dmq.test5" description=" --> ">
+   <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq5"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+</target>
+<target name="dmq.test6" depends="dmq6_init" description=" --> ">
+<parallel>
+   <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="dmq.TestDmq6"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+   </antcall>
+ <sequential>
+   <sleep seconds="3" />
+   <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+    </java>
+ </sequential>
+</parallel>  
+</target>
+<target name="dmq6_init" depends="compile,init">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="a3config.dtd" todir="${test.dir}"/>
+    <copy file="a3debug.cfg" todir="${test.dir}"/>
+    <copy file="dmq/jndi.properties" tofile="${test.dir}/jndi.properties"/>
+    <copy file="dmq/a3servers.xml" tofile="${test.dir}/a3servers.xml" overwrite="true"/>
+    <copy file="dmq/joramAdmin.xml" todir="${test.dir}"/>
+</target>
 
 <!--
  use for resolve probleme of with delete temp topic 
