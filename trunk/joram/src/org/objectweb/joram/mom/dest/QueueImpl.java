@@ -392,7 +392,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void MonitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
+  public void monitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
