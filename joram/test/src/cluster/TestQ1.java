@@ -120,6 +120,7 @@ public class TestQ1 extends TestCase {
 		msg.setText("Test number " + j);
 		producer1.send(clusterQueue, msg);
 	    }
+	    Thread.sleep(2000);
 	    System.out.println(" sent");
 	    
 	    assertEquals(10,listener0.nbMsg);
