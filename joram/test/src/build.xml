@@ -3314,7 +3314,7 @@
       <param name="args" value=""/>
     </antcall>
 </target>
-<target name="dmq.test2" description=" --> ">
+<target name="dmq.test2" description=" --> check default threshold">
    <antcall target="test.start" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="dmq.TestDmq2"/>
@@ -3324,7 +3324,7 @@
       <param name="args" value=""/>
     </antcall>
 </target>
-<target name="dmq.test3" description=" --> ">
+<target name="dmq.test3" description=" --> check default dmq">
    <antcall target="test.start" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="dmq.TestDmq3"/>
@@ -3334,7 +3334,7 @@
       <param name="args" value=""/>
     </antcall>
 </target>
-<target name="dmq.test4" description=" --> ">
+<target name="dmq.test4" description=" --> check default dmq and default threshold for queue">
    <antcall target="test.start" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="dmq.TestDmq4"/>
@@ -3344,7 +3344,7 @@
       <param name="args" value=""/>
     </antcall>
 </target>
-<target name="dmq.test5" description=" --> ">
+<target name="dmq.test5" description=" --> check default dmq and default threshold for user">
    <antcall target="test.start" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="dmq.TestDmq5"/>
@@ -3354,7 +3354,7 @@
       <param name="args" value=""/>
     </antcall>
 </target>
-<target name="dmq.test6" depends="dmq6_init" description=" --> ">
+<target name="dmq.test6" depends="dmq6_init" description=" --> check config dmq with joramAdmin.xml">
 <parallel>
    <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
