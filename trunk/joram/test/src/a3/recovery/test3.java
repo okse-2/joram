@@ -78,6 +78,7 @@ public class test3 extends TestCase {
                          ((UnknownAgent) not).agent);
           }
           crashAgentServer((short) 1);
+	  Thread.sleep(1000);
           startAgentServer((short) 1);
 
           sendTo(slave1, new Echo());
