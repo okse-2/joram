@@ -453,7 +453,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
   // State of the transaction monitor.
   private int phase = INIT;
-  String phaseInfo = PhaseInfo[phase];
 
   /**
    *
@@ -463,12 +462,11 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   public String getPhaseInfo() {
-    return phaseInfo;
+    return PhaseInfo[phase];
   }
 
   private final void setPhase(int newPhase) {
     phase = newPhase;
-    phaseInfo = PhaseInfo[phase];
   }
 
   public final synchronized void begin() throws IOException {

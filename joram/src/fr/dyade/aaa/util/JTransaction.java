@@ -136,6 +136,14 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     return dir.getPath();
   }
 
+  public int getPhase() {
+    return phase;
+  }
+
+  public String getPhaseInfo() {
+    return PhaseInfo[phase];
+  }
+
   private void setPhase(int newPhase) throws IOException {
     logFile.seek(0L);
     logFile.writeInt(newPhase);
