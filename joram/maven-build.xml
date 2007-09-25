@@ -168,7 +168,7 @@
     </condition>
 
     <!-- Execute the internal target -->
-    <antcall target="deploy" />
+    <antcall target="internal:deploy" />
   </target>
 
   <!-- - - - - - - - - - - - - - - - - -
