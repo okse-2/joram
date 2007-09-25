@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,37 +23,25 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
-import org.objectweb.joram.mom.messages.Message;
-import org.objectweb.joram.mom.notifications.AckJoinQueueCluster;
-import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.notifications.JoinQueueCluster;
-import org.objectweb.joram.mom.notifications.LBCycleLife;
-import org.objectweb.joram.mom.notifications.LBMessageGive;
-import org.objectweb.joram.mom.notifications.LBMessageHope;
-import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
-import org.objectweb.joram.mom.notifications.QueueClusterNot;
-import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetRightRequest;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.admin.AddQueueCluster;
-import org.objectweb.joram.shared.admin.ListClusterQueue;
-import org.objectweb.joram.shared.admin.RemoveQueueCluster;
-import org.objectweb.joram.shared.admin.SpecialAdmin;
-import org.objectweb.joram.shared.excepts.RequestException;
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.*;
+import org.objectweb.joram.shared.selectors.*;
+import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.shared.admin.*;
+
+import org.objectweb.joram.shared.messages.Message;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>ClusterQueueImpl</code> class implements the MOM queue behaviour,
@@ -70,29 +58,21 @@ public class ClusterQueueImpl extends QueueImpl {
   /** to calcul the loading factor, overloaded, ... */
   protected LoadingFactor loadingFactor;
 
-  /**
-   * key = msgId
+  /** key = msgId
    * value = date 
    */
   private Hashtable timeTable;
 
-  /**
-   * key = msgId
+  /** key = msgId
    * value = Vector (alreadyVisit)
    */
   private Hashtable visitTable;
 
-  /** Number of message send to cluster */
+  /** number of message send to cluster */
   private long clusterDeliveryCount;
 
-  /** Waiting after a cluster request */
+  /** waiting after a cluster request */
   private long waitAfterClusterReq = -1;
-
-  /**
-   * Maximum period of time before frowarding a waiting message or request
-   * to other queues of the cluster. By default it is set to period.
-   */
-  private long timeThreshold = -1L;
 
   /**
    * Constructs a <code>ClusterQueueImpl</code> instance.
@@ -131,12 +111,6 @@ public class ClusterQueueImpl extends QueueImpl {
       }
       autoEvalThreshold =
         Boolean.valueOf(prop.getProperty("autoEvalThreshold")).booleanValue();
-      try {
-        timeThreshold = 
-          Long.valueOf(prop.getProperty("timeThreshold")).longValue();
-      } catch (NumberFormatException exc) {
-        timeThreshold = period;
-      }
     }
 
     clusters = new Hashtable();
@@ -156,11 +130,36 @@ public class ClusterQueueImpl extends QueueImpl {
   public String toString() {
     return "ClusterQueueImpl:" + destId.toString();
   }
- 
-  /**
+
+  /** 
+   * implement special process (see QueueImpl). 
+   */
+  protected void specialProcess(Notification not) {
+    if (not instanceof ClientMessages)
+      doProcess((ClientMessages) not);
+    else if (not instanceof SetRightRequest)
+      doProcess((SetRightRequest) not);
+    else
+      super.specialProcess(not);
+  }
+
+  /** propagate right to all cluster. */
+  protected void doProcess(SetRightRequest not) {
+    super.doProcess(not);
+    sendToCluster(
+      new SetRightQueueCluster(
+        loadingFactor.getRateOfFlow(),
+        not,
+        clients));
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "--- " + this +
+                                    " ClusterQueueImpl.doReact(" + not + ")" +
+                                    "\nclients=" + clients);
+  }
+
+  /** 
    * use to add or remove ClusterQueue to cluster. 
-   * 
-   * @param not
    */
   public Object specialAdminProcess(SpecialAdminRequest not) 
     throws RequestException {
@@ -169,8 +168,8 @@ public class ClusterQueueImpl extends QueueImpl {
     try {
       SpecialAdmin req = not.getRequest();
       
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "--- " + this +
                                       " specialAdminProcess : " +
                                       req);
@@ -185,8 +184,8 @@ public class ClusterQueueImpl extends QueueImpl {
         ret = doList((ListClusterQueue) req);
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgDestination.log(BasicLevel.WARN, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        MomTracing.dbgDestination.log(BasicLevel.WARN, 
                                       "--- " + this +
                                       " specialAdminProcess",
                                       exc);
@@ -195,12 +194,7 @@ public class ClusterQueueImpl extends QueueImpl {
     return ret;
   }
   
-  /**
-   * return the cluster list (vector).
-   * 
-   * @param req
-   * @return the cluster list (vector).
-   */
+  /** return the cluster list (vector). */
   protected Object doList(ListClusterQueue req) {
     Vector vect = new Vector();
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); )
@@ -209,10 +203,7 @@ public class ClusterQueueImpl extends QueueImpl {
   }
  
   /**
-   * send to joiningQueue a JoinQueueCluster not.
-   * 
-   * @param joiningQueue
-   * @param rateOfFlow
+   *  send to joiningQueue a JoinQueueCluster not.
    */
   protected void addQueueCluster(String joiningQueue, float rateOfFlow) {
     AgentId id = AgentId.fromString(joiningQueue);
@@ -220,36 +211,32 @@ public class ClusterQueueImpl extends QueueImpl {
 
 //    clusters.put(id,new Float(rateOfFlow));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
                                     " ClusterQueueImpl.addQueueCluster in " + destId +
                                     "\njoiningQueue=" + joiningQueue +
                                     "\nclusters=" + clusters);
 
-    forward(id,
-            new JoinQueueCluster(loadingFactor.getRateOfFlow(),
-                                 clusters,
-                                 clients,
-                                 freeReading,
-                                 freeWriting));
+    Channel.sendTo(id,
+                   new JoinQueueCluster(loadingFactor.getRateOfFlow(),
+                                        clusters,
+                                        clients,
+                                        freeReading,
+                                        freeWriting));
   }
   
-  /**
+  /** 
    * broadcast to cluster the removeQueue. 
-   * 
-   * @param removeQueue
    */
   protected void broadcastLeave(String removeQueue) {
     sendToCluster(new LeaveQueueCluster(removeQueue));
   }
 
-  /**
+  /** 
    * removeQueue leave the cluster.
-   * 
-   * @param removeQueue
    */
-  public void removeQueueCluster(String removeQueue) {
+  protected void removeQueueCluster(String removeQueue) {
     AgentId id = AgentId.fromString(removeQueue);
     if (destId.equals(id)) {
       clusters.clear();
@@ -262,82 +249,135 @@ public class ClusterQueueImpl extends QueueImpl {
         visit.remove(id);
     }
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
                                     " ClusterQueueImpl.removeQueueCluster in " + destId +
                                     "\nremoveQueue=" + removeQueue +
                                     "\nclusters=" + clusters);
   }
   
-  /**
-   * overload preProcess(AgentId, ClientMessages)
-   * store all msgId in timeTable and visitTable.
-   * 
-   * @param from
-   * @param not
+  /** 
+   * overload doProcess(ClientMessages)
+   * store all msgId in timeTable and visitTable,
+   * store message and deliver message if consumer
+   * wait.
+   * call factorCheck to evaluate the loading factor,
+   * activity, ... and send message to cluster if need.
    */
-  public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+  protected void doProcess(ClientMessages not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "--- " + this + 
                                     " " + not);
+
     receiving = true;
+
     long date = System.currentTimeMillis();
     
     Message msg;
     // Storing each received message:
     for (Enumeration msgs = not.getMessages().elements();
          msgs.hasMoreElements();) {
-      msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+
+      if (arrivalsCounter == Long.MAX_VALUE)
+        arrivalsCounter = 0;
+
+      msg = (Message) msgs.nextElement();
       msg.order = arrivalsCounter++;
+      storeMessage(msg);
       storeMsgIdInTimeTable(msg.getIdentifier(),
                             new Long(date));
-      //storeMsgIdInVisitTable(msg.getIdentifier(), destId);
+//        storeMsgIdInVisitTable(msg.getIdentifier(),
+//                               destId);
     }
-    return not;
-  }
-  
-  /**
-   * call factorCheck to evaluate the loading factor,
-   * activity, ... and send message to cluster if need.
-   * 
-   * @param not
-   */
-  public void postProcess(ClientMessages not) {
-    if (getMessageCounter() > loadingFactor.producThreshold)
-      loadingFactor.factorCheck(clusters, 
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+
+    // Lauching a delivery sequence:
+    deliverMessages(0);
+
+    if (getNumberOfPendingMessages() > loadingFactor.producThreshold)
+      loadingFactor.factorCheck(clusters,
+                                getNumberOfPendingMessages(),
+                                getNumberOfPendingRequests());
     else
-      loadingFactor.evalRateOfFlow(getMessageCounter(),
-                                   getWaitingRequestCount());
+      loadingFactor.evalRateOfFlow(getNumberOfPendingMessages(),
+                                   getNumberOfPendingRequests());
     receiving = false;
+  }
+
+  /**
+   * Distributes the received notifications to the appropriate reactions.
+   *
+   * @exception UnknownNotificationException  When receiving an unexpected
+   *              notification.
+   */
+  public void react(AgentId from, Notification not)
+    throws UnknownNotificationException {
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
+                                    " react(" + from + "," + not + ")");
+
+    if (not instanceof AckJoinQueueCluster)
+      doReact((AckJoinQueueCluster) not);
+    else if (not instanceof JoinQueueCluster)
+      doReact((JoinQueueCluster) not);
+    else if (not instanceof LeaveQueueCluster)
+      removeQueueCluster(((LeaveQueueCluster) not).removeQueue);
+    else if (not instanceof ReceiveRequest) {
+      super.react(from, not);
+      doReact((ReceiveRequest) not);
+    } else if (not instanceof LBMessageGive)
+      doReact(from, (LBMessageGive) not);
+    else if (not instanceof LBMessageHope)
+      doReact(from, (LBMessageHope) not);
+    else if (not instanceof LBCycleLife)
+      doReact(from, (LBCycleLife) not);
+    else if (not instanceof WakeUpNot)
+      doReact((WakeUpNot) not);
+    else if (not instanceof SetRightQueueCluster)
+      doReact((SetRightQueueCluster) not);
+    else
+      super.react(from, not);
+  }
+
+  /** set the same right to all cluster */
+  protected void doReact(SetRightQueueCluster not) {
+    try {
+      AgentId user = not.setRightRequest.getClient();
+      int right = not.setRightRequest.getRight();
+      super.processSetRight(user,right);
+    } catch (RequestException exc) {}
+    super.doProcess(not.setRightRequest);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "--- " + this +
+                                    " ClusterQueueImpl.doReact(" + not + ")" +
+                                    "\nclients=" + clients);
   }
 
   /**
    * wake up, and call factorCheck to evaluate the loading factor...
    * if msg stay more a periode time in timeTable send to an other
    * (no visited) queue in cluster.
-   * 
-   * @param not
    */
-  public void wakeUpNot(WakeUpNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+  protected void doReact(WakeUpNot not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "--- " + this +
-                                    " ClusterQueueImpl.wakeUpNot(" + not + ")");
-    super.wakeUpNot(not);
-    
+                                    " ClusterQueueImpl.doReact(" + not + ")");
+
+    super.doReact(not);
+
     if (clusters.size() > 1)
       loadingFactor.factorCheck(clusters,
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+                                getNumberOfPendingMessages(),
+                                getNumberOfPendingRequests());
 
-    // Check if there is message arrived before "timeThreshold".
-    // if is true forwards message to the next (no visited) clusterQueue.
-    List toGive = new ArrayList();
-    long oldTime = System.currentTimeMillis() - timeThreshold;
+    // check if msg arrived befor "period".
+    // if is true send msg to the next (no visited) clusterQueue.
+    Vector toGive = new Vector();
+    long oldTime = System.currentTimeMillis() - period;
     for (Enumeration e = timeTable.keys(); e.hasMoreElements(); ) {
       String msgId = (String) e.nextElement();
       if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
@@ -355,15 +395,15 @@ public class ClusterQueueImpl extends QueueImpl {
       for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
         if (! visit.contains(id)) {
-          Message message = getMessage(msgId, true);
-          if (message != null) {
-            LBCycleLife cycle = (LBCycleLife) table.get(id);
-            if (cycle == null) {
-              cycle = new LBCycleLife(loadingFactor.getRateOfFlow());
-              cycle.setClientMessages(new ClientMessages());
-            }
-            ClientMessages cm = cycle.getClientMessages();
-            cm.addMessage(message.msg);
+          LBCycleLife cycle = (LBCycleLife) table.get(id);
+          if (cycle == null) {
+            cycle = new LBCycleLife(loadingFactor.getRateOfFlow());
+            cycle.setClientMessages(new ClientMessages());
+          }
+          ClientMessages cm = cycle.getClientMessages();
+          Message msg = removeMessage(msgId);
+          if (msg != null) {
+            cm.addMessage(msg);
             cycle.putInVisitTable(msgId,visit);
             table.put(id,cycle);
             break;
@@ -374,7 +414,7 @@ public class ClusterQueueImpl extends QueueImpl {
 
     for (Enumeration e = table.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
-      forward(id,(LBCycleLife) table.get(id));
+      loadingFactor.processGive(id,(LBCycleLife) table.get(id));
     }
   }
 
@@ -382,11 +422,8 @@ public class ClusterQueueImpl extends QueueImpl {
    * The messages are not consumed by an other cluster's queue
    * in a periode time, try to consume in this queue.
    * update visitTable, and process clientMessages. 
-   * 
-   * @param from
-   * @param not
    */
-  public void lBCycleLife(AgentId from, LBCycleLife not) {
+  protected void doReact(AgentId from, LBCycleLife not) {
 
     clusters.put(from,new Float(not.getRateOfFlow()));
 
@@ -396,23 +433,21 @@ public class ClusterQueueImpl extends QueueImpl {
       visitTable.put(msgId,vT.get(msgId));
     }
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
-                                    " ClusterQueueImpl.lBCycleLife(" + not + ")" +
+                                    " ClusterQueueImpl.doReact(" + not + ")" +
                                     "\nvisitTable=" + clusters);
     ClientMessages cm = not.getClientMessages();
     if (cm != null)
-      doClientMessages(from, cm);
+      doProcess(cm);
   }
 
   /**
    * new queue come in cluster, update clusters.
    * and spread to clusters the AckjoiningQueue.
-   * 
-   * @param not JoinQueueCluster
    */
-  public void joinQueueCluster(JoinQueueCluster not) {
+  protected void doReact(JoinQueueCluster not) {
     for (Enumeration e = not.clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (! clusters.containsKey(id))
@@ -438,19 +473,15 @@ public class ClusterQueueImpl extends QueueImpl {
                               freeReading,
                               freeWriting));
   
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
-                                    " ClusterQueueImpl.joinQueueCluster(" + not + ")" +
+                                    " ClusterQueueImpl.doReact(" + not + ")" +
                                     "\nclusters=" + clusters +
                                     "\nclients=" + clients);
   }
 
-  /**
-   * 
-   * @param not AckJoinQueueCluster
-   */
-  public void ackJoinQueueCluster(AckJoinQueueCluster not) {
+  protected void doReact(AckJoinQueueCluster not) {
     for (Enumeration e = not.clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (! clusters.containsKey(id))
@@ -469,152 +500,100 @@ public class ClusterQueueImpl extends QueueImpl {
     freeReading = freeReading | not.freeReading;
     freeWriting = freeWriting | not.freeWriting;
   
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
-                                    " ClusterQueueImpl.ackJoinQueueCluster(" + not + ")" +
+                                    " ClusterQueueImpl.doReact(" + not + ")" +
                                     "\nclusters=" + clusters +
                                     "\nclients=" + clients);
   }
 
   /**
    * 
-   * @param not ReceiveRequest
    */
-  public void receiveRequest(ReceiveRequest not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+  protected void doReact(ReceiveRequest not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this + 
-                                    " ClusterQueueImpl.receiveRequest(" + not + ")");
+                                    " ClusterQueueImpl.doReact(" + not + ")");
 
     //loadingFactor.setWait();
 
-    if (getWaitingRequestCount() > loadingFactor.consumThreshold)
+    if (getNumberOfPendingRequests() > loadingFactor.consumThreshold)
       loadingFactor.factorCheck(clusters,
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+                                getNumberOfPendingMessages(),
+                                getNumberOfPendingRequests());
   }
 
-  /**
+  /** 
    * load balancing message give by an other cluster queue.
    * process ClientMessages, no need to check if sender is writer.
-   * 
-   * @param from  AgentId
-   * @param not   LBMessageGive
-   * @throws UnknownNotificationException
    */
-  public void lBMessageGive(AgentId from, LBMessageGive not) 
+  protected void doReact(AgentId from, LBMessageGive not) 
     throws UnknownNotificationException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "--- " + this +
-                                    " ClusterQueueImpl.lBMessageGive(" + from + "," + not + ")");
+                                    " ClusterQueueImpl.doReact(" + from + "," + not + ")");
 
     clusters.put(from,new Float(not.getRateOfFlow()));
 
     ClientMessages cm = not.getClientMessages();
     if (cm != null)
-      doClientMessages(from, cm);
+      doProcess(cm);
   }
 
-  /**
+  /** 
    * load balancing message hope by the "from" queue.
-   * 
-   * @param from
-   * @param not   LBMessageHope
    */
-  public void lBMessageHope(AgentId from, LBMessageHope not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+  protected void doReact(AgentId from, LBMessageHope not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this + 
-                                    " ClusterQueueImpl.lBMessageHope(" + from + "," + not + ")");
+                                    " ClusterQueueImpl.doReact(" + from + "," + not + ")");
     
     clusters.put(from,new Float(not.getRateOfFlow()));
 
     int hope = not.getNbMsg();
-
-    long current = System.currentTimeMillis();
-    // Cleaning the possible expired messages.
-    ClientMessages deadMessages = cleanPendingMessage(current);
-    // If needed, sending the dead messages to the DMQ:
-    if (deadMessages != null)
-      sendToDMQ(deadMessages, null);
-    
+    // TODO: if validityperiod
     if (loadingFactor.getRateOfFlow() < 1) {
-      int possibleGive = getMessageCounter() - getWaitingRequestCount();
+      int possibleGive = getNumberOfPendingMessages() - getNumberOfPendingRequests();
       LBMessageGive msgGive = 
         new LBMessageGive(waitAfterClusterReq,loadingFactor.getRateOfFlow());
-      
-      // get client messages, hope or possible give.
-      ClientMessages cm = null;
-      if (possibleGive > hope) {
-        cm = getClientMessages(hope, null, true);
-      } else {
-        cm = getClientMessages(possibleGive, null, true);
+      ClientMessages cm = new ClientMessages();
+      for (int i = 0; (i < possibleGive) && (i < hope); i++) {
+        if (! messagesIsEmpty()) {
+          Message msg = removeMessage(0);
+          cm.addMessage(msg);
+        } else 
+          break;
       }
-
       msgGive.setClientMessages(cm);
       msgGive.setRateOfFlow(
-        loadingFactor.evalRateOfFlow(getMessageCounter(), getWaitingRequestCount()));
+        loadingFactor.evalRateOfFlow(getNumberOfPendingMessages(),
+                                     getNumberOfPendingRequests()));
+      Channel.sendTo(from,msgGive);
       
-      // send notification contains ClientMessages.
-      forward(from, msgGive);
-      
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "--- " + this +
-                                      " ClusterQueueImpl.lBMessageHope LBMessageHope : nbMsgSend = " + 
+                                      " ClusterQueueImpl.doReact LBMessageHope : nbMsgSend = " + 
                                       cm.getMessages().size());
+
+      for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+        Message msg = (Message) e.nextElement();
+        messageSendToCluster(msg.getIdentifier());
+        deletePersistenceMessage(msg);
+      }
     }
   }
 
   /**
-   *  get a client message contain nb messages.
-   *  add cluster monitoring value.
-   *  
-   * @param nb        number of messages returned in ClientMessage.
-   * @param selector  jms selector
-   * @param remove    delete all messages returned if true
-   * @return ClientMessages (contains nb Messages)
-   */
-  protected ClientMessages getClientMessages(int nb, String selector, boolean remove) {
-    ClientMessages cm = super.getClientMessages(nb, selector, remove);
-    if (cm != null) {
-      // set information in cluster
-      for (Enumeration e = cm.getMessages().elements();
-           e.hasMoreElements(); ) {
-        org.objectweb.joram.shared.messages.Message message = 
-          (org.objectweb.joram.shared.messages.Message) e.nextElement();
-        monitoringMsgSendToCluster(message.id);
-      }
-    }
-    return cm;
-  }
-  
-  /**
-   * get mom message, delete if remove = true.
-   * add cluster monitoring value.
-   * 
-   * @param msgId   message identification
-   * @param remove  if true delete message
-   * @return mom message
-   */
-  protected Message getMessage(String msgId, boolean remove) {  
-    Message msg = super.getMessage(msgId, remove);
-    if (msg != null) {
-      monitoringMsgSendToCluster(msg.getIdentifier());
-    }
-    return msg;
-  }
-  
-  /**
    * send to all queue in cluster.
-   * 
-   * @param not
    */
   protected void sendToCluster(QueueClusterNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this + 
                                     " ClusterQueueImpl.sendToCluster(" + not + ")");
 
@@ -623,7 +602,7 @@ public class ClusterQueueImpl extends QueueImpl {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (! id.equals(destId))
-        forward(id,not);
+        Channel.sendTo(id,not);
     }
   }
 
@@ -635,21 +614,23 @@ public class ClusterQueueImpl extends QueueImpl {
   }
 
   /**
-   * 
-   * @param msgId
-   * @param date
+   * return index of message.
    */
+  private int getIndexOfMessage(String msgId) {
+    for (int i = 0; i < messages.size(); i++) {
+      Message msg = (Message) messages.get(i);
+      if (msgId.equals(msg.getIdentifier()))
+        return i;
+    }
+    return -1;
+  }
+
   private void storeMsgIdInTimeTable(String msgId, Long date) {
     try {
       timeTable.put(msgId,date);
     } catch (NullPointerException exc) {}
   }
 
-  /**
-   * 
-   * @param msgId
-   * @param destId
-   */
   private void storeMsgIdInVisitTable(String msgId, AgentId destId) {
     Vector alreadyVisit = (Vector) visitTable.get(msgId);
     if (alreadyVisit == null) alreadyVisit = new Vector();
@@ -657,71 +638,88 @@ public class ClusterQueueImpl extends QueueImpl {
     visitTable.put(msgId,alreadyVisit);
   }
 
-  /**
-   * 
-   * @param msgId
-   */
   protected void messageDelivered(String msgId) {
     timeTable.remove(msgId);
     visitTable.remove(msgId);
   }
 
-  /**
-   * 
-   * @param msgId
-   */
-  protected void monitoringMsgSendToCluster(String msgId) {
+  protected void messageRemoved(String msgId) {
+    timeTable.remove(msgId);
+    visitTable.remove(msgId);
+  }
+
+  protected void messageSendToCluster(String msgId) {
     timeTable.remove(msgId);
     visitTable.remove(msgId);
     clusterDeliveryCount++;
   }
+
+  Message removeMessage(String msgId) {
+    for (Enumeration e = messages.elements(); e.hasMoreElements(); ) {
+      Message msg = (Message) e.nextElement();
+      if (msgId.equals(msg.getIdentifier())) {
+        // fix bug for softRefMessage
+        msg.setPin(true);
+        if (messages.remove(msg))
+          return msg;
+        else 
+          return null;
+      }
+    }
+    return null;
+  }
+
+  Message removeMessage(int index) {
+    Message msg = (Message) messages.remove(0);
+    // fix bug for softRefMessage
+    msg.setPin(true);
+    return msg;
+  }
+
+  boolean messagesIsEmpty() {
+   return messages.isEmpty();
+  }
+
+  void deletePersistenceMessage(Message msg) {
+    msg.delete();
+  }
+
+  AgentId getDestId() {
+    return destId;
+  }
+
+  public int getNumberOfPendingMessages() {
+    return messages.size();
+  }
   
-  /**
-   * 
-   * @param waitAfterClusterReq
-   */
+  public int getNumberOfPendingRequests() {
+    return requests.size();
+  }
+  
   public void setWaitAfterClusterReq(long waitAfterClusterReq) {
     this.waitAfterClusterReq = waitAfterClusterReq;
     loadingFactor.validityPeriod = waitAfterClusterReq;
   }
   
-  /**
-   * 
-   * @param producThreshold
-   */
   public void setProducThreshold(int producThreshold) {
     loadingFactor.producThreshold = producThreshold;
   }
   
-  /**
-   * 
-   * @param consumThreshold
-   */
   public void setConsumThreshold(int consumThreshold) {
     loadingFactor.consumThreshold = consumThreshold;
   }
   
-  /**
-   * 
-   * @param autoEvalThreshold
-   */
   public void setAutoEvalThreshold(boolean autoEvalThreshold) {
     loadingFactor.autoEvalThreshold = autoEvalThreshold;
   }
 
-  /**
-   * 
-   * @param in
-   * @throws IOException
-   * @throws ClassNotFoundException
-   */
   private void readObject(java.io.ObjectInputStream in)
     throws IOException, ClassNotFoundException {
 
     in.defaultReadObject();
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this + 
                                     " ClusterQueueImpl.readObject" +
                                     " loadingFactor = " + loadingFactor);

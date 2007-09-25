@@ -352,7 +352,8 @@ public class PoolNetwork extends StreamNetwork {
 
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         nis = new MessageInputStream(sock.getInputStream());
         nos = new MessageOutputStream(sock.getOutputStream());
@@ -422,7 +423,8 @@ public class PoolNetwork extends StreamNetwork {
 
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         nis = new MessageInputStream(sock.getInputStream());
         nos = new MessageOutputStream(sock.getOutputStream());
@@ -593,7 +595,8 @@ public class PoolNetwork extends StreamNetwork {
         AgentServer.getTransaction().begin();
         msg.delete();
         msg.free();
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

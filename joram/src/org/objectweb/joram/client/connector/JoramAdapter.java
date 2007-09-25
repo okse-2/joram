@@ -63,6 +63,7 @@ import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.NotSupportedException;
@@ -128,11 +129,6 @@ public class JoramAdapter
   /** Port number of the underlying JORAM server. */
   int serverPort = 16010;
 
-
-  /** Root name. */
-    String rootName = "root";
-    String rootPasswd = "root";
-
   /** Identifier of the JORAM server to start. */
   short serverId = 0;
 
@@ -169,8 +165,7 @@ public class JoramAdapter
   /** Names of the bound objects. */
   private static Vector boundNames = new Vector();
   /** Standard JMSResource MBean ObjectName. */
-//  private static ObjectName jmsResourceON;
-  
+  private static ObjectName jmsResourceON;
   /** Local MBean server. */
   private static MBeanServer mbs = null;
 
@@ -932,24 +927,9 @@ public class JoramAdapter
     joramAdmin.setDefaultDMQ(serverId,dmq);
   }
 
-  public void setDefaultDMQId(int serverId, String dmqId)
-  throws ConnectException, AdminException {
-    joramAdmin.setDefaultDMQId(serverId,dmqId);
-  }
-  
   public DeadMQueue getDefaultDMQ(int serverId)
     throws ConnectException, AdminException {
     return joramAdmin.getDefaultDMQ(serverId);
-  }
-
-  public String getDefaultDMQId()
-    throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId();
-  }
-
-  public String getDefaultDMQId(int serverId)
-    throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId(serverId);
   }
 
   public DeadMQueue getDefaultDMQ()
@@ -1100,7 +1080,7 @@ public class JoramAdapter
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
         .getParameters().connectingTimer = 60;
 
-      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd);
+      joramAdmin = new JoramAdmin(factory, "root", "root");
     }
     catch (ConnectException exc) {
       throw new AdminException("Admin connection can't be established: "
@@ -1359,14 +1339,6 @@ public class JoramAdapter
     this.serverId = serverId.shortValue();
   }
 
-    public void setRootName(java.lang.String rn) {
-	rootName = rn;
-    }
-    public void setRootPasswd(java.lang.String rp) { 
-	rootPasswd = rp;
-    }
-
-
   public void setClusterId(java.lang.Short clusterId) {
     this.clusterId = clusterId.shortValue();
     if (this.clusterId != AgentServer.NULL_ID){
@@ -1448,13 +1420,6 @@ public class JoramAdapter
 
   public Short getServerId() {
     return new Short(serverId);
-  }
-
-  public java.lang.String getRootName() {
-      return rootName;
-  }
-  public java.lang.String getRootPasswd() { 
-      return rootPasswd;
   }
 
   public java.lang.String getServerName() {

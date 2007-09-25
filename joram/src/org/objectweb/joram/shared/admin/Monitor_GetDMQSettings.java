@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetDMQSettings</code> instance requests the DMQ settings
  * of a server, a user or a destination.
  */
 public class Monitor_GetDMQSettings extends Monitor_Request {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 7889757065920058205L;
 
   /** Identifier of the target server. */
   private int serverId = -1;
@@ -58,8 +52,6 @@ public class Monitor_GetDMQSettings extends Monitor_Request {
     this.target = target;
   }
 
-  public Monitor_GetDMQSettings() { }
-  
   /** Returns the identifier of the target server. */
   public int getServerId() {
     return serverId;
@@ -68,21 +60,5 @@ public class Monitor_GetDMQSettings extends Monitor_Request {
   /** Returns the identifier of the target destination or user. */
   public String getTarget() {
     return target;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_DMQ_SETTINGS;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    serverId = StreamUtil.readIntFrom(is);
-    target = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(serverId, os);
-    StreamUtil.writeTo(target, os);
   }
 }

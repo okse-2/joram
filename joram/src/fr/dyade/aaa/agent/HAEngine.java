@@ -177,7 +177,7 @@ final class HAEngine extends Engine {
                  " receiveFromJGroups qin.size() = " + qin.size() +
                  ", qinFromExt.size() = " + qinFromExt.size());
 
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     qinFromExt.addElement(msg);
     postFromExt();
     AgentServer.getTransaction().release();

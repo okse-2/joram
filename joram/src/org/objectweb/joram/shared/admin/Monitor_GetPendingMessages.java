@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetPendingMessages</code> instance requests the number of
  * pending messages on a given queue.
  */
 public class Monitor_GetPendingMessages extends Monitor_Request {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 7260309432612595438L;
 
   /** Identifier of the target destination. */
   private String dest;
@@ -47,24 +41,9 @@ public class Monitor_GetPendingMessages extends Monitor_Request {
     this.dest = dest;
   }
 
-  public Monitor_GetPendingMessages() { }
 
   /** Returns the identifier of the target destination. */
   public String getDest() {
     return dest;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_PENDING_MESSAGES;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    dest = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(dest, os);
   }
 }

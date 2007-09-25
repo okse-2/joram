@@ -20,7 +20,8 @@
  */
 package fr.dyade.aaa.util;
 
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 /**
  * The <code>Queue</code> class implements a First-In-First-Out 

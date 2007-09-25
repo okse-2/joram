@@ -376,7 +376,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(AgentId.factoryId, factory);
         factory.save();
-        logmon.log(BasicLevel.INFO, getName() + ", factory created");
+        logmon.log(BasicLevel.WARN, getName() + ", factory created");
       }
 
       // loads all fixed agents
@@ -499,8 +499,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (agents.size() < (NbMaxAgents + fixedAgentIdList.size()))
       return;
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO,
                  getName() + ", garbage: " + agents.size() +
                  '/' + NbMaxAgents + '+' + fixedAgentIdList.size() +
                  ' ' + now);
@@ -521,7 +521,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       }
     }
 
-    logmon.log(BasicLevel.DEBUG,
+    logmon.log(BasicLevel.INFO,
                getName() + ", garbage: " + agents.size());
   }
 
@@ -974,7 +974,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     dispatch();
     // Saves the agent state then commit the transaction.
     if (agent != null) agent.save();
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
@@ -1014,7 +1014,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
          msg.from,
          new ExceptionNotification(msg.to, msg.not, exc));
     dispatch();
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     // The transaction has commited, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();

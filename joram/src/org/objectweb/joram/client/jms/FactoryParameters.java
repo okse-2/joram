@@ -170,13 +170,7 @@ public class FactoryParameters implements java.io.Serializable {
     return url;
   }
 
-//   public void toReference(Reference ref) {
-//     toReference(ref, "cf");
-//   }
-
   public void toReference(Reference ref, String prefix) {
-//     if (prefix == null) prefix = "cf";
-
     ref.add(new StringRefAddr(prefix + ".host", getHost()));
     ref.add(new StringRefAddr(prefix + ".port",
                               new Integer(getPort()).toString()));
@@ -207,13 +201,7 @@ public class FactoryParameters implements java.io.Serializable {
                               new Integer(topicActivationThreshold).toString()));
   }
 
-//   public void fromReference(Reference ref) {
-//     fromReference(ref, "cf");
-//   }
-
   public void fromReference(Reference ref, String prefix) {
-//     if (prefix == null) prefix = "cf";
-
     host = (String) ref.get(prefix + ".host").getContent();
     port = new Integer((String) ref.get(prefix + ".port").getContent()).intValue();
 
@@ -262,6 +250,7 @@ public class FactoryParameters implements java.io.Serializable {
   public void decode(Hashtable h, String prefix) {
     host = (String) h.get(prefix + ".host");
     port = ((Integer) h.get(prefix + ".port")).intValue();
+
 
     url = (String) h.get(prefix + ".url");
 

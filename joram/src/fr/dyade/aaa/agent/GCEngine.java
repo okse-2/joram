@@ -97,7 +97,7 @@ final class GCEngine extends Engine {
       // Post all notifications temporary keeped in mq in the rigth consumers,
       // then saves changes.
       dispatch();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit();
       // The transaction has commited, then validate all messages.
       Channel.validate();
     }

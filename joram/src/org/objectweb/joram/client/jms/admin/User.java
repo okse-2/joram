@@ -186,23 +186,9 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */
   public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
-    setDMQId(dmq.getName());
+    AdminModule.doRequest(new SetUserDMQ(proxyId, dmq.getName()));
   }
 
-  /**
-   * Admin method setting a given dead message queue for this user.
-   * <p>
-   * The request fails if the user is deleted server side.
-   *
-   * @param dmqId  The dead message queue Id to be set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public void setDMQId(String dmqId) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetUserDMQ(proxyId, dmqId));
-  }
-  
   /**
    * Admin method setting a given value as the threshold for this user.
    * <p>
@@ -237,22 +223,6 @@ public class User extends AdministeredObject implements UserMBean {
       return new DeadMQueue(reply.getDMQName());
   }
 
-  /** 
-   * Returns the dead message queue Id for this user, null if not set.
-   * <p>
-   * The request fails if the user is deleted server side.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public String getDMQId() throws ConnectException, AdminException {
-    DeadMQueue dmq = getDMQ();  
-    if (dmq == null)
-      return null;
-    else
-      return dmq.getName();
-  }
-  
   /** 
    * Returns the threshold for this user, -1 if not set.
    * <p>
@@ -444,8 +414,8 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public Hashtable code() {
     Hashtable h = new Hashtable();
-    h.put("name",name);
-    h.put("proxyId",proxyId);
+    h.put("user.name",name);
+    h.put("user.id",proxyId);
     return h;
   }
 
@@ -453,7 +423,7 @@ public class User extends AdministeredObject implements UserMBean {
    * Decodes an <code>User</code> which travelled through the SOAP protocol.
    */
   public void decode(Hashtable h) {
-    name = (String) h.get("name");
-    proxyId = (String) h.get("proxyId");
+    name = (String) h.get("user.name");
+    proxyId = (String) h.get("user.id");
   }
 }
