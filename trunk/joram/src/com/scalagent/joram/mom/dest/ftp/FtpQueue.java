@@ -39,6 +39,10 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class FtpQueue extends Queue {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final String FTP_QUEUE_TYPE = "queue.ftp";
 
   public static String getDestinationType() {

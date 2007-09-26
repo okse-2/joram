@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>QueueBrowser</code> when requesting an enumeration.
  */
 public final class QBrowseRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The selector for filtering messages. */
   private String selector;
 

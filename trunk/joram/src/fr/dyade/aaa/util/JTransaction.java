@@ -38,6 +38,11 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   static final int DELETE = 2;
 
   class Operation implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    
     String dirName;
     String name;
     int type;

@@ -27,6 +27,11 @@ package org.objectweb.joram.shared.client;
  * A <code>CnxCloseRequest</code> is sent by a closing SOAP connection.
  */
 public final class CnxCloseRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CNX_CLOSE_REQUEST;
   }

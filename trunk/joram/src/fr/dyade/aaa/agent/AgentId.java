@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +23,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import fr.dyade.aaa.util.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * <code>AgentIdStamp</code> class defines static members, variable and
@@ -38,6 +38,11 @@ import fr.dyade.aaa.util.*;
  * class.
  */
 final class AgentIdStamp implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
 
@@ -153,7 +158,10 @@ final class AgentIdStamp implements Serializable {
  * @see AgentIdStamp
  */
 public final class AgentId implements Serializable {
-  static final long serialVersionUID = -5096976989176739863L;
+  /*
+   * 
+   */
+  static final long serialVersionUID = 1L;
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.

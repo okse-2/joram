@@ -26,6 +26,11 @@ import java.io.*;
 
 public class PropertyCmdException extends ExceptionCmd {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public PropertyCmdException(Throwable exc) {
     super(exc);
   }

@@ -30,6 +30,11 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
  */
 public class MessageValueException extends MessageException {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>MessageValueException</code> instance.
    */
   public MessageValueException(String info) {

@@ -33,6 +33,10 @@ public class HATcpConnectionFactory
   extends org.objectweb.joram.client.jms.ConnectionFactory {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * Constructs an <code>HATcpConnectionFactory</code> instance.
    */
   public HATcpConnectionFactory(String url) {

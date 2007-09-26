@@ -22,7 +22,6 @@
 package fr.dyade.aaa.agent;
 
 import java.util.*;
-import java.lang.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -33,6 +32,11 @@ import fr.dyade.aaa.agent.conf.*;
 
 
 final public class AgentAdmin extends Agent {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   static Logger logmon;
 
   // current operation

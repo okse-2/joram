@@ -53,6 +53,10 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class Topic extends Destination {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final String TOPIC_TYPE = "topic";
   
   public static String getDestinationType() {

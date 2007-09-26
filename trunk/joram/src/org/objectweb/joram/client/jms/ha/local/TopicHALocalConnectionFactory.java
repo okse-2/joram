@@ -26,6 +26,11 @@ import org.objectweb.joram.client.jms.*;
 public class TopicHALocalConnectionFactory 
     extends org.objectweb.joram.client.jms.TopicConnectionFactory {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public TopicHALocalConnectionFactory() {
     super("", -1);
   }

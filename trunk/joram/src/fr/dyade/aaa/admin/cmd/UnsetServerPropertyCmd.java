@@ -26,6 +26,10 @@ import java.util.*;
 
 public class UnsetServerPropertyCmd extends UnsetPropertyCmd implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String serverName = null;
 
  /**

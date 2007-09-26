@@ -39,6 +39,11 @@ public class ActivationSpecImpl
                   java.io.Serializable
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Value for the property <code>acknowledgeMode</code>
    * defined in the MDB deployment descriptor.
    */

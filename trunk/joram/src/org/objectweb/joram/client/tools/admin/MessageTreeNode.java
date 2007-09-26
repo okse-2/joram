@@ -30,6 +30,11 @@ import org.objectweb.joram.client.jms.admin.*;
 class MessageTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private AdminController c;
 
   private String msgId;
@@ -84,6 +89,11 @@ class MessageTreeNode extends DefaultMutableTreeNode
   }
 
   private class DeleteMessageAction extends AbstractAction {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     public DeleteMessageAction() {
       super("Delete", AdminToolConstants.trashIcon);

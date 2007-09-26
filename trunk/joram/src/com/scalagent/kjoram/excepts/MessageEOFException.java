@@ -26,6 +26,11 @@ package com.scalagent.kjoram.excepts;
 public class MessageEOFException extends JMSException
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>MessageEOFException</code> instance.
    */
   public MessageEOFException(String info)

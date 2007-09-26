@@ -34,6 +34,10 @@ package dotcom;
  * @see		CustomerTreatment
  */
 public class OkMessage implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Order id. */
   int id ;
   /** Item ordered. */

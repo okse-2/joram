@@ -33,6 +33,10 @@ import java.util.Vector;
  * sending one or many messages to a destination.
  */
 public class ClientMessages extends AbstractRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Message sent by the client. */
   private Message message = null;
   /** Messages sent by the client. */

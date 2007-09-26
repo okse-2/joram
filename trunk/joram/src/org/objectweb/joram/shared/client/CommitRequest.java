@@ -35,6 +35,11 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 
 public final class CommitRequest extends AbstractJmsRequest {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * List of ProducerMessages
    */
   private Vector producerMessages;

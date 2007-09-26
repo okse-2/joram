@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageConsumer</code> for denying a received message.
  */
 public final class ConsumerDenyRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Message identifier. */
   private String id;
 

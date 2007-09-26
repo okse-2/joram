@@ -33,6 +33,10 @@ import org.objectweb.joram.mom.notifications.ClusterRequest;
  */
 class ClusterTest extends Notification
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The original client request. */
   ClusterRequest request;
   /** The original requester. */

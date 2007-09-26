@@ -29,6 +29,10 @@ package org.objectweb.joram.mom.notifications;
  */
 public class Monit_GetDMQSettingsRep extends AdminReply
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** DMQ identifier. */
   private String dmqId;
   /** Threshold. */

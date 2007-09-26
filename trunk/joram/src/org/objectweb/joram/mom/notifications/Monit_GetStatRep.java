@@ -30,6 +30,10 @@ import java.util.Hashtable;
  */
 public class Monit_GetStatRep extends AdminReply {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Hashtable stats;
 
   /**

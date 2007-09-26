@@ -36,6 +36,10 @@ import org.objectweb.util.monolog.api.Logger;
 public class HARequestManager 
     implements LifeCycleListener, BagSerializer, java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final int IDEMPOTENT = -2;
   public static final int NOT_IDEMPOTENT = -1;
 

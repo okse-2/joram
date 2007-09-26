@@ -37,6 +37,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * topic.
  */
 public final class GetAdminTopicReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Identifier of the admin topic. */
   private String id;
 

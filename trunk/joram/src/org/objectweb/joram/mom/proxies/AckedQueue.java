@@ -29,6 +29,11 @@ import java.util.*;
 
 public class AckedQueue implements java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private Vector list;
 
   private int current;

@@ -30,6 +30,11 @@ package com.scalagent.kjoram.excepts;
 public class AccessException extends MomException
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs an <code>AccessException</code> instance.
    */
   public AccessException(String info)

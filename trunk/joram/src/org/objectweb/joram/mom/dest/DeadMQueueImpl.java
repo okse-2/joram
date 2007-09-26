@@ -45,6 +45,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * requests.
  */
 public class DeadMQueueImpl extends QueueImpl {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId id = null;
   /** Static value holding the default threshold for a server. */

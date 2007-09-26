@@ -30,6 +30,11 @@ import org.objectweb.joram.client.jms.admin.*;
 import javax.jms.*;
 
 public class SubscriptionPanel extends JPanel {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private final AdminController controller;
 
   private DefaultListModel msgListModel;

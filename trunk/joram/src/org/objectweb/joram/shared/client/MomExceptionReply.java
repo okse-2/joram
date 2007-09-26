@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.excepts.MomException;
  * to send a <code>MomException</code> back to a JMS client.
  */
 public final class MomExceptionReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final int MomException = 1;
   public static final int AccessException = 2;
   public static final int DestinationException = 3;

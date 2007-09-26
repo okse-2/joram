@@ -1253,6 +1253,10 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 }
 
 final class Operation implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   static final int SAVE = 1;
   static final int CREATE = 4;
   static final int DELETE = 2;

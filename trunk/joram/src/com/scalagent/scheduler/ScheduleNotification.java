@@ -30,4 +30,9 @@ import fr.dyade.aaa.agent.Notification;
  * @see		Scheduler
  */
 public class ScheduleNotification extends Notification {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 }

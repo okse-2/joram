@@ -27,6 +27,11 @@ package com.scalagent.kjoram.excepts;
 public class MessageNotWriteableException extends JMSException
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>MessageNotWriteableException</code> instance.
    */
   public MessageNotWriteableException(String info)

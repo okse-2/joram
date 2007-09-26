@@ -33,6 +33,11 @@ import org.objectweb.util.monolog.api.*;
 
 class DomainTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private AdminController c;
 
   private String domainName;
@@ -95,6 +100,11 @@ class DomainTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateServerAction extends AbstractAction {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public CreateServerAction() {
       super("Create server..."); 
     }
@@ -132,6 +142,11 @@ class DomainTreeNode extends DefaultMutableTreeNode
   }
 
   private class DeleteDomainAction extends AbstractAction {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public DeleteDomainAction() {
       super("Delete domain", AdminToolConstants.trashIcon);
     }

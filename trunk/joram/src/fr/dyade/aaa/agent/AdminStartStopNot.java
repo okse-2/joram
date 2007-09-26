@@ -33,6 +33,10 @@ import fr.dyade.aaa.admin.script.*;
  */
 public class AdminStartStopNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** start script vector */
   public StartScript startScript = null;
   /** stop script vector */

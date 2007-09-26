@@ -37,6 +37,10 @@ import fr.dyade.aaa.agent.conf.*;
  * @see A3CMLConfig
  */
 public class Script implements Serializable, Cloneable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** AdminCmd Vector */
   private Vector commands = null;
   /** create new configuration */

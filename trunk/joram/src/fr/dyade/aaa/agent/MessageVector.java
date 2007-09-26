@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,6 @@
  * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
-
-import java.io.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -505,6 +503,11 @@ final class MessageVector implements MessageQueue {
   }
 
   final class TransactionError extends Error {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     TransactionError(Throwable cause) {
       super(cause);
     }

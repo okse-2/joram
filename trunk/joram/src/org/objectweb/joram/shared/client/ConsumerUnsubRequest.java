@@ -29,6 +29,11 @@ package org.objectweb.joram.shared.client;
  * unsubscribing a durable subscriber.
  */
 public final class ConsumerUnsubRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CONSUMER_UNSUB_REQUEST;
   }

@@ -26,6 +26,11 @@ import fr.dyade.aaa.agent.Notification;
 
 public class SendReplyNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private int key;
 
   private int requestId;

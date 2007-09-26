@@ -33,6 +33,10 @@ import fr.dyade.aaa.agent.Notification;
  */
 class ClusterNot extends Notification
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The identifier of the topic to add to the cluster. */
   AgentId topicId;
 

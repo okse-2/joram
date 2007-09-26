@@ -27,6 +27,11 @@ package org.objectweb.joram.shared.client;
  * A <code>CnxCloseReply</code> replies to a <code>CnxCloseRequest</code>.
  */
 public final class CnxCloseReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CNX_CLOSE_REPLY;
   }

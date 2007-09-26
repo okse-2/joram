@@ -36,6 +36,11 @@ import fr.dyade.aaa.agent.AgentId;
  */
 public class DeadMQueue extends Queue {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static String getDestinationType() {
     return "queue.dmq";
   }

@@ -79,6 +79,11 @@ import fr.dyade.aaa.agent.*;
  */
 public class Scheduler extends ProxyAgent {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(Scheduler.class.getName());
   
   /** initializes service only once */

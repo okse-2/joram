@@ -28,6 +28,11 @@ import javax.naming.*;
 
 public class NamingContextInfo implements Serializable {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private NamingContext namingContext;
 
   private CompositeName name;

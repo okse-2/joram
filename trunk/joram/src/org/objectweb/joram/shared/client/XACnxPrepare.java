@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * the proxy.
  */
 public final class XACnxPrepare extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Transaction branch qualifier. */
   private byte[] bq;
 

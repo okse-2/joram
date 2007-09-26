@@ -29,8 +29,10 @@ import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.AgentServer;
 
 public class A3CMLConfig implements Serializable {
-  /** use serialVersionUID for interoperability */
-  private static final long serialVersionUID = -2497621374376654935L;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   /** Hashtable of all domains */
   public Hashtable domains = null;

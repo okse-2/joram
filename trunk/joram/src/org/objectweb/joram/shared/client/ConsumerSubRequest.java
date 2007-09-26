@@ -35,6 +35,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageConsumer</code> destinated to consume messages on a topic.
  */
 public final class ConsumerSubRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The subscription's name. */
   private String subName;
 

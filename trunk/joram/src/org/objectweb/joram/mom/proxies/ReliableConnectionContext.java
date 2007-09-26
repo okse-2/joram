@@ -38,6 +38,11 @@ import org.objectweb.joram.shared.client.CnxCloseRequest;
  */
 public class ReliableConnectionContext implements ConnectionContext, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private int key;
 
   private long inputCounter;

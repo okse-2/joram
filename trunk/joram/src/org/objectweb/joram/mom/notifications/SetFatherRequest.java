@@ -32,6 +32,10 @@ import fr.dyade.aaa.agent.AgentId;
  */
 public class SetFatherRequest extends AdminRequest
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The hierarchical father identifier. */
   private AgentId fatherId;
 

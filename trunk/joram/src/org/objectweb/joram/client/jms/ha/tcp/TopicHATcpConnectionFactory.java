@@ -28,6 +28,10 @@ import org.objectweb.joram.client.jms.*;
 public class TopicHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.TopicConnectionFactory {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private String url;
 
   public TopicHATcpConnectionFactory(String url) {

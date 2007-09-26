@@ -36,6 +36,11 @@ import org.objectweb.util.monolog.api.Logger;
 public class RequestManager 
     implements LifeCycleListener, java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private Container container;
 
   private transient ServerImpl impl;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,20 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.util.*;
-import java.io.*;
-
-import fr.dyade.aaa.agent.conf.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.conf.A3CML;
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.agent.conf.A3CMLDomain;
+import fr.dyade.aaa.agent.conf.A3CMLNetwork;
+import fr.dyade.aaa.agent.conf.A3CMLServer;
+import fr.dyade.aaa.agent.conf.A3CMLService;
 
 public class ServerConfigHelper {
 
@@ -331,18 +338,33 @@ public class ServerConfigHelper {
   }
 
   public static class ServerIdAlreadyUsedException extends Exception {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public ServerIdAlreadyUsedException(String info) {
       super(info);
     }
   }
   
   public static class NameAlreadyUsedException extends Exception {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public NameAlreadyUsedException(String info) {
       super(info);
     }
   }
 
   public static class StartFailureException extends Exception {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public StartFailureException(String info) {
       super(info);
     }

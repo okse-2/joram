@@ -29,6 +29,10 @@ package org.objectweb.joram.mom.dest.jmsbridge;
  */
 public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * Identifier of the message successfuly delivered to the foreign
    * JMS server.
    */

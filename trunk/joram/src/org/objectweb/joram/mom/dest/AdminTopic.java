@@ -47,6 +47,11 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class AdminTopic extends Topic {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs an <code>AdminTopic</code> agent. 
    */ 
   public AdminTopic() {

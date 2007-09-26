@@ -29,6 +29,10 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
  * MOM actors.
  */
 public class MomException extends Exception {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   protected int type;
 
   public MomException(int type, String info) {

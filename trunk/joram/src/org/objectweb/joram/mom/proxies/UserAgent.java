@@ -65,6 +65,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * All the user requests are delegated to the proxy
    */
   private ProxyImpl proxyImpl;
@@ -428,6 +433,11 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    */
   class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements
       java.io.Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private int timeout;
 
     private Integer key;

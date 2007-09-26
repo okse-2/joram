@@ -47,6 +47,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * of the messages.
  */
 class ClientSubscription implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The proxy's agent identifier. */
   private AgentId proxyId;
   /** <code>true</code> if the subscription is durable. */

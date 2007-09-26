@@ -28,6 +28,11 @@ import javax.swing.tree.*;
 class SubscriptionRootTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public SubscriptionRootTreeNode() {
     super("Subscriptions");
   }

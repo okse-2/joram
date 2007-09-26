@@ -41,6 +41,11 @@ import fr.dyade.aaa.jndi2.impl.*;
  */
 public class MissingRecordException extends NamingException {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private NamingContextId namingContextId;
 
   private Object ownerId;

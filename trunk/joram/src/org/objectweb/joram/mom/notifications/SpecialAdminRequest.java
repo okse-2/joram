@@ -32,6 +32,10 @@ import org.objectweb.joram.shared.admin.SpecialAdmin;
  */
 public class SpecialAdminRequest extends AdminRequest {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private SpecialAdmin request;
 
   /**

@@ -52,6 +52,10 @@ public class DefaultConnectionManager
                         java.io.Serializable
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * Static reference to the local <code>DefaultConnectionManager</code>
    * instance.
    */

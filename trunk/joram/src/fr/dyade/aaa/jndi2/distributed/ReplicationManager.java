@@ -63,6 +63,10 @@ import fr.dyade.aaa.jndi2.server.Trace;
 public class ReplicationManager 
     extends RequestManager implements UpdateListener {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public final static String INIT_REQUEST_TABLE = "initRequestTable";
   public final static String SYNC_REQUEST_TABLE = "syncRequestTable";
   public final static String WRITE_REQUEST_TABLE = "writeRequestTable";
@@ -725,6 +729,10 @@ public class ReplicationManager
 
   static class RequestContextList 
       implements java.io.Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private Vector list;
 
     RequestContextList() {

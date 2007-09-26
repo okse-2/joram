@@ -28,6 +28,10 @@ import java.lang.ref.*;
 public class SimpleContextTable 
     implements ContextTable, java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Hashtable table;
 
   public SimpleContextTable() {

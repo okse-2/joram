@@ -77,6 +77,10 @@ import fr.dyade.aaa.agent.UnknownAgent;
  * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
 public class TopicImpl extends DestinationImpl implements TopicImplMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
   /** Vector of cluster fellows, if any. */

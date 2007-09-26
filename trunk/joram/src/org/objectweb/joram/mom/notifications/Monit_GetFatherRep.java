@@ -28,6 +28,10 @@ package org.objectweb.joram.mom.notifications;
  */
 public class Monit_GetFatherRep extends AdminReply
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Identifier of the hierarchical father. */
   private String fatherId;
 

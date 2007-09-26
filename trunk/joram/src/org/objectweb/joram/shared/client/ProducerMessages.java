@@ -39,6 +39,11 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageProducer</code> when sending messages.
  */
 public final class ProducerMessages extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** The wrapped messages. */
   private Vector messages = null;
 

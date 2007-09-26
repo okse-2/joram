@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * <code>Connection</code>.
  */
 public final class CnxStartRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CNX_START_REQUEST;
   }

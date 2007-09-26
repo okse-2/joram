@@ -37,6 +37,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>XACnxRecoverRequest</code> and carries transaction identifiers.
  */
 public final class XACnxRecoverReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Branch qualifiers. */
   private Vector bqs;
 

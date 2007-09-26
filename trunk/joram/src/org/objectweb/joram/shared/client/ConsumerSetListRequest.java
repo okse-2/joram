@@ -37,6 +37,10 @@ import fr.dyade.aaa.util.Strings;
  * <code>MessageConsumer</code> on which a message listener is set.
  */
 public final class ConsumerSetListRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Selector for filtering messages on a queue. */
   private String selector;
 

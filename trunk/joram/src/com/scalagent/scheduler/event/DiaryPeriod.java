@@ -31,6 +31,11 @@ import java.util.Calendar;
  */
 public class DiaryPeriod implements Serializable {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Time unit for this period, as a <code>Calendar</code> constant.
    * Available constants are <code>YEAR</code>, <code>MONTH</code>,
    * <code>DAY_OF_MONTH</code>, <code>HOUR_OF_DAY</code>, <code>MINUTE</code>,

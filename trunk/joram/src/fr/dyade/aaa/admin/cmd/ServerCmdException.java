@@ -26,6 +26,11 @@ import java.io.*;
 
 public class ServerCmdException extends ExceptionCmd {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public ServerCmdException(Throwable exc) {
     super(exc);
   }

@@ -41,6 +41,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * during a transaction.
  */
 public final class XACnxRollback extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Transaction branch qualifier. */
   private byte[] bq;
 

@@ -68,6 +68,10 @@ public class ManagedConnectionFactoryImpl
                         javax.resource.spi.ValidatingManagedConnectionFactory,
                         java.io.Serializable
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Vector of managed connections. */
   private transient Vector connections = null;
   /** Out stream for error logging and tracing. */

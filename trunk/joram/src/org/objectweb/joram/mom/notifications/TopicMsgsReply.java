@@ -30,6 +30,10 @@ import java.util.Vector;
  * messages to an agent client which subscribed to it.
  */
 public class TopicMsgsReply extends AbstractReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Vector of messages. */
   private Vector messages;
 

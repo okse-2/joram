@@ -41,6 +41,11 @@ import org.objectweb.util.monolog.api.*;
 public class AdminTool extends JFrame
     implements ControllerEventListener
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private static AdminTool adminTool = null;
 
   private final AdminController c;
@@ -535,6 +540,11 @@ public class AdminTool extends JFrame
 
   private class JndiConnectAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public JndiConnectAction()
       {
         super("Connect...");
@@ -573,6 +583,11 @@ public class AdminTool extends JFrame
 
   private class JndiDisconnectAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public JndiDisconnectAction()
       {
         super("Disconnect");
@@ -603,6 +618,11 @@ public class AdminTool extends JFrame
 
   private class JndiRefreshAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public JndiRefreshAction()
       {
         super("Refresh", AdminToolConstants.refreshIcon);
@@ -622,6 +642,11 @@ public class AdminTool extends JFrame
 
   private class JndiCreateFactoryAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public JndiCreateFactoryAction()
       {
         super("Create Connection Factory...");
@@ -644,6 +669,11 @@ public class AdminTool extends JFrame
 
   private class AdminConnectAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public AdminConnectAction()
       {
         super("Connect...");
@@ -686,6 +716,11 @@ public class AdminTool extends JFrame
 
   private class AdminDisconnectAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public AdminDisconnectAction()
       {
         super("Disconnect");
@@ -716,6 +751,11 @@ public class AdminTool extends JFrame
 
   private class AdminRefreshAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public AdminRefreshAction()
       {
         super("Refresh", AdminToolConstants.refreshIcon);
@@ -733,6 +773,11 @@ public class AdminTool extends JFrame
 
   private class ExitAction extends AbstractAction
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public ExitAction() { super("Exit"); }
     
     public void actionPerformed(ActionEvent e)
@@ -743,6 +788,11 @@ public class AdminTool extends JFrame
 
   private class ConfigTreeCellRenderer extends DefaultTreeCellRenderer
   {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public ConfigTreeCellRenderer() {
       super();
       setClosedIcon(AdminToolConstants.collapsedIcon);

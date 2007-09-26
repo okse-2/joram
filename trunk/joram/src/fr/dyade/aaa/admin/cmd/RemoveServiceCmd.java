@@ -27,6 +27,11 @@ import java.util.*;
 public class RemoveServiceCmd extends ServiceCmd implements Serializable {
 
  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+/**
   * remove service
   *
   * @param serverName  server name

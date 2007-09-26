@@ -27,6 +27,11 @@ import java.util.*;
 public class RemoveNetworkCmd extends NetworkCmd implements Serializable {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a new network removal command.
    *
    * @param serverName  server name

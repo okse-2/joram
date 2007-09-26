@@ -45,6 +45,10 @@ import org.objectweb.joram.shared.JoramTracing;
  */
 public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.admin.AdministeredObject implements javax.jms.ConnectionFactory {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   protected Hashtable cluster = null;
 
   /** 

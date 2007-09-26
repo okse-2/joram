@@ -30,6 +30,11 @@ package com.scalagent.kjoram.excepts;
 public class MomException extends Exception
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>MomException</code> containing a given description.
    */
   public MomException(String info)

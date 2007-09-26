@@ -32,6 +32,10 @@ import java.util.*;
  * <code>ReceiveRequest</code> by sending a message to a client.
  */
 public class QueueMsgReply extends AbstractReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The message sent by the queue. */
   private Vector messages;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,15 +20,17 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.NoSuchElementException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.conf.*;
+import fr.dyade.aaa.util.Strings;
 
 /**
  * Object which manages services.
@@ -38,6 +40,11 @@ import fr.dyade.aaa.agent.conf.*;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
 

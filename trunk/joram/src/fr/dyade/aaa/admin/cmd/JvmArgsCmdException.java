@@ -26,6 +26,11 @@ import java.io.*;
 
 public class JvmArgsCmdException extends ExceptionCmd {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public JvmArgsCmdException(Throwable exc) {
     super(exc);
   }

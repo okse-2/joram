@@ -40,6 +40,10 @@ import org.objectweb.joram.shared.JoramTracing;
  */
 public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private final static String TMP_TOPIC_TYPE = "topic.tmp";
 
   public static boolean isTemporaryTopic(String type) {

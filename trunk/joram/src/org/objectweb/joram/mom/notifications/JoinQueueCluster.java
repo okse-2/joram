@@ -27,6 +27,10 @@ import java.util.Hashtable;
 
 public class JoinQueueCluster extends QueueClusterNot {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public Hashtable clusters;
   public Hashtable clients;
   public boolean freeReading;

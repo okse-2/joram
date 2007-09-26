@@ -27,6 +27,10 @@ import fr.dyade.aaa.agent.AgentId;
 public class RegisteredDestNot 
     extends fr.dyade.aaa.agent.Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private AgentId reply;
   private String name;
   private AgentId dest = null;

@@ -29,6 +29,11 @@ package org.objectweb.joram.shared.client;
  * request.
  */
 public final class ServerReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return SERVER_REPLY;
   }

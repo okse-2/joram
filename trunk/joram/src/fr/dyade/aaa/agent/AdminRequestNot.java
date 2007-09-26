@@ -32,6 +32,10 @@ import fr.dyade.aaa.admin.script.*;
  */
 public class AdminRequestNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** configuration script. */
   public Script script = null;
   /** used to start script in a same reaction.

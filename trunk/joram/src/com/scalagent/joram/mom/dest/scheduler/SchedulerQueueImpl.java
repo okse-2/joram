@@ -42,6 +42,11 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Debug;
 
 public class SchedulerQueueImpl extends QueueImpl {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger =
       Debug.getLogger("com.scalagent.joram.scheduler.SchedulerQueueImpl");
 

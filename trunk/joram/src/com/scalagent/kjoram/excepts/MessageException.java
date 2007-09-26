@@ -30,6 +30,11 @@ package com.scalagent.kjoram.excepts;
 public class MessageException extends MomException
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>MessageException</code> instance.
    */
   public MessageException(String info)

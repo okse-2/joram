@@ -51,6 +51,11 @@ import fr.dyade.aaa.agent.DeleteNot;
  * and which is accessible through the Pub/Sub communication mode.
  */
 public class JMSBridgeTopicImpl extends TopicImpl {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
 

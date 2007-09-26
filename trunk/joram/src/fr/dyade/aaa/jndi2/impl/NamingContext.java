@@ -33,6 +33,11 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class NamingContext implements Serializable, Cloneable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private NamingContextId id;
 
   private Object ownerId;

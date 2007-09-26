@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * for commiting the messages and acknowledgements it sent to the proxy.
  */
 public final class XACnxCommit extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Transaction branch qualifier. */
   private byte[] bq;
 

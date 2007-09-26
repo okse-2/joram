@@ -37,6 +37,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageConsumer</code> for acknowledging a received message.
  */
 public final class ConsumerAckRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Message identifier. */
   private Vector ids;
 

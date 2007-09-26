@@ -23,6 +23,10 @@
 package com.scalagent.joram.mom.dest.mail;
 
 public class UpdateSenderInfo extends org.objectweb.joram.shared.admin.SpecialAdmin {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public SenderInfo oldSi = null;
   public SenderInfo newSi = null;
   

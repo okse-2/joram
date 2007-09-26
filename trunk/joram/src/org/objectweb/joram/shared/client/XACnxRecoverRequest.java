@@ -29,6 +29,11 @@ package org.objectweb.joram.shared.client;
  * prepared transactions.
  */
 public final class XACnxRecoverRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return XA_CNX_RECOVER_REQUEST;
   }

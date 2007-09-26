@@ -31,6 +31,10 @@ package org.objectweb.joram.mom.notifications;
 public class SubscribeRequest extends AbstractRequest
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * Selector for filtering messages, null or empty string for no selection.
    */
   private String selector;

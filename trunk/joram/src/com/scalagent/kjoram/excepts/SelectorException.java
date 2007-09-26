@@ -30,6 +30,11 @@ package com.scalagent.kjoram.excepts;
 public class SelectorException extends MomException
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>SelectorException</code> instance.
    */
   public SelectorException(String info)

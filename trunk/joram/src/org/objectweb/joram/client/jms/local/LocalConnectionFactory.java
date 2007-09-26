@@ -34,6 +34,12 @@ import javax.naming.NamingException;
 public class LocalConnectionFactory
     extends org.objectweb.joram.client.jms.ConnectionFactory {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+
+  /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
    */
   public LocalConnectionFactory() {

@@ -40,6 +40,10 @@ import com.scalagent.scheduler.*;
  * @see		ScheduleEvent
  */
 public class CronEvent extends ScheduleEvent {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** minutes of hour */
   private static final int CRON_MN = 0;
   /** hours of day */

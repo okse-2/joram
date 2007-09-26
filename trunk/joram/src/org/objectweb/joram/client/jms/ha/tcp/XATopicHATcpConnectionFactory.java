@@ -38,6 +38,10 @@ public class XATopicHATcpConnectionFactory
     extends org.objectweb.joram.client.jms.XATopicConnectionFactory
 {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private String url;
 
   /**

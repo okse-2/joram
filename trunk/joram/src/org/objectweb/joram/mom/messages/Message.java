@@ -44,6 +44,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * by properties and "header" fields.
  */
 public final class Message implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** Arrival position of this message on its queue or proxy. */
   transient public long order;
 

@@ -22,4 +22,9 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-public class AbortedRequestException extends Exception {}
+public class AbortedRequestException extends Exception {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;}

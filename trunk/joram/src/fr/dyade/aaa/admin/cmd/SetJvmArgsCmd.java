@@ -26,6 +26,10 @@ import java.util.*;
 
 public class SetJvmArgsCmd implements AdminCmd, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String serverName = null;
   public String args = null;
 

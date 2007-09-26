@@ -26,6 +26,11 @@ import org.objectweb.joram.client.jms.*;
 public class QueueHALocalConnectionFactory 
     extends org.objectweb.joram.client.jms.QueueConnectionFactory {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public QueueHALocalConnectionFactory() {
     super("", -1);
   }

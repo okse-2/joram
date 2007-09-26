@@ -37,6 +37,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * and the proxy identifier.
  */
 public final class CnxConnectReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The connection's key. */
   private int cnxKey;
 

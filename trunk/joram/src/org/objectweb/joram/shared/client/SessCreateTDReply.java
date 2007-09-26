@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * to a <code>SessCreate&lt;TQ/TT&gt;Request</code>.
  */
 public final class SessCreateTDReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The string identifier of the temporary destination agent. */
   private String agentId;
 

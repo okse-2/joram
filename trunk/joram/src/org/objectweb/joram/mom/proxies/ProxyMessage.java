@@ -26,6 +26,11 @@ import org.objectweb.joram.shared.client.AbstractJmsMessage;
 
 public class ProxyMessage implements java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private long id;
 
   private long ackId;

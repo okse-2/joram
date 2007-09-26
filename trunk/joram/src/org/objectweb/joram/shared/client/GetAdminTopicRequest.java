@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * the identifier of the local admin topic.
  */
 public final class GetAdminTopicRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return GET_ADMIN_TOPIC_REQUEST;
   }

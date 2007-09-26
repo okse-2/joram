@@ -28,6 +28,11 @@ import javax.naming.*;
 public class LookupRequest extends JndiRequest 
     implements JndiReadRequest {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public LookupRequest(CompositeName name) {
     super(name);
   }

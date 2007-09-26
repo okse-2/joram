@@ -25,6 +25,11 @@ package com.scalagent.joram.mom.dest.mail;
 import fr.dyade.aaa.agent.Notification;
 
 public class WakeUpPopNot extends Notification {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public WakeUpPopNot() {
     persistent = false;
   }

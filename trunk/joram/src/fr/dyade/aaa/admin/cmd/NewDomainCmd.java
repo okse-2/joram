@@ -27,6 +27,11 @@ import java.util.*;
 public class NewDomainCmd extends DomainCmd implements Serializable {
 
  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+/**
   * create new domain
   *
   * @param name          domain name
