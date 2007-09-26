@@ -11,6 +11,48 @@
   </properties>
 
   <body>
+    <s1 name="JORAM release 5.0 (September 25, 2007)">
+      <p>Joram 5.0 is available in the CVS repository with tag JORAM_5_0_6.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>New serialisation mechanism between client and server to allow
+              the C/C++ client API: Xoram.</li>
+          <li>New architecture for destinations.</li>
+          <li>New architecture for ConnectionFactory.</li>
+          <li>Enhancements for the bridge destinations: XA, etc.</li>
+          <li>Enhancements for clustered destinations.</li>
+	  <li>Implements loose coupling for distributed JNDI.</li>
+          <li>Improve AdministeredObject handling.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Message retrieval in DMQ after a restart.</li>
+          <li>Persistance fault with administration messages on Windows.</li>
+          <li>Problems with Soap encoding.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.3.30 (September 25, 2007)">
+      <p>This is a maintenance release. It is available in the CVS repository 
+      with tag JORAM_4_3_30.
+      This release provides the following fixes and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Implements loose coupling for distributed JNDI.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Message retrieval in DMQ after a restart.</li>
+          <li>Persistance fault with administration messages on Windows.</li>
+          <li>Problems with Soap encoding.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 4.3.28 (April 26, 2007)">
       <p>This is a maintenance release. It is available in the CVS repository 
       with tag JORAM_4_3_28.
