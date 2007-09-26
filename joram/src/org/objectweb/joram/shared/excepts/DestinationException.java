@@ -31,6 +31,11 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
  */
 public class DestinationException extends MomException {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>DestinationException</code> instance.
    */
   public DestinationException(String info) {

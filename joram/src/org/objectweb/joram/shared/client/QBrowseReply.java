@@ -39,6 +39,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * actually replying to a client <code>QBrowseRequest</code>.
  */
 public final class QBrowseReply extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The vector of messages carried by this reply. */
   private Vector messages = null;
 

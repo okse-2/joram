@@ -38,6 +38,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * for denying the messages it consumed.
  */
 public final class SessDenyRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Vector of message identifiers. */
   private Vector ids;
 

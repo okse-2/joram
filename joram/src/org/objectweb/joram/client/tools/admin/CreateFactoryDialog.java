@@ -28,6 +28,11 @@ import java.text.*;
 
 
 public class CreateFactoryDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private static CreateFactoryDialog dialog;
 
   private Frame parent = null;

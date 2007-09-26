@@ -32,6 +32,10 @@ import fr.dyade.aaa.agent.AgentId;
  */
 public class SetRightRequest extends AdminRequest
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Identifier of the user, <code>null</code> stands for all users. */
   private AgentId client;
   /**

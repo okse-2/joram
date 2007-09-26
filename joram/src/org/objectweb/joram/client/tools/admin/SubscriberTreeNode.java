@@ -7,6 +7,11 @@ import javax.swing.tree.*;
 class SubscriberTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public SubscriberTreeNode(String userId) {
     super(userId);
   }

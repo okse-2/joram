@@ -21,10 +21,15 @@
  */
 package fr.dyade.aaa.jndi2.ha; 
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.SyncNotification;
 
 public class GetRequestIdNot extends SyncNotification {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public void Return(int id) {
     Return(new Object[]{new Integer(id)});
   }

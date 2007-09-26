@@ -80,6 +80,11 @@ import fr.dyade.aaa.util.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class QueueImpl extends DestinationImpl implements QueueImplMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(QueueImpl.class.getName());
 
   /** period to run task at regular interval: cleaning, load-balancing, etc. */

@@ -23,6 +23,10 @@
 package com.scalagent.joram.mom.dest.mail;
 
 public class SenderInfo implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String smtpServer;
   public String to;
   public String cc;

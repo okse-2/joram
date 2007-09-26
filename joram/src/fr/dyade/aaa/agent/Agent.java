@@ -66,7 +66,10 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Channel
  */
 public abstract class Agent implements AgentMBean, Serializable {
-  static final long serialVersionUID = 2955513886633164244L;
+  /**
+   * 
+   */
+  static final long serialVersionUID = 1L;
 
   /**
    * <code>true</code> if the agent state has changed.

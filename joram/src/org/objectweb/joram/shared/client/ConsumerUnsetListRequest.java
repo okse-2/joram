@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageConsumer</code> which listener is unset.
  */
 public final class ConsumerUnsetListRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** <code>true</code> if the listener is listening to a queue. */
   private boolean queueMode;
 

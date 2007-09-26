@@ -33,6 +33,10 @@ import org.objectweb.util.monolog.api.*;
 
 class PlatformTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private AdminController c;
   
   public PlatformTreeNode(AdminController c,
@@ -72,6 +76,11 @@ class PlatformTreeNode extends DefaultMutableTreeNode
   public String toString() { return "Platform"; }
 
   private class SaveConfigAction extends AbstractAction {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public SaveConfigAction() {
       super("Save config..."); 
     }

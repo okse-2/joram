@@ -38,6 +38,10 @@ public class XAQueueHATcpConnectionFactory
     extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
 {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private String url;
 
   /**

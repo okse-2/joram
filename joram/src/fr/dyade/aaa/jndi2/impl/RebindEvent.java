@@ -26,6 +26,10 @@ import javax.naming.CompositeName;
 
 public class RebindEvent extends UpdateEvent {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Object object;
 
   public RebindEvent(CompositeName compositeName,NamingContextId updatedContextId,

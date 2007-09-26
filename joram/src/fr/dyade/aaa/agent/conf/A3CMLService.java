@@ -25,6 +25,10 @@ import java.util.*;
  * The class <code>A3CMLService</code> describes a service.
  */
 public class A3CMLService implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String classname = null;
   public String args = null;
 

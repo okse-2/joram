@@ -27,5 +27,10 @@ package fr.dyade.aaa.util;
 import java.lang.Exception;
 
 public class EmptyQueue extends Exception {
+    /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
     public EmptyQueue() {}
 }

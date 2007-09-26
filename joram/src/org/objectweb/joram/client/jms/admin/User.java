@@ -44,6 +44,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * JORAM users.
  */
 public class User extends AdministeredObject implements UserMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The name of the user. */
   String name;
   /** Identifier of the user's proxy agent. */

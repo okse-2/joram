@@ -38,6 +38,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public final class Message implements Cloneable, Serializable, Streamable {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a bright new <code>Message</code>.
    */
   public Message() {}

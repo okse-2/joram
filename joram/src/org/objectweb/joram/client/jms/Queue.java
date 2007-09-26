@@ -48,6 +48,10 @@ import fr.dyade.aaa.util.management.MXWrapper;
  *  
  */
 public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private final static String QUEUE_TYPE = "queue";
 
   public static boolean isQueue(String type) {

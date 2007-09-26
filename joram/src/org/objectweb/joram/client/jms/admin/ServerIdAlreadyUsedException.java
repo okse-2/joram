@@ -24,6 +24,11 @@
 package org.objectweb.joram.client.jms.admin;
 
 public class ServerIdAlreadyUsedException extends AdminException {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public ServerIdAlreadyUsedException(String info) {
     super(info);
   }

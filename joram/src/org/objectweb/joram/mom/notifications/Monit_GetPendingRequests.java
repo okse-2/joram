@@ -30,6 +30,11 @@ package org.objectweb.joram.mom.notifications;
 public class Monit_GetPendingRequests extends AdminRequest
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>Monit_GetPendingRequests</code>.
    *
    * @param id  Identifier of the request, may be null.

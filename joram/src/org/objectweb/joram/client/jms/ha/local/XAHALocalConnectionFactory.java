@@ -35,6 +35,12 @@ public class XAHALocalConnectionFactory
     extends org.objectweb.joram.client.jms.XAConnectionFactory
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+
+  /**
    * Constructs an <code>XALocalConnectionFactory</code> instance.
    */
   public XAHALocalConnectionFactory()

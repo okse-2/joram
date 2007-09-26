@@ -26,6 +26,10 @@ import java.util.*;
 
 public class SetPropertyCmd implements AdminCmd, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String name = null;
   public String value = null;
 

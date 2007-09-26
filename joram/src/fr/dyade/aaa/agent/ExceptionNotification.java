@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -27,8 +28,10 @@ package fr.dyade.aaa.agent;
  * @see Engine
  */
 public class ExceptionNotification extends Notification {
-
-  static final long serialVersionUID =  -78084906213588139L;
+  /**
+   * 
+   */
+  static final long serialVersionUID = 1L;
 
   /** The target agent id. */
   public AgentId agent;

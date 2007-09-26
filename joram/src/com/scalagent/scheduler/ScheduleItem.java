@@ -41,6 +41,10 @@ import fr.dyade.aaa.agent.*;
  * @see		ScheduleEvent
  */
 public class ScheduleItem implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** may be of a derived class */
   ScheduleEvent event;
   /** next schedule date */

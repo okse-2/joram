@@ -36,6 +36,11 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * 
  */
 public final class JmsRequestGroup extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return JMS_REQUEST_GROUP;
   }

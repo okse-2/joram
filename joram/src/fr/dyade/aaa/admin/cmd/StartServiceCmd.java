@@ -26,6 +26,10 @@ import java.util.*;
 
 public class StartServiceCmd implements StartAdminCmd, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public String className = null;
   public String args = null;
 

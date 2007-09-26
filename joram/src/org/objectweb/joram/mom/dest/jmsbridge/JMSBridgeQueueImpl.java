@@ -51,6 +51,10 @@ import fr.dyade.aaa.agent.DeleteNot;
  * This queue is in fact a bridge linking JORAM and a foreign JMS server.
  */
 public class JMSBridgeQueueImpl extends QueueImpl {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
   /**

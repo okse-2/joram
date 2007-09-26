@@ -27,6 +27,11 @@ package org.objectweb.joram.shared.client;
  * A <code>CnxStopRequest</code> is sent by a stopping <code>Connection</code>.
  */
 public final class CnxStopRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CNX_STOP_REQUEST;
   }

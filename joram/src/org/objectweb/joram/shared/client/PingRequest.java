@@ -24,6 +24,11 @@
 package org.objectweb.joram.shared.client;
 
 public final class PingRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return PING_REQUEST;
   }

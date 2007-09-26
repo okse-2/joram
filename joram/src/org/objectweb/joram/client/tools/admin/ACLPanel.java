@@ -45,7 +45,12 @@ import org.objectweb.joram.client.jms.admin.*;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class ACLPanel extends JPanel {
-	private static final Dimension LIST_DIMENSION = new Dimension(120, 100);
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  private static final Dimension LIST_DIMENSION = new Dimension(120, 100);
 
 	private JList userList = new JList();
 	private DefaultListModel userListModel = new DefaultListModel();

@@ -42,6 +42,11 @@ public class QueueTcpConnectionFactory
              extends org.objectweb.joram.client.jms.QueueConnectionFactory
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>QueueTcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.

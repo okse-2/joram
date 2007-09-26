@@ -33,6 +33,11 @@ public class XAHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.XAConnectionFactory {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs an <code>XAHATcpConnectionFactory</code> instance.
    */
   public XAHATcpConnectionFactory(String url) {

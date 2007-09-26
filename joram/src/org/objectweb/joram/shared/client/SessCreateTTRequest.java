@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * for creating a <code>TemporaryTopic</code>.
  */
 public final class SessCreateTTRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return SESS_CREATE_TTREQUEST;
   }

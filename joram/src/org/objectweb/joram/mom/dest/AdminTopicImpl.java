@@ -168,6 +168,11 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
  * basically processing administration requests.
  */
 public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** Reference of the server's local AdminTopicImpl instance. */
   private static AdminTopicImpl ref;
   
@@ -2521,6 +2526,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   static class AdminRequestNot extends Notification {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     String msgId = null;
     AgentId replyTo = null;
     AdminRequest request = null;
@@ -2536,6 +2545,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   static class DestinationDesc 
       implements java.io.Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private AgentId id;
     private String name;
     private String className;

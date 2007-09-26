@@ -34,6 +34,10 @@ import javax.naming.StringRefAddr;
  * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters.
  */
 public class FactoryParameters implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Name of host hosting the server to create connections with. */
   private String host;
   /** Port to be used for accessing the server. */

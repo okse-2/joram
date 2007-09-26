@@ -34,6 +34,10 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
 public class SchedulerQueue extends Queue {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final String QUEUE_SCHEDULER_TYPE = "queue_scheduler";
 
   public static String getDestinationType() {

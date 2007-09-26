@@ -37,6 +37,11 @@ import fr.dyade.aaa.agent.AgentId;
 
 public class LoadingFactor implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static class Status {
     public final static int INIT = 0;
     public final static int RUN = 1;

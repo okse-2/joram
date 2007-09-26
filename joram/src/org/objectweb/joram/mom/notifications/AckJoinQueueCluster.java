@@ -26,6 +26,11 @@ import java.util.Hashtable;
 
 public class AckJoinQueueCluster extends JoinQueueCluster {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public AckJoinQueueCluster(float rateOfFlow,
                              Hashtable clusters,
                              Hashtable clients,

@@ -41,6 +41,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class TcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>TcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.

@@ -42,6 +42,11 @@ import javax.naming.StringRefAddr;
 public class SoapConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>SoapConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.

@@ -39,6 +39,11 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class JMSBridgeQueue extends Queue {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>BridgeQueue</code> agent. 
    */ 
   public JMSBridgeQueue() {

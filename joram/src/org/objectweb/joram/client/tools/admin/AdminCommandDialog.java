@@ -29,6 +29,10 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.util.monolog.api.*;
 
 public class AdminCommandDialog extends JDialog {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private JLabel msgLabel;
   private JButton abortButton;
 

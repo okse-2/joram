@@ -27,6 +27,11 @@ import org.objectweb.joram.shared.messages.Message;
 
 public class FtpNot extends ClientMessages {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public FtpNot(int clientContext, 
                 int requestId,
                 Message msg) {

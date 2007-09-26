@@ -73,6 +73,11 @@ import org.objectweb.util.monolog.api.Logger;
  * destinations replies to clients.
  */ 
 public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(ProxyImpl.class.getName());
 
   /** period to run the cleaning task, by default 60s. */
@@ -2775,6 +2780,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
  * a global transaction identifier.
  */
 class Xid implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   byte[] bq;
   int fi;
   byte[] gti;

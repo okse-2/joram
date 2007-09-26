@@ -43,7 +43,10 @@ import fr.dyade.aaa.agent.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class FtpQueueImpl extends QueueImpl {
-  private static final long serialVersionUID = 2742569589343325791L;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(FtpQueueImpl.class.getName());
   

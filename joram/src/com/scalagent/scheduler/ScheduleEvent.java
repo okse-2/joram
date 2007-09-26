@@ -44,6 +44,10 @@ import fr.dyade.aaa.agent.*;
  * @see		Condition
  */
 public class ScheduleEvent extends Notification {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** event and condition name */
   protected String name;
   /** event scheduling date */

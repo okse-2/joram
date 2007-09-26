@@ -47,6 +47,11 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class ClusterQueue extends Queue {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Empty constructor for newInstance(). 
    */ 
   protected ClusterQueue() {}

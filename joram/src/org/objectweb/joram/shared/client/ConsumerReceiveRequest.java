@@ -36,6 +36,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * <code>MessageConsumer</code> when requesting a message.
  */
 public final class ConsumerReceiveRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** The selector for filtering messages on a queue. */
   private String selector;
 

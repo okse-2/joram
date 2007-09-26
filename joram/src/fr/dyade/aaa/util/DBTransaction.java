@@ -582,6 +582,10 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
 }
 
 final class DBOperation implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   static final int SAVE = 1;
   static final int DELETE = 2;
   static final int COMMIT = 3;

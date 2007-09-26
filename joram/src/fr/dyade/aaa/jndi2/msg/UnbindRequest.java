@@ -27,6 +27,11 @@ import javax.naming.*;
 
 public class UnbindRequest extends JndiRequest {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public UnbindRequest(CompositeName name) {
     super(name);
   }

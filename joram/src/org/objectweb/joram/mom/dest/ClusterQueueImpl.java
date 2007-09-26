@@ -61,6 +61,11 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  * delivering to an other cluster queue.
  */
 public class ClusterQueueImpl extends QueueImpl {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** 
    * key = agentId of ClusterQueue 
    * value = rateOfFlow (Float)

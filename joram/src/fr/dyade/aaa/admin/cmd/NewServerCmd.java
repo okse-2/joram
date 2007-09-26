@@ -27,6 +27,11 @@ import java.util.*;
 public class NewServerCmd extends ServerCmd implements Serializable {
 
  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+/**
   * create new persistent server
   *
   * @param name      persistent server name

@@ -24,6 +24,11 @@ package fr.dyade.aaa.jndi2.impl;
 
 public class NamingContextId implements java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private Object factoryId;
 
   private long localId;

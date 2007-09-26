@@ -42,6 +42,11 @@ import org.objectweb.joram.client.jms.admin.*;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class UserPanel extends JPanel {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private final AdminController c;
 
   private User user = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,14 +20,17 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * Class Notification is the root of the notifications hierarchy. Every
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  static final long serialVersionUID = 3007264908616389613L;
+  /**
+   * 
+   */
+  static final long serialVersionUID = 1L;
 
   /**
    * True if the notification is persistent, false otherwise. By default, this

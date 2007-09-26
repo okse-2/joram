@@ -31,6 +31,10 @@ package org.objectweb.joram.mom.notifications;
 public class SetThreshRequest extends AdminRequest
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * The threshold value, negative or zero for no threshold, <code>null</code>
    * for unsetting the previous value.
    */

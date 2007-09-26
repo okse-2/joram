@@ -30,6 +30,11 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
  */
 public class StateException extends MomException {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>Statexception</code> instance.
    */
   public StateException(String info) {

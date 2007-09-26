@@ -41,6 +41,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * context.
  */
 class ClientContext implements java.io.Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** The proxy's agent identifier. */
   private AgentId proxyId;
 

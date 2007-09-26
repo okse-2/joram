@@ -40,6 +40,11 @@ import fr.dyade.aaa.agent.Notification;
 public class JMSBridgeTopic extends Topic {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs a <code>BridgeTopic</code> agent. 
    */ 
   public JMSBridgeTopic() {

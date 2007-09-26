@@ -26,6 +26,10 @@ public class ChangeOwnerRequest
     extends JndiRequest 
     implements JndiAdminRequest {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private String ownerId;
 
   public ChangeOwnerRequest(String ownerId) {

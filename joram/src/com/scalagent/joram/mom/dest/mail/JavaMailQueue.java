@@ -44,6 +44,11 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailQueueImpl
  */
 public class JavaMailQueue extends Queue {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(JavaMailQueue.class.getName());
   
   public static final String MAIL_QUEUE_TYPE = "queue.mail";

@@ -32,6 +32,11 @@ import java.util.*;
  */
 public class GetProxyIdListNot extends SyncNotification {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public void Return(AgentId[] proxyIds) {
     Return(new Object[]{proxyIds});
   }

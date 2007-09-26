@@ -33,6 +33,10 @@ import fr.dyade.aaa.admin.cmd.ExceptionCmd;
  */
 public class AdminAckStartStopNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** exception catch in start/stop */
   public ExceptionCmd exc = null;
   /** start script */

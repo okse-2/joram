@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -24,13 +24,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
+import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Vector;
 
-import fr.dyade.aaa.util.Strings;
 import fr.dyade.aaa.util.SocketAddress;
+import fr.dyade.aaa.util.Strings;
 
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
@@ -39,6 +39,10 @@ import fr.dyade.aaa.util.SocketAddress;
  * it's very important to make all modifiers package.
  */
 public final class ServerDesc implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /**  Server unique identifier. */
   short sid;
   /** Server name. */

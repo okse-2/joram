@@ -63,6 +63,11 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
                                             javax.jms.MessageListener,
                                             java.io.Serializable {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** logger */
   public static Logger logger = Debug.getLogger(JMSBridgeModule.class.getName());
   

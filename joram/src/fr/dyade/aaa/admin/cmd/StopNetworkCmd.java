@@ -26,6 +26,11 @@ import java.util.*;
 
 public class StopNetworkCmd implements StopAdminCmd, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public short sid;
 
   public String domainName;

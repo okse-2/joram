@@ -27,6 +27,11 @@ import java.util.*;
 public class NewServiceCmd extends ServiceCmd implements Serializable {
 
  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+/**
   * create new service
   *
   * @param serverName  server name

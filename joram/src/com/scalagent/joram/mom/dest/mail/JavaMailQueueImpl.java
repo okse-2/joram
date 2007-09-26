@@ -46,6 +46,11 @@ import fr.dyade.aaa.util.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(JavaMailQueueImpl.class.getName());
 
   private String smtpServer = null;

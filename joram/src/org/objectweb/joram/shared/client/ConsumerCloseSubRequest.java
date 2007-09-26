@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * <code>TopicSubscriber</code>.
  */
 public final class ConsumerCloseSubRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return CONSUMER_CLOSE_SUB_REQUEST;
   }

@@ -26,6 +26,11 @@ import fr.dyade.aaa.agent.*;
 
 public class RequestNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private int cKey;
 
   private Object msg;

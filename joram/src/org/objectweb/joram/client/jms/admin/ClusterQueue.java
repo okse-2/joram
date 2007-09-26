@@ -38,6 +38,11 @@ import javax.jms.JMSException;
  * this is a sample.
  */
 public class ClusterQueue extends ClusterDestination implements javax.jms.Queue {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** 
    * Constructs an empty queue.
    */

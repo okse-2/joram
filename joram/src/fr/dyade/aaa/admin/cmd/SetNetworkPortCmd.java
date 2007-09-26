@@ -26,6 +26,10 @@ import java.util.*;
 
 public class SetNetworkPortCmd extends NetworkCmd {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public int port;
 
   /**

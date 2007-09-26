@@ -28,6 +28,10 @@ import org.objectweb.joram.client.jms.*;
 public class QueueHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.QueueConnectionFactory {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private String url;
 
   public QueueHATcpConnectionFactory(String url) {

@@ -38,6 +38,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * for acknowledging the messages it consumed.
  */
 public final class SessAckRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Vector of message identifiers. */
   private Vector ids;
 

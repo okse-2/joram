@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * for creating a <code>TemporaryQueue</code>.
  */
 public final class SessCreateTQRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return SESS_CREATE_TQREQUEST;
   }

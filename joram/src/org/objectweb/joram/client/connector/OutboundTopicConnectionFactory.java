@@ -41,6 +41,11 @@ public class OutboundTopicConnectionFactory
                         javax.resource.Referenceable
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Constructs an <code>OutboundTopicConnectionFactory</code> instance.
    *
    * @param mcf        Central manager for outbound connectivity.

@@ -33,6 +33,10 @@ import fr.dyade.aaa.admin.script.*;
  */
 public class AdminReplyNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** exception catch in configuration */
   public ExceptionCmd exc = null;
   /** start script */

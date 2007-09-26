@@ -26,6 +26,10 @@ import java.util.*;
 
 public class NewNetworkCmd extends NetworkCmd implements Serializable {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public int port;
 
   /**

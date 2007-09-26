@@ -87,6 +87,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class JoramAdapter
   implements javax.resource.spi.ResourceAdapter,
              java.io.Serializable, JoramAdapterMBean {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
 

@@ -32,6 +32,11 @@ public class DriverDone extends Notification {
 
 
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int driver;		/** identifies the terminated driver (OUT or IN) */
 
   /** Identifies the driver in the context of multi-connections. */

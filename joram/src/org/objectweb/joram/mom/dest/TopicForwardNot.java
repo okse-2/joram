@@ -32,6 +32,10 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
  */
 public class TopicForwardNot extends fr.dyade.aaa.agent.Notification {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  /**
    * <code>true</code> if the notification is destinated to a hierarchical
    * father.
    */

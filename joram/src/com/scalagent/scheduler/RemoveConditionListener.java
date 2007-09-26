@@ -31,6 +31,10 @@ import fr.dyade.aaa.agent.*;
  * @see		Scheduler
  */
 public class RemoveConditionListener extends Notification {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** condition name */
   String name;
 

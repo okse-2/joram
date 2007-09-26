@@ -30,6 +30,11 @@ public class UnknownServerException extends Exception {
 
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    *  Constructs a new <code>UnknownServerException</code> with no
    * detail message.
    */

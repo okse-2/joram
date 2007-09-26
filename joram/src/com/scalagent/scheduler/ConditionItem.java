@@ -30,6 +30,10 @@ import java.io.*;
  * @see	Scheduler
  */
 public class ConditionItem implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** condition name */
   String name;
   /** list of registered agents for this event */

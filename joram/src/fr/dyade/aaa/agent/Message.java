@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,13 +20,10 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.Date;
+import java.io.IOException;
+import java.io.Serializable;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.util.Pool;
 
 /**
  * The internal message structure.
@@ -38,7 +35,10 @@ import fr.dyade.aaa.util.*;
  * </ul>
  */
 final class Message implements Serializable {
-  static final long serialVersionUID =  -2179939607085028300L;
+  /**
+   * 
+   */
+  static final long serialVersionUID = 1L;
 
   /** <code>AgentId</code> of sender. */
   transient AgentId from;

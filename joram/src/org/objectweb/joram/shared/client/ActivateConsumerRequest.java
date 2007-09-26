@@ -30,6 +30,10 @@ import java.io.IOException;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 public final class ActivateConsumerRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private boolean activate;
 
   public boolean getActivate() {

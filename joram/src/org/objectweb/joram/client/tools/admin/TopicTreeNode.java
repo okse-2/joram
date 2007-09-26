@@ -28,6 +28,11 @@ import org.objectweb.joram.client.jms.Topic;
 
 class TopicTreeNode extends DestinationTreeNode {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private SubscriberRootTreeNode subscriberRoot;
 
   private Topic topic;

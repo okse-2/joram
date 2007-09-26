@@ -31,6 +31,10 @@ import org.objectweb.joram.shared.messages.Message;
  * by a JMS module from a foreign JMS server.
  */
 public class JMSBridgeDeliveryNot extends fr.dyade.aaa.agent.Notification {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Message obtained from the foreign JMS server. */
   private Message message;
 

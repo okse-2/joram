@@ -62,6 +62,10 @@ import fr.dyade.aaa.util.TimerTask;
  */
 public class Queue extends Destination implements BagSerializer {
   
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public static final String QUEUE_TYPE = "queue";
 
   public static String getDestinationType() {

@@ -29,6 +29,10 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class A3CMLCluster implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   public short sid = -1;
   public String name = null;
   public String jvmArgs = null;

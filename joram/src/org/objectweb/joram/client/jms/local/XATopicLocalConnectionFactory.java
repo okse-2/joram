@@ -39,6 +39,12 @@ public class XATopicLocalConnectionFactory
     extends org.objectweb.joram.client.jms.XATopicConnectionFactory
 {
   /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
+
+  /**
    * Constructs an <code>XATopicLocalConnectionFactory</code> instance.
    */
   public XATopicLocalConnectionFactory()

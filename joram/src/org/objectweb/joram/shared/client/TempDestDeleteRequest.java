@@ -28,6 +28,11 @@ package org.objectweb.joram.shared.client;
  * deleting temporary destination.
  */
 public final class TempDestDeleteRequest extends AbstractJmsRequest {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   protected int getClassId() {
     return TEMP_DEST_DELETE_REQUEST;
   }

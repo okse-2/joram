@@ -44,6 +44,11 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailTopicImpl
  */
 public class JavaMailTopic extends Topic {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public static Logger logger = Debug.getLogger(JavaMailTopic.class.getName());
   
   public static final String MAIL_TOPIC_TYPE = "topic.mail";

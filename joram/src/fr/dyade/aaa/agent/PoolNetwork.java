@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,14 +21,29 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamConstants;
+import java.io.OptionalDataException;
+import java.io.OutputStream;
+import java.io.StreamCorruptedException;
+import java.net.ConnectException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  *  <code>PoolNetwork</code> is an implementation of <code>StreamNetwork</code>
@@ -184,6 +199,11 @@ public class PoolNetwork extends StreamNetwork {
   }
 
   final class MessageVector extends Vector {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public synchronized Message removeMessage(int stamp) {
       Message msg = null;
 

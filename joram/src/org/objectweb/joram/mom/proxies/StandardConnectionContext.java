@@ -38,6 +38,11 @@ import fr.dyade.aaa.util.Queue;
 public class StandardConnectionContext 
   implements ConnectionContext, java.io.Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private int key;
 
   private Queue queue;

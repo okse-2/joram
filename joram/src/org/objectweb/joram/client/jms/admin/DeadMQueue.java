@@ -39,6 +39,10 @@ import java.net.ConnectException;
  */
 public class DeadMQueue extends Queue {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private final static String DMQ_TYPE = "queue.dmq";
 
   public static boolean isDeadMQueue(String type) {

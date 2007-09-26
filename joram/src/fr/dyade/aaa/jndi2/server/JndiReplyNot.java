@@ -28,6 +28,11 @@ import fr.dyade.aaa.jndi2.msg.*;
 
 public class JndiReplyNot extends Notification {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private JndiRequest request;
   
   private JndiReply reply;

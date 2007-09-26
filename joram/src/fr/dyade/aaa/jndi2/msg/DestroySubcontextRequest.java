@@ -27,6 +27,11 @@ import javax.naming.*;
 
 public class DestroySubcontextRequest extends JndiRequest {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public DestroySubcontextRequest(CompositeName name) {
     super(name);
   }

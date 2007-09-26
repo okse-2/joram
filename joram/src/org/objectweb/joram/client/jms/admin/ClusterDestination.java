@@ -47,6 +47,10 @@ import org.objectweb.joram.shared.admin.SetWriter;
  */
 public class ClusterDestination extends Destination {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   protected Hashtable cluster = null;
 
   /**

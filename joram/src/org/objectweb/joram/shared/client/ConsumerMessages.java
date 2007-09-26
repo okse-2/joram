@@ -39,6 +39,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * to a consumer.
  */
 public final class ConsumerMessages extends AbstractJmsReply {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   /** Wrapped messages. */
   private Vector messages = null;
 
