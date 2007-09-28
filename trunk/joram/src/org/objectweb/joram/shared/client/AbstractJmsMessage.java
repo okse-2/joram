@@ -172,14 +172,14 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
     AbstractJmsMessage msg = null;
     ByteArrayInputStream bais = null;
 
+    String classname = (String) h.get("classname");
+    msg = (AbstractJmsMessage) Class.forName(classname).newInstance();
+    byte[] content = (byte[]) h.get("bytecontent");
     try {
-      String classname = (String) h.get("classname");
-      msg = (AbstractJmsMessage) Class.forName(classname).newInstance();
-      byte[] content = (byte[]) h.get("bytecontent");
       bais = new ByteArrayInputStream(content);
       msg.readFrom(bais);
     } finally {
-      bais.close();
+      if (bais != null) bais.close();
     }
 
     return msg;
