@@ -49,7 +49,10 @@ public class Monitor_GetDMQSettingsRep extends Monitor_Reply {
    */
   public Monitor_GetDMQSettingsRep(String dmqId, Integer threshold) {
     this.dmqId = dmqId;
-    this.threshold = threshold;
+    if (threshold != null)
+      this.threshold = threshold;
+    else
+      this.threshold = new Integer(-1);
   }
 
   public Monitor_GetDMQSettingsRep() { }
