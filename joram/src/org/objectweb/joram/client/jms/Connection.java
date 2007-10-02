@@ -96,14 +96,33 @@ public class Connection implements javax.jms.Connection {
   /** Connection meta data. */
   private ConnectionMetaData metaData = null;
 
+  class AtomicCounter {
+    long value;
+    StringBuffer strbuf;
+    int initial;
+
+    AtomicCounter(String prefix) {
+      value = 0;
+      strbuf = new StringBuffer(prefix.length() + 20);
+      strbuf.append(prefix);
+      initial = strbuf.length();
+    }
+
+    synchronized String nextValue() {
+      strbuf.setLength(initial);
+      strbuf.append(value++);
+      return strbuf.toString();
+    }
+  }
+
   /** Sessions counter. */
-  private int sessionsC = 0;
+  private AtomicCounter sessionsC;
 
   /** Messages counter. */
-  private int messagesC = 0;
+  private AtomicCounter messagesC;
 
   /** Subscriptions counter. */
-  private int subsC = 0;
+  private AtomicCounter subsC;
 
   /** Client's agent proxy identifier. */
   String proxyId;
@@ -172,7 +191,12 @@ public class Connection implements javax.jms.Connection {
     CnxConnectReply rep = (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
-    
+
+    sessionsC = new AtomicCounter("c" + key + 's');
+    messagesC =
+      new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
+    subsC = new AtomicCounter("c"  + key + "sub");
+
     stringImage = "Cnx:" + proxyId + ':' + key;
     hashCode = stringImage.hashCode();
 
@@ -635,27 +659,18 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new session identifier. */
-  synchronized String nextSessionId() {
-    if (sessionsC == Integer.MAX_VALUE)
-      sessionsC = 0;
-    sessionsC++;
-    return "c" + key + "s" + sessionsC;
+  String nextSessionId() {
+    return sessionsC.nextValue();
   }
  
   /** Returns a new message identifier. */
-  synchronized String nextMessageId() {
-    if (messagesC == Integer.MAX_VALUE)
-      messagesC = 0;
-    messagesC++;
-    return "ID:" + proxyId.substring(1) + "c" + key + "m" + messagesC;
+  String nextMessageId() {
+    return messagesC.nextValue();
   }
 
   /** Returns a new subscription name. */
-  synchronized String nextSubName() {
-    if (subsC == Integer.MAX_VALUE)
-      subsC = 0;
-    subsC++;
-    return "c"  + key + "sub" + subsC;
+  String nextSubName() {
+    return subsC.nextValue();
   }
 
   /**
