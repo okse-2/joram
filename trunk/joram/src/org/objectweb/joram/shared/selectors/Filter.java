@@ -31,6 +31,8 @@
 
 package org.objectweb.joram.shared.selectors;
 
+import java.util.StringTokenizer;
+
 import java_cup.runtime.*;
 import org.objectweb.joram.shared.messages.Message;
 
@@ -726,10 +728,9 @@ class CUP$Filter$actions {
 		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
 		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
 		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = sts + st.substring(1, st.length() - 1);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
+
+		RESULT = sts + "\b" + st.substring(1, st.length() - 1);
+		CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }
           return CUP$Filter$result;
 
@@ -999,20 +1000,25 @@ class CUP$Filter$actions {
 		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
 		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
 		
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
+		Object value = Interpreter.interpret(id, message, syntaxType);
+		if (value == null)
+		  RESULT = null;
 
-                  else if (Interpreter.interpret(id, message, syntaxType)
-                           instanceof String)
-                    RESULT =
-                      new Boolean(sts.indexOf((String)
-                                              Interpreter.interpret
-                                              (id, message, syntaxType))
-                                              == -1);
+		else if (value instanceof String) {
+		  StringTokenizer st = new StringTokenizer(sts, "\b");
+		  boolean match = true;
+		  while (st.hasMoreTokens()) {
+		    String current = st.nextToken();
+		    if (current.equals(value)) {
+		      match = false;
+		      break;
+		    }
+		  }
+		  RESULT = new Boolean(match);
 
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
+		  // Comparison of non like values returns FALSE.
+		} else
+		  RESULT = new Boolean("FALSE");
                 
               CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }
@@ -1029,20 +1035,24 @@ class CUP$Filter$actions {
 		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
 		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
 		
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
+		Object value = Interpreter.interpret(id, message, syntaxType);
+		if (value == null)
+		  RESULT = null;
 
-                  else if (Interpreter.interpret(id, message, syntaxType)
-                           instanceof String)
-                    RESULT =
-                      new Boolean(sts.indexOf((String)
-                                              Interpreter.interpret
-                                              (id, message, syntaxType))
-                                              != -1);
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
+		else if (value instanceof String) {
+		  StringTokenizer st = new StringTokenizer(sts, "\b");
+		  boolean match = false;
+		  while (st.hasMoreTokens()) {
+		    String current = st.nextToken();
+		    if (current.equals(value)) {
+		      match = true;
+		      break;
+		    }
+		  }
+		  RESULT = new Boolean(match);
+		  // Comparison of non like values returns FALSE.
+		} else
+		  RESULT = new Boolean("FALSE");
                 
               CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }
