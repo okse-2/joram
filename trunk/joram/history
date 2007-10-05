@@ -1,4 +1,19 @@
 +==============================================================================
+| 2007/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: handling of HA connection factories through JNDI. ObjectFactory
+needs a default empty constructor.
++==============================================================================
+| 2007/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Synchronisation issue in Connection with id generation. Now use an
+AtomicCounter class.
++==============================================================================
+| 2007/09/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Removes NPE during getThreshold if threshold is not set.
+ AbstractJmsMessage: Fix try/finally to avoid NPE hiding.
++==============================================================================
 | 2007/09/26 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  add serialVersionUID.
