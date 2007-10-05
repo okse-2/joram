@@ -1,4 +1,9 @@
 +==============================================================================
+| 2007/10/05 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: in selector 
+   identifier [NOT] IN (string-literal1, string-literal2,...)
++==============================================================================
 | 2007/10/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: handling of HA connection factories through JNDI. ObjectFactory
