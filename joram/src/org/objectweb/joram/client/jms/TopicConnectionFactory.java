@@ -31,8 +31,7 @@ import javax.jms.JMSException;
  */
 public abstract class TopicConnectionFactory
                       extends ConnectionFactory
-                      implements javax.jms.TopicConnectionFactory
-{
+  implements javax.jms.TopicConnectionFactory {
   /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given
    * server.
@@ -40,10 +39,9 @@ public abstract class TopicConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TopicConnectionFactory(String host, int port)
-    {
-      super(host, port);
-    }
+  public TopicConnectionFactory(String host, int port) {
+    super(host, port);
+  }
 
   /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given server.
@@ -57,16 +55,15 @@ public abstract class TopicConnectionFactory
 
   /**
    * Constructs an empty <code>TopicConnectionFactory</code>.
+   * Needed by ObjectFactory.
    */
-  public TopicConnectionFactory()
-    {}
+  public TopicConnectionFactory() {}
 
 
   /** Returns a string view of the connection factory. */
-  public String toString()
-    {
-      return "TCF:" + params.getHost() + "-" + params.getPort();
-    }
+  public String toString() {
+    return "TCF:" + params.getHost() + "-" + params.getPort();
+  }
 
   /**
    * API method, implemented according to the communication protocol.
@@ -85,8 +82,7 @@ public abstract class TopicConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection createTopicConnection() throws JMSException
-    {
-      return createTopicConnection(getDefaultLogin(), getDefaultPassword());
-    }
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
+    return createTopicConnection(getDefaultLogin(), getDefaultPassword());
+  }
 }

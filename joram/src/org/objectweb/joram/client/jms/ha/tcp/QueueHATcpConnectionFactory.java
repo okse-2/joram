@@ -40,6 +40,12 @@ public class QueueHATcpConnectionFactory
   }
 
   /**
+   * Constructs an empty <code>QueueHATcpConnectionFactory</code>.
+   * Needed by ObjectFactory.
+   */
+  public QueueHATcpConnectionFactory() {}
+
+  /**
    * Method inherited from the <code>QueueConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.

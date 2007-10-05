@@ -60,6 +60,7 @@ public abstract class ConnectionFactory
 
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
+   * Needed by ObjectFactory.
    */
   public ConnectionFactory() {
     super();
