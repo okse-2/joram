@@ -70,6 +70,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
+   * Needed by ObjectFactory.
    */
   public AbstractConnectionFactory() {
     params = new FactoryParameters();

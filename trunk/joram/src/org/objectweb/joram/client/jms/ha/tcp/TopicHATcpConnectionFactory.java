@@ -40,6 +40,12 @@ public class TopicHATcpConnectionFactory
   }
 
   /**
+   * Constructs an empty <code>TopicHATcpConnectionFactory</code>.
+   * Needed by ObjectFactory.
+   */
+  public TopicHATcpConnectionFactory() {}
+
+  /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
