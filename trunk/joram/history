@@ -1,4 +1,8 @@
 +==============================================================================
+| 2007/11/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add MySQLDBTransaction and DerbyDBTransaction (DBTransaction is made abstract)
++==============================================================================
 | 2007/10/05 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: in selector 
