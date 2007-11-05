@@ -21,24 +21,34 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
-import java.util.*;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamConstants;
+import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
-public final class DBTransaction implements Transaction, DBTransactionMBean {
+public abstract class DBTransaction implements Transaction, DBTransactionMBean {
   // Logging monitor
-  private static Logger logmon = null;
+  protected static Logger logmon = null;
 
   File dir = null;
 
@@ -92,14 +102,11 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     return startTime;
   }
 
-  String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-  String connurl = "jdbc:derby:";
+  protected Connection conn = null;
 
-  Connection conn = null;
-
-  PreparedStatement insertStmt = null;
-  PreparedStatement updateStmt = null;
-  PreparedStatement deleteStmt = null;
+  private PreparedStatement insertStmt = null;
+  private PreparedStatement updateStmt = null;
+  private PreparedStatement deleteStmt = null;
 
   public DBTransaction() {}
 
@@ -111,7 +118,8 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
       logmon.log(BasicLevel.INFO, "DBTransaction, init()");
 
     dir = new File(path);
-    if (!dir.exists()) dir.mkdir();
+    if (!dir.exists())
+      dir.mkdir();
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
 
@@ -120,46 +128,17 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     DataOutputStream ldos = null;
     try {
       File tfc = new File(dir, "TFC");
-      if (! tfc.exists()) {
+      if (!tfc.exists()) {
         ldos = new DataOutputStream(new FileOutputStream(tfc));
         ldos.writeUTF(getClass().getName());
         ldos.flush();
       }
     } finally {
-      if (ldos != null) ldos.close();
+      if (ldos != null)
+        ldos.close();
     }
 
-    try {
-      Class.forName(driver).newInstance();
-
-      Properties props = new Properties();
-      props.put("user", "user1");
-      props.put("password", "user1");
-
-      conn = DriverManager.getConnection(connurl + new File(dir, "JoramDB").getPath() + ";create=true", props);
-      conn.setAutoCommit(false);
-//         break;
-    } catch (IllegalAccessException exc) {
-        throw new IOException(exc.getMessage());
-      } catch (ClassNotFoundException exc) {
-        throw new IOException(exc.getMessage());
-      } catch (InstantiationException exc) {
-        throw new IOException(exc.getMessage());
-      } catch (SQLException sqle) {
-        throw new IOException(sqle.getMessage());
-    }
-
-    try {
-        // Creating a statement lets us issue commands against the connection.
-        Statement s = conn.createStatement();
-        // We create the table.
-        s.execute("CREATE TABLE JoramDB (name VARCHAR(256), content LONG VARCHAR FOR BIT DATA, PRIMARY KEY(name))");
-        s.close();
-        conn.commit();
-    } catch (SQLException sqle) {
-      if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO, "DBTransaction, init() DB already exists");
-    }
+    initDB();
 
     try {
       insertStmt = conn.prepareStatement("INSERT INTO JoramDB VALUES (?, ?)");
@@ -184,6 +163,12 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     /* The Transaction subsystem is ready */
     setPhase(FREE);
   }
+
+  /**
+   * Instantiates the database driver and creates the table if necessary
+   * @throws IOException
+   */
+  protected abstract void initDB() throws IOException;
 
   public final File getDir() {
     return dir;
@@ -287,6 +272,14 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
     (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
   };
+  
+  public final void create(Serializable obj, String name) throws IOException {
+    save(obj, null, name);
+  }
+  
+  public final void create(Serializable obj, String dirName, String name) throws IOException {
+    save(obj, dirName, name);
+  }
 
   public void save(Serializable obj,
                    String dirName, String name) throws IOException {
@@ -321,7 +314,6 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "DBTransaction, saveByteArray(" + name + ")");
 
-    Context ctx = (Context) perThreadContext.get();
     saveInLog(buf, name, ((Context) perThreadContext.get()).log, true);
   }
 
@@ -414,7 +406,7 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
     if (op != null) op.free();
   }
 
-  public final synchronized void commit() throws IOException {
+  public final synchronized void commit(boolean release) throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
 
@@ -469,19 +461,14 @@ public final class DBTransaction implements Transaction, DBTransactionMBean {
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "DBTransaction, committed");
-
-    setPhase(COMMIT);
-  }
-
-  public final synchronized void rollback() throws IOException {
-    if (phase != RUN)
-      throw new IllegalStateException("Can not rollback.");
-
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "DBTransaction, rollback");
-
-    setPhase(ROLLBACK);
-    ((Context) perThreadContext.get()).log.clear();
+    
+    if (release) {
+      // Change the transaction state and save it.
+      setPhase(FREE);
+      notify();
+    } else {
+      setPhase(COMMIT);
+    }
   }
 
   public final synchronized void release() throws IOException {
