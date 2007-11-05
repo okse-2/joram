@@ -52,7 +52,8 @@
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
       <include name="fr/dyade/aaa/util/FileRepository.java"/>
       <!-- include name="fr/dyade/aaa/util/DBRepository.java"/ -->
-      <!-- include name="fr/dyade/aaa/util/DBTransaction.java"/ -->
+      <include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/>
+      <include name="fr/dyade/aaa/util/DerbyDBTransaction.java"/>
       <include name="fr/dyade/aaa/util/management/*.java"/>
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
       <include name="org/objectweb/joram/shared/admin/**/*.java"/>
