@@ -456,8 +456,7 @@ final class MessageVector implements MessageQueue {
      * @return The message to which this reference refers.
      */
     public Message getMessage() {
-      if (ref != null) return ref;
-      return (Message) get();
+      return null != ref ? ref : (Message) this.get();
     }
 
     /**
@@ -509,7 +508,7 @@ final class MessageVector implements MessageQueue {
     private static final long serialVersionUID = 1L;
 
     TransactionError(Throwable cause) {
-      super(cause);
+      super(cause.getMessage());
     }
   }
 }

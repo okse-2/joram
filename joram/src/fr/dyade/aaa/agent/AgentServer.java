@@ -173,7 +173,7 @@ public final class AgentServer {
   }
 
   /** Static reference to the transactional monitor. */
-  private static Transaction transaction = null;
+  static Transaction transaction = null;
 
   /**
    * Returns the agent server transaction context.
@@ -1191,7 +1191,7 @@ public final class AgentServer {
         // re-initialization..
         status.value = Status.INSTALLED;
       }
-      throw new Exception(t);
+      throw new Exception(t.getMessage());
     }
 
     synchronized(status) {
