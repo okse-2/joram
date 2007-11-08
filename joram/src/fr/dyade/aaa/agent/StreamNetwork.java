@@ -82,8 +82,8 @@ public abstract class StreamNetwork extends Network {
    *  Enable SO_LINGER with the specified linger time in seconds, if the
    * value is less than 0 then it disables SO_LINGER. Default value is -1.
    *  This value can be adjusted for all network components by setting
-   * <code>TcpNoDelay</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.TcpNoDelay</code> specific property.
+   * <code>SoLinger</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.SoLinger</code> specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
