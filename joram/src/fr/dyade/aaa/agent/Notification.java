@@ -93,6 +93,29 @@ public class Notification implements Serializable, Cloneable {
     return expiration;
   }
 
+  /** The priority for this notification */
+  byte priority = (byte) 3;
+  
+  /**
+   * Sets the priority for this notification.
+   *
+   * A value between 0 (highest) and 7 (lowest), by default 3 (normal).
+   *
+   * @param priority the priority for this notification.
+   */
+  public void setPriority(int priority) {
+	  if ((priority >= 0) && (priority <= 7)) this.priority = (byte) priority;
+  }
+  
+  /**
+   * Gets the notification's priority value.
+   *
+   * @return The notification's priotity value.
+   */
+  public int getPriority() {
+    return (int) priority;
+  }
+
   /**
    * If the notification is stored independently that its containing message
    * messageId contains the persistent name of this notification.
@@ -177,6 +200,7 @@ public class Notification implements Serializable, Cloneable {
     output.append(",detached=").append(detached);
     output.append(",context=").append(context);
     output.append(",expiration=").append(expiration);
+    output.append(",priority=").append(priority);
     output.append(')');
 
     return output;
