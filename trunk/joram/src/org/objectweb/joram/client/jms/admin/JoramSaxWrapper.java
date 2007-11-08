@@ -955,14 +955,8 @@ public class JoramSaxWrapper extends DefaultHandler {
       } catch (SAXException exc) {
         throw exc;
       } catch (Exception exc) {
-        Exception cause = (Exception) exc.getCause();
-        if (cause != null) {
-          logger.log(BasicLevel.ERROR,"",cause);
-          throw new SAXException(cause.getMessage(), cause);
-        } else {
-          logger.log(BasicLevel.ERROR,"",exc);
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        logger.log(BasicLevel.ERROR,"",exc);
+        throw new SAXException(exc.getMessage(), exc);
       }
     }
   }
