@@ -214,10 +214,11 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
   private class GarbageTask extends TimerTask {
     private GarbageTask() {
-      if (timer == null) timer = new Timer();
+      if (NTransaction.this.timer == null)
+        NTransaction.this.timer = new Timer();
       if (logFile.garbageTimeOut > 0) {
         try {
-          timer.schedule(this, logFile.garbageTimeOut);
+          NTransaction.this.timer.schedule(this, logFile.garbageTimeOut);
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
                      "NTransaction, cannot schedule garbage task ", exc);
@@ -1146,7 +1147,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logFile.write(buf, 0, count);
 
       // AF: May be we can avoid this second synchronous write, using a
-      // marker: determination d'un marqueur lié au log courant (date en
+      // marker: determination d'un marqueur lie au log courant (date en
       // millis par exemple), ecriture du marqueur au debut du log, puis
       // ecriture du marqueur apres chaque Operation.COMMIT.
       logFile.seek(current -1);
