@@ -127,14 +127,9 @@ class ClientContext implements java.io.Serializable {
     proxy.setSave();
   }
    
-  /** Returns the temporary destinations' identifiers. */
-    /* Enumeration getTempDestinations()
-    {
-      return tempDestinations.elements();
-    }*/
   Enumeration getTempDestinations()
   {
-    //Creats an enumeration not backed by tempDestinations
+    //Creates an enumeration not backed by tempDestinations
     Vector tempDests = new Vector();
     for(Enumeration dests = tempDestinations.elements(); dests.hasMoreElements(); ){  
       tempDests.addElement(dests.nextElement());
