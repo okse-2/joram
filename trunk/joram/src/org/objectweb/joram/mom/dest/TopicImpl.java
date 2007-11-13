@@ -322,7 +322,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if (fatherId != null) {
+    if ((fatherId != null) && ! fatherId.equals(request.getFatherId())) {
       strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to Topic [").append(destId)
         .append("], successful [false]: topic already part of a hierarchy");
