@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.Date;
 
 import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -801,9 +802,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @return the destination creation time.
    */
   public String getCreationDate() {
-    Calendar cal = Calendar.getInstance();
-    cal.setTimeInMillis(creationDate);
-    return cal.getTime().toString();
+    return new Date(creationDate).toString();
   }
 
   /**
