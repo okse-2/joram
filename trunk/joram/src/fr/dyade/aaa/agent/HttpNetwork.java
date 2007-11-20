@@ -695,6 +695,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
             socket = listen.accept();
             open(socket);
             
+            msgout = null;
             short from = getRequest(is, nis, buf);
             long currentTimeMillis = System.currentTimeMillis();
             do {
@@ -705,16 +706,12 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
               do {
                 msgout = qout.getMessageTo(from);
 
-                if ((msgout != null) &&(msgout.not.expiration != -1))
-                  logmon.log(BasicLevel.FATAL,
-                             getName() + ": AF YYY " + msgout.not);
-
                 if ((msgout != null) &&
                     (msgout.not.expiration > 0) &&
                     (msgout.not.expiration < currentTimeMillis)) {
                   if (logmon.isLoggable(BasicLevel.DEBUG))
                     logmon.log(BasicLevel.DEBUG,
-                               getName() + ": AF removes expired notification " +
+                               getName() + ": removes expired notification " +
                                msgout.from + ", " + msgout.not);
                   //  Suppress the processed notification from message queue,
                   // and deletes it. It can be done outside of a transaction
@@ -733,10 +730,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                            this.getName() + ", sendReply: " + msgout);
 
               sendReply(msgout, os, nos, ack, currentTimeMillis);
-
-              logmon.log(BasicLevel.DEBUG,
-                         getName() + ": AF WWW " + msgout);
-
               getRequest(is, nis, buf);
             } while (running);
           } catch (Exception exc) {
