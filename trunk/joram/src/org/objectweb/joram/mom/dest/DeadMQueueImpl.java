@@ -24,20 +24,28 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Properties;
+import java.util.Vector;
+
+import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
+import org.objectweb.joram.mom.notifications.BrowseReply;
+import org.objectweb.joram.mom.notifications.BrowseRequest;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DenyRequest;
+import org.objectweb.joram.mom.notifications.QueueMsgReply;
+import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetThreshRequest;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.selectors.Selector;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
-
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.mom.messages.Message;
-import org.objectweb.joram.shared.selectors.Selector;
-
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>DeadMQueueImpl</code> class implements the MOM dead message queue
@@ -53,6 +61,8 @@ public class DeadMQueueImpl extends QueueImpl {
   static AgentId id = null;
   /** Static value holding the default threshold for a server. */
   static Integer threshold = null;
+  
+  public static Logger logger = Debug.getLogger(DeadMQueueImpl.class.getName());
 
   /**
    * Constructs a <code>DeadMQueueImpl</code> instance.
@@ -66,11 +76,9 @@ public class DeadMQueueImpl extends QueueImpl {
     setFreeWriting(true);
   }
 
-
   public String toString() {
     return "DeadMQueueImpl:" + destId.toString();
   }
-
 
   /** Static method returning the default DMQ identifier. */
   public static AgentId getId() {
@@ -88,19 +96,20 @@ public class DeadMQueueImpl extends QueueImpl {
    *
    * @exception AccessException  Not thrown.
    */
-  public void setDMQRequest(AgentId from, SetDMQRequest req)
-                 throws AccessException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + req);
+  public void setDMQRequest(AgentId from, SetDMQRequest req) throws AccessException {
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN, "Unexpected request: " + req);
   }
   
   /**
-   * Overrides this <code>DestinationImpl</code> method; the messages carried 
+   * Overrides this <code>DestinationImpl</code> method; the messages carried
    * by the <code>ClientMessages</code> instance are stored in their arrival
    * order, WRITE right is not checked.
    */
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Preprocess on the dead message queue: " + not);
+    
     // Getting and persisting the messages:
     Message msg;
     // Storing each received message:
@@ -110,6 +119,7 @@ public class DeadMQueueImpl extends QueueImpl {
       msg.setExpiration(0L);
       msg.order = arrivalsCounter++;
       messages.add(msg);
+      nbMsgsReceiveSinceCreation++;
       // Persisting the message.
       setMsgTxName(msg);
       msg.save();
@@ -125,17 +135,17 @@ public class DeadMQueueImpl extends QueueImpl {
    */
   public void setThreshRequest(AgentId from, SetThreshRequest req)
                  throws AccessException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + req);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN, "Unexpected request: " + req);
   }
 
   /**
    * Overrides this <code>QueueImpl</code> method; messages matching the
    * request's selector are actually sent as a reply; no cleaning nor DMQ
    * sending is done.
-   *
-   * @exception AccessException  If the requester is not a reader.
+   * 
+   * @exception AccessException
+   *                If the requester is not a reader.
    */
   public void browseRequest(AgentId from, BrowseRequest not)
                  throws AccessException {
@@ -157,8 +167,8 @@ public class DeadMQueueImpl extends QueueImpl {
     // Delivering the reply:
     forward(from, rep);
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Request answered.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Request answered.");
   }
 
   /**
@@ -229,19 +239,16 @@ public class DeadMQueueImpl extends QueueImpl {
         if (Selector.matches(message.msg, notRec.getSelector())) {
           notMsg.addMessage(message.msg);
           
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Message "
-                                          + message.getIdentifier()
-                                          + " sent to "
-                                          + notRec.requester
-                                          + " as a reply to "
-                                          + notRec.getRequestId());
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " sent to "
+                + notRec.requester + " as a reply to " + notRec.getRequestId());
 
           // Removing the message:
           messages.remove(j);
           message.delete();
           // Removing the request.
           replied = true;
+          nbMsgsDeliverSinceCreation++;
           requests.remove(index);
           break;
         }
