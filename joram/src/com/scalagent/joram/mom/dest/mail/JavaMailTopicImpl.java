@@ -291,7 +291,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
    * @param server 	The pop server or null for unsetting previous value.
    */
   public void setPopServer(String server) {
-    this.popServer = popServer;
+    this.popServer = server;
   }
 
   /**
