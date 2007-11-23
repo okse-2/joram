@@ -23,8 +23,7 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.Vector;
+import java.io.IOException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -565,7 +564,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if ((msg.not.expiration > 0) &&
+    if ((msg.not.expiration > 0L) &&
         (msg.not.expiration < System.currentTimeMillis())) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
