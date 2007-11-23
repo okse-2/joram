@@ -24,12 +24,11 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.IOException;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Date;
 
 import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -642,8 +641,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *          <code>null</code> if not provided.
    */
   protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + deadMessages);
+
+    deadMessages.setExpiration(0);
+    
     Vector messages = deadMessages.getMessages();
-    nbMsgsSendToDMQSinceCreation = nbMsgsSendToDMQSinceCreation + messages.size();
+    nbMsgsSendToDMQSinceCreation += messages.size();
 
     AgentId destDmqId = null;
     if (dmqId != null) {
