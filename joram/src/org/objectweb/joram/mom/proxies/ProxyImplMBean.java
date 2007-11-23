@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
 
 public interface ProxyImplMBean {
   /**
@@ -122,4 +122,12 @@ public interface ProxyImplMBean {
    * Returns a string representation of this user's proxy.
    */
   String toString();
+  
+  /**
+   * Returns the number of erroneous messages forwarded to the DMQ since
+   * creation time of this proxy..
+   * 
+   * @return the number of erroneous messages forwarded to the DMQ.
+   */
+  long getNbMsgsSentToDMQSinceCreation();
 }
