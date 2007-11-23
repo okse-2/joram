@@ -53,21 +53,21 @@ public class Notification implements Serializable, Cloneable {
    */
   protected transient boolean detached = false;
 
-  /** 
+  /**
    * The expiration date for this notification.
-   *
-   * This field is handled by the network protocol in order to fit
-   * the time synchronisation problem.
+   * 
+   * This field is handled by the network protocol in order to fit the time
+   * synchronization problem.
    */
-  long expiration = -1L;
+  long expiration = 0L;
 
   /**
    * Sets the expiration date for this notification.
-   *
-   * A value of -1L (default) indicates that the notification does
-   * not expire.
-   *
-   * @param expiration the expiration date for this notification.
+   * 
+   * A value of 0L (default) indicates that the notification does not expire.
+   * 
+   * @param expiration
+   *            the expiration date for this notification.
    */
   public void setExpiration(long expiration) {
     this.expiration = expiration;
@@ -93,27 +93,32 @@ public class Notification implements Serializable, Cloneable {
     return expiration;
   }
 
-  /** The priority for this notification */
-  byte priority = (byte) 3;
+  /**
+   * The priority for this notification from 0 to 9, 9 being the highest. By
+   * default, the priority is 4
+   */
+  byte priority = (byte) 4;
   
   /**
    * Sets the priority for this notification.
-   *
-   * A value between 0 (highest) and 7 (lowest), by default 3 (normal).
-   *
-   * @param priority the priority for this notification.
+   * 
+   * A value between 0 (lowest) and 9 (highest), by default 4 (normal).
+   * 
+   * @param priority
+   *            the priority for this notification.
    */
   public void setPriority(int priority) {
-	  if ((priority >= 0) && (priority <= 7)) this.priority = (byte) priority;
+    if ((priority >= 0) && (priority <= 9))
+      this.priority = (byte) priority;
   }
   
   /**
    * Gets the notification's priority value.
-   *
-   * @return The notification's priotity value.
+   * 
+   * @return The notification's priority value.
    */
   public int getPriority() {
-    return (int) priority;
+    return priority;
   }
 
   /**
