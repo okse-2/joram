@@ -22,15 +22,24 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.net.*;
-import java.util.Vector;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamConstants;
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  *  <code>SimpleNetwork</code> is a simple implementation of
@@ -174,11 +183,9 @@ public class SimpleNetwork extends StreamNetwork {
     protected void shutdown() {}
 
     public void run() {
-      int ret;
       Message msg = null;
       short msgto;
       ServerDesc server = null;
-      InputStream is = null;
 
       try {
         try {
@@ -219,7 +226,7 @@ public class SimpleNetwork extends StreamNetwork {
                                 this.getName() + ", try to send message -> " +
                                 msg + "/" + msgto);
 
-              if ((msg.not.expiration > 0) &&
+              if ((msg.not.expiration > 0L) &&
                   (msg.not.expiration < currentTimeMillis)) {
                 throw new ExpirationExceededException();
               }
@@ -296,10 +303,10 @@ public class SimpleNetwork extends StreamNetwork {
               // Remove the message (see below), may be we have to post an
               // error notification to sender.
             } catch (ExpirationExceededException exc) {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           getName() + ": removes expired notification " +
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": run : removes expired notification " +
                            msg.from + ", " + msg.not);
+              }
             }
 
             AgentServer.getTransaction().begin();
@@ -343,7 +350,7 @@ public class SimpleNetwork extends StreamNetwork {
       ServerDesc server = null;
 
       for (int i=0; i<sendList.size(); i++) {
-        Message msg = (Message) sendList.getMessageAt(i);
+        Message msg = sendList.getMessageAt(i);
         short msgto = msg.getDest();
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -353,12 +360,12 @@ public class SimpleNetwork extends StreamNetwork {
                           " from " + msg.from +
                           " to " + msg.to);
 
-        if ((msg.not.expiration > 0) &&
+        if ((msg.not.expiration > 0L) &&
             (msg.not.expiration < currentTimeMillis)) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ": removes expired notification " +
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, getName() + ": watchdog : removes expired notification " +
                        msg.from + ", " + msg.not);
+          }
 
           // Remove the message.
           AgentServer.getTransaction().begin();
@@ -465,7 +472,6 @@ public class SimpleNetwork extends StreamNetwork {
     public void send(Socket socket,
                      Message msg,
                      long currentTimeMillis) throws IOException {
-      int ret;
       InputStream is = null;
 
       try {
@@ -479,7 +485,7 @@ public class SimpleNetwork extends StreamNetwork {
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", wait ack");
         is = socket.getInputStream();
-        if ((ret = is.read()) == -1)
+        if (is.read() == -1)
           throw new ConnectException("Connection broken");
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -575,7 +581,7 @@ public class SimpleNetwork extends StreamNetwork {
             // Reads notification object
             ois = new ObjectInputStream(is);
             msg.not = (Notification) ois.readObject();
-            if (msg.not.expiration > 0)
+            if (msg.not.expiration > 0L)
               msg.not.expiration += System.currentTimeMillis();
             msg.not.persistent = persistent;
             msg.not.detachable = detachable;
@@ -655,15 +661,15 @@ public class SimpleNetwork extends StreamNetwork {
       count = Message.LENGTH +8;
 
       try {
-        if (msg.not.expiration > 0)
+        if (msg.not.expiration > 0L)
           msg.not.expiration -= currentTimeMillis;
         oos.writeObject(msg.not);
         oos.reset();
         oos.flush();
-        os.write(buf, 0, count);;
+        os.write(buf, 0, count);
         os.flush();
       } finally {
-        if (msg.not.expiration > 0)
+        if (msg.not.expiration > 0L)
           msg.not.expiration += currentTimeMillis;
         count = 0;
       }

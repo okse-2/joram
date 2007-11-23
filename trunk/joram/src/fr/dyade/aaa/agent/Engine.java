@@ -21,14 +21,14 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.util.Queue;
 
 class EngineThread extends Thread {
   Engine engine = null;
@@ -826,7 +826,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if ((msg.not.expiration > 0) &&
+    if ((msg.not.expiration > 0L) &&
         (msg.not.expiration < System.currentTimeMillis())) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
@@ -872,7 +872,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 	canStop = false;
 	if (! isRunning) break;
 
-        if ((msg.not.expiration <= 0) ||
+        if ((msg.not.expiration <= 0L) ||
             (msg.not.expiration >= System.currentTimeMillis())) {
           // The message is valid, try to load the destination agent
           try {
