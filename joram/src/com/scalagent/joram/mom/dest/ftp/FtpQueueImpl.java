@@ -76,11 +76,6 @@ public class FtpQueueImpl extends QueueImpl {
     setProperties(prop);
 
     transferTable = new Hashtable();
-    this.path = path;
-    if (user != null)
-      this.user = user;
-    if (pass != null)
-      this.pass = pass;
     try {
       if ((ftpImplName != null) && (ftpImplName.length() > 0))
         transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
