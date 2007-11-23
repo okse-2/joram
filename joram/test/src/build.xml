@@ -10,7 +10,7 @@
   <property file="env.properties"/>
 
 
-<target name="tests.all" description=" --> lauch all tests">
+<target name="tests.all" description=" --> launch all tests">
     <ant dir="." antfile="build.xml" target="tests.messages"/>
     <ant dir="." antfile="build.xml" target="tests.property"/>
     <ant dir="." antfile="build.xml" target="tests.selector"/>
@@ -44,9 +44,10 @@
     <ant dir="." antfile="build.xml" target="jca.test"/>
     <ant dir="." antfile="build.xml" target="tests.a3"/>
     <ant dir="." antfile="build.xml" target="tests.dmq"/>
+  	<ant dir="." antfile="build.xml" target="tests.ttl"/>
 </target>
 
-<target name="tests.messages" description=" --> lauch all messages tests">
+<target name="tests.messages" description=" --> launch all messages tests">
     <ant dir="." antfile="build.xml" target="base.test_Q_M"/>
     <ant dir="." antfile="build.xml" target="base.test_T_M"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MText"/>
@@ -61,20 +62,20 @@
     <ant dir="." antfile="build.xml" target="base.test_T_MStream"/>
     <ant dir="." antfile="build.xml" target="base.test_dmqb"/>
 </target>
-<target name="tests.property" description=" --> lauch all properties tests" >
+<target name="tests.property" description=" --> launch all properties tests" >
     <ant dir="." antfile="build.xml" target="base.test_property_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_property_T"/>
 </target>
-<target name="tests.selector" description=" --> lauch all selectors tests">
+<target name="tests.selector" description=" --> launch all selectors tests">
     <ant dir="." antfile="build.xml" target="base.test_Selector_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_Selector_T"/>
 </target>
-<target name="tests.temporary" description=" --> lauch all temporary tests">
+<target name="tests.temporary" description=" --> launch all temporary tests">
     <ant dir="." antfile="build.xml" target="base.test_Temp_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_Temp_T"/>
     <ant dir="." antfile="build.xml" target="base.test_Temp_T2"/>
 </target>
-<target name="tests.ack" description=" --> lauch all acknowledge tests">
+<target name="tests.ack" description=" --> launch all acknowledge tests">
     <ant dir="." antfile="build.xml" target="base.test_CAck1_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_CAck1_T"/>
     <ant dir="." antfile="build.xml" target="base.test_CAck2_Q"/>
@@ -82,20 +83,20 @@
     <ant dir="." antfile="build.xml" target="base.test_CAck3_Q"/>
 </target>
 
-<target name="tests.transacted" description=" --> lauch all transacted tests">
+<target name="tests.transacted" description=" --> launch all transacted tests">
     <ant dir="." antfile="build.xml" target="base.test_Trans_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_Trans_T"/>
 </target>
-<target name="tests.exceptionlistener" description=" --> lauch all exceptionlistener tests">
+<target name="tests.exceptionlistener" description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="base.test_ExcpList_Q"/>
     <ant dir="." antfile="build.xml" target="base.test_ExcpList_T"/>
 </target>
 
-<target name="tests.ha" description=" --> lauch all ha tests">
+<target name="tests.ha" description=" --> launch all ha tests">
     <ant dir="." antfile="build.xml" target="ha.test1"/>
     <ant dir="." antfile="build.xml" target="ha.test2"/>
 </target>
-<target name="tests.recovery" description=" --> lauch all recovery tests">
+<target name="tests.recovery" description=" --> launch all recovery tests">
     <ant dir="." antfile="build.xml" target="recovery.test1"/>
     <ant dir="." antfile="build.xml" target="recovery.test2"/>
     <ant dir="." antfile="build.xml" target="recovery.test3"/>
@@ -109,13 +110,13 @@
     <!--<ant dir="." antfile="build.xml" target="recovery.test9"/>
     <ant dir="." antfile="build.xml" target="recovery.test9_2"/>-->
 </target>
-<target name="tests.dist" description=" --> lauch all distributed tests">
+<target name="tests.dist" description=" --> launch all distributed tests">
     <ant dir="." antfile="build.xml" target="dist.test1"/>
     <ant dir="." antfile="build.xml" target="dist.test2"/>
     <ant dir="." antfile="build.xml" target="dist.test3"/>
     <ant dir="." antfile="build.xml" target="dist.test4"/>
 </target>
-<target name="tests.client" description=" --> lauch all client tests">
+<target name="tests.client" description=" --> launch all client tests">
     <ant dir="." antfile="build.xml" target="client.test8"/>
     <ant dir="." antfile="build.xml" target="client.test13"/>
     <ant dir="." antfile="build.xml" target="client.test18"/>
@@ -144,30 +145,30 @@
     <ant dir="." antfile="build.xml" target="client.noloss_1"/>
     <ant dir="." antfile="build.xml" target="client.noloss_2"/>
 </target>
-<target name="tests.local" description=" --> lauch all local tests">
+<target name="tests.local" description=" --> launch all local tests">
     <ant dir="." antfile="build.xml" target="local.test"/>
     <ant dir="." antfile="build.xml" target="local.test1"/>
     <ant dir="." antfile="build.xml" target="local.test2"/>
 </target>   
-<target name="tests.dursub" description=" --> lauch all dursub tests">
+<target name="tests.dursub" description=" --> launch all dursub tests">
     <ant dir="." antfile="build.xml" target="dursub.test1"/>
     <ant dir="." antfile="build.xml" target="dursub.test2"/>
     <ant dir="." antfile="build.xml" target="dursub.test3"/>
     <ant dir="." antfile="build.xml" target="dursub.test4"/>
     <ant dir="." antfile="build.xml" target="dursub.unsub"/>
 </target>  
-<target name="tests.tcp" description=" --> lauch all tcp tests">
+<target name="tests.tcp" description=" --> launch all tcp tests">
     <ant dir="." antfile="build.xml" target="tcp.test1"/>
     <ant dir="." antfile="build.xml" target="tcp.test2"/>
     <ant dir="." antfile="build.xml" target="tcp.test3"/>
     <ant dir="." antfile="build.xml" target="tcp.test4"/>
     <ant dir="." antfile="build.xml" target="tcp.test5"/>
 </target>  
-<target name="tests.reconf" description=" --> lauch all reconf tests">
+<target name="tests.reconf" description=" --> launch all reconf tests">
     <ant dir="." antfile="build.xml" target="reconf.test"/>
     <ant dir="." antfile="build.xml" target="reconf.test1"/>
 </target>  
-<target name="tests.perf" description=" --> lauch all perf tests">
+<target name="tests.perf" description=" --> launch all perf tests">
     <ant dir="." antfile="build.xml" target="perf.test5"/>
    <!-- <ant dir="." antfile="build.xml" target="perf.test6.all"/>
     <ant dir="." antfile="build.xml" target="perf.test6M"/>-->
@@ -182,7 +183,7 @@
     <ant dir="." antfile="build.xml" target="perf.test54"/>
     <ant dir="." antfile="build.xml" target="perf.asynctest"/>
 </target>
-<target name="tests.noreg" description=" --> lauch all noreg tests">
+<target name="tests.noreg" description=" --> launch all noreg tests">
     <ant dir="." antfile="build.xml" target="noreg.test3"/>
     <ant dir="." antfile="build.xml" target="noreg.test4"/>
     <ant dir="." antfile="build.xml" target="noreg.test7"/>
@@ -215,14 +216,14 @@
     <ant dir="." antfile="build.xml" target="noreg.test51"/>
     <ant dir="." antfile="build.xml" target="noreg.test56"/>
 </target>  
-<target name="tests.xa" description=" --> lauch all xa tests">
+<target name="tests.xa" description=" --> launch all xa tests">
     <ant dir="." antfile="build.xml" target="xa.test1"/>
     <ant dir="." antfile="build.xml" target="xa.test2"/>
     <ant dir="." antfile="build.xml" target="xa.test3"/>
     <ant dir="." antfile="build.xml" target="xa.test4"/>
 </target>  
 
-<target name="tests.jndi" description=" --> lauch all jndi tests">
+<target name="tests.jndi" description=" --> launch all jndi tests">
     <ant dir="." antfile="build.xml" target="jndi.test1"/>
     <ant dir="." antfile="build.xml" target="jndi.test2"/>
     <ant dir="." antfile="build.xml" target="test.dtb"/>
@@ -233,12 +234,12 @@
     <ant dir="." antfile="build.xml" target="test.dtb.crash"/>
 </target>  
 
-<target name="tests.nocoupling" description=" --> lauch all jndi loose couplig tests">
+<target name="tests.nocoupling" description=" --> launch all jndi loose couplig tests">
     <ant dir="." antfile="build.xml" target="nocoupling.test1"/>
     <ant dir="." antfile="build.xml" target="nocoupling.test2"/>
     <ant dir="." antfile="build.xml" target="nocoupling.test3"/>
 </target>  
-<target name="tests.bridge" description=" --> lauch all bridge tests">
+<target name="tests.bridge" description=" --> launch all bridge tests">
     <ant dir="." antfile="build.xml" target="bridge.test1"/>
     <ant dir="." antfile="build.xml" target="bridge.test2"/>
     <ant dir="." antfile="build.xml" target="bridge.test3"/>
@@ -252,11 +253,11 @@
     <ant dir="." antfile="build.xml" target="bridge.xatest5"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest6"/>
 </target>  
-<target name="tests.schedqueue" description=" --> lauch all schedqueue tests">
+<target name="tests.schedqueue" description=" --> launch all schedqueue tests">
     <ant dir="." antfile="build.xml" target="schedqueue.test1"/>
     <ant dir="." antfile="build.xml" target="schedqueue.test2"/>
 </target>  
-<target name="tests.cluster" description=" --> lauch all cluster tests">
+<target name="tests.cluster" description=" --> launch all cluster tests">
     <ant dir="." antfile="build.xml" target="cluster.test1"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ1"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ2"/>
@@ -264,13 +265,13 @@
     <ant dir="." antfile="build.xml" target="cluster.testQ4"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ5"/>
 </target>  
-<target name="tests.hierarchical" description=" --> lauch all hierarchical tests">
+<target name="tests.hierarchical" description=" --> launch all hierarchical tests">
     <ant dir="." antfile="build.xml" target="hierarchical.test1"/>
 </target>   
-<target name="tests.ssl" description=" --> lauch all ssl tests">
+<target name="tests.ssl" description=" --> launch all ssl tests">
     <ant dir="." antfile="build.xml" target="ssl.test"/>
 </target> 
-<target name="tests.dmq" description=" --> lauch all dmq tests">
+<target name="tests.dmq" description=" --> launch all dmq tests">
     <ant dir="." antfile="build.xml" target="dmq.test1"/>
     <ant dir="." antfile="build.xml" target="dmq.test2"/>
     <ant dir="." antfile="build.xml" target="dmq.test3"/>
@@ -278,7 +279,10 @@
     <ant dir="." antfile="build.xml" target="dmq.test5"/>
     <ant dir="." antfile="build.xml" target="dmq.test6"/>
 </target>  
-
+  <target name="tests.ttl" description=" --> launch all ttl tests">
+    <ant dir="." antfile="build.xml" target="ttl.test1"/>
+    <ant dir="." antfile="build.xml" target="ttl.test2"/>
+  </target> 
 
 
   <target name="init.src">
@@ -3382,6 +3386,29 @@
     <copy file="dmq/a3servers.xml" tofile="${test.dir}/a3servers.xml" overwrite="true"/>
     <copy file="dmq/joramAdmin.xml" todir="${test.dir}"/>
 </target>
+  
+  <!-- TTL tests -->
+  <target name="ttl.test1" description=" --> test ttl with with 2 distributed serveurs and a topic">
+    <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="ttl.Test1_Topic"/>  
+      <param name="jndiconf" value="ttl/jndi.properties"/>
+      <param name="a3conf" value="ttl/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="ttl.test2" description=" --> test ttl with with 2 distributed serveurs and a queue">
+    <antcall target="test.start" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="ttl.Test2_Queue"/>  
+      <param name="jndiconf" value="ttl/jndi.properties"/>
+      <param name="a3conf" value="ttl/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 
 <!--
  use for resolve probleme of with delete temp topic 
