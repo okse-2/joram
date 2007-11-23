@@ -22,24 +22,25 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
 
 import org.objectweb.joram.mom.dest.DeadMQueueImpl;
-import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.selectors.Selector;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
-
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
@@ -51,6 +52,9 @@ class ClientSubscription implements java.io.Serializable {
    * 
    */
   private static final long serialVersionUID = 1L;
+  
+  public static Logger logger = Debug.getLogger(ClientSubscription.class.getName());
+  
   /** The proxy's agent identifier. */
   private AgentId proxyId;
   /** <code>true</code> if the subscription is durable. */
@@ -172,9 +176,8 @@ class ClientSubscription implements java.io.Serializable {
 
     proxyStringId = proxyId.toString();
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
 //    public String dump() {
@@ -309,10 +312,8 @@ class ClientSubscription implements java.io.Serializable {
                     Vector persistedMessages,
                     boolean denyDeliveredMessages)
   {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "ClientSubscription[" + this + 
-                              "].reinitialize()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
     
     this.proxyStringId = proxyStringId;
     this.messagesTable = messagesTable;
@@ -325,24 +326,20 @@ class ClientSubscription implements java.io.Serializable {
       msgId = message.getIdentifier();
 
       if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(
-            BasicLevel.DEBUG,
-            " -> contains message " + msgId);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> contains message " + msgId);
         message.acksCounter++;
         message.durableAcksCounter++;
         
         if (message.acksCounter == 1) {
-          if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgProxy.log(
-              BasicLevel.DEBUG,
-              " -> messagesTable.put(" + msgId + ')');
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> messagesTable.put(" + msgId + ')');
           messagesTable.put(msgId, message);
         }
 //          if (message.durableAcksCounter == 1) {
-//            if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-//              JoramTracing.dbgProxy.log(
-//                BasicLevel.DEBUG,
+        // if (logger.isLoggable(BasicLevel.DEBUG))
+        // logger.log(
+        //                BasicLevel.DEBUG,
 //                " -> save message " + message);
 // it's alredy save.
 //          message.save(proxyStringId);          
@@ -388,16 +385,14 @@ class ClientSubscription implements java.io.Serializable {
     // Some updated attributes are persistent
     save();
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ": reactivated.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": reactivated.");
   }
 
   /** De-activates the subscription, denies the non acknowledgded messages. */  
   void deactivate() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              "ClientSubscription.deactivate()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription.deactivate()");
 
     unsetListener();
     unsetReceiver();
@@ -410,9 +405,8 @@ class ClientSubscription implements java.io.Serializable {
     // deliveredIds is persistent
     save();
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ": deactivated.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": deactivated.");
   }
 
   void setActive(boolean active) {
@@ -429,9 +423,8 @@ class ClientSubscription implements java.io.Serializable {
     this.requestId = requestId;
     toListener = true;
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ": listener set.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": listener set.");
   }
 
   /** Unsets the listener. */
@@ -440,22 +433,21 @@ class ClientSubscription implements java.io.Serializable {
     requestId = -1;
     toListener = false;
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ": listener unset.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": listener unset.");
   }
 
   /**
    * Sets a receiver request.
-   *
-   * @param requestId  Identifier of the "receive" request.
-   * @param timeToLive  Request's time to live value.
+   * 
+   * @param requestId
+   *            Identifier of the "receive" request.
+   * @param timeToLive
+   *            Request's time to live value.
    */
   void setReceiver(int requestId, long timeToLive) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ".setReceiver(" + requestId + 
-                              "," + timeToLive + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ".setReceiver(" + requestId + "," + timeToLive + ")");
 
     this.requestId = requestId;
     toListener = false;
@@ -468,9 +460,8 @@ class ClientSubscription implements java.io.Serializable {
 
   /** Unsets a receiver request. */
   void unsetReceiver() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ".unsetReceiver()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ".unsetReceiver()");
     requestId = -1;
     requestExpTime = 0;
   }
@@ -497,10 +488,8 @@ class ClientSubscription implements java.io.Serializable {
   // AF: TODO we should parse each message for each subscription
   // see ProxyImpl.doFwd
   void browseNewMessages(Vector newMessages) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                              this + ".browseNewMessages(" + 
-                              newMessages + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ".browseNewMessages(" + newMessages + ')');
     // Browsing the messages one by one.
     Message message;
     String msgId;
@@ -533,10 +522,8 @@ class ClientSubscription implements java.io.Serializable {
         messageIds.add(msgId);
         save();
 
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                  this + ": added msg " + msgId
-                                  + " for delivery.");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, this + ": added msg " + msgId + " for delivery.");
       }
     }
   }
@@ -545,24 +532,19 @@ class ClientSubscription implements java.io.Serializable {
    * Launches a delivery sequence, either for a listener, or for a receiver.
    */
   ConsumerMessages deliver() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ClientSubscription[" + proxyId + ',' + 
-        topicId + ',' + name + "].deliver()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + ',' + topicId + ',' + name
+          + "].deliver()");
 
     // Returning null if no request exists:
     if (requestId == -1)
       return null;
 
      // Returning null if a "receive" request has expired:
-    if (! toListener
-        && requestExpTime > 0
-        && System.currentTimeMillis() >= requestExpTime) {
+    if (!toListener && requestExpTime > 0 && System.currentTimeMillis() >= requestExpTime) {
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                      this + ": receive request " + requestId
-                                      + " expired.");
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": receive request " + requestId
+            + " expired.");
       requestId = -1;
       requestExpTime = 0;
       return null;
@@ -577,9 +559,8 @@ class ClientSubscription implements java.io.Serializable {
     Vector deliverables = new Vector();
     ClientMessages deadMessages = null;
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                " -> messageIds.size() = " + messageIds.size());
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, " -> messageIds.size() = " + messageIds.size());
     
     // Delivering to a listener.
     if (toListener) {
@@ -621,10 +602,8 @@ class ClientSubscription implements java.io.Serializable {
             lastPrior = message.getPriority();
             deliverables.insertElementAt(message.msg.clone(), insertionIndex);
 
-            if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                      this + ": message " + id
-                                      + " added for delivery.");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, this + ": message " + id + " added for delivery.");
           } else {
             // Invalid message: removing and adding it to the vector of dead
             // messages.
@@ -658,15 +637,15 @@ class ClientSubscription implements java.io.Serializable {
       while (i < messageIds.size()) {
         id = (String) messageIds.elementAt(i);
         message = (Message) messagesTable.get(id);
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> message = " + message);
-        
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> message = " + message);
+
         // Message still exists.
         if (message != null) {
           // Checking valid message.
           if (message.isValid(System.currentTimeMillis())) {
-            if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> valid message");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> valid message");
             // Higher priority: keeping the message.
             if (message.getPriority() > highestP) {
               highestP = message.getPriority();
@@ -678,8 +657,8 @@ class ClientSubscription implements java.io.Serializable {
           } else {
             // Invalid message: removing and adding it to the vector of dead
             // messages.
-            if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-              JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> invalid message");
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
             save();
             messagesTable.remove(id);
@@ -694,13 +673,15 @@ class ClientSubscription implements java.io.Serializable {
               message.msg.redelivered = true;
             }
             message.msg.expired = true;
-            deadMessages = new ClientMessages();
+            
+            if (deadMessages == null)
+              deadMessages = new ClientMessages();
             deadMessages.addMessage(message.msg);
           }
         } else {
           // Message has already been deleted.
-          if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> deleted message");
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, " -> deleted message");
 
           messageIds.remove(id);
           deniedMsgs.remove(id);
@@ -724,10 +705,9 @@ class ClientSubscription implements java.io.Serializable {
         }
         deliverables.add(keptMsg.msg.clone());
 
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                  this + ": message " + keptMsg.getIdentifier()
-                                  + " added for delivery.");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger
+              .log(BasicLevel.DEBUG, this + ": message " + keptMsg.getIdentifier() + " added for delivery.");
       } else {
         i++;
       }
@@ -761,9 +741,8 @@ class ClientSubscription implements java.io.Serializable {
   }
 
   void acknowledge(String id) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                              this + ": acknowledges message: " + id);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": acknowledges message: " + id);
     
     deliveredIds.remove(id);
     deniedMsgs.remove(id);
@@ -788,9 +767,8 @@ class ClientSubscription implements java.io.Serializable {
    * Denies messages.
    */
   void deny(Enumeration denies) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                              this + ".deny(" + denies + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
     Message message;
     ClientMessages deadMessages = null;
@@ -805,17 +783,15 @@ class ClientSubscription implements java.io.Serializable {
 
       String deliveredMsgId = (String)deliveredIds.remove(id);
       if (deliveredMsgId == null) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                  this + ": cannot denies message: " + id);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, this + ": cannot denies message: " + id);
 
         continue denyLoop;
       }
       save();
       
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                this + ": denies message: " + id);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ": denies message: " + id);
       
       message = (Message) messagesTable.get(id);
       
@@ -849,9 +825,8 @@ class ClientSubscription implements java.io.Serializable {
         // Else, putting it back to the deliverables vector according to its
         // original delivery order, and adding a new entry for it in the
         // denied messages table.
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                    " -> put back to the messages to deliver");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> put back to the messages to deliver");
         
         i = 0;
         insertLoop:
@@ -914,25 +889,25 @@ class ClientSubscription implements java.io.Serializable {
   /**
    * Method used for sending messages to the appropriate dead message queue.
    */
-  private void sendToDMQ(ClientMessages messages)
-  {
-    if (dmqId != null)
+  private void sendToDMQ(ClientMessages messages) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
+    messages.setExpiration(0);
+    if (dmqId != null) {
       Channel.sendTo(dmqId, messages);
-    else if (DeadMQueueImpl.getId() != null)
+    } else if (DeadMQueueImpl.getId() != null) {
       Channel.sendTo(DeadMQueueImpl.getId(), messages);
+    }
   }
 
   Message getMessage(String msgId) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "ClientSubscription.getMessage(" + msgId + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription.getMessage(" + msgId + ')');
     int index = messageIds.indexOf(msgId);
     if (index < 0) {
       // The message has been delivered
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(
-          BasicLevel.DEBUG, " -> message not found");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> message not found");
       return null;
     } else {
       return (Message) messagesTable.get(msgId);
@@ -994,12 +969,8 @@ class ClientSubscription implements java.io.Serializable {
 
   public void readBag(ObjectInputStream in) 
     throws IOException, ClassNotFoundException {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ClientSubscription[" + 
-        proxyId + 
-        "].readbag()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].readbag()");
 
     contextId = in.readInt();
     subRequestId = in.readInt();
@@ -1013,12 +984,8 @@ class ClientSubscription implements java.io.Serializable {
 
   public void writeBag(ObjectOutputStream out)
     throws IOException {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ClientSubscription[" + 
-        proxyId + 
-        "].writeBag()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].writeBag()");
 
     out.writeInt(contextId);
     out.writeInt(subRequestId);
