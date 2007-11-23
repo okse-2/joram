@@ -28,44 +28,108 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.management.openmbean.CompositeDataSupport;
+
+import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.dest.AdminTopicImpl;
+import org.objectweb.joram.mom.dest.DeadMQueueImpl;
+import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.dest.Topic;
+import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
+import org.objectweb.joram.mom.notifications.AbstractReply;
+import org.objectweb.joram.mom.notifications.AbstractRequest;
+import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
+import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.BrowseReply;
+import org.objectweb.joram.mom.notifications.BrowseRequest;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DenyRequest;
+import org.objectweb.joram.mom.notifications.ExceptionReply;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsgRep;
+import org.objectweb.joram.mom.notifications.QueueMsgReply;
+import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.notifications.RegisterTmpDestNot;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SetThreshRequest;
+import org.objectweb.joram.mom.notifications.SubscribeReply;
+import org.objectweb.joram.mom.notifications.SubscribeRequest;
+import org.objectweb.joram.mom.notifications.TopicMsgsReply;
+import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
+import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.admin.ClearSubscription;
+import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
+import org.objectweb.joram.shared.admin.GetSubscription;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageIdsRep;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
+import org.objectweb.joram.shared.admin.GetSubscriptionRep;
+import org.objectweb.joram.shared.admin.GetSubscriptions;
+import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.ActivateConsumerRequest;
+import org.objectweb.joram.shared.client.CnxCloseReply;
+import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.CnxConnectReply;
+import org.objectweb.joram.shared.client.CnxConnectRequest;
+import org.objectweb.joram.shared.client.CnxStartRequest;
+import org.objectweb.joram.shared.client.CnxStopRequest;
+import org.objectweb.joram.shared.client.CommitRequest;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
+import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
+import org.objectweb.joram.shared.client.ConsumerDenyRequest;
+import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.ConsumerReceiveRequest;
+import org.objectweb.joram.shared.client.ConsumerSetListRequest;
+import org.objectweb.joram.shared.client.ConsumerSubRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
+import org.objectweb.joram.shared.client.GetAdminTopicReply;
+import org.objectweb.joram.shared.client.GetAdminTopicRequest;
+import org.objectweb.joram.shared.client.JmsRequestGroup;
+import org.objectweb.joram.shared.client.MomExceptionReply;
+import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.client.QBrowseReply;
+import org.objectweb.joram.shared.client.QBrowseRequest;
+import org.objectweb.joram.shared.client.ServerReply;
+import org.objectweb.joram.shared.client.SessAckRequest;
+import org.objectweb.joram.shared.client.SessCreateTDReply;
+import org.objectweb.joram.shared.client.SessCreateTQRequest;
+import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessDenyRequest;
+import org.objectweb.joram.shared.client.TempDestDeleteRequest;
+import org.objectweb.joram.shared.client.XACnxCommit;
+import org.objectweb.joram.shared.client.XACnxPrepare;
+import org.objectweb.joram.shared.client.XACnxRecoverReply;
+import org.objectweb.joram.shared.client.XACnxRecoverRequest;
+import org.objectweb.joram.shared.client.XACnxRollback;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.DestinationException;
+import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.joram.shared.excepts.RequestException;
+import org.objectweb.joram.shared.excepts.StateException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-import fr.dyade.aaa.agent.Channel;
-
-import org.objectweb.joram.mom.dest.*;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.messages.Message;
-
-import org.objectweb.joram.shared.admin.DeleteUser;
-import org.objectweb.joram.shared.admin.UpdateUser;
-
-import org.objectweb.joram.shared.admin.GetSubscriptions;
-import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
-import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
-import org.objectweb.joram.shared.admin.GetSubscriptionMessageIdsRep;
-import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
-import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
-import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
-import org.objectweb.joram.shared.admin.GetSubscription;
-import org.objectweb.joram.shared.admin.GetSubscriptionRep;
-import org.objectweb.joram.shared.admin.ClearSubscription;
-
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.shared.excepts.*;
-
-import javax.management.openmbean.CompositeDataSupport;
-
 import fr.dyade.aaa.util.Debug;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>ProxyImpl</code> class implements the MOM proxy behaviour,
@@ -82,6 +146,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   /** period to run the cleaning task, by default 60s. */
   protected long period = 60000L;
+  
+  /** the number of erroneous messages forwarded to the DMQ */
+  protected long nbMsgsSentToDMQSinceCreation = 0;
 
   /**
    * Returns  the period value of this queue, -1 if not set.
@@ -2479,12 +2546,16 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   /**
    * Method used for sending messages to the appropriate dead message queue.
    */
-  private void sendToDMQ(ClientMessages messages)
-  {
-    if (dmqId != null)
+  private void sendToDMQ(ClientMessages messages) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
+    messages.setExpiration(0);
+    nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
+    if (dmqId != null) {
       proxyAgent.sendNot(dmqId, messages);
-    else if (DeadMQueueImpl.getId() != null)
+    } else if (DeadMQueueImpl.getId() != null) {
       proxyAgent.sendNot(DeadMQueueImpl.getId(), messages);
+    }
   }
 
   void cleanPendingMessages(long currentTime) {
@@ -2772,6 +2843,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     out.writeObject(messages);
   
+  }
+
+  public long getNbMsgsSentToDMQSinceCreation() {
+    return nbMsgsSentToDMQSinceCreation;
   }
 }
 
