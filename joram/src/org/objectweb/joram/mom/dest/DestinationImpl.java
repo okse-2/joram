@@ -815,9 +815,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @return the number of messages received since creation time.
    */
-  public long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsReceiveSinceCreation;
-  }
+  abstract public long getNbMsgsReceiveSinceCreation();
+  
   /**
    * Returns the number of messages delivered since creation time of this
    * destination. It includes messages all delivered messages to a consumer,
