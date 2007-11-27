@@ -25,34 +25,54 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import javax.management.openmbean.*;
+import java.util.Enumeration;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 
 import org.objectweb.joram.mom.messages.Message;
 
-import java.util.Hashtable;
-import java.util.Collection;
-
 public class MessageJMXWrapper {
 
-  public final static String[] itemNames = {
-    "id", "priority"};
+  public final static String[] itemNames = { "id", "priority" };
 
-  public final static String[] itemDescs = {
-    "xxx", "xxx"};
+  public final static String[] itemDescs = { "xxx", "xxx" };
 
-  public final static OpenType[] itemTypes = {
-    SimpleType.STRING, SimpleType.INTEGER};
+  public final static String[] itemDesc = { "xxx", "xxx" };
 
-  public static CompositeDataSupport createCompositeDataSupport(
-    Message msg) throws Exception {
-    return new CompositeDataSupport(
-      new CompositeType("Message",
-                        "xxx",
-                        itemNames,
-                        itemDescs,
-                        itemTypes),
-      itemNames,
-      new Object[]{msg.getIdentifier(),
-                   new Integer(msg.getPriority())});
+  public final static String[] itemDes = { "xxx", "xxx" };
+
+  public final static OpenType[] itemTypes = { SimpleType.STRING, SimpleType.INTEGER };
+
+  private static CompositeType rowType;
+
+  public static CompositeData createCompositeDataSupport(Message msg) throws Exception {
+    if (rowType == null) {
+      rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
+    }
+    return new CompositeDataSupport(rowType, itemNames, new Object[] { msg.getIdentifier(),
+        new Integer(msg.getPriority()) });
+  }
+
+  public static TabularData createTabularDataSupport(Enumeration messages) throws Exception {
+    if (rowType == null) {
+      rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
+    }
+    CompositeType rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
+    String[] id = { "id" };
+    TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages",
+        "Id and priority of the messages", rowType, id));
+
+    while (messages.hasMoreElements()) {
+      Message message = (Message) messages.nextElement();
+      tds.put(MessageJMXWrapper.createCompositeDataSupport(message));
+    }
+    return tds;
   }
 }
