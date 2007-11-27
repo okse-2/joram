@@ -724,8 +724,6 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    */
   protected void doDeleteNot(DeleteNot not) {
     AgentId clientId;
-    Vector subs;
-    SubscribeRequest sub;
 
     // For each subscriber...
     for (int i = 0; i < subscribers.size(); i++) {
@@ -808,7 +806,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
           deliverables = messages;
           alreadySentLocally = true;
         }
-        // A local sending already occured: cloning the messages.
+        // A local sending already occurred: cloning the messages.
         else {
           deliverables = new Vector();
           for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();)
@@ -822,7 +820,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
         
           if (Selector.matches(message, selector)) {
 
-            // Subscriber not local, or no other sending occured locally:
+            // Subscriber not local, or no other sending occurred locally:
             // directly sending the message.
             if (! local) {
               deliverables.add(message);
@@ -831,7 +829,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
               deliverables.add(message);
               alreadySentLocally = true;
             }
-            // A local sending already occured: cloning the message.
+            // A local sending already occurred: cloning the message.
             else 
               deliverables.add(message.clone());
           }
@@ -849,5 +847,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
   public void setAlreadySentLocally(boolean alreadySentLocally) {
     this.alreadySentLocally = alreadySentLocally;
+  }
+
+  public long getNbMsgsReceiveSinceCreation() {
+    return nbMsgsReceiveSinceCreation;
   }
 }
