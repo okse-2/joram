@@ -22,6 +22,8 @@
  */
 package ttl;
 
+import java.util.Properties;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
@@ -80,21 +82,21 @@ public class Test2_Queue extends TestCase {
       TextMessage msg = null;
       TextMessage msg1 = null;
 
-      for (int j = 0; j < 10; j++) {
+      for (int j = 0; j < 3; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 3000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
       }
       
       // Waiting for the messages to be out of date
-      Thread.sleep(6000);
+      Thread.sleep(4000);
 
       msg1 = (TextMessage) consumer.receive(1000);
       assertEquals(null, msg1);
       
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(10, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue.getPendingMessages());
       AdminModule.disconnect();
 
       // the server containing the queue is stopped
@@ -103,18 +105,19 @@ public class Test2_Queue extends TestCase {
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 3000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
       }
 
       // Waiting for the messages to be out of date
-      Thread.sleep(6000);
+      Thread.sleep(4000);
 
       startAgentServer((short) 1);
 
       // No additional messages should be present on the DMQ, they should have
       // been deleted by the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(10, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue.getPendingMessages());
+      ((org.objectweb.joram.client.jms.Queue) queue).getStatistic();
       AdminModule.disconnect();
       
       cnx.close();
@@ -134,10 +137,14 @@ public class Test2_Queue extends TestCase {
    * Admin : Create queue and a user anonymous use jndi
    */
   public void admin() throws Exception {
+
+    Properties prop = new Properties();
+    prop.setProperty("period", "1000");
+
     // connection
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     // create a Queue
-    org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create(1);
+    org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create(1, prop);
     // create a DMQueue
     DeadMQueue dmqueue = (DeadMQueue) DeadMQueue.create(1);
 

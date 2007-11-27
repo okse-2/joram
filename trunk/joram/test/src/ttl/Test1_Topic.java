@@ -80,41 +80,45 @@ public class Test1_Topic extends TestCase {
       TextMessage msg = null;
       TextMessage msg1 = null;
 
-      for (int j = 0; j < 10; j++) {
+      for (int j = 0; j < 3; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 3000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
       }
-      
+
       // Waiting for the messages to be out of date
-      Thread.sleep(6000);
+      Thread.sleep(4000);
 
       msg1 = (TextMessage) consumer.receive(1000);
       assertEquals(null, msg1);
 
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(10, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue.getPendingMessages());
       AdminModule.disconnect();
 
-       // the server containing the queue is stopped
-      stopAgentServer((short) 1);
+      // the server containing the queue is stopped
+      //      stopAgentServer((short) 1);
 
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 3000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
       }
 
       // Waiting for the messages to be out of date
-      Thread.sleep(6000);
+      Thread.sleep(4000);
+      
+      producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
 
-      startAgentServer((short) 1);
+      //      startAgentServer((short) 1);
+      
+      Thread.sleep(120000);
 
       // No additional message should be present on the DMQ, they should have
       // been deleted by the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(10, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue.getPendingMessages());
       AdminModule.disconnect();
 
       cnx.close();
