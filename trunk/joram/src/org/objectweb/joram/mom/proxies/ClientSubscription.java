@@ -25,9 +25,13 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
 import org.objectweb.joram.mom.dest.DeadMQueueImpl;
 import org.objectweb.joram.mom.messages.Message;
@@ -47,7 +51,7 @@ import fr.dyade.aaa.util.Debug;
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements java.io.Serializable {
+class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /**
    * 
    */
@@ -76,7 +80,7 @@ class ClientSubscription implements java.io.Serializable {
    */
   private Integer threshold;
 
-  /** nb Max of Message store in queue (-1 no limit). */
+  /** Max number of Message stored in the queue (-1 no limit). */
   protected int nbMaxMsg = -1;
 
   /** Vector of identifiers of the messages to deliver. */
@@ -114,15 +118,15 @@ class ClientSubscription implements java.io.Serializable {
   private transient long requestExpTime;
 
   /**
-   * Proxy messages table.
-   * AF: Currently this table is shared between all subscription.
+   * Proxy messages table. Be careful: currently this table is shared between
+   * all subscription.
    */
   private transient Hashtable messagesTable;
 
-  /** string proxy agent id */
-  private transient String proxyStringId;
-  
   private transient ProxyAgentItf proxy;
+  
+  /** the number of erroneous messages forwarded to the DMQ */
+  protected long nbMsgsSentToDMQSinceCreation = 0;
 
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -174,8 +178,6 @@ class ClientSubscription implements java.io.Serializable {
     requestId = -1;
     toListener = false;
 
-    proxyStringId = proxyId.toString();
-
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": created.");
   }
@@ -213,43 +215,43 @@ class ClientSubscription implements java.io.Serializable {
 
 
   /** Returns the subscription's context identifier. */
-  int getContextId()
+  public int getContextId()
   {
     return contextId;
   }
 
   /** Returns the identifier of the subscribing request. */
-  int getSubRequestId()
+  public int getSubRequestId()
   {
     return subRequestId;
   }
 
   /** Returns the name of the subscription. */
-  String getName()
+  public String getName()
   {
     return name;
   }
 
   /** Returns the identifier of the subscription topic. */
-  AgentId getTopicId()
+  public AgentId getTopicId()
   {
     return topicId;
   }
 
   /** Returns the selector. */
-  String getSelector()
+  public String getSelector()
   {
     return selector;
   }
 
   /** Returns <code>true</code> if the subscription is durable. */
-  boolean getDurable()
+  public boolean getDurable()
   {
     return durable;
   }
 
   /** Returns <code>true</code> if the subscription is active. */
-  boolean getActive()
+  public boolean getActive()
   {
     return active;
   }
@@ -280,7 +282,7 @@ class ClientSubscription implements java.io.Serializable {
    *
    * @return The number of pending message for the subscription.
    */
-  int getMessageCount() {
+  public int getPendingMessageCount() {
     return messageIds.size();
   }
 
@@ -289,7 +291,7 @@ class ClientSubscription implements java.io.Serializable {
    *
    * @return the list of message's identifiers for the subscription.
    */
-  String[] getMessageIds() {
+  public String[] getMessageIds() {
     String[] res = new String[messageIds.size()];
     messageIds.copyInto(res);
     return res;
@@ -302,20 +304,17 @@ class ClientSubscription implements java.io.Serializable {
   /**
    * Re-initializes the client subscription.
    * 
-   * @param proxyStringId  string proxy id.
    * @param messagesTable  Proxy's table where storing the messages.
    * @param persistedMessages  Proxy's persisted messages.
    * @param denyDeliveredMessages Denies already delivered messages.
    */
-  void reinitialize(String proxyStringId,
-                    Hashtable messagesTable,
+  void reinitialize(Hashtable messagesTable,
                     Vector persistedMessages,
                     boolean denyDeliveredMessages)
   {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
     
-    this.proxyStringId = proxyStringId;
     this.messagesTable = messagesTable;
 
     // Browsing the persisted messages.
@@ -893,11 +892,29 @@ class ClientSubscription implements java.io.Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
     messages.setExpiration(0);
+    nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
     if (dmqId != null) {
       Channel.sendTo(dmqId, messages);
     } else if (DeadMQueueImpl.getId() != null) {
       Channel.sendTo(DeadMQueueImpl.getId(), messages);
     }
+  }
+  
+  public long getNbMsgsSentToDMQSinceCreation() {
+    return nbMsgsSentToDMQSinceCreation;
+  }
+  
+  public CompositeData getMessageCompositeData(String msgId) throws Exception {
+    Message msg = getMessage(msgId);
+    if (msg != null) {
+      return MessageJMXWrapper.createCompositeDataSupport(msg);
+    } else {
+      throw new Exception("Message not found");
+    }
+  }
+
+  public TabularData getMessagesTabularData() throws Exception {
+    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
   }
 
   Message getMessage(String msgId) {
@@ -914,7 +931,7 @@ class ClientSubscription implements java.io.Serializable {
     }
   }
 
-  void deleteMessage(String msgId) {
+  public void deleteMessage(String msgId) {
     messageIds.remove(msgId);
     Message message = removeMessage(msgId);
     save();
@@ -925,7 +942,7 @@ class ClientSubscription implements java.io.Serializable {
     }
   }
 
-  void clear() {
+  public void clear() {
     ClientMessages deadMessages = null;
     for (int i = 0; i < messageIds.size(); i++) {
       String msgId = (String)messageIds.elementAt(i);
@@ -995,5 +1012,9 @@ class ClientSubscription implements java.io.Serializable {
     out.writeInt(requestId);
     out.writeBoolean(toListener);
     out.writeLong(requestExpTime);
+  }
+
+  void cleanMessageIds() {
+    messageIds.retainAll(messagesTable.keySet());
   }
 }
