@@ -22,9 +22,10 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
 
 
 /**
@@ -51,4 +52,6 @@ public interface ProxyAgentItf {
 
   public void setNoSave();
   public void setSave();
+
+  public String getName();
 }
