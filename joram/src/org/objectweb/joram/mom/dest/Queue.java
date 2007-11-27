@@ -110,12 +110,7 @@ public class Queue extends Destination implements BagSerializer {
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Queue.react(" + from + ',' + not + ')');
-
-    int reqId = -1;
-    if (not instanceof AbstractRequest)
-      reqId = ((AbstractRequest) not).getRequestId();
+      logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
 
     try {     
       if (not instanceof SetThreshRequest)
