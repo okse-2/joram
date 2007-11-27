@@ -20,14 +20,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -197,7 +196,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
-  protected static final String nullName = "";
+  public static final String nullName = "";
 
   /**
    *  the <code>last</code> variable contains the virtual time of the
