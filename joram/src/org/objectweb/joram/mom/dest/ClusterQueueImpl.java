@@ -41,7 +41,6 @@ import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
 import org.objectweb.joram.mom.notifications.QueueClusterNot;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.JoramTracing;
@@ -310,34 +309,28 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not
    */
   public void postProcess(ClientMessages not) {
-    if (getMessageCounter() > loadingFactor.producThreshold)
-      loadingFactor.factorCheck(clusters, 
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+    if (getPendingMessageCount() > loadingFactor.producThreshold)
+      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
     else
-      loadingFactor.evalRateOfFlow(getMessageCounter(),
-                                   getWaitingRequestCount());
+      loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount());
     receiving = false;
   }
 
   /**
-   * wake up, and call factorCheck to evaluate the loading factor...
-   * if msg stay more a periode time in timeTable send to an other
-   * (no visited) queue in cluster.
+   * wake up, and call factorCheck to evaluate the loading factor... if msg stay
+   * more a periode time in timeTable send to an other (no visited) queue in
+   * cluster.
    * 
    * @param not
    */
   public void wakeUpNot(WakeUpNot not) {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " ClusterQueueImpl.wakeUpNot(" + not + ")");
+      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueueImpl.wakeUpNot(" + not
+          + ")");
     super.wakeUpNot(not);
-    
+
     if (clusters.size() > 1)
-      loadingFactor.factorCheck(clusters,
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
 
     // Check if there is message arrived before "timeThreshold".
     // if is true forwards message to the next (no visited) clusterQueue.
@@ -495,17 +488,17 @@ public class ClusterQueueImpl extends QueueImpl {
     //loadingFactor.setWait();
 
     if (getWaitingRequestCount() > loadingFactor.consumThreshold)
-      loadingFactor.factorCheck(clusters,
-                                getMessageCounter(),
-                                getWaitingRequestCount());
+      loadingFactor.factorCheck(clusters, getPendingMessageCount(), getWaitingRequestCount());
   }
 
   /**
-   * load balancing message give by an other cluster queue.
-   * process ClientMessages, no need to check if sender is writer.
+   * load balancing message give by an other cluster queue. process
+   * ClientMessages, no need to check if sender is writer.
    * 
-   * @param from  AgentId
-   * @param not   LBMessageGive
+   * @param from
+   *            AgentId
+   * @param not
+   *            LBMessageGive
    * @throws UnknownNotificationException
    */
   public void lBMessageGive(AgentId from, LBMessageGive not) 
@@ -546,7 +539,7 @@ public class ClusterQueueImpl extends QueueImpl {
       sendToDMQ(deadMessages, null);
     
     if (loadingFactor.getRateOfFlow() < 1) {
-      int possibleGive = getMessageCounter() - getWaitingRequestCount();
+      int possibleGive = getPendingMessageCount() - getWaitingRequestCount();
       LBMessageGive msgGive = 
         new LBMessageGive(waitAfterClusterReq,loadingFactor.getRateOfFlow());
       
@@ -560,7 +553,7 @@ public class ClusterQueueImpl extends QueueImpl {
 
       msgGive.setClientMessages(cm);
       msgGive.setRateOfFlow(
-        loadingFactor.evalRateOfFlow(getMessageCounter(), getWaitingRequestCount()));
+        loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
       
       // send notification contains ClientMessages.
       forward(from, msgGive);
