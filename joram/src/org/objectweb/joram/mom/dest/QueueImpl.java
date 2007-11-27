@@ -157,18 +157,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /** Counter of messages arrivals. */
   protected long arrivalsCounter = 0;
 
-  /**
-   * Returns the number of messages received since creation time.
-   *
-   * @return The number of received messages.
-   */
-  public int getMessageCounter() {
-    if (messages != null) {
-      return messages.size();
-    }
-    return 0;
-  }
-
   /** Vector holding the requests before reply or expiry. */
   protected Vector requests;
 
@@ -1040,7 +1028,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
 
   protected final synchronized void addMessage(Message message) {
-    nbMsgsReceiveSinceCreation++;
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       ClientMessages deadMessages = new ClientMessages();
@@ -1179,11 +1166,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
   
   /**
-   * get nb messages, if it's possible.
+   * get messages, if it's possible.
    * 
-   * @param nb        -1 return all messages.
-   * @param selector  jms selector.
-   * @return  List of mom messages.
+   * @param nb
+   *            -1 return all messages.
+   * @param selector
+   *            jms selector.
+   * @return List of mom messages.
    */
   private List getMessages(int nb, String selector, boolean remove) {   
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1523,5 +1512,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     out.writeBoolean(receiving);
     out.writeObject(messages);
     out.writeObject(deliveredMsgs);
+  }
+
+  public long getNbMsgsReceiveSinceCreation() {
+    return nbMsgsSendToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
 }
