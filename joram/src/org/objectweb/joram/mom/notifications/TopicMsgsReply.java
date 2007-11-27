@@ -23,7 +23,10 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import java.util.Iterator;
 import java.util.Vector;
+
+import org.objectweb.joram.shared.messages.Message;
 
 /**
  * A <code>TopicMsgsReply</code> instance is used by a topic for sending
@@ -43,7 +46,20 @@ public class TopicMsgsReply extends AbstractReply {
    * @param messages  Vector of delivered messages.
    */
   public TopicMsgsReply(Vector messages) {
+    long newExpiration = -1L;
+    int newPriority = 0;
+    for (Iterator iterator = messages.iterator(); iterator.hasNext();) {
+      Message msg = (Message) iterator.next();
+      if (newExpiration != 0L && (msg.expiration > newExpiration || msg.expiration == 0L)) {
+        newExpiration = msg.expiration;
+      }
+      if (msg.priority > newPriority) {
+        newPriority = msg.priority;
+      }
+    }
     this.messages = messages;
+    this.setExpiration(newExpiration);
+    this.setPriority(newPriority);
   }
 
 
