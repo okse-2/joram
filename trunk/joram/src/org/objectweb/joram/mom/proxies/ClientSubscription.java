@@ -30,7 +30,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.objectweb.joram.mom.dest.DeadMQueueImpl;
@@ -902,15 +901,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   
   public long getNbMsgsSentToDMQSinceCreation() {
     return nbMsgsSentToDMQSinceCreation;
-  }
-  
-  public CompositeData getMessageCompositeData(String msgId) throws Exception {
-    Message msg = getMessage(msgId);
-    if (msg != null) {
-      return MessageJMXWrapper.createCompositeDataSupport(msg);
-    } else {
-      throw new Exception("Message not found");
-    }
   }
 
   public TabularData getMessagesTabularData() throws Exception {
