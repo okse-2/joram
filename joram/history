@@ -1,4 +1,13 @@
 +==============================================================================
+| 2007/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add handling of TTL and priority of the JMS messages in the Notifications
+  (ClientMessages and TopicMsgsReply). Expired messages are no more transmitted
+  by the network.
+ JMX enhancement: ClientSubscriptionMBean added
+ Various bug fixes in Queue and DeadMQueue when counting received/delivered
+  messages
++==============================================================================
 | 2007/11/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add MySQLDBTransaction and DerbyDBTransaction (DBTransaction is made abstract)
@@ -15,7 +24,7 @@ needs a default empty constructor.
 +==============================================================================
 | 2007/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Bug fix: Synchronisation issue in Connection with id generation. Now use an
+ Bug fix: Synchronization issue in Connection with id generation. Now use an
 AtomicCounter class.
 +==============================================================================
 | 2007/09/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
