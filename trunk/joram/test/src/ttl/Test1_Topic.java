@@ -98,7 +98,7 @@ public class Test1_Topic extends TestCase {
       AdminModule.disconnect();
 
       // the server containing the queue is stopped
-      //      stopAgentServer((short) 1);
+      stopAgentServer((short) 1);
 
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
@@ -109,9 +109,7 @@ public class Test1_Topic extends TestCase {
       // Waiting for the messages to be out of date
       Thread.sleep(4000);
       
-      producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
-
-      //      startAgentServer((short) 1);
+      startAgentServer((short) 1);
       
       Thread.sleep(120000);
 
