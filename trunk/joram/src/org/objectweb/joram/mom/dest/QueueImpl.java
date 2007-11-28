@@ -440,8 +440,16 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   public void monitGetNbMaxMsg(AgentId from, Monit_GetNbMaxMsg not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
-
     forward(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
+  }
+  
+  /**
+   * Overrides the destination method to add pending message counter
+   */
+  protected Hashtable getStatisticHashtable() {
+    Hashtable stats = super.getStatisticHashtable();
+    stats.put("pendingMessageCount", new Long(getPendingMessageCount()));
+    return stats;
   }
 
   /**
