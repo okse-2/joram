@@ -415,14 +415,22 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   public void monitGetStat(AgentId from, Monit_GetStat not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
+    forward(from, new Monit_GetStatRep(not, getStatisticHashtable()));
+  }
 
+  /**
+   * Gets some statistics about the destination
+   * 
+   * @return a Hashtable with some information statistics about the destination.
+   *         Keys are String describing the values.
+   */
+  protected Hashtable getStatisticHashtable() {
     Hashtable stats = new Hashtable();
-    stats.put("nbMsgsReceiveSinceCreation", new Long(nbMsgsReceiveSinceCreation));
-    stats.put("nbMsgsDeliverSinceCreation", new Long(nbMsgsDeliverSinceCreation));
-    stats.put("nbMsgsSendToDMQSinceCreation", new Long(nbMsgsSendToDMQSinceCreation));
+    stats.put("nbMsgsReceiveSinceCreation", new Long(getNbMsgsReceiveSinceCreation()));
+    stats.put("nbMsgsDeliverSinceCreation", new Long(getNbMsgsDeliverSinceCreation()));
+    stats.put("nbMsgsSendToDMQSinceCreation", new Long(getNbMsgsSendToDMQSinceCreation()));
     stats.put("creationDate", new Long(creationDate));
-
-    forward(from, new Monit_GetStatRep(not, stats));
+    return stats;
   }
 
   /**
