@@ -25,13 +25,13 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.util.Hashtable;
 
-import javax.naming.*;
-import javax.jms.JMSException;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
@@ -40,7 +40,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   /** Object containing the factory's parameters. */
   protected FactoryParameters params;
 
-  /** Reliable class name, for exemple use by ssl. */
+  /** Reliable class name, for example use by ssl. */
   protected String reliableClass = null;
 
   /**
@@ -174,7 +174,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   }
 
   /**
-   * Codes a <code>ConnectionFactory</code> as a Hashtable for travelling
+   * Codes a <code>ConnectionFactory</code> as a Hashtable for traveling
    * through the SOAP protocol.
    */
   public Hashtable code() {
