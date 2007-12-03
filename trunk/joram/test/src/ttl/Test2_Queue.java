@@ -101,6 +101,7 @@ public class Test2_Queue extends TestCase {
 
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
+      Thread.sleep(1000);
       
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
@@ -117,6 +118,7 @@ public class Test2_Queue extends TestCase {
       // been deleted by the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       assertEquals(3, dmqueue.getPendingMessages());
+      assertEquals(0, ((org.objectweb.joram.client.jms.Queue) queue).getPendingMessages());
       ((org.objectweb.joram.client.jms.Queue) queue).getStatistic();
       AdminModule.disconnect();
       
