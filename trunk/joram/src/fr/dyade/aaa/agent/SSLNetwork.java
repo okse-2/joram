@@ -21,12 +21,17 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.net.*;
-import javax.net.ssl.*;
-import javax.security.cert.X509Certificate;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.security.KeyStore;
-import java.security.SecureRandom;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  *
@@ -52,9 +57,6 @@ public final class SSLNetwork extends PoolNetwork {
    */
   public final static String KEYFILE = "SSLNetwork.keyfile";
 
-  SSLSocketFactory socketFactory = null;
-  SSLServerSocketFactory serverSocketFactory = null;
-
   public SSLNetwork() throws Exception {
     super();
     name = "SSLNetwork#" + AgentServer.getServerId();
@@ -79,28 +81,6 @@ public final class SSLNetwork extends PoolNetwork {
   }
 
   /**
-   *  This method creates and returns a socket connected to a ServerSocket at
-   * the specified network address and port. It may be overloaded in subclass,
-   * in order to create particular subclasses of sockets.
-   * <p>
-   *  Due to polymorphism of both factories and sockets, different kinds of
-   * sockets can be used by the same application code. The sockets returned
-   * to the application can be subclasses of <a href="java.net.Socket">
-   * Socket</a>, so that they can directly expose new APIs for features such
-   * as compression, security, or firewall tunneling.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
-   */
-  Socket createSocket(InetAddress host, int port) throws IOException {
-    return socketFactory.createSocket(host, port);
-  }
-
-  /**
    *  This method creates and returns a server socket which uses all network
    * interfaces on the host, and is bound to the specified port. It may be
    * overloaded in subclass, in order to create particular subclasses of
@@ -111,10 +91,8 @@ public final class SSLNetwork extends PoolNetwork {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    ServerSocket serverSocket = null;
-    serverSocket = serverSocketFactory.createServerSocket(port);
+    ServerSocket serverSocket = super.createServerSocket(port);
     ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
-
     return serverSocket;
   }
 

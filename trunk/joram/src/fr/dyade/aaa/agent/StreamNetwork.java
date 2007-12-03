@@ -24,19 +24,20 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.net.Socket;
-import java.net.ServerSocket;
-import java.net.InetAddress;
-import java.net.ConnectException;
+import java.io.IOException;
 import java.net.BindException;
-import java.net.UnknownHostException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+
+import javax.net.ServerSocketFactory;
+import javax.net.SocketFactory;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.SocketAddress;
 
@@ -101,21 +102,29 @@ public abstract class StreamNetwork extends Network {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int SoTimeout = 0;
+  
+  protected ServerSocketFactory serverSocketFactory = null;
+  protected SocketFactory socketFactory = null;
 
   /** Creates a new Network component */
   public StreamNetwork() {
     super();
+    serverSocketFactory = ServerSocketFactory.getDefault();
+    socketFactory = SocketFactory.getDefault();
   }
 
   /**
    * Initializes a new <tt>StreamNetwork</tt> component.
-   *
+   * 
    * @see Network
-   *
-   * @param name	The domain name.
-   * @param port	The listen port.
-   * @param servers	The list of servers directly accessible from this
-   *			network interface.
+   * 
+   * @param name
+   *            The domain name.
+   * @param port
+   *            The listen port.
+   * @param servers
+   *            The list of servers directly accessible from this network
+   *            interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
@@ -221,7 +230,20 @@ public abstract class StreamNetwork extends Network {
   Socket createSocket(InetAddress host, int port) throws IOException {
     if (host == null)
       throw new UnknownHostException();
-    return new Socket(host, port);
+    
+    String addr = System.getProperty("OutLocalAddressIP");
+    if (addr == null) {
+      addr = "localhost";
+    }
+    int localPort;
+    String strLocalPort = System.getProperty("OutLocalAddressPort");
+    if (strLocalPort == null) {
+      localPort = 0;
+    } else {
+      localPort = Integer.valueOf(strLocalPort).intValue();
+    }
+    
+    return socketFactory.createSocket(host, port, InetAddress.getByName(addr), localPort);
   }
 
   /**
@@ -257,7 +279,12 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    return new ServerSocket(port, backlog);
+    String addr = System.getProperty("InLocalAddressIP");
+    if (addr == null) {
+      return serverSocketFactory.createServerSocket(port, backlog);
+    } else {
+      return serverSocketFactory.createServerSocket(port, backlog, InetAddress.getByName(addr));
+    }
   }
 
   /**
@@ -280,4 +307,5 @@ public abstract class StreamNetwork extends Network {
     else
       sock.setSoLinger(false, 0);
   }
+
 }
