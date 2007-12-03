@@ -22,88 +22,92 @@
  */
 package noreg;
 
-import java.lang.reflect.Method;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.ConnectionMetaData;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
 
-import javax.jms.*;
-
-import fr.dyade.aaa.agent.AgentServer;
-
-import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
  * check message ID and system property
- *
+ * 
  */
 public class Test9 extends BaseTest {
   static int NbRound = 100;
   static ConnectionFactory cf = null;
 
-  public static void main (String args[]) throws Exception {
-      new Test9().run();
+  public static void main(String args[]) throws Exception {
+    new Test9().run();
   }
-  public void run(){
-      try{
-	  System.out.println("server start");
-	  startServer();
-	  String baseclass = "noreg.ColocatedBaseTest";
-	  baseclass = System.getProperty("BaseClass", baseclass);
-	  
-	  NbRound = Integer.getInteger("NbRound", NbRound).intValue();
-	  
-	  AdminConnect(baseclass);
-	  
-	  Destination dest = createDestination("org.objectweb.joram.client.jms.Queue");
-	  dest.setFreeReading();
-	  dest.setFreeWriting();
-	  
-	  User user = User.create("anonymous", "anonymous", 0);
-      
-	  org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
-      
-	  ConnectionFactory cf =  createConnectionFactory(baseclass);
-	  Connection cnx = cf.createConnection();
-	  ConnectionMetaData cnxmd = cnx.getMetaData();
-      
-	  
-	  //System.out.println("Provider: " + cnxmd.getJMSProviderName() + cnxmd.getProviderVersion());
-	  assertEquals("Joram",cnxmd.getJMSProviderName());
 
-	  // System.out.println("Transaction: " + System.getProperty("Transaction"));
-	  //assertEquals("fr.dyade.aaa.util.NTransaction",System.getProperty("Transaction"));
-	 
-	  // System.out.println("Engine: " + System.getProperty("Engine"));
-	  assertEquals("fr.dyade.aaa.agent.GCEngine",System.getProperty("Engine"));
-	  
-	  //System.out.println("baseclass: " + baseclass);
-	  assertEquals("noreg.ColocatedBaseTest",baseclass);
-	  
-	  //System.out.println("NbRound=" + NbRound);
-	  assertEquals(10,NbRound);
-	  
-	  Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	  Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	  MessageConsumer consumer = sess1.createConsumer(dest);
-	  MessageProducer producer = sess2.createProducer(dest);
-	  
-	  cnx.start();
-	  
-	  Message msg = sess2.createMessage();
-	  for (int i=0; i<NbRound; i++) {
-	      producer.send(msg);
-	  msg = consumer.receive();
-	  // System.out.println(msg.getJMSMessageID());
-	  assertEquals("ID:0.0.1027c0m"+(i+1),msg.getJMSMessageID());
-	  }
-	  //System.out.println("Test OK");
-      }catch(Throwable exc){
-	  exc.printStackTrace();
-	  error(exc);
-      }finally{
-	  System.out.println("server stop");
-	  fr.dyade.aaa.agent.AgentServer.stop();
-	  endTest(); 
-	  
+  public void run() {
+    try {
+      System.out.println("server start");
+      startServer();
+      String baseclass = "noreg.ColocatedBaseTest";
+      baseclass = System.getProperty("BaseClass", baseclass);
+
+      NbRound = Integer.getInteger("NbRound", NbRound).intValue();
+
+      AdminConnect(baseclass);
+
+      Destination dest = createDestination("org.objectweb.joram.client.jms.Queue");
+      dest.setFreeReading();
+      dest.setFreeWriting();
+
+      User.create("anonymous", "anonymous", 0);
+
+      org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+
+      ConnectionFactory cf = createConnectionFactory(baseclass);
+      Connection cnx = cf.createConnection();
+      ConnectionMetaData cnxmd = cnx.getMetaData();
+
+      // System.out.println("Provider: " + cnxmd.getJMSProviderName() +
+      // cnxmd.getProviderVersion());
+      assertEquals("Joram", cnxmd.getJMSProviderName());
+
+      // System.out.println("Transaction: " +
+      // System.getProperty("Transaction"));
+      // assertEquals("fr.dyade.aaa.util.NTransaction",System.getProperty("Transaction"));
+
+      // System.out.println("Engine: " + System.getProperty("Engine"));
+      assertEquals("fr.dyade.aaa.agent.GCEngine", System.getProperty("Engine"));
+
+      // System.out.println("baseclass: " + baseclass);
+      assertEquals("noreg.ColocatedBaseTest", baseclass);
+
+      // System.out.println("NbRound=" + NbRound);
+      assertEquals(10, NbRound);
+
+      Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer consumer = sess1.createConsumer(dest);
+      MessageProducer producer = sess2.createProducer(dest);
+
+      cnx.start();
+
+      Message msg = sess2.createMessage();
+      Message msgRcv;
+      for (int i = 0; i < NbRound; i++) {
+        producer.send(msg);
+        msgRcv = consumer.receive();
+        assertEquals(msg.getJMSMessageID(), msgRcv.getJMSMessageID());
       }
+      // System.out.println("Test OK");
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("server stop");
+      fr.dyade.aaa.agent.AgentServer.stop();
+      endTest();
+
+    }
   }
 }
