@@ -24,10 +24,6 @@
  */
 package org.objectweb.joram.client.connector;
 
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -40,6 +36,9 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
@@ -136,6 +135,12 @@ public class DefaultConnectionManager
     factory.getParameters().connectingTimer = mcf.getConnectingTimer();
     factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
     factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
+    factory.getParameters().asyncSend = mcf.isAsyncSend();
+    factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
+    factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
+    factory.getParameters().outLocalAddressIP = mcf.getOutLocalAddressIP();
+    factory.getParameters().outLocalAddressPort = mcf.getOutLocalAddressPort().intValue();
+    
   }
 
   /**

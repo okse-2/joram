@@ -24,24 +24,17 @@
  */
 package org.objectweb.joram.client.connector;
 
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Set;
 
-import javax.jms.ConnectionFactory;
+import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.jms.IllegalStateException;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
-import javax.jms.XAQueueConnection;
-import javax.jms.XATopicConnection;
-import javax.naming.StringRefAddr;
 import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
 import javax.resource.spi.ConnectionManager;
@@ -51,11 +44,11 @@ import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.SecurityException;
 import javax.security.auth.Subject;
 
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
-
+import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -72,8 +65,7 @@ public class ManagedConnectionFactoryImpl
    * 
    */
   private static final long serialVersionUID = 1L;
-  /** Vector of managed connections. */
-  private transient Vector connections = null;
+  
   /** Out stream for error logging and tracing. */
   protected transient PrintWriter out = null;
 
@@ -139,6 +131,18 @@ public class ManagedConnectionFactoryImpl
    *
    */
   public int multiThreadSyncDelay = -1;
+  
+  /**
+   * This is the local IP address on which the TCP connection is activated. The
+   * value can either be a machine name, such as "java.sun.com", or a textual
+   * representation of its IP address.
+   */
+  public String outLocalAddressIP = null;
+
+  /**
+   * This is the local IP address port on which the TCP connection is activated
+   */
+  public int outLocalAddressPort = 0;
 
   /**
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
@@ -156,6 +160,18 @@ public class ManagedConnectionFactoryImpl
 
   public int getTxPendingTimer() {
     return txPendingTimer;
+  }
+  
+  public boolean isAsyncSend() {
+    return asyncSend;
+  }
+
+  public boolean isMultiThreadSync() {
+    return multiThreadSync;
+  }
+
+  public int getMultiThreadSyncDelay() {
+    return multiThreadSyncDelay;
   }
 
   protected void setParameters(Object factory) {
@@ -181,6 +197,12 @@ public class ManagedConnectionFactoryImpl
       }
       if (multiThreadSyncDelay > 0) {
         fp.multiThreadSyncDelay = multiThreadSyncDelay;
+      }
+      if (outLocalAddressPort > 0) {
+        fp.outLocalAddressPort = outLocalAddressPort;
+      }
+      if (outLocalAddressIP != null) {
+        fp.outLocalAddressIP = outLocalAddressIP;
       }
     }
   }
@@ -552,7 +574,6 @@ public class ManagedConnectionFactoryImpl
           throws java.io.IOException, ClassNotFoundException
   {
     in.defaultReadObject();
-    connections = new Vector();
   }
 
   // ------------------------------------------
@@ -607,5 +628,21 @@ public class ManagedConnectionFactoryImpl
   public java.lang.String getPassword()
   {
     return password;
+  }
+  
+  public java.lang.String getOutLocalAddressIP() {
+    return outLocalAddressIP;
+  }
+
+  public java.lang.Integer getOutLocalAddressPort() {
+    return new Integer(outLocalAddressPort);
+  }
+
+  public void setOutLocalAddressIP(java.lang.String outLocalAddressIP) {
+    this.outLocalAddressIP = outLocalAddressIP;
+  }
+
+  public void setOutLocalAddressPort(java.lang.Integer outLocalAddressPort) {
+    this.outLocalAddressPort = outLocalAddressPort.intValue();
   }
 }
