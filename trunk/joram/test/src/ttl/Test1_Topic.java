@@ -99,6 +99,7 @@ public class Test1_Topic extends TestCase {
 
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
+      Thread.sleep(1000);
 
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
