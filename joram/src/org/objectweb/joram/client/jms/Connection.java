@@ -42,9 +42,9 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -260,9 +260,17 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.topicPassivationThreshold;
   }
   
+  final String getOutLocalAddressIP() {
+    return factoryParameters.outLocalAddressIP;
+  }
+
+  final int getOutLocalAddressPort() {
+    return factoryParameters.outLocalAddressPort;
+  }
+  
   /**
-   * Checks if the connecion is closed. If true
-   * raises an IllegalStateException.
+   * Checks if the connection is closed. If true raises an
+   * IllegalStateException.
    */
   final protected synchronized void checkClosed() throws IllegalStateException {
     if (status == Status.CLOSE ||  mtpx.isClosed()) 

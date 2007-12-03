@@ -23,23 +23,29 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Timer;
+import java.util.Vector;
 
-import javax.jms.*;
 import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.stream.StreamUtil;
-
-import fr.dyade.aaa.util.ReliableTcpConnection;
-
-import fr.dyade.aaa.util.Debug;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.ReliableTcpConnection;
 
 public class ReliableTcpClient {
   public static Logger logger = Debug.getLogger(ReliableTcpClient.class.getName());
@@ -51,7 +57,7 @@ public class ReliableTcpClient {
   public static final String[] statusNames =
   {"INIT", "CONNECT", "CLOSE"};
 
-  private FactoryParameters params;
+  protected FactoryParameters params;
 
   private String name;
   
@@ -192,8 +198,7 @@ public class ReliableTcpClient {
         try {
           wait(nextSleep);
         } catch (InterruptedException intExc) {
-          IllegalStateException jmsExc =
-            new IllegalStateException("Could not open the connection with "
+          throw new IllegalStateException("Could not open the connection with "
                                       + addresses + ": interrupted");
         }          
 
@@ -220,7 +225,18 @@ public class ReliableTcpClient {
 
   protected Socket createSocket(String hostName, int port) 
     throws Exception {
-    return new Socket(hostName, port);
+    
+    String addr = params.outLocalAddressIP;
+    if (addr == null) {
+      addr = "localhost";
+    }
+    int localPort = params.outLocalAddressPort;
+    
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient.createSocket(" + hostName + "," + port
+          + ") on interface " + addr + ":" + localPort);
+
+    return new Socket(hostName, port, InetAddress.getByName(addr), localPort);
   }
 
   private void doConnect(String hostName, int port) 

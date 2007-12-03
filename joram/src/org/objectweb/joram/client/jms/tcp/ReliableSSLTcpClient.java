@@ -22,29 +22,24 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import fr.dyade.aaa.util.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
 import java.io.FileInputStream;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.SSLContext;
-import javax.jms.*;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
-import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class ReliableSSLTcpClient extends ReliableTcpClient {
 
-  private final static String CIPHER = "org.objectweb.joram.cipherList";
+  //  private final static String CIPHER = "org.objectweb.joram.cipherList";
   private final static String KS = "org.objectweb.joram.keystore";
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
@@ -56,14 +51,19 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
 
   protected Socket createSocket(String hostName, int port) 
     throws Exception {
+    
+    String addr = params.outLocalAddressIP;
+    if (addr == null) {
+      addr = "localhost";
+    }
+    int localPort = params.outLocalAddressPort;
+    
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "ReliableSSLTcpClient.createSocket(" + 
-        hostName+"," + port + ")");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableSSLTcpClient.createSocket(" + hostName + ","
+          + port + ") on interface " + addr + ":" + localPort);
 
     SocketFactory socketFactory = createSocketFactory();
-    return socketFactory.createSocket(hostName, port);
+    return socketFactory.createSocket(hostName, port, InetAddress.getByName(addr), localPort);
   }
 
   private static SocketFactory createSocketFactory() 
@@ -97,6 +97,6 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
 //    SecureRandom securerandom = null;
     ctx.init(kmf.getKeyManagers(),trustManagers,securerandom);
     
-    return (SocketFactory) ctx.getSocketFactory();
+    return ctx.getSocketFactory();
   }
 }
