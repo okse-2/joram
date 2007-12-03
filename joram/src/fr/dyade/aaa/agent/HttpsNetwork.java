@@ -21,17 +21,26 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.net.*;
-import javax.net.ssl.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.KeyStore;
-import javax.security.cert.X509Certificate;
-import java.util.Vector;
+
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.*;
 
 /**
  * <tt>HttpNetwork</tt> is a specialization of <tt>HttpNetwork</tt>
@@ -55,74 +64,55 @@ public final class HttpsNetwork extends HttpNetwork {
    */
   public final static String KEYFILE = "HttpsNetwork.keyfile";
 
-  /**
-   *
-   */
-  SSLSocketFactory socketFactory = null;
-  /**
-   *
-   */
-  SSLServerSocketFactory serverSocketFactory = null;
-
   public HttpsNetwork() throws Exception {
     super();
-  }
+    
+    // Initialize server socket factory
+    try {
+      char[] pass = AgentServer.getProperty(PASS, "changeit").toCharArray();
+      String keyFile = AgentServer.getProperty(KEYFILE, ".keystore");
 
-  SSLSocketFactory getSocketFactory() throws IOException {
-    if (socketFactory == null) {
-      try {
-        char[] pass =  AgentServer.getProperty(PASS, "changeit").toCharArray();
-        String keyFile = AgentServer.getProperty(KEYFILE, ".keystore");
- 
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(keyFile), pass);
+      KeyStore ks = KeyStore.getInstance("JKS");
+      ks.load(new FileInputStream(keyFile), pass);
 
-//         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-//         kmf.init(ks, pass);
+      KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+      kmf.init(ks, pass);
 
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-        tmf.init(ks);
+      SSLContext ctx = SSLContext.getInstance("TLS");
+      ctx.init(kmf.getKeyManagers(), null, null);
 
-        SSLContext ctx = SSLContext.getInstance("TLS");
-        ctx.init(null, tmf.getTrustManagers(), null);
- 
-        socketFactory = ctx.getSocketFactory();
-      } catch (IOException exc) {
-        throw exc;
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR,
-                   this.getName() + ", cannot initialize SSLSocketFactory", exc);
-        throw new IOException(exc.getMessage());
-      }
+      serverSocketFactory = ctx.getServerSocketFactory();
+    } catch (IOException exc) {
+      throw exc;
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, this.getName() + ", cannot initialize SSLServerSocketFactory", exc);
+      throw new IOException(exc.getMessage());
     }
-    return socketFactory;
-  }
+    
+    // Initialize socket factory
+    try {
+      char[] pass = AgentServer.getProperty(PASS, "changeit").toCharArray();
+      String keyFile = AgentServer.getProperty(KEYFILE, ".keystore");
 
-  SSLServerSocketFactory getServerSocketFactory() throws IOException {
-    if (serverSocketFactory == null) {
-      try {
-        char[] pass =  AgentServer.getProperty(PASS, "changeit").toCharArray();
-        String keyFile = AgentServer.getProperty(KEYFILE, ".keystore");
- 
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(keyFile), pass);
+      KeyStore ks = KeyStore.getInstance("JKS");
+      ks.load(new FileInputStream(keyFile), pass);
 
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(ks, pass);
+      // KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+      // kmf.init(ks, pass);
 
-        SSLContext ctx = SSLContext.getInstance("TLS");
-        ctx.init(kmf.getKeyManagers(), null, null);
- 
-        serverSocketFactory = ctx.getServerSocketFactory();
-      } catch (IOException exc) {
-        throw exc;
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR,
-                   this.getName() + ", cannot initialize SSLServerSocketFactory", exc);
-        throw new IOException(exc.getMessage());
-      }
+      TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+      tmf.init(ks);
+
+      SSLContext ctx = SSLContext.getInstance("TLS");
+      ctx.init(null, tmf.getTrustManagers(), null);
+
+      socketFactory = ctx.getSocketFactory();
+    } catch (IOException exc) {
+      throw exc;
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, this.getName() + ", cannot initialize SSLSocketFactory", exc);
+      throw new IOException(exc.getMessage());
     }
-    return serverSocketFactory;
   }
 
   /**
@@ -135,42 +125,27 @@ public final class HttpsNetwork extends HttpNetwork {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    ServerSocket serverSocket = null;
-    serverSocket = getServerSocketFactory().createServerSocket(port, backlog);
+    ServerSocket serverSocket = super.createServerSocket(port);
     ((SSLServerSocket) serverSocket).setNeedClientAuth(false);
-
     return serverSocket;
   }
 
   /**
-   *  This method creates and returns a SSL socket connected to a ServerSocket
-   * at the specified network address and port.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
-   */
-  Socket createSocket(InetAddress host, int port) throws IOException {
-    if (host == null)
-      throw new UnknownHostException();
-
-    return getSocketFactory().createSocket(host, port);
-  }
-
-  /**
-   * This method creates a tunnelling socket if a proxy is used.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @param proxy	the proxy host.
-   * @param proxyport	the proxy port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
+   * This method creates a tunneling socket if a proxy is used.
+   * 
+   * @param host
+   *            the server host.
+   * @param port
+   *            the server port.
+   * @param proxy
+   *            the proxy host.
+   * @param proxyport
+   *            the proxy port.
+   * @return a socket connected to a ServerSocket at the specified network
+   *         address and port.
+   * 
+   * @exception IOException
+   *                if the connection can't be established
    */
   Socket createTunnelSocket(InetAddress host, int port,
                             InetAddress proxy, int proxyport) throws IOException {
@@ -182,8 +157,8 @@ public final class HttpsNetwork extends HttpNetwork {
     doTunnelHandshake(tunnel, host, port);
 
     // Ok, let's overlay the tunnel socket with SSL.
-    SSLSocket socket =
-      (SSLSocket) getSocketFactory().createSocket(tunnel,host.getHostName(), port, true);
+    SSLSocket socket = (SSLSocket) ((SSLSocketFactory) socketFactory).createSocket(tunnel,
+        host.getHostName(), port, true);
     // register a callback for handshaking completion event
     socket.addHandshakeCompletedListener(
       new HandshakeCompletedListener() {
@@ -222,7 +197,6 @@ public final class HttpsNetwork extends HttpNetwork {
     boolean		headerDone = false;	/* Done on first newline */
 
     InputStream	in = tunnel.getInputStream();
-    boolean		error = false;
 
     while (newlinesSeen < 2) {
       int i = in.read();
