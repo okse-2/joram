@@ -1,4 +1,12 @@
 +==============================================================================
+| 2007/12/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add the ability to choose the local network interface:
+  - in the network by placing the properties InLocalAdressIP, OutLocalAddressIP
+    and OutLocalAddressPort
+  - in the JMS level with new connection factory parameters: outLocalAddressIP
+    and outLocalAddressPort
++==============================================================================
 | 2007/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add handling of TTL and priority of the JMS messages in the Notifications
