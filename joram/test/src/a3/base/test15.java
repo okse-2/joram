@@ -24,8 +24,11 @@
 
 package a3.base;
 
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
 import framework.TestCase;
-import fr.dyade.aaa.agent.*;
 
 public class test15 extends TestCase {
   public test15() {
@@ -127,7 +130,7 @@ public class test15 extends TestCase {
           assertEquals("a3.base.test15$Ball", not.getClass().getName());
           assertEquals(((Ball) not).bounce, 1);
           try {
-            Thread.sleep(1000L);
+            Thread.sleep(1200L);
           } catch (InterruptedException exc) {}
           break;
         case 1:
