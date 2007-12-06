@@ -172,10 +172,10 @@ public class ConnectionManager {
    */ 
   public static void stopService() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ConnectionManager.stop()");
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
+
     if (timer != null)
       timer.cancel();
+    timer = null;
   }
 }

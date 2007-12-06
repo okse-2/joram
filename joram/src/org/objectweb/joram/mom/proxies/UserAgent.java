@@ -480,8 +480,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   }
 
   class CleaningTask extends TimerTask {
-    CleaningTask() {
-    }
+    CleaningTask() {}
     
     /** Method called when the timer expires. */
     public void run() {
@@ -489,23 +488,25 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     }
  
     public void schedule() {
+      // Don't schedule CleaningTask on HA slaves.
+      if (AgentServer.isHAServer() && ! AgentServer.isMasterHAServer())
+        return;
+
       long period = proxyImpl.getPeriod();
 
       if (period != -1) {
         try {
-          Timer timer = ConnectionManager.getTimer();        
+          Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-	    if( (!AgentServer.isHAServer()) ||
-		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
-		if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-		    JoramTracing.dbgDestination.log(BasicLevel.WARN,
-			 			    "--- " + this + " Proxy(...)", exc);     
-	    }
+          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+            JoramTracing.dbgDestination.log(BasicLevel.WARN,
+                                            "--- " + this + " Proxy(...)", exc);     
 	}
       }
     }
   }
+
   public void setNoSave() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
