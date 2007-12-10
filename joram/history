@@ -1,4 +1,8 @@
 +==============================================================================
+| 2007/12/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add asynchronous subscription request.
++==============================================================================
 | 2007/12/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add the ability to choose the local network interface:
