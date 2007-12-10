@@ -366,7 +366,7 @@ public class Connection implements javax.jms.Connection {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable));
+          targetName, selector, false, durable, false));
     }
     
     MultiSessionConsumer msc =
@@ -527,7 +527,7 @@ public class Connection implements javax.jms.Connection {
       if (status == Status.STOP)
         return;
     }
-
+    
     // At this point, the server won't deliver messages anymore,
     // the connection just waits for the sessions to have finished their
     // processings.
@@ -539,7 +539,7 @@ public class Connection implements javax.jms.Connection {
       Session session = (Session) sessions.get(i);
       session.stop();
     }
-
+    
     synchronized (this) {
       if (status == Status.STOP)
         return;

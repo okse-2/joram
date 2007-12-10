@@ -934,7 +934,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
       tSub.putSubscription(subName, req.getSelector());
       sent =
-        updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId());
+        updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
     }  else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
 
@@ -948,7 +948,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         TopicSubscription oldTSub =
           (TopicSubscription) topicsTable.get(cSub.getTopicId());
         oldTSub.removeSubscription(subName);
-        updateSubscriptionToTopic(cSub.getTopicId(), -1, -1);
+        updateSubscriptionToTopic(cSub.getTopicId(), -1, -1, req.isAsyncSubscription());
       }
 
       // Updated selector?
@@ -978,7 +978,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         tSub.putSubscription(subName, req.getSelector());
         sent = updateSubscriptionToTopic(topicId,
                                          activeCtxId,
-                                         req.getRequestId());
+                                         req.getRequestId(),
+                                         req.isAsyncSubscription());
       }
     }
     // Activating the subscription.
@@ -2606,7 +2607,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       updateSubscriptionToTopic(destId, -1, -1);
     }
   }
-  
+
   /**
    * Updates the proxy's subscription to a topic.
    *
@@ -2618,13 +2619,31 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *          sent to the topic.
    */
   private boolean updateSubscriptionToTopic(AgentId topicId,
+      int contextId,
+      int requestId) {
+    return updateSubscriptionToTopic(topicId, contextId, requestId, false);
+  }
+  
+  /**
+   * Updates the proxy's subscription to a topic.
+   *
+   * @param topicId  Identifier of the topic to subscribe to.
+   * @param contextId  Identifier of the subscription context.
+   * @param requestId  Identifier of the subscription request.
+   * @param asyncSub   asynchronous subscription request.
+   *
+   * @return  <code>true</code> if a <code>SubscribeRequest</code> has been
+   *          sent to the topic.
+   */
+  private boolean updateSubscriptionToTopic(AgentId topicId,
                                             int contextId,
-                                            int requestId)
+                                            int requestId,
+                                            boolean asyncSub)
   {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ProxyImpl.updateSubscriptionToTopic(" +
-                 topicId + ',' + contextId + ',' + requestId + ')');
+                 topicId + ',' + contextId + ',' + requestId + ',' + asyncSub +')');
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(topicId);
 
     // No more subs to this topic: unsubscribing.
@@ -2645,10 +2664,14 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       return false;
 
     tSub.setLastSelector(builtSelector);
-    proxyAgent.sendNot(topicId, new SubscribeRequest(contextId,
-                                                     requestId,
-                                                     builtSelector));
-   
+    SubscribeRequest req = new SubscribeRequest(contextId, requestId, builtSelector, asyncSub);
+    proxyAgent.sendNot(topicId, req);
+    
+    // send reply if asynchronous subscription request.
+    if (asyncSub) {
+      doFwd(new SubscribeReply(req));
+    }
+    
     return true;
   }
 

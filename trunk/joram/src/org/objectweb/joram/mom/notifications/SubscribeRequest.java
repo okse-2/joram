@@ -38,6 +38,9 @@ public class SubscribeRequest extends AbstractRequest
    * Selector for filtering messages, null or empty string for no selection.
    */
   private String selector;
+  
+  /** asynchronous subscription request. */
+  private boolean asyncSub = false;
 
 
   /**
@@ -47,11 +50,13 @@ public class SubscribeRequest extends AbstractRequest
    * @param requestId  Request identifier.
    * @param selector  Selector expression for filtering messages, null or 
    *          empty string for no selection.
+   * @param asyncSub true if asynchronous subscription.
    */
-  public SubscribeRequest(int clientContext, int requestId, String selector)
+  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub)
   {
     super(clientContext, requestId);
     this.selector = selector;
+    this.asyncSub = asyncSub;
   }
 
 

@@ -22,12 +22,10 @@
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.Externalizable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
-import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
@@ -41,6 +39,9 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
   private static final long serialVersionUID = 1L;
   /** The subscription's name. */
   private String subName;
+  
+  /** asynchronous subscription. */
+  private boolean asyncSub;
 
   /** Sets the subscription name. */
   public void setSubName(String subName) {
@@ -94,6 +95,11 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     return durable;
   }
 
+  /** Returns <code>true</code> for asynchronous subscription. */
+  public boolean isAsyncSubscription() {
+    return asyncSub;
+  }
+  
   protected int getClassId() {
     return CONSUMER_SUB_REQUEST;
   }
@@ -106,14 +112,16 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
    * @param selector  The selector for filtering messages, if any.
    * @param noLocal  <code>true</code> for not consuming the local messages.
    * @param durable  <code>true</code> for a durable subscription.
+   * @param asyncSub  <code>true</code> for a asynchronous subscription request.
    */
   public ConsumerSubRequest(String topic, String subName, String selector,
-                            boolean noLocal, boolean durable) {
+                            boolean noLocal, boolean durable, boolean asyncSub) {
     super(topic);
     this.subName = subName;
     this.selector = selector;
     this.noLocal = noLocal;
     this.durable = durable;
+    this.asyncSub = asyncSub;
   }
 
   /**
@@ -137,6 +145,7 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     StreamUtil.writeTo(selector, os);
     StreamUtil.writeTo(noLocal, os);
     StreamUtil.writeTo(durable, os);
+    StreamUtil.writeTo(asyncSub, os);
   }
 
   /**
@@ -151,5 +160,6 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
     selector = StreamUtil.readStringFrom(is);
     noLocal = StreamUtil.readBooleanFrom(is);
     durable = StreamUtil.readBooleanFrom(is);
+    asyncSub = StreamUtil.readBooleanFrom(is);
   }
 }

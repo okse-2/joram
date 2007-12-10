@@ -175,7 +175,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                                subName,
                                selector,
                                noLocal,
-                               durableSubscriber));
+                               durableSubscriber,
+                               sess.isAsyncSub()));
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
