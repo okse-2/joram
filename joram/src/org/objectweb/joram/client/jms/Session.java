@@ -23,20 +23,38 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.TimerTask;
+import java.util.Vector;
 
-import javax.jms.JMSException;
-import javax.jms.TransactionRolledBackException;
 import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
+import javax.jms.TransactionRolledBackException;
 
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
-
-import org.objectweb.joram.shared.client.*;
-
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CommitRequest;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
+import org.objectweb.joram.shared.client.ConsumerDenyRequest;
+import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.ConsumerReceiveRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
+import org.objectweb.joram.shared.client.GetAdminTopicReply;
+import org.objectweb.joram.shared.client.GetAdminTopicRequest;
+import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.client.SessAckRequest;
+import org.objectweb.joram.shared.client.SessCreateTDReply;
+import org.objectweb.joram.shared.client.SessCreateTQRequest;
+import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -284,6 +302,9 @@ public class Session implements javax.jms.Session {
   private int topicActivationThreshold;
   
   private MessageConsumerListener messageConsumerListener;
+  
+  /** For asynchronous subscription request. */
+  private boolean asyncSub = false;
   
   /**
    * Opens a session.
@@ -651,6 +672,19 @@ public class Session implements javax.jms.Session {
     return mp;
   }
 
+  /** 
+   * return true for asynchronous subscription request. 
+   */
+  public boolean isAsyncSub() {
+    return asyncSub;
+  }
+  /** 
+   * set true for asynchronous subscription request. 
+   */
+  public void setAsyncSub(boolean asyncSub) {
+    this.asyncSub = asyncSub;
+  }
+  
   /**
    * Creates a MessageConsumer for the specified destination using a
    * message selector.
@@ -1235,7 +1269,7 @@ public class Session implements javax.jms.Session {
 //     }
 
     doStop();
-
+    
     setStatus(Status.STOP);
   }
 
