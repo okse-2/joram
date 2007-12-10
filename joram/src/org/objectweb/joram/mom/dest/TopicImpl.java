@@ -514,7 +514,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     else
       selectors.remove(from);
 
-    forward(from, new SubscribeReply(not));
+    if (!not.isAsyncSub())
+      forward(from, new SubscribeReply(not));
 
     postSubscribe(not);
     

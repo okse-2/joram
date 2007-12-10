@@ -59,6 +59,13 @@ public class SubscribeRequest extends AbstractRequest
     this.asyncSub = asyncSub;
   }
 
+  /**
+   * 
+   * @return true for asynchronous subscription request.
+   */
+  public boolean isAsyncSub() {
+    return asyncSub;
+  }
 
   /** Returns the selector. */
   public String getSelector()
