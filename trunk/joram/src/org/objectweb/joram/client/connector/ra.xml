@@ -180,12 +180,12 @@
             <config-property>
               <config-property-name>outLocalAddressIP</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
-              <config-property-value>true</config-property-value>
+              <config-property-value>localhost</config-property-value>
             </config-property>
             <config-property>
               <config-property-name>outLocalAddressPort</config-property-name>
               <config-property-type>java.lang.Integer</config-property-type>
-              <config-property-value>true</config-property-value>
+              <config-property-value>0</config-property-value>
             </config-property>
             <connectionfactory-interface>javax.jms.ConnectionFactory</connectionfactory-interface>
             <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundConnectionFactory</connectionfactory-impl-class>
