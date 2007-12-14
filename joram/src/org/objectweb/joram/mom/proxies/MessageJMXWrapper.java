@@ -44,10 +44,6 @@ public class MessageJMXWrapper {
 
   public final static String[] itemDescs = { "xxx", "xxx" };
 
-  public final static String[] itemDesc = { "xxx", "xxx" };
-
-  public final static String[] itemDes = { "xxx", "xxx" };
-
   public final static OpenType[] itemTypes = { SimpleType.STRING, SimpleType.INTEGER };
 
   private static CompositeType rowType;
