@@ -24,25 +24,6 @@
  */
 package org.objectweb.joram.client.connector;
 
-import fr.dyade.aaa.agent.AgentServer;
-import com.scalagent.jmx.JMXServer;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.JoramAdmin;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
-
-import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
-import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ConnectionMetaData;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -76,7 +57,26 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 
+import org.objectweb.joram.client.jms.ConnectionMetaData;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.JoramAdmin;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import com.scalagent.jmx.JMXServer;
+
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * A <code>JoramAdapter</code> instance manages connectivities to an
@@ -282,7 +282,7 @@ public class JoramAdapter
     java.util.ArrayList array = MBeanServerFactory.findMBeanServer(null);
     if (!array.isEmpty())
       mbs = (MBeanServer) array.get(0);
-    jmxServer = new JMXServer(mbs,"JoramAdapter");
+    jmxServer = new JMXServer(mbs);
   }
 
   /**

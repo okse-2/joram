@@ -21,29 +21,29 @@
  */
 package com.scalagent.jmx;
 
-import java.io.*;
-import java.util.*;
 import java.lang.reflect.Method;
 
-import javax.management.*;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.RuntimeOperationsException;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-import org.objectweb.util.monolog.api.LoggerFactory;
-
-import fr.dyade.aaa.util.management.*;
+import fr.dyade.aaa.util.management.MXServer;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * 
  */
 public class JMXServer implements MXServer {
+  
   public MBeanServer mxserver = null;
-  public String domain = null;
 
-  public JMXServer(MBeanServer mxserver,
-                   String domain) {
+  public JMXServer(MBeanServer mxserver) {
     this.mxserver = mxserver;
-    this.domain = domain;
     MXWrapper.setMXServer(this);
   }
 
@@ -57,7 +57,6 @@ public class JMXServer implements MXServer {
       // Prior JDK1.5 (with JMXRI implementation).
       this.mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
     }
-    this.domain = "AgentServer";
     MXWrapper.setMXServer(this);
   }
 
