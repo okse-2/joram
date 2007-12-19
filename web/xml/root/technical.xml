@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">JORAM team</author>
+    <author email="joram-team@ow2.org">JORAM team</author>
     <title>Specification</title>
     <filename>technical.xml</filename>
     <pathtoroot>.</pathtoroot>
@@ -76,7 +76,7 @@
 	JORAM is welcome. JORAM, as an <strong>open source</strong> project,
 	also welcomes <strong>external contributions</strong>. Interested?
 	Contact <a
-	href="mailto:joram-team@objectweb.org">us</a> or check the
+	href="mailto:joram-team@ow2.org">us</a> or check the
         <a href="dev/corner.html">developer's corner</a>.
         </p>
 

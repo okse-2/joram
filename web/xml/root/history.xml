@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">JORAM team</author>
+    <author email="joram-team@ow2.org">JORAM team</author>
     <title>History</title>
     <filename>history.xml</filename>
     <pathtoroot>.</pathtoroot>
@@ -13,11 +13,11 @@
   <body>
     <s1 name="JORAM History">
 	<subtitle>September 25, 2007: JORAM 5.0.6 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, and in Maven repository.</p>
-	<p>It is tagged in CVS (JORAM_5_0_6), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+	<p>It is tagged in CVS (JORAM_5_0_6), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>September 25, 2007: JORAM 4.3.30 is released</subtitle>
-	<p>This version basically fixes some bug. It is tagged in CVS (JORAM_4_3_30), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version basically fixes some bug. It is tagged in CVS (JORAM_4_3_30), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>September 27th and 28th, 2007: JORAM Training Session, Grenoble, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
@@ -26,20 +26,20 @@
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/0709-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
 	<subtitle>April 26, 2007: JORAM 4.3.28 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug.</p>
-	<p>It is tagged in CVS (JORAM_4_3_28), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug.</p>
+	<p>It is tagged in CVS (JORAM_4_3_28), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>March 27, 2007: JORAM 4.3.26 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it provides somes improvments in the use of clustering destinations.</p>
-	<p>It is tagged in CVS (JORAM_4_3_26), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it provides somes improvments in the use of clustering destinations.</p>
+	<p>It is tagged in CVS (JORAM_4_3_26), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>March 08, 2007: JORAM 4.3.25 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.objectweb.org/">Jonas 4.8.5</a>.</p>
-	<p>It is tagged in CVS (JORAM_4_3_25), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.5</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_25), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>February 26, 2007: JORAM 4.3.22 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.objectweb.org/">Jonas 4.8.4</a>.</p>
-	<p>It is tagged in CVS (JORAM_4_3_22), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.4</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_22), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>September 27th and 28th, 2006: JORAM Training Session, Paris, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
@@ -48,16 +48,16 @@
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060927-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
 	<subtitle>September 20, 2006: JORAM 4.3.21 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a> and <a href="http://petals.objectweb.org/">Petals 1.0</a>.</p>
-	<p>It is tagged in CVS (JORAM_4_3_21), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a> and <a href="http://petals.ow2.org/">Petals 1.0</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_21), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>August 04, 2006: JORAM 4.3.20 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas 4.8</a>.</p>
-	<p>It is tagged in CVS (JORAM_4_3_20), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_20), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>July 11, 2006: JORAM 4.3.19 is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.objectweb.org/">Jonas</a> release (4.7.5).</p>
-	<p>It is tagged in CVS (JORAM_4_3_19), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas</a> release (4.7.5).</p>
+	<p>It is tagged in CVS (JORAM_4_3_19), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>June 14-15, 2006: JORAM Training Session, Paris, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
@@ -66,12 +66,12 @@
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060614-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
 	<subtitle>May 31, 2006: JORAM 4.3.18 version is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips.</p>
-	<p>It is tagged in CVS (JORAM_4_3_18), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips.</p>
+	<p>It is tagged in CVS (JORAM_4_3_18), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>March 19, 2006: JORAM 4.3.14 version is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically fixes some bug.</p>
-	<p>It is tagged in CVS (JORAM_4_3_14), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug.</p>
+	<p>It is tagged in CVS (JORAM_4_3_14), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>March 29-30, 2006: JORAM Training Session, Grenoble, France</subtitle>
 	<p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
@@ -80,14 +80,14 @@
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060329-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
       <subtitle>January 19, 2006: JORAM 4.3.12 version is released</subtitle>
-      <p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>. It is tagged in CVS (JORAM_4_3_12), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>. It is tagged in CVS (JORAM_4_3_12), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
         <subtitle>January 18, 2006: </subtitle>
         <p>JORAM is acknowledged as the best open source MOM implementation, according to <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging proprietary products from IBM, Sun and TIBCO.</p>
 
       <subtitle>November 3, 2005: JORAM 4.3.10 version is released</subtitle>
-      <p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes XML scripting capabilities and some bug fixes.</p>
-      <p>It is tagged in CVS (JORAM_4_3_10), the complete list of changes can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically includes XML scripting capabilities and some bug fixes.</p>
+      <p>It is tagged in CVS (JORAM_4_3_10), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
       <subtitle>October 25, 2005: JORAM 4.3.9 version is released</subtitle>
       <p>The Joram 4.3.9 maintenance release is now available for download. This version is embedded in the last JOnAS build (4.6.1). It fixes an incorrect behavior of subscriptions with nolocal attribute. It is tagged in CVS: JORAM_4_3_9.</p>
@@ -107,14 +107,14 @@
 	<a href="http://www.scalagent.com/pages/fr/datasheet/051129-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
 	<subtitle>October 21, 2005: JORAM 4.3.8 version is released</subtitle>
-	<p>This version is available for <a href="http://joram.objectweb.org/download/index.html">download</a>, it basically includes:</p>
+	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically includes:</p>
 	<ul>
 	  <li>extended JMX management,</li>
 	  <li>performance improvments,</li>
 	  <li>and several bug fixes.</li>
 	</ul>
 	<p>It is tagged in CVS (JORAM_4_3_8) and will be embedded in the next
-        Jonas release. The complete list can be viewed either in <a href="http://joram.objectweb.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+        Jonas release. The complete list can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
       <subtitle>September 26th, 2005: JORAM Survey Synthesis</subtitle>
       <p>A synthesis of the JORAM Survey is available 
@@ -186,7 +186,7 @@
 
         <p>This version has been partly sponsored by France Telecom R&amp;D</p>
 	<p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
-        its constant evolution a reality that anyone can benefit from. Contact the joram-team@objectweb.org if you want
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@ow2.org if you want
         to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
         proprietary messaging system.</p>
 
@@ -210,7 +210,7 @@
 	</ul>
         <p>This version has been sponsored by France Telecom R&amp;D</p>
 	<p> Sponsoring helps maintain a high quality message oriented middleware available to the community and makes
-        its constant evolution a reality that anyone can benefit from. Contact the joram-team@objectweb.org if you want
+        its constant evolution a reality that anyone can benefit from. Contact the joram-team@ow2.org if you want
         to participate and sustain the shared development effort of JORAM as the enterprise-class alternative to 
         proprietary messaging system.</p>
 

@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">JORAM team</author>
+    <author email="joram-team@ow2.org">JORAM team</author>
     <title>Team</title>
     <filename>team.xml</filename>
     <pathtoroot>.</pathtoroot>
@@ -39,7 +39,7 @@
 	<li>JC Waeny (<a href="http://www.dfjug.org">Brasilia Java Users Group</a>)</li>
       </ul>
 
-      <p>If you feel forgotten, please <a href="mailto:joram-team@objectweb.org">contact</a> us.</p>
+      <p>If you feel forgotten, please <a href="mailto:joram-team@ow2.org">contact</a> us.</p>
     </s1>
   </body>
 </document>
