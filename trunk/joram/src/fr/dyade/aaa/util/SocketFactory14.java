@@ -26,10 +26,29 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 /**
  * This class implements the SocketFactory interface for JDK since 1.4.
  */
-public class SocketFactory14 implements SocketFactory {
+public class SocketFactory14 extends SocketFactory {
+  /**
+   * The SocketFactory singleton for this class.
+   */
+  static SocketFactory factory;
+
+  /**
+   * Returns the SocketFactory singleton for this class.
+   *
+   * @return The SocketFactory singleton for this class.
+   */
+  public static SocketFactory getFactory() {
+    if (factory == null)
+      factory = new SocketFactory14();
+    return factory;
+  }
+
   /**
    *  Creates a stream socket and connects it to the specified port number at
    * the specified IP address. Try to establish the connection to the server
