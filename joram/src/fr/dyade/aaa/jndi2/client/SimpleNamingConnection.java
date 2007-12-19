@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,30 +31,73 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.util.SocketAddress;
+import fr.dyade.aaa.util.SocketFactory;
 
-public class SimpleNamingConnection 
-    implements NamingConnection {
+public class SimpleNamingConnection implements NamingConnection {
+  /**
+   *  Allows to define a specific factory for socket in order to by-pass
+   * compatibility problem between JDK version.
+   *  Currently there is two factories, The default factory one for JDK
+   * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
+   *  This value can be adjusted by setting
+   * <code>fr.dyade.aaa.jndi2.client.SocketFactory</code> property.
+   */
+  SocketFactory socketFactory = null;
 
-  private String hostName;
+  /**
+   * Name of the property that allow to define the SocketFactory class used for
+   * NamingConnection.
+   */
+  final static String SOCKET_FACTORY_PROPERTY = "fr.dyade.aaa.jndi2.client.SocketFactory";
 
-  private int port;
+  /**
+   *  Defines in milliseconds the timeout used during socket connection.
+   * The timeout must be > 0. A timeout of zero is interpreted as an infinite
+   * timeout. Default value is 0.
+   *  This value can be adjusted by setting
+   * <code>fr.dyade.aaa.jndi2.client.ConnectTimeout</code> property.
+   * <p>
+   */
+  int connectTimeout = 0;
 
-  private Hashtable env;
+  /**
+   * Name of the property that allow the configuration of the timeout
+   * during connect (by default 0, infinite timeout).
+   */ 
+  final static String TIMEOUT_PROPERTY = "fr.dyade.aaa.jndi2.client.ConnectTimeout";
 
-  private IOControl ioCtrl;
+  protected String hostName;
 
-  public SimpleNamingConnection(String hostName, 
-                                int port,
-                                Hashtable env) {
+  protected int port;
+
+  protected Hashtable env;
+
+  protected IOControl ioCtrl;
+
+  public SimpleNamingConnection() {}
+
+  public SimpleNamingConnection(String hostName, int port, Hashtable env) {
+    init(hostName, port, env);
+  }
+
+  public void init(String hostName, int port, Hashtable env) {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "SimpleNamingConnection.<init>(" + 
+                       "SimpleNamingConnection.init(" + 
                        hostName + ',' + 
                        port + ',' + 
                        env + ')');
     this.hostName = hostName;
     this.port = port;
     this.env = env;
+
+    connectTimeout = Integer.getInteger(TIMEOUT_PROPERTY,
+                                        connectTimeout).intValue();
+
+    String sfcn = System.getProperty(SOCKET_FACTORY_PROPERTY,
+                                     SocketFactory.DefaultFactory);
+    socketFactory = SocketFactory.getFactory(sfcn);
   }
 
   public final String getHostName() {
@@ -75,20 +118,22 @@ public class SimpleNamingConnection
   public synchronized JndiReply invoke(JndiRequest request) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "NamingConnection.invoke(" + request + ')');
+                       "SimpleNamingConnection.invoke(" + request + ')');
     open();
     try {
       ioCtrl.writeObject(request);
       return (JndiReply)ioCtrl.readObject();
     } catch (IOException ioe) {
       if (Trace.logger.isLoggable(BasicLevel.ERROR))
-        Trace.logger.log(BasicLevel.ERROR, "NamingConnection.receive()", ioe);
+        Trace.logger.log(BasicLevel.ERROR,
+                         "SimpleNamingConnection.receive()", ioe);
       NamingException ne = new NamingException(ioe.getMessage());
       ne.setRootCause(ioe);
       throw ne;
     } catch (ClassNotFoundException cnfe) {
       if (Trace.logger.isLoggable(BasicLevel.ERROR))
-        Trace.logger.log(BasicLevel.ERROR, "NamingConnection.receive()", cnfe);
+        Trace.logger.log(BasicLevel.ERROR,
+                         "SimpleNamingConnection.receive()", cnfe);
       NamingException ne = new NamingException(cnfe.getMessage());
       ne.setRootCause(cnfe);
       throw ne;
@@ -97,21 +142,18 @@ public class SimpleNamingConnection
     }
   }
 
-  private static String TIMEOUT_PROPERTY =
-      "fr.dyade.aaa.jndi2.client.SimpleNamingConnection.timeout";
-
   private void open() throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
+      Trace.logger.log(BasicLevel.DEBUG,
                        "SimpleNamingConnection.open()");
     try {
-      int timeout = Integer.getInteger(TIMEOUT_PROPERTY, 0).intValue();
-      Socket socket = new Socket();
-      socket.connect(new InetSocketAddress(hostName, port), timeout);
+      InetAddress addr = InetAddress.getByName(hostName);
+      Socket socket = socketFactory.createSocket(addr, port, connectTimeout);
       ioCtrl = new IOControl(socket);
     } catch (IOException exc) {
       if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, "NamingConnection.open()", exc);
+        Trace.logger.log(BasicLevel.DEBUG,
+                         "SimpleNamingConnection.open()", exc);
       NamingException exc2 = new NamingException(exc.getMessage());
       exc2.setRootCause(exc);
       throw exc2;
