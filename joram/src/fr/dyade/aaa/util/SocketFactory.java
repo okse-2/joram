@@ -24,16 +24,54 @@ package fr.dyade.aaa.util;
 import java.net.Socket;
 import java.net.InetAddress;
 import java.io.IOException;
+import java.lang.reflect.Method;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * This class wraps multiples implementations of the java.net.Socket class.
  */
-public interface SocketFactory {
+public abstract class SocketFactory {
+  /**
+   * Logger statique des objets de la classe SocketFactory.
+   */
+  static Logger logger = Debug.getLogger(SocketFactory.class.getName());
+
   /**
    * The default implementation of the SocketFactory interface is for 
    * JDK since 1.4.
    */
-  final String DefaultFactory = "fr.dyade.aaa.util.SocketFactory14";
+  public static final String DefaultFactory = "fr.dyade.aaa.util.SocketFactory14";
+
+  /**
+   * Returns the SocketFactory singleton for the specified default class.
+   *
+   * @return The SocketFactory singleton for the default class.
+   */
+  public static SocketFactory getDefaultFactory() {
+    return SocketFactory14.getFactory();
+  }
+
+  /**
+   * Returns the SocketFactory singleton for the specified class.
+   *
+   * @param  The classname for SocketFactory class.
+   * @return The SocketFactory singleton for the specified class.
+   */
+  public static SocketFactory getFactory(String sfcn) {
+    SocketFactory socketFactory = null;
+    try {
+      Class factoryClass = Class.forName(sfcn);
+      Method method = factoryClass.getMethod("getFactory", null);
+      socketFactory = (SocketFactory) method.invoke(null, null);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR,
+                 "Unable to instantiate SocketFactory: " + sfcn, exc);
+      socketFactory = getDefaultFactory();
+    }
+    return socketFactory;
+  }
 
   /**
    *  Creates a stream socket and connects it to the specified port number at
@@ -46,8 +84,8 @@ public interface SocketFactory {
    * @param port	the port number.
    * @param timeout	the timeout value to be used in milliseconds.
    */
-  Socket createSocket(InetAddress addr, int port,
-                      int timeout) throws IOException;
+  public abstract Socket createSocket(InetAddress addr, int port,
+                                      int timeout) throws IOException;
 
   /**
    *  Creates a socket and connects it to the specified remote host on the
@@ -63,7 +101,7 @@ public interface SocketFactory {
    * @param localPort	the local port the socket is bound to 
    * @param timeout	the timeout value to be used in milliseconds.
    */
-  Socket createSocket(InetAddress addr, int port,
-                      InetAddress localAddr, int localPort,
-                      int timeout) throws IOException;
+  public abstract Socket createSocket(InetAddress addr, int port,
+                                      InetAddress localAddr, int localPort,
+                                      int timeout) throws IOException;
 }
