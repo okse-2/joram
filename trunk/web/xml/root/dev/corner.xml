@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">joram-team</author>
+    <author email="joram-team@ow2.org">joram-team</author>
     <title>Developers' corner</title>
     <filename>corner.xml</filename>
     <pathtoroot>..</pathtoroot>
@@ -19,7 +19,7 @@
     <p>A contribution can be the development of a new feature, but also
     new or improved documentation, suggestions, feedbacks, debugging.</p>
     <p>Simply send your ideas, documents and developments (if any) to the 
-    <a href="mailto:joram-team@objectweb.org">joram team</a> .</p>
+    <a href="mailto:joram-team@ow2.org">joram team</a> .</p>
     <p></p>
 
     <p>The following resources are proposed to the advanced users and

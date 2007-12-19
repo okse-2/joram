@@ -4,7 +4,7 @@
 
 <document>
   <properties>
-    <author email="joram-team@objectweb.org">JORAM team</author>
+    <author email="joram-team@ow2.org">JORAM team</author>
     <title>Releases Info</title>
     <filename>versions.xml</filename>
     <pathtoroot>..</pathtoroot>
@@ -566,7 +566,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         
         <li><code>org.objectweb.joram.client.jms.admin.AdminModule.connect()</code>
         not working with XA factories, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-05/msg00022.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-05/msg00022.html">
         Bradely Mazurek</a>. The class has been updated.</li>
       </ul>
       </s2>
@@ -597,7 +597,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       <s2 name="Corrected bugs (latest: April 28, 2004)">
       <ul>
         <li>Broken SOAP connections not detected, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-04/msg00143.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-04/msg00143.html">
         Christian Neudorfer</a>. The corrected classes are
         <code>org.objectweb.joram.client.jms.soap.QueueSoapConnectionFactory</code>,
         <code>org.objectweb.joram.client.jms.soap.SoapConnectionFactory</code>,
@@ -605,7 +605,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         and <code>org.objectweb.joram.client.jms.admin.ObjectFactory</code>.
         </li>
         <li>Transacted sending not working from kJoram client, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00040.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-03/msg00040.html">
         André Bottaro</a>. The bug is corrected, the packages to update are
         <code>com.scalagent.kjoram.ksoap</code> and
         <code>com.scalagent.ksoap</code>.</li>
@@ -629,39 +629,39 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       <s2 name="Corrected bugs"> 
       <ul>
         <li>Blocking admin disconnection, found  by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-03/msg00028.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-03/msg00028.html">
         Martin Thompson</a>. When disconnecting an administrator from a stopped
         server, the <code>disconnect()</code> call would block and never
         return. The bug is corrected, the updated class is
         <code>org.objectweb.joram.client.jms.admin.AdminModule</code>.</li>
         <li>Improper construction of the <code>mom.jar</code> library, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00102.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00102.html">
         Nigel Rantor</a>. The <code>fr.dyade.aaa.jndi2.distributed</code> 
         package was not included in the jar construction, preventing any
         distributed JNDI conf to work. An updated <code>joram.xml</code> build
         file has been submitted under <code>src/</code>.</li>
         <li>kJoram compiling issues, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00058.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00058.html">
         Stanley</a>. Due to improper build setup and JORAM 4.0 new 
         connection management, kJoram client classes could not be compiled 
         and used anymore. Many corrections have been made in the CVS
         tree, to get them please update <code>com/scalagent</code>.</li>
         <li>Blocking connection request, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00090.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00090.html">
         Piero de Salvia</a>. In case a user does not exist, trying to
         open a connection for this user would block instead of throwing a 
         security exception. The bug is corrected, the updated class is
         <code>org.objectweb.joram.mom.proxies.OpenConnectionNot</code>.
         </li>
         <li>Improper connection close, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00067.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00067.html">
         Christian Neudorfer</a>. Due to a static timer, it was not possible
         to open a new connection after having closed one in a same process. 
         Bug is corrected, the impacted classe is 
         <code>org.objectweb.joram.client.jms.Connection</code>.
         </li>
         <li>SOAP connections failures never detected, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00060.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00060.html">
         Christian Neudorfer</a>. Despite the setting of the connection pending
         timer, a failing SOAP connection was never detected due to an 
         improper reconstruction of SOAP connection factories retrieved from
@@ -673,7 +673,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         </li>
         <li>Incorrect target for launching JORAM as a SOAP service in the 
         samples <code>build.xml</code> file, found  by 
-        <a href="http://www.objectweb.org/wws/arc/joram/2004-02/msg00053.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2004-02/msg00053.html">
         Christian Neudorfer</a>. The target still refers to the
         old <code>fr.dyade.aaa.joram</code> package instead of refering to
         <code>org.objectweb.joram.client.jms</code>. An updated version
@@ -731,20 +731,20 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         class is <code>fr.dyade.aaa.mom.dest.QueueImpl</code>.</li>
         <li>Expired "receive" requests monitored as pending requests, as 
         described
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00064.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-12/msg00064.html">
         here</a>. When monitoring a queue's requests, the expired requests are
         removed and thus not listed as pending requests anymore. The updated
         class is <code>fr.dyade.aaa.mom.dest.QueueImpl</code>.</li>
         <li>Automatic deny request sent to already deleted temporary queue, 
         found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00042.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-12/msg00042.html">
         Gerald Schröder</a>. This bug had no influence on a server's
         operations, however it generated the logging of ERROR messages. It
         is corrected, the class to update is
         <code>fr.dyade.aaa.mom.proxies.ClientContext</code>.</li>
         <li><code>NullPointerException</code> thrown by a single user's proxy
         which subscribed to various leafs of a same topic hierarchy, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-12/msg00019.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-12/msg00019.html">
         Mark Anderson</a>. This bug is due to messages not being cloned in the
         topic leafs and to an improper processing of duplicated incoming
         messages. It has been corrected, the impacted classes
@@ -759,7 +759,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         </li>
         <li>Messages delivered in an incorrect order after a rollback or
         disconnection, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-11/msg00080.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-11/msg00080.html">
         Franck Delporte</a>. In some cases messages were delivered in an order
         different from the original delivery order after a client rollback or
         disconnection. The bug is corrected, the updated classes are
@@ -769,7 +769,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.
         </li>
         <li>Message delivered twice, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-11/msg00065.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-11/msg00065.html">
         Dirk Muthorst</a>. In a very specific case, persistent messages might
         be duplicated by the server. It occured when a message which arrived
         for example on a queue, was persisted alone, then consumed and denied
@@ -798,7 +798,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       <s2 name="Corrected bugs">
       <ul>
         <li>Recovery issue, found by 
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-10/msg00069.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-10/msg00069.html">
         Dirk Muthorst</a>. When stopping a JORAM server during a PTP exchange,
         and re-starting it, a <code>NullPointerException</code> was happening
         from time to time. This was due to the fact that the consumer's 
@@ -837,7 +837,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       <ul>
         <li>Impossible to bind <code>TopicSoapConnectionFactory</code> objects
         when using JORAM JNDI through the SOAP protocol, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-10/msg00003.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-10/msg00003.html">
         Sabrina Tardelli</a>. The bug is corrected, the impacted classes are
         <code>fr.dyade.aaa.joram.soap.TopicSoapConnectionFactory</code> and
         <code>fr.dyade.aaa.joram.soap.QueueSoapConnectionFactory</code>.</li>
@@ -886,15 +886,15 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
         <code>fr.dyade.aaa.mom.dest.AdminTopicImpl</code>.</li>
         <li>Bug related to the <code>MessageConsumer</code>
         <code>noLocal</code> attribute, found by 
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00020.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-09/msg00020.html">
         Tony Thompson</a>. The bug has been corrected, the impacted class is
         <code>fr.dyade.aaa.mom.proxies.ClientSubscription</code>.</li>
         <li>Invalid precedence on naming properties (as noticed
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-09/msg00015.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-09/msg00015.html">
         here</a>). The correct order is now taken into account. Modifications
         occured in the <code>fr.dyade.aaa.jndi2</code> package.</li>
         <li>Blocking <code>AdminItf.stopServer</code> method (as noticed
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-08/msg00021.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-08/msg00021.html">
         here</a>). The processing of this method disapeared from the
         administration topic server side since release 3.5, probably due to an
         invalid CVS merge. The code is back
@@ -929,7 +929,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       <li><code>ClassCastException</code> occuring in
         <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code> when subscribing to
         a non-readable topic, found by
-        <a href="http://www.objectweb.org/wws/arc/joram/2003-06/msg00053.html">
+        <a href="http://www.ow2.org/wws/arc/joram/2003-06/msg00053.html">
         Prashanth Kasturi</a>. The bug is corrected, the impacted class is
         <code>fr.dyade.aaa.mom.proxies.ProxyImpl</code>.</li>
       </ul>
