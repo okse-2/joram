@@ -44,12 +44,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  *  <code>PoolNetwork</code> is an implementation of <code>StreamNetwork</code>
  * class that manages multiple connection.
  */
-public class PoolNetwork extends StreamNetwork {
+public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   /** */
   WakeOnConnection wakeOnConnection = null; 
   /** */
@@ -59,7 +60,7 @@ public class PoolNetwork extends StreamNetwork {
   /** */
   WatchDog watchDog = null;
 
-  static int nbMaxCnx;
+  int nbMaxCnx;
   int nbActiveCnx = 0;
   NetSession activeSessions[];
   long current = 0L;
@@ -90,12 +91,28 @@ public class PoolNetwork extends StreamNetwork {
     // Creates a session for all domain's server.
     sessions = new NetSession[servers.length];
     for (int i=0; i<sessions.length; i++) {
-      if (servers[i] != AgentServer.getServerId())
+      if (servers[i] != AgentServer.getServerId()) {
         sessions[i] = new NetSession(getName(), servers[i]);
+
+        try {
+          MXWrapper.registerMBean(new NetSessionWrapper(this, servers[i]),
+                                  "AgentServer", getMBeanName(servers[i]));
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+        }
+      }
     }
     wakeOnConnection = new WakeOnConnection(getName(), logmon);
     dispatcher = new Dispatcher(getName(), logmon);
     watchDog = new WatchDog(getName(), logmon);
+  }
+
+  private String getMBeanName(short sid) {
+    return new StringBuffer()
+      .append("server=").append(AgentServer.getName())
+      .append(",cons=").append(name)
+      .append(",session=netSession#").append(sid)
+      .toString();
   }
 
   /**
@@ -149,7 +166,16 @@ public class PoolNetwork extends StreamNetwork {
     if (watchDog != null) watchDog.stop();
     for (int i=0; i<sessions.length; i++) {
       // May be we can take in account only "active" sessions.
-      if (sessions[i]!= null) sessions[i].stop();
+      if (sessions[i] != null) {
+        sessions[i].stop();
+
+        try {
+          MXWrapper.unregisterMBean("AgentServer",
+                                    getMBeanName(sessions[i].sid));
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+        }
+      }
     }
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
@@ -171,6 +197,34 @@ public class PoolNetwork extends StreamNetwork {
 
   final NetSession getSession(short sid) {
     return sessions[index(sid)];
+  }
+
+  public int getNbMaxActiveSession() {
+    return nbMaxCnx;
+  }
+
+  public int getNbActiveSession() {
+    return nbActiveCnx;
+  }
+
+  final boolean isSessionRunning(short sid) {
+    return sessions[index(sid)].isRunning();
+  }
+
+  final int getSessionNbWaitingMessages(short sid) {
+    return sessions[index(sid)].getNbWaitingMessages();
+  }
+
+  final  int getNbMessageSent(short sid) {
+    return sessions[index(sid)].getNbMessageSent();
+  }
+
+  final  int getNbMessageReceived(short sid) {
+    return sessions[index(sid)].getNbMessageReceived();
+  }
+
+  final  int getNbAckSent(short sid) {
+    return sessions[index(sid)].getNbAckSent();
   }
 
   /**
@@ -226,6 +280,169 @@ public class PoolNetwork extends StreamNetwork {
         }
       }
       throw new NoSuchElementException();
+    }
+  }
+
+  final class WakeOnConnection extends Daemon {
+    ServerSocket listen = null;
+
+    WakeOnConnection(String name, Logger logmon) throws IOException {
+      super(name + ".wakeOnConnection");
+      // creates a server socket listening on configured port
+      listen = createServerSocket();
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
+    }
+
+    protected void close() {
+      try {
+	listen.close();
+      } catch (Exception exc) {}
+      listen = null;
+    }
+
+    protected void shutdown() {
+      close();
+    }
+
+    /**
+     * 
+     */
+    public void run() {
+      /** Connected socket. */
+      Socket sock = null;
+
+      try {
+	while (running) {
+	  try {
+	    canStop = true;
+
+	    // Get the connection
+	    try {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", waiting connection");
+
+	      sock = listen.accept();
+	    } catch (IOException exc) {
+              if (running)
+                this.logmon.log(BasicLevel.ERROR,
+                                this.getName() +
+                                ", error during waiting connection", exc);
+	      continue;
+	    }
+	    canStop = false;
+
+	    setSocketOption(sock);
+
+            Boot boot = readBoot(sock.getInputStream());
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() + ", connection setup from #" +
+                              boot.sid);
+            getSession(boot.sid).start(sock, boot.boot);
+	  } catch (Exception exc) {
+	    this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", bad connection setup", exc);
+	  }
+	}
+      } finally {
+        finish();
+      }
+    }
+  }
+
+  final class Dispatcher extends Daemon {
+    Dispatcher(String name, Logger logmon) {
+      super(name + ".dispatcher");
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
+    }
+
+    protected void close() {}
+
+    protected void shutdown() {}
+
+    public void run() {
+      Message msg = null;
+      
+      try {
+        while (running) {
+          canStop = true;
+
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + ", waiting message");
+          try {
+            msg = qout.get();
+          } catch (InterruptedException exc) {
+            continue;
+          }
+          canStop = false;
+          if (! running) break;
+
+          // Send the message
+          getSession(msg.getDest()).send(msg);
+          qout.pop();
+
+          Thread.yield();
+        }
+      } finally {
+        finish();
+      }
+    }
+  }
+
+  final class WatchDog extends Daemon {
+   /** Use to synchronize thread */
+    private Object lock;
+
+    WatchDog(String name, Logger logmon) {
+      super(name + ".watchdog");
+      lock = new Object();
+      // Overload logmon definition in Daemon
+      this.logmon = logmon;
+    }
+
+    protected void close() {}
+
+    protected void shutdown() {
+      wakeup();
+    }
+
+    void wakeup() {
+      synchronized (lock) {
+	lock.notify();
+      }
+    }
+
+    public void run() {
+      try {
+        synchronized (lock) {
+          while (running) {
+            try {
+              lock.wait(WDActivationPeriod);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG,
+                                this.getName() + ", activated");
+            } catch (InterruptedException exc) {
+              continue;
+            }
+
+            if (! running) break;
+
+            for (int sid=0; sid<sessions.length; sid++) {
+              if ((sessions[sid] != null) &&
+                  (sessions[sid].sendList.size() > 0) &&
+                  (! sessions[sid].running)) {
+                sessions[sid].start();
+              }
+            }
+          }
+        }
+      } finally {
+        finish();
+      }
     }
   }
 
@@ -298,6 +515,46 @@ public class PoolNetwork extends StreamNetwork {
      */
     public final String getName() {
       return name;
+    }
+
+    public short getRemoteSID() {
+      return sid;
+    }
+
+    /**
+     * Tests if the session is connected.
+     *
+     * @return	true if this session is connected; false otherwise.
+     */
+    public boolean isRunning() {
+      return running;
+    }
+
+    /**
+     * Gets the number of waiting messages to send for this session.
+     *
+     * @return	the number of waiting messages.
+     */
+    int getNbWaitingMessages() {
+      return sendList.size();
+    }
+
+    int nbMessageSent = 0;
+
+    int getNbMessageSent() {
+      return nbMessageSent;
+    }
+
+    int nbMessageReceived = 0;
+
+    int getNbMessageReceived() {
+      return nbMessageReceived;
+    }
+
+    int nbAckSent = 0;
+
+    int getNbAckSent() {
+      return nbAckSent;
     }
 
     void start() {
@@ -594,7 +851,7 @@ public class PoolNetwork extends StreamNetwork {
     }
 
     /**
-     * Removes all messages in sendList previous to the ack'ed one.
+     * Removes the acknowledged notification from waiting list.
      * Be careful, messages in sendList are not always in stamp order.
      * Its method should not be synchronized, it scans the list from
      * begin to end, and it removes always the first element. Other
@@ -642,6 +899,7 @@ public class PoolNetwork extends StreamNetwork {
       long currentTimeMillis = System.currentTimeMillis();
 
       if (msg.not != null) {
+        nbMessageSent += 1;
         sendList.addElement(msg);
 
         if ((msg.not.expiration > 0) &&
@@ -659,6 +917,8 @@ public class PoolNetwork extends StreamNetwork {
           }
           return;
         }
+      } else {
+        nbAckSent += 1;
       }
 
       if (sock == null) {
@@ -683,6 +943,7 @@ public class PoolNetwork extends StreamNetwork {
       ack.stamp = stamp;
 
       qout.push(ack);
+      qout.validate();
     }
 
     final private synchronized void transmit(Message msg,
@@ -745,11 +1006,14 @@ public class PoolNetwork extends StreamNetwork {
           // the message get a new stamp to be delivered).
           int stamp = msg.getStamp();
           if (msg.not != null) {
+            nbMessageReceived += 1;
             deliver(msg);
             ack(stamp);
           } else {
             doAck(stamp);
           }
+
+          Thread.yield();
 	}
       } catch (EOFException exc) {
         if (running)
@@ -891,168 +1155,6 @@ public class PoolNetwork extends StreamNetwork {
     }
   }
 
-  final class WakeOnConnection extends Daemon {
-    ServerSocket listen = null;
-
-    WakeOnConnection(String name, Logger logmon) throws IOException {
-      super(name + ".wakeOnConnection");
-      // creates a server socket listening on configured port
-      listen = createServerSocket();
-      // Overload logmon definition in Daemon
-      this.logmon = logmon;
-    }
-
-    protected void close() {
-      try {
-	listen.close();
-      } catch (Exception exc) {}
-      listen = null;
-    }
-
-    protected void shutdown() {
-      close();
-    }
-
-    /**
-     * 
-     */
-    public void run() {
-      /** Connected socket. */
-      Socket sock = null;
-
-      try {
-	while (running) {
-	  try {
-	    canStop = true;
-
-	    // Get the connection
-	    try {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", waiting connection");
-
-	      sock = listen.accept();
-	    } catch (IOException exc) {
-              if (running)
-                this.logmon.log(BasicLevel.ERROR,
-                                this.getName() +
-                                ", error during waiting connection", exc);
-	      continue;
-	    }
-	    canStop = false;
-
-	    setSocketOption(sock);
-
-            Boot boot = readBoot(sock.getInputStream());
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG,
-                              this.getName() + ", connection setup from #" +
-                              boot.sid);
-            getSession(boot.sid).start(sock, boot.boot);
-	  } catch (Exception exc) {
-	    this.logmon.log(BasicLevel.ERROR,
-                            this.getName() + ", bad connection setup", exc);
-	  }
-	}
-      } finally {
-        finish();
-      }
-    }
-  }
-
-  final class Dispatcher extends Daemon {
-    Dispatcher(String name, Logger logmon) {
-      super(name + ".dispatcher");
-      // Overload logmon definition in Daemon
-      this.logmon = logmon;
-    }
-
-    protected void close() {}
-
-    protected void shutdown() {}
-
-    public void run() {
-      Message msg = null;
-      
-      try {
-        while (running) {
-          canStop = true;
-
-          if (this.logmon.isLoggable(BasicLevel.DEBUG))
-            this.logmon.log(BasicLevel.DEBUG,
-                            this.getName() + ", waiting message");
-          try {
-            msg = qout.get();
-          } catch (InterruptedException exc) {
-            continue;
-          }
-          canStop = false;
-          if (! running) break;
-
-          // Send the message
-          getSession(msg.getDest()).send(msg);
-          qout.pop();
-        }
-      } finally {
-        finish();
-      }
-    }
-  }
-
-  final class WatchDog extends Daemon {
-   /** Use to synchronize thread */
-    private Object lock;
-
-    WatchDog(String name, Logger logmon) {
-      super(name + ".watchdog");
-      lock = new Object();
-      // Overload logmon definition in Daemon
-      this.logmon = logmon;
-    }
-
-    protected void close() {}
-
-    protected void shutdown() {
-      wakeup();
-    }
-
-    void wakeup() {
-      synchronized (lock) {
-	lock.notify();
-      }
-    }
-
-    public void run() {
-      try {
-        synchronized (lock) {
-          while (running) {
-            try {
-              lock.wait(WDActivationPeriod);
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", activated");
-            } catch (InterruptedException exc) {
-              continue;
-            }
-
-            if (! running) break;
-
-            for (int sid=0; sid<sessions.length; sid++) {
-              if ((sessions[sid] != null) &&
-                  (sessions[sid].sendList.size() > 0) &&
-                  (! sessions[sid].running)) {
-                sessions[sid].start();
-              }
-            }
-          }
-        }
-      } finally {
-        finish();
-      }
-    }
-  }
-
-
   final void writeBoot(OutputStream out) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", writeBoot: " + getBootTS());
@@ -1121,5 +1223,76 @@ public class PoolNetwork extends StreamNetwork {
       logmon.log(BasicLevel.DEBUG, getName() + ", readAck:" + boot);
 
     return boot;
+  }
+}
+
+final class NetSessionWrapper implements NetSessionWrapperMBean {
+  PoolNetwork network = null;
+  short sid;
+
+  NetSessionWrapper(PoolNetwork network, short sid) {
+    this.network = network;
+    this.sid = sid;
+  }
+
+//   /**
+//    * Returns this session's name.
+//    *
+//    * @return this session's name.
+//    */
+//   public String getName() {
+//     return session.getName();
+//   }
+
+  public short getRemoteSID() {
+    return sid;
+  }
+
+
+  /**
+   * Tests if the session is connected.
+   *
+   * @return	true if this session is connected; false otherwise.
+   */
+  public boolean isRunning() {
+    return network.isSessionRunning(sid);
+  }
+
+
+  /**
+   * Gets the number of waiting messages to send for this session.
+   *
+   * @return	the number of waiting messages.
+   */
+  public int getNbWaitingMessages() {
+    return network.getSessionNbWaitingMessages(sid);
+  }
+
+
+//   /** Causes this engine to begin execution */
+//   public void start() throws Exception;
+
+//   /** Forces the engine to stop executing */
+//   public void stop();
+
+//   /**
+//    * Returns a string representation of this consumer.
+//    *
+//    * @return	A string representation of this consumer. 
+//    */
+//   public String toString() {
+//     return session.;
+//   }
+
+  public int getNbMessageSent() {
+    return network.getNbMessageSent(sid);
+  }
+
+  public int getNbMessageReceived() {
+    return network.getNbMessageReceived(sid);
+  }
+
+  public int getNbAckSent() {
+    return network.getNbAckSent(sid);
   }
 }
