@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,11 +41,13 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.stream.StreamUtil;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.SocketFactory;
+import fr.dyade.aaa.util.ReliableTcpConnection;
 
 import fr.dyade.aaa.util.Debug;
-import fr.dyade.aaa.util.ReliableTcpConnection;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class ReliableTcpClient {
   public static Logger logger = Debug.getLogger(ReliableTcpClient.class.getName());
@@ -59,11 +61,11 @@ public class ReliableTcpClient {
 
   protected FactoryParameters params;
 
-  private String name;
+  protected String name;
   
   private String password;
 
-  private int key;
+  protected int key;
 
   private ReliableTcpConnection connection;
 
@@ -223,32 +225,39 @@ public class ReliableTcpClient {
     }
   }
 
-  protected Socket createSocket(String hostName, int port) 
-    throws Exception {
-    
-    String addr = params.outLocalAddressIP;
-    if (addr == null) {
-      addr = "localhost";
-    }
-    int localPort = params.outLocalAddressPort;
+  protected Socket createSocket(String hostname, int port) throws Exception {
+    InetAddress addr = InetAddress.getByName(hostname);
+
+    InetAddress outLocalAddr = null;
+    String outLocalAddrStr = params.outLocalAddress;
+    if (outLocalAddrStr != null)
+      outLocalAddr = InetAddress.getByName(outLocalAddrStr);
+
+    int outLocalPort = params.outLocalPort;
     
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient.createSocket(" + hostName + "," + port
-          + ") on interface " + addr + ":" + localPort);
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "ReliableTcpClient[" + name + ',' + key + "].createSocket(" + hostname + "," + port
+          + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
 
-    return new Socket(hostName, port, InetAddress.getByName(addr), localPort);
+    SocketFactory factory = SocketFactory.getFactory(params.socketFactory);
+    Socket socket = factory.createSocket(addr, port,
+                                         outLocalAddr, outLocalPort,
+                                         params.connectingTimer *1000);
+
+    return socket;
   }
 
-  private void doConnect(String hostName, int port) 
-    throws Exception, JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + name + ',' + key + "].doConnect(" + hostName + ',' + port + ')');
+  private void doConnect(String hostname, int port) throws Exception, JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "ReliableTcpClient[" + name + ',' + key + "].doConnect(" + hostname + "," + port + ")");
+    Socket socket = createSocket(hostname, port);
 
-    Socket socket = createSocket(hostName, port);    
-    socket.setTcpNoDelay(true);
-    socket.setSoTimeout(0);
-    socket.setSoLinger(true, 1000);
+    socket.setTcpNoDelay(params.TcpNoDelay);
+    socket.setSoTimeout(params.SoTimeout);
+    if (params.SoLinger >= 0)
+      socket.setSoLinger(true, params.SoLinger);
     
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     OutputStream os = socket.getOutputStream();
