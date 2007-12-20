@@ -1,3 +1,27 @@
+###############################################################################
+# 2007/12/19 | Joram 5.0.6 tag.
+###############################################################################
++==============================================================================
+| 2007/12/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram TCP connection:
+   - Use SocketFactory to solve compatibility issues.
+   - Adds multiple TCP parameters in FactoryParameters : TcpNoDelay, SoLinger
+     and SoTimeOut.
+   - Allows binding for local socket through outLocalAddress and outLocalPort
+     attributes in FactoryParameters.
+2. JNDI TCP connection:
+   - Use SocketFactory to solve compatibility issues.
+3. Network components
+   - Use SocketFactory to solve compatibility issues.
+   - Allows binding for socket through inLocalAddress, outLocalAddress and
+     outLocalPort properties.
+   - Adds specific MBeans for PoolNetwork monitoring.
++==============================================================================
+| 2007/12/06 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: avoid "IllegalStateException: Timer has been cancelled" during
+restart. 
 +==============================================================================
 | 2007/12/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -48,7 +72,7 @@ AtomicCounter class.
 +------------+-----------------------------------------------------------------
  add serialVersionUID.
 ###############################################################################
-# 2006/09/25 | Joram 5.0.6 tag.
+# 2007/09/25 | Joram 5.0.6 tag.
 ###############################################################################
 +==============================================================================
 | 2007/09/20 | Andre Freyssinet - ScalAgent Distributed Technologies 
@@ -61,7 +85,7 @@ AtomicCounter class.
 The ':' character is forbidden by Windows file system and it leads to
 persistancy fault.
 ###############################################################################
-# 2006/08/07 | Joram 5.0.5 tag.
+# 2007/08/07 | Joram 5.0.5 tag.
 ###############################################################################
 +==============================================================================
 | 2007/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
@@ -107,7 +131,7 @@ Replace getTempDestinations in ClientContext.
    of Serializable.
  - Bug fix: delete destination.
 ###############################################################################
-# 2006/07/10 | Joram 5.0.4 tag.
+# 2007/07/10 | Joram 5.0.4 tag.
 ###############################################################################
 +==============================================================================
 | 2007/07/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
@@ -121,7 +145,7 @@ Replace getTempDestinations in ClientContext.
  Implements Serializable interface in AdministeredObjetcs in order to fit the 
 JNDI specification.
 ###############################################################################
-# 2006/03/27 | Joram 5.0.3 tag.
+# 2007/03/27 | Joram 5.0.3 tag.
 ###############################################################################
 +==============================================================================
 | 2007/06/27 | Nicolas Tachker - ScalAgent Distributed Technologies 
@@ -175,7 +199,7 @@ arrival counter is not correct after a reload.
  New architecture for Joram destinations and Implementations.
  Bug fixes.
 ###############################################################################
-# 2006/03/27 | Joram 5.0.2 tag.
+# 2007/03/27 | Joram 5.0.2 tag.
 ###############################################################################
 +==============================================================================
 | 2007/03/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
@@ -186,7 +210,7 @@ factories.
  Adds clustering facilities in administered objects: connection factories and
 destinations.
 ###############################################################################
-# 2006/03/05 | Joram 4.3.25 tag.
+# 2007/03/05 | Joram 4.3.25 tag.
 ###############################################################################
 +==============================================================================
 | 2007/03/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
