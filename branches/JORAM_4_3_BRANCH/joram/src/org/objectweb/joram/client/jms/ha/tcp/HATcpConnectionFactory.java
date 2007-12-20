@@ -23,7 +23,9 @@
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import org.objectweb.joram.client.jms.*;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
 
 /**
  * An <code>XATcpConnectionFactory</code> instance is a factory of
@@ -39,6 +41,10 @@ public class HATcpConnectionFactory
     super(url);
   }
 
+  public HATcpConnectionFactory() {
+	super();  
+  }
+  
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
    *
