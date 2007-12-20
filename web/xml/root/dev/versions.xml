@@ -11,7 +11,32 @@
   </properties>
 
   <body>
-    <s1 name="JORAM release 5.0 (September 25, 2007)">
+    <s1 name="JORAM maintenance release 5.0.7 (December 19, 2007)">
+      <p>Joram 5.0.7 is available in the CVS repository with tag JORAM_5_0_7.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Add MySQLDBTransaction and DerbyDBTransaction.</li>
+          <li>Best handling of TTL and priority of the JMS messages.</li>
+          <li>JMX enhancement: ClientSubscriptionMBean added.</li>
+          <li>Asynchronous subscription request.</li>
+          <li>Handling of socket binding either for Joram TCP connections
+              and network components.</li>
+          <li>Handling of serialVersionUID.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Removes NPE during getThreshold if threshold is not set.</li>
+          <li>Synchronization issue in Connection with id generation.</li>
+          <li>Handling of HA connection factories through JNDI.</li>
+          <li>Handling of [NOT] IN in selector.</li>
+          <li>DMQ behavior.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM release 5.0.6 (September 25, 2007)">
       <p>Joram 5.0 is available in the CVS repository with tag JORAM_5_0_6.
        This release provides many features and changes:</p>
       <s2 name="New features and improvments">

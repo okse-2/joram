@@ -20,23 +20,8 @@
 
   <s1 name="Call for contributions">
 
-    <subtitle>C/C++ client sample</subtitle>
-    <p>The usual communication protocol between a client application and
-    a Joram server is based on TCP and Java serialization. Since release
-    3.4, a new protocol based on SOAP has been added. It gets rid of the 
-    Java serialization, and thus opens the door to connecting non Java
-    applications.</p>
-    <p>In order to exhibit Joram as a true MOM allowing to interconnect 
-    heterogenous applications, a sample involving a C or C++ client
-    would be a great contribution!</p>
-
-    <subtitle>Database message persistence</subtitle>
-    <p>The Joram persistence is a complex mechanism involving internal
-    transactions, for guaranteeing atomicity and coherence, and which support
-    is file based. This mechanism has been improved in the 3.5 release, 
-    allowing better performances and flexibility.</p>
-    <p>The next evolution could be to persist the messages in a database rather
-    than on file.</p>
+    <subtitle>Tutorial and documentation</subtitle>
+    <p>If you wish to contribute a translation, feel free to contact us.</p>
 
   </s1>
 
