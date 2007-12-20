@@ -114,7 +114,7 @@ sub error {
 
     # footer
     print $q->hr;
-    print $q->p('<address><a href="mailto:webmaster@objectweb.org">webmaster@objectweb.org</a></address>');
+    print $q->p('<address><a href="mailto:webmaster@ow2.org">webmaster@objectweb.org</a></address>');
     print $q->end_html;
 
     exit 1;
