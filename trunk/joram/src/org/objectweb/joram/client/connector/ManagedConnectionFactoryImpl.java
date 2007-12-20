@@ -137,12 +137,12 @@ public class ManagedConnectionFactoryImpl
    * value can either be a machine name, such as "java.sun.com", or a textual
    * representation of its IP address.
    */
-  public String outLocalAddressIP = null;
+  public String outLocalAddress = null;
 
   /**
    * This is the local IP address port on which the TCP connection is activated
    */
-  public int outLocalAddressPort = 0;
+  public int outLocalPort = 0;
 
   /**
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
@@ -198,11 +198,11 @@ public class ManagedConnectionFactoryImpl
       if (multiThreadSyncDelay > 0) {
         fp.multiThreadSyncDelay = multiThreadSyncDelay;
       }
-      if (outLocalAddressPort > 0) {
-        fp.outLocalAddressPort = outLocalAddressPort;
+      if (outLocalPort > 0) {
+        fp.outLocalPort = outLocalPort;
       }
-      if (outLocalAddressIP != null) {
-        fp.outLocalAddressIP = outLocalAddressIP;
+      if (outLocalAddress != null) {
+        fp.outLocalAddress = outLocalAddress;
       }
     }
   }
@@ -630,19 +630,21 @@ public class ManagedConnectionFactoryImpl
     return password;
   }
   
-  public java.lang.String getOutLocalAddressIP() {
-    return outLocalAddressIP;
+  public java.lang.String getOutLocalAddress() {
+    return outLocalAddress;
   }
 
-  public java.lang.Integer getOutLocalAddressPort() {
-    return new Integer(outLocalAddressPort);
+  public java.lang.Integer getOutLocalPort() {
+    return new Integer(outLocalPort);
   }
 
-  public void setOutLocalAddressIP(java.lang.String outLocalAddressIP) {
-    this.outLocalAddressIP = outLocalAddressIP;
+  public void setOutLocalAddress(java.lang.String outLocalAddress) {
+    this.outLocalAddress = null;
+    if ((outLocalAddress != null) && (outLocalAddress.length() > 0))
+      this.outLocalAddress = outLocalAddress;
   }
 
-  public void setOutLocalAddressPort(java.lang.Integer outLocalAddressPort) {
-    this.outLocalAddressPort = outLocalAddressPort.intValue();
+  public void setOutLocalPort(java.lang.Integer outLocalPort) {
+    this.outLocalPort = outLocalPort.intValue();
   }
 }

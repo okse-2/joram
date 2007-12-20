@@ -178,12 +178,13 @@
               <config-property-value>true</config-property-value>
             </config-property>
             <config-property>
-              <config-property-name>outLocalAddressIP</config-property-name>
+              <config-property-name>outLocalAddress</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
-              <config-property-value>localhost</config-property-value>
+              <!-- Empty value corresponds to INADDRANY (wildcard address) -->
+              <config-property-value></config-property-value>
             </config-property>
             <config-property>
-              <config-property-name>outLocalAddressPort</config-property-name>
+              <config-property-name>outLocalPort</config-property-name>
               <config-property-type>java.lang.Integer</config-property-type>
               <config-property-value>0</config-property-value>
             </config-property>

@@ -127,8 +127,7 @@ public class DefaultConnectionManager
     }
   }
 
-  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , 
-                                    ManagedConnectionFactoryImpl mcf) {
+  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " setFactoryParameters(" + factory + "," + mcf + ")");   
@@ -138,8 +137,8 @@ public class DefaultConnectionManager
     factory.getParameters().asyncSend = mcf.isAsyncSend();
     factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
     factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
-    factory.getParameters().outLocalAddressIP = mcf.getOutLocalAddressIP();
-    factory.getParameters().outLocalAddressPort = mcf.getOutLocalAddressPort().intValue();
+    factory.getParameters().outLocalAddress = mcf.getOutLocalAddress();
+    factory.getParameters().outLocalPort = mcf.getOutLocalPort().intValue();
     
   }
 
