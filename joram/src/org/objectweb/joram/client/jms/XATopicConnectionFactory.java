@@ -54,6 +54,10 @@ public abstract class XATopicConnectionFactory
     super(url);
   }
 
+  public XATopicConnectionFactory() {
+	  super();
+  }
+  
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "XATCF:" + params.getHost() + "-" + params.getPort();

@@ -54,7 +54,9 @@ public abstract class XAQueueConnectionFactory
     super(url);
   }
 
-
+  public XAQueueConnectionFactory() {
+	  super();
+  }
 
   /** Returns a string view of the connection factory. */
   public String toString() {
