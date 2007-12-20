@@ -35,9 +35,9 @@
       <p>JORAM is used by JOnAS to undergo the J2EE 1.4 certification, and has passed all tests concerning JMS 1.1 certification in this TCK.</p>
    
       <s2 name="Latest News">
-	<subtitle>September 25, 2007: JORAM 5.0.6 is released</subtitle>
+	<subtitle>December 19, 2007: JORAM 5.0.7 is released</subtitle>
 	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-	<p>It is tagged in CVS (JORAM_5_0_6), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>It is tagged in CVS (JORAM_5_0_7), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
 	<subtitle>September 25, 2007: JORAM 4.3.30 is released</subtitle>
 	<p>This version basically fixes some bug. It is tagged in CVS (JORAM_4_3_30), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
@@ -47,10 +47,6 @@
 	<p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
 	<p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
 	<p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/0709-JORAM-formation.pdf">(PDF, in french only)</a></p>
-
-	<subtitle>April 26, 2007: JORAM 4.3.28 is released</subtitle>
-	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug.</p>
-	<p>It is tagged in CVS (JORAM_4_3_28), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
 
         <subtitle>January 18, 2006</subtitle>
         <p>JORAM is acknowledged as the best open source MOM implementation, according to <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging proprietary products from IBM, Sun and TIBCO.</p>
