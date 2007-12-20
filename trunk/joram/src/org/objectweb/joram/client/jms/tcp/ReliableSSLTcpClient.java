@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,19 +27,19 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class ReliableSSLTcpClient extends ReliableTcpClient {
 
-  //  private final static String CIPHER = "org.objectweb.joram.cipherList";
+  private final static String CIPHER = "org.objectweb.joram.cipherList";
   private final static String KS = "org.objectweb.joram.keystore";
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
@@ -49,38 +49,43 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
     super();
   }
 
-  protected Socket createSocket(String hostName, int port) 
-    throws Exception {
-    
-    String addr = params.outLocalAddressIP;
-    if (addr == null) {
-      addr = "localhost";
-    }
-    int localPort = params.outLocalAddressPort;
+  protected Socket createSocket(String hostname, int port) throws Exception {
+    InetAddress addr = InetAddress.getByName(hostname);
+
+    InetAddress outLocalAddr = null;
+    String outLocalAddrStr = params.outLocalAddress;
+    if (outLocalAddrStr != null)
+      outLocalAddr = InetAddress.getByName(outLocalAddrStr);
+
+    int outLocalPort = params.outLocalPort;
     
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableSSLTcpClient.createSocket(" + hostName + ","
-          + port + ") on interface " + addr + ":" + localPort);
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "ReliableSSLTcpClient[" + name + ',' + key + "].createSocket(" + hostname + "," + port
+          + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
 
     SocketFactory socketFactory = createSocketFactory();
-    return socketFactory.createSocket(hostName, port, InetAddress.getByName(addr), localPort);
+    // AF: Be careful SSLSocketFactory don't allow to use ConnectTimeout
+    Socket socket =  socketFactory.createSocket(hostname, port,
+                                                outLocalAddr, outLocalPort);
+
+    return socket;
   }
 
-  private static SocketFactory createSocketFactory() 
-    throws Exception {
+  private static SocketFactory createSocketFactory() throws Exception {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "ReliableSSLTcpClient.createSocketFactory()");
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "ReliableSSLTcpClient.createSocketFactory()");
 
+    // AF: TODO these parameters should be in FactoryParameters
     char[] keyStorePass =  System.getProperty(KS_PASS,"jorampass").toCharArray();
     String keystoreFile = System.getProperty(KS,"./joram_ks");
     String sslContext = System.getProperty(SSLCONTEXT,"SSL");
     String ksType = System.getProperty(KS_TYPE,"JKS");
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, "SSLTcpProxyService.createSocketFactory : keystoreFile=" + 
-        keystoreFile);
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "SSLTcpProxyService.createSocketFactory : keystoreFile=" + keystoreFile);
     
     KeyStore keystore = KeyStore.getInstance(ksType);
     keystore.load(new FileInputStream(keystoreFile),keyStorePass);
