@@ -39,6 +39,9 @@ public class XAHATcpConnectionFactory
     super(url);
   }
 
+  public XAHATcpConnectionFactory() {
+	  super();
+  }
 
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.

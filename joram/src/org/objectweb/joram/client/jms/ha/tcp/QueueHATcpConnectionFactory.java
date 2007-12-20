@@ -23,18 +23,21 @@
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import org.objectweb.joram.client.jms.*;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
 
 public class QueueHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.QueueConnectionFactory {
 
-  private String url;
-
   public QueueHATcpConnectionFactory(String url) {
     super(url);
-    this.url = url;
   }
 
+  public QueueHATcpConnectionFactory() {
+  }
+  
   /**
    * Method inherited from the <code>QueueConnectionFactory</code> class.
    *
@@ -45,7 +48,7 @@ public class QueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new QueueConnection(params, lc);
     }
 
@@ -60,7 +63,7 @@ public class QueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 
@@ -82,5 +85,9 @@ public class QueueHATcpConnectionFactory
     QueueHATcpConnectionFactory cf = new QueueHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;
+  }
+  
+  public String toString() {
+	  return super.toString() + ": url = " + getParameters().getUrl();
   }
 }
