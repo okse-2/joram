@@ -33,7 +33,11 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class HANamingContextFactory implements InitialContextFactory {
 
-  /**
+	  public HANamingContextFactory() {
+	  }
+
+
+	  /**
    * @param  env  This contains the hostname and the port.
    * @return  A JNDI initial context.
    * @exception  NamingException  Thrown if the host and port properties 
@@ -45,7 +49,7 @@ public class HANamingContextFactory implements InitialContextFactory {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(
         BasicLevel.DEBUG, 
-        "NamingContextFactory.getInitialContext(" + env + ')');
+        "HANamingContextFactory.getInitialContext(" + env + ')');
     return new fr.dyade.aaa.jndi2.client.NamingContextImpl(
       getNamingConnection(env), 
       new CompositeName());    
@@ -68,13 +72,14 @@ public class HANamingContextFactory implements InitialContextFactory {
     throws NamingException {    
     try {
       NamingConnection namingConnection;
-
+      
       // URL should be as: hascn://host:port
-      String url = getEnvProperty(env, "scn.naming.provider.url");
+      String url = getEnvProperty(env, "hascn.naming.provider.url");
+      
       if (url == null) {
         url = getEnvProperty(env, Context.PROVIDER_URL);
       }
-    
+      
       if (url != null) {
         StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
         if (! tokenizer.hasMoreElements()) 
