@@ -257,8 +257,8 @@ public class FactoryParameters implements java.io.Serializable {
                               new Integer(topicPassivationThreshold).toString()));
     ref.add(new StringRefAddr(prefix + ".topicActivationThreshold", 
                               new Integer(topicActivationThreshold).toString()));
-    ref.add(new StringRefAddr(prefix + ".outLocalAddressPort", new Integer(outLocalAddressPort).toString()));
-    ref.add(new StringRefAddr(prefix + ".outLocalAddressIP", outLocalAddressIP));
+    ref.add(new StringRefAddr(prefix + ".outLocalPort", new Integer(outLocalPort).toString()));
+    ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
   }
 
 //   public void fromReference(Reference ref) {
@@ -291,9 +291,8 @@ public class FactoryParameters implements java.io.Serializable {
     multiThreadSyncThreshold = new Integer((String) ref.get(prefix + ".multiThreadSyncThreshold").getContent()).intValue();
     topicPassivationThreshold = new Integer((String) ref.get(prefix + ".topicPassivationThreshold").getContent()).intValue();
     topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
-    outLocalAddressPort = new Integer((String) ref.get(prefix + ".outLocalAddressPort").getContent())
-        .intValue();
-    outLocalAddressIP = (String) ref.get(prefix + ".outLocalAddressPort").getContent();
+    outLocalPort = new Integer((String) ref.get(prefix + ".outLocalPort").getContent()).intValue();
+    outLocalAddress = (String) ref.get(prefix + ".outLocalAddress").getContent();
   }
 
   public Hashtable code(Hashtable h, String prefix) {
@@ -322,8 +321,8 @@ public class FactoryParameters implements java.io.Serializable {
     h.put(prefix + ".multiThreadSyncThreshold", new Integer(multiThreadSyncThreshold));
     h.put(prefix + ".topicPassivationThreshold", new Integer(topicPassivationThreshold));
     h.put(prefix + ".topicActivationThreshold", new Integer(topicActivationThreshold));
-    h.put(prefix + ".outLocalAddressPort", new Integer(outLocalAddressPort));
-    h.put(prefix + ".outLocalAddressIP", outLocalAddressIP);
+    h.put(prefix + ".outLocalPort", new Integer(outLocalPort));
+    h.put(prefix + ".outLocalAddress", outLocalAddress);
 
     return h;
   }
@@ -352,8 +351,8 @@ public class FactoryParameters implements java.io.Serializable {
     multiThreadSyncThreshold = ((Integer) h.get(prefix + ".multiThreadSyncThreshold")).intValue();
     topicPassivationThreshold = ((Integer) h.get(prefix + ".topicPassivationThreshold")).intValue();
     topicActivationThreshold = ((Integer) h.get(prefix + ".topicActivationThreshold")).intValue();
-    outLocalAddressPort = ((Integer) h.get(prefix + ".outLocalAddressPort")).intValue();
-    outLocalAddressIP = (String) h.get(prefix + ".outLocalAddressPort");
+    outLocalPort = ((Integer) h.get(prefix + ".outLocalPort")).intValue();
+    outLocalAddress = (String) h.get(prefix + ".outLocalAddress");
   }
 
   public String toString() {
@@ -371,7 +370,7 @@ public class FactoryParameters implements java.io.Serializable {
       ",multiThreadSyncThreshold=" + multiThreadSyncThreshold +
       ",topicPassivationThreshold=" + topicPassivationThreshold +
       ",topicActivationThreshold=" + topicActivationThreshold +
-      ",outLocalAddressIP=" + outLocalAddressIP +
-      ",outLocalAddressPort=" + outLocalAddressPort + ')';
+      ",outLocalAddress=" + outLocalAddress +
+      ",outLocalPort=" + outLocalPort + ')';
   }
 }
