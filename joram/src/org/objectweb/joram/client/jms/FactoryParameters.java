@@ -158,12 +158,12 @@ public class FactoryParameters implements java.io.Serializable {
    * value can either be a machine name, such as "java.sun.com", or a textual
    * representation of its IP address.
    */
-  public String outLocalAddressIP = null;
+  public String outLocalAddress = null;
 
   /**
    * This is the local IP address port on which the TCP connection is activated
    */
-  public int outLocalAddressPort = 0;
+  public int outLocalPort = 0;
 
   /**
    * Constructs a <code>FactoryParameters</code> instance.
