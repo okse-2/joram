@@ -34,12 +34,12 @@
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
       <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
-      <!-- include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/ -->
+      <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
       <include name="com/scalagent/jmx/*.java"/>
       <include name="com/scalagent/scheduler/**/*.java"/>
       <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
-      <!-- include name="com/scalagent/joram/mom/dest/ftp/*.java"/ -->
-      <!-- include name="com/scalagent/joram/mom/dest/mail/*.java"/ -->
+      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
 
       <include name="com/scalagent/joram/osgi/server/Activator.java"/>
       <include name="com/scalagent/joram/osgi/client/Activator.java"/>
@@ -49,11 +49,13 @@
       <include name="fr/dyade/aaa/admin/**/*.java"/>
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
+      <include name="fr/dyade/aaa/util/JTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
       <include name="fr/dyade/aaa/util/FileRepository.java"/>
-      <!-- include name="fr/dyade/aaa/util/DBRepository.java"/ -->
+      <include name="fr/dyade/aaa/util/DBRepository.java"/>
       <include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/>
       <include name="fr/dyade/aaa/util/DerbyDBTransaction.java"/>
+      <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
       <include name="fr/dyade/aaa/util/management/*.java"/>
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
       <include name="org/objectweb/joram/shared/admin/**/*.java"/>
@@ -61,6 +63,7 @@
       <include name="org/objectweb/joram/shared/excepts/**/*.java"/>
       <include name="org/objectweb/joram/shared/messages/**/*.java"/>
       <include name="org/objectweb/joram/client/**/*.java"/>
+      <exclude name="org/objectweb/joram/kclient/*.java"/>
       <include name="org/objectweb/joram/mom/**/*.java"/>
     </patternset>
 
@@ -234,38 +237,32 @@
   <!-- Builds kjoram (needs 1.1 compiler) -->
   <target name="build.kjoram" depends="init.joram, prepare"
       description="--> Builds kjoram jars.">
+    <mkdir dir="${obj.dir}/kobj"/>
     <!-- Compilation phase -->
     <javac source="1.3" target="1.1"
-           bootclasspath="${lib.dir}/midpapi.jar"
-           classpath="${lib.dir}/kxml.jar"
-           srcdir="${src.dir}:${obj.dir}"
-           destdir="${obj.dir}"
+           bootclasspath="${lib.dir}/cldcapi11.jar"
+           classpath="${lib.dir}/ow_util_log_api.jar"
+           srcdir="${src.dir}:${obj.dir}/kobj"
+           destdir="${obj.dir}/kobj"
            debug="on"
            deprecation="${deprecation}"
            optimize="false"
            nowarn="${nowarn}"
            verbose="${verbose}">
-      <include name="com/scalagent/ksoap/**/*.java"/>
-      <include name="com/scalagent/kjndi/**/*.java"/>
-      <include name="com/scalagent/kjoram/**/*.java"/>
+      <include name="org/objectweb/joram/kclient/*.java"/>
     </javac>
     <!-- jars building -->
     <jar jarfile="${build.dir}/joram-kclient.jar">
       <manifest>
-        <attribute name="Specification-Title" value="JMS"/>
-        <attribute name="Specification-Version" value="1.1"/>
-        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
-        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Title" value="kJoram"/>
         <attribute name="Implementation-Version" value="${version}"/> 
         <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
       </manifest>
       <metainf dir="${licenses.dir}">
         <include name="NOTICE.TXT"/>
       </metainf>
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/ksoap/**/*.class"/>
-        <include name="com/scalagent/kjndi/**/*.class"/>
-        <include name="com/scalagent/kjoram/**/*.class"/>
+      <fileset dir="${obj.dir}/kobj">
+        <include name="**/*.class"/>
       </fileset>
     </jar>
   </target>
@@ -273,7 +270,7 @@
   <!-- Ships a JORAM distribution -->
   <target name="ship.joram" depends="ship"/>
 
-  <target name="ship" depends="build.joram,build.kjoram"
+  <target name="ship" depends="build.joram"
     description="--> Creates a Joram shipment.">
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
