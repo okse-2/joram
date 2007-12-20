@@ -260,12 +260,12 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.topicPassivationThreshold;
   }
   
-  final String getOutLocalAddressIP() {
-    return factoryParameters.outLocalAddressIP;
+  final String getOutLocalAddress() {
+    return factoryParameters.outLocalAddress;
   }
 
-  final int getOutLocalAddressPort() {
-    return factoryParameters.outLocalAddressPort;
+  final int getOutLocalPort() {
+    return factoryParameters.outLocalPort;
   }
   
   /**
