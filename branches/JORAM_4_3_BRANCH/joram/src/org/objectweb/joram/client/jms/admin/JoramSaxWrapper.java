@@ -58,6 +58,7 @@ import org.objectweb.util.monolog.api.Logger;
 public class JoramSaxWrapper extends DefaultHandler {
 
   public static final String SCN = "scn:comp/";
+  public static final String HASCN = "hascn:comp/";
   
   public JoramSaxWrapper() {}
 
@@ -981,6 +982,9 @@ public class JoramSaxWrapper extends DefaultHandler {
         if (name.startsWith(SCN)) {
           buff = new StringBuffer(SCN);
           st = new StringTokenizer(name.substring(SCN.length(), name.length()), "/");
+        } else if (name.startsWith(HASCN)) {
+              buff = new StringBuffer(HASCN);
+              st = new StringTokenizer(name.substring(HASCN.length(), name.length()), "/");
         } else {
           buff = new StringBuffer();
           st = new StringTokenizer(name, "/");
