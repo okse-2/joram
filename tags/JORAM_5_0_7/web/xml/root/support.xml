@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Support</title>
+    <filename>support.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Support">     
+      <subtitle>JORAM support, provided by ScalAgent Distributed
+      Technologies</subtitle>
+      <p>In order to fulfill an increasing demand, <a href="http://www.scalagent.com/">ScalAgent Distributed 
+			Technologies</a> supports the development and deployment of operational solutions based on Joram,
+			 and delivers high-level professional services: </p>
+			 <ul>
+			 	<li>Professional Support : <a href="http://www.scalagent.com/pages/en/products/joram-support.htm">
+			 			please consult our terms and conditions online</a>
+			 	</li>
+			 	<li>Consulting, Advanced Studies and Prototyping
+				</li>
+			 	<li>Training : please consult <a href="http://www.scalagent.com/pages/en/services/training02.htm">the
+			 			training pages</a> for more information
+			 	</li>
+			 	<li>Custom Software Development and Integration
+				</li>
+			 </ul> 
+			 <p>Check the <a href="http://www.scalagent.com/pages/en/datasheet/0412-Joram_support-UK.pdf">brochure</a>.</p>
+    </s1>
+  </body>
+</document>
+

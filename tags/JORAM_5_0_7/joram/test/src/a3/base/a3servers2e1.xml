@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.HttpNetwork"/>
+  <property name="D1.ActivationPeriod" value="50"/>
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D1" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
+  </server>
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D1" port="16301"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>
+  </server>
+</config>
