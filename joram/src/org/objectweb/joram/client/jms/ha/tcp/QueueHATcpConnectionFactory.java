@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,10 +20,14 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
+ *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import org.objectweb.joram.client.jms.*;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
 
 public class QueueHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.QueueConnectionFactory {
@@ -32,11 +36,9 @@ public class QueueHATcpConnectionFactory
    * 
    */
   private static final long serialVersionUID = 1L;
-  private String url;
 
   public QueueHATcpConnectionFactory(String url) {
     super(url);
-    this.url = url;
   }
 
   /**
@@ -55,7 +57,7 @@ public class QueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+        getParameters().getUrl(), params, name, password, reliableClass);
       return new QueueConnection(params, lc);
     }
 
@@ -70,7 +72,7 @@ public class QueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        url, params, name, password, reliableClass);
+        getParameters().getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 
@@ -92,5 +94,9 @@ public class QueueHATcpConnectionFactory
     QueueHATcpConnectionFactory cf = new QueueHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;
+  }
+  
+  public String toString() {
+	  return super.toString() + ": url = " + getParameters().getUrl();
   }
 }

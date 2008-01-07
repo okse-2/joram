@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,10 +20,13 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
+ *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import org.objectweb.joram.client.jms.*;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.XAConnection;
 
 /**
  * An <code>XAHATcpConnectionFactory</code> instance is a factory of
@@ -44,6 +47,9 @@ public class XAHATcpConnectionFactory
     super(url);
   }
 
+  public XAHATcpConnectionFactory() {
+	  super();
+  }
 
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.

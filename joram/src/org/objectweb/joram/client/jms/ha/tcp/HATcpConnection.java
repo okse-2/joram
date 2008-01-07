@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,17 +23,17 @@
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import java.io.*;
-import java.util.*;
+import java.util.StringTokenizer;
+import java.util.Timer;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
-import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.client.jms.tcp.ReliableTcpClient;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
 
 public class HATcpConnection 
     implements RequestChannel {
@@ -60,6 +60,10 @@ public class HATcpConnection
          name,
          password,
          "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  }
+  
+  public HATcpConnection() {
+    super();
   }
   
   /**
