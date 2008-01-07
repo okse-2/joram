@@ -149,6 +149,7 @@
       <fileset dir="${obj.dir}">
         <include name="fr/dyade/aaa/jndi2/client/*.class"/>
         <include name="fr/dyade/aaa/jndi2/haclient/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/hascn/*.class"/>
         <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/SoapExt_*.class"/>
         <include name="org/objectweb/joram/client/jms/*.class"/>
