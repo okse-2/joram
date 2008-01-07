@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,6 +58,7 @@ import org.objectweb.util.monolog.api.Logger;
 public class JoramSaxWrapper extends DefaultHandler {
 
   public static final String SCN = "scn:comp/";
+  public static final String HASCN = "hascn:comp/";
   
   public JoramSaxWrapper() {}
 
@@ -1018,6 +1019,9 @@ public class JoramSaxWrapper extends DefaultHandler {
         if (name.startsWith(SCN)) {
           buff = new StringBuffer(SCN);
           st = new StringTokenizer(name.substring(SCN.length(), name.length()), "/");
+        } else if (name.startsWith(HASCN)) {
+          buff = new StringBuffer(HASCN);
+          st = new StringTokenizer(name.substring(HASCN.length(), name.length()), "/");
         } else {
           buff = new StringBuffer();
           st = new StringTokenizer(name, "/");
