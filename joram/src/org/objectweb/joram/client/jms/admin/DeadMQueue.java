@@ -23,14 +23,14 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import org.objectweb.joram.client.jms.Queue;
+import java.net.ConnectException;
+
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
-
-import java.net.ConnectException;
 
 
 /**
@@ -54,7 +54,7 @@ public class DeadMQueue extends Queue {
    * server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    *
@@ -78,7 +78,7 @@ public class DeadMQueue extends Queue {
     buff.append("type=").append(DMQ_TYPE);
     buff.append(",name=").append(name);
     try {
-      MXWrapper.registerMBean((Queue) dmq, "joramClient", buff.toString());
+      MXWrapper.registerMBean(dmq, "joramClient", buff.toString());
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
@@ -90,7 +90,7 @@ public class DeadMQueue extends Queue {
    * Admin method creating and deploying a dead message queue on the
    * local server. 
    * <p>
-   * The request fails if the destination deployement fails server side.
+   * The request fails if the destination deployment fails server side.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
