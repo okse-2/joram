@@ -63,7 +63,8 @@ public class Test1_Topic extends TestCase {
 
       Context ictx = new InitialContext();
       Topic topic = (Topic) ictx.lookup("topic");
-      DeadMQueue dmqueue = (DeadMQueue) ictx.lookup("dmqueue");
+      DeadMQueue dmqueue0 = (DeadMQueue) ictx.lookup("dmqueue0");
+      DeadMQueue dmqueue1 = (DeadMQueue) ictx.lookup("dmqueue1");
       ConnectionFactory cf0 = (ConnectionFactory) ictx.lookup("cf0");
       ConnectionFactory cf1 = (ConnectionFactory) ictx.lookup("cf1");
       ictx.close();
@@ -95,7 +96,7 @@ public class Test1_Topic extends TestCase {
 
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue1.getPendingMessages());
       AdminModule.disconnect();
 
       // the server containing the queue is stopped
@@ -113,12 +114,11 @@ public class Test1_Topic extends TestCase {
       
       startAgentServer((short) 1);
       
-      Thread.sleep(120000);
-
       // No additional message should be present on the DMQ, they should have
       // been deleted by the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue1.getPendingMessages());
+      assertEquals(10, dmqueue0.getPendingMessages());
       AdminModule.disconnect();
 
       cnx.close();
@@ -145,13 +145,15 @@ public class Test1_Topic extends TestCase {
     // create a Topic
     org.objectweb.joram.client.jms.Topic topic = org.objectweb.joram.client.jms.Topic.create(0);
     // create a DMQueue
-    DeadMQueue dmqueue = (DeadMQueue) DeadMQueue.create(1);
+    DeadMQueue dmqueue0 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue1 = (DeadMQueue) DeadMQueue.create(1);
+    AdminModule.setDefaultDMQ(0, dmqueue0);
 
     // create a user
     org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
     org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User.create(
         "anonymous", "anonymous", 1);
-    user.setDMQ(dmqueue);
+    user.setDMQ(dmqueue1);
     // set permissions
     topic.setFreeReading();
     topic.setFreeWriting();
@@ -163,7 +165,8 @@ public class Test1_Topic extends TestCase {
     jndiCtx.bind("cf0", cf0);
     jndiCtx.bind("cf1", cf1);
     jndiCtx.bind("topic", topic);
-    jndiCtx.bind("dmqueue", dmqueue);
+    jndiCtx.bind("dmqueue0", dmqueue0);
+    jndiCtx.bind("dmqueue1", dmqueue1);
     jndiCtx.close();
 
     AdminModule.disconnect();

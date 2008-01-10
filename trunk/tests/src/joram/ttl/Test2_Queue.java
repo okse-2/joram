@@ -65,7 +65,8 @@ public class Test2_Queue extends TestCase {
 
       Context ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("queue");
-      DeadMQueue dmqueue = (DeadMQueue) ictx.lookup("dmqueue");
+      DeadMQueue dmqueue1 = (DeadMQueue) ictx.lookup("dmqueue1");
+      DeadMQueue dmqueue0 = (DeadMQueue) ictx.lookup("dmqueue0");
       ConnectionFactory cf0 = (ConnectionFactory) ictx.lookup("cf0");
       ConnectionFactory cf1 = (ConnectionFactory) ictx.lookup("cf1");
       ictx.close();
@@ -97,7 +98,8 @@ public class Test2_Queue extends TestCase {
       
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue.getPendingMessages());
+
+      assertEquals(3, dmqueue1.getPendingMessages());
       AdminModule.disconnect();
 
       // the server containing the queue is stopped
@@ -115,12 +117,13 @@ public class Test2_Queue extends TestCase {
 
       startAgentServer((short) 1);
 
-      // No additional messages should be present on the DMQ, they should have
-      // been deleted by the network
+      // No additional messages should be present on the DMQ1, they should have
+      // been sent to DMQ0 before traveling on the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue.getPendingMessages());
+      assertEquals(3, dmqueue1.getPendingMessages());
+      assertEquals(10, dmqueue0.getPendingMessages());
       assertEquals(0, ((org.objectweb.joram.client.jms.Queue) queue).getPendingMessages());
-      ((org.objectweb.joram.client.jms.Queue) queue).getStatistic();
+      
       AdminModule.disconnect();
       
       cnx.close();
@@ -149,7 +152,9 @@ public class Test2_Queue extends TestCase {
     // create a Queue
     org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create(1, prop);
     // create a DMQueue
-    DeadMQueue dmqueue = (DeadMQueue) DeadMQueue.create(1);
+    DeadMQueue dmqueue0 = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmqueue1 = (DeadMQueue) DeadMQueue.create(1);
+    AdminModule.setDefaultDMQ(0, dmqueue0);
 
     // create a user
     org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
@@ -157,7 +162,7 @@ public class Test2_Queue extends TestCase {
     // set permissions
     queue.setFreeReading();
     queue.setFreeWriting();
-    queue.setDMQ(dmqueue);
+    queue.setDMQ(dmqueue1);
     
     ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 2560);
     ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 2561);
@@ -166,7 +171,8 @@ public class Test2_Queue extends TestCase {
     jndiCtx.bind("cf0", cf0);
     jndiCtx.bind("cf1", cf1);
     jndiCtx.bind("queue", queue);
-    jndiCtx.bind("dmqueue", dmqueue);
+    jndiCtx.bind("dmqueue0", dmqueue0);
+    jndiCtx.bind("dmqueue1", dmqueue1);
     jndiCtx.close();
 
     AdminModule.disconnect();
