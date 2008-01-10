@@ -840,9 +840,19 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       if (! deliverables.isEmpty()) {
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
+        setDmq(topicMsgsReply); 
         forward(subscriber, topicMsgsReply);
         nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
       }
+    }
+  }
+
+  private void setDmq(TopicMsgsReply not) {
+    // Setting the producer's DMQ identifier field:
+    if (dmqId != null) {
+      not.setDMQId(dmqId);
+    } else {
+      not.setDMQId(DeadMQueueImpl.getId());
     }
   }
 
