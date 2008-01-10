@@ -67,6 +67,8 @@
     <ant dir="." antfile="build.xml" target="test12.base"/>
     <ant dir="." antfile="build.xml" target="test14.base"/>
     <ant dir="." antfile="build.xml" target="test15.base"/>
+    <ant dir="." antfile="build.xml" target="test18.base"/>
+    <ant dir="." antfile="build.xml" target="test19.base"/>
   </target>
 
   <target name="tests.http.base">
@@ -76,6 +78,9 @@
     <ant dir="." antfile="build.xml" target="test5-3.http.base"/>
     <ant dir="." antfile="build.xml" target="test11.http.base"/>
     <ant dir="." antfile="build.xml" target="test15.base"/>
+    <ant dir="." antfile="build.xml" target="test15.http.base"/>
+    <ant dir="." antfile="build.xml" target="test16.http.base"/>
+    <ant dir="." antfile="build.xml" target="test17.http.base"/>
   </target>
 
   <!--
@@ -536,6 +541,52 @@
       <param name="y" value="a"/>
       <param name="a3conf" value="a3/base/a3servers5.http.xml"/>
       <param name="jvmargs" value="-Dbounce=100000"/>
+    </antcall>
+  </target>
+
+  <!-- Test forwarding of expired notification with different networks -->
+  <target name="test18.base" depends="test18-1.base,test18-2.base,test18-3.base"/>
+
+  <target name="test18-1.base" depends="init.a3test,compile">
+    <!-- 2 server, NTransaction, SimpleNetwork -->
+    <antcall target="testx.base" inheritAll="true">
+      <param name="x" value="18"/>
+      <param name="y" value="1"/>
+      <param name="a3conf" value="a3/base/a3servers2.xml"/>
+      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="test18-2.base" depends="init.a3test,compile">
+    <!-- 2 server, NTransaction, PoolNetwork -->
+    <antcall target="testx.base" inheritAll="true">
+      <param name="x" value="18"/>
+      <param name="y" value="2"/>
+      <param name="a3conf" value="a3/base/a3servers2.xml"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="test18-3.base" depends="init.a3test,compile">
+    <!-- 2 server, NTransaction, HttpNetwork -->
+    <antcall target="testx.base" inheritAll="true">
+      <param name="x" value="18"/>
+      <param name="y" value="3"/>
+      <param name="a3conf" value="a3/base/a3servers2e1.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <!-- Test forwarding of expired notification within the engine -->
+  <target name="test19.base" depends="init.a3test,compile">
+    <!-- 2 server, NTransaction, SimpleNetwork -->
+    <antcall target="testx.base" inheritAll="true">
+      <param name="x" value="19"/>
+      <param name="y" value="1"/>
+      <param name="a3conf" value="a3/base/a3servers2e1.xml"/>
+      <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
@@ -1072,3 +1123,4 @@
     </antcall>
   </target>
 
+<!--</project>-->
