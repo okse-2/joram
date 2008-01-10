@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -51,7 +52,7 @@ class EngineThread extends Thread {
  *   // get the agent to process event
  *   Agent agent = load(msg.to);
  *   // execute relevant reaction, all notification sent during this
- *   // reaction is inserted into persistant queue in order to processed
+ *   // reaction is inserted into persistent queue in order to processed
  *   // by the channel.
  *   agent.react(msg.from, msg.not);
  *   // save changes, then commit.
@@ -104,7 +105,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
   /**
    * Boolean variable used to stop the engine properly. If this variable
-   * is true then the engine is waiting and it can interupted, else it
+   * is true then the engine is waiting and it can interrupted, else it
    * handles a notification and it will exit after (the engine tests the
    * <code><a href="#isRunning">isRunning</a></code> variable between
    * each reaction)
@@ -114,7 +115,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** Logical timestamp information for messages in "local" domain. */
   private int stamp;
 
-  /** Buffer used to optimise */
+  /** Buffer used to optimize */
   private byte[] stampBuf = null;
 
   /** True if the timestamp is modified since last save. */
@@ -369,7 +370,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       // all fixed agents.
       fixedAgentIdList = (Vector) AgentServer.getTransaction().load(getName() + ".fixed");
       if (fixedAgentIdList == null) {
-        // It's the first launching of this engine, in other case theres is
+        // It's the first launching of this engine, in other case there is
         // at least the factory in fixedAgentIdList.
         fixedAgentIdList = new Vector();
         // Creates factory
@@ -596,8 +597,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * object is not already present in the server memory, it is loaded from
    * the storage.
    *
-   *  Be carefull, if the save method can be overloaded to optimize the save
-   * processus, the load procedure used by engine is always load.
+   *  Be careful, if the save method can be overloaded to optimize the save
+   * process, the load procedure used by engine is always load.
    *
    * @param	id		The agent identification.
    * @return			The corresponding agent.
@@ -607,7 +608,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @exception	ClassNotFoundException
    *	Should never happen (the agent has already been loaded in deploy).
    * @exception	UnknownAgentException
-   *	There is no correponding agent on secondary storage.
+   *	There is no corresponding agent on secondary storage.
    * @exception Exception
    *	when executing class specific initialization
    */
@@ -675,7 +676,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
   /**
    * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialisation to restore the component
+   * This method is used during initialization to restore the component
    * state from persistent storage.
    *
    * @param msg		the message
@@ -826,15 +827,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if ((msg.not.expiration > 0L) &&
-        (msg.not.expiration < System.currentTimeMillis())) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ": removes expired notification " +
-                   msg.from + ", " + msg.not);
-      return;
-    }
-      
     if (msg.isPersistent()) {
       stamp(msg);
       msg.save();
@@ -860,7 +852,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
 	// Get a notification, then execute the right reaction.
 	try {
-	  msg = (Message) qin.get(timeout);
+	  msg = qin.get(timeout);
           if (msg == null) {
             onTimeOut();
             continue;
@@ -900,10 +892,19 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             break main_loop;
           }
         } else {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ": removes expired notification " +
-                       msg.from + ", " + msg.not);
+          if (msg.not.deadNotificationAgentId != null) {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
+                  + msg.not + " to " + msg.not.deadNotificationAgentId);
+            }
+            ExpiredNot expiredNot = new ExpiredNot(msg.not);
+            push(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot);
+          } else {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
+                  + msg.not);
+            }
+          }
         }
 
 	if (agent != null) {
@@ -953,7 +954,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /**
-   * Commit the agent reaction in case of rigth termination:<ul>
+   * Commit the agent reaction in case of right termination:<ul>
    * <li>suppress the processed notification from message queue,
    * then deletes it ;
    * <li>push all new notifications in qin and qout, and saves them ;
@@ -969,13 +970,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     msg.delete();
     // .. and frees it.
     msg.free();
-    // Post all notifications temporary keeped in mq in the rigth consumers,
+    // Post all notifications temporary kept in mq to the right consumers,
     // then saves changes.
     dispatch();
     // Saves the agent state then commit the transaction.
     if (agent != null) agent.save();
     AgentServer.getTransaction().commit(false);
-    // The transaction has commited, then validate all messages.
+    // The transaction has committed, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
   }
@@ -1015,7 +1016,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
          new ExceptionNotification(msg.to, msg.not, exc));
     dispatch();
     AgentServer.getTransaction().commit(false);
-    // The transaction has commited, then validate all messages.
+    // The transaction has committed, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
   }

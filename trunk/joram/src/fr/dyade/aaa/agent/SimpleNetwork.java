@@ -36,6 +36,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -47,7 +48,7 @@ import fr.dyade.aaa.util.Daemon;
  * a time.
  */
 public class SimpleNetwork extends StreamNetwork {
-  /** FIFO list of all messages to be sent by the watch-dog thead. */
+  /** FIFO list of all messages to be sent by the watch-dog thread. */
   MessageVector sendList;
 
   private JGroups jgroups = null;
@@ -220,6 +221,7 @@ public class SimpleNetwork extends StreamNetwork {
             msgto = msg.getDest();
             
             Socket socket = null;
+            ExpiredNot expiredNot = null;
             try {
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
                 this.logmon.log(BasicLevel.DEBUG,
@@ -303,13 +305,27 @@ public class SimpleNetwork extends StreamNetwork {
               // Remove the message (see below), may be we have to post an
               // error notification to sender.
             } catch (ExpirationExceededException exc) {
-              if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, getName() + ": run : removes expired notification " +
-                           msg.from + ", " + msg.not);
+              if (msg.not.deadNotificationAgentId != null) {
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
+                      + msg.from
+                      + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
+                }
+                expiredNot = new ExpiredNot(msg.not);
+              } else {
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from
+                      + ", " + msg.not);
+                }
               }
             }
 
             AgentServer.getTransaction().begin();
+            if (expiredNot != null) {
+              System.err.println("channel.post");
+              Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+              Channel.validate();
+            }
             //  Suppress the processed notification from message queue,
             // and deletes it.
             qout.pop();
@@ -339,7 +355,7 @@ public class SimpleNetwork extends StreamNetwork {
      *
      * @exception IOException unrecoverable exception during transaction.
      */
-    void watchdog(long currentTimeMillis) throws IOException {
+    void watchdog(long currentTimeMillis) throws Exception {
 //       this.logmon.log(BasicLevel.DEBUG,
 //                       this.getName() + " watchdog().");
 
@@ -362,13 +378,26 @@ public class SimpleNetwork extends StreamNetwork {
 
         if ((msg.not.expiration > 0L) &&
             (msg.not.expiration < currentTimeMillis)) {
-          if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, getName() + ": watchdog : removes expired notification " +
-                       msg.from + ", " + msg.not);
-          }
-
+          
           // Remove the message.
           AgentServer.getTransaction().begin();
+
+          if (msg.not.deadNotificationAgentId != null) {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification2 " + msg.from
+                  + ", "
+                  + msg.not + " to " + msg.not.deadNotificationAgentId);
+            }
+            ExpiredNot expiredNot = new ExpiredNot(msg.not);
+            Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+            Channel.validate();
+          } else {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
+                  + msg.not);
+            }
+          }
+
           // Deletes the processed notification
           sendList.removeMessageAt(i); i--;
 // AF: A reprendre.

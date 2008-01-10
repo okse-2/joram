@@ -34,6 +34,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -578,11 +579,24 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 if ((msgout != null) &&
                     (msgout.not.expiration > 0) &&
                     (msgout.not.expiration < currentTimeMillis)) {
-                  if (logmon.isLoggable(BasicLevel.DEBUG))
-                    logmon.log(BasicLevel.DEBUG,
-                               getName() + ": AF removes expired notification XXX " +
-                               msgout.from + ", " + msgout.not);
-                  //  Suppress the processed notification from message queue,
+                  if (msgout.not.deadNotificationAgentId != null) {
+                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                      logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
+                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
+                    }
+                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
+                    AgentServer.getTransaction().begin();
+                    Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
+                        expiredNot));
+                    Channel.validate();
+                    AgentServer.getTransaction().commit(true);
+                  } else {
+                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                      logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
+                          + msgout.from + ", " + msgout.not);
+                    }
+                  }
+                  // Suppress the processed notification from message queue,
                   // and deletes it. It can be done outside of a transaction
                   // and committed later (on next handle).
                   qout.removeMessage(msgout);
@@ -716,11 +730,25 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
 
                 if ((msgout != null) && (msgout.not.expiration > 0L)
                     && (msgout.not.expiration < currentTimeMillis)) {
-                  if (logmon.isLoggable(BasicLevel.DEBUG))
-                    logmon.log(BasicLevel.DEBUG,
-                               getName() + ": removes expired notification " +
-                               msgout.from + ", " + msgout.not);
-                  //  Suppress the processed notification from message queue,
+                  
+                  if (msgout.not.deadNotificationAgentId != null) {
+                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                      logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
+                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
+                    }
+                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
+                    AgentServer.getTransaction().begin();
+                    Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
+                        expiredNot));
+                    Channel.validate();
+                    AgentServer.getTransaction().commit(true);
+                  } else {
+                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                      logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
+                          + msgout.from + ", " + msgout.not);
+                    }
+                  }
+                  // Suppress the processed notification from message queue,
                   // and deletes it. It can be done outside of a transaction
                   // and committed later (on next handle).
                   qout.removeMessage(msgout);
