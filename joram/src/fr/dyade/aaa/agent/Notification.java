@@ -77,9 +77,9 @@ public class Notification implements Serializable, Cloneable {
    * Gets the notification's expiration value.
    *
    * This field is handled by the network protocol in order to fit
-   * the time synchronisation problem.
+   * the time synchronization problem.
    *
-   * If the expiration date is set to -1L (default), it indicates that
+   * If the expiration date is set to 0L (default), it indicates that
    * the notification does not expire.
    *
    * When a notification's expiration time is reached, the MOM should
@@ -98,6 +98,13 @@ public class Notification implements Serializable, Cloneable {
    * default, the priority is 4
    */
   byte priority = (byte) 4;
+  
+  /**
+   * The agentId identifying the agent to which the notification is sent when it
+   * is expired.<br>
+   * Default value is null, which means the expired notification is lost.
+   */
+  AgentId deadNotificationAgentId = null;
   
   /**
    * Sets the priority for this notification.
@@ -189,12 +196,31 @@ public class Notification implements Serializable, Cloneable {
   }
 
   /**
+   * 
+   * @return The agentId identifying the agent to which the notification is sent
+   *         when it is expired.
+   */
+  public AgentId getDeadNotificationAgentId() {
+    return deadNotificationAgentId;
+  }
+
+  /**
+   * Sets the forwardExpiredNotAgentId value which enable sending expired
+   * notifications to a specific agent
+   * 
+   * @param deadNotificationAgentId
+   *            the AgentId to which the dead notification is forwarded
+   */
+  public void setDeadNotificationAgentId(AgentId deadNotificationAgentId) {
+    this.deadNotificationAgentId = deadNotificationAgentId;
+  }
+
+  /**
    * Appends a string image for this object to the StringBuffer parameter.
-   *
+   * 
    * @param output
-   *	buffer to fill in
-   * @return
-	<code>output</code> buffer is returned
+   *            buffer to fill in
+   * @return <code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
@@ -206,6 +232,7 @@ public class Notification implements Serializable, Cloneable {
     output.append(",context=").append(context);
     output.append(",expiration=").append(expiration);
     output.append(",priority=").append(priority);
+    output.append(",deadNotificationAgentId=").append(deadNotificationAgentId);
     output.append(')');
 
     return output;
