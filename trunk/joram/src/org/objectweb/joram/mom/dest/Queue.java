@@ -34,6 +34,7 @@ import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
 import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
 import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
@@ -133,6 +134,8 @@ public class Queue extends Destination implements BagSerializer {
         ((QueueImpl)destImpl).denyRequest(from, (DenyRequest) not);
       else if (not instanceof AbortReceiveRequest)
         ((QueueImpl)destImpl).abortReceiveRequest(from, (AbortReceiveRequest) not);
+      else if (not instanceof ExpiredNot)
+        ((DeadMQueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
 //      else if (not instanceof DestinationAdminRequestNot)
 //        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else if (not instanceof WakeUpNot) {
