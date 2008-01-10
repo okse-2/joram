@@ -18,15 +18,7 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.*;
 
 /**
  *  Implementation of Engine that used Group-Commit in order to improve 
@@ -45,9 +37,10 @@ final class GCEngine extends Engine {
   }
 
   /**
-   * Commit the agent reaction in case of rigth termination:<ul>
-   * <li>suppress the processed notification from message queue,
-   * then deletes it ;
+   * Commit the agent reaction in case of right termination:
+   * <ul>
+   * <li>suppress the processed notification from message queue, then deletes
+   * it ;
    * <li>push all new notifications in qin and qout, and saves them ;
    * <li>saves the agent state ;
    * <li>then commit the transaction to validate all changes.
