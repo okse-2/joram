@@ -322,7 +322,6 @@ public class SimpleNetwork extends StreamNetwork {
 
             AgentServer.getTransaction().begin();
             if (expiredNot != null) {
-              System.err.println("channel.post");
               Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
               Channel.validate();
             }
