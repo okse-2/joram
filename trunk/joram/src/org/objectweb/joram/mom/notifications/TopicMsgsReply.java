@@ -28,6 +28,8 @@ import java.util.Vector;
 
 import org.objectweb.joram.shared.messages.Message;
 
+import fr.dyade.aaa.agent.AgentId;
+
 /**
  * A <code>TopicMsgsReply</code> instance is used by a topic for sending
  * messages to an agent client which subscribed to it.
@@ -66,5 +68,13 @@ public class TopicMsgsReply extends AbstractReply {
   /** Returns the messages. */
   public Vector getMessages() {
     return messages;
+  }
+
+  /**
+   * Sets the identifier of the producer's dead message queue. Basically, it
+   * simply calls {@link #setDeadNotificationAgentId(AgentId)}
+   */
+  public void setDMQId(AgentId dmqId) {
+    setDeadNotificationAgentId(dmqId);
   }
 } 
