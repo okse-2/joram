@@ -564,15 +564,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if ((msg.not.expiration > 0L) &&
-        (msg.not.expiration < System.currentTimeMillis())) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ": removes expired notification " +
-                   msg.from + ", " + msg.not);
-      return;
-    }
-
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
