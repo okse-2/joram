@@ -33,10 +33,12 @@ import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetDMQRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
+import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -109,13 +111,18 @@ public class DeadMQueueImpl extends QueueImpl {
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Preprocess on the dead message queue: " + not);
-    
+    doMessages(not.getMessages());
+    return null;
+  }
+
+  private void doMessages(Vector msgs) {
     // Getting and persisting the messages:
     Message msg;
+    Enumeration enu = msgs.elements();
+
     // Storing each received message:
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
-      msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+    while (enu.hasMoreElements()) {
+      msg = new Message((org.objectweb.joram.shared.messages.Message) enu.nextElement());
       msg.setExpiration(0L);
       msg.order = arrivalsCounter++;
       messages.add(msg);
@@ -124,7 +131,6 @@ public class DeadMQueueImpl extends QueueImpl {
       setMsgTxName(msg);
       msg.save();
     }
-    return null;
   }
   
   /**
@@ -191,7 +197,6 @@ public class DeadMQueueImpl extends QueueImpl {
    * in queue.
    */
   protected void doUnknownAgent(UnknownAgent uA) {
-    AgentId client = uA.agent;
     Notification not = uA.not;
 
     // If the notification is not a delivery, doing nothing. 
@@ -273,4 +278,15 @@ public class DeadMQueueImpl extends QueueImpl {
    * may be sent by the DMQ to itself.
    */
   protected void sendToDMQ(Vector deadMessages, AgentId dmqId) {}
+
+  protected void handleExpiredNot(AgentId from, ExpiredNot not) {
+    Notification expiredNot = not.getExpiredNot();
+    if (expiredNot instanceof ClientMessages) {
+      doMessages(((ClientMessages) expiredNot).getMessages());
+    } else if (expiredNot instanceof TopicMsgsReply) {
+      doMessages(((TopicMsgsReply) expiredNot).getMessages());
+    } else {
+      doMessages(((QueueMsgReply) expiredNot).getMessages());
+    }
+  }
 }
