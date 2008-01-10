@@ -1,10 +1,15 @@
 +==============================================================================
+| 2008/01/10 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds forwarding of the expired messages to the DMQ within the networks,
+  instead of simple deletion.
++==============================================================================
 | 2008/01/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add jndi2/hascn
  Bug fix : HA
 ###############################################################################
-# 2007/12/19 | Joram 5.0.6 tag.
+# 2007/12/19 | Joram 5.0.7 tag.
 ###############################################################################
 +==============================================================================
 | 2007/12/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
@@ -31,14 +36,6 @@ restart.
 | 2007/12/10 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add asynchronous subscription request.
-+==============================================================================
-| 2007/12/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- Add the ability to choose the local network interface:
-  - in the network by placing the properties InLocalAdressIP, OutLocalAddressIP
-    and OutLocalAddressPort
-  - in the JMS level with new connection factory parameters: outLocalAddressIP
-    and outLocalAddressPort
 +==============================================================================
 | 2007/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -115,7 +112,7 @@ ClusterQueueImpl.getClientMessages method.
 | 2007/07/31 | Badolle fabien - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 Bug fix: after close connection, all temporary topic was not delete. 
-(using Enumeration of a vetor, and delete elements of this vector)
+(using Enumeration of a vector, and delete elements of this vector)
 Replace getTempDestinations in ClientContext.
 +==============================================================================
 | 2007/07/25 | Badolle fabien - ScalAgent Distributed Technologies 
