@@ -40,6 +40,7 @@ import java.net.SocketException;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -784,19 +785,25 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       long currentTimeMillis = System.currentTimeMillis();
       for (int i=0; i<waiting.length; i++) {
         msg = (Message) waiting[i];
-        if ((msg.not != null) &&
-            (msg.not.expiration > 0) &&
-            (msg.not.expiration < currentTimeMillis)) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ": removes expired notification " +
-                       msg.from + ", " + msg.not);
+        if ((msg.not != null) && (msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
           try {
-            doAck(msg.getStamp());
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ": cannot removes expired notification " +
-                       msg.from + ", " + msg.not, exc);
+            ExpiredNot expiredNot = null;
+            if (msg.not.deadNotificationAgentId != null) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
+                    + msg.not + " to " + msg.not.deadNotificationAgentId);
+              }
+              expiredNot = new ExpiredNot(msg.not);
+            } else {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
+                    + msg.not);
+              }
+            }
+            doAck(msg.getStamp(), expiredNot);
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR, getName() + ": cannot remove expired notification " + msg.from
+                + ", " + msg.not, exc);
           }
         } else {
           transmit(msg, currentTimeMillis);
@@ -857,7 +864,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * begin to end, and it removes always the first element. Other
      * methods using sendList just adds element at the end.
      */
-    final private void doAck(int ack) throws IOException {
+    final private void doAck(int ack, ExpiredNot expiredNot) throws Exception {
       Message msg = null;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -868,6 +875,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         // and deletes it.
         msg = sendList.removeMessage(ack);
         AgentServer.getTransaction().begin();
+        if (expiredNot != null) {
+          Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+          Channel.validate();
+        }
         msg.delete();
         msg.free();
         AgentServer.getTransaction().commit(true);
@@ -904,18 +915,25 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         if ((msg.not.expiration > 0) &&
             (msg.not.expiration < currentTimeMillis)) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ": removes expired notification " +
-                       msg.from + ", " + msg.not);
           try {
-            doAck(msg.getStamp());
-          } catch (IOException exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ": cannot removes expired notification " +
-                       msg.from + ", " + msg.not, exc);
+            ExpiredNot expiredNot = null;
+            if (msg.not.deadNotificationAgentId != null) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
+                    + msg.not + " to " + msg.not.deadNotificationAgentId);
+              }
+              expiredNot = new ExpiredNot(msg.not);
+            } else {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
+                    + msg.not);
+              }
+            }
+            doAck(msg.getStamp(), expiredNot);
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR, getName() + ": cannot removes expired notification " + msg.from
+                + ", " + msg.not, exc);
           }
-          return;
         }
       } else {
         nbAckSent += 1;
@@ -1010,7 +1028,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             deliver(msg);
             ack(stamp);
           } else {
-            doAck(stamp);
+            doAck(stamp, null);
           }
 
           Thread.yield();
