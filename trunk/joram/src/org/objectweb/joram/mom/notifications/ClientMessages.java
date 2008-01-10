@@ -43,8 +43,6 @@ public class ClientMessages extends AbstractRequest {
   private Message message = null;
   /** Messages sent by the client. */
   private Vector messages = null;
-  /** Identifier of the producer's dead message queue, if any. */
-  private AgentId producerDMQId = null;
   
   private boolean asyncSend;
 
@@ -63,7 +61,7 @@ public class ClientMessages extends AbstractRequest {
    *
    * @param clientContext  Identifies a client context.
    * @param requestId  Request identifier.
-   * @param messages  The message.
+   * @param message  The message.
    */
   public ClientMessages(int clientContext, int requestId, Message message) {
     super(clientContext, requestId);
@@ -131,9 +129,12 @@ public class ClientMessages extends AbstractRequest {
     }
   }
 
-  /** Sets the identifier of the producer's dead message queue, if any. */
+  /**
+   * Sets the identifier of the producer's dead message queue. Basically, it
+   * simply calls {@link #setDeadNotificationAgentId(AgentId)}
+   */
   public void setDMQId(AgentId dmqId) {
-    producerDMQId = dmqId;
+    setDeadNotificationAgentId(dmqId);
   }
 
   
@@ -155,9 +156,12 @@ public class ClientMessages extends AbstractRequest {
     return asyncSend;
   }
 
-  /** Returns the identifier of the producer's dead message queue, if any. */
+  /**
+   * Returns the identifier of the producer's dead message queue, if any.
+   * Basically, it simply calls {@link #getDeadNotificationAgentId()}
+   */
   public AgentId getDMQId() {
-    return producerDMQId;
+    return getDeadNotificationAgentId();
   }
 
   /**
@@ -173,7 +177,6 @@ public class ClientMessages extends AbstractRequest {
     super.toString(output);
     output.append(",message=").append(message);
     output.append(",messages=").append(messages);
-    output.append(",producerDMQId=").append(producerDMQId);
     output.append(",asyncSend=").append(asyncSend);
     output.append(')');
 
