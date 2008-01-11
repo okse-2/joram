@@ -228,6 +228,7 @@
 </target>  
 <target name="tests.cluster" description=" --> launch all cluster tests">
     <ant dir="." antfile="build.xml" target="cluster.test1"/>
+    <ant dir="." antfile="build.xml" target="cluster.test2"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ1"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ2"/>
     <ant dir="." antfile="build.xml" target="cluster.testQ3"/>
@@ -2990,6 +2991,17 @@
 <target name="cluster.test1"  description=" -->  test topic cluster send and receive message">
      <antcall target="test.start" inheritAll="true">
       <param name="className" value="joram.cluster.Test1"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="joram/cluster/jndi.properties"/>
+      <param name="a3conf" value="joram/cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+</target>
+
+<target name="cluster.test2"  description=" -->  Test : can't cluster an already clustered topic">
+     <antcall target="test.start" inheritAll="true">
+      <param name="className" value="joram.cluster.Test2"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="joram/cluster/jndi.properties"/>
