@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,8 +25,11 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.notifications.AdminReply;
@@ -83,8 +86,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   private static final long serialVersionUID = 1L;
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
-  /** Vector of cluster fellows, if any. */
-  protected Vector friends = null;
+  /** Set of cluster fellows, if any. */
+  protected Set friends = null;
   
   /** Vector of subscribers' identifiers. */
   protected Vector subscribers;
@@ -141,10 +144,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (friends == null) {
       // state change, so save.
       setSave();
-      friends = new Vector();
+      friends = new HashSet();
     }
 
-    if (friends.contains(newFriendId) || destId.equals(newFriendId)) {
+    if (destId.equals(newFriendId)) {
       info = strbuf.append("Request [").append(req.getClass().getName())
         .append("], sent to Topic [").append(destId)
         .append("], successful [false]: joining topic already")
@@ -154,7 +157,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       return;
     }
 
-    ClusterTest not = new ClusterTest(req, from);
+    ClusterTest not = new ClusterTest(req, from, friends);
     forward(newFriendId, not);
   }
 
@@ -167,11 +170,23 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     String info = null;
     // The topic is already part of a cluster: can't join an other cluster.
     if (friends != null && ! friends.isEmpty()) {
-      info = strbuf.append("Topic [").append(destId)
-        .append("] can't join cluster of topic [").append(from)
-        .append("] as it is already part of a cluster").toString();
-      strbuf.setLength(0);
-      forward(from, new ClusterAck(not, false, info));
+      if (friends.contains(from)) {
+        info = strbuf.append("Topic [").append(destId)
+          .append("] already joined cluster of topic [").append(from)
+          .append(']').toString();
+        strbuf.setLength(0);
+        friends.add(from);
+        friends.addAll(not.friends);
+        // Remove self if present
+        friends.remove(destId);
+        forward(from, new ClusterAck(not, true, info));
+      } else {
+        info = strbuf.append("Topic [").append(destId)
+          .append("] can't join cluster of topic [").append(from)
+          .append("] as it is already part of a cluster").toString();
+        strbuf.setLength(0);
+        forward(from, new ClusterAck(not, false, info));
+      }
     // The topic is already part of a hierarchy: can't join a cluster.
     } else if (fatherId != null) {
       info = strbuf.append("Topic [").append(destId)
@@ -183,8 +198,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     } else {
       // state change, so save.
       setSave();
-      friends = new Vector();
+      friends = new HashSet();
       friends.add(from);
+      friends.addAll(not.friends);
+      // Remove self if present
+      friends.remove(destId);
       info = strbuf.append("Topic [").append(destId)
         .append("] ok for joining cluster of topic [").append(from)
         .append(']').toString();
@@ -209,16 +227,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       return;
     }
   
-    AgentId fellowId;
-    ClusterNot fellowNot;
     ClusterNot newFriendNot = new ClusterNot(from);
-    for (int i = 0; i < friends.size(); i++) {
-      fellowId = (AgentId) friends.get(i);
-      fellowNot = new ClusterNot(fellowId);
-      // Notifying the joining topic of the current fellow.
-      forward(from, fellowNot);
+    Iterator iterator = friends.iterator();
+    while (iterator.hasNext()) {
       // Notifying the current fellow of the joining topic.
-      forward(fellowId, newFriendNot);
+      forward((AgentId) iterator.next(), newFriendNot);
     }
     // state change, so save.
     setSave();
@@ -242,14 +255,16 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * of a new cluster fellow.
    */
   public void clusterNot(AgentId from, ClusterNot not) {
-    // state change, so save.
-    setSave();
-    friends.add(not.topicId);
-      
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
-                                    + not.topicId.toString()
-                                    + " set as a fellow.");
+    if (! not.topicId.equals(destId)) {
+      // state change, so save.
+      setSave();
+      friends.add(not.topicId);
+        
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                      + not.topicId.toString()
+                                      + " set as a fellow.");
+    }
   }
  
   /**
@@ -274,15 +289,14 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     }
 
     UnclusterNot not = new UnclusterNot();
-    AgentId fellowId;
     // Notifying each fellow of the leave.
-    while (! friends.isEmpty()) {
-      // state change, so save.
-      setSave();
-      fellowId = (AgentId) friends.remove(0);
-      forward(fellowId, not);
+    Iterator iterator = friends.iterator();
+    while (iterator.hasNext()) {
+      forward((AgentId) iterator.next(), not);
     }
     friends = null;
+    // state change, so save.
+    setSave();
 
     String info = strbuf.append("Request [")
       .append(request.getClass().getName())
@@ -468,8 +482,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     Vector cluster = null;
     if (friends != null) {
       cluster = new Vector();
-      for (int i = 0; i < friends.size(); i++)
-        cluster.add(friends.get(i).toString());
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
+        cluster.add(iterator.next().toString());
+      }
       cluster.add(destId.toString());
     }
 
@@ -734,13 +750,13 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     // For each cluster fellow if any...
     if (friends != null) {
-      AgentId topicId;
-      while (! friends.isEmpty()) {
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
         // state change, so save.
         setSave();
-        topicId = (AgentId) friends.remove(0);
-        forward(topicId, new UnclusterNot());
+        forward((AgentId) iterator.next(), new UnclusterNot());
       }
+      friends = null;
     }
   }
 
@@ -752,8 +768,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   {
     if (friends != null && ! friends.isEmpty()) {
       AgentId topicId;
-      for (int i = 0; i < friends.size(); i++) {
-        topicId = (AgentId) friends.get(i);
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
+        topicId = (AgentId) iterator.next();
         forward(topicId, new TopicForwardNot(messages, false));
 
         if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
