@@ -25,9 +25,41 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
+
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.notifications.AbstractRequest;
+import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.ClusterRequest;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
+import org.objectweb.joram.mom.notifications.ExceptionReply;
+import org.objectweb.joram.mom.notifications.Monit_GetCluster;
+import org.objectweb.joram.mom.notifications.Monit_GetClusterRep;
+import org.objectweb.joram.mom.notifications.Monit_GetFather;
+import org.objectweb.joram.mom.notifications.Monit_GetFatherRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNumberRep;
+import org.objectweb.joram.mom.notifications.Monit_GetSubscriptions;
+import org.objectweb.joram.mom.notifications.SetFatherRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SubscribeReply;
+import org.objectweb.joram.mom.notifications.SubscribeRequest;
+import org.objectweb.joram.mom.notifications.TopicMsgsReply;
+import org.objectweb.joram.mom.notifications.UnclusterRequest;
+import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
+import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
+import org.objectweb.joram.shared.admin.GetSubscriberIds;
+import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.selectors.Selector;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
@@ -36,16 +68,6 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-
-import org.objectweb.joram.shared.admin.*;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.notifications.AdminReply;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.shared.selectors.*;
-
-import org.objectweb.joram.mom.MomTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>TopicImpl</code> class implements the MOM topic behaviour,
@@ -63,8 +85,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
-  /** Vector of cluster fellows, if any. */
-  protected Vector friends = null;
+  /** Set of cluster fellows, if any. */
+  protected Set friends = null;
   
   /** Vector of subscribers' identifiers. */
   protected Vector subscribers;
@@ -189,10 +211,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (friends == null) {
       // state change, so save.
       setSave();
-      friends = new Vector();
+      friends = new HashSet();
     }
 
-    if (friends.contains(newFriendId) || destId.equals(newFriendId)) {
+    if (destId.equals(newFriendId)) {
       info = strbuf.append("Request [").append(req.getClass().getName())
         .append("], sent to Topic [").append(destId)
         .append("], successful [false]: joining topic already")
@@ -202,7 +224,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       return;
     }
 
-    ClusterTest not = new ClusterTest(req, from);
+    ClusterTest not = new ClusterTest(req, from, friends);
     Channel.sendTo(newFriendId, not);
   }
 
@@ -216,11 +238,23 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     String info = null;
     // The topic is already part of a cluster: can't join an other cluster.
     if (friends != null && ! friends.isEmpty()) {
-      info = strbuf.append("Topic [").append(destId)
-        .append("] can't join cluster of topic [").append(from)
-        .append("] as it is already part of a cluster").toString();
-      strbuf.setLength(0);
-      Channel.sendTo(from, new ClusterAck(not, false, info));
+      if (friends.contains(from)) {
+        info = strbuf.append("Topic [").append(destId)
+          .append("] already joined cluster of topic [").append(from)
+          .append(']').toString();
+        strbuf.setLength(0);
+        friends.add(from);
+        friends.addAll(not.friends);
+        // Remove self if present
+        friends.remove(destId);
+        Channel.sendTo(from, new ClusterAck(not, true, info));
+      } else {
+        info = strbuf.append("Topic [").append(destId)
+          .append("] can't join cluster of topic [").append(from)
+          .append("] as it is already part of a cluster").toString();
+        strbuf.setLength(0);
+        Channel.sendTo(from, new ClusterAck(not, false, info));
+      }
     // The topic is already part of a hierarchy: can't join a cluster.
     } else if (fatherId != null) {
       info = strbuf.append("Topic [").append(destId)
@@ -232,8 +266,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     } else {
       // state change, so save.
       setSave();
-      friends = new Vector();
+      friends = new HashSet();
       friends.add(from);
+      friends.addAll(not.friends);
+      // Remove self if present
+      friends.remove(destId);
       info = strbuf.append("Topic [").append(destId)
         .append("] ok for joining cluster of topic [").append(from)
         .append(']').toString();
@@ -260,16 +297,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       return;
     }
   
-    AgentId fellowId;
-    ClusterNot fellowNot;
     ClusterNot newFriendNot = new ClusterNot(from);
-    for (int i = 0; i < friends.size(); i++) {
-      fellowId = (AgentId) friends.get(i);
-      fellowNot = new ClusterNot(fellowId);
-      // Notifying the joining topic of the current fellow.
-      Channel.sendTo(from, fellowNot);
+    Iterator iterator = friends.iterator();
+    while (iterator.hasNext()) {
       // Notifying the current fellow of the joining topic.
-      Channel.sendTo(fellowId, newFriendNot);
+      Channel.sendTo((AgentId) iterator.next(), newFriendNot);
     }
     // state change, so save.
     setSave();
@@ -294,14 +326,16 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    */
   protected void doReact(AgentId from, ClusterNot not)
   {
-    // state change, so save.
-    setSave();
-    friends.add(not.topicId);
-      
-    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
-                                    + not.topicId.toString()
-                                    + " set as a fellow.");
+    if (! not.topicId.equals(destId)) {
+      // state change, so save.
+      setSave();
+      friends.add(not.topicId);
+        
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                      + not.topicId.toString()
+                                      + " set as a fellow.");
+    }
   }
  
   /**
@@ -328,15 +362,14 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     }
 
     UnclusterNot not = new UnclusterNot();
-    AgentId fellowId;
     // Notifying each fellow of the leave.
-    while (! friends.isEmpty()) {
-      // state change, so save.
-      setSave();
-      fellowId = (AgentId) friends.remove(0);
-      Channel.sendTo(fellowId, not);
+    Iterator iterator = friends.iterator();
+    while (iterator.hasNext()) {
+      Channel.sendTo((AgentId) iterator.next(), not);
     }
     friends = null;
+    // state change, so save.
+    setSave();
 
     String info = strbuf.append("Request [")
       .append(request.getClass().getName())
@@ -536,8 +569,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     Vector cluster = null;
     if (friends != null) {
       cluster = new Vector();
-      for (int i = 0; i < friends.size(); i++)
-        cluster.add(friends.get(i).toString());
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
+        cluster.add(iterator.next().toString());
+      }
       cluster.add(destId.toString());
     }
 
@@ -804,8 +839,6 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   protected void doProcess(DeleteNot not)
   {
     AgentId clientId;
-    Vector subs;
-    SubscribeRequest sub;
 
     // For each subscriber...
     for (int i = 0; i < subscribers.size(); i++) {
@@ -815,13 +848,13 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     // For each cluster fellow if any...
     if (friends != null) {
-      AgentId topicId;
-      while (! friends.isEmpty()) {
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
         // state change, so save.
         setSave();
-        topicId = (AgentId) friends.remove(0);
-        Channel.sendTo(topicId, new UnclusterNot());
+        Channel.sendTo((AgentId) iterator.next(), new UnclusterNot());
       }
+      friends = null;
     }
   }
 
@@ -833,8 +866,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   {
     if (friends != null && ! friends.isEmpty()) {
       AgentId topicId;
-      for (int i = 0; i < friends.size(); i++) {
-        topicId = (AgentId) friends.get(i);
+      Iterator iterator = friends.iterator();
+      while (iterator.hasNext()) {
+        topicId = (AgentId) iterator.next();
         Channel.sendTo(topicId, new TopicForwardNot(messages, false));
 
         if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
