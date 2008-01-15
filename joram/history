@@ -1,4 +1,8 @@
 +==============================================================================
+| 2008/01/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: restart topic cluster error
++==============================================================================
 | 2008/01/10 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Adds forwarding of the expired messages to the DMQ within the networks,
