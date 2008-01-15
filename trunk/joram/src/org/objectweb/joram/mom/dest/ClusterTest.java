@@ -23,9 +23,12 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Set;
+
+import org.objectweb.joram.mom.notifications.ClusterRequest;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
-import org.objectweb.joram.mom.notifications.ClusterRequest;
 
 /**
  * A <code>ClusterTest</code> instance is a notification sent by a topic 
@@ -41,6 +44,9 @@ class ClusterTest extends Notification
   ClusterRequest request;
   /** The original requester. */
   AgentId requester;
+  
+  /** Set containing AgentId of topics already in the cluster */
+  Set friends;
 
   /**
    * Constructs a <code>ClusterTest</code> instance.
@@ -48,9 +54,9 @@ class ClusterTest extends Notification
    * @param request  The original client request.
    * @param requester  The original requester.
    */
-  ClusterTest(ClusterRequest request, AgentId requester)
-  {
+  ClusterTest(ClusterRequest request, AgentId requester, Set friends) {
     this.request = request;
     this.requester = requester;
+    this.friends = friends;
   }
 }
