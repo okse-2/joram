@@ -21,6 +21,7 @@
  */
 package com.scalagent.jmx;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -38,7 +39,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  * 
  */
-public class JMXServer implements MXServer {
+public class JMXServer implements MXServer, Serializable {
   
   public MBeanServer mxserver = null;
 
