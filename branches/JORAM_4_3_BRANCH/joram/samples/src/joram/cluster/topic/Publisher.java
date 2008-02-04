@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,40 +19,55 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package cluster.topic;
 
 import javax.jms.*;
 import javax.naming.*;
 
-public class Publisher
-{
-  static Context ictx;
+public class Publisher {
+  static Context ictx = null; ;
 
-  public static void main(String[] arg) throws Exception
-  {
-    System.out.println();
-    System.out.println("Publishes messages on topic on server0...");
+  public static void main(String[] args) throws Exception {
+    ConnectionFactory cf = null;
+    Topic dest = null;
+
+    if (args.length != 1)
+     throw new Exception("Bad number of argument");
 
     ictx = new InitialContext();
-    ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf0");
-    Topic dest = (Topic) ictx.lookup("top0");
-    ictx.close();
+    try {
+      if (args[0].equals("-")) {
+        // Choose a connection factory and the associated topic depending of
+        // the location property.
+        cf = (ConnectionFactory) ictx.lookup("clusterCF");
+        dest = (Topic) ictx.lookup("clusterTopic");
+      } else {
+        cf = (ConnectionFactory) ictx.lookup("cf" + args[0]);
+        dest = (Topic) ictx.lookup("topic" + args[0]);
+        System.setProperty("location", "server" + args[0]);
+      }
+    } finally {
+      ictx.close();
+    }
 
-    Connection cnx = cnxF.createConnection("publisher00", "publisher00");
-    Session sess = cnx.createSession(true, 0);
-    MessageProducer pub = sess.createProducer(dest);
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
+    Session session = cnx.createSession(true, 0);
+    MessageProducer pub = session.createProducer(dest);
 
-    TextMessage msg = sess.createTextMessage();
+    String location = System.getProperty("location");
+    if (location != null)
+      System.out.println("Publishes messages on topic on " + location);
+
+    TextMessage msg = session.createTextMessage();
 
     int i;
     for (i = 0; i < 10; i++) {
       msg.setText("Msg " + i);
       pub.send(msg);
     }
-
-    sess.commit();
+    session.commit();
 
     System.out.println(i + " messages published.");
 
