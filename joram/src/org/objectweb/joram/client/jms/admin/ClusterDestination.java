@@ -27,9 +27,13 @@ package org.objectweb.joram.client.jms.admin;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.shared.admin.SetReader;
+import org.objectweb.joram.shared.admin.SetWriter;
+
 
 import javax.naming.*;
 
+import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Enumeration;
