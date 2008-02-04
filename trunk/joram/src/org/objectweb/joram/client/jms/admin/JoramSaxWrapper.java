@@ -924,6 +924,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           cluster.clear();
 
+          configureDestination(clusterQueue);
           // Bind the destination in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
@@ -945,6 +946,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           cluster.clear();
 
+          configureDestination(clusterTopic);
           // Bind the destination in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
