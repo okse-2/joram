@@ -32,13 +32,25 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 public class AddDomainRequest extends AdminRequest {
   private static final long serialVersionUID = 1L;
   private String domainName;
+  private String network;
   private int serverId;
   private int port;
+
+  public AddDomainRequest(String domainName,
+                          String network,
+                          int serverId,
+                          int port) {
+    this.domainName = domainName;
+    this.network = network;
+    this.serverId = serverId;
+    this.port = port;
+  }
 
   public AddDomainRequest(String domainName,
                           int serverId,
                           int port) {
     this.domainName = domainName;
+    this.network = null;
     this.serverId = serverId;
     this.port = port;
   }
@@ -47,6 +59,12 @@ public class AddDomainRequest extends AdminRequest {
   
   public final String getDomainName() {
     return domainName;
+  }
+  
+  public final String getNetwork() {
+    if (network == null)
+      return "fr.dyade.aaa.agent.SimpleNetwork";
+    return network;
   }
 
   public final int getServerId() {
@@ -63,12 +81,14 @@ public class AddDomainRequest extends AdminRequest {
 
   public void readFrom(InputStream is) throws IOException {
     domainName = StreamUtil.readStringFrom(is);
+    network = StreamUtil.readStringFrom(is);
     serverId = StreamUtil.readIntFrom(is);
     port = StreamUtil.readIntFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(domainName, os);
+    StreamUtil.writeTo(network, os);
     StreamUtil.writeTo(serverId, os);
     StreamUtil.writeTo(port, os);
   }
