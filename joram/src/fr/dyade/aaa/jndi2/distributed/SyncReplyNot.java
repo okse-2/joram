@@ -22,11 +22,6 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.*;
 
-public class SyncReplyNot extends Notification {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;}
+public class SyncReplyNot extends Notification {}

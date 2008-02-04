@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,15 +23,11 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.shared.admin.SpecialAdmin;
 
 
 public class AddQueueCluster extends SpecialAdmin {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -7467277380733000634L;
 
   public String joiningQueue;
 
@@ -49,8 +45,6 @@ public class AddQueueCluster extends SpecialAdmin {
     this.joiningQueue = joiningQueue;
   }
 
-  public AddQueueCluster() { }
-  
   public String toString() {
     StringBuffer buff = new StringBuffer();
     buff.append("AddQueueCluster (clusterQueue=");
@@ -59,19 +53,5 @@ public class AddQueueCluster extends SpecialAdmin {
     buff.append(joiningQueue);
     buff.append(')');
     return buff.toString();
-  }
-  
-  protected int getClassId() {
-    return ADD_QUEUE_CLUSTER;
-  }
-
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    joiningQueue = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(joiningQueue, os);
   }
 }

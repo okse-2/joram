@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -32,21 +31,14 @@ import org.objectweb.joram.client.jms.TopicConnection;
 public class TopicHATcpConnectionFactory
   extends org.objectweb.joram.client.jms.TopicConnectionFactory {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public TopicHATcpConnectionFactory(String url) {
     super(url);
   }
 
-  /**
-   * Constructs an empty <code>TopicHATcpConnectionFactory</code>.
-   * Needed by ObjectFactory.
-   */
-  public TopicHATcpConnectionFactory() {}
-
+  public TopicHATcpConnectionFactory() {
+	  super();
+  }
+  
   /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
    *
@@ -57,7 +49,7 @@ public class TopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new TopicConnection(params, lc);
     }
 
@@ -72,7 +64,7 @@ public class TopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 

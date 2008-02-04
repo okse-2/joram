@@ -74,26 +74,10 @@ public class LocalConnection implements RequestChannel {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "LocalConnection.connect()");
 
-    if (AgentServer.getStatus() != AgentServer.Status.STARTED) {
-      if ((AgentServer.getStatus() != AgentServer.Status.INITIALIZED) &&
-          (AgentServer.getStatus() != AgentServer.Status.STOPPED)) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgProxy.log(BasicLevel.ERROR,
-                                    "LocalConnection.connect(), server is not initialized: " + AgentServer.getStatusInfo() + '.');
-
-        throw new Exception();
-      }
-      
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgProxy.log(BasicLevel.WARN,
-                                  "LocalConnection.connect(), server is not started: " + AgentServer.getStatusInfo() + '.');
-    }
-
     GetProxyIdNot gpin = new GetProxyIdNot(userName, password, null);
     try {
-      gpin.invoke(new AgentId(AgentServer.getServerId(),
-                              AgentServer.getServerId(),
-                              AgentId.JoramAdminStamp));
+      gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer
+          .getServerId(), AgentId.JoramAdminStamp));
       proxyId = gpin.getProxyId();
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))

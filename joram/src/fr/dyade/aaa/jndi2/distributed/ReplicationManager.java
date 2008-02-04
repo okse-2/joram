@@ -63,10 +63,6 @@ import fr.dyade.aaa.jndi2.server.Trace;
 public class ReplicationManager 
     extends RequestManager implements UpdateListener {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public final static String INIT_REQUEST_TABLE = "initRequestTable";
   public final static String SYNC_REQUEST_TABLE = "syncRequestTable";
   public final static String WRITE_REQUEST_TABLE = "writeRequestTable";
@@ -175,7 +171,8 @@ public class ReplicationManager
       for (int i = 0; i < serverIds.length; i++) {        
         AgentId aid = DistributedJndiServer.getDefault(serverIds[i]);
         servers.addElement(aid);
-	sendTo(aid, new InitJndiServerNot(null, null, true));
+        sendTo(aid, new InitJndiServerNot(
+          null, null, true));
       }
       saveServers();
     }
@@ -211,13 +208,13 @@ public class ReplicationManager
       Trace.logger.log(BasicLevel.WARN,
                        "Distributed jndi update warn:",
                        exc);
-    } catch (NamingException exc) { 
-	if(!looseCoupling){
+    } catch (NamingException exc) {    
+   	if(!looseCoupling){
 	    Trace.logger.log(BasicLevel.ERROR, 
 			     "Distributed jndi update error:",
 			     exc);
 	    throw new Error(exc.toString());
-	}
+      	}
     }
   }  
 
@@ -452,7 +449,6 @@ public class ReplicationManager
       for (int i = 0; i < initServers.size(); i++) {
         AgentId newServerId = 
           (AgentId)initServers.elementAt(i);
-	/** Modif */
 	if(! (rootOwnerId.equals( (AgentId)initServers.elementAt(i))))
         sendTo(newServerId, new InitJndiServerNot(
           localJndiServerIds, 
@@ -475,6 +471,8 @@ public class ReplicationManager
     Hashtable  composite_context= new Hashtable();
     if (contexts != null) {
       Vector newNames = new Vector();
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	  Trace.logger.log(BasicLevel.DEBUG,"InitJndiServerNot update record context :"+contexts.toString()+"\n\n\n" );
       for (int i = 0; i < contexts.length; i++) {
 	  if(!looseCoupling){
 	      NamingContext nc = getServerImpl().getNamingContext(
@@ -497,15 +495,16 @@ public class ReplicationManager
 		  nc=null;
 	      }
 	      if(nc == null){
+		  if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+		      Trace.logger.log(BasicLevel.DEBUG,"naming context not exist :"+contexts[i].getCompositeName() );
 		  nc = getServerImpl().newNamingContext( getId(),null,contexts[i].getCompositeName());
 		  contexts[i].getNamingContext().setOwnerId(getId());
 	      }
-	     
 	      Enumeration enumRecord = contexts[i].getNamingContext().getEnumRecord();
 	      while (enumRecord.hasMoreElements()) {          
 		  Record record =(Record)  enumRecord.nextElement();
 		  Record r = nc.getRecord(record.getName());
-		  if (r == null)  
+		  if (r == null)
 		      nc.addRecord(record);
 		  if(record instanceof ContextRecord){
 		      CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
@@ -515,6 +514,8 @@ public class ReplicationManager
 	      composite_context.put(contexts[i].getCompositeName(),nc);
 	 }
       }
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	  Trace.logger.log(BasicLevel.DEBUG,"end InitJndiServerNot update record");
       if(looseCoupling){
 	  Enumeration enumKeyRecord = record_compositeName.keys();
 	  while(enumKeyRecord.hasMoreElements()) { 
@@ -729,10 +730,6 @@ public class ReplicationManager
 
   static class RequestContextList 
       implements java.io.Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
     private Vector list;
 
     RequestContextList() {

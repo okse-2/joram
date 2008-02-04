@@ -30,10 +30,6 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class AgentEntryPoint implements EntryPoint {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private RequestManager manager;
 
   public void setRequestManager(RequestManager manager) {

@@ -33,10 +33,6 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class AdminNotification extends Notification
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The proxy's <code>AgentId</code> identifier. */
   private AgentId proxyId;
   /** The administrator's name. */

@@ -24,6 +24,10 @@
  */
 package org.objectweb.joram.client.connector;
 
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -36,9 +40,6 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
@@ -50,10 +51,6 @@ public class DefaultConnectionManager
              implements javax.resource.spi.ConnectionManager,
                         java.io.Serializable
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * Static reference to the local <code>DefaultConnectionManager</code>
    * instance.
@@ -127,19 +124,14 @@ public class DefaultConnectionManager
     }
   }
 
-  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
+  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , 
+                                    ManagedConnectionFactoryImpl mcf) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " setFactoryParameters(" + factory + "," + mcf + ")");   
     factory.getParameters().connectingTimer = mcf.getConnectingTimer();
     factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
     factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
-    factory.getParameters().asyncSend = mcf.isAsyncSend();
-    factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
-    factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
-    factory.getParameters().outLocalAddress = mcf.getOutLocalAddress();
-    factory.getParameters().outLocalPort = mcf.getOutLocalPort().intValue();
-    
   }
 
   /**

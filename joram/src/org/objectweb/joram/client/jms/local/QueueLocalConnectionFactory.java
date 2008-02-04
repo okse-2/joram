@@ -36,12 +36,6 @@ public class QueueLocalConnectionFactory
     extends org.objectweb.joram.client.jms.QueueConnectionFactory
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-
-  /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
    */
   public QueueLocalConnectionFactory()

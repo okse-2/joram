@@ -24,6 +24,25 @@
  */
 package org.objectweb.joram.client.connector;
 
+import fr.dyade.aaa.agent.AgentServer;
+import com.scalagent.jmx.JMXServer;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.JoramAdmin;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+
+import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ConnectionMetaData;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -44,6 +63,7 @@ import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.NotSupportedException;
@@ -57,26 +77,7 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 
-import org.objectweb.joram.client.jms.ConnectionMetaData;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.admin.JoramAdmin;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
-import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import com.scalagent.jmx.JMXServer;
-
-import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * A <code>JoramAdapter</code> instance manages connectivities to an
@@ -87,11 +88,6 @@ import fr.dyade.aaa.agent.AgentServer;
 public class JoramAdapter
   implements javax.resource.spi.ResourceAdapter,
              java.io.Serializable, JoramAdapterMBean {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
 
@@ -133,11 +129,6 @@ public class JoramAdapter
   /** Port number of the underlying JORAM server. */
   int serverPort = 16010;
 
-
-  /** Root name. */
-    String rootName = "root";
-    String rootPasswd = "root";
-
   /** Identifier of the JORAM server to start. */
   short serverId = 0;
 
@@ -174,8 +165,7 @@ public class JoramAdapter
   /** Names of the bound objects. */
   private static Vector boundNames = new Vector();
   /** Standard JMSResource MBean ObjectName. */
-//  private static ObjectName jmsResourceON;
-  
+  private static ObjectName jmsResourceON;
   /** Local MBean server. */
   private static MBeanServer mbs = null;
 
@@ -282,7 +272,7 @@ public class JoramAdapter
     java.util.ArrayList array = MBeanServerFactory.findMBeanServer(null);
     if (!array.isEmpty())
       mbs = (MBeanServer) array.get(0);
-    jmxServer = new JMXServer(mbs);
+    jmxServer = new JMXServer(mbs,"JoramAdapter");
   }
 
   /**
@@ -937,24 +927,9 @@ public class JoramAdapter
     joramAdmin.setDefaultDMQ(serverId,dmq);
   }
 
-  public void setDefaultDMQId(int serverId, String dmqId)
-  throws ConnectException, AdminException {
-    joramAdmin.setDefaultDMQId(serverId,dmqId);
-  }
-  
   public DeadMQueue getDefaultDMQ(int serverId)
     throws ConnectException, AdminException {
     return joramAdmin.getDefaultDMQ(serverId);
-  }
-
-  public String getDefaultDMQId()
-    throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId();
-  }
-
-  public String getDefaultDMQId(int serverId)
-    throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId(serverId);
   }
 
   public DeadMQueue getDefaultDMQ()
@@ -1105,7 +1080,7 @@ public class JoramAdapter
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
         .getParameters().connectingTimer = 60;
 
-      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd);
+      joramAdmin = new JoramAdmin(factory, "root", "root");
     }
     catch (ConnectException exc) {
       throw new AdminException("Admin connection can't be established: "
@@ -1364,14 +1339,6 @@ public class JoramAdapter
     this.serverId = serverId.shortValue();
   }
 
-    public void setRootName(java.lang.String rn) {
-	rootName = rn;
-    }
-    public void setRootPasswd(java.lang.String rp) { 
-	rootPasswd = rp;
-    }
-
-
   public void setClusterId(java.lang.Short clusterId) {
     this.clusterId = clusterId.shortValue();
     if (this.clusterId != AgentServer.NULL_ID){
@@ -1453,13 +1420,6 @@ public class JoramAdapter
 
   public Short getServerId() {
     return new Short(serverId);
-  }
-
-  public java.lang.String getRootName() {
-      return rootName;
-  }
-  public java.lang.String getRootPasswd() { 
-      return rootPasswd;
   }
 
   public java.lang.String getServerName() {

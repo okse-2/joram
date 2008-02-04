@@ -28,11 +28,6 @@ import org.objectweb.joram.client.jms.Queue;
 
 class QueueTreeNode extends DestinationTreeNode {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private MessageRootTreeNode msgRoot;
 
   private Queue queue;
@@ -61,11 +56,6 @@ class QueueTreeNode extends DestinationTreeNode {
   }
 
   private class ClearQueueAction extends AbstractAction {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
 
     public ClearQueueAction() {
       super("Clear", AdminToolConstants.trashIcon);

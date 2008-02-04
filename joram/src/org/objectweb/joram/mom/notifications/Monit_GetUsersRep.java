@@ -32,10 +32,6 @@ import java.util.Vector;
  */
 public class Monit_GetUsersRep extends AdminReply
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Vector of readers' or writers' identifiers. */
   private Vector users;
 

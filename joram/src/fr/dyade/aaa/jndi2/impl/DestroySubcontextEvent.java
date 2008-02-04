@@ -28,10 +28,6 @@ import javax.naming.CompositeName;
 
 public class DestroySubcontextEvent extends UpdateEvent {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private CompositeName path;
 
   public DestroySubcontextEvent(NamingContextId updatedContextId,

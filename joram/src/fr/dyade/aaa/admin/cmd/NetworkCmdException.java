@@ -26,11 +26,6 @@ import java.io.*;
 
 public class NetworkCmdException extends ExceptionCmd {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public NetworkCmdException(Throwable exc) {
     super(exc);
   }

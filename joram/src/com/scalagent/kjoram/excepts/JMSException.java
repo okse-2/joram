@@ -24,10 +24,6 @@ package com.scalagent.kjoram.excepts;
 
 
 public class JMSException extends Exception {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private String errorCode;
   private Exception linkedException;
   

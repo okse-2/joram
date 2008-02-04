@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,20 +24,13 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * An <code>AdminReply</code> is a reply sent by a
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic and containing data or
  * information destinated to a client administrator.
  */
-public class AdminReply extends AbstractAdminMessage {
-
-  private static final long serialVersionUID = 1L;
+public class AdminReply implements java.io.Serializable {
+  private static final long serialVersionUID = 1188608769364211862L;
 
   public final static int NAME_ALREADY_USED = 0;
 
@@ -103,8 +96,6 @@ public class AdminReply extends AbstractAdminMessage {
     this.replyObj = replyObj;
   }
 
-  public AdminReply() { }
-  
   /**
    * Returns <code>true</code> if this reply replies to a successful request.
    */
@@ -133,27 +124,4 @@ public class AdminReply extends AbstractAdminMessage {
       ",errorCode=" + errorCode + 
       ",replyObj=" + replyObj + ')';
   }
-
-  protected int getClassId() {
-    return ADMIN_REPLY;
-  }
-
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
-  
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(success, os);
-    StreamUtil.writeTo(info, os);
-    StreamUtil.writeObjectTo(replyObj, os);
-    StreamUtil.writeTo(errorCode, os);
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    success = StreamUtil.readBooleanFrom(is);
-    info = StreamUtil.readStringFrom(is);
-    replyObj = StreamUtil.readObjectFrom(is);
-    errorCode = StreamUtil.readIntFrom(is);
-  }
-
 }

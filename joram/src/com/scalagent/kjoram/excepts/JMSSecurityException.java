@@ -26,11 +26,6 @@ package com.scalagent.kjoram.excepts;
 public class JMSSecurityException extends JMSException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>JMSSecurityException</code> instance.
    */
   public JMSSecurityException(String info)

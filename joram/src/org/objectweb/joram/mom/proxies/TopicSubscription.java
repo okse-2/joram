@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import fr.dyade.aaa.agent.AgentId;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 

@@ -37,10 +37,6 @@ import fr.dyade.aaa.agent.conf.*;
  * @see A3CMLConfig
  */
 public class StopScript implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** vector of StopAdminCmd */
   private Vector commands = null;
 

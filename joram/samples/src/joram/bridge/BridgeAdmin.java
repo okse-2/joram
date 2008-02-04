@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - ScalAgent DT
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent DT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,90 +18,55 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package bridge;
 
-import java.util.Properties;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import java.util.Properties;
 
 
 /**
  * Administers an agent server for the bridge sample.
  */
-public class BridgeAdmin {
-  public static void main(String[] args) throws Exception {
+public class BridgeAdmin
+{
+  public static void main(String[] args) throws Exception
+  {
     System.out.println();
     System.out.println("Bridge administration...");
 
     AdminModule.connect("root", "root", 60);
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    
-    User.create("anonymous", "anonymous", 0);
-    User.create("anonymous", "anonymous", 1);
-    
-    // create The foreign destination and connectionFactory
-    Queue foreignQueue = Queue.create(1, "foreignQueue");
-    foreignQueue.setFreeReading();
-    foreignQueue.setFreeWriting();
-    System.out.println("foreign queue = " + foreignQueue);
-    
-    Topic foreignTopic = Topic.create(1, "foreignTopic");
-    foreignTopic.setFreeReading();
-    foreignTopic.setFreeWriting();
-    System.out.println("foreign topic = " + foreignTopic);
-    
-    javax.jms.ConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
-    
-    // bind foreign destination and connectionFactory
-    jndiCtx.rebind("foreignQueue", foreignQueue);
-    jndiCtx.rebind("foreignTopic", foreignTopic);
-    jndiCtx.rebind("foreignCF", foreignCF);
-    
-    
+
     // Setting the bridge properties
     Properties prop = new Properties();
+    // Communication mode: PTP
+    prop.setProperty("jmsMode", "ptp");
     // Foreign QueueConnectionFactory JNDI name: foreignCF
     prop.setProperty("connectionFactoryName", "foreignCF");
     // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("destinationName", "foreignQueue");
-    // automaticRequest
-    prop.setProperty("automaticRequest", "false");
+    prop.setProperty("destinationName", "foreignDest");
 
-    // Creating a Queue bridge on server 0:
-    Queue joramQueue = Queue.create(0,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
-                                 prop);
-    joramQueue.setFreeReading();
-    joramQueue.setFreeWriting();
-    System.out.println("joram queue = " + joramQueue);
-    
-    // Setting the bridge properties
-    prop = new Properties();
-    // Foreign QueueConnectionFactory JNDI name: foreignCF
-    prop.setProperty("connectionFactoryName", "foreignCF");
-    // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("destinationName", "foreignTopic");
-    
     // Creating a Topic bridge on server 0:
-    Topic joramTopic = Topic.create(0,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
+    Topic bridgeD = Topic.create(0,
+                                 "org.objectweb.joram.mom.dest.BridgeTopic",
                                  prop);
-    joramTopic.setFreeReading();
-    joramTopic.setFreeWriting();
-    System.out.println("joram topic = " + joramTopic);
 
-    javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create();
+    bridgeD.setFreeReading();
+    bridgeD.setFreeWriting();
 
-    jndiCtx.rebind("joramQueue", joramQueue);
-    jndiCtx.rebind("joramTopic", joramTopic);
-    jndiCtx.rebind("joramCF", joramCF);
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create();
+
+    User user = User.create("anonymous", "anonymous", 0);
+
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+
+    jndiCtx.bind("bridgeD", bridgeD);
+    jndiCtx.bind("cf", cf);
     
     jndiCtx.close();
 

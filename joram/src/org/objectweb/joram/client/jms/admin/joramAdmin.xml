@@ -35,8 +35,6 @@
   
   <User name="" login="" password="" serverId=""/>
   
-  <Server serverId="" dmq="" threshold=""/>
-
   <Destination type=""
                serverId=""
                name=""

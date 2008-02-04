@@ -27,10 +27,6 @@ import javax.naming.*;
 
 public class ListReply extends JndiReply {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private NameClassPair[] pairs;
 
   public ListReply(NameClassPair[] pairs) {

@@ -37,10 +37,6 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class SendRepliesNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Vector replies;
   
   public SendRepliesNot(Vector v) {

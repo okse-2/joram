@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,11 +21,6 @@ package fr.dyade.aaa.agent;
 
 public class UnknownDomainException extends Exception {
 
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   /**
    *  Constructs a new <code>UnknownDomainException</code> with no

@@ -198,24 +198,24 @@ final class DBRepository implements Repository {
     nbsaved += 1;
   }
 
-//   /**
-//    * Loads the object.
-//    *
-//    * @return The loaded object or null if it does not exist.
-//    */
-//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
-//     byte[] content = load(dirName, name); 
+  /**
+   * Loads the object.
+   *
+   * @return The loaded object or null if it does not exist.
+   */
+  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
+    byte[] content = load(dirName, name); 
 
-//     ByteArrayInputStream bis = new ByteArrayInputStream(content);
-//     ObjectInputStream ois = new ObjectInputStream(bis);
-//     try {
-//       Object obj = ois.readObject();
-//       return obj;
-//     } finally {
-//       ois.close();
-//       bis.close();
-//     }
-//   }
+    ByteArrayInputStream bis = new ByteArrayInputStream(content);
+    ObjectInputStream ois = new ObjectInputStream(bis);
+    try {
+      Object obj = ois.readObject();
+      return obj;
+    } finally {
+      ois.close();
+      bis.close();
+    }
+  }
 
   /**
    * Loads the byte array.

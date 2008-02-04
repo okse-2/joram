@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,36 +17,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.Serializable;
-import java.util.Enumeration;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.mom.notifications.*;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.objectweb.joram.mom.notifications.LBMessageGive;
-import org.objectweb.joram.mom.notifications.LBMessageHope;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.AgentId;
+import java.util.Enumeration;
+import java.io.Serializable;
 
 public class LoadingFactor implements Serializable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   public static class Status {
     public final static int INIT = 0;
     public final static int RUN = 1;
     public final static int WAIT = 2;
     
-    public final static String[] names = {"INIT", "RUN", "WAIT"};
+    public final static String[] names = 
+    {"INIT", "RUN", "WAIT"};
   }
 
   public static class ConsumerStatus {
@@ -151,8 +145,8 @@ public class LoadingFactor implements Serializable {
   private void updateThreshol() {
     if (autoEvalThreshold) {
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.updateThreshol before" +
                                       " rateOfFlow=" + rateOfFlow +
                                       ", producThreshold=" + producThreshold +
@@ -183,8 +177,8 @@ public class LoadingFactor implements Serializable {
           consumThreshold = deltaCons;
       }
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.updateThreshol after" +
                                       " rateOfFlow=" + rateOfFlow +
                                       ", producThreshold=" + producThreshold +
@@ -199,10 +193,6 @@ public class LoadingFactor implements Serializable {
    * else if rateOfFlow < 1 the queue are more pending messages 
    * than pending requests.
    * This value is set in all QueueClusterNot notification.
-   * 
-   * @param pendingMessages
-   * @param pendingRequests
-   * @return
    */
   public float evalRateOfFlow(int pendingMessages,
                               int pendingRequests) {
@@ -221,8 +211,8 @@ public class LoadingFactor implements Serializable {
     
     rateOfFlow = (currentROF + rateOfFlow ) / 2;
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "LoadingFactor.evalRateOfFlow" +
                                     " pendingMessages = " + pendingMessages +
                                     ", pendingRequests = " + pendingRequests +
@@ -236,10 +226,6 @@ public class LoadingFactor implements Serializable {
    * this method eval the rate of flow and activity.
    * if necessary send "give or hope" messages, and
    * update threshol.
-   * 
-   * @param clusters
-   * @param pendingMessages
-   * @param pendingRequests
    */
   public void factorCheck(Hashtable clusters,
                           int pendingMessages,
@@ -253,8 +239,8 @@ public class LoadingFactor implements Serializable {
       status = Status.RUN;
     
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     ">> LoadingFactor.factorCheck " +
                                     this + "\nclusters = " + clusters);
 
@@ -275,17 +261,15 @@ public class LoadingFactor implements Serializable {
 
     updateThreshol();
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "<< LoadingFactor.factorCheck " 
                                     + this);
   }
 
-  /**
-   * true if cluster queue is overloaded.
+  /** 
+   * return true if cluster queue is overloaded.
    * depends on activity.
-   * 
-   * @return  true if cluster queue is overloaded.
    */
   public boolean isOverloaded() {
     overLoaded = false;
@@ -295,8 +279,8 @@ public class LoadingFactor implements Serializable {
          ProducerStatus.PRODUCER_HIGH_ACTIVITY))
       overLoaded = true;
     
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "LoadingFactor.isOverloaded " 
                                     + overLoaded);
     return overLoaded;
@@ -305,10 +289,6 @@ public class LoadingFactor implements Serializable {
   /**
    * use to dispatch request hope or give messages
    * in clusters.
-   * 
-   * @param clusters
-   * @param nbOfPendingMessages
-   * @param nbOfPendingRequests
    */
   private void dispatchAndSendTo(Hashtable clusters,
                                  int nbOfPendingMessages,
@@ -331,8 +311,8 @@ public class LoadingFactor implements Serializable {
 //      else
 //        nbMsgGive = nbOfPendingMessages - nbOfPendingRequests;
     
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "LoadingFactor.dispatchAndSendTo" +
                                     "\nnbMsgHope=" + nbMsgHope +
                                     ", nbMsgGive=" + nbMsgGive);
@@ -346,10 +326,7 @@ public class LoadingFactor implements Serializable {
   }
 
   /**
-   * send nb messages on clusters.
-   * 
-   * @param nbMsgGive
-   * @param clusters  Hashtable of cluster Queue
+   * send  nb messages on clusters.
    */
   private void processGive(int nbMsgGive, Hashtable clusters) {
     if (nbMsgGive < 1) return;
@@ -359,49 +336,75 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() >= 1 && 
-          !id.equals(clusterQueueImpl.destId))
+          !id.equals(clusterQueueImpl.getDestId()))
         selected.add(id);
     }
     
     if (selected.size() == 0) return;
     
-    int nbGivePerQueue = nbMsgGive / selected.size();
-    LBMessageGive msgGive = new LBMessageGive(validityPeriod, rateOfFlow);
+    int givePerQueue = nbMsgGive / selected.size();
     
-    if (nbGivePerQueue == 0 && nbMsgGive > 0) {
-      // send all to the first element of clusterQueue.
+    LBMessageGive msgGive = new LBMessageGive(validityPeriod,rateOfFlow);
+    ClientMessages cm = new ClientMessages();
+    
+    if (givePerQueue == 0 && nbMsgGive > 0) {
       AgentId id = (AgentId) selected.get(0);
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processGive" +
                                       " nbMsgGive = " + nbMsgGive +
                                       ", id = " + id);
-      msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbMsgGive, null, true));
-      clusterQueueImpl.forward(id,msgGive);
+
+      for (int i = 0; i < givePerQueue; i++) {
+        if (! clusterQueueImpl.messagesIsEmpty()) {
+          Message msg = clusterQueueImpl.removeMessage(0);
+          cm.addMessage(msg);
+        } else 
+          break;
+      }
+      msgGive.setClientMessages(cm);
+      Channel.sendTo(id,msgGive);
+      
+      for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+        Message msg = (Message) e.nextElement();
+        clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
+        clusterQueueImpl.deletePersistenceMessage(msg);
+      }
     } else {
-      // dispatch to cluster.
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processGive" +
-                                      " givePerQueue = " + nbGivePerQueue +
+                                      " givePerQueue = " + givePerQueue +
                                       ", selected = " + selected);
+      
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
-        msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbGivePerQueue, null, true));
-        clusterQueueImpl.forward(id,msgGive);
+        
+        for (int i = 0; i < givePerQueue; i++) {
+          if (clusterQueueImpl.messagesIsEmpty()) break;
+          Message msg = clusterQueueImpl.removeMessage(0);
+          cm.addMessage(msg);
+        }
+        msgGive.setClientMessages(cm);
+        Channel.sendTo(id,msgGive);
+
+        for (Enumeration e2 = cm.getMessages().elements(); e2.hasMoreElements(); ) {
+          Message msg = (Message) e2.nextElement();
+          clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
+          clusterQueueImpl.deletePersistenceMessage(msg);
+        }
+        cm = new ClientMessages();
       }
     }
   }
 
- /**
-  * send a hope request on a cluster queue.
-  * 
-  * @param nbMsgHope
-  * @param clusters   Hashtable of cluster Queue
-  */
+  /**
+   * 
+   */
   private void processHope(int nbMsgHope, Hashtable clusters) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                     "LoadingFactor.processHope" +
                                     " nbMsgHope = " + nbMsgHope);
     if (nbMsgHope < 1) return;
@@ -410,40 +413,54 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() <= 1 && 
-          !id.equals(clusterQueueImpl.destId))
+          !id.equals(clusterQueueImpl.getDestId()))
         selected.add(id);
     }
 
     if (selected.size() == 0) return;
 
-    int nbHopePerQueue = nbMsgHope / selected.size();
-    if (nbHopePerQueue == 0 && nbMsgHope > 0) {
-      // send the hope request to the first element of clusterQueue.
+    int hopePerQueue = nbMsgHope / selected.size();
+    if (hopePerQueue == 0 && nbMsgHope > 0) {
       AgentId id = (AgentId) selected.get(0);
       
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processHope" +
                                       " nbMsgHope = " + nbMsgHope +
                                       ", id = " + id);
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       msgHope.setNbMsg(nbMsgHope);
-      clusterQueueImpl.forward(id,msgHope);
+      Channel.sendTo(id,msgHope);
       
     } else {
-      // dispatch the hope request to clusterQueue.
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
                                       "LoadingFactor.processHope" +
-                                      " hopePerQueue = " + nbHopePerQueue +
+                                      " hopePerQueue = " + hopePerQueue +
                                       ", selected = " + selected);
       
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
-        msgHope.setNbMsg(nbHopePerQueue);
-        clusterQueueImpl.forward(id,msgHope);
+        msgHope.setNbMsg(hopePerQueue);
+        Channel.sendTo(id,msgHope);
       }
+    }
+  }
+
+  public void processGive(AgentId to, LBCycleLife cycle) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    "LoadingFactor.processGive" +
+                                    " to = " + to +
+                                    ", cycle = " + cycle);
+    Channel.sendTo(to,cycle);
+
+    ClientMessages cm = cycle.getClientMessages();
+    for (Enumeration e = cm.getMessages().elements(); e.hasMoreElements(); ) {
+      Message msg = (Message) e.nextElement();
+      clusterQueueImpl.messageSendToCluster(msg.getIdentifier());
+      clusterQueueImpl.deletePersistenceMessage(msg);
     }
   }
 

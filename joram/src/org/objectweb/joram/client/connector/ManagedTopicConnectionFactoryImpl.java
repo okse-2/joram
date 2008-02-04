@@ -76,11 +76,6 @@ public class ManagedTopicConnectionFactoryImpl
                         java.io.Serializable
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>ManagedTopicConnectionFactoryImpl</code> instance.
    */
   public ManagedTopicConnectionFactoryImpl()

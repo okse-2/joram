@@ -26,33 +26,26 @@ package org.objectweb.joram.client.jms.tcp;
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
 
 /**
  * An <code>XATcpConnectionFactory</code> instance is a factory of
  * TCP connections dedicated to XA communication.
  */
 public class XATcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an <code>iXATcpConnectionFactory</code> instance.
-   */
-  public XATcpConnectionFactory() {
-    super();
-  }
-  
+             extends org.objectweb.joram.client.jms.XAConnectionFactory
+{
   /**
    * Constructs an <code>iXATcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XATcpConnectionFactory(String host, int port) {
+  public XATcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 

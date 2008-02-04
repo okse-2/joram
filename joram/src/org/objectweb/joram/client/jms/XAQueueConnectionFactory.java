@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -31,16 +31,8 @@ import javax.jms.JMSException;
  */
 public abstract class XAQueueConnectionFactory
                 extends XAConnectionFactory
-                implements javax.jms.XAQueueConnectionFactory {
-  
-  /**
-   * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
-   * given server.
-   */
-  public XAQueueConnectionFactory() {
-  	super();
-  }
-  
+                implements javax.jms.XAQueueConnectionFactory
+{
   /**
    * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
    * given server.
@@ -62,7 +54,9 @@ public abstract class XAQueueConnectionFactory
     super(url);
   }
 
-
+  public XAQueueConnectionFactory() {
+	  super();
+  }
 
   /** Returns a string view of the connection factory. */
   public String toString() {

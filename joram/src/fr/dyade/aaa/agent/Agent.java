@@ -20,13 +20,14 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.io.*;
+import java.util.*;
+import java.lang.reflect.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -65,10 +66,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Channel
  */
 public abstract class Agent implements AgentMBean, Serializable {
-  /**
-   * 
-   */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 2955513886633164244L;
 
   /**
    * <code>true</code> if the agent state has changed.
@@ -196,7 +194,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
-  public static final String nullName = "";
+  protected static final String nullName = "";
 
   /**
    *  the <code>last</code> variable contains the virtual time of the

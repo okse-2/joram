@@ -26,11 +26,6 @@ import java.awt.*;
 
 
 public class InputFormPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public InputFormPanel(JLabel[] labels, JTextField[] textFields) {
     GridBagLayout gridbag = new GridBagLayout();
 

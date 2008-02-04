@@ -34,11 +34,6 @@ import org.objectweb.util.monolog.api.Logger;
 public class ContextManager 
     implements java.io.Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private ContextTable contextIdTable;
 
   private ContextTable contextNameTable;

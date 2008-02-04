@@ -31,16 +31,8 @@ import javax.jms.JMSException;
  */
 public abstract class XATopicConnectionFactory
                 extends XAConnectionFactory
-                implements javax.jms.XATopicConnectionFactory {
- 
-  /**
-   * Constructs an <code>XATopicConnectionFactory</code> dedicated to a
-   * given server.
-   */
-  public XATopicConnectionFactory() {
-    super();
-  }
-  
+                implements javax.jms.XATopicConnectionFactory
+{
   /**
    * Constructs an <code>XATopicConnectionFactory</code> dedicated to a
    * given server.
@@ -62,6 +54,10 @@ public abstract class XATopicConnectionFactory
     super(url);
   }
 
+  public XATopicConnectionFactory() {
+	  super();
+  }
+  
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "XATCF:" + params.getHost() + "-" + params.getPort();

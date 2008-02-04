@@ -29,10 +29,6 @@ import fr.dyade.aaa.agent.*;
 
 public class ProxyRequestGroupNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private RequestNot[] requests;
 
   public ProxyRequestGroupNot(RequestNot[] array) {

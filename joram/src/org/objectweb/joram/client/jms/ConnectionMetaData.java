@@ -41,9 +41,9 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   /** JMS API version, currently 1.1 */
   public final static String jmsVersion = "1.1";
   /** Joram's major version number */
-  public static int providerMajorVersion = 5;
+  public static int providerMajorVersion = 4;
   /** Joram's minor version number */
-  public static int providerMinorVersion = 0;
+  public static int providerMinorVersion = 3;
   /** Joram's implementation version, currently @version@. */
   public final static String providerVersion = "@version@";
   /** Enumeration of the Joram's JMSX property names */

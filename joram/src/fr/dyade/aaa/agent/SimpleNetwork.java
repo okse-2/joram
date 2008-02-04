@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,25 +22,15 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
-import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
+import java.util.Vector;
 import java.util.Enumeration;
 
-import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.*;
 
 /**
  *  <code>SimpleNetwork</code> is a simple implementation of
@@ -48,7 +38,7 @@ import fr.dyade.aaa.util.Daemon;
  * a time.
  */
 public class SimpleNetwork extends StreamNetwork {
-  /** FIFO list of all messages to be sent by the watch-dog thread. */
+  /** FIFO list of all messages to be sent by the watch-dog thead. */
   MessageVector sendList;
 
   private JGroups jgroups = null;
@@ -63,7 +53,8 @@ public class SimpleNetwork extends StreamNetwork {
       //  Deletes the processed notification
       qout.remove(ack.getStamp());
       ack.delete();
-      AgentServer.getTransaction().commit(true);
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,
                         this.getName() + ", ackMsg(...) done.");
@@ -184,9 +175,11 @@ public class SimpleNetwork extends StreamNetwork {
     protected void shutdown() {}
 
     public void run() {
+      int ret;
       Message msg = null;
       short msgto;
       ServerDesc server = null;
+      InputStream is = null;
 
       try {
         try {
@@ -221,14 +214,13 @@ public class SimpleNetwork extends StreamNetwork {
             msgto = msg.getDest();
             
             Socket socket = null;
-            ExpiredNot expiredNot = null;
             try {
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
                 this.logmon.log(BasicLevel.DEBUG,
                                 this.getName() + ", try to send message -> " +
                                 msg + "/" + msgto);
 
-              if ((msg.not.expiration > 0L) &&
+              if ((msg.not.expiration > 0) &&
                   (msg.not.expiration < currentTimeMillis)) {
                 throw new ExpirationExceededException();
               }
@@ -305,26 +297,13 @@ public class SimpleNetwork extends StreamNetwork {
               // Remove the message (see below), may be we have to post an
               // error notification to sender.
             } catch (ExpirationExceededException exc) {
-              if (msg.not.deadNotificationAgentId != null) {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
-                      + msg.from
-                      + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
-                }
-                expiredNot = new ExpiredNot(msg.not);
-              } else {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from
-                      + ", " + msg.not);
-                }
-              }
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
+                           getName() + ": removes expired notification " +
+                           msg.from + ", " + msg.not);
             }
 
             AgentServer.getTransaction().begin();
-            if (expiredNot != null) {
-              Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-              Channel.validate();
-            }
             //  Suppress the processed notification from message queue,
             // and deletes it.
             qout.pop();
@@ -333,7 +312,8 @@ public class SimpleNetwork extends StreamNetwork {
               jgroups.send(new JGroupsAckMsg(msg));
             msg.delete();
             msg.free();
-            AgentServer.getTransaction().commit(true);
+            AgentServer.getTransaction().commit();
+            AgentServer.getTransaction().release();
           }
         }
       } catch (Exception exc) {
@@ -354,7 +334,7 @@ public class SimpleNetwork extends StreamNetwork {
      *
      * @exception IOException unrecoverable exception during transaction.
      */
-    void watchdog(long currentTimeMillis) throws Exception {
+    void watchdog(long currentTimeMillis) throws IOException {
 //       this.logmon.log(BasicLevel.DEBUG,
 //                       this.getName() + " watchdog().");
 
@@ -365,7 +345,7 @@ public class SimpleNetwork extends StreamNetwork {
       ServerDesc server = null;
 
       for (int i=0; i<sendList.size(); i++) {
-        Message msg = sendList.getMessageAt(i);
+        Message msg = (Message) sendList.getMessageAt(i);
         short msgto = msg.getDest();
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -375,28 +355,15 @@ public class SimpleNetwork extends StreamNetwork {
                           " from " + msg.from +
                           " to " + msg.to);
 
-        if ((msg.not.expiration > 0L) &&
+        if ((msg.not.expiration > 0) &&
             (msg.not.expiration < currentTimeMillis)) {
-          
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+
           // Remove the message.
           AgentServer.getTransaction().begin();
-
-          if (msg.not.deadNotificationAgentId != null) {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification2 " + msg.from
-                  + ", "
-                  + msg.not + " to " + msg.not.deadNotificationAgentId);
-            }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not);
-            Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-            Channel.validate();
-          } else {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                  + msg.not);
-            }
-          }
-
           // Deletes the processed notification
           sendList.removeMessageAt(i); i--;
 // AF: A reprendre.
@@ -405,7 +372,8 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         }
 
         try {
@@ -425,7 +393,8 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
 
           continue;
         }
@@ -434,12 +403,6 @@ public class SimpleNetwork extends StreamNetwork {
           // The server has already been tested during this round
           continue;
         }
-
-        this.logmon.log(BasicLevel.DEBUG,
-                        this.getName() + server.active + ',' +
-                        server.retry + ',' +
-                        server.last + ',' +
-                        currentTimeMillis);
 
         if ((server.active) ||
             ((server.retry < WDNbRetryLevel1) && 
@@ -492,7 +455,12 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
+        } else {
+          // Set last in order to avoid the sending of following messages to
+          // same server.
+          server.last = currentTimeMillis +1;
         }
       }
     }
@@ -500,6 +468,7 @@ public class SimpleNetwork extends StreamNetwork {
     public void send(Socket socket,
                      Message msg,
                      long currentTimeMillis) throws IOException {
+      int ret;
       InputStream is = null;
 
       try {
@@ -513,7 +482,7 @@ public class SimpleNetwork extends StreamNetwork {
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", wait ack");
         is = socket.getInputStream();
-        if (is.read() == -1)
+        if ((ret = is.read()) == -1)
           throw new ConnectException("Connection broken");
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -538,7 +507,6 @@ public class SimpleNetwork extends StreamNetwork {
 
     NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
-      // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -549,7 +517,6 @@ public class SimpleNetwork extends StreamNetwork {
       try {
 	listen.close();
       } catch (Exception exc) {}
-      listen = null;
     }
 
     protected void shutdown() {
@@ -563,12 +530,6 @@ public class SimpleNetwork extends StreamNetwork {
       byte[] iobuf = new byte[29];
 
       try {
-        // After a stop we needs to create anew the listen socket.
-        if (listen == null) {
-          // creates a server socket listening on configured port
-          listen = createServerSocket();
-        }
-
 	while (running) {
 	  try {
 	    canStop = true;
@@ -617,7 +578,7 @@ public class SimpleNetwork extends StreamNetwork {
             // Reads notification object
             ois = new ObjectInputStream(is);
             msg.not = (Notification) ois.readObject();
-            if (msg.not.expiration > 0L)
+            if (msg.not.expiration > 0)
               msg.not.expiration += System.currentTimeMillis();
             msg.not.persistent = persistent;
             msg.not.detachable = detachable;
@@ -654,9 +615,6 @@ public class SimpleNetwork extends StreamNetwork {
 	    socket = null;
 	  }
 	}
-      } catch (IOException exc) {
-        this.logmon.log(BasicLevel.ERROR,
-                        this.getName() + ", bad socket initialisation", exc);
       } finally {
         finish();
       }
@@ -700,15 +658,15 @@ public class SimpleNetwork extends StreamNetwork {
       count = Message.LENGTH +8;
 
       try {
-        if (msg.not.expiration > 0L)
+        if (msg.not.expiration > 0)
           msg.not.expiration -= currentTimeMillis;
         oos.writeObject(msg.not);
         oos.reset();
         oos.flush();
-        os.write(buf, 0, count);
+        os.write(buf, 0, count);;
         os.flush();
       } finally {
-        if (msg.not.expiration > 0L)
+        if (msg.not.expiration > 0)
           msg.not.expiration += currentTimeMillis;
         count = 0;
       }

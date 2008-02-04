@@ -29,11 +29,6 @@ import fr.dyade.aaa.agent.*;
 
 public class CreateSubcontextRequest extends JndiRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public CreateSubcontextRequest(CompositeName name) {
     super(name);
   }

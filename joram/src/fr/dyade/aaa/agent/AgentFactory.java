@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,9 +20,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -46,10 +45,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * to remotely delete agents.
  */
 final class AgentFactory extends Agent {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * Allocates a new <code>AgentFactory</code> agent.
    * An <code>AgentFactory</code> agent must be created on every agent

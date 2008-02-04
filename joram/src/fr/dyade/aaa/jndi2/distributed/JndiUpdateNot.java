@@ -22,15 +22,12 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
+import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.impl.*;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.jndi2.impl.UpdateEvent;
 
 public class JndiUpdateNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private UpdateEvent updateEvent;
 
   public JndiUpdateNot(UpdateEvent updateEvent) {

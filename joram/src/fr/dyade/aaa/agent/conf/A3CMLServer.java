@@ -25,10 +25,6 @@ import java.util.*;
  * The class <code>Server</code> describes an agent server.
  */
 public class A3CMLServer implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public short sid = -1;
   public String name = null;
   public String hostname = null;

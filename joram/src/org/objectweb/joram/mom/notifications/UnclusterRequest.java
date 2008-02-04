@@ -32,11 +32,6 @@ import fr.dyade.aaa.agent.AgentId;
 public class UnclusterRequest extends AdminRequest
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs an <code>UnclusterRequest</code> instance.
    *
    * @param id  Identifier of the request, may be null.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,10 +63,13 @@ public class SCAdminBase {
                                  File dir) throws Exception {
     StringTokenizer st = new StringTokenizer(a3config.getJvmArgs(sid));
     int nb = st.countTokens();
-    String[] jvmargs = new String[nb];
-    for (int i=0; i<nb; i++){
+    String[] jvmargs = new String[nb+2];
+    int i=0;
+    for (; i<nb; i++){
       jvmargs[i] = st.nextToken();
     }
+    jvmargs[i++] = "-Dcom.sun.management.jmxremote";
+    jvmargs[i++] = "-DMXServer=com.scalagent.jmx.JMXServer";
 
     return scadmin.startAgentServer(sid, dir, jvmargs);
   }

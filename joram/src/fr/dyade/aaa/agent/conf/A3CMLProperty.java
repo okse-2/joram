@@ -24,10 +24,6 @@ import java.io.*;
  * The class <code>A3CMLProperty</code> describes a property.
  */
 public class A3CMLProperty implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Name of the property. */
   public String name = null;
   /** Value of the property. */

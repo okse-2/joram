@@ -21,28 +21,17 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
+import javax.net.ssl.*;
 import java.security.KeyStore;
-import java.net.UnknownHostException;
-
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import javax.security.cert.X509Certificate;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.*;
 
 /**
  * <tt>HttpNetwork</tt> is a specialization of <tt>HttpNetwork</tt>
@@ -87,6 +76,9 @@ public final class HttpsNetwork extends HttpNetwork {
  
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(new FileInputStream(keyFile), pass);
+
+//         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+//         kmf.init(ks, pass);
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
         tmf.init(ks);
@@ -134,8 +126,8 @@ public final class HttpsNetwork extends HttpNetwork {
   }
 
   /**
-   *  This method creates and returns a SSL server socket which is bound to
-   * the specified port.
+   *  This method creates and returns a SSL server socket which uses all
+   * network interfaces on the host, and is bound to the specified port.
    *
    * @param port	the port to listen to.
    * @return		a SSL server socket bound to the specified port.
@@ -143,8 +135,8 @@ public final class HttpsNetwork extends HttpNetwork {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    ServerSocket serverSocket = 
-      getServerSocketFactory().createServerSocket(port, backlog, inLocalAddr);
+    ServerSocket serverSocket = null;
+    serverSocket = getServerSocketFactory().createServerSocket(port, backlog);
     ((SSLServerSocket) serverSocket).setNeedClientAuth(false);
 
     return serverSocket;
@@ -154,20 +146,18 @@ public final class HttpsNetwork extends HttpNetwork {
    *  This method creates and returns a SSL socket connected to a ServerSocket
    * at the specified network address and port.
    *
-   * @param addr	the server address.
+   * @param host	the server host.
    * @param port	the server port.
    * @return		a socket connected to a ServerSocket at the specified
    *			network address and port.
    *
    * @exception IOException	if the connection can't be established
    */
-  Socket createSocket(InetAddress addr, int port) throws IOException {
-    if (addr == null)
+  Socket createSocket(InetAddress host, int port) throws IOException {
+    if (host == null)
       throw new UnknownHostException();
 
-    // AF: Be careful SSLSocketFactory don't allow to use ConnectTimeout
-    return getSocketFactory().createSocket(addr, port,
-                                           outLocalAddr, outLocalPort);
+    return getSocketFactory().createSocket(host, port);
   }
 
   /**
@@ -184,6 +174,8 @@ public final class HttpsNetwork extends HttpNetwork {
    */
   Socket createTunnelSocket(InetAddress host, int port,
                             InetAddress proxy, int proxyport) throws IOException {
+//     SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+
     // Set up a socket to do tunneling through the proxy.
     // Start it off as a regular socket, then layer SSL over the top of it.
     Socket tunnel = new Socket(proxy, proxyport);
@@ -230,6 +222,7 @@ public final class HttpsNetwork extends HttpNetwork {
     boolean		headerDone = false;	/* Done on first newline */
 
     InputStream	in = tunnel.getInputStream();
+    boolean		error = false;
 
     while (newlinesSeen < 2) {
       int i = in.read();

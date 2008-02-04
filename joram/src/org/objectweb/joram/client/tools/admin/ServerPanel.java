@@ -42,11 +42,6 @@ import org.objectweb.joram.client.jms.admin.DeadMQueue;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class ServerPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private final AdminController c;
 
   private int id = 0;

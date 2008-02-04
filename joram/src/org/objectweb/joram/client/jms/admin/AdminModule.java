@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -82,10 +82,10 @@ public class AdminModule {
   /** The requestor for sending the synchronous requests. */
   private static AdminRequestor requestor;
 
-  /** AdminMessage sent to the platform. */
-  private static AdminMessage requestMsg;
-  /** AdminMessage received from the platform. */
-  private static AdminMessage replyMsg;
+  /** ObjectMessage sent to the platform. */
+  private static ObjectMessage requestMsg;
+  /** ObjectMessage received from the platform. */
+  private static ObjectMessage replyMsg;
 
   /** Reply object received from the platform. */
   protected static AdminReply reply;
@@ -360,7 +360,7 @@ public class AdminModule {
     throws ConnectException, AdminException {
     addServer(sid,
               hostName, domainName, port, serverName,
-              new String[]{}, new String[]{});
+              null, null);
   }
 
   /**
@@ -422,9 +422,11 @@ public class AdminModule {
   /**
    * Adds a domain to the platform.
    *
-   * @param domainName Name of the added domain.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
+   * @param domainName Name of the added domain
+   * @param sid Id of the router server that
+   *            gives access to the added domain
+   * @param port Listening port in the added domain of the
+   *             router server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -435,29 +437,6 @@ public class AdminModule {
     throws ConnectException, AdminException {
     doRequest(new AddDomainRequest(
                 domainName,
-                sid,
-                port));
-  }
-
-  /**
-   * Adds a domain to the platform using a specific network component.
-   *
-   * @param domainName Name of the added domain.
-   * @param network    Classname of the network component to use.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void addDomain(String domainName,
-                               String network,
-                               int sid,
-                               int port)
-    throws ConnectException, AdminException {
-    doRequest(new AddDomainRequest(
-                domainName,
-                network,
                 sid,
                 port));
   }
@@ -500,27 +479,9 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static void setDefaultDMQ(int serverId, DeadMQueue dmq)
-  throws ConnectException, AdminException {
-    if (dmq != null) {
+    throws ConnectException, AdminException
+    {
       doRequest(new SetDefaultDMQ(serverId, dmq.getName()));
-    }
-  }
-  
-  /**
-   * Sets a given dead message queue as the default DMQ for a given server
-   * (<code>null</code> for unsetting previous DMQ).
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId  The identifier of the server.
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void setDefaultDMQId(int serverId, String dmqId)
-    throws ConnectException, AdminException {
-      doRequest(new SetDefaultDMQ(serverId, dmqId));
     }
 
   /**
@@ -533,24 +494,11 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static void setDefaultDMQ(DeadMQueue dmq)
-    throws ConnectException, AdminException {
+    throws ConnectException, AdminException
+    {
       setDefaultDMQ(localServer, dmq);
     }
 
-  /**
-   * Sets a given dead message queue as the default DMQ for the local server
-   * (<code>null</code> for unsetting previous DMQ).
-   *
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static void setDefaultDMQId(String dmqId)
-    throws ConnectException, AdminException {
-      setDefaultDMQId(localServer, dmqId);
-    }
-  
   /**
    * Sets a given value as the default threshold for a given server (-1 for
    * unsetting previous value).
@@ -678,12 +626,16 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static DeadMQueue getDefaultDMQ(int serverId)
-    throws ConnectException, AdminException {
-    String reply = getDefaultDMQId(serverId);
-    if (reply == null)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+      if (reply.getDMQName() == null)
         return null;
       else
-        return new DeadMQueue(reply);
+        return new DeadMQueue(reply.getDMQName());
     }
 
   /**
@@ -694,41 +646,9 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static DeadMQueue getDefaultDMQ()
-    throws ConnectException, AdminException {
+    throws ConnectException, AdminException
+    {
       return getDefaultDMQ(localServer);
-    }
-  
-  /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static String getDefaultDMQId()
-    throws ConnectException, AdminException {
-      return getDefaultDMQId(localServer);
-    }
-  
-  /**
-   * Returns the default dead message queue for a given server, null if not
-   * set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static String getDefaultDMQId(int serverId)
-    throws ConnectException, AdminException {
-      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
-      Monitor_GetDMQSettingsRep reply;
-      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
-
-      if (reply.getDMQName() == null)
-        return null;
-      else
-        return reply.getDMQName();
     }
 
   /**
@@ -964,9 +884,9 @@ public class AdminModule {
       timeout = requestTimeout;
 
     try {
-      replyMsg = (AdminMessage) requestor.request(
+      replyMsg = (ObjectMessage) requestor.request(
         request, timeout);
-      reply = (AdminReply) replyMsg.getAdminMessage();
+      reply = (AdminReply) replyMsg.getObject();
 
       if (! reply.succeeded()) {
         switch (reply.getErrorCode()) {
@@ -1030,8 +950,7 @@ public class AdminModule {
           "AdminModule.AdminRequestor.request(" +
           request + ',' + timeout + ')');
 
-      requestMsg = new AdminMessage();
-      requestMsg.setAdminMessage(request);
+      requestMsg = sess.createObjectMessage(request);
       requestMsg.setJMSReplyTo(tmpTopic);
       producer.send(requestMsg);
       String correlationId = requestMsg.getJMSMessageID();
