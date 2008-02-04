@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -538,6 +538,7 @@ public class SimpleNetwork extends StreamNetwork {
 
     NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
+      // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -548,6 +549,7 @@ public class SimpleNetwork extends StreamNetwork {
       try {
 	listen.close();
       } catch (Exception exc) {}
+      listen = null;
     }
 
     protected void shutdown() {
@@ -561,6 +563,12 @@ public class SimpleNetwork extends StreamNetwork {
       byte[] iobuf = new byte[29];
 
       try {
+        // After a stop we needs to create anew the listen socket.
+        if (listen == null) {
+          // creates a server socket listening on configured port
+          listen = createServerSocket();
+        }
+
 	while (running) {
 	  try {
 	    canStop = true;
@@ -646,6 +654,9 @@ public class SimpleNetwork extends StreamNetwork {
 	    socket = null;
 	  }
 	}
+      } catch (IOException exc) {
+        this.logmon.log(BasicLevel.ERROR,
+                        this.getName() + ", bad socket initialisation", exc);
       } finally {
         finish();
       }
