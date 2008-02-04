@@ -30,13 +30,7 @@ fi
 # Test the argument number
 if [ -z $1 ]
 then
-  echo "!! Missing file argument !!"
-  exit 1
-fi
-
-if [ ! -z $2 ]
-then
-  echo "!! Too many arguments !!"
+  echo "!! Missing class argument !!"
   exit 1
 fi
 
@@ -53,12 +47,13 @@ fi
 
 # Building the Classpath
 CLASSPATH=$JORAM_LIBS/joram-client.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-mom.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/jakarta-regexp-1.2.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jms.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jndi.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/jmxri.jar
 CLASSPATH=$CLASSPATH:$SAMPLE_CLASSES
 CLASSPATH=$CLASSPATH:$RUN_DIR
 
@@ -70,4 +65,4 @@ if $cygwin; then
 fi
 
 echo "== Launching the $1 client =="
-cd $RUN_DIR; exec $JAVA_HOME/bin/java -classpath $CLASSPATH $1
+cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java -classpath $CLASSPATH $*
