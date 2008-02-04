@@ -132,6 +132,34 @@ public class ClusterDestination extends Destination {
     return getDestination().getName();
   }
 
+  public void setReader(User user) throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetReader(user.getProxyId(), dest.getName()));
+    }
+  }
+
+  public void setWriter(User user) throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetWriter(user.getProxyId(), dest.getName()));
+    }
+  }
+  
+  public void setFreeReading() throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetReader(null, dest.getName()));
+    }
+  }
+
+  public void setFreeWriting() throws ConnectException, AdminException {
+    for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
+      Destination dest = (Destination) dests.nextElement(); 
+      AdminModule.doRequest(new SetWriter(null, dest.getName()));
+    }
+  }
+  
 //   /**
 //    * Returns <code>true</code> if the parameter object is a Joram
 //    * cluster destination wrapping the same agent identifier.
