@@ -431,80 +431,52 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-  
-  <!-- Runs the cluster administration -->
-  <target name="cluster_admin" depends="init"
-    description="--> Runs the cluster administration">
+  <!-- Runs the cluster topic administration -->
+  <target name="topic_cluster_admin" depends="init"
+    description="--> Runs the cluster topic administration">
     <java classname="cluster.topic.ClusterAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
 
-  <target name="cluster_adminxml" depends="init"
-    description="--> Runs the cluster administration xml">
+  <target name="topic_cluster_adminxml" depends="init"
+    description="--> Runs the cluster topic administration xml">
     <copy file="${src.dir}/cluster/topic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
     <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
       <arg line="./joramAdmin.xml"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
-  <target name="cadmin0" depends="init"
-    description="--> Runs the cluster administration">
-    <java classname="cluster.queue.perfs.ClusterQAdmin" failonerror="no" fork="yes"
+  <!-- Runs a cluster topic subscriber -->
+  <target name="topic_cluster_subscriber" depends="init"
+    description="--> Runs a cluster topic subscriber">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2" defaultvalue=""/>
+    <java classname="cluster.topic.Subscriber" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="0"/>
+      <arg value="${sid}"/>
     </java>
   </target>
 
-  <target name="cadmin1" depends="init"
-    description="--> Runs the cluster administration">
-    <java classname="cluster.queue.perfs.ClusterQAdmin" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="1"/>
-    </java>
-  </target>
-
-  <!-- Runs a cluster subscriber -->
-  <target name="subscriber10" depends="init">
-    <java classname="cluster.topic.Subscriber10" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs a cluster subscriber -->
-  <target name="subscriber20" depends="init">
-    <java classname="cluster.topic.Subscriber20" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs a cluster subscriber -->
-  <target name="subscriber21" depends="init">
-    <java classname="cluster.topic.Subscriber21" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the cluster publisher -->
-  <target name="cluster_pub" depends="init">
+  <!-- Runs a cluster topic publisher -->
+  <target name="topic_cluster_publisher" depends="init"
+    description="--> Runs a cluster topic publisher">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2" defaultvalue=""/>
     <java classname="cluster.topic.Publisher" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg value="${sid}"/>
     </java>
   </target>
 
-  <!-- Runs queue cluster administration -->
+  <!-- Runs the cluster queue administration -->
   <target name="queue_cluster_admin" depends="init"
-    description="--> Runs queue cluster administration">
+    description="--> Runs the cluster queue administration">
     <java classname="cluster.queue.ClusterAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
@@ -512,67 +484,35 @@
   </target>
 
   <target name="queue_cluster_adminxml" depends="init"
-    description="--> Runs queue cluster administration xml">
+    description="--> Runs the cluster queue administration xml">
     <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
     <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
       <arg line="./joramAdmin.xml"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
-  <!-- Runs a queue cluster consumer 0 -->
-  <target name="consumer0" depends="init">
+  <!-- Runs a queue cluster consumer -->
+  <target name="queue_cluster_consumer" depends="init">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2"/>
     <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="0"/>
+      <jvmarg line="-Dsleep=5000 -DnbMsgSleep=10"/>
+      <arg value="${sid}"/>
     </java>
   </target>
 
-  <!-- Runs a queue cluster consumer 1 -->
-  <target name="consumer1" depends="init">
-    <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="1"/>
-    </java>
-  </target>
-
-  <!-- Runs a queue cluster consumer 2 -->
-  <target name="consumer2" depends="init">
-    <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="2"/>
-    </java>
-  </target>
-
-  <!-- Runs a queue cluster producer 0 -->
-  <target name="producer0" depends="init">
+  <!-- Runs a queue cluster producer -->
+  <target name="queue_cluster_producer" depends="init">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2"/>
     <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <arg line="0 1000"/>
-    </java>
-  </target>
-
-  <!-- Runs a queue cluster producer 1 -->
-  <target name="producer1" depends="init">
-    <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="1 1000"/>
-    </java>
-  </target>
-
-  <!-- Runs a queue cluster producer 2 -->
-  <target name="producer2" depends="init">
-    <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="2 1000"/>
+      <arg line="${sid} 1000"/>
     </java>
   </target>
 
