@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -881,6 +881,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           cluster.clear();
 
+          configureDestination(clusterQueue);
           // Bind the destination in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
@@ -902,6 +903,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
           cluster.clear();
 
+          configureDestination(clusterTopic);
           // Bind the destination in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
