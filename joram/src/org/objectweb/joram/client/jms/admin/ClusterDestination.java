@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -46,7 +46,6 @@ import org.objectweb.joram.shared.admin.SetWriter;
  * A base class for clustered destinations.
  */
 public class ClusterDestination extends Destination {
-
   /**
    * 
    */
@@ -153,14 +152,14 @@ public class ClusterDestination extends Destination {
     }
   }
   
-  public void setFreeReader() throws ConnectException, AdminException {
+  public void setFreeReading() throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
       AdminModule.doRequest(new SetReader(null, dest.getName()));
     }
   }
 
-  public void setFreeWriter() throws ConnectException, AdminException {
+  public void setFreeWriting() throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
       AdminModule.doRequest(new SetWriter(null, dest.getName()));
