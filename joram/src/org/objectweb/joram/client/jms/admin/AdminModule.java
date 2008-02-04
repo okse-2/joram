@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -422,11 +422,9 @@ public class AdminModule {
   /**
    * Adds a domain to the platform.
    *
-   * @param domainName Name of the added domain
-   * @param sid Id of the router server that
-   *            gives access to the added domain
-   * @param port Listening port in the added domain of the
-   *             router server
+   * @param domainName Name of the added domain.
+   * @param sid Id of the router server that gives access to the added domain.
+   * @param port Listening port in the added domain of the router server.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -437,6 +435,29 @@ public class AdminModule {
     throws ConnectException, AdminException {
     doRequest(new AddDomainRequest(
                 domainName,
+                sid,
+                port));
+  }
+
+  /**
+   * Adds a domain to the platform using a specific network component.
+   *
+   * @param domainName Name of the added domain.
+   * @param network    Classname of the network component to use.
+   * @param sid Id of the router server that gives access to the added domain.
+   * @param port Listening port in the added domain of the router server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static void addDomain(String domainName,
+                               String network,
+                               int sid,
+                               int port)
+    throws ConnectException, AdminException {
+    doRequest(new AddDomainRequest(
+                domainName,
+                network,
                 sid,
                 port));
   }
