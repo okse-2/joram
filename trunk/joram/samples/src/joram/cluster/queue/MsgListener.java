@@ -27,8 +27,7 @@ import javax.jms.*;
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
  */
-public class MsgListener implements MessageListener
-{
+public class MsgListener implements MessageListener {
   String ident = null;
   int nbMsg = 0;
   long startTime = -1;
@@ -39,7 +38,7 @@ public class MsgListener implements MessageListener
 
   public MsgListener(String ident) {
     this.ident = ident;
-    int sleep = Integer.getInteger("sleep", 0).intValue();
+    int sleep = Integer.getInteger("sleep", 10).intValue();
     int nbMsgSleep = Integer.getInteger("nbMsgSleep", 10).intValue();
     System.out.println("sleep = " + sleep + ", nbMsgSleep=" + nbMsgSleep);
   }

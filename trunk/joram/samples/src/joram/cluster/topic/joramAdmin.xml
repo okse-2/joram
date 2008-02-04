@@ -3,71 +3,61 @@
 <JoramAdmin>
   
   <AdminModule>
-    <connect host="localhost"
-             port="16010"
-             name="root"
-             password="root"/>
+    <connect host="localhost" port="16010" name="root" password="root"/>
   </AdminModule>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
-    <tcp host="localhost"
-         port="16010"/>
-    <jndi name="cf0"/>
-  </ConnectionFactory>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
-    <tcp host="localhost"
-         port="16011"/>
-    <jndi name="cf1"/>
-  </ConnectionFactory>
-  
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
-    <tcp host="localhost"
-         port="16012"/>
-    <jndi name="cf2"/>
-  </ConnectionFactory>
-  
-  <User name="publisher00"
-        password="publisher00"
-        serverId="0"/>
-  <User name="subscriber10"
-        password="subscriber10"
-        serverId="1"/>
-  <User name="subscriber20"
-        password="subscriber20"
-        serverId="2"/>
-  <User name="subscriber21"
-        password="subscriber21"
-        serverId="2"/>
-  
-  <Cluster>
-    <Topic name="top0"
-           serverId="0">
-      <jndi name="top0"/>
-    </Topic>
-    <Topic name="top1"
-           serverId="1">
-      <jndi name="top1"/>
-    </Topic>
-    <Topic name="top2"
-           serverId="2">
-      <jndi name="top2"/>
-    </Topic>
-    <freeReader/>
-    <freeWriter/>
-    <reader user="publisher00"/>
-    <writer user="publisher00"/>
-    <reader user="publisher10"/>
-    <writer user="publisher10"/>
-    <reader user="publisher20"/>
-    <writer user="publisher20"/>
-  </Cluster>
-  
+
   <InitialContext>
     <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
     <property name="java.naming.factory.host" value="localhost"/>
     <property name="java.naming.factory.port" value="16400"/>
   </InitialContext>
   
+  <ConnectionFactory name="cf0"
+                     className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost" port="16010"/>
+    <jndi name="cf0"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory name="cf1"
+                     className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost" port="16011"/>
+    <jndi name="cf1"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory name="cf2"
+                     className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost" port="16012"/>
+    <jndi name="cf2"/>
+  </ConnectionFactory>
+
+  <ClusterCF>
+    <ClusterElement name="cf0" location="server0"/>
+    <ClusterElement name="cf1" location="server1"/>
+    <ClusterElement name="cf2" location="server2"/>
+    <jndi name="clusterCF"/>
+  </ClusterCF>
+
+  <User name="anonymous" password="anonymous" serverId="0"/>
+  <User name="anonymous" password="anonymous" serverId="1"/>
+  <User name="anonymous" password="anonymous" serverId="2"/>
+  
+  <Topic name="topic0" serverId="0">
+    <jndi name="topic0"/>
+  </Topic>
+  <Topic name="topic1" serverId="1">
+    <jndi name="topic1"/>
+  </Topic>
+  <Topic name="topic2" serverId="2">
+    <jndi name="topic2"/>
+  </Topic>
+
+  <ClusterTopic>
+    <ClusterElement name="topic0" location="server0"/>
+    <ClusterElement name="topic1" location="server1"/>
+    <ClusterElement name="topic2" location="server2"/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="clusterTopic"/>
+  </ClusterTopic>
   
 </JoramAdmin>

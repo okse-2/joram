@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
 package cluster.queue;
@@ -32,28 +33,42 @@ public class Consumer {
   static Context ictx = null; 
 
   public static void main(String[] args) throws Exception {
+    ConnectionFactory cf = null;
+    Queue dest = null;
 
-    int i = new Integer(args[0]).intValue();
-    System.setProperty("location", ""+i);
-
-    System.out.println();
-    System.out.println("Listens to the cluster queue " + i);
+    if (args.length != 1)
+     throw new Exception("Bad number of argument");
 
     ictx = new InitialContext();
-    Destination queue = (Destination) ictx.lookup("clusterQueue");
-    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("qcf"+i);
-    ictx.close();
+    try {
+      if (args[0].equals("-")) {
+        // Choose a connection factory and the associated topic depending of
+        // the location property.
+        cf = (ConnectionFactory) ictx.lookup("clusterCF");
+        dest = (Queue) ictx.lookup("clusterQueue");
+      } else {
+        cf = (ConnectionFactory) ictx.lookup("cf" + args[0]);
+        dest = (Queue) ictx.lookup("queue" + args[0]);
+        System.setProperty("location", "server" + args[0]);
+      }
+    } finally {
+      ictx.close();
+    }
 
-    Connection cnx = cf.createConnection("user"+i,"user"+i);
-    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer recv = sess.createConsumer(queue);
-    recv.setMessageListener(new MsgListener("location" + i + " listener"));
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
+    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer sub = session.createConsumer(dest);
 
+    String location = System.getProperty("location");
+    if (location != null)
+      System.out.println("Subscribes and listens to queue on " + location);
+
+    sub.setMessageListener(new MsgListener("location" + location + " listener"));
     cnx.start();
 
-//    cnx.close();
+    System.out.println("Press a key to exit..");
+    System.in.read();
 
-    System.out.println();
-    System.out.println("Consumer closed.");
+    cnx.close();
   }
 }
