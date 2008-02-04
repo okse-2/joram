@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,18 +94,106 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     for (int i=0; i<sessions.length; i++) {
       if (servers[i] != AgentServer.getServerId()) {
         sessions[i] = new NetSession(getName(), servers[i]);
-
-        try {
-          MXWrapper.registerMBean(new NetSessionWrapper(this, servers[i]),
-                                  "AgentServer", getMBeanName(servers[i]));
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
-        }
       }
     }
     wakeOnConnection = new WakeOnConnection(getName(), logmon);
     dispatcher = new Dispatcher(getName(), logmon);
     watchDog = new WatchDog(getName(), logmon);
+  }
+
+  /**
+   * Adds the server sid in the network configuration.
+   *
+   * @param id	the unique server id.
+   */
+  synchronized void addServer(short id) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      for (int i=0; i<servers.length; i++) {
+        strbuf.append("\n\t").append(sessions[i]);
+      }
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + " before addServer:" + strbuf.toString());
+    }
+
+    try {
+    super.addServer(id);
+
+    if (sessions.length == servers.length) return;
+
+    NetSession[] newSessions = new NetSession[servers.length];
+
+
+    // Copy the old array in the new one
+    for (int i=0; i<sessions.length; i++) {
+      if ((sessions[i] != null) && 
+          (sessions[i].sid != AgentServer.getServerId())) {
+        newSessions[index(sessions[i].sid)] = sessions[i];
+        sessions[i] = null;
+      }
+    }
+    sessions = newSessions;
+    // Allocate the NetSession for the new server
+    int idx = index(id);
+    sessions[idx] = new NetSession(getName(), id);
+    sessions[idx].init();
+
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      for (int i=0; i<servers.length; i++) {
+        strbuf.append("\t").append(sessions[i]).append("\n");
+      }
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + " after addServer:" + strbuf.toString());
+    }
+
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
+    }
+    logmon.log(BasicLevel.FATAL, getName() + " addServer ok", new Exception());
+  }
+
+  /**
+   * Removes the server sid in the network configuration.
+   *
+   * @param id	the unique server id.
+   */
+  synchronized void delServer(short id) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      for (int i=0; i<servers.length; i++) {
+        strbuf.append("\t").append(sessions[i]).append("\n");
+      }
+      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+    }
+
+    try {
+    super.delServer(id);
+
+    NetSession[] newSessions = new NetSession[servers.length];
+    int j = 0;
+    for (int i=0; i<servers.length; i++) {
+      if (sessions[i] == null) {
+        j += 1;
+      } else if (sessions[i].sid != id) {
+        newSessions[j++] = sessions[i];
+        sessions[i] = null;
+      }
+    }
+    sessions = newSessions;
+
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      for (int i=0; i<servers.length; i++) {
+        strbuf.append("\t").append(sessions[i]).append("\n");
+      }
+      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+    }
+
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.FATAL, getName() + " delServer failed", exc);
+    }
+    logmon.log(BasicLevel.FATAL, getName() + " delServer ok", new Exception());
   }
 
   private String getMBeanName(short sid) {
@@ -136,7 +224,16 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 	throw new IOException("Consumer already running.");
 
       for (int i=0; i<sessions.length; i++) {
-        if (sessions[i] != null) sessions[i].init();
+        if (sessions[i] != null) {
+          sessions[i].init();
+
+          try {
+            MXWrapper.registerMBean(new NetSessionWrapper(this, servers[i]),
+                                    "AgentServer", getMBeanName(servers[i]));
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+          }
+        }
       }
 
       activeSessions = new NetSession[nbMaxCnx];
@@ -165,11 +262,18 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     if (wakeOnConnection != null) wakeOnConnection.stop();
     if (dispatcher != null) dispatcher.stop();
     if (watchDog != null) watchDog.stop();
-    for (int i=0; i<sessions.length; i++) {
-      // May be we can take in account only "active" sessions.
-      if (sessions[i] != null) {
-        sessions[i].stop();
 
+    // Stop all active sessions
+    for (int i=0; i<activeSessions.length; i++) {
+      if (activeSessions[i] != null)
+        activeSessions[i].stop();
+      activeSessions[i] = null;
+    }
+    nbActiveCnx = 0;
+
+    // Unregister all sesion's MBean
+    for (int i=0; i<sessions.length; i++) {
+      if (sessions[i] != null) {
         try {
           MXWrapper.unregisterMBean("AgentServer",
                                     getMBeanName(sessions[i].sid));
@@ -289,7 +393,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
     WakeOnConnection(String name, Logger logmon) throws IOException {
       super(name + ".wakeOnConnection");
-      // creates a server socket listening on configured port
+      // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -314,6 +418,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       Socket sock = null;
 
       try {
+        // After a stop we needs to create anew the listen socket.
+        if (listen == null) {
+          // creates a server socket listening on configured port
+          listen = createServerSocket();
+        }
+
 	while (running) {
 	  try {
 	    canStop = true;
@@ -347,6 +457,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                             this.getName() + ", bad connection setup", exc);
 	  }
 	}
+      } catch (IOException exc) {
+        this.logmon.log(BasicLevel.ERROR,
+                        this.getName() + ", bad socket initialisation", exc);
       } finally {
         finish();
       }
@@ -490,6 +603,17 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     private MessageVector sendList;
 
     private long last = 0L;
+
+    public String toString() {
+      return toString(new StringBuffer()).toString();
+    }
+
+    public StringBuffer toString(StringBuffer strbuf) {
+      strbuf.append("[sid=").append(sid);
+      strbuf.append(",running=").append(running);
+      strbuf.append(",name=").append(name).append("]");
+      return strbuf;
+    }
 
     NetSession(String name, short sid) {
       this.sid = sid;
