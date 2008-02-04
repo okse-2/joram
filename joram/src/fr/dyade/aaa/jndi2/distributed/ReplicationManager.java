@@ -419,6 +419,10 @@ public class ReplicationManager
       Trace.logger.log(BasicLevel.DEBUG, 
                        "ReplicationManager.doReact(" +
                        from + ',' + not + ')');
+    
+    if (servers == null)
+      return;
+    
     AgentId[] jndiServerIds = not.getJndiServerIds();
     Vector initServers = new Vector();
     if (jndiServerIds != null) {
