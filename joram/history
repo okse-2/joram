@@ -1,4 +1,10 @@
 +==============================================================================
+| 2008/02/04 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ modify JMXServer to use Joram RA in BEA Weblogic.
+ add HA distributed JNDI.
+ Bug fix: HAEngine commit.
++==============================================================================
 | 2008/01/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: restart topic cluster error
