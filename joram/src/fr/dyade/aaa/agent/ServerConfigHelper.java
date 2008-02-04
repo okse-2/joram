@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,9 +37,8 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 
 public class ServerConfigHelper {
-
-  private static Logger logger = Debug.getLogger(
-    "fr.dyade.aaa.agent.ServerConfigHelper");
+  private static Logger logger =
+    Debug.getLogger(ServerConfigHelper.class.getName());
 
   private boolean autoCommit;
 
@@ -48,14 +47,15 @@ public class ServerConfigHelper {
   }
 
   public boolean addDomain(String domainName,
+                           String network,
                            int routerId,
                            int port) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addDomain(" + 
-                 domainName +
-                 ',' + routerId + ',' + 
+                 "ServerConfigHelper.addDomain(" + domainName + ',' +
+                 network + ','
+                 + routerId + ',' + 
                  port + ')');
 
     // Check configuration consistency (may fail)
@@ -67,9 +67,7 @@ public class ServerConfigHelper {
       throw new Exception("Server not found: " + routerId);
     
     // Update the configuration (can't fail)
-    A3CMLDomain domain = new A3CMLDomain(
-      domainName, 
-      fr.dyade.aaa.agent.SimpleNetwork.class.getName());
+    A3CMLDomain domain = new A3CMLDomain(domainName, network);
     a3cmlConfig.addDomain(domain);
     A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)routerId);
     domain.addServer(a3cmlServer);
@@ -83,17 +81,17 @@ public class ServerConfigHelper {
     boolean res = false;
     if (routerId == AgentServer.getServerId()) {
       // Create and start the run-time entities (may fail)
-      Network network = 
-        (Network) fr.dyade.aaa.agent.SimpleNetwork.class.newInstance();
-      AgentServer.addConsumer(domainName, network);
+      Network net = 
+        (Network) Class.forName(network).newInstance();
+      AgentServer.addConsumer(domainName, net);
       
       try {
         short[] sids = new short[1];
         sids[0] = (short)routerId;
-        network.init(domainName, 
+        net.init(domainName, 
                      port, 
                      sids);
-        network.start();
+        net.start();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "", exc);
@@ -209,7 +207,10 @@ public class ServerConfigHelper {
     AgentServer.initServerDesc(serverDesc, server);
     if (serverDesc.gateway == serverDesc.sid) {
       if (serverDesc.domain instanceof Network) {
-        ((Network) serverDesc.domain).addServer((short)sid);
+        Network net = (Network) serverDesc.domain;
+        net.stop();
+        net.addServer((short)sid);
+        net.start();
       } else {
         throw new Error("Unknown gateway type: " + 
                         serverDesc.domain);
@@ -248,8 +249,10 @@ public class ServerConfigHelper {
         AgentServer.removeServerDesc((short)sid);
       
       if (servDesc.domain instanceof Network) {
-        Network nw = (Network) servDesc.domain;
-        nw.delServer(servDesc.sid);
+        Network net = (Network) servDesc.domain;
+        net.stop();
+        net.delServer(servDesc.sid);
+        net.start();
       }
       
       for (Enumeration e = AgentServer.elementsServerDesc(); 
