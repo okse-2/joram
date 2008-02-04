@@ -846,7 +846,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   protected boolean needToBeCommited = false;
   protected long timeout = Long.MAX_VALUE;
 
-  protected void onTimeOut() {}
+  protected void onTimeOut() throws Exception {}
 
   /**
    * Main loop of agent server <code>Engine</code>.
