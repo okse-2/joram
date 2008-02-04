@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,16 +17,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package cluster.topic;
 
 import javax.jms.*;
 import javax.naming.*;
 
-public class Publisher {
-  static Context ictx = null; ;
+public class Subscriber {
+  static Context ictx = null; 
 
   public static void main(String[] args) throws Exception {
     ConnectionFactory cf = null;
@@ -53,23 +52,18 @@ public class Publisher {
     }
 
     Connection cnx = cf.createConnection("anonymous", "anonymous");
-    Session session = cnx.createSession(true, 0);
-    MessageProducer pub = session.createProducer(dest);
+    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer sub = session.createConsumer(dest);
 
     String location = System.getProperty("location");
     if (location != null)
-      System.out.println("Publishes messages on topic on " + location);
+      System.out.println("Subscribes and listens to topic on " + location);
 
-    TextMessage msg = session.createTextMessage();
+    sub.setMessageListener(new Listener());
+    cnx.start();
 
-    int i;
-    for (i = 0; i < 10; i++) {
-      msg.setText("Msg " + i);
-      pub.send(msg);
-    }
-    session.commit();
-
-    System.out.println(i + " messages published.");
+    System.out.println("Press a key to exit..");
+    System.in.read();
 
     cnx.close();
   }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -38,10 +38,28 @@ import java.util.Hashtable;
 public class ClusterAdmin {
   public static void main(String[] args) throws Exception {
     System.out.println();
-    System.out.println("Cluster administration...");
+    System.out.println("Cluster of queues administration...");
 
-    AdminModule admin = new AdminModule();
-    admin.connect("root", "root", 60);
+    AdminModule.connect("root", "root", 60);
+    javax.naming.Context ictx = new javax.naming.InitialContext();
+
+    User user0 = User.create("anonymous", "anonymous", 0);
+    User user1 = User.create("anonymous", "anonymous", 1);
+    User user2 = User.create("anonymous", "anonymous", 2);
+
+    ConnectionFactory cf0 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16010);
+    ConnectionFactory cf1 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16011);
+    ConnectionFactory cf2 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16012);
+
+    ictx.bind("cf0", cf0);
+    ictx.bind("cf1", cf1);
+    ictx.bind("cf2", cf2);
+
+    ClusterConnectionFactory clusterCF = new ClusterConnectionFactory();
+    clusterCF.addConnectionFactory("server0", cf0);
+    clusterCF.addConnectionFactory("server1", cf1);
+    clusterCF.addConnectionFactory("server2", cf2);
+    ictx.rebind("clusterCF", clusterCF);
 
     Properties prop = new Properties();
     prop.setProperty("period","100");
@@ -49,12 +67,6 @@ public class ClusterAdmin {
     prop.setProperty("consumThreshold","2");
     prop.setProperty("autoEvalThreshold","true");
     prop.setProperty("waitAfterClusterReq","100");
-
-//     prop.setProperty("period",args[0]);
-//     prop.setProperty("producThreshold",args[1]);
-//     prop.setProperty("consumThreshold",args[2]);
-//     prop.setProperty("autoEvalThreshold",args[3]);
-//     prop.setProperty("waitAfterClusterReq",args[4]);
 
     String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
 
@@ -65,56 +77,25 @@ public class ClusterAdmin {
     System.out.println("queue0 = " + queue0);
     System.out.println("queue1 = " + queue1);
     System.out.println("queue2 = " + queue1);
-
-    User user0 = User.create("user0", "user0", 0);
-    User user1 = User.create("user1", "user1", 1);
-    User user2 = User.create("user2", "user2", 2);
-
-    javax.jms.QueueConnectionFactory cf0 =
-      QueueTcpConnectionFactory.create("localhost", 16010);
-    javax.jms.QueueConnectionFactory cf1 =
-      QueueTcpConnectionFactory.create("localhost", 16011);
-    javax.jms.QueueConnectionFactory cf2 =
-      QueueTcpConnectionFactory.create("localhost", 16012);
-
-    AdminHelper.setQueueCluster(queue0,queue1);
-    AdminHelper.setQueueCluster(queue0,queue2);
     
     queue0.addClusteredQueue(queue1);
     queue0.addClusteredQueue(queue2);
     
-    Hashtable h = new Hashtable();
-    h.put("0",queue0);
-    h.put("1",queue1);
-    h.put("2",queue2);
+    ictx.bind("queue0", queue0);
+    ictx.bind("queue1", queue1);
+    ictx.bind("queue2", queue2);
 
-    ClusterQueue clusterQueue = new ClusterQueue(h);
+    ClusterQueue clusterQueue = new ClusterQueue();
+    clusterQueue.addDestination("server0", queue0);
+    clusterQueue.addDestination("server1", queue1);
+    clusterQueue.addDestination("server2", queue2);
+    clusterQueue.setFreeReading();
+    clusterQueue.setFreeWriting();
+    ictx.rebind("clusterQueue", clusterQueue);
+
     System.out.println("clusterQueue = " + clusterQueue);
 
-    clusterQueue.setReader(user0);
-    clusterQueue.setWriter(user0);
-    clusterQueue.setReader(user1);
-    clusterQueue.setWriter(user1);
-    clusterQueue.setReader(user2);
-    clusterQueue.setWriter(user2);
-
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("qcf0", cf0);
-    jndiCtx.bind("qcf1", cf1);
-    jndiCtx.bind("qcf2", cf2);
-    jndiCtx.bind("clusterQueue", clusterQueue);
-    jndiCtx.bind("queue0", queue0);
-    jndiCtx.bind("queue1", queue1);
-    jndiCtx.bind("queue2", queue2);
-    jndiCtx.close();
-
-    admin.disconnect();
-
-    javax.naming.InitialContext jndiCtx2 = new javax.naming.InitialContext();
-    clusterQueue = (ClusterQueue) jndiCtx2.lookup("clusterQueue");
-    System.out.println("clusterQueue = " + clusterQueue);
-    jndiCtx2.close();
-
-    System.out.println("Admins closed.");
+    ictx.close();
+    AdminModule.disconnect();
   }
 }

@@ -34,11 +34,11 @@
          className="org.objectweb.joram.mom.dest.ClusterQueue">
     <freeReader/>
     <freeWriter/>
-    <property name="period" value="10000"/>
-    <property name="producThreshold" value="50"/>
+    <property name="period" value="100"/>
+    <property name="producThreshold" value="25"/>
     <property name="consumThreshold" value="2"/>
-    <property name="autoEvalThreshold" value="false"/>
-    <property name="waitAfterClusterReq" value="1000"/>
+    <property name="autoEvalThreshold" value="true"/>
+    <property name="waitAfterClusterReq" value="100"/>
     <jndi name="queue0"/>
   </Queue>
 
@@ -46,11 +46,11 @@
          className="org.objectweb.joram.mom.dest.ClusterQueue">
     <freeReader/>
     <freeWriter/>
-    <property name="period" value="10000"/>
-    <property name="producThreshold" value="50"/>
+    <property name="period" value="100"/>
+    <property name="producThreshold" value="25"/>
     <property name="consumThreshold" value="2"/>
-    <property name="autoEvalThreshold" value="false"/>
-    <property name="waitAfterClusterReq" value="1000"/>
+    <property name="autoEvalThreshold" value="true"/>
+    <property name="waitAfterClusterReq" value="100"/>
     <jndi name="queue1"/>
   </Queue>
 
@@ -58,25 +58,25 @@
          className="org.objectweb.joram.mom.dest.ClusterQueue">
     <freeReader/>
     <freeWriter/>
-    <property name="period" value="10000"/>
-    <property name="producThreshold" value="50"/>
+    <property name="period" value="100"/>
+    <property name="producThreshold" value="25"/>
     <property name="consumThreshold" value="2"/>
-    <property name="autoEvalThreshold" value="false"/>
-    <property name="waitAfterClusterReq" value="1000"/>
+    <property name="autoEvalThreshold" value="true"/>
+    <property name="waitAfterClusterReq" value="100"/>
     <jndi name="queue2"/>
   </Queue>
 
   <ClusterCF>
-    <ClusterElement name="cf0" location="s0"/>
-    <ClusterElement name="cf1" location="s1"/>
-    <ClusterElement name="cf2" location="s2"/>
+    <ClusterElement name="cf0" location="server0"/>
+    <ClusterElement name="cf1" location="server1"/>
+    <ClusterElement name="cf2" location="server2"/>
     <jndi name="clusterCF"/>
   </ClusterCF>
 
   <ClusterQueue>
-    <ClusterElement name="queue0" location="s0"/>
-    <ClusterElement name="queue1" location="s1"/>
-    <ClusterElement name="queue2" location="s2"/>
+    <ClusterElement name="queue0" location="server0"/>
+    <ClusterElement name="queue1" location="server1"/>
+    <ClusterElement name="queue2" location="server2"/>
     <jndi name="clusterQueue"/>
   </ClusterQueue>
   
