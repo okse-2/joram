@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -2176,6 +2176,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     try {
       ServerConfigHelper helper = new ServerConfigHelper(true);
       if (helper.addDomain(request.getDomainName(),
+                           request.getNetwork(),
                            request.getServerId(),
                            request.getPort())) {
         distributeReply(replyTo, msgId,
