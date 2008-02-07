@@ -134,8 +134,8 @@ public class HANamingConnection implements NamingConnection {
         ioCtrl = new IOControl(socket);
         return;
       } catch (IOException exc) {
-        if (Trace.logger.isLoggable(BasicLevel.ERROR))
-          Trace.logger.log(BasicLevel.ERROR, "NamingConnection.open()", exc);
+        if (Trace.logger.isLoggable(BasicLevel.WARN))
+          Trace.logger.log(BasicLevel.WARN, "NamingConnection.open()", exc);
         // Put the faulty address at the end of the list
         addresses.removeElementAt(0);
         addresses.addElement(sa);
