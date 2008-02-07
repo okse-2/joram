@@ -41,7 +41,6 @@ import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipInputStream;
 import java.util.jar.JarFile;
 
-import org.objectweb.joram.client.connector.AdapterTracing;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
@@ -570,8 +569,6 @@ public class RAConfig {
 
     // extract the joram-config.jar file from RAR in the temp dir
     extractFromRAR(rarName,JORAM_CONFIG_JAR);
-    // extract the a3servers.xml file from joram-config.jar in the tmp dir
-    extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
 
     // if present the a3server.xml source is the confdir one
     // otherwise, we take the RAR one
@@ -579,7 +576,13 @@ public class RAConfig {
         File f = new File(confDir, A3SERVERS_XML);
         if (f.exists()) {
             copy(f.getPath(), tmpDir + A3SERVERS_XML);
+        } else {
+          // extract the a3servers.xml file from joram-config.jar in the tmp dir
+          extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
         }
+    } else {
+      // extract the a3servers.xml file from joram-config.jar in the tmp dir
+      extractFromJAR(tmpDir + JORAM_CONFIG_JAR, A3SERVERS_XML);
     }
 
     // update A3SERVERS_XML
