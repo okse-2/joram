@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.Destination;
@@ -68,6 +69,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_ADMINMODULE = "AdminModule";
   /** Syntaxic name for connect element */
   static final String ELT_CONNECT = "connect";
+  /** Syntaxic name for haConnect element */
+  static final String ELT_HACONNECT = "haConnect";
   /** Syntaxic name for collocatedConnect element */
   static final String ELT_COLLOCATEDCONNECT = "collocatedConnect";
   /** Syntaxic name for ConnectionFactory element */
@@ -157,6 +160,7 @@ public class JoramSaxWrapper extends DefaultHandler {
 
   static final String DFLT_LISTEN_HOST = "localhost";
   static final int DFLT_LISTEN_PORT = 16010;
+  static final String DFLT_HA_URL = "hajoram://localhost:2560,localhost:2561,localhost:2562";
 
   static final String DFLT_CF =
     "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
@@ -351,6 +355,33 @@ public class JoramSaxWrapper extends DefaultHandler {
             throw new Exception("bad value for port: " +
                                 atts.getValue(ATT_PORT) +
                                 " or cnxTimer: " +
+                                atts.getValue(ATT_CNXTIMER));
+          }
+        } catch (Exception exc) {
+          throw new SAXException(exc.getMessage(), exc);
+        }
+      } else if (rawName.equals(ELT_HACONNECT)) {
+        try {
+          try {
+            // Get the ha url for administrator connection.
+            url = atts.getValue(ATT_URL);
+            if (!isSet(url)) url = DFLT_HA_URL;
+            // Get the username for administrator connection.
+            name = atts.getValue(ATT_NAME);
+            if (!isSet(name))
+              name = AbstractConnectionFactory.getDefaultRootLogin();
+            // Get the password for administrator connection.
+            password = atts.getValue(ATT_PASSWORD);
+            if (!isSet(password))
+              password = AbstractConnectionFactory.getDefaultRootPassword();
+            // Get the CnxTimer attribute for administrator connection.
+            value = atts.getValue(ATT_CNXTIMER);
+            if (value == null)
+              cnxTimer = 60;
+            else
+              cnxTimer = Integer.parseInt(value);
+          } catch (NumberFormatException exc) {
+            throw new Exception("cnxTimer: " +
                                 atts.getValue(ATT_CNXTIMER));
           }
         } catch (Exception exc) {
@@ -615,6 +646,17 @@ public class JoramSaxWrapper extends DefaultHandler {
                        cnxTimer + "," +
                        reliableClass + ")");
           AdminModule.connect(host,port,name,password,cnxTimer,reliableClass);
+        } else if (rawName.equals(ELT_HACONNECT)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "AdminModule.haConnect(" +
+                       url + "," +
+                       name + "," +
+                       password + "," +
+                       cnxTimer + ")");
+          javax.jms.TopicConnectionFactory tcf =
+            TopicHATcpConnectionFactory.create(url);
+          ((ConnectionFactory) tcf).getParameters().connectingTimer = cnxTimer;
+          AdminModule.connect(tcf, name, password);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
