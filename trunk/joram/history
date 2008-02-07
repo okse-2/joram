@@ -1,4 +1,13 @@
 +==============================================================================
+| 2008/02/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Add HADistributedJndiServer.
+2. JoramSaxWrapper
+  add HA connect for admin module.
+3. Add HA jndi sample.
+4. Bug fix: HAEngine commit.
+						ReplicationManager test servers in InitJndiServerNot react.
++==============================================================================
 | 2008/01/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: restart topic cluster error
