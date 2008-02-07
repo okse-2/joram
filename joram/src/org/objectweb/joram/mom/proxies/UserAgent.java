@@ -41,6 +41,7 @@ import org.objectweb.joram.shared.client.ServerReply;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
@@ -472,6 +473,10 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     }
  
     public void schedule() {
+      // Don't schedule CleaningTask on HA slaves.
+      if (AgentServer.isHAServer() && ! AgentServer.isMasterHAServer())
+        return;
+
       long period = proxyImpl.getPeriod();
 
       if (period != -1) {
@@ -479,10 +484,10 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
           Timer timer = ConnectionManager.getTimer();        
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "--- " + this + " Proxy(...)", exc);
-        }
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.WARN))
+            MomTracing.dbgProxy.log(BasicLevel.WARN,
+                                            "--- " + this + " Proxy(...)", exc);     
+	}
       }
     }
   }

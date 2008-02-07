@@ -33,6 +33,7 @@ import org.objectweb.joram.mom.notifications.WakeUpNot;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
@@ -134,9 +135,12 @@ public class Queue extends Destination implements BagSerializer {
           Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            MomTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "--- " + this + " Queue(...)", exc);
+	    if( (!AgentServer.isHAServer()) ||
+		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
+		if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+		    MomTracing.dbgDestination.log(BasicLevel.WARN,
+                                            "--- " + this + " Queue(...)", exc);
+	    }
         }
       }
     }
