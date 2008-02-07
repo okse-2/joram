@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -417,11 +417,15 @@ public class ReplicationManager
   }
 
   void doReact(AgentId from, 
-               InitJndiServerNot not) throws Exception {
+      InitJndiServerNot not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "ReplicationManager.doReact(" +
-                       from + ',' + not + ')');
+          "ReplicationManager.doReact(" +
+          from + ',' + not + ')');
+   
+    if (servers == null)
+      return;
+    
     AgentId[] jndiServerIds = not.getJndiServerIds();
     Vector initServers = new Vector();
     if (jndiServerIds != null) {
@@ -431,7 +435,7 @@ public class ReplicationManager
         }
       }
     }
-    
+
     // Send back an init notif if:
     // - the init notif is a request
     // - or the server 'from' is unknown
@@ -441,7 +445,7 @@ public class ReplicationManager
 
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       " -> initServers = " + initServers);
+          " -> initServers = " + initServers);
 
     if (initServers.size() > 0) {
       AgentId[] localJndiServerIds = new AgentId[servers.size()];
@@ -452,12 +456,12 @@ public class ReplicationManager
       for (int i = 0; i < initServers.size(); i++) {
         AgentId newServerId = 
           (AgentId)initServers.elementAt(i);
-	/** Modif */
-	if(! (rootOwnerId.equals( (AgentId)initServers.elementAt(i))))
-        sendTo(newServerId, new InitJndiServerNot(
-          localJndiServerIds, 
-          localContexts,
-          (!from.equals(newServerId))));
+        /** Modif */
+        if(! (rootOwnerId.equals( (AgentId)initServers.elementAt(i))))
+          sendTo(newServerId, new InitJndiServerNot(
+              localJndiServerIds, 
+              localContexts,
+              (!from.equals(newServerId))));
         if (servers.indexOf(newServerId) < 0) {
           servers.addElement(newServerId);
         }
@@ -470,71 +474,71 @@ public class ReplicationManager
     }
 
     NamingContextInfo[] contexts = not.getContexts();
-    
+
     Hashtable  record_compositeName= new Hashtable();
     Hashtable  composite_context= new Hashtable();
     if (contexts != null) {
       Vector newNames = new Vector();
       for (int i = 0; i < contexts.length; i++) {
-	  if(!looseCoupling){
-	      NamingContext nc = getServerImpl().getNamingContext(
-								  contexts[i].getNamingContext().getId());
-	      if (nc == null) {
-		  getServerImpl().addNamingContext(contexts[i]);
-		  newNames.addElement(contexts[i].getCompositeName());
-	      }
-	      // Else the naming context has already been
-	      // added by an other server that is the (new)
-	      // owner of this context.
-      
-	  }else{
-	      NamingContext nc;
-	      try{
-		  nc = getServerImpl().getNamingContext(contexts[i].getCompositeName());
-              }catch(MissingRecordException mre){
-		  nc=null;
-	      }catch( MissingContextException mce){
-		  nc=null;
-	      }
-	      if(nc == null){
-		  nc = getServerImpl().newNamingContext( getId(),null,contexts[i].getCompositeName());
-		  contexts[i].getNamingContext().setOwnerId(getId());
-	      }
-	     
-	      Enumeration enumRecord = contexts[i].getNamingContext().getEnumRecord();
-	      while (enumRecord.hasMoreElements()) {          
-		  Record record =(Record)  enumRecord.nextElement();
-		  Record r = nc.getRecord(record.getName());
-		  if (r == null)  
-		      nc.addRecord(record);
-		  if(record instanceof ContextRecord){
-		      CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
-		      record_compositeName.put(record,parentPath);
-		  }
-	      }
-	      composite_context.put(contexts[i].getCompositeName(),nc);
-	 }
+        if(!looseCoupling) {
+          NamingContext nc = getServerImpl().getNamingContext(
+              contexts[i].getNamingContext().getId());
+          if (nc == null) {
+            getServerImpl().addNamingContext(contexts[i]);
+            newNames.addElement(contexts[i].getCompositeName());
+          }
+          // Else the naming context has already been
+          // added by an other server that is the (new)
+          // owner of this context.
+
+        } else {
+          NamingContext nc;
+          try{
+            nc = getServerImpl().getNamingContext(contexts[i].getCompositeName());
+          }catch(MissingRecordException mre){
+            nc=null;
+          }catch( MissingContextException mce){
+            nc=null;
+          }
+          if(nc == null){
+            nc = getServerImpl().newNamingContext( getId(),null,contexts[i].getCompositeName());
+            contexts[i].getNamingContext().setOwnerId(getId());
+          }
+
+          Enumeration enumRecord = contexts[i].getNamingContext().getEnumRecord();
+          while (enumRecord.hasMoreElements()) {          
+            Record record =(Record)  enumRecord.nextElement();
+            Record r = nc.getRecord(record.getName());
+            if (r == null)  
+              nc.addRecord(record);
+            if(record instanceof ContextRecord){
+              CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
+              record_compositeName.put(record,parentPath);
+            }
+          }
+          composite_context.put(contexts[i].getCompositeName(),nc);
+        }
       }
       if(looseCoupling){
-	  Enumeration enumKeyRecord = record_compositeName.keys();
-	  while(enumKeyRecord.hasMoreElements()) { 
-	      Record recor =(Record)enumKeyRecord.nextElement();
-	      CompositeName cn =(CompositeName)((CompositeName)(record_compositeName.get(recor))).clone();
-	      cn.add(recor.getName());
-	      if(composite_context.containsKey(cn)){
-		  NamingContext nc  =(NamingContext)composite_context.get(cn);
-		  ((ContextRecord)recor).setId(nc.getId());
-	      }	      
-          }
-	  Enumeration enumContext = composite_context.elements();
-	  while(enumContext.hasMoreElements()) { 
-	      NamingContext nc  =(NamingContext)enumContext.nextElement();
-	      getServerImpl().storeNamingContext(nc);
-	  }
+        Enumeration enumKeyRecord = record_compositeName.keys();
+        while(enumKeyRecord.hasMoreElements()) { 
+          Record recor =(Record)enumKeyRecord.nextElement();
+          CompositeName cn =(CompositeName)((CompositeName)(record_compositeName.get(recor))).clone();
+          cn.add(recor.getName());
+          if(composite_context.containsKey(cn)){
+            NamingContext nc  =(NamingContext)composite_context.get(cn);
+            ((ContextRecord)recor).setId(nc.getId());
+          }	      
+        }
+        Enumeration enumContext = composite_context.elements();
+        while(enumContext.hasMoreElements()) { 
+          NamingContext nc  =(NamingContext)enumContext.nextElement();
+          getServerImpl().storeNamingContext(nc);
+        }
       }
-      
 
-      
+
+
       Vector retryNames = new Vector();
       Vector retryLists = new Vector();
       Enumeration names = initRequestContextLists.keys();
@@ -558,7 +562,7 @@ public class ReplicationManager
           retryLists.addElement(ctxList);
         }
       }
-      
+
       for (int i = 0; i < retryNames.size(); i++) {
         CompositeName name = 
           (CompositeName)retryNames.elementAt(i);
