@@ -853,14 +853,14 @@
     </antcall>
   </target>
   <target name="ha_server1"
-          description="--> Starts a server for a distributed architecture (HA #1)">
+          description="--> Starts a server for a HA architecture (HA #1)">
     <antcall target="ha_server">
       <param name="sid" value="0"/>
       <param name="haId" value="1"/>
     </antcall>
   </target>
   <target name="ha_server2"
-          description="--> Starts a server for a distributed architecture (HA #2)">
+          description="--> Starts a server for a HA architecture (HA #2)">
     <antcall target="ha_server">
       <param name="sid" value="0"/>
       <param name="haId" value="2"/>
@@ -894,4 +894,112 @@
     </java>
   </target>
 
+  <!-- ***************************************************************** -->
+  <!-- *                            HA JNDI                            * -->
+  <!-- ***************************************************************** -->
+    <!-- Initializes the HA JNDI configuration -->
+    <target name="hajndi_init" depends="init">
+      <mkdir dir="${run.dir}"/>
+      <mkdir dir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/hajndi_a3servers.xml"
+            tofile="${run.dir}/hajndi${haId}/a3servers.xml"
+            overwrite="true"/>
+    </target>
+
+    <!-- Starts a HA JNDI server -->
+    <target name="hajndi_server" depends="hajndi_init">
+      <java classname="fr.dyade.aaa.agent.AgentServer"
+            failonerror="no" fork="yes"
+            dir="${run.dir}/hajndi${haId}">
+        <classpath path="${project.class.path}"/>
+        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <arg line="${sid} ./s${sid} ${haId}"/>
+      </java>
+    </target>
+
+    <target name="hajndi_server0"
+            description="--> Starts a server for a HA JNDI architecture (HA JNDI #0)">
+      <antcall target="hajndi_server">
+        <param name="sid" value="0"/>
+        <param name="haId" value="0"/>
+      </antcall>
+    </target>
+  
+    <target name="hajndi_server1"
+            description="--> Starts a server for a HA JNDI architecture (HA JNDI #1)">
+      <antcall target="hajndi_server">
+        <param name="sid" value="0"/>
+        <param name="haId" value="1"/>
+      </antcall>
+    </target>
+
+ 	 <target name="hajndi_server3" depends="init"
+           description="--> Starts a server for a HA JNDI architecture (Server #3)">
+ 	   <mkdir dir="${run.dir}"/>
+ 	   <mkdir dir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/hajndi_a3servers.xml"
+           tofile="${run.dir}/hajndi3/a3servers.xml"
+           overwrite="true"/>
+  		<java classname="fr.dyade.aaa.agent.AgentServer"
+    		    failonerror="no" fork="yes"
+      		  dir="${run.dir}/hajndi3">
+    		<classpath path="${project.class.path}"/>
+    		<jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+    		<arg line="3 ./s3"/>
+  		</java>
+		</target>
+  
+    <!-- Runs the HA administration --> 
+ 	 	<target name="hajndi_adminxml" depends="init"
+    	      description="--> Runs a HA JNDI administration XML">
+   	 	<copy file="${src.dir}/hajndi/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+	    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+			      failonerror="no" fork="yes"
+      			dir="${run.dir}">
+      	<classpath path="${project.class.path}"/>
+      	<arg line="./joramAdmin.xml"/>
+    	</java>
+  	</target>
+
+    <!-- Runs a HA JNDI subscriber -->
+    <target name="hajndi_sub" depends="init"
+      description="--> Runs the ha jndi subscriber">
+      <java classname="hajndi.Subscriber" failonerror="no" fork="yes"
+            dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </target>
+
+    <!-- Runs a HA JNDI publisher -->
+    <target name="hajndi_pub" depends="init"
+      description="--> Runs the ha jndi publisher">
+      <java classname="hajndi.Publisher" failonerror="no" fork="yes"
+            dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </target>
+  
+  <!-- Runs a HA JNDI list -->
+  <target name="hajndi_list0" depends="init"
+    description="--> Runs the ha jndi list">
+    <java classname="hajndi.List" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0"/>
+    </java>
+  </target>
+  
+  <!-- Runs a JNDI list server 3-->
+  <target name="hajndi_list3" depends="init"
+    description="--> Runs the ha jndi list">
+    <java classname="hajndi.List" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
 </project>
