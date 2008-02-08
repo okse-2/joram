@@ -2,6 +2,11 @@
 # 2008/02/08 | Joram 4.3.32 tag.
 ###############################################################################
 +==============================================================================
+| 2008/02/08 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: adds an empty constructor for <XA><Tcp>ConnectionFactory. This
+constructor is needed for JNDI use.
++==============================================================================
 | 2008/02/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 1. JoramSaxWrapper: add HA connect for admin module.
