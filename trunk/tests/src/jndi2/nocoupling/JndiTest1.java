@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
  
@@ -85,7 +85,7 @@ public class JndiTest1 extends TestCase {
 	    ctx0.bind("/A/C/G","G");
 	    ctx0.bind("/A/C/F/I","I");
 	    
-	    Thread.sleep(3000);
+	    Thread.sleep(6000);
 	    
 	    ctx1.bind("/H","H");
 	    ctx1.createSubcontext("/A/C/F/L");
@@ -94,7 +94,7 @@ public class JndiTest1 extends TestCase {
 	    ctx1.bind("/A/C/N","N");
 	    ctx1.bind("/A/C/F/L/O","O");
 	    
-	    Thread.sleep(3000);
+	    Thread.sleep(6000);
 	}catch(Exception exc){
 	    excp=exc;
 	}
@@ -112,7 +112,7 @@ public class JndiTest1 extends TestCase {
 
 	look = (String) ctx1.lookup("/A/M");
 	assertEquals("M",look);
-	Thread.sleep(3000);
+	Thread.sleep(6000);
     
 	try{
 	    ctx0.rebind("/A/D","D");
@@ -126,7 +126,7 @@ public class JndiTest1 extends TestCase {
 	
      		
 	ctx0.destroySubcontext("/A/C/F/P");
-	Thread.sleep(3000);
+	Thread.sleep(6000);
 	// check context destroy
 	try{
 	    look=((fr.dyade.aaa.jndi2.client.NamingContextImpl) ctx1.lookup("/A/C/F/P")).getNameInNamespace();
@@ -136,7 +136,7 @@ public class JndiTest1 extends TestCase {
 	assertTrue(excp instanceof NameNotFoundException);
 	
 	ctx1.destroySubcontext("/A/C/U");
-	Thread.sleep(3000);
+	Thread.sleep(6000);
 	try{
 	    look=((fr.dyade.aaa.jndi2.client.NamingContextImpl) ctx0.lookup("/A/C/U")).getNameInNamespace();
 	}catch(NameNotFoundException nnfe){
@@ -146,7 +146,7 @@ public class JndiTest1 extends TestCase {
 
 
 	ctx1.unbind("/A/D");
-	Thread.sleep(3000);
+	Thread.sleep(6000);
 	try{
 	    look= (String)ctx0.lookup("/A/D");
 	}catch(NameNotFoundException nnfe){
@@ -156,7 +156,7 @@ public class JndiTest1 extends TestCase {
 
 
 	ctx0.unbind("/H");
-	Thread.sleep(3000);
+	Thread.sleep(6000);
 	try{
 	    look= (String)ctx1.lookup("/H");
 	}catch(NameNotFoundException nnfe){
