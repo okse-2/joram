@@ -128,7 +128,7 @@ public class ReliableTest extends TestCase {
        msg2 = (TextMessage)consumer.receive();
             
        assertEquals("test2",msg2.getText());
-       Thread.sleep(2000);
+       Thread.sleep(5000);
       
        startServer();
       
