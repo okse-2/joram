@@ -73,7 +73,7 @@ public class ReconfTest extends TestCase {
       checkQueue((short)1);
 
       //System.out.println("Add domain D1");
-      AdminModule.addDomain("D1", 1, 18770);
+      AdminModule.addDomain("D1", "fr.dyade.aaa.agent.PoolNetwork", 1, 18770);
 
       //System.out.println("Add server s2");
       AdminModule.addServer(2, "localhost", "D1", 18771, "s2",
