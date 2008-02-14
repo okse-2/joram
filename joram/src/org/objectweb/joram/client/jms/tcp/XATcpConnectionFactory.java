@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package org.objectweb.joram.client.jms.tcp;
 
@@ -41,7 +41,6 @@ public class XATcpConnectionFactory
 
   /**
    * Constructs an <code>iXATcpConnectionFactory</code> instance.
-   * This empty constructor is needed for JNDI.
    */
   public XATcpConnectionFactory() {
     super();
