@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -36,13 +35,7 @@ import org.objectweb.joram.client.jms.XATopicConnection;
  * tcp connections for XA Pub/Sub HA communication.
  */
 public class XATopicHATcpConnectionFactory
-    extends org.objectweb.joram.client.jms.XATopicConnectionFactory
-{
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+    extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
 
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
@@ -66,7 +59,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new XATopicConnection(params, lc);
     }
 
@@ -80,7 +73,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new XAConnection(params, lc);
     }
 
@@ -94,7 +87,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new TopicConnection(params, lc);
     }
 
@@ -108,7 +101,7 @@ public class XATopicHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 

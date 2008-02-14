@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -28,32 +28,23 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
 
-import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
-import org.objectweb.joram.mom.notifications.AbstractRequest;
-import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
-import org.objectweb.joram.mom.notifications.BrowseRequest;
-import org.objectweb.joram.mom.notifications.DenyRequest;
-import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.ExpiredNot;
-import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
-import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
-import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
-import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
-import org.objectweb.joram.mom.notifications.SetThreshRequest;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.excepts.MomException;
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
 
+import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
@@ -63,10 +54,6 @@ import fr.dyade.aaa.util.TimerTask;
  */
 public class Queue extends Destination implements BagSerializer {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public static final String QUEUE_TYPE = "queue";
 
   public static String getDestinationType() {
@@ -104,57 +91,15 @@ public class Queue extends Destination implements BagSerializer {
     task = new Task(getId());
     task.schedule();
   }
-  
-  /**
-   * Distributes the received notifications to the appropriate reactions.
-   * @throws Exception 
-   */
+
   public void react(AgentId from, Notification not) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
-
-    try {     
-      if (not instanceof SetThreshRequest)
-        ((QueueImpl)destImpl).setThreshRequest(from, (SetThreshRequest) not);
-      else if (not instanceof SetNbMaxMsgRequest)
-        ((QueueImpl)destImpl).setNbMaxMsgRequest(from, (SetNbMaxMsgRequest) not);
-      else if (not instanceof Monit_GetPendingMessages)
-        ((QueueImpl)destImpl).monitGetPendingMessages(from, (Monit_GetPendingMessages) not);
-      else if (not instanceof Monit_GetPendingRequests)
-        ((QueueImpl)destImpl).monitGetPendingRequests(from, (Monit_GetPendingRequests) not);
-      else if (not instanceof Monit_GetNbMaxMsg)
-        ((QueueImpl)destImpl).monitGetNbMaxMsg(from, (Monit_GetNbMaxMsg) not);
-      else if (not instanceof ReceiveRequest)
-        ((QueueImpl)destImpl).receiveRequest(from, (ReceiveRequest) not);
-      else if (not instanceof BrowseRequest)
-        ((QueueImpl)destImpl).browseRequest(from, (BrowseRequest) not);
-      else if (not instanceof AcknowledgeRequest)
-        ((QueueImpl)destImpl).acknowledgeRequest(from, (AcknowledgeRequest) not);
-      else if (not instanceof DenyRequest)
-        ((QueueImpl)destImpl).denyRequest(from, (DenyRequest) not);
-      else if (not instanceof AbortReceiveRequest)
-        ((QueueImpl)destImpl).abortReceiveRequest(from, (AbortReceiveRequest) not);
-      else if (not instanceof ExpiredNot)
-        ((DeadMQueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
-//      else if (not instanceof DestinationAdminRequestNot)
-//        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
-      else if (not instanceof WakeUpNot) {
-        if (task == null)
-          task = new Task(getId());
-        task.schedule();
-        ((QueueImpl)destImpl).wakeUpNot((WakeUpNot) not);
-      }else
-        super.react(from, not);
-
-    } catch (MomException exc) {
-      // MOM Exceptions are sent to the requester.
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, exc);
-
-      if (not instanceof AbstractRequest) {
-        AbstractRequest req = (AbstractRequest) not;
-        Channel.sendTo(from, new ExceptionReply(req, exc));
-      }
+    if (not instanceof WakeUpNot) {
+      if (task == null)
+        task = new Task(getId());
+      task.schedule();
+      ((QueueImpl) destImpl).react(from, not);
+    } else {
+      super.react(from, not);
     }
   }
 
@@ -184,6 +129,7 @@ public class Queue extends Destination implements BagSerializer {
 
     public void schedule() {
       long period = ((QueueImpl) destImpl).getPeriod();
+
       if (period != -1) {
         try {
           Timer timer = ConnectionManager.getTimer();
@@ -191,8 +137,8 @@ public class Queue extends Destination implements BagSerializer {
         } catch (Exception exc) {
 	    if( (!AgentServer.isHAServer()) ||
 		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
-		if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-		    JoramTracing.dbgDestination.log(BasicLevel.WARN,
+		if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+		    MomTracing.dbgDestination.log(BasicLevel.WARN,
                                             "--- " + this + " Queue(...)", exc);
 	    }
         }

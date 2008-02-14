@@ -39,10 +39,6 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                                   java.io.Serializable,
                                                   javax.resource.Referenceable
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Central manager for outbound connectivity. */
   protected ManagedConnectionFactoryImpl mcf;
   /** Manager for connection pooling. */

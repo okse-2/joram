@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,24 +21,14 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
+import java.util.Vector;
 
-import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.*;
 
 /**
  * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>
@@ -71,14 +61,15 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   int proxyport = 0;
 
   /**
-   * Period of time between two activation of NetServerOut, it matches to the
+   *  Period of time between two activation of NetServerOut, it matchs to the
    * time between two requests from the client to the server when there is no
-   * message to transmit from client to server. This value can be adjusted for
-   * all HttpNetwork components by setting <code>ActivationPeriod</code>
-   * global property or for a particular network by setting
-   * <code>\<DomainName\>.ActivationPeriod</code> specific property.
+   * message to transmit from client to server.
+   *  This value can be adjusted for all HttpNetwork components by setting
+   * <code>ActivationPeriod</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.ActivationPeriod</code>
+   * specific property.
    * <p>
-   * Theses properties can be fixed either from <code>java</code> launching
+   *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file. By default,
    * its value is 10000 (10s).
    */
@@ -445,7 +436,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       qout.removeMessage(msgout);
       msgout.delete();
       msgout.free();
-      AgentServer.getTransaction().commit(true);
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
     }
 
     Message msg = nis.getMessage();
@@ -570,7 +562,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendRequest: " + msgout + ", ack=" + ack);
 
-              if ((msgout != null) && (msgout.not.expiration != 0L))
+              if ((msgout != null) &&(msgout.not.expiration != -1))
                 logmon.log(BasicLevel.FATAL,
                            getName() + ": AF YYY " + msgout.not);
 
@@ -579,26 +571,13 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 if ((msgout != null) &&
                     (msgout.not.expiration > 0) &&
                     (msgout.not.expiration < currentTimeMillis)) {
-                  if (msgout.not.deadNotificationAgentId != null) {
-                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                      logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
-                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
-                    }
-                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
-                    AgentServer.getTransaction().begin();
-                    Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
-                        expiredNot));
-                    Channel.validate();
-                    AgentServer.getTransaction().commit(true);
-                  } else {
-                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                      logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
-                          + msgout.from + ", " + msgout.not);
-                    }
-                  }
-                  // Suppress the processed notification from message queue,
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG,
+                               getName() + ": AF removes expired notification XXX " +
+                               msgout.from + ", " + msgout.not);
+                  //  Suppress the processed notification from message queue,
                   // and deletes it. It can be done outside of a transaction
-                  // and committed later (on next handle).
+                  // and commited later (on next handle).
                   qout.removeMessage(msgout);
                   msgout.delete();
                   msgout.free();
@@ -717,7 +696,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
             socket = listen.accept();
             open(socket);
             
-            msgout = null;
             short from = getRequest(is, nis, buf);
             long currentTimeMillis = System.currentTimeMillis();
             do {
@@ -728,29 +706,20 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
               do {
                 msgout = qout.getMessageTo(from);
 
-                if ((msgout != null) && (msgout.not.expiration > 0L)
-                    && (msgout.not.expiration < currentTimeMillis)) {
-                  
-                  if (msgout.not.deadNotificationAgentId != null) {
-                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                      logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
-                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
-                    }
-                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
-                    AgentServer.getTransaction().begin();
-                    Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
-                        expiredNot));
-                    Channel.validate();
-                    AgentServer.getTransaction().commit(true);
-                  } else {
-                    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                      logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
-                          + msgout.from + ", " + msgout.not);
-                    }
-                  }
-                  // Suppress the processed notification from message queue,
+                if ((msgout != null) &&(msgout.not.expiration != -1))
+                  logmon.log(BasicLevel.FATAL,
+                             getName() + ": AF YYY " + msgout.not);
+
+                if ((msgout != null) &&
+                    (msgout.not.expiration > 0) &&
+                    (msgout.not.expiration < currentTimeMillis)) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG,
+                               getName() + ": AF removes expired notification " +
+                               msgout.from + ", " + msgout.not);
+                  //  Suppress the processed notification from message queue,
                   // and deletes it. It can be done outside of a transaction
-                  // and committed later (on next handle).
+                  // and commited later (on next handle).
                   qout.removeMessage(msgout);
                   msgout.delete();
                   msgout.free();
@@ -765,6 +734,10 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                            this.getName() + ", sendReply: " + msgout);
 
               sendReply(msgout, os, nos, ack, currentTimeMillis);
+
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ": AF WWW " + msgout);
+
               getRequest(is, nis, buf);
             } while (running);
           } catch (Exception exc) {
@@ -847,7 +820,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
         // Reads notification object
         ObjectInputStream ois = new ObjectInputStream(this);
         msg.not = (Notification) ois.readObject();
-        if (msg.not.expiration > 0L) {
+        if (msg.not.expiration > 0) {
           msg.not.expiration += System.currentTimeMillis();
         }
         msg.not.persistent = persistent;
@@ -917,14 +890,14 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
         count = (Message.LENGTH + 12 +4);
 
         try {
-          if (msg.not.expiration > 0L) {
+          if (msg.not.expiration > 0) {
             msg.not.expiration -= currentTimeMillis;
           }
           oos.writeObject(msg.not);
           oos.reset();
           oos.flush();
         } finally {
-          if ((msg.not != null) && (msg.not.expiration > 0L)) {
+          if ((msg.not != null) && (msg.not.expiration > 0)) {
             msg.not.expiration += currentTimeMillis;
           }
         }

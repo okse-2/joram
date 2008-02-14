@@ -31,10 +31,6 @@ import org.objectweb.joram.client.jms.Topic;
 class DestinationTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   protected AdminController c;
   private Destination dest;
   

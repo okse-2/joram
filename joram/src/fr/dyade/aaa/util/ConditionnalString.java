@@ -24,11 +24,6 @@ import java.util.*;
 public class ConditionnalString implements java.io.Serializable {
 
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public static ConditionnalString valueOf(String s) throws Exception {
     StringTokenizer tokenizer = new StringTokenizer(s, "(),");
     int tokenNb = tokenizer.countTokens();

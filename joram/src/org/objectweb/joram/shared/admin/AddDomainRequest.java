@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,48 +23,23 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 public class AddDomainRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 6612015960765154221L;
+
   private String domainName;
-  private String network;
   private int serverId;
   private int port;
 
   public AddDomainRequest(String domainName,
-                          String network,
                           int serverId,
                           int port) {
     this.domainName = domainName;
-    this.network = network;
     this.serverId = serverId;
     this.port = port;
   }
 
-  public AddDomainRequest(String domainName,
-                          int serverId,
-                          int port) {
-    this.domainName = domainName;
-    this.network = null;
-    this.serverId = serverId;
-    this.port = port;
-  }
-
-  public AddDomainRequest() { }
-  
   public final String getDomainName() {
     return domainName;
-  }
-  
-  public final String getNetwork() {
-    if (network == null)
-      return "fr.dyade.aaa.agent.SimpleNetwork";
-    return network;
   }
 
   public final int getServerId() {
@@ -73,23 +48,5 @@ public class AddDomainRequest extends AdminRequest {
 
   public final int getPort() {
     return port;
-  }
-
-  protected int getClassId() {
-    return ADD_DOMAIN_REQUEST;
-  }
-
-  public void readFrom(InputStream is) throws IOException {
-    domainName = StreamUtil.readStringFrom(is);
-    network = StreamUtil.readStringFrom(is);
-    serverId = StreamUtil.readIntFrom(is);
-    port = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(domainName, os);
-    StreamUtil.writeTo(network, os);
-    StreamUtil.writeTo(serverId, os);
-    StreamUtil.writeTo(port, os);
   }
 }

@@ -582,7 +582,8 @@ public class NGNetwork extends StreamNetwork {
 
           AgentServer.getTransaction().begin();
           testBootTS(sid, boot);
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         } else {
           throw new ConnectException("Can't get status");
         }
@@ -649,7 +650,8 @@ public class NGNetwork extends StreamNetwork {
 
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.channel = channel;
@@ -1064,7 +1066,8 @@ public class NGNetwork extends StreamNetwork {
         AgentServer.getTransaction().begin();
         msg.delete();
         msg.free();
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

@@ -21,11 +21,6 @@ package fr.dyade.aaa.util;
 
 public class A3configException extends Exception{
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public A3configException(String message){
     super(message);
   }

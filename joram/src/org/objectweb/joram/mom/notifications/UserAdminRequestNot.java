@@ -30,11 +30,6 @@ import fr.dyade.aaa.agent.*;
 public class UserAdminRequestNot 
     extends fr.dyade.aaa.agent.Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AdminRequest request;
 
   private AgentId replyTo;

@@ -26,10 +26,6 @@ import java.util.*;
 
 public class ServerCmd implements AdminCmd, Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String name = null;
   public String hostname = null;
   public Short sid = null;

@@ -32,10 +32,6 @@ import org.kxml.parser.*;
 
 public class SoapFault extends IOException {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String faultcode;
   public String faultstring;
   public String faultactor;

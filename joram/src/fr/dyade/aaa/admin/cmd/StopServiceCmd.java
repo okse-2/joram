@@ -26,10 +26,6 @@ import java.util.*;
 
 public class StopServiceCmd implements StopAdminCmd, Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String className = null;
   public String args = null;
 

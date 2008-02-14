@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,8 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 public class GetSubscriptionRep extends AdminReply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -8046513411425387452L;
 
   private String topicId;
 
@@ -45,8 +39,6 @@ public class GetSubscriptionRep extends AdminReply {
     this.messageCount = messageCount;
     this.durable = durable;
   }
-  
-  public GetSubscriptionRep() { }
 
   public final String getTopicId() {
     return topicId;
@@ -58,23 +50,5 @@ public class GetSubscriptionRep extends AdminReply {
 
   public final boolean getDurable() {
     return durable;
-  }
-  
-  protected int getClassId() {
-    return GET_SUBSCRIPTION_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    topicId = StreamUtil.readStringFrom(is);
-    messageCount = StreamUtil.readIntFrom(is);
-    durable = StreamUtil.readBooleanFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(topicId, os);
-    StreamUtil.writeTo(messageCount, os);
-    StreamUtil.writeTo(durable, os);
   }
 }

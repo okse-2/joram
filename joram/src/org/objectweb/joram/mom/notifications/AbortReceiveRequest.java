@@ -25,10 +25,6 @@ package org.objectweb.joram.mom.notifications;
 
 public class AbortReceiveRequest extends AbstractRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private int abortedRequestId;
 
   public AbortReceiveRequest(

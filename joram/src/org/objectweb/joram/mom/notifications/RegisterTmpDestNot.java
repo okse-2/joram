@@ -28,11 +28,6 @@ import fr.dyade.aaa.agent.*;
 public class RegisterTmpDestNot 
     extends fr.dyade.aaa.agent.Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AgentId tmpDestId;
 
   private boolean topic;

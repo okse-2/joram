@@ -28,9 +28,4 @@ package org.objectweb.joram.mom.dest;
  * to another topic for notifying it it is leaving the cluster.
  */
 class UnclusterNot extends fr.dyade.aaa.agent.Notification
-{
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;}
+{}

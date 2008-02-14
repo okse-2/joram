@@ -23,7 +23,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -218,15 +219,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     this.WDRetryPeriod3 = WDRetryPeriod3;
   }
 
-  /**
-   * Gets the number of waiting messages in this engine.
-   *
-   *  return	the number of waiting messages.
-   */
-  public int getNbWaitingMessages() {
-    return qout.size();
-  }
-
   protected Logger logmon = null;
 
   /** Id. of local server. */
@@ -401,7 +393,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Get the logging monitor from current server MonologLoggerFactory
     // Be careful, logmon is initialized from name and not this.name !!
     logmon = Debug.getLogger(Debug.A3Network + '.' + name);
-    logmon.log(BasicLevel.INFO, name + ", initialized");
+    logmon.log(BasicLevel.DEBUG, name + ", initialized");
 
     WDActivationPeriod = Long.getLong("WDActivationPeriod",
                                       WDActivationPeriod).longValue();
@@ -564,6 +556,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
+    if ((msg.not.expiration > 0) &&
+        (msg.not.expiration < System.currentTimeMillis())) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ": removes expired notification " +
+                   msg.from + ", " + msg.not);
+      return;
+    }
+
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
@@ -678,7 +679,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     }
   }
 
-//   int last = -1;
+  int last = -1;
 
   /**
    * Try to deliver the received message to the right consumer.
@@ -702,10 +703,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                           " by " + source);
     }
 
-//     if ((last != -1) && (msg.getStamp() != (last +1)))
-//       logmon.log(BasicLevel.FATAL,
-//                  getName() + ", recv msg#" + msg.getStamp() + " should be #" + (last +1));
-//     last = msg.getStamp();
+    if ((last != -1) && (msg.getStamp() != (last +1)))
+      if (logmon.isLoggable(BasicLevel.WARN))
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
+    last = msg.getStamp();
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
@@ -739,14 +741,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                    getName() + ", deliver msg#" + msg.getStamp());
 
       Channel.save();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit();
       // then commit and validate the message.
       Channel.validate();
       AgentServer.getTransaction().release();
     } else {
 //    it's an already delivered message, we have just to re-send an
 //    aknowledge (see below).
-      AgentServer.getTransaction().commit(true);
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
     }
   }
 

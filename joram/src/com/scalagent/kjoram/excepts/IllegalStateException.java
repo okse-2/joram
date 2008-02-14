@@ -26,11 +26,6 @@ package com.scalagent.kjoram.excepts;
 public class IllegalStateException extends JMSException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>IllegalStateException</code> instance.
    */
   public IllegalStateException(String info)

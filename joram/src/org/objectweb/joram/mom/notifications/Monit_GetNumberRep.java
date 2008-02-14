@@ -29,10 +29,6 @@ package org.objectweb.joram.mom.notifications;
  */
 public class Monit_GetNumberRep extends AdminReply
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The wrapped value. */
   private int number;
 

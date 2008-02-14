@@ -25,10 +25,6 @@ package org.objectweb.joram.mom.notifications;
 
 public class LeaveQueueCluster extends QueueClusterNot {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String removeQueue;
 
   public LeaveQueueCluster(String removeQueue) {

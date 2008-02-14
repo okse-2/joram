@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -32,11 +32,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 public class NamingContext implements Serializable, Cloneable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   private NamingContextId id;
 
@@ -71,8 +66,8 @@ public class NamingContext implements Serializable, Cloneable {
     return null;
   } 
   
-  public Enumeration getEnumRecord() {
-    Vector elt=new Vector();
+ public Enumeration getEnumRecord() {
+     Vector elt=new Vector();
     for (int i = 0; i < records.size(); i++) {
       Record r = (Record)records.elementAt(i);
       elt.add(r);
@@ -81,10 +76,10 @@ public class NamingContext implements Serializable, Cloneable {
   } 
 
   public void addRecord(Record record) {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG,"\nadd record : "+record +
-          " vector record : " + records +"\n");
-    records.addElement(record);
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	  Trace.logger.log(BasicLevel.DEBUG,"\n\nadd record : "+record +
+			   " vector record : "+records +"\n\n");
+      records.addElement(record);
   }
 
   public boolean removeRecord(String name) {

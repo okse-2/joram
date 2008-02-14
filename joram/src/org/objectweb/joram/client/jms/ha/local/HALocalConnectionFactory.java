@@ -18,6 +18,7 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.ha.local;
 
@@ -25,11 +26,6 @@ import org.objectweb.joram.client.jms.*;
 
 public class HALocalConnectionFactory 
     extends org.objectweb.joram.client.jms.ConnectionFactory {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   public HALocalConnectionFactory() {
     super("", -1);

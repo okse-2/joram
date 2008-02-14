@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * A <code>DeadMQueue</code> agent is an agent hosting a MOM dead message
@@ -35,11 +36,6 @@ import fr.dyade.aaa.agent.AgentId;
  * @see DeadMQueueImpl
  */
 public class DeadMQueue extends Queue {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   public static String getDestinationType() {
     return "queue.dmq";

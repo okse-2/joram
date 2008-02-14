@@ -31,10 +31,6 @@ import fr.dyade.aaa.agent.*;
  * @see		Task
  */
 public class Condition extends Notification {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** condition name, may be null */
   public String name;
   /** condition status */

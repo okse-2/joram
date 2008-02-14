@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -36,19 +35,13 @@ import org.objectweb.joram.client.jms.XAQueueConnection;
  * tcp connections for XA PTP HA communication.
  */
 public class XAQueueHATcpConnectionFactory
-    extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
-{
+    extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   /**
    * Constructs an <code>XAQueueHATcpConnectionFactory</code> instance.
    */
-  public XAQueueHATcpConnectionFactory(String url)
-    {
+  public XAQueueHATcpConnectionFactory(String url) {
       super(url);
     }
 
@@ -66,7 +59,7 @@ public class XAQueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new XAQueueConnection(params, lc);
     }
 
@@ -80,7 +73,7 @@ public class XAQueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new XAConnection(params, lc);
     }
 
@@ -94,7 +87,7 @@ public class XAQueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new QueueConnection(params, lc);
     }
 
@@ -107,7 +100,7 @@ public class XAQueueHATcpConnectionFactory
     throws javax.jms.JMSException
     {
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+          getParameters().getUrl(), params, name, password, reliableClass);
       return new Connection(params, lc);
     }
 

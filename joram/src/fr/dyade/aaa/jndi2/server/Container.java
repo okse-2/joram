@@ -34,11 +34,6 @@ public class Container
     extends Agent 
     implements BagSerializer {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private Vector entryPoints;
 
   private LifeCycleListener lifeCycleListener;

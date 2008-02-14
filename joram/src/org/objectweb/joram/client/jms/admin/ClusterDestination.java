@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -27,6 +27,9 @@ package org.objectweb.joram.client.jms.admin;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.shared.admin.SetReader;
+import org.objectweb.joram.shared.admin.SetWriter;
+
 
 import javax.naming.*;
 
@@ -39,17 +42,12 @@ import java.util.Random;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.admin.SetReader;
-import org.objectweb.joram.shared.admin.SetWriter;
 
 /**
  * A base class for clustered destinations.
  */
 public class ClusterDestination extends Destination {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+
   protected Hashtable cluster = null;
 
   /**
@@ -189,6 +187,7 @@ public class ClusterDestination extends Destination {
       strbuf.append("cluster#").append(i).append(".key");
       ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       Destination dest = (Destination) entries[i].getValue();
 
       strbuf.setLength(0);
@@ -200,6 +199,7 @@ public class ClusterDestination extends Destination {
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
     cluster = new Hashtable();
+
     int i = 0;
     Destination dest = null;
     StringBuffer strbuf = new StringBuffer(20);

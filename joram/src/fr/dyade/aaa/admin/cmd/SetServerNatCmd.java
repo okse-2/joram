@@ -25,10 +25,6 @@ import java.io.*;
 
 public class SetServerNatCmd implements AdminCmd, Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String serverName = null;
   public String translationServerName = null;
   public String translationHostName = null;

@@ -33,11 +33,6 @@ import org.objectweb.util.monolog.api.Logger;
 public class TcpRequestContext 
     extends RequestContext {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private transient IOControl ioCtrl;
 
   private JndiRequest request;

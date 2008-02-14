@@ -26,11 +26,6 @@ import java.awt.event.*;
 
 
 public class CreateDestinationDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private static CreateDestinationDialog dialog;
 
   private Frame parent = null;

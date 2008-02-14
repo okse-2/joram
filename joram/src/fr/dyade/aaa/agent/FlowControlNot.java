@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -36,11 +36,6 @@ package fr.dyade.aaa.agent;
  */
 public class FlowControlNot extends Notification {
 
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   /** id of <code>DriverIn</code> agent issuing notification, when applicable */
   int driverId;

@@ -74,11 +74,6 @@ public class ManagedQueueConnectionFactoryImpl
                         java.io.Serializable
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>ManagedQueueConnectionFactoryImpl</code> instance.
    */
   public ManagedQueueConnectionFactoryImpl()

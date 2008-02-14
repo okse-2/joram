@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -42,9 +42,9 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -96,33 +96,14 @@ public class Connection implements javax.jms.Connection {
   /** Connection meta data. */
   private ConnectionMetaData metaData = null;
 
-  class AtomicCounter {
-    long value;
-    StringBuffer strbuf;
-    int initial;
-
-    AtomicCounter(String prefix) {
-      value = 0;
-      strbuf = new StringBuffer(prefix.length() + 20);
-      strbuf.append(prefix);
-      initial = strbuf.length();
-    }
-
-    synchronized String nextValue() {
-      strbuf.setLength(initial);
-      strbuf.append(value++);
-      return strbuf.toString();
-    }
-  }
-
   /** Sessions counter. */
-  private AtomicCounter sessionsC;
+  private int sessionsC = 0;
 
   /** Messages counter. */
-  private AtomicCounter messagesC;
+  private int messagesC = 0;
 
   /** Subscriptions counter. */
-  private AtomicCounter subsC;
+  private int subsC = 0;
 
   /** Client's agent proxy identifier. */
   String proxyId;
@@ -191,12 +172,7 @@ public class Connection implements javax.jms.Connection {
     CnxConnectReply rep = (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
-
-    sessionsC = new AtomicCounter("c" + key + 's');
-    messagesC =
-      new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
-    subsC = new AtomicCounter("c"  + key + "sub");
-
+    
     stringImage = "Cnx:" + proxyId + ':' + key;
     hashCode = stringImage.hashCode();
 
@@ -260,17 +236,9 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.topicPassivationThreshold;
   }
   
-  final String getOutLocalAddress() {
-    return factoryParameters.outLocalAddress;
-  }
-
-  final int getOutLocalPort() {
-    return factoryParameters.outLocalPort;
-  }
-  
   /**
-   * Checks if the connection is closed. If true raises an
-   * IllegalStateException.
+   * Checks if the connecion is closed. If true
+   * raises an IllegalStateException.
    */
   final protected synchronized void checkClosed() throws IllegalStateException {
     if (status == Status.CLOSE ||  mtpx.isClosed()) 
@@ -366,7 +334,7 @@ public class Connection implements javax.jms.Connection {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable, false));
+          targetName, selector, false, durable));
     }
     
     MultiSessionConsumer msc =
@@ -527,7 +495,7 @@ public class Connection implements javax.jms.Connection {
       if (status == Status.STOP)
         return;
     }
-    
+
     // At this point, the server won't deliver messages anymore,
     // the connection just waits for the sessions to have finished their
     // processings.
@@ -539,7 +507,7 @@ public class Connection implements javax.jms.Connection {
       Session session = (Session) sessions.get(i);
       session.stop();
     }
-    
+
     synchronized (this) {
       if (status == Status.STOP)
         return;
@@ -564,7 +532,7 @@ public class Connection implements javax.jms.Connection {
       logger.log(
         BasicLevel.DEBUG, 
         newTrace(".close()"));
-
+    
     closer.close();
   }
 
@@ -667,18 +635,27 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new session identifier. */
-  String nextSessionId() {
-    return sessionsC.nextValue();
+  synchronized String nextSessionId() {
+    if (sessionsC == Integer.MAX_VALUE)
+      sessionsC = 0;
+    sessionsC++;
+    return "c" + key + "s" + sessionsC;
   }
  
   /** Returns a new message identifier. */
-  String nextMessageId() {
-    return messagesC.nextValue();
+  synchronized String nextMessageId() {
+    if (messagesC == Integer.MAX_VALUE)
+      messagesC = 0;
+    messagesC++;
+    return "ID:" + proxyId.substring(1) + "c" + key + "m" + messagesC;
   }
 
   /** Returns a new subscription name. */
-  String nextSubName() {
-    return subsC.nextValue();
+  synchronized String nextSubName() {
+    if (subsC == Integer.MAX_VALUE)
+      subsC = 0;
+    subsC++;
+    return "c"  + key + "sub" + subsC;
   }
 
   /**

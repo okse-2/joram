@@ -30,9 +30,4 @@ import fr.dyade.aaa.agent.*;
  * @see		Task
  */
 public class AddStatusListenerNot extends Notification {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 }

@@ -24,11 +24,6 @@
 package org.objectweb.joram.client.jms.admin;
 
 public class StartFailureException extends AdminException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public StartFailureException(String info) {
     super(info);
   }

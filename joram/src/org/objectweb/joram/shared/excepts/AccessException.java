@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,28 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package org.objectweb.joram.shared.excepts;
-
-import org.objectweb.joram.shared.client.MomExceptionReply;
 
 /**
  * An <code>AccessException</code> is thrown by a destination when processing
  * a request of a client which does not have valid rights for this request.
  */
-public class AccessException extends MomException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+public class AccessException extends MomException
+{
   /**
    * Constructs an <code>AccessException</code> instance.
    */
-  public AccessException(String info) {
+  public AccessException(String info)
+  {
     super(info);
-    type = MomExceptionReply.AccessException;
   }
 }
