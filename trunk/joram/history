@@ -1,26 +1,42 @@
+###############################################################################
+# 2008/02/14 | Joram 5.0.8 tag.
+###############################################################################
++==============================================================================
+| 2008/02/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram reconfiguration:
+   - Bug fix when adding/removing a server in a PoolNetwork domain.
+   - Allows to specify the network component when adding a domain.
+   - Stop then start the domain when adding or removing a server.
+   - Bug fix on stop/start for SimpleNetwork and PoolNetwork components.
+2. Clustered destinations:
+   - Bug fix in creation of clustered destinations with XML script: adds a
+     configure opérations in order to fix rights.
+   - Bug fix: implements setFreeReading and setFreeWriting operations for
+     clustered destinations.
 +==============================================================================
 | 2008/02/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 1. Add HADistributedJndiServer.
-2. JoramSaxWrapper
-  add HA connect for admin module.
+2. JoramSaxWrapper: add HA connect for admin module.
 3. Add HA jndi sample.
 4. Bug fix: HAEngine commit.
-						ReplicationManager test servers in InitJndiServerNot react.
+   ReplicationManager test servers in InitJndiServerNot react.
+5. Modify JMXServer to use Joram RA in BEA Weblogic.
 +==============================================================================
 | 2008/01/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Bug fix: restart topic cluster error
+ Bug fix: restart topic cluster error.
 +==============================================================================
 | 2008/01/10 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Adds forwarding of the expired messages to the DMQ within the networks,
-  instead of simple deletion.
+instead of simple deletion.
 +==============================================================================
 | 2008/01/07 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Add jndi2/hascn
- Bug fix : HA
+ Add jndi2/hascn.
+ Bug fix : HA.
 ###############################################################################
 # 2007/12/19 | Joram 5.0.7 tag.
 ###############################################################################
@@ -89,6 +105,10 @@ AtomicCounter class.
 ###############################################################################
 # 2007/09/25 | Joram 5.0.6 tag.
 ###############################################################################
++==============================================================================
+| 2007/09/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in SimpleNetwork reconnection after a long failure of the remote node.
 +==============================================================================
 | 2007/09/20 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
