@@ -2,9 +2,9 @@
 
 <JoramAdmin>
   <AdminModule>
-    <haConnect host="hajoram://localhost:2560,localhost:2561"
-             name="root"
-             password="root"/>
+    <haConnect url="hajoram://localhost:2560,localhost:2561"
+               name="root"
+               password="root"/>
   </AdminModule>
   
 
