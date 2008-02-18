@@ -11,6 +11,50 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 5.0.8 (February 12, 2008)">
+      <p>Joram 5.0.8 is available in the CVS repository with tag JORAM_5_0_8.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Allows to choose the network component when adding a domain.</li>
+	  <li>New HADistributedJndiServer component.</li>
+	  <li>Allows administration through HA connection in XML Script.</li>
+	  <li>Handling of expired messages in internal queue of MOM.</li>
+	  <li>Use of RA with WebLogic server.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Adding and removing a server in a PoolNetwork domain.</li>
+          <li>Starting and stopping a network component.</li>
+          <li>Right handling for ClusterDestination.</li>
+	  <li>Allows server&#39;s synchronization during engine inactivity.</li>
+	  <li>Cluster topic building is now an idempotent operation.</li>
+	</ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.3.32 (February 12, 2008)">
+      <p>Joram 4.3.32 is available in the CVS repository with tag JORAM_4_3_32.
+       This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.9</a>.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>New HADistributedJndiServer component.</li>
+	  <li>Allows administration through HA connection in XML Script.</li>
+	  <li>Use of RA with WebLogic server.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>Right handling for ClusterDestination.</li>
+	  <li>Allows server&#39;s synchronization during engine inactivity.</li>
+	  <li>Cluster topic building is now an idempotent operation.</li>
+	  <li>Use of &#60;XA&#62;&#60;Tcp&#62;ConnectionFactory objects with JNDI.</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 5.0.7 (December 19, 2007)">
       <p>Joram 5.0.7 is available in the CVS repository with tag JORAM_5_0_7.
        This release provides many features and changes:</p>
