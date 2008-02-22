@@ -51,7 +51,7 @@ public class Test10 extends BaseTest {
 	    writeIntoFile("==================== start test ======================");
 	    startServer();
 
-	    String baseclass = "noreg.TcpBaseTest";
+	    String baseclass = "joram.noreg.TcpBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 
 	    NbRound = Integer.getInteger("NbRound", NbRound).intValue();

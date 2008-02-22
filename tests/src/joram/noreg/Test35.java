@@ -43,7 +43,7 @@ public class Test35 extends BaseTest {
 	try{
 	    startServer();
 
-	    String baseclass = "noreg.ColocatedBaseTest";
+	    String baseclass = "joram.noreg.ColocatedBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 
 	    AdminConnect(baseclass);

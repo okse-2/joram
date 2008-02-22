@@ -53,7 +53,7 @@ public class Test7 extends BaseTest {
 	    if (! Boolean.getBoolean("ServerOutside"))
 		startServer();
 
-	    String baseclass = "noreg.ColocatedBaseTest";
+	    String baseclass = "joram.noreg.ColocatedBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 	    NbDest = Integer.getInteger("NbDest", NbDest).intValue();
 	    NbMsg = Integer.getInteger("NbMsg", NbMsg).intValue();
