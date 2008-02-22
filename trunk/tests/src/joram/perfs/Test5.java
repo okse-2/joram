@@ -47,9 +47,9 @@ class ServerTest5 extends BaseTest {
 	try{
 	    startServer();
 	    
-	    AdminConnect("perfs.ColocatedBaseTest");
+	    AdminConnect("joram.perfs.ColocatedBaseTest");
 	    sync = createDestination("org.objectweb.joram.client.jms.Queue", "SyncQ");
-	    cf =  createConnectionFactory("perfs.ColocatedBaseTest");
+	    cf =  createConnectionFactory("joram.perfs.ColocatedBaseTest");
 	    User user = User.create("anonymous", "anonymous", 0);
 	    sync.setFreeReading();
 	    sync.setFreeWriting();
@@ -125,7 +125,7 @@ public class Test5 extends BaseTest {
 					    "org.objectweb.joram.client.jms.Queue");
 	  host = System.getProperty("hostname", host);
 	  port = Integer.getInteger("port", port).intValue();
-	  String baseclass = "perfs.TcpBaseTest";
+	  String baseclass = "joram.perfs.TcpBaseTest";
 	  baseclass = System.getProperty("BaseClass", baseclass);
 	  AdminConnect(baseclass);
 	  dest = createDestination(destc);

@@ -86,7 +86,7 @@ public class Receiver extends BaseTest implements MessageListener {
   }
 
   public static void main(String args[]) throws Exception {
-    String baseclass = "perfs.TcpBaseTest";
+    String baseclass = "joram.perfs.TcpBaseTest";
 
     baseclass = System.getProperty("BaseClass", baseclass);
 

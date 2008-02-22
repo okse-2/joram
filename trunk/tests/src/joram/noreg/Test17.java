@@ -96,7 +96,7 @@ public class Test17 extends BaseTest {
 	    writeIntoFile("======================== start test ======================");
 	    startServer();
 
-	    String baseclass = "noreg.ColocatedBaseTest";
+	    String baseclass = "joram.noreg.ColocatedBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 
 	    String destclass =  "org.objectweb.joram.client.jms.Queue";

@@ -49,7 +49,7 @@ public class Test9 extends BaseTest {
     try {
       System.out.println("server start");
       startServer();
-      String baseclass = "noreg.ColocatedBaseTest";
+      String baseclass = "joram.noreg.ColocatedBaseTest";
       baseclass = System.getProperty("BaseClass", baseclass);
 
       NbRound = Integer.getInteger("NbRound", NbRound).intValue();
@@ -80,7 +80,7 @@ public class Test9 extends BaseTest {
       assertEquals("fr.dyade.aaa.agent.GCEngine", System.getProperty("Engine"));
 
       // System.out.println("baseclass: " + baseclass);
-      assertEquals("noreg.ColocatedBaseTest", baseclass);
+      assertEquals("joram.noreg.ColocatedBaseTest", baseclass);
 
       // System.out.println("NbRound=" + NbRound);
       assertEquals(10, NbRound);

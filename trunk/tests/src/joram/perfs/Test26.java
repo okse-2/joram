@@ -65,7 +65,7 @@ public class Test26 extends BaseTest {
 	    AgentServer.init((short) 0, "./s0", null);
 	    AgentServer.start();
 	    
-	    String baseclass = "perfs.ColocatedBaseTest";
+	    String baseclass = "joram.perfs.ColocatedBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 
 	    String destclass = System.getProperty("Destination",
