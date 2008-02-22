@@ -1,11 +1,45 @@
-<target name="tests.a3.all" description=" --> launch all a3 tests">
-    <ant dir="." antfile="build.xml" target="tests.a3"/>
-    <ant dir="." antfile="build.xml" target="tests.http"/>
-</target>
+<?xml version="1.0"?>
 
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "file:./common.xml">
+]>
+
+<project default="tests.a3.all" basedir=".">
+  <!-- Includes generic stuff -->
+  &common;
+
+  <property file="env.properties"/>
+
+  <target name="init.src">
+    <!-- Tests specific sources set -->
+    <patternset id="specific">
+      <include name="**/**/*.java"/>
+    </patternset>
+  </target>
+
+  <target name="tests.a3.all" description=" --> launch all a3 tests">
+    <ant dir="." antfile="builda3.xml" target="tests.a3"/>
+    <ant dir="." antfile="builda3.xml" target="tests.http"/>
+  </target>
 
   <target name="tests.a3" depends="tests.a3base,tests.a3recovery,tests.a3perf" description=" --> launch test : base,recovery,perf"/>
   <target name="tests.http" depends="tests.http.base,tests.http.recovery" description=" -->  launch all http tests"/>
+
+  <target name="init.test" depends="init,compile">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@engine@" value="${engine}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@transaction@" value="${transaction}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@network@" value="${network}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@multiCnxSync@" value="${multiCnx}"/>
+    <copy file="a3config.dtd" tofile="${test.dir}/a3config.dtd"/>
+    <copy file="${a3debug}" tofile="${test.dir}/a3debug.cfg"/>
+  </target>
 
   <target name="admin" depends="init,compile">
     <antcall target="init.test" inheritAll="true">
@@ -55,32 +89,32 @@
     - Scalagent middleware base tests
     -->
   <target name="tests.a3base">
-    <ant dir="." antfile="build.xml" target="test1.base"/>
-    <ant dir="." antfile="build.xml" target="test2.base"/>
-    <ant dir="." antfile="build.xml" target="test3.base"/>
-    <ant dir="." antfile="build.xml" target="test4.base"/>
-    <ant dir="." antfile="build.xml" target="test5.base"/>
-    <ant dir="." antfile="build.xml" target="test6.base"/>
-    <ant dir="." antfile="build.xml" target="test8.base"/>
-    <ant dir="." antfile="build.xml" target="test9.base"/>
-    <ant dir="." antfile="build.xml" target="test11.base"/>
-    <ant dir="." antfile="build.xml" target="test12.base"/>
-    <ant dir="." antfile="build.xml" target="test14.base"/>
-    <ant dir="." antfile="build.xml" target="test15.base"/>
-    <ant dir="." antfile="build.xml" target="test18.base"/>
-    <ant dir="." antfile="build.xml" target="test19.base"/>
+    <ant dir="." antfile="builda3.xml" target="test1.base"/>
+    <ant dir="." antfile="builda3.xml" target="test2.base"/>
+    <ant dir="." antfile="builda3.xml" target="test3.base"/>
+    <ant dir="." antfile="builda3.xml" target="test4.base"/>
+    <ant dir="." antfile="builda3.xml" target="test5.base"/>
+    <ant dir="." antfile="builda3.xml" target="test6.base"/>
+    <ant dir="." antfile="builda3.xml" target="test8.base"/>
+    <ant dir="." antfile="builda3.xml" target="test9.base"/>
+    <ant dir="." antfile="builda3.xml" target="test11.base"/>
+    <ant dir="." antfile="builda3.xml" target="test12.base"/>
+    <ant dir="." antfile="builda3.xml" target="test14.base"/>
+    <ant dir="." antfile="builda3.xml" target="test15.base"/>
+    <ant dir="." antfile="builda3.xml" target="test18.base"/>
+    <ant dir="." antfile="builda3.xml" target="test19.base"/>
   </target>
 
   <target name="tests.http.base">
-    <ant dir="." antfile="build.xml" target="test3.http.base"/>
-    <ant dir="." antfile="build.xml" target="test4.http.base"/>
-    <ant dir="." antfile="build.xml" target="test5.http.base"/>
-    <ant dir="." antfile="build.xml" target="test5-3.http.base"/>
-    <ant dir="." antfile="build.xml" target="test11.http.base"/>
-    <ant dir="." antfile="build.xml" target="test15.base"/>
-    <ant dir="." antfile="build.xml" target="test15.http.base"/>
-    <ant dir="." antfile="build.xml" target="test16.http.base"/>
-    <ant dir="." antfile="build.xml" target="test17.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test3.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test4.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test5.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test5-3.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test11.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test15.base"/>
+    <ant dir="." antfile="builda3.xml" target="test15.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test16.http.base"/>
+    <ant dir="." antfile="builda3.xml" target="test17.http.base"/>
   </target>
 
   <!--
@@ -122,7 +156,7 @@
   <target name="test3.base" depends="test3-1.base,test3-2.base"/>
 
   <target name="test3-1.base" depends="init.a3test,compile">
-   <!-- 1 domain -->
+    <!-- 1 domain -->
     <antcall target="testx.base" inheritAll="true">
       <param name="x" value="3"/>
       <param name="y" value="1"/>
@@ -341,12 +375,12 @@
       <param name="a3conf" value="a3/base/a3servers1.xml"/>
     </antcall>
     <parallel>
-        <java classname="fr.dyade.aaa.agent.AgentServer"
+      <java classname="fr.dyade.aaa.agent.AgentServer"
             failonerror="no" fork="yes"
             dir="${test.dir}">
-           <classpath path="${project.class.path}"/>
-           <arg line="0 ./s0"/>
-        </java>
+        <classpath path="${project.class.path}"/>
+        <arg line="0 ./s0"/>
+      </java>
       <!--<antcall target="server.start" inheritAll="true">
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="sid" value="0"/>
@@ -658,29 +692,29 @@
     - Scalagent middleware recovery tests
     -->
   <target name="tests.a3recovery">
-    <ant dir="." antfile="build.xml" target="test1.recovery"/>
-    <ant dir="." antfile="build.xml" target="test2.recovery"/>
-    <ant dir="." antfile="build.xml" target="test3.recovery"/>
-    <ant dir="." antfile="build.xml" target="test4.recovery"/>
-    <ant dir="." antfile="build.xml" target="test5.recovery"/>
-    <ant dir="." antfile="build.xml" target="test6.recovery"/>
-    <ant dir="." antfile="build.xml" target="test7.recovery"/>
-    <ant dir="." antfile="build.xml" target="test8.recovery"/>
-    <ant dir="." antfile="build.xml" target="test9.recovery"/>
-    <ant dir="." antfile="build.xml" target="test10.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test1.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test2.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test3.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test4.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test5.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test6.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test7.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test8.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test9.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test10.recovery"/>
   </target>
 
   <target name="tests.http.recovery">
-    <ant dir="." antfile="build.xml" target="test1.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test2-1.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test2-2.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test3.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test4.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test5.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test8-1.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test8-2.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test9.http.recovery"/>
-    <ant dir="." antfile="build.xml" target="test10.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test1.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test2-1.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test2-2.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test3.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test4.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test5.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test8-1.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test8-2.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test9.http.recovery"/>
+    <ant dir="." antfile="builda3.xml" target="test10.http.recovery"/>
   </target>
 
   <!--
@@ -942,8 +976,8 @@
   </target>
 
   <!-- 3 servers HttpNetwork, 2 domains -->
-   <target name="test8-2.http.recovery" depends="init.a3test,compile,prop1.recovery">
-   <antcall target="testx.recovery" inheritAll="true">
+  <target name="test8-2.http.recovery" depends="init.a3test,compile,prop1.recovery">
+    <antcall target="testx.recovery" inheritAll="true">
       <param name="x" value="8"/>
       <param name="y" value="2a.http"/>
       <param name="a3conf" value="a3/recovery/a3servers2.http.1.xml"/>
@@ -1012,9 +1046,9 @@
     - Simple performance tests
     -->
   <target name="tests.a3perf">
-    <ant dir="." antfile="build.xml" target="test1.perf"/>
-    <ant dir="." antfile="build.xml" target="test2.perf"/>
-    <ant dir="." antfile="build.xml" target="test5.perf"/>
+    <ant dir="." antfile="builda3.xml" target="test1.perf"/>
+    <ant dir="." antfile="builda3.xml" target="test2.perf"/>
+    <ant dir="." antfile="builda3.xml" target="test5.perf"/>
   </target>
 
   <!--
@@ -1123,4 +1157,4 @@
     </antcall>
   </target>
 
-<!--</project>-->
+</project>

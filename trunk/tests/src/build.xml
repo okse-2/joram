@@ -1,37 +1,12 @@
 <?xml version="1.0"?>
-<!DOCTYPE project [
-    <!ENTITY common SYSTEM "common.xml">
-    <!ENTITY builda3 SYSTEM "builda3.xml">
-    <!ENTITY joram SYSTEM "joram.xml">
-    <!ENTITY jndi SYSTEM "jndi.xml">
-    <!ENTITY jms SYSTEM "jms.xml">
-    ]>
-    
 
 <project default="tests.all" basedir=".">
-    
-  <property file="env.properties"/>
 
-
-<target name="tests.all" description=" --> launch all tests">
-    <ant dir="." antfile="build.xml" target="tests.jndi.all"/>
-    <ant dir="." antfile="build.xml" target="tests.joram.all"/>
-    <ant dir="." antfile="build.xml" target="tests.a3.all"/>
-    <ant dir="." antfile="build.xml" target="tests.jms.all"/>
-</target>
-
-  <target name="init.src">
-    <!-- Tests specific sources set -->
-    <patternset id="specific">
-      <include name="**/**/*.java"/>
-    </patternset>
+  <target name="tests.all" description=" --> launch all tests">
+    <ant dir="." antfile="builda3.xml" target="tests.a3.all" />
+    <ant dir="." antfile="jndi.xml" target="tests.jndi.all" />
+    <ant dir="." antfile="joram.xml" target="tests.joram.all" />
+    <ant dir="." antfile="jms.xml" target="tests.jms.all" />
   </target>
-
-  <!-- Include generic part -->
-&common;
-&builda3;
-&joram;
-&jndi;
-&jms;
 
 </project>
