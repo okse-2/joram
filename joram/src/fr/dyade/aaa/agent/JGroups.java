@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,24 +22,24 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.util.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Vector;
 
+import org.jgroups.Address;
+import org.jgroups.Channel;
+import org.jgroups.ChannelClosedException;
+import org.jgroups.ChannelException;
+import org.jgroups.JChannel;
+import org.jgroups.MembershipListener;
+import org.jgroups.Message;
+import org.jgroups.MessageListener;
+import org.jgroups.View;
+import org.jgroups.blocks.PullPushAdapter;
+import org.jgroups.util.Util;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import org.jgroups.MembershipListener;
-import org.jgroups.MessageListener;
-import org.jgroups.Message;
-import org.jgroups.Channel;
-import org.jgroups.JChannel;
-import org.jgroups.Address;
-import org.jgroups.View;
-import org.jgroups.blocks.*;
-import org.jgroups.util.Util;
-import org.jgroups.ChannelException;
-import org.jgroups.ChannelClosedException;
-import org.jgroups.ChannelNotConnectedException;
 
 /**
  *  Implementation of JGroups in order to improve HA.
@@ -51,7 +51,7 @@ final class JGroups
 
   private int nbClusterExpected = 2;
   boolean coordinator = false;
-  private Channel channel;
+  private Channel channel = null;
   private Address myAddr = null;
   private Address coordinatorAddr = null;
   private String channelName = null;
@@ -103,11 +103,16 @@ final class JGroups
   }
 
   void disconnect() {
-    channel.disconnect();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "disconnect()");
+    if (channel != null) {
+      channel.disconnect();
+      channel = null;
+    }
   }
   
   void connect() throws ChannelException, ChannelClosedException {
-    if (!channel.isConnected()) channel.connect(channelName);
+    if (channel != null && !channel.isConnected()) channel.connect(channelName);
   }
 
   void startConsAndServ() {
@@ -135,6 +140,8 @@ final class JGroups
   }
 
   void send(Serializable message) throws Exception {
+    if (channel == null) return;
+    
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups send(" + message + ")");
 
@@ -158,6 +165,7 @@ final class JGroups
   }
   
   void sendTo(Address dst, Serializable obj) throws Exception {
+    if (channel == null) return;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups sendTo(" + dst + "," + obj + ")");
     channel.send(dst,myAddr,obj);
