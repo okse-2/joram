@@ -267,10 +267,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /**
    * Returns the object body of the message.
    *
-   * @exception IOException  In case of an error while getting the object.
-   * @exception ClassNotFoundException  If the object class is unknown.
+   * @exception Exception  In case of an error while getting the object.
    */
-  public Serializable getObject() throws ClassNotFoundException, IOException {
+  public Serializable getObject() throws Exception {
     // AF: May be, we should verify that it is an Object message!!
     if (body == null) return null;
 
@@ -285,6 +284,8 @@ public final class Message implements Cloneable, Serializable, Streamable {
     } catch (Exception e) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getObject()", e);
+      // Don't forget to rethrow the Exception
+      throw e;
     } finally {
       try {
         ois.close();
