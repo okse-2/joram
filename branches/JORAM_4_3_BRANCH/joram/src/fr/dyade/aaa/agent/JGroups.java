@@ -51,7 +51,7 @@ final class JGroups
 
   private int nbClusterExpected = 2;
   boolean coordinator = false;
-  private Channel channel;
+  private Channel channel = null;
   private Address myAddr = null;
   private Address coordinatorAddr = null;
   private String channelName = null;
@@ -103,11 +103,16 @@ final class JGroups
   }
 
   void disconnect() {
-    channel.disconnect();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "disconnect()");//NTA tmp
+    if (channel != null) {
+      channel.disconnect();
+      channel = null;
+    }
   }
   
   void connect() throws ChannelException, ChannelClosedException {
-    if (!channel.isConnected()) channel.connect(channelName);
+    if (channel != null && !channel.isConnected()) channel.connect(channelName);
   }
 
   void startConsAndServ() {
@@ -135,6 +140,8 @@ final class JGroups
   }
 
   void send(Serializable message) throws Exception {
+    if (channel == null) return;
+    
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups send(" + message + ")");
 
@@ -158,6 +165,7 @@ final class JGroups
   }
   
   void sendTo(Address dst, Serializable obj) throws Exception {
+    if (channel == null) return;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups sendTo(" + dst + "," + obj + ")");
     channel.send(dst,myAddr,obj);
