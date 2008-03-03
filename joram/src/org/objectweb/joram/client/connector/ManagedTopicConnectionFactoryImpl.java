@@ -184,54 +184,66 @@ public class ManagedTopicConnectionFactoryImpl
     }
 
     try {
-        if (isHa) {
-            if (collocated) {
-                if (cxRequest instanceof TopicConnectionRequest) {
-                    XATopicConnectionFactory factory = XATopicHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXATopicConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
+      if (isHa) {
+        if (collocated) {
+          if (ra.haURL != null) {
+            if (cxRequest instanceof TopicConnectionRequest) {
+              XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(ra.haURL);
+              setParameters(factory);
+              cnx = factory.createXATopicConnection(userName, password);
             } else {
-                String urlHa = "hajoram://" + hostName + ":" + serverPort;
-                if (cxRequest instanceof TopicConnectionRequest) {
-                    XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXATopicConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
+              XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
+              setParameters(factory);
+              cnx = factory.createXAConnection(userName, password);
             }
+          } else {
+            if (cxRequest instanceof TopicConnectionRequest) {
+              XATopicConnectionFactory factory = XATopicHALocalConnectionFactory.create();
+              setParameters(factory);
+              cnx = factory.createXATopicConnection(userName, password);
+            } else {
+              XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+              setParameters(factory);
+              cnx = factory.createXAConnection(userName, password);
+            }
+          }
         } else {
-            if (collocated) {
-                if (cxRequest instanceof TopicConnectionRequest) {
-                    XATopicConnectionFactory factory = XATopicLocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXATopicConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            } else {
-                if (cxRequest instanceof TopicConnectionRequest) {
-                    XATopicConnectionFactory factory = XATopicTcpConnectionFactory.create(hostName, serverPort);
-                    setParameters(factory);
-                    cnx = factory.createXATopicConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            }
+          String urlHa = "hajoram://" + hostName + ":" + serverPort;
+          if (cxRequest instanceof TopicConnectionRequest) {
+            XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(urlHa);
+            setParameters(factory);
+            cnx = factory.createXATopicConnection(userName, password);
+          } else {
+            XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+            setParameters(factory);
+            cnx = factory.createXAConnection(userName, password);
+          }
         }
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+      } else {
+        if (collocated) {
+          if (cxRequest instanceof TopicConnectionRequest) {
+            XATopicConnectionFactory factory = XATopicLocalConnectionFactory.create();
+            setParameters(factory);
+            cnx = factory.createXATopicConnection(userName, password);
+          } else {
+            XAConnectionFactory factory = XALocalConnectionFactory.create();
+            setParameters(factory);
+            cnx = factory.createXAConnection(userName, password);
+          }
+        } else {
+          if (cxRequest instanceof TopicConnectionRequest) {
+            XATopicConnectionFactory factory = XATopicTcpConnectionFactory.create(hostName, serverPort);
+            setParameters(factory);
+            cnx = factory.createXATopicConnection(userName, password);
+          } else {
+            XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
+            setParameters(factory);
+            cnx = factory.createXAConnection(userName, password);
+          }
+        }
+      }
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
         if (out != null)
