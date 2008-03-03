@@ -1,3 +1,9 @@
++==============================================================================
+| 2008/03/03 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+HA: In collocated mode, if haURL is set, the adapter start 
+    in HATcp mode instead HALocal mode.
+Bug fix: jgroups disconnect, test channel before send. 
 ###############################################################################
 # 2008/02/08 | Joram 4.3.32 tag.
 ###############################################################################
