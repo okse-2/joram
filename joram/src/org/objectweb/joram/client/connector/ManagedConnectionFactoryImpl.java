@@ -307,18 +307,22 @@ public class ManagedConnectionFactoryImpl
     }
 
     if (isHa) {
-        if (collocated) {
-            factory = XAHALocalConnectionFactory.create();
+      if (collocated) {
+        if (ra.haURL != null) {
+          factory = XAHATcpConnectionFactory.create(ra.haURL);
         } else {
-            String urlHa = "hajoram://" + hostName + ":" + serverPort;
-            factory = XAHATcpConnectionFactory.create(urlHa);
+          factory = XAHALocalConnectionFactory.create();
         }
+      } else {
+        String urlHa = "hajoram://" + hostName + ":" + serverPort;
+        factory = XAHATcpConnectionFactory.create(urlHa);
+      }
     } else {
-        if (collocated) {
-            factory = XALocalConnectionFactory.create();
-        } else {
-            factory = XATcpConnectionFactory.create(hostName, serverPort);
-        }
+      if (collocated) {
+        factory = XALocalConnectionFactory.create();
+      } else {
+        factory = XATcpConnectionFactory.create(hostName, serverPort);
+      }
     }
 
     setParameters(factory);
