@@ -76,6 +76,11 @@
          <config-property-value>16010</config-property-value>
       </config-property>
       <config-property>
+         <config-property-name>HAURL</config-property-name>
+         <config-property-type>java.lang.String</config-property-type>
+         <config-property-value>hajoram://localhost:16010,localhost:16011</config-property-value>
+      </config-property>
+      <config-property>
          <config-property-name>ConnectingTimer</config-property-name>
          <config-property-type>java.lang.Integer</config-property-type>
          <config-property-value>0</config-property-value>
