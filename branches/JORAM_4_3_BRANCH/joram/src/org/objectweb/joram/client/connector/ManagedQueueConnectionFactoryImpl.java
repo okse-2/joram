@@ -184,28 +184,40 @@ public class ManagedQueueConnectionFactoryImpl
     try {
 
         if (isHa) {
-            if (collocated) {
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            } else {
-                String urlHa = "hajoram://" + hostName + ":" + serverPort;
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
+          if (collocated) {
+            if (ra.haURL != null) {
+              if (cxRequest instanceof QueueConnectionRequest) {
+                XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(ra.haURL);
+                setParameters(factory);
+                cnx = factory.createXAQueueConnection(userName, password);
+              } else {
+                XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
+                setParameters(factory);
+                cnx = factory.createXAConnection(userName, password);
+              }
+            } else {          
+              if (cxRequest instanceof QueueConnectionRequest) {
+                XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
+                setParameters(factory);
+                cnx = factory.createXAQueueConnection(userName, password);
+              } else {
+                XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+                setParameters(factory);
+                cnx = factory.createXAConnection(userName, password);
+              }
             }
+          } else {
+            String urlHa = "hajoram://" + hostName + ":" + serverPort;
+            if (cxRequest instanceof QueueConnectionRequest) {
+              XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
+              setParameters(factory);
+              cnx = factory.createXAQueueConnection(userName, password);
+            } else {
+              XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+              setParameters(factory);
+              cnx = factory.createXAConnection(userName, password);
+            }
+          }
         } else {
             if (collocated) {
                 if (cxRequest instanceof QueueConnectionRequest) {
