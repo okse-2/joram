@@ -133,6 +133,8 @@ public class JoramAdapter
   /** Port number of the underlying JORAM server. */
   int serverPort = 16010;
 
+  /** URL hajoram (for collocated mode). */
+  String haURL = null;
 
   /** Root name. */
     String rootName = "root";
@@ -697,18 +699,23 @@ public class JoramAdapter
       XAConnectionFactory connectionFactory = null;
 
       if (isHa) {
-          if (collocated)
-              connectionFactory = XAHALocalConnectionFactory.create();
-          else {
-              String urlHa = "hajoram://" + hostName + ":" + serverPort;
-              connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+        if (collocated) {
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
+          if (haURL != null) {
+            connectionFactory = XAHATcpConnectionFactory.create(haURL);
+          } else {
+            connectionFactory = XAHALocalConnectionFactory.create();
           }
+        } else {
+          String urlHa = "hajoram://" + hostName + ":" + serverPort;
+          connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+        }
       }  else {
-
-      if (collocated)
-        connectionFactory = XALocalConnectionFactory.create();
-      else
-              connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+        if (collocated)
+          connectionFactory = XALocalConnectionFactory.create();
+        else
+          connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
       }
 
       ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
@@ -842,17 +849,23 @@ public class JoramAdapter
           password = specImpl.getPassword();
 
           if (isHa) {
-              if (collocated)
-                  connectionFactory = XAHALocalConnectionFactory.create();
-              else {
-                  String urlHa = "hajoram://" + hostName + ":" + serverPort;
-                  connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+            if (collocated) {
+              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
+              if (haURL != null) {
+                connectionFactory = XAHATcpConnectionFactory.create(haURL);
+              } else {
+                connectionFactory = XAHALocalConnectionFactory.create();
               }
+            } else {
+              String urlHa = "hajoram://" + hostName + ":" + serverPort;
+              connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+            }
           }  else {
-          if (collocated)
-            connectionFactory = XALocalConnectionFactory.create();
-          else
-                  connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+            if (collocated)
+              connectionFactory = XALocalConnectionFactory.create();
+            else
+              connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
           }
 
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
@@ -1089,17 +1102,23 @@ public class JoramAdapter
       TopicConnectionFactory factory;
 
       if (isHa) {
-          if (collocated)
-              factory = TopicHALocalConnectionFactory.create();
-          else {
-              String urlHa = "hajoram://" + hostName + ":" + serverPort;
-              factory = TopicHATcpConnectionFactory.create(urlHa);
+        if (collocated) {
+          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
+          if (haURL != null) {
+            factory = TopicHATcpConnectionFactory.create(haURL);
+          } else {
+            factory = TopicHALocalConnectionFactory.create();
           }
+        } else {
+          String urlHa = "hajoram://" + hostName + ":" + serverPort;
+          factory = TopicHATcpConnectionFactory.create(urlHa);
+        }
       } else {
-      if (collocated)
-        factory = TopicLocalConnectionFactory.create();
-      else
-        factory = TopicTcpConnectionFactory.create(hostName, serverPort);
+        if (collocated)
+          factory = TopicLocalConnectionFactory.create();
+        else
+          factory = TopicTcpConnectionFactory.create(hostName, serverPort);
       }
 
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
@@ -1403,6 +1422,10 @@ public class JoramAdapter
     this.serverPort = serverPort.intValue();
   }
 
+  public void setHAURL(java.lang.String haURL) {
+    this.haURL = haURL;
+  }
+  
   public void setConnectingTimer(java.lang.Integer connectingTimer) {
     this.connectingTimer = connectingTimer.intValue();
   }
@@ -1490,6 +1513,10 @@ public class JoramAdapter
     return new Integer(serverPort);
   }
 
+  public java.lang.String getHAURL() {
+    return haURL;
+  }
+  
   public java.lang.Integer getConnectingTimer() {
     return new Integer(connectingTimer);
   }
@@ -1547,7 +1574,7 @@ public class JoramAdapter
       this.deleteDurableSubscription = flg.booleanValue();
   }
 
-/**
+  /**
    * Export the repository content to an XML file
    * - only the destinations objects are retrieved in this version
    * - xml script format of the admin objects (joramAdmin.xml)

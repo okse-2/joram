@@ -24,42 +24,33 @@
  */
 package org.objectweb.joram.client.connector;
 
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.XAConnection;
+import javax.jms.XAConnectionFactory;
+import javax.jms.XAQueueConnectionFactory;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+import javax.resource.ResourceException;
+import javax.resource.spi.CommException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.SecurityException;
+import javax.security.auth.Subject;
+
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAQueueHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.jms.IllegalStateException;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.XAConnection;
-import javax.jms.XAQueueConnection;
-import javax.jms.XAConnectionFactory;
-import javax.jms.XAQueueConnectionFactory;
-import javax.naming.StringRefAddr;
-import javax.naming.Reference;
-import javax.resource.ResourceException;
-import javax.resource.spi.CommException;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.SecurityException;
-import javax.security.auth.Subject;
-
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
-
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -189,28 +180,40 @@ public class ManagedQueueConnectionFactoryImpl
     try {
 
         if (isHa) {
-            if (collocated) {
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            } else {
-                String urlHa = "hajoram://" + hostName + ":" + serverPort;
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-                    setParameters(factory);
-                    cnx = factory.createXAConnection(userName, password);
-                }
+          if (collocated) {
+            if (ra.haURL != null) {
+              if (cxRequest instanceof QueueConnectionRequest) {
+                XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(ra.haURL);
+                setParameters(factory);
+                cnx = factory.createXAQueueConnection(userName, password);
+              } else {
+                XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
+                setParameters(factory);
+                cnx = factory.createXAConnection(userName, password);
+              }
+            } else {          
+              if (cxRequest instanceof QueueConnectionRequest) {
+                XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
+                setParameters(factory);
+                cnx = factory.createXAQueueConnection(userName, password);
+              } else {
+                XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+                setParameters(factory);
+                cnx = factory.createXAConnection(userName, password);
+              }
             }
+          } else {
+            String urlHa = "hajoram://" + hostName + ":" + serverPort;
+            if (cxRequest instanceof QueueConnectionRequest) {
+              XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
+              setParameters(factory);
+              cnx = factory.createXAQueueConnection(userName, password);
+            } else {
+              XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+              setParameters(factory);
+              cnx = factory.createXAConnection(userName, password);
+            }
+          }
         } else {
             if (collocated) {
                 if (cxRequest instanceof QueueConnectionRequest) {
