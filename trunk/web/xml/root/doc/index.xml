@@ -24,13 +24,13 @@
 
     <subtitle>Installation and Users Guide</subtitle>
       <ul>
-        <li>Guide of the <a href="Joram-5.0.8-en.pdf">5.0.8 release</a>.</li>
-        <li>Guide of the <a href="Joram-4.3.32-en.pdf">4.3.32 release</a>.</li>
+        <li>Guide of the <a href="current/doc/Joram-5.0.8-en.pdf">5.0.8 release</a>.</li>
+        <li>Guide of the <a href="current/doc/Joram-4.3.32-en.pdf">4.3.32 release</a>.</li>
       </ul>
 
     <subtitle>API documentation</subtitle>
       <ul>
-        <li>Browsing the <a href="../current/javadoc/">Joram 5.0.8 javadoc</a>.</li>
+        <li>Browsing the <a href="current/javadoc/">Joram 5.0.8 javadoc</a>.</li>
       </ul>
     </s1>
 
