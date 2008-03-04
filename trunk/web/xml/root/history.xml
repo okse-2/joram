@@ -14,11 +14,11 @@
     <s1 name="JORAM History">
 	<subtitle>February 12, 2008: JORAM 5.0.8 is released</subtitle>
 	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-	<p>It is tagged in CVS (JORAM_5_0_8), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>It is tagged in CVS (JORAM_5_0_8), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/joram/history?rev=HEAD&amp;content-type=text/plain">CVS history</a>.</p>
 
 	<subtitle>February 12, 2008: JORAM 4.3.32 is released</subtitle>
 	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvments and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.9</a>.</p>
-	<p>It is tagged in CVS (JORAM_4_3_32), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history">CVS history</a>.</p>
+	<p>It is tagged in CVS (JORAM_4_3_32), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in <a href="http://cvs.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/joram/history&amp;only_with_tag=JORAM_4_3_BRANCH">CVS history</a>.</p>
 
 	<subtitle>December 19, 2007: JORAM 5.0.7 is released</subtitle>
 	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
