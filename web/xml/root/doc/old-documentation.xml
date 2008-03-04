@@ -48,8 +48,8 @@
 
     <subtitle>Advanced features and administration</subtitle>
       <ul>
-        <li>Guide of the Joram HA release <a href="http://forge.objectweb.org/project/download.php?group_id=4&file_id=3563">(in the download area)</a>.</li>
-        <li>Specification of the Joram HA features <a href="http://forge.objectweb.org/project/download.php?group_id=4&file_id=3562">(in the download area)</a>.</li>
+        <li>Guide of the Joram HA release <a href="http://forge.objectweb.org/project/download.php?group_id=4&amp;file_id=3563">(in the download area)</a>.</li>
+        <li>Specification of the Joram HA features <a href="http://forge.objectweb.org/project/download.php?group_id=4&amp;file_id=3562">(in the download area)</a>.</li>
         <li>Distributed JNDI server provided with the <a href="../current/doc/joram4_0_JNDI.pdf">4.0 release</a>.</li>
         <li>Bridge feature introduced by the <a href="../current/doc/joram4_0_BRIDGE.pdf">4.0 release</a>.</li>
         <li>Configuring the SOAP protocol for the <a href="../current/doc/joram4_0_SOAP.pdf">4.0 release</a>.</li>
