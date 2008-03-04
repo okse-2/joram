@@ -24,15 +24,13 @@
 
     <subtitle>Installation and Users Guide</subtitle>
       <ul>
-        <li>Guide of the <a href="Joram-en.pdf"> 4.3 release</a>.</li>
-	<li>Guide of the Joram HA release <a href="../download/index.html">(in the download area)</a>.</li>
-	<li>Specification of the Joram HA features <a href="../download/index.html">(in the download area)</a>.</li>
+        <li>Guide of the <a href="Joram-en.pdf">5.0.8 release</a>.</li>
+        <li>Guide of the <a href="Joram-en.pdf">4.3.32 release</a>.</li>
       </ul>
 
     <subtitle>API documentation</subtitle>
       <ul>
-        <li>Browsing the <a href="../current/javadoc/">
-        4.3 release javadoc</a>.</li>
+        <li>Browsing the <a href="../current/javadoc/">Joram 5.0.8 javadoc</a>.</li>
       </ul>
     </s1>
 
