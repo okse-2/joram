@@ -38,12 +38,6 @@ public class XAQueueLocalConnectionFactory
     extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-
-  /**
    * Constructs an <code>XAQueueLocalConnectionFactory</code> instance.
    */
   public XAQueueLocalConnectionFactory()

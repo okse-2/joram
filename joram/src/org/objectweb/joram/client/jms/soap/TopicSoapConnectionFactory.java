@@ -44,11 +44,6 @@ public class TopicSoapConnectionFactory
              extends org.objectweb.joram.client.jms.TopicConnectionFactory
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>TopicSoapConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * An <code>UnsetUserThreshold</code> instance requests to unset 
  * the threshold of a given user.
  */
 public class UnsetUserThreshold extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2486661870903852503L;
 
   /** Identifier of the user's proxy which threshold is unset. */
   private String userProxId;
@@ -49,22 +43,9 @@ public class UnsetUserThreshold extends AdminRequest {
     this.userProxId = userProxId;
   }
 
-  public UnsetUserThreshold() { }
   
   /** Returns the identifier of the user's proxy which threshold is unset. */
   public String getUserProxId() {
     return userProxId;
-  }
-  
-  protected int getClassId() {
-    return UNSET_USER_THRESHOLD;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    userProxId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(userProxId, os);
   }
 }

@@ -28,10 +28,6 @@ import javax.swing.tree.*;
 class UserRootTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private ServerTreeNode parentServerTreeNode;
   
   public UserRootTreeNode(ServerTreeNode parentServerTreeNode) {

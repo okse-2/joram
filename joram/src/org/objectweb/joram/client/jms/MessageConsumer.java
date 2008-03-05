@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,16 +32,13 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
-
-import org.objectweb.joram.shared.selectors.ClientSelector;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.MessageConsumer</code> interface.
  */
 public class MessageConsumer implements javax.jms.MessageConsumer {
+
   /**
    * Status of the message consumer.
    */
@@ -157,8 +154,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     }
 
     try {
-      ClientSelector.checks(selector);
-    } catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
+      org.objectweb.joram.shared.selectors.Selector.checks(selector);
+    }
+    catch (org.objectweb.joram.shared.excepts.SelectorException sE) {
       throw new InvalidSelectorException("Invalid selector syntax: " + sE);
     }
 
@@ -175,8 +173,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                                subName,
                                selector,
                                noLocal,
-                               durableSubscriber,
-                               sess.isAsyncSub()));
+                               durableSubscriber));
       targetName = subName;
       this.noLocal = noLocal;
       queueMode = false;
@@ -241,7 +238,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
   
   /**
-   * Sets the message consumer's MessageListener.
    * API method.
    * <p>
    * This method must not be called if the connection the consumer belongs to
@@ -293,7 +289,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /**
-   * Gets the message consumer's MessageListener.
    * API method.
    *
    * @exception IllegalStateException  If the consumer is closed.
@@ -306,7 +301,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /**
-   * Gets this message consumer's message selector expression.
    * API method.
    *
    * @exception IllegalStateException  If the consumer is closed.
@@ -318,8 +312,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message that arrives before the specified timeout.
-   * API method.
+   * API method implemented in subclasses.
    *
    * @exception IllegalStateException  If the consumer is closed, or if the
    *              connection is broken.
@@ -339,7 +332,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message produced for this message consumer.
    * API method.
    * 
    * @exception IllegalStateException  If the consumer is closed, or if the
@@ -354,7 +346,6 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
   }
 
   /** 
-   * Receives the next message if one is immediately available.
    * API method.
    * 
    * @exception IllegalStateException  If the consumer is closed, or if the

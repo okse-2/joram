@@ -53,12 +53,12 @@ public interface Repository {
    */
   public byte[] load(String dirName, String name) throws IOException;
 
-//   /**
-//    * Loads the object.
-//    *
-//    * @return The loaded object or null if it does not exist.
-//    */
-//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException;
+  /**
+   * Loads the object.
+   *
+   * @return The loaded object or null if it does not exist.
+   */
+  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException;
 
   /**
    * Deletes the corresponding objects in repository.

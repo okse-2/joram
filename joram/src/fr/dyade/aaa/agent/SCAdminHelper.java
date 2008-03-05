@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s):
  */
 package fr.dyade.aaa.agent;
 
@@ -131,9 +129,6 @@ public class SCAdminHelper {
       for (int i=0; i<jvmarg.length; i++)
         argv.addElement(jvmarg[i]);
     }
-    argv.addElement("-Dcom.sun.management.jmxremote");
-    argv.addElement("-DMXServer=com.scalagent.jmx.JMXServer");
-
     argv.addElement(className);
     argv.addElement(Short.toString(sid));
     argv.addElement("s" + sid);

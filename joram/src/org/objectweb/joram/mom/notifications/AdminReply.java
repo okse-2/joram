@@ -29,10 +29,6 @@ package org.objectweb.joram.mom.notifications;
  */
 public class AdminReply extends AbstractNotification
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Field identifying the original request. */
   private String requestId;
   /** <code>true</code> if the request succeeded. */

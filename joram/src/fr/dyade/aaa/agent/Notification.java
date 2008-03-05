@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,17 +20,14 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Class Notification is the root of the notifications hierarchy. Every
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  /**
-   * 
-   */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 3007264908616389613L;
 
   /**
    * True if the notification is persistent, false otherwise. By default, this
@@ -53,21 +50,21 @@ public class Notification implements Serializable, Cloneable {
    */
   protected transient boolean detached = false;
 
-  /**
+  /** 
    * The expiration date for this notification.
-   * 
-   * This field is handled by the network protocol in order to fit the time
-   * synchronization problem.
+   *
+   * This field is handled by the network protocol in order to fit
+   * the time synchronisation problem.
    */
-  long expiration = 0L;
+  long expiration = -1L;
 
   /**
    * Sets the expiration date for this notification.
-   * 
-   * A value of 0L (default) indicates that the notification does not expire.
-   * 
-   * @param expiration
-   *            the expiration date for this notification.
+   *
+   * A value of -1L (default) indicates that the notification does
+   * not expire.
+   *
+   * @param expiration the expiration date for this notification.
    */
   public void setExpiration(long expiration) {
     this.expiration = expiration;
@@ -77,9 +74,9 @@ public class Notification implements Serializable, Cloneable {
    * Gets the notification's expiration value.
    *
    * This field is handled by the network protocol in order to fit
-   * the time synchronization problem.
+   * the time synchronisation problem.
    *
-   * If the expiration date is set to 0L (default), it indicates that
+   * If the expiration date is set to -1L (default), it indicates that
    * the notification does not expire.
    *
    * When a notification's expiration time is reached, the MOM should
@@ -91,41 +88,6 @@ public class Notification implements Serializable, Cloneable {
    */
   public long getExpiration() {
     return expiration;
-  }
-
-  /**
-   * The priority for this notification from 0 to 9, 9 being the highest. By
-   * default, the priority is 4
-   */
-  byte priority = (byte) 4;
-  
-  /**
-   * The agentId identifying the agent to which the notification is sent when it
-   * is expired.<br>
-   * Default value is null, which means the expired notification is lost.
-   */
-  AgentId deadNotificationAgentId = null;
-  
-  /**
-   * Sets the priority for this notification.
-   * 
-   * A value between 0 (lowest) and 9 (highest), by default 4 (normal).
-   * 
-   * @param priority
-   *            the priority for this notification.
-   */
-  public void setPriority(int priority) {
-    if ((priority >= 0) && (priority <= 9))
-      this.priority = (byte) priority;
-  }
-  
-  /**
-   * Gets the notification's priority value.
-   * 
-   * @return The notification's priority value.
-   */
-  public int getPriority() {
-    return priority;
   }
 
   /**
@@ -196,31 +158,12 @@ public class Notification implements Serializable, Cloneable {
   }
 
   /**
-   * 
-   * @return The agentId identifying the agent to which the notification is sent
-   *         when it is expired.
-   */
-  public AgentId getDeadNotificationAgentId() {
-    return deadNotificationAgentId;
-  }
-
-  /**
-   * Sets the forwardExpiredNotAgentId value which enable sending expired
-   * notifications to a specific agent
-   * 
-   * @param deadNotificationAgentId
-   *            the AgentId to which the dead notification is forwarded
-   */
-  public void setDeadNotificationAgentId(AgentId deadNotificationAgentId) {
-    this.deadNotificationAgentId = deadNotificationAgentId;
-  }
-
-  /**
    * Appends a string image for this object to the StringBuffer parameter.
-   * 
+   *
    * @param output
-   *            buffer to fill in
-   * @return <code>output</code> buffer is returned
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
@@ -231,8 +174,6 @@ public class Notification implements Serializable, Cloneable {
     output.append(",detached=").append(detached);
     output.append(",context=").append(context);
     output.append(",expiration=").append(expiration);
-    output.append(",priority=").append(priority);
-    output.append(",deadNotificationAgentId=").append(deadNotificationAgentId);
     output.append(')');
 
     return output;

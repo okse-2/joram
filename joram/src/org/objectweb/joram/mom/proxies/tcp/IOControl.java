@@ -26,17 +26,13 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.mom.MomTracing;
 
-import fr.dyade.aaa.util.Debug;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 public class IOControl {
-  public static Logger logger = Debug.getLogger(IOControl.class.getName());
 
   private long inputCounter;
 
@@ -68,63 +64,67 @@ public class IOControl {
   }
 
   public synchronized void send(ProxyMessage msg) throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "IOControl.send:" + msg);
-
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "IOControl.send(" + 
+        msg + ')');
     try {
       nos.send(msg.getId(), msg.getAckId(), msg.getObject());
       unackCounter = 0;
     } catch (IOException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "IOControl.send", exc);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       close();
       throw exc;
     }
   }
 
-  static class NetOutputStream extends ByteArrayOutputStream {
+  static class NetOutputStream {
+    private ByteArrayOutputStream baos = null;
+    private ObjectOutputStream oos = null;
     private OutputStream os = null;
 
+    static private final byte[] streamHeader = {
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
+      (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
+    };
+
     NetOutputStream(Socket sock) throws IOException {
-      super(1024);
-      reset();
+      baos = new ByteArrayOutputStream(1024);
+      oos = new ObjectOutputStream(baos);
+      baos.reset();
       os = sock.getOutputStream();
     }
 
-    public void reset() {
-      count = 4;
-    }
-
-    void send(long id, long ackId, AbstractJmsMessage msg) throws IOException {
+    void send(long id, long ackId, Object msg) throws IOException {
       try {
-        StreamUtil.writeTo(id, this);
-        StreamUtil.writeTo(ackId, this);
-        AbstractJmsMessage.write(msg, this);
+        baos.write(streamHeader, 0, 4);
+        oos.writeLong(id);
+        oos.writeLong(ackId);
+        oos.writeObject(msg);
+        oos.flush();
 
-        buf[0] = (byte) ((count -4) >>>  24);
-        buf[1] = (byte) ((count -4) >>>  16);
-        buf[2] = (byte) ((count -4) >>>  8);
-        buf[3] = (byte) ((count -4) >>>  0);
-
-        writeTo(os);
+        baos.writeTo(os);
         os.flush();
       } finally {
-        reset();
+        oos.reset();
+        baos.reset();
       }
     }
   }
   
   public ProxyMessage receive() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "IOControl.receive()");
-
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "IOControl.receive()");
     try {
       while (true) {
-        int len = StreamUtil.readIntFrom(bis);
-        long messageId = StreamUtil.readLongFrom(bis);
-        long ackId = StreamUtil.readLongFrom(bis);
-        AbstractJmsRequest obj =  (AbstractJmsRequest) AbstractJmsMessage.read(bis);
-
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        long messageId = ois.readLong();
+        long ackId = ois.readLong();
+        Object obj = ois.readObject();
 	if (messageId > inputCounter) {
 	  inputCounter = messageId;
           synchronized (this) {
@@ -136,22 +136,23 @@ public class IOControl {
           }
 	  return new ProxyMessage(messageId, ackId, obj);      
 	} else {
-	  logger.log(BasicLevel.DEBUG,
-                     "IOControl.receive: already received message: " + messageId + " -> " + obj);
+	  MomTracing.dbgProxy.log(
+	    BasicLevel.DEBUG, " -> already received message: " + 
+	    messageId + " " + obj);
 	}
       }
     } catch (IOException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "IOControl.receive", exc);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       close();
       throw exc;
     }
   }
 
   public void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "IOControl.close()");
-
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "IOControl.close()");
     try { 
       if (bis != null) bis.close();
       bis = null;

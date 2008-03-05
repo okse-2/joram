@@ -29,11 +29,6 @@ import javax.naming.*;
 class JndiTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AdminController c;
 
   private Context ctx = null;
@@ -152,11 +147,6 @@ class JndiTreeNode extends DefaultMutableTreeNode
 
   private class DeleteObjectAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public DeleteObjectAction()
     {
       super("Delete", AdminToolConstants.trashIcon);

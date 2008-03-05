@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,16 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package org.objectweb.joram.client.jms.tcp;
 
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import java.util.Vector;
+
+import javax.naming.NamingException;
 
 
 /**
@@ -32,28 +36,16 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
  * TCP connections dedicated to XA communication.
  */
 public class XATcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an <code>iXATcpConnectionFactory</code> instance.
-   * This empty constructor is needed for JNDI.
-   */
-  public XATcpConnectionFactory() {
-    super();
-  }
-  
+             extends org.objectweb.joram.client.jms.XAConnectionFactory
+{
   /**
    * Constructs an <code>iXATcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XATcpConnectionFactory(String host, int port) {
+  public XATcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 

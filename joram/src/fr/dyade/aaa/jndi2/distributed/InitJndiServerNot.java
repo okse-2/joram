@@ -29,11 +29,6 @@ import fr.dyade.aaa.util.Strings;
 
 public class InitJndiServerNot extends Notification {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AgentId[] jndiServerIds;
 
   private NamingContextInfo[] contexts;

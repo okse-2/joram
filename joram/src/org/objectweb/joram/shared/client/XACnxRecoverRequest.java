@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,28 +17,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
+
+import java.util.Hashtable;
+
 
 /**
  * A <code>XACnxRecoverRequest</code> instance is used by an
  * <code>XACnxion</code> for recovering the identifiers of the TM's
  * prepared transactions.
  */
-public final class XACnxRecoverRequest extends AbstractJmsRequest {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  protected int getClassId() {
-    return XA_CNX_RECOVER_REQUEST;
-  }
-
+public class XACnxRecoverRequest extends AbstractJmsRequest
+{
   /**
    * Constructs a <code>XACnxRecoverRequest</code> instance.
    */
-  public XACnxRecoverRequest() {}
+  public XACnxRecoverRequest()
+  {}
+
+
+  public static Object soapDecode(Hashtable h)
+  {
+    XACnxRecoverRequest req = new XACnxRecoverRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    return req;
+  }
 }

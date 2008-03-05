@@ -40,11 +40,13 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * 
  */
 public class JMXServer implements MXServer, Serializable {
-  
   public MBeanServer mxserver = null;
+  public String domain = null;
 
-  public JMXServer(MBeanServer mxserver) {
+  public JMXServer(MBeanServer mxserver,
+                   String domain) {
     this.mxserver = mxserver;
+    this.domain = domain;
     MXWrapper.setMXServer(this);
   }
 
@@ -58,6 +60,7 @@ public class JMXServer implements MXServer, Serializable {
       // Prior JDK1.5 (with JMXRI implementation).
       this.mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
     }
+    this.domain = "AgentServer";
     MXWrapper.setMXServer(this);
   }
 

@@ -169,7 +169,8 @@ public class XAResource implements javax.transaction.xa.XAResource {
    *
    * @exception XAException  If the RM fails to recover.
    */
-  public Xid[] recover(int flag) throws XAException {
+  public Xid[] recover(int flag) throws XAException
+  {
     return rm.recover(flag);
   }
 

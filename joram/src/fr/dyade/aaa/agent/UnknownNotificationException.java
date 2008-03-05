@@ -33,12 +33,6 @@ public class UnknownNotificationException extends Exception {
 
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-
-  /**
    *  Constructs a new <code>UnknownNotificationException</code> with
    * no detail message.
    */

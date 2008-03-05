@@ -26,11 +26,6 @@ package com.scalagent.kjoram.excepts;
 public class TransactionRolledBackException extends JMSException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>TransactionRolledBackException</code> instance.
    */
   public TransactionRolledBackException(String info)

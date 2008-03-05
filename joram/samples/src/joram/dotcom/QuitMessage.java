@@ -35,9 +35,4 @@ package dotcom;
  * @see		ControlTreatment
  * @see		DeliveryTreatment
  */
-public class QuitMessage implements java.io.Serializable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;}
+public class QuitMessage implements java.io.Serializable {}

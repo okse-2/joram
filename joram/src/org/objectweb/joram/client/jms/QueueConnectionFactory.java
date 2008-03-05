@@ -31,7 +31,8 @@ import javax.jms.JMSException;
  */
 public abstract class QueueConnectionFactory
                       extends ConnectionFactory
-  implements javax.jms.QueueConnectionFactory {
+                      implements javax.jms.QueueConnectionFactory
+{
   /**
    * Constructs a <code>QueueConnectionFactory</code> dedicated to a given
    * server.
@@ -39,9 +40,10 @@ public abstract class QueueConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public QueueConnectionFactory(String host, int port) {
-    super(host, port);
-  }
+  public QueueConnectionFactory(String host, int port)
+    {
+      super(host, port);
+    }
 
   /**
    * Constructs a <code>QueueConnectionFactory</code> dedicated to a given server.
@@ -54,15 +56,16 @@ public abstract class QueueConnectionFactory
 
   /**
    * Constructs an empty <code>QueueConnectionFactory</code>.
-   * Needed by ObjectFactory.
    */
-  public QueueConnectionFactory() {}
+  public QueueConnectionFactory()
+    {}
 
 
   /** Returns a string view of the connection factory. */
-  public String toString() {
-    return "QCF:" + params.getHost() + "-" + params.getPort();
-  }
+  public String toString()
+    {
+      return "QCF:" + params.getHost() + "-" + params.getPort();
+    }
 
   /**
    * API method, implemented according to the communication protocol.
@@ -81,7 +84,8 @@ public abstract class QueueConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.QueueConnection createQueueConnection() throws JMSException {
-    return createQueueConnection(getDefaultLogin(), getDefaultPassword());
-  }
+  public javax.jms.QueueConnection createQueueConnection() throws JMSException
+    {
+      return createQueueConnection(getDefaultLogin(), getDefaultPassword());
+    }
 }

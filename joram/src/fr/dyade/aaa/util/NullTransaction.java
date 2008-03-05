@@ -90,8 +90,6 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
     return new String[0];
   }
 
-  public void create(Serializable obj, String name) throws IOException {}
-
   public void save(Serializable obj, String name) throws IOException {}
   
   public void saveByteArray(byte[] buf, String name) throws IOException {}
@@ -105,8 +103,6 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
   }
 
   public void delete(String name) {}
-
-  public void create(Serializable obj, String dirName, String name) throws IOException {}
 
   public void save(Serializable obj, String dirName, String name) throws IOException {}
   
@@ -122,25 +118,19 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
 
   public void delete(String dirName, String name) {}
 
-  public synchronized void commit(boolean release) throws IOException {
+  public void commit() throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
 
     setPhase(COMMIT);
-    if (release) {
-      // Change the transaction state.
-      setPhase(FREE);
-      // wake-up an eventually user's thread in begin
-      notify();
-    }
   }
 
-//   public void rollback() throws IOException {
-//     if (phase != RUN)
-//       throw new IllegalStateException("Can not rollback.");
+  public void rollback() throws IOException {
+    if (phase != RUN)
+      throw new IllegalStateException("Can not rollback.");
 
-//     setPhase(ROLLBACK);
-//   }
+    setPhase(ROLLBACK);
+  }
 
   public synchronized void release() throws IOException {
     if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))

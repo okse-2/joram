@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * An <code>UnsetDestinationDMQ</code> instance requests to unset the DMQ of
  * a given destination.
  */
 public class UnsetDestinationDMQ extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -117929092888904461L;
 
   /** Identifier of the destination which DMQ is unset. */
   private String destId;
@@ -48,22 +42,9 @@ public class UnsetDestinationDMQ extends AdminRequest {
     this.destId = destId;
   }
 
-  public UnsetDestinationDMQ() { }
   
   /** Returns the identifier of the destination which DMQ is unset. */
   public String getDestId() {
     return destId;
-  }
-  
-  protected int getClassId() {
-    return UNSET_DESTINATION_DMQ;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    destId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(destId, os);
   }
 }

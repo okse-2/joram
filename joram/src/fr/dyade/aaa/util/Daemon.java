@@ -202,8 +202,7 @@ public abstract class Daemon implements Runnable {
    */
   public synchronized void start() {
     if ((thread != null) && thread.isAlive()) {
-      if (logmon.isLoggable(BasicLevel.WARN))
-        logmon.log(BasicLevel.WARN, getName() + ", already started.");
+      logmon.log(BasicLevel.WARN, getName() + ", already started.");
       throw new IllegalThreadStateException("already started");
     }
 
@@ -215,8 +214,7 @@ public abstract class Daemon implements Runnable {
     canStop = true;
     thread.start();
 
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", started.");
+    logmon.log(BasicLevel.DEBUG, getName() + ", started.");
   }
 
   /**
@@ -244,8 +242,7 @@ public abstract class Daemon implements Runnable {
   final protected void finish() {
     running = false;
     close();
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", ended");
+    logmon.log(BasicLevel.DEBUG, getName() + ", ended");
   }
 
   /**
@@ -254,8 +251,7 @@ public abstract class Daemon implements Runnable {
    * then the shutdown method is called to close all ressources.
    */
   public synchronized void stop() {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", stops.");
+    logmon.log(BasicLevel.DEBUG, getName() + ", stops.");
     running = false;
     if (thread != null) {
       while (thread.isAlive()) {

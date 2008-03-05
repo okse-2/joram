@@ -25,23 +25,21 @@ package org.objectweb.joram.client.jms.local;
 
 import org.objectweb.joram.client.jms.XAConnection;
 
+import javax.naming.NamingException;
+
+
 /**
  * An <code>XALocalConnectionFactory</code> instance is a factory of
  * local connections dedicated to XA communication.
  */
 public class XALocalConnectionFactory
-    extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-
+    extends org.objectweb.joram.client.jms.XAConnectionFactory
+{
   /**
    * Constructs an <code>XALocalConnectionFactory</code> instance.
    */
-  public XALocalConnectionFactory(){
+  public XALocalConnectionFactory()
+  {
     super("localhost", -1);
   }
 
@@ -53,7 +51,8 @@ public class XALocalConnectionFactory
    */
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
-    throws javax.jms.JMSException {
+    throws javax.jms.JMSException
+  {
     LocalConnection lc = new LocalConnection(name, password);
     return new XAConnection(params, lc);
   }

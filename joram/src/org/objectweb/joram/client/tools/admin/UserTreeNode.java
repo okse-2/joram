@@ -30,10 +30,6 @@ import org.objectweb.joram.client.jms.admin.User;
 class UserTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private AdminController c;
   private User user;
 
@@ -110,11 +106,6 @@ class UserTreeNode extends DefaultMutableTreeNode
 
   private class DeleteUserAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public DeleteUserAction()
       {
         super("Delete", AdminToolConstants.trashIcon);
@@ -140,11 +131,6 @@ class UserTreeNode extends DefaultMutableTreeNode
 
   private class ChangePasswordAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public ChangePasswordAction()
       {
         super("Change Password...");

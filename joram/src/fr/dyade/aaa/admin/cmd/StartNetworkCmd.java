@@ -26,11 +26,6 @@ import java.util.*;
 
 public class StartNetworkCmd implements StartAdminCmd, Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public short sid;
 
   public String domainName;

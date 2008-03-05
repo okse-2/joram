@@ -23,11 +23,6 @@ import java.util.*;
 
 public class ServerAddress implements java.io.Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public static ServerAddress valueOf(String s) throws Exception {
     StringTokenizer tokenizer = new StringTokenizer(s, "=:");
     String serverName = tokenizer.nextToken();

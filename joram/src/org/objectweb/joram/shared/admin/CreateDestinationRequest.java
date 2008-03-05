@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,19 +23,14 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Properties;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>CreateDestinationRequest</code> instance requests the creation of a
  * destination on a given server.
  */
 public class CreateDestinationRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 4956998807717134521L;
 
   /** Id of the server where deploying the destination. */
   private int serverId;
@@ -70,8 +65,6 @@ public class CreateDestinationRequest extends AdminRequest {
     this.expectedType = expectedType;
   }
 
-  public CreateDestinationRequest() { }
-  
   /** Returns the id of the server where deploying the destination. */
   public final int getServerId() {
     return serverId;
@@ -94,25 +87,5 @@ public class CreateDestinationRequest extends AdminRequest {
 
   public final String getExpectedType() {
     return expectedType;
-  }
-  
-  protected int getClassId() {
-    return CREATE_DESTINATION_REQUEST;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    serverId = StreamUtil.readIntFrom(is);
-    name = StreamUtil.readStringFrom(is);
-    className = StreamUtil.readStringFrom(is);
-    props = StreamUtil.readJPropertiesFrom(is);
-    expectedType = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(serverId, os);
-    StreamUtil.writeTo(name, os);
-    StreamUtil.writeTo(className, os);
-    StreamUtil.writeTo(props, os);
-    StreamUtil.writeTo(expectedType, os);
   }
 }

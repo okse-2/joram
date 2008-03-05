@@ -28,11 +28,6 @@ import javax.naming.*;
 public class ListBindingsRequest extends JndiRequest 
     implements JndiReadRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public ListBindingsRequest(CompositeName name) {
     super(name);
   }

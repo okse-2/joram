@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,24 +22,24 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Vector;
+import java.util.*;
+import java.io.*;
 
-import org.jgroups.Address;
-import org.jgroups.Channel;
-import org.jgroups.ChannelClosedException;
-import org.jgroups.ChannelException;
-import org.jgroups.JChannel;
-import org.jgroups.MembershipListener;
-import org.jgroups.Message;
-import org.jgroups.MessageListener;
-import org.jgroups.View;
-import org.jgroups.blocks.PullPushAdapter;
-import org.jgroups.util.Util;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import org.jgroups.MembershipListener;
+import org.jgroups.MessageListener;
+import org.jgroups.Message;
+import org.jgroups.Channel;
+import org.jgroups.JChannel;
+import org.jgroups.Address;
+import org.jgroups.View;
+import org.jgroups.blocks.*;
+import org.jgroups.util.Util;
+import org.jgroups.ChannelException;
+import org.jgroups.ChannelClosedException;
+import org.jgroups.ChannelNotConnectedException;
 
 /**
  *  Implementation of JGroups in order to improve HA.
@@ -104,7 +104,7 @@ final class JGroups
 
   void disconnect() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "disconnect()");
+      logmon.log(BasicLevel.DEBUG, "disconnect()");//NTA tmp
     if (channel != null) {
       channel.disconnect();
       channel = null;

@@ -29,10 +29,6 @@ import fr.dyade.aaa.util.Strings;
 
 public class JndiScriptReplyNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private JndiReply[] replies;
 
   public JndiScriptReplyNot(JndiReply[] replies) {

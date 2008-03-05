@@ -29,11 +29,6 @@ public class StoppedQueueException extends RuntimeException
 {
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a new <code>StoppedQueueException</code> with
    * no detail message.
    */

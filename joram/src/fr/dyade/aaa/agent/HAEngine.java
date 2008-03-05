@@ -42,7 +42,7 @@ final class HAEngine extends Engine {
 
   /** JGroups component */
   private JGroups jgroups = null;
-  
+
   private static long DEFAULT_HA_TIMEOUT = 10000;
   private static String HA_TIMEOUT_PROPERTY = "fr.dyade.aaa.agent.HAEngine.HA_TIMEOUT";
 
@@ -143,7 +143,7 @@ final class HAEngine extends Engine {
 
     if (msg != null)
       super.commit();
-    
+
     if (needToSync && (qin.size() == 0)) {
       // Get state server
       getState();
@@ -183,7 +183,7 @@ final class HAEngine extends Engine {
                  " receiveFromJGroups qin.size() = " + qin.size() +
                  ", qinFromExt.size() = " + qinFromExt.size());
 
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     qinFromExt.addElement(msg);
     postFromExt();
     AgentServer.getTransaction().release();
@@ -314,10 +314,9 @@ final class HAEngine extends Engine {
     } catch (IOException exc) {}
     return obj;
   }
-
+  
   protected void onTimeOut() throws Exception {
     if (! requestor.isEmpty())
       commit();
   }
-  
 }

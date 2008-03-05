@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,28 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package org.objectweb.joram.shared.excepts;
-
-import org.objectweb.joram.shared.client.MomExceptionReply;
 
 /**
  * A <code>SelectorException</code> is thrown when an error occurs while
  * parsing a selector expression.
  */
-public class SelectorException extends MomException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+public class SelectorException extends MomException
+{
   /**
    * Constructs a <code>SelectorException</code> instance.
    */
-  public SelectorException(String info) {
+  public SelectorException(String info)
+  {
     super(info);
-    type = MomExceptionReply.SelectorException;
   }
 }

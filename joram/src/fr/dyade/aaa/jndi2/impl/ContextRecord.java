@@ -24,10 +24,6 @@ package fr.dyade.aaa.jndi2.impl;
 
 public class ContextRecord extends Record {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private NamingContextId id;
 
   public ContextRecord(String name,

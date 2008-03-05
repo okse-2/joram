@@ -87,8 +87,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_SOAP = "soap";
   /** Syntaxic name for jndi element */
   static final String ELT_JNDI = "jndi";
-  /** Syntaxic name for Server element */
-  static final String ELT_SERVER = "Server";
   /** Syntaxic name for User element */
   static final String ELT_USER = "User";
   /** Syntaxic name for Destination element */
@@ -464,32 +462,6 @@ public class JoramSaxWrapper extends DefaultHandler {
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
-      } else if (rawName.equals(ELT_SERVER)) {
-        try {
-          try {
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId =  AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-          dmq = atts.getValue(ATT_DMQ);
-          value = atts.getValue(ATT_THRESHOLD);
-          try {
-            if (value == null)
-              threshold = -1;
-            else
-              threshold = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for threshold: " +
-                                atts.getValue(ATT_THRESHOLD));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
       } else if (rawName.equals(ELT_USER)) {
         try {
           try {
@@ -736,21 +708,6 @@ public class JoramSaxWrapper extends DefaultHandler {
           Object[] objParams = {host, new Integer(port), new Integer(timeout)};
           obj = methode.invoke(null, objParams);
         } else if (rawName.equals(ELT_JNDI)) {
-        } else if (rawName.equals(ELT_SERVER)) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       "Server.configure(" + serverId + ")");
-          if (threshold > 0)
-            AdminModule.setDefaultThreshold(serverId, threshold);
-
-          if (isSet(dmq)) {
-            if (dmqs.containsKey(dmq)) {
-              AdminModule.setDefaultDMQ(serverId, (DeadMQueue) dmqs.get(dmq));
-            } else {
-              logger.log(BasicLevel.ERROR,
-                         "User.create(): Unknown DMQ: " + dmq);
-            }
-          }
         } else if (rawName.equals(ELT_USER)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "User.create(" +
@@ -1000,8 +957,14 @@ public class JoramSaxWrapper extends DefaultHandler {
       } catch (SAXException exc) {
         throw exc;
       } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR,"",exc);
-        throw new SAXException(exc.getMessage(), exc);
+        Exception cause = (Exception) exc.getCause();
+        if (cause != null) {
+          logger.log(BasicLevel.ERROR,"",cause);
+          throw new SAXException(cause.getMessage(), cause);
+        } else {
+          logger.log(BasicLevel.ERROR,"",exc);
+          throw new SAXException(exc.getMessage(), exc);
+        }
       }
     }
   }
@@ -1064,8 +1027,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           buff = new StringBuffer(SCN);
           st = new StringTokenizer(name.substring(SCN.length(), name.length()), "/");
         } else if (name.startsWith(HASCN)) {
-          buff = new StringBuffer(HASCN);
-          st = new StringTokenizer(name.substring(HASCN.length(), name.length()), "/");
+              buff = new StringBuffer(HASCN);
+              st = new StringTokenizer(name.substring(HASCN.length(), name.length()), "/");
         } else {
           buff = new StringBuffer();
           st = new StringTokenizer(name, "/");

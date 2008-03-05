@@ -25,9 +25,13 @@
  */
 package org.objectweb.joram.client.jms;
 
+import javax.naming.*;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.XAConnectionFactory</code> interface.
@@ -35,7 +39,6 @@ import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 public abstract class XAConnectionFactory
                 extends AbstractConnectionFactory
                 implements javax.jms.XAConnectionFactory {
-  
   /**
    * Constructs an <code>XAConnectionFactory</code> dedicated to a given
    * server.

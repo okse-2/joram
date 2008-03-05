@@ -39,26 +39,24 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * A <code>TcpConnectionFactory</code> instance is a factory of
  * TCP connections.
  */
-public class TcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+public class TcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory
+{
   /**
    * Constructs a <code>TcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TcpConnectionFactory(String host, int port) {
+  public TcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 
   /**
    * Constructs an empty <code>TcpConnectionFactory</code> instance.
    */
-  public TcpConnectionFactory() {}
+  public TcpConnectionFactory()
+  {}
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -69,10 +67,10 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
   public javax.jms.Connection createConnection(String name, String password)
     throws javax.jms.JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnectionFactory.createConnection(" + 
-                                 name + ',' + password + ") reliableClass=" + reliableClass);
-
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "TcpConnectionFactory.createConnection(" + 
+        name + ',' + password + ") reliableClass=" + reliableClass);
     return new Connection(params, 
                           new TcpConnection(params, 
                                             name, 

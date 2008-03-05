@@ -26,11 +26,6 @@ import javax.naming.*;
 
 public class CreateSubcontextEvent extends UpdateEvent {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private CompositeName path;
  
   private NamingContextId contextId;

@@ -25,10 +25,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public class ExceptionCmd extends Exception {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Throwable throwable;
 
   public ExceptionCmd() {

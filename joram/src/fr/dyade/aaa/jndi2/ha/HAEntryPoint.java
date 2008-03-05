@@ -29,10 +29,6 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class HAEntryPoint implements EntryPoint {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private HARequestManager manager;
 
   public void setHARequestManager(HARequestManager manager) {

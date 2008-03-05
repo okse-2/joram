@@ -23,11 +23,6 @@ package fr.dyade.aaa.agent.conf;
  */
 public class UnknownServiceException extends Exception {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    *  Constructs a new <code>UnknownServiceException</code> with no
    * detail message.
    */

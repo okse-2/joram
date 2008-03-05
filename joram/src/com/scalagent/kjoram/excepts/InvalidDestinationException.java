@@ -27,11 +27,6 @@ package com.scalagent.kjoram.excepts;
 public class InvalidDestinationException extends JMSException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>InvalidDestinationException</code> instance.
    */
   public InvalidDestinationException(String info)

@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package org.objectweb.joram.client.jms.tcp;
 
@@ -30,34 +30,26 @@ import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
 
 /**
  * An <code>XAQueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for XA PTP communication.
  */
 public class XAQueueTcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an <code>XAQueueTcpConnectionFactory</code> instance.
-   * This empty constructor is needed for JNDI.
-   */
-  public XAQueueTcpConnectionFactory() {
-    super();
-  }
-  
+             extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
+{
   /**
    * Constructs an <code>XAQueueTcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XAQueueTcpConnectionFactory(String host, int port) {
+  public XAQueueTcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 

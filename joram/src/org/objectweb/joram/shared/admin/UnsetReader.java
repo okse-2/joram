@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,17 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-
 /**
  * An <code>UnsetReader</code> instance requests to unset a given user as
  * a reader on a given destination.
  */
 public class UnsetReader extends SetRight {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 6227293661317828752L;
 
   /**
    * Constructs an <code>UnsetReader</code> instance.
@@ -43,19 +38,5 @@ public class UnsetReader extends SetRight {
    */
   public UnsetReader(String userProxId, String destId) {
     super(userProxId, destId);
-  }
-  
-  public UnsetReader() { }
-  
-  protected int getClassId() {
-    return UNSET_READER;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
   }
 }

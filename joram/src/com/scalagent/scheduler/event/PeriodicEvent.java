@@ -39,11 +39,6 @@ import fr.dyade.aaa.util.Strings;
  */
 public class PeriodicEvent implements DiaryEvent {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Provides an internal computation facility to others, unrelated to
    * any specific <code>PeriodicEvent</code> object.
    *

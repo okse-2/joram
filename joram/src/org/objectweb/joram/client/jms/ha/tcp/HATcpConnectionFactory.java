@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -36,20 +35,12 @@ public class HATcpConnectionFactory
   extends org.objectweb.joram.client.jms.ConnectionFactory {
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * Constructs an <code>HATcpConnectionFactory</code> instance.
    */
   public HATcpConnectionFactory(String url) {
     super(url);
   }
 
-  /**
-   * Constructs an empty <code>HATcpConnectionFactory</code>.
-   * Needed by ObjectFactory.
-   */
   public HATcpConnectionFactory() {
 	super();  
   }
