@@ -85,7 +85,7 @@ public class JndiTest1 extends TestCase {
 	    ctx0.bind("/A/C/G","G");
 	    ctx0.bind("/A/C/F/I","I");
 	    
-	    Thread.sleep(6000);
+	    Thread.sleep(10000);
 	    
 	    ctx1.bind("/H","H");
 	    ctx1.createSubcontext("/A/C/F/L");
@@ -94,7 +94,7 @@ public class JndiTest1 extends TestCase {
 	    ctx1.bind("/A/C/N","N");
 	    ctx1.bind("/A/C/F/L/O","O");
 	    
-	    Thread.sleep(6000);
+	    Thread.sleep(10000);
 	}catch(Exception exc){
 	    excp=exc;
 	}
