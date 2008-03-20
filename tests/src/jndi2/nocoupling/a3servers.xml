@@ -3,7 +3,7 @@
 
 <config>
   <property name="fr.dyade.aaa.jndi2.impl.LooseCoupling" value="true" />
-  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+  <domain name="D0" network="fr.dyade.aaa.agent.PoolNetwork"/>
   <server id="0" name="s0" hostname="localhost">
     <network domain="D0" port="27300"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
@@ -22,6 +22,6 @@
   <server id="3" name="s3" hostname="localhost">
     <network domain="D0" port="27303"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8093"/>
-    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16403 0 1"/>
+    <service class="fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" args="16403 0"/>
   </server>
 </config>
