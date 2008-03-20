@@ -30,6 +30,7 @@
     <ant dir="." antfile="jndi.xml" target="test.dtb3" />
     <ant dir="." antfile="jndi.xml" target="test.dtb4" />
     <ant dir="." antfile="jndi.xml" target="test.dtb5" />
+    <ant dir="." antfile="jndi.xml" target="test.dtb6" />
     <ant dir="." antfile="jndi.xml" target="test.dtb.crash" />
   </target>
 
@@ -37,6 +38,8 @@
     <ant dir="." antfile="jndi.xml" target="nocoupling.test1" />
     <ant dir="." antfile="jndi.xml" target="nocoupling.test2" />
     <ant dir="." antfile="jndi.xml" target="nocoupling.test3" />
+    <ant dir="." antfile="jndi.xml" target="nocoupling.test4" />
+    <ant dir="." antfile="jndi.xml" target="nocoupling.test5" />
   </target>
 
 
@@ -124,6 +127,14 @@
     </antcall>
   </target>
 
+  <target name="test.dtb6" depends="compile" description=" --> Test suggested by CS use-case">
+    <antcall target="init.test.jndi2.distributed" inheritAll="true" />
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0" />
+      <param name="className" value="jndi2.distributed.JndiTest6" />
+    </antcall>
+  </target>
+
   <target name="test.dtb.crash" depends="compile" description=" --> Check that the jndi still working after the recovery">
     <antcall target="init.test.jndi2.distributed" inheritAll="true" />
     <antcall target="client.start" inheritAll="true">
@@ -172,6 +183,14 @@
     <antcall target="client.start" inheritAll="true">
       <param name="x" value="0"/>
       <param name="className" value="jndi2.nocoupling.JndiTest4"/>
+    </antcall>
+  </target>
+
+  <target name="nocoupling.test5" depends="compile" description=" --> test jndi config when start a slave server without master">
+    <antcall target="init.test.nocoupling" inheritAll="true" />
+    <antcall target="client.start" inheritAll="true">
+      <param name="x" value="0"/>
+      <param name="className" value="jndi2.nocoupling.JndiTest5"/>
     </antcall>
   </target>
 
