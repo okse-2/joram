@@ -34,6 +34,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.jndi2.impl.BindEvent;
+import fr.dyade.aaa.jndi2.impl.ChangeOwnerEvent;
 import fr.dyade.aaa.jndi2.impl.CreateSubcontextEvent;
 import fr.dyade.aaa.jndi2.impl.DestroySubcontextEvent;
 import fr.dyade.aaa.jndi2.impl.MissingContextException;
@@ -203,8 +204,8 @@ public class ReplicationManager
         onUpdateEvent(from, (CreateSubcontextEvent)updateEvent);
       } else if (updateEvent instanceof DestroySubcontextEvent) {
         onUpdateEvent(from, (DestroySubcontextEvent)updateEvent);
-//       } else if (updateEvent instanceof ChangeOwnerEvent) {
-//         onUpdateEvent(from, (ChangeOwnerEvent)updateEvent);
+       } else if (updateEvent instanceof ChangeOwnerEvent) {
+         onUpdateEvent(from, (ChangeOwnerEvent)updateEvent);
       }
     } catch (NotOwnerException exc) {       
       // This may happen after a change owner event
@@ -323,27 +324,35 @@ public class ReplicationManager
       }
   }
 
-  // private void onUpdateEvent(AgentId from, ChangeOwnerEvent evt) 
-//     throws NamingException {
-//     NamingContextInfo[] contexts = evt.getNamingContexts();
-//     for (int i = 0; i < contexts.length; i++) {
-//       NamingContext nc = getServerImpl().getNamingContext(
-//         contexts[i].getNamingContext().getId());
-//       if (nc == null) {
-//         // The InitJndiServerNot sent by 
-//         // the server that created this context may not
-//         // have been received.
-//         getServerImpl().addNamingContext(contexts[i]);
+   private void onUpdateEvent(AgentId from, ChangeOwnerEvent evt) 
+     throws NamingException {
+     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+       Trace.logger.log(BasicLevel.DEBUG, 
+                        "ReplicationManager.onUpdateEvent(" +
+                        from + ',' + evt + ')');
+     
+     NamingContextInfo[] contexts = evt.getNamingContexts();
+     for (int i = 0; i < contexts.length; i++) {
+       NamingContext nc = getServerImpl().getNamingContext(
+         contexts[i].getNamingContext().getId());
+       
+       if (nc == null) {
+         // The InitJndiServerNot sent by 
+         // the server that created this context may not
+         // have been received.
+         getServerImpl().addNamingContext(contexts[i]);
+         // TODO : NTA uncomment and implement retryRequestsWaitingForMissingContext
 //         retryRequestsWaitingForMissingContext(
 //           contexts[i].getNamingContext().getId());
-//       } else {
-//         getServerImpl().resetNamingContext(
-//           contexts[i].getNamingContext());
-//         // DF: must retry the sync and write
-//         // requests to the new owner.
-//       }
-//     }
-//   }  
+       } else {
+         nc.setOwnerId(contexts[i].getNamingContext().getOwnerId());
+         getServerImpl().resetNamingContext(
+           contexts[i].getNamingContext());
+         // DF: must retry the sync and write
+         // requests to the new owner.
+       }
+     }
+   }  
 
   /**
    * Overrides the <code>JndiServer</code> behavior.

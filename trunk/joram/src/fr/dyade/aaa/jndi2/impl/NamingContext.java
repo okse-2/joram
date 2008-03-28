@@ -23,15 +23,31 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import fr.dyade.aaa.util.*;
-import java.util.*;
-import java.io.*;
-import javax.naming.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.naming.Binding;
+import javax.naming.CompositeName;
+import javax.naming.Context;
+import javax.naming.InvalidNameException;
+import javax.naming.NameClassPair;
+import javax.naming.NamingException;
+import javax.naming.Reference;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-public class NamingContext implements Serializable, Cloneable {
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
+import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import fr.dyade.aaa.jndi2.msg.UnbindRequest;
+import fr.dyade.aaa.jndi2.server.JndiScriptRequestNot;
+import fr.dyade.aaa.util.Strings;
+
+public class NamingContext implements NamingContextMBean, Serializable, Cloneable {
 
   /**
    * 
@@ -43,12 +59,16 @@ public class NamingContext implements Serializable, Cloneable {
   private Object ownerId;
 
   private Vector records;
+  
+  private CompositeName contextName;
 
   public NamingContext(NamingContextId id,
-                       Object ownerId) {
+                       Object ownerId,
+                       CompositeName contextName) {
     this.id = id;
     this.ownerId = ownerId;
     records = new Vector();
+    this.contextName = contextName;
   }
 
   public final NamingContextId getId() {
@@ -170,9 +190,76 @@ public class NamingContext implements Serializable, Cloneable {
     buf.append('(' + super.toString());
     buf.append(",id=" + id);
     buf.append(",ownerId=" + ownerId);
+    buf.append(",name=" + contextName);
     buf.append(",records=");
     Strings.toString(buf, records);
     buf.append(')');
     return buf.toString();
   }
+
+  public CompositeName getContextName() {
+    return contextName;  
+  }
+  
+  // ======== MBean implementation ===========
+  public String[] getNamingContext() {
+    String[] array = new String[records.size()];
+     for (int i=0; i < records.size(); i++) {
+      Record r = (Record)records.elementAt(i);
+      if (r instanceof ObjectRecord) 
+        array[i] = ((String)r.getName());
+      else
+        array[i] = "(javax.naming.Context)- " + ((String)r.getName());
+    }
+    return array;    
+  }
+  
+  public String getStrOwnerId() {
+    return ownerId.toString();
+  }
+
+  public void setStrOwnerId(String strOwnerId) {
+    if (!strOwnerId.equals(ownerId.toString()))
+      sendTo(new ChangeOwnerRequest((CompositeName) contextName.clone(), strOwnerId));
+  }
+
+  public void createSubcontext(String ctxName) throws NamingException {
+    CompositeName cn = (CompositeName) contextName.clone();
+    if (contextName != null)
+      cn.add(ctxName);
+    else
+      cn = getCompositeName(ctxName);
+    sendTo(new CreateSubcontextRequest(cn));
+  }
+
+  public void destroySubcontext() throws NamingException {
+    sendTo(new DestroySubcontextRequest(contextName));
+  }
+
+  public String lookup(String name) throws NamingException {
+    Record rec = getRecord(name);
+    if (rec != null)
+      return rec.toString();
+    return null;
+  }
+
+  public void unbind(String name) throws NamingException {
+    CompositeName cn = (CompositeName) contextName.clone();
+    if (contextName != null)
+      cn.add(name);
+    else
+      cn = getCompositeName(name);
+    sendTo(new UnbindRequest(cn));
+  }
+  
+  private CompositeName getCompositeName(String path) throws InvalidNameException {
+    if (path.startsWith("/"))
+      return new CompositeName(path.substring(1, path.length()));
+    return new CompositeName(path);
+  }
+  
+  private void sendTo(JndiRequest request) {
+    Channel.sendTo((AgentId)ownerId, new JndiScriptRequestNot(new JndiRequest[]{request}));
+  }
+  // ======== end MBean implementation ===========
 }
