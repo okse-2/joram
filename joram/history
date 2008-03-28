@@ -1,4 +1,9 @@
 +==============================================================================
+| 2008/03/28 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Add JMX MBean for JNDI.
+2. Finish implementation of changeOwner (JMX used).
++==============================================================================
 | 2008/03/03 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 HA: In collocated mode, if haURL is set, the adapter start 
