@@ -551,6 +551,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       try {
 	while (running) {
           canStop = true;
+
+          // AF: Il faudrait faire une passe ici sur la queue afin d'eliminer
+          // les messages expires. lors d'une panne, si le premier message
+          // n'expire pas, les suivants ne sont pas supprimés!
+          // AF: Voir le code correspondant dans la base CVS d'aurore.
 	  try {
 	    try {
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -569,10 +574,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendRequest: " + msgout + ", ack=" + ack);
-
-              if ((msgout != null) && (msgout.not.expiration != 0L))
-                logmon.log(BasicLevel.FATAL,
-                           getName() + ": AF YYY " + msgout.not);
 
               long currentTimeMillis = System.currentTimeMillis();
               do {
