@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,16 +22,41 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.util.*;
-import java.io.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.impl.*; 
-import fr.dyade.aaa.jndi2.msg.*;
+import javax.naming.Binding;
+import javax.naming.NameClassPair;
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.jndi2.impl.MissingContextException;
+import fr.dyade.aaa.jndi2.impl.MissingRecordException;
+import fr.dyade.aaa.jndi2.impl.NotOwnerException;
+import fr.dyade.aaa.jndi2.impl.ObjectRecord;
+import fr.dyade.aaa.jndi2.impl.Record;
+import fr.dyade.aaa.jndi2.impl.ServerImpl;
+import fr.dyade.aaa.jndi2.msg.BindRequest;
+import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
+import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.JndiAdminRequest;
+import fr.dyade.aaa.jndi2.msg.JndiError;
+import fr.dyade.aaa.jndi2.msg.JndiReadRequest;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import fr.dyade.aaa.jndi2.msg.ListBindingsReply;
+import fr.dyade.aaa.jndi2.msg.ListBindingsRequest;
+import fr.dyade.aaa.jndi2.msg.ListReply;
+import fr.dyade.aaa.jndi2.msg.ListRequest;
+import fr.dyade.aaa.jndi2.msg.LookupReply;
+import fr.dyade.aaa.jndi2.msg.LookupRequest;
+import fr.dyade.aaa.jndi2.msg.UnbindRequest;
 
 public class RequestManager 
     implements LifeCycleListener, java.io.Serializable {
@@ -240,9 +265,9 @@ public class RequestManager
 
   protected void changeOwner(ChangeOwnerRequest request)
     throws NamingException {
-    AgentId serverId;
+    AgentId newOwnerId;
     try {
-      serverId =
+      newOwnerId =
         AgentId.fromString(request.getOwnerId());
     } catch (Exception exc) {
       NamingException ne = 
@@ -250,9 +275,9 @@ public class RequestManager
       ne.setRootCause(exc);
       throw ne;
     }
-    if (getId().equals(serverId))
+    if (getId().equals(newOwnerId))
       throw new NamingException("Server already owner");
-    impl.changeOwner(serverId);
+    impl.changeOwner(request.getName(), newOwnerId);
   }
 
   /**

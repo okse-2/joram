@@ -41,7 +41,7 @@ public class SCNamingAdmin {
   public void changeOwner(String ownerId) 
     throws NamingException {
     JndiReply reply = connection.invoke(
-      new ChangeOwnerRequest(ownerId));
+      new ChangeOwnerRequest(null, ownerId));
     if (reply instanceof JndiError) {
       NamingException exc = 
         ((JndiError)reply).getException();

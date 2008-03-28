@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,14 +23,22 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.*;
-import java.util.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import fr.dyade.aaa.util.*;
+import javax.naming.Binding;
+import javax.naming.CompositeName;
+import javax.naming.ContextNotEmptyException;
+import javax.naming.NameAlreadyBoundException;
+import javax.naming.NameClassPair;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
+import javax.naming.NotContextException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Transaction;
 
 public class ServerImpl {
 
@@ -93,15 +101,15 @@ public class ServerImpl {
     // Creates the root naming context if this
     // server owns it.
     if (rootOwnerId.equals(serverId) || looseCoupling ) {
-	if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-	    Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.initialize : create root NamingContext" );
-	NamingContext rootNc = 
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+        Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.initialize : create root NamingContext" );
+      NamingContext rootNc = 
         contextManager.getRootNamingContext();
       if (rootNc == null) {
-        contextManager.newNamingContext(
-          serverId, 
-          null, 
-          new CompositeName());
+        rootNc = contextManager.newNamingContext(
+            serverId, 
+            null, 
+            new CompositeName());
       }
     }
   }
@@ -599,15 +607,15 @@ public class ServerImpl {
   }
 
 
-  public void changeOwner(Object formerOwnerId)
+  public void changeOwner(CompositeName name, Object newOwnerId)
     throws NamingException {
     NamingContextInfo[] contexts = 
       contextManager.changeOwner(
-        formerOwnerId, serverId);    
+          name, serverId, newOwnerId);  
     if (updateListener != null) {
       updateListener.onUpdate(
         new ChangeOwnerEvent(
-          formerOwnerId,
+          newOwnerId,
           contexts));
     }
   }

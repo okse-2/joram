@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,18 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.*;
-import java.util.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
-import fr.dyade.aaa.util.*;
+import javax.naming.CompositeName;
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Transaction;
 
 public class StorageManager {
 
@@ -84,8 +88,7 @@ public class StorageManager {
       ncid = newNamingContextId();
     }
     NamingContext nc = new NamingContext(
-      ncid,
-      ownerId);
+      ncid, ownerId, name);
     addNamingContext(
       nc, 
       name);
