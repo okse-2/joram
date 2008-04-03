@@ -21,6 +21,7 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 
 import fr.dyade.aaa.util.Pool;
@@ -215,6 +216,29 @@ final class Message implements Serializable {
 
     return idx;
   }
+  
+  void readFromStream(InputStream is) throws IOException {
+    // Reads sender's AgentId
+    from = new AgentId(
+        (short) (((is.read() & 0xFF) << 8) + (is.read() & 0xFF)),
+        (short) (((is.read() & 0xFF) << 8) + (is.read() & 0xFF)),
+        ((is.read() & 0xFF) << 24) + ((is.read() & 0xFF) << 16) +
+        ((is.read() & 0xFF) << 8) + ((is.read() & 0xFF) << 0));
+    // Reads adressee's AgentId
+    to = new AgentId(
+        (short) (((is.read() & 0xFF) << 8) + (is.read() & 0xFF)),
+        (short) (((is.read() & 0xFF) << 8) + (is.read() & 0xFF)),
+        ((is.read() & 0xFF) << 24) + ((is.read() & 0xFF) << 16) +
+        ((is.read() & 0xFF) << 8) + ((is.read() & 0xFF) << 0));
+    // Reads source server id of message
+    source = (short) (((is.read() & 0xFF) << 8) + ((is.read() & 0xFF) << 0));
+    // Reads destination server id of message
+    dest = (short) (((is.read() & 0xFF) << 8) + ((is.read() & 0xFF) << 0));
+    // Reads stamp of message
+    stamp = ((is.read() & 0xFF) << 24) + ((is.read() & 0xFF) << 16) + ((is.read() & 0xFF) << 8)
+        + ((is.read() & 0xFF) << 0);
+
+  }
 
   transient private String stringId = null;
 
@@ -334,8 +358,8 @@ final class Message implements Serializable {
   }
   
   private void set(AgentId from, AgentId to, Notification not) {
-    this.from = (AgentId) from;
-    this.to = (AgentId) to;
+    this.from = from;
+    this.to = to;
     if (not != null) {
       this.not = (Notification) not.clone();
       this.not.detached = not.detached;
