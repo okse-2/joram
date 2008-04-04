@@ -23,12 +23,15 @@
 
 package a3.recovery;
 
-import java.util.*;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import joram.framework.TestCase;
-
-
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
 
 public class test2 extends TestCase {
   public test2() {
@@ -45,7 +48,7 @@ public class test2 extends TestCase {
     startAgentServer(router);
 
     int bounce = Integer.getInteger("bounce", 600).intValue();
-    //  timeout = 200L * bounce;
+    timeout = 200L * bounce;
     timeout = Long.getLong("timeout", timeout).longValue();
     
     Timer timer = new Timer(true);
@@ -123,7 +126,7 @@ public class test2 extends TestCase {
 	    TestCase.crashAgentServer(test2.router);
 	  }
 	  // Wait in order to prevent WAIT status on TCP connection
-	  Thread.currentThread().sleep(1000L);
+	  Thread.sleep(1000L);
 	  // Start server#2
 	  TestCase.startAgentServer(test2.router);
 	  nbStopTask++;
