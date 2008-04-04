@@ -49,17 +49,19 @@ import fr.dyade.aaa.util.Daemon;
 
 public class UDPNetwork extends Network {
 
+  /** The maximum number of bytes of one datagram */
   final static int DATAGRAM_MAX_SIZE = 8000; // bytes
 
   /** Input component */
-  NetServerIn netServerIn = null;
+  private NetServerIn netServerIn = null;
 
   /** Output component */
-  NetServerOut netServerOut = null;
+  private NetServerOut netServerOut = null;
 
-  Hashtable serversInfo = new Hashtable();
-  Hashtable messageLastPacket = new Hashtable();
+  /** An hashtable linking a socket address to some information about datagrams sent/received/acked */
+  private Hashtable serversInfo = new Hashtable();
 
+  /** A socket used to send and receive datagrams */
   private DatagramSocket socket;
 
   public boolean isRunning() {
@@ -102,17 +104,48 @@ public class UDPNetwork extends Network {
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
+  /**
+   * Structure storing details about a particular remote network.
+   */
   final class ServerInfo {
-    int nbPacketsSent = 1;
-    int nbPacketsReceived;
-    int nbPacketsAck;
+    
+    /** Identifier for the next packet to be send. Number 1 is for handshaking. */
+    int nextPacketNumber = 2;
+    
+    /** Identifier for the last packet received. */
+    int lastPacketReceived = 1;
+    
+    /** Identifier for the last packet received. */
+    int lastPacketAck = 0;
+    
+    /** Object used to deserialize messages sent to this server. */
     MessageInputStream messageInputStream;
+    
+    /** A FIFO list to store sent messages waiting to be acked. */
     List messagesToAck = Collections.synchronizedList(new LinkedList());
+    
+    /** Tells if the server responded to the handshake message. */
+    boolean handshaken = false; 
   }
 
+  
+  /**
+   * A particular structure used to remember:
+   * <ul>
+   * <li> the sent message.</li>
+   * <li> the index of the first packet containing the message.</li>
+   * <li> the number of packets used to send the message.</li>
+   * </ul>
+   */
   final class MessageAndIndex {
+    
+    /** The sent message. */
     Message msg;
+    
+    /** The index of the first packet containing the message. */
     int index;
+    
+    /** The number of packets used to send the message. */
     int size;
 
     public MessageAndIndex(Message msg, int index, int size) {
@@ -151,8 +184,8 @@ public class UDPNetwork extends Network {
       try {
         while (running) {
           try {
+            
             canStop = true;
-
             try {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting messages");
@@ -165,6 +198,7 @@ public class UDPNetwork extends Network {
               continue;
             }
             canStop = false;
+            
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
               logmon.log(BasicLevel.DEBUG, this.getName() + ", received message from: " + " "
                   + packet.getAddress() + ":" + packet.getPort());
@@ -180,8 +214,33 @@ public class UDPNetwork extends Network {
             int ackUpTo = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) + ((buf[2] & 0xFF) << 8)
                 + ((buf[3] & 0xFF) << 0);
 
+            // Reads packet number
+            int packetNumber = ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) + ((buf[6] & 0xFF) << 8)
+                + ((buf[7] & 0xFF) << 0);
+
+            // Handshake response received
+            if (ackUpTo == 1) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, "Handshake response received " + ackUpTo);
+              }
+              cleanServerInfo(srvInfo, packetNumber);
+              continue;
+            }
+
+            // Handshake received
+            if (packetNumber == 1) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, "Handshake received, send handshake response ");
+              }
+              cleanServerInfo(srvInfo, ackUpTo);
+              // Send handshake response
+              netServerOut.messageOutputStream.writeAck(1, packet.getSocketAddress());
+              continue;
+            }
+                      
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "MessageInputStream, ack up to " + ackUpTo);
+              logmon.log(BasicLevel.DEBUG, getName() + ", packet received " + packetNumber
+                  + ", ack up to " + ackUpTo);
             }
 
             boolean isNack = false;
@@ -190,23 +249,23 @@ public class UDPNetwork extends Network {
               isNack = true;
             }
 
+            // Suppress the acked notifications from waiting list and deletes it.
             AgentServer.getTransaction().begin();
             while (!srvInfo.messagesToAck.isEmpty()
                 && ((MessageAndIndex) srvInfo.messagesToAck.get(0)).index
                     + ((MessageAndIndex) srvInfo.messagesToAck.get(0)).size - 1 <= ackUpTo) {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, "MessageInputStream, clean message "
+                logmon.log(BasicLevel.DEBUG, getName() + ", clean message "
                     + ((MessageAndIndex) srvInfo.messagesToAck.get(0)).msg);
               }
               MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.remove(0);
 
-              //  Suppress the processed notification from message queue,
-              // and deletes it.
               msgi.msg.delete();
               msgi.msg.free();
             }
             AgentServer.getTransaction().commit(true);
 
+            // If nack, unblock netServerOut to launch watchdog
             if (isNack) {
               synchronized (qout) {
                 qout.notify();
@@ -215,32 +274,25 @@ public class UDPNetwork extends Network {
 
             // Ack was not alone in the packet
             if (packet.getLength() > Message.LENGTH) {
-              // Reads packet number
-              int packetNumber = ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) + ((buf[6] & 0xFF) << 8)
-                  + ((buf[7] & 0xFF) << 0);
 
-              if (packetNumber != srvInfo.nbPacketsReceived + 1) {
-                if (packetNumber <= srvInfo.nbPacketsReceived) {
+              if (packetNumber != srvInfo.lastPacketReceived + 1) {
+                if (packetNumber <= srvInfo.lastPacketReceived) {
                   if (logmon.isLoggable(BasicLevel.INFO)) {
-                    logmon.log(BasicLevel.DEBUG, "MessageInputStream, Already received packet "
+                    logmon.log(BasicLevel.DEBUG, getName() + ", Already received packet "
                         + packetNumber + "-> Ignored");
                   }
                 } else {
                   if (logmon.isLoggable(BasicLevel.INFO)) {
-                    logmon.log(BasicLevel.DEBUG, "MessageInputStream, Missing packet -> Send nack "
-                        + (srvInfo.nbPacketsReceived + 1));
+                    logmon.log(BasicLevel.DEBUG, getName() + ", Missing packet -> Send nack "
+                        + (srvInfo.lastPacketReceived + 1));
                   }
-                  srvInfo.nbPacketsAck = -(srvInfo.nbPacketsReceived + 1);
-                  netServerOut.messageOutputStream.writeAck(srvInfo.nbPacketsAck, packet.getSocketAddress());
+                  srvInfo.lastPacketAck = -(srvInfo.lastPacketReceived + 1);
+                  netServerOut.messageOutputStream.writeAck(srvInfo.lastPacketAck, packet.getSocketAddress());
                 }
 
               } else {
 
-                srvInfo.nbPacketsReceived++;
-
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, "MessageInputStream, packet received " + packetNumber);
-                }
+                srvInfo.lastPacketReceived++;
 
                 if (srvInfo.messageInputStream == null || !srvInfo.messageInputStream.isRunning()) {
                   srvInfo.messageInputStream = new MessageInputStream(srvInfo, logmon);
@@ -257,6 +309,81 @@ public class UDPNetwork extends Network {
       } finally {
         finish();
       }
+    }
+
+    /**
+     * Cleans a server information about packets. Restarts datagram packets numbering from
+     * beginning. Cleans expired messages.
+     * 
+     * @param srvInfo
+     *            the server information.
+     * @param bootstamp
+     *            the boot timestamp for the given server.
+     * @throws IOException
+     * @throws Exception
+     */
+    private void cleanServerInfo(ServerInfo srvInfo, int bootstamp) throws IOException, Exception {
+      if (srvInfo.messageInputStream != null) {
+        srvInfo.messageInputStream.shutdown();
+      }
+      srvInfo.messageInputStream = new MessageInputStream(srvInfo, logmon);
+      srvInfo.handshaken = true;
+      srvInfo.lastPacketReceived = 1;
+      srvInfo.nextPacketNumber = 2;
+      srvInfo.lastPacketAck = 0;
+      
+      short remotesid = (short) (((buf[8] & 0xF) << 8) + ((buf[9] & 0xF) << 0));
+      
+      AgentServer.getTransaction().begin();
+      synchronized (srvInfo.messagesToAck) {
+        int diff = 0;
+        if (srvInfo.messagesToAck.size() > 0) {
+          MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.get(0);
+          diff = msgi.index - 2;
+        }
+        Iterator iterMessages = srvInfo.messagesToAck.iterator();
+        MessageAndIndex msgi = null;
+        
+        while (iterMessages.hasNext()) {
+          msgi = (MessageAndIndex) iterMessages.next();
+          
+          ExpiredNot expiredNot = null;
+          if ((msgi.msg.not.expiration > 0L)
+              && (msgi.msg.not.expiration < System.currentTimeMillis())) {
+            if (msgi.msg.not.deadNotificationAgentId != null) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
+                    + msgi.msg.from + ", " + msgi.msg.not + " to "
+                    + msgi.msg.not.deadNotificationAgentId);
+              }
+              expiredNot = new ExpiredNot(msgi.msg.not);
+              Channel.post(Message.alloc(AgentId.localId, msgi.msg.not.deadNotificationAgentId,
+                  expiredNot));
+              Channel.validate();
+            } else {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
+                    + msgi.msg.from + ", " + msgi.msg.not);
+              }
+            }
+            iterMessages.remove();
+            diff += msgi.size;
+          }
+          
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "Changed index " + msgi.index + "->" + (msgi.index - diff) + " "
+                + msgi.msg);
+          }
+          msgi.index = msgi.index - diff;
+
+        }
+        if (msgi != null) {
+          srvInfo.nextPacketNumber = msgi.index + msgi.size;
+        }
+      }
+      
+      testBootTS(remotesid, bootstamp);
+      AgentServer.getTransaction().commit(true);
     }
   }
 
@@ -318,7 +445,7 @@ public class UDPNetwork extends Network {
               server = AgentServer.getServerDesc(msgto);
 
               if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to send message -> " + msg + "/"
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to send message:" + msg + "/"
                     + msgto);
               }
 
@@ -341,12 +468,10 @@ public class UDPNetwork extends Network {
               }
             } catch (UnknownServerException exc) {
               this.logmon.log(BasicLevel.ERROR, this.getName() + ", can't send message: " + msg, exc);
-              // Remove the message (see below), may be we have to post an
-              // error notification to sender.
+              // Remove the message (see below), may be we have to post an error notification to sender.
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.ERROR, this.getName() + ", can't send message: " + msg, exc);
-              // Remove the message (see below), may be we have to post an
-              // error notification to sender.
+              // Remove the message (see below), may be we have to post an error notification to sender.
             }
 
             AgentServer.getTransaction().begin();
@@ -372,33 +497,54 @@ public class UDPNetwork extends Network {
     private long last = 0L;
 
     public void watchdog(boolean force) {
+      
       long currentTimeMillis = System.currentTimeMillis();
-      if (currentTimeMillis < (last + WDActivationPeriod) && !force)
+      if (currentTimeMillis < (last + WDActivationPeriod) && !force) {
         return;
+      }
       last = currentTimeMillis;
+      
       Enumeration enuAddr = serversInfo.keys();
-      long time = System.currentTimeMillis();
+      
       while (enuAddr.hasMoreElements()) {
         SocketAddress addr = (SocketAddress) enuAddr.nextElement();
         ServerInfo servInfo = (ServerInfo) serversInfo.get(addr);
         synchronized (servInfo.messagesToAck) {
-          if (servInfo.messagesToAck.isEmpty()) {
+          // If connection wasn't established, send handshake
+          if (servInfo.handshaken == false) {
             try {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", watchdog send ack.");
-              netServerOut.messageOutputStream.writeAck(servInfo.nbPacketsAck, addr);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", watchdog send handshake.");
+              }
+              netServerOut.messageOutputStream.handShake(addr);
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.ERROR, this.getName() + ", watchdog ack ", exc);
             }
             continue;
           }
+          
+          // If no more message need to be send, only send an acknowledgment
+          if (servInfo.messagesToAck.isEmpty()) {
+            try {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", watchdog send ack.");
+              }
+              netServerOut.messageOutputStream.writeAck(servInfo.lastPacketAck, addr);
+            } catch (IOException exc) {
+              this.logmon.log(BasicLevel.ERROR, this.getName() + ", watchdog ack ", exc);
+            }
+            continue;
+          }
+          
+          // Re-send the messages
           Iterator iterMessages = servInfo.messagesToAck.iterator();
           while (iterMessages.hasNext()) {
             try {
               MessageAndIndex msgi = (MessageAndIndex) iterMessages.next();
-              netServerOut.messageOutputStream.rewriteMessage(addr, msgi.msg, time, msgi.index);
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              netServerOut.messageOutputStream.rewriteMessage(addr, msgi, currentTimeMillis);
+              if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
                 this.logmon.log(BasicLevel.DEBUG, this.getName() + ", re-send message " + msgi.msg);
+              }
             } catch (IOException exc) {
               this.logmon.log(BasicLevel.ERROR, this.getName() + ", re send error ", exc);
             }
@@ -414,8 +560,11 @@ public class UDPNetwork extends Network {
   final class MessageOutputStream extends OutputStream {
 
     private ObjectOutputStream oos = null;
+    
     private byte[] buf = new byte[DATAGRAM_MAX_SIZE];
-    private byte[] ackBuf = new byte[8];
+    private byte[] ackBuf = new byte[10];
+    private byte[] handshakeBuf = new byte[10];
+    
     private int count = 0;
     private DatagramPacket packet;
     private int datagramStamp;
@@ -426,50 +575,35 @@ public class UDPNetwork extends Network {
 
     MessageOutputStream() throws IOException {
       oos = new ObjectOutputStream(this);
+      // Stamp 1 for handshaking
+      handshakeBuf[4] = 0;
+      handshakeBuf[5] = 0;
+      handshakeBuf[6] = 0;
+      handshakeBuf[7] = 1;
+      
+      handshakeBuf[8] = (byte) (sid >>> 8);
+      handshakeBuf[9] = (byte) (sid >>> 0);
     }
 
     void writeMessage(SocketAddress addr, Message msg, long currentTimeMillis) throws IOException {
-
       serverAddr = addr;
       if (serversInfo.get(serverAddr) == null) {
         serverInfo = new ServerInfo();
         serversInfo.put(serverAddr, serverInfo);
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          logmon.log(BasicLevel.DEBUG, getName() + ", starting handshake.");
+        }
+        handShake(serverAddr);
       } else {
         serverInfo = (ServerInfo) serversInfo.get(serverAddr);
       }
-      datagramStamp = serverInfo.nbPacketsSent;
+      
+      datagramStamp = serverInfo.nextPacketNumber;
       size = 0;
 
-      int idx = msg.writeToBuf(buf, 8);
-      // Writes notification attributes
-      buf[idx++] = (byte) ((msg.not.persistent ? Message.PERSISTENT : 0) | (msg.not.detachable ? Message.DETACHABLE
-          : 0));
-
-      buf[Message.LENGTH + 8] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[Message.LENGTH + 9] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[Message.LENGTH + 10] = (byte) ((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[Message.LENGTH + 11] = (byte) ((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
-
-      // Be careful, the stream header is hard-written in buf
-      count = Message.LENGTH + 12;
-
-      try {
-        if (msg.not.expiration > 0L) {
-          msg.not.expiration -= currentTimeMillis;
-        }
-        oos.writeObject(msg.not);
-        oos.flush();
-        oos.reset();
-
-        sendPacket();
-      } finally {
-        if (msg.not.expiration > 0L) {
-          msg.not.expiration += currentTimeMillis;
-        }
-        count = 0;
-      }
-      serverInfo.messagesToAck.add(new MessageAndIndex(msg, serverInfo.nbPacketsSent, size));
-      serverInfo.nbPacketsSent = datagramStamp;
+      sendMessage(msg, currentTimeMillis);
+      serverInfo.messagesToAck.add(new MessageAndIndex(msg, serverInfo.nextPacketNumber, size));
+      serverInfo.nextPacketNumber = datagramStamp;
     }
 
     void writeAck(int ackNumber, SocketAddress addr) throws IOException {
@@ -478,7 +612,26 @@ public class UDPNetwork extends Network {
       ackBuf[1] = (byte) (ackNumber >>> 16);
       ackBuf[2] = (byte) (ackNumber >>> 8);
       ackBuf[3] = (byte) (ackNumber >>> 0);
-      packet = new DatagramPacket(ackBuf, 8, addr);
+      
+      // if ack=1, it's handshake response, use packet stamp for server boot timestamp
+      if (ackNumber == 1) {
+        int boot = getBootTS();
+        ackBuf[4] = (byte) (boot >>> 24);
+        ackBuf[5] = (byte) (boot >>> 16);
+        ackBuf[6] = (byte) (boot >>> 8);
+        ackBuf[7] = (byte) (boot >>> 0);
+        ackBuf[8] = (byte) (sid >>> 8);
+        ackBuf[9] = (byte) (sid >>> 0);
+      } else {
+        // Stamp 0 for acknowledge
+        ackBuf[4] = 0;
+        ackBuf[5] = 0;
+        ackBuf[6] = 0;
+        ackBuf[7] = 0;
+        ackBuf[8] = 0;
+        ackBuf[9] = 0;
+      }
+      packet = new DatagramPacket(ackBuf, 10, addr);
       socket.send(packet);
     }
 
@@ -493,10 +646,10 @@ public class UDPNetwork extends Network {
 
     private void sendPacket() throws IOException {
       // Writes the ack for last packet received
-      buf[0] = (byte) (serverInfo.nbPacketsAck >>> 24);
-      buf[1] = (byte) (serverInfo.nbPacketsAck >>> 16);
-      buf[2] = (byte) (serverInfo.nbPacketsAck >>> 8);
-      buf[3] = (byte) (serverInfo.nbPacketsAck >>> 0);
+      buf[0] = (byte) (serverInfo.lastPacketAck >>> 24);
+      buf[1] = (byte) (serverInfo.lastPacketAck >>> 16);
+      buf[2] = (byte) (serverInfo.lastPacketAck >>> 8);
+      buf[3] = (byte) (serverInfo.lastPacketAck >>> 0);
 
       // Writes the number of the datagram
       buf[4] = (byte) (datagramStamp >>> 24);
@@ -507,20 +660,24 @@ public class UDPNetwork extends Network {
       datagramStamp++;
       size++;
 
-      packet = new DatagramPacket(buf, count, serverAddr);
-
-      socket.send(packet);
+      if (serverInfo.handshaken) {
+        packet = new DatagramPacket(buf, count, serverAddr);
+        socket.send(packet);
+      }
     }
 
-    void rewriteMessage(SocketAddress addr, Message msg, long currentTimeMillis, int index)
+    void rewriteMessage(SocketAddress addr, MessageAndIndex msgi, long currentTimeMillis)
         throws IOException {
       serverAddr = addr;
-      datagramStamp = index;
+      datagramStamp = msgi.index;
+      sendMessage(msgi.msg, currentTimeMillis);
+    }
 
+    private void sendMessage(Message msg, long currentTimeMillis) throws IOException {
       int idx = msg.writeToBuf(buf, 8);
       // Writes notification attributes
-      buf[idx++] = (byte) ((msg.not.persistent ? Message.PERSISTENT : 0) | (msg.not.detachable ? Message.DETACHABLE
-          : 0));
+      buf[idx++] = (byte) ((msg.not.persistent ? Message.PERSISTENT : 0) 
+          | (msg.not.detachable ? Message.DETACHABLE : 0));
 
       buf[Message.LENGTH + 8] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
       buf[Message.LENGTH + 9] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
@@ -530,9 +687,11 @@ public class UDPNetwork extends Network {
       // Be careful, the stream header is hard-written in buf
       count = Message.LENGTH + 12;
 
+      boolean hasExpiration = false;
       try {
         if (msg.not.expiration > 0L) {
           msg.not.expiration -= currentTimeMillis;
+          hasExpiration = true;
         }
         oos.writeObject(msg.not);
         oos.reset();
@@ -541,15 +700,29 @@ public class UDPNetwork extends Network {
         sendPacket();
 
       } finally {
-        if (msg.not.expiration > 0L) {
+        if (hasExpiration) {
           msg.not.expiration += currentTimeMillis;
         }
         count = 0;
       }
     }
-
+    
+    void handShake(SocketAddress addr) throws IOException {
+      // Use acknumber for  for handshaking
+      int boot = getBootTS();
+      handshakeBuf[0] = (byte) (boot >>> 24);
+      handshakeBuf[1] = (byte) (boot >>> 16);
+      handshakeBuf[2] = (byte) (boot >>> 8);
+      handshakeBuf[3] = (byte) (boot >>> 0);
+      
+      packet = new DatagramPacket(handshakeBuf, 10, addr);
+      socket.send(packet);
+    }
   }
 
+  /**
+   * Class used to transform UDP packets into a stream, to build the messages.
+   */
   final class MessageInputStream extends Daemon {
 
     private ServerInfo servInfo;
@@ -579,6 +752,9 @@ public class UDPNetwork extends Network {
             try {
               message.readFromStream(pipeIn);
             } catch (IOException ioe) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, getName() + ", interrupted " + message);
+              }
               break;
             }
             canStop = false;
@@ -593,7 +769,7 @@ public class UDPNetwork extends Network {
             try {
               ois = new ObjectInputStream(pipeIn);
             } catch (StreamCorruptedException exc) {
-              logmon.log(BasicLevel.ERROR, "MessageInputStream ", exc);
+              logmon.log(BasicLevel.ERROR, getName(), exc);
               continue;
             }
 
@@ -606,15 +782,15 @@ public class UDPNetwork extends Network {
             message.not.detached = false;
 
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "MessageInputStream, msg received " + message);
+              logmon.log(BasicLevel.DEBUG, getName() + ", msg received " + message);
             }
 
             deliver(message);
 
             pipeIn.read();
-            servInfo.nbPacketsAck = servInfo.nbPacketsReceived;
+            servInfo.lastPacketAck = servInfo.lastPacketReceived;
           } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR, "MessageInputStream ", exc);
+            logmon.log(BasicLevel.ERROR, getName(), exc);
             break;
           }
         }
@@ -629,7 +805,7 @@ public class UDPNetwork extends Network {
         pipeIn.close();
         pipeOut.close();
       } catch (IOException exc) {
-        logmon.log(BasicLevel.ERROR, "MessageInputStream ", exc);
+        logmon.log(BasicLevel.ERROR, getName(), exc);
       }
     }
 
