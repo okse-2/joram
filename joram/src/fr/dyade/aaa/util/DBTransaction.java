@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,6 +46,15 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
 
+/**
+ *  The DBTransaction class implements a transactionnal storage through
+ * a JDBC interface. This class is designed to be specialized for different
+ * database implementation. 
+ *
+ * @see Transaction
+ * @see MySQLDBTransaction
+ * @see DerbyDBTransaction
+ */
 public abstract class DBTransaction implements Transaction, DBTransactionMBean {
   // Logging monitor
   protected static Logger logmon = null;

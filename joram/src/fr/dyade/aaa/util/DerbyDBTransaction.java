@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,12 @@ import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+/**
+ *  The DerbyDBTransaction class implements a transactionnal storage through
+ * a Derby embeded database.
+ *
+ * @see Transaction
+ */
 public final class DerbyDBTransaction extends DBTransaction {
 
   private String driver = "org.apache.derby.jdbc.EmbeddedDriver";

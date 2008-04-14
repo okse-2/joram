@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,12 @@ import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+/**
+ *  The MySQLDBTransaction class implements a transactionnal storage through
+ * a MySQL database.
+ *
+ * @see Transaction
+ */
 public final class MySQLDBTransaction extends DBTransaction {
 
   private String driver = "com.mysql.jdbc.Driver";
