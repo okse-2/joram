@@ -1,4 +1,18 @@
 +==============================================================================
+| 2008/04/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Joram adminsitration:
+   - Remove static public access to AdminTopicImpl object.
+   - Change way to retrieve AdminTopic id.
+2. NTransaction:
+   - Bug fix: no longer call System.exit on fatal error during initialization.
+3. JNDI:
+   - Bug fix: no longer throw an Error in case of fatal error. Rather throw a
+   NamingException to allow the engine running.
+4. HttpNetwork: Factorizes the code allowing to close the connections.
+5. Javadoc enhancement:
+6. Logging enhancement.
++==============================================================================
 | 2008/03/28 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 1. Add JMX MBean for JNDI.
