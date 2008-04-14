@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
+ * Initial developer(s): 
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.util;
 
@@ -44,6 +44,59 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import fr.dyade.aaa.util.*;
 
+/**
+ *  This class allows to use a MySQL database as repository with the
+ * NTransaction module.
+ * <p>
+ * The basic setup at the code to get Database code to run is the same.
+ *
+ * The additional thing when using MySQL database is:
+ * <ol>
+ * <li>For the a3servers.xml that will be copy to run directory, we have
+ * to add these:
+ * <pre>
+ *   &lt;property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/&gt;
+ *   &lt;property name="NTRepositoryImpl" value="fr.dyade.aaa.util.MySqlDBRepository"/&gt;
+ *   &lt;property name="DBDriver" value="org.gjt.mm.mysql.Driver"/&gt;
+ *   &lt;property name="ConnURL" value="jdbc:mysql://hostname:3306/instance"/&gt;
+ *   &lt;property name="DBUser" value="dbUserName"/&gt;
+ *   &lt;property name="DBPass" value="dbPassword"/&gt;
+ * </pre>
+ * <li>In the start script in the bin directory:
+ * <ol>
+ * <li>We have to add the following library
+ * <pre>
+ * CLASSPATH=$CLASSPATH:$VIATOR_LIB/mysql-connector-java-5.0.5-bin.jar
+ * CLASSPATH=$CLASSPATH:$VIATOR_LIB/commons-dbcp-1.2.1.jar
+ * CLASSPATH=$CLASSPATH:$VIATOR_LIB/commons-pool-1.3.jar
+ * </pre>
+ * <li>change the java command to add in a few -D parameter
+ * <pre>
+ * JAVA_ARGS=$JAVA_ARGS"
+ * -DNTRepositoryImpl=fr.dyade.aaa.util.MySqlDBRepository
+ * -DDBDriver=org.gjt.mm.mysql.Driver
+ * -DConnURL=jdbc:mysql://hostname:3306/instance
+ * -DDBUser=dbUserName
+ * -DDBPass=dbPassword"
+ * </pre>
+ * <li>may need to up size the max memory for better performace
+ * This is what we use: JAVA_ARGS=" -Xms100M -Xmx1024M "
+ * </ol>
+ * <li>At the MySQL database side:
+ * <ol>
+ * <li>we have to set the max-allowed-packet to a bigger size, I think the
+ * default is 1M, if the number of messages become large, it will fail.
+ * "max_allowed_packet=16M"
+ * <li>create the JoramDB table first (we decided that we will create it
+ * outside here instead of in the code.
+ * <pre>
+ * CREATE TABLE JoramDB (name VARCHAR(256), content longblob, primary key(name));
+ * </pre>
+ * </ol>
+ *
+ * @see NTransaction
+ * @see Repository
+ */
 final class MySqlDBRepository implements Repository {
   /*
   String driver = "org.apache.derby.jdbc.EmbeddedDriver";

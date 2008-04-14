@@ -23,6 +23,13 @@ package fr.dyade.aaa.util;
 import java.io.*;
 import java.util.*;
 
+/**
+ *  The JTransaction class implements a transactionnal storage.
+ *  This implementation is simple but inefficient, its main advantage is
+ * the compatibility with old JDK.
+ *
+ * @see Transaction
+ */
 public final class JTransaction implements Transaction, JTransactionMBean {
   public static final String EMPTY_STRING = new String();
 

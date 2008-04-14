@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ *  This class allows to use a database through JDBC as repository with the
+ * NTransaction module.
+ *
+ * @see NTransaction
+ * @see Repository
+ */
 final class DBRepository implements Repository {
   String driver = "org.apache.derby.jdbc.EmbeddedDriver";
   String connurl = "jdbc:derby:";
