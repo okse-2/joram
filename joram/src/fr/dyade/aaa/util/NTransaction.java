@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,18 @@ import java.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+/**
+ *  The NTransaction class implements a transactionnal storage.
+ *  For efficiency it uses a file for its transaction journal, the final
+ * storage is provided through the Repository interface on filesystem or
+ * database.
+ *
+ * @see Transaction
+ * @see Repository
+ * @see FileRepository
+ * @see DBRepository
+ * @see MySqlDBRepository
+ */
 public final class NTransaction implements Transaction, NTransactionMBean {
   // Logging monitor
   private static Logger logmon = null;
@@ -1044,7 +1056,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
                        "NTransaction.init(), END=" + optype + ", " +
                        logFile.getFilePointer());
 
-          if (optype != Operation.END) System.exit(-1);
+          if (optype != Operation.END)
+            throw new IOException("Corrupted transaction log");
         } catch (IOException exc) {
           throw exc;
         } finally {
