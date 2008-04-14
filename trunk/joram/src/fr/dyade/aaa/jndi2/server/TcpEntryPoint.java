@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,8 +48,7 @@ public class TcpEntryPoint implements EntryPoint {
   }
 
   /**
-   * Reacts to a TCP connection request. This is the
-   * TCP entry point.
+   * Reacts to a TCP connection request. This is the TCP entry point.
    *
    * @param not the TCP connection request
    */

@@ -25,6 +25,7 @@ package fr.dyade.aaa.jndi2.server;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import javax.naming.Binding;
 import javax.naming.NameClassPair;
@@ -58,8 +59,7 @@ import fr.dyade.aaa.jndi2.msg.LookupReply;
 import fr.dyade.aaa.jndi2.msg.LookupRequest;
 import fr.dyade.aaa.jndi2.msg.UnbindRequest;
 
-public class RequestManager 
-    implements LifeCycleListener, java.io.Serializable {
+public class RequestManager implements LifeCycleListener, Serializable {
 
   /**
    * 
@@ -99,8 +99,7 @@ public class RequestManager
   public void agentFinalize(boolean lastTime) {}
 
   /**
-   * Returns the root naming context owner
-   * identifier.
+   * Returns the root naming context owner identifier.
    * May be overridden by a subclass.
    */
   protected AgentId getRootOwnerId() {
@@ -173,8 +172,7 @@ public class RequestManager
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "RequestManager.invokeWriteRequest(" + 
-                       reqCtx + ',' + ')');
+                       "RequestManager.invokeWriteRequest(" + reqCtx + ',' + ')');
     try {
       JndiRequest request = reqCtx.getRequest();
       JndiReply reply;
@@ -218,8 +216,7 @@ public class RequestManager
     }
   }
 
-  private void bind(BindRequest request) 
-    throws NamingException {
+  private void bind(BindRequest request) throws NamingException {
     if (request.isRebind()) {
       impl.rebind(
         request.getName(), 
@@ -231,40 +228,33 @@ public class RequestManager
     } 
   }
 
-  private void unbind(UnbindRequest request) 
-    throws NamingException {
+  private void unbind(UnbindRequest request) throws NamingException {
     impl.unbind(request.getName());
   }
 
-  private Record lookup(LookupRequest request) 
-    throws NamingException {
+  private Record lookup(LookupRequest request) throws NamingException {
     return impl.lookup(request.getName());
   }
 
-  private NameClassPair[] list(ListRequest request) 
-    throws NamingException {
+  private NameClassPair[] list(ListRequest request) throws NamingException {
     return impl.list(request.getName());
   }
 
-  private Binding[] listBindings(ListBindingsRequest request) 
-    throws NamingException {
+  private Binding[] listBindings(ListBindingsRequest request) throws NamingException {
     return impl.listBindings(request.getName());
   }
 
-  protected void createSubcontext(CreateSubcontextRequest request) 
-    throws NamingException {
+  protected void createSubcontext(CreateSubcontextRequest request) throws NamingException {
     impl.createSubcontext(
       request.getName());
   }
 
-  private void destroySubcontext(DestroySubcontextRequest request)
-    throws NamingException {
+  private void destroySubcontext(DestroySubcontextRequest request) throws NamingException {
     impl.destroySubcontext(
       request.getName());
   }
 
-  protected void changeOwner(ChangeOwnerRequest request)
-    throws NamingException {
+  protected void changeOwner(ChangeOwnerRequest request) throws NamingException {
     AgentId newOwnerId;
     try {
       newOwnerId =
