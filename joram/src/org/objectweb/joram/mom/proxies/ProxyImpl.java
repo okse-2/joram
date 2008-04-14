@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -736,9 +736,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     doReply(
       key,
-      new GetAdminTopicReply(
-        req,
-        AdminTopicImpl.getReference().getId().toString()));
+      new GetAdminTopicReply(req, AdminTopic.getDefault().toString()));
   }
 
   /**
@@ -2555,14 +2553,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception Exception  If the requester is not an administrator.
    */
-  public void deleteProxy(AgentId from) throws Exception
-  {
+  public void deleteProxy(AgentId from) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "--- " + this + " notified to be deleted.");
 
-    if (! from.equals(AdminTopicImpl.getReference().getId()))
-      throw new Exception();
+    if (! from.equals(AdminTopic.getDefault()))
+      throw new Exception("Unauthorized deletion of proxy");
 
     // Notifying the connected clients:
     Enumeration keys = contexts.keys();
