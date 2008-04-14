@@ -90,8 +90,7 @@ public class ContextManager
     contextNameTable.put(name, nc);
   }
 
-  public NamingContext getNamingContext(NamingContextId ncid) 
-    throws NamingException {
+  public NamingContext getNamingContext(NamingContextId ncid) throws NamingException {
     return getNamingContext(ncid, true);
   }
 
@@ -114,10 +113,8 @@ public class ContextManager
   private NamingContext getNamingContextFromName(CompositeName name) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(
-        BasicLevel.DEBUG, 
-        "ContextManager.getNamingContextFromName(" + 
-        name + ')');
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ContextManager.getNamingContextFromName(" + name + ')');
 
     // 1- Try to get the context directly from the cache
     NamingContext nc = contextNameTable.get(name);
@@ -125,14 +122,15 @@ public class ContextManager
 
     // 2- Try to get the context id from the index of
     // the storage manager.
-    NamingContextId ncid = 
-      storageManager.getIdFromName(name);
+    NamingContextId ncid = storageManager.getIdFromName(name);
     if (ncid != null) {
       // 3- Get the naming context
       nc = getNamingContext(ncid);
-      if (nc == null) throw new Error(
-        "Missing context: name=" + name + 
-        ", id=" + ncid);
+      if (nc == null) {
+        // The context no longer exists, thow an Exception. The JNDI server
+        // is in an incoherent state, may be we should reinitialized it.
+        throw new NamingException("Missing context: name=" + name + ", id=" + ncid);
+      }
       put(name, nc);
       return nc;
     } else {
@@ -151,8 +149,7 @@ public class ContextManager
     NamingContext nc = getNamingContextFromName(name);
     if (nc != null) return nc;
 
-    // Go upward the naming path in order to
-    // to find out which name is missing.
+    // Go upward the naming path in order to find out which name is missing.
     CompositeName parentName = name;
     NamingContext parentNc = null;
     int unresolvedIndex = 0;
