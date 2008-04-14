@@ -174,9 +174,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private static final long serialVersionUID = 1L;
 
   /** Reference of the server's local AdminTopicImpl instance. */
-  private static AdminTopicImpl ref;
+  static AdminTopicImpl ref;
   
-  public static AdminTopicImpl getReference() {
+  public final static AdminTopicImpl getReference() {
     return ref;
   }
 
