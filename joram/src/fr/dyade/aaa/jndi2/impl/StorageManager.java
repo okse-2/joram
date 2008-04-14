@@ -69,8 +69,7 @@ public class StorageManager {
     }
 
     // Load the context index
-    nameToIdIndex = (Hashtable)transaction.load(
-      CTX_INDEX);
+    nameToIdIndex = (Hashtable)transaction.load(CTX_INDEX);
     if (nameToIdIndex == null) {
       nameToIdIndex = new Hashtable();
     }
@@ -100,9 +99,7 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.addNamingContext(" + 
-                       nc + ',' + 
-                       name + ')');
+                       "StorageManager.addNamingContext(" +  nc + ',' +  name + ')');
     nameToIdIndex.put(name, nc.getId());
     storeIndex();
     storeNamingContext(nc);    
@@ -129,8 +126,7 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.storeNamingContext(" + 
-                       nc + ')');
+                       "StorageManager.storeNamingContext(" + nc + ')');
     try {
       transaction.save(nc, ROOT, nc.getId().toString());
     } catch (IOException exc) {
@@ -143,19 +139,16 @@ public class StorageManager {
   public NamingContext loadNamingContext(NamingContextId ncid) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(
-        BasicLevel.DEBUG, 
-        "StorageManager.loadNamingContext(" + 
-        ncid + ')');
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "StorageManager.loadNamingContext(" + ncid + ')');
     return loadNamingContext(ncid.toString());
   }
   
   public NamingContext loadNamingContext(String fileName) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(
-        BasicLevel.DEBUG, 
-        "StorageManager.loadNamingContext(" + fileName + ')');
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "StorageManager.loadNamingContext(" + fileName + ')');
     try {
       Object obj = transaction.load(
         ROOT, fileName);
@@ -184,8 +177,7 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.delete(" + 
-                       ncid + ',' + name + ')');
+                       "StorageManager.delete(" + ncid + ',' + name + ')');
     transaction.delete(ROOT, ncid.toString());
     nameToIdIndex.remove(name);
     storeIndex();

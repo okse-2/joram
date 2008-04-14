@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -269,7 +269,7 @@ public class ServerImpl {
    */
   public Record lookup(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.lookup(" + path + ')');    
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.lookup(" + path + ')');
 
     if (path.size() == 0) {
       return null;
