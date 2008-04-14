@@ -524,17 +524,18 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     }
 
     protected void close() {
-      if (socket != null) {
-        try {
-          os.close();
-        } catch (Exception exc) {}
-        try {
-          is.close();
-        } catch (Exception exc) {}
-        try {
-          socket.close();
-        } catch (Exception exc) {}
-      }
+      try {
+        os.close();
+      } catch (Exception exc) {}
+      os = null;
+      try {
+        is.close();
+      } catch (Exception exc) {}
+      is = null;
+      try {
+        socket.close();
+      } catch (Exception exc) {}
+      socket = null;
     }
 
     protected void shutdown() {
@@ -555,7 +556,10 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
           // AF: Il faudrait faire une passe ici sur la queue afin d'eliminer
           // les messages expires. lors d'une panne, si le premier message
           // n'expire pas, les suivants ne sont pas supprimés!
+          // AF: Il faudrait aussi reprendre le code permettant de moduler
+          // la periode de reconnection en fonction des erreurs.
           // AF: Voir le code correspondant dans la base CVS d'aurore.
+
 	  try {
 	    try {
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -626,19 +630,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
           } finally {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         this.getName() + ", connection ends");
-            try {
-              os.close();
-            } catch (Exception exc) {}
-            os = null;
-            try {
-              is.close();
-            } catch (Exception exc) {}
-            is = null;
-            try {
-              socket.close();
-            } catch (Exception exc) {}
-            socket = null;
+                          this.getName() + ", connection ends");
+            close();
           }
         }
       } finally {
@@ -680,24 +673,26 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     }
 
     protected void close() {
-      if (socket != null) {
-        try {
-          os.close();
-        } catch (Exception exc) {}
-        try {
-          is.close();
-        } catch (Exception exc) {}
-        try {
-          socket.close();
-        } catch (Exception exc) {}
-      }
       try {
-	listen.close();
+        os.close();
       } catch (Exception exc) {}
+      os = null;
+      try {
+        is.close();
+      } catch (Exception exc) {}
+      is = null;
+      try {
+        socket.close();
+      } catch (Exception exc) {}
+      socket = null;
     }
 
     protected void shutdown() {
       close();
+      try {
+	listen.close();
+      } catch (Exception exc) {}
+      listen = null;
     }
 
     public void run() {
@@ -774,18 +769,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
           } finally {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG, ", connection ends");
-            try {
-              os.close();
-            } catch (Exception exc) {}
-            os = null;
-            try {
-              is.close();
-            } catch (Exception exc) {}
-            is = null;
-            try {
-              socket.close();
-            } catch (Exception exc) {}
-            socket = null;
+            close();
           }
         }
       } finally {
