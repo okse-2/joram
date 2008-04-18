@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,6 +44,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -115,7 +116,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
     try {
-      MXWrapper.registerMBean(destImpl, "Joram", getMBeanName());
+      MXWrapper.registerMBean(destImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
       JoramTracing.dbgDestination.log(BasicLevel.ERROR,
                                       this + " jmx failed", exc);
@@ -125,7 +126,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
     try {
-      MXWrapper.unregisterMBean("Joram", getMBeanName());
+      MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
