@@ -965,104 +965,142 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     throws UnknownServerException, RequestException {
 
     if (checkServerId(request.getServerId())) {
-      // The destination is  local, process the request.
-      String destName = request.getDestinationName();
-      boolean destNameActivated = (destName != null && ! destName.equals(""));
-
-      DestinationDesc destDesc;
+      // The destination is local, process the request.
       
-      Agent dest = null;
-      String info;
-      Properties properties = request.getProperties();
-
-      // Retrieving an existing destination:
-      if (destNameActivated && destinationsTable.containsKey(destName)) {
-        destDesc = (DestinationDesc) destinationsTable.get(destName);
-        if (! destDesc.isAssignableTo(request.getExpectedType())) {
-          throw new RequestException("Destination type not compliant");
-        }
-        info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], processed by AdminTopic on server [").append(serverId)
-          .append("], successful [true]: destination [")
-          .append(destName).append("] has been retrieved").toString();
-        strbuf.setLength(0);
-      } else {
-        // Instanciating the destination class.
-        String className = request.getClassName();
-        Class clazz;
-        String destType;
-        try {
-          clazz = Class.forName(className);
-          dest = (Agent) clazz.newInstance();
-          if (destName != null) {
-            dest.name = destName;
-          }
-          ((AdminDestinationItf) dest).init(this.destId, properties);
-          
-          Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
-          destType = (String)getTypeM.invoke(null, new Object[0]);
-        } catch (Exception exc) {
-          if (exc instanceof ClassCastException) {
-            throw new RequestException(
-              "Class [" + className + 
-              "] is not a Destination class.");
-          } else {
-            throw new RequestException(
-              "Could not instanciate Destination class [" + 
-              className + "]: " + exc);
-          }
-        }
-
-        AgentId createdDestId = dest.getId();
-        
-        if (! destNameActivated)
-          destName = createdDestId.toString();
-        
-        destDesc = new DestinationDesc(createdDestId, destName, 
-                                       className, destType);
-        if (! destDesc.isAssignableTo(request.getExpectedType())) {
-          throw new RequestException("Destination type not compliant");
-        }
-        
-        try {
-          dest.deploy();
-          destinationsTable.put(destName, destDesc);
-          
-          info = strbuf.append("Request [").append(request.getClass().getName())
-            .append("], processed by AdminTopic on server [").append(serverId)
-            .append("], successful [true]: ").append(className).append(" [")
-            .append(createdDestId.toString()).append("] has been created and deployed")
-            .toString();
-          strbuf.setLength(0);
-        }
-        catch (Exception exc) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
-
-
-          throw new RequestException("Error while deploying Destination [" + 
-                                     clazz + "]: " + exc);
-        }
-      }
-
+      DestinationDesc destDesc = createDestination(
+          request.getDestinationName(),
+          null,
+          request.getProperties(),
+          request.getExpectedType(),
+          request.getClassName(),
+          request.getClass().getName(),
+          strbuf);
+      
       distributeReply(
-        replyTo,
-        msgId,
-        new CreateDestinationReply(
-          destDesc.getId().toString(), 
-          destDesc.getName(),
-          destDesc.getType(),
-          info));
-      
+          replyTo,
+          msgId,
+          new CreateDestinationReply(
+              destDesc.getId().toString(), 
+              destDesc.getName(),
+              destDesc.getType(),
+              strbuf.toString()));
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, strbuf.toString());
+      strbuf.setLength(0);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+          new AdminRequestNot(replyTo, msgId, request));
     }
   }
+   
+  /**
+   * Instanciating the destination class or retrieving the destination.
+   * 
+   * @param destName           destination Name
+   * @param adminId            other admin (null for TopicAdmin)
+   * @param properties         destination properties
+   * @param type               destination type ("queue" or "topic")
+   * @param className          creates an instance of the class
+   * @param requestClassName  
+   * @param strbuf             information
+   * @return DestinationDesc   contain destination description
+   * @throws UnknownServerException
+   * @throws RequestException
+   */
+  public DestinationDesc createDestination(
+      String destName,
+      AgentId adminId,
+      Properties properties,
+      String type,
+      String className,
+      String requestClassName,
+      StringBuffer strbuf)
+  throws UnknownServerException, RequestException {
 
+    boolean destNameActivated = (destName != null && ! destName.equals(""));
+    DestinationDesc destDesc;
+    Agent dest = null;
+
+    // Retrieving an existing destination:
+    if (destNameActivated && destinationsTable.containsKey(destName)) {
+      destDesc = (DestinationDesc) destinationsTable.get(destName);
+      if (! destDesc.isAssignableTo(type)) {
+        throw new RequestException("Destination type not compliant");
+      }
+      strbuf.append("Request [").append(requestClassName)
+      .append("], processed by AdminTopic on server [").append(serverId)
+      .append("], successful [true]: destination [")
+      .append(destName).append("] has been retrieved");
+    } else {
+      // Instanciating the destination class.
+      Class clazz;
+      String destType;
+      try {
+        clazz = Class.forName(className);
+        dest = (Agent) clazz.newInstance();
+        if (destName != null) {
+          dest.name = destName;
+        }
+
+        if (adminId == null)
+          adminId = this.destId;
+        ((AdminDestinationItf) dest).init(adminId, properties);
+
+        Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
+        destType = (String)getTypeM.invoke(null, new Object[0]);
+      } catch (Exception exc) {
+        if (exc instanceof ClassCastException) {
+          throw new RequestException(
+              "Class [" + className + 
+          "] is not a Destination class.");
+        } else {
+          throw new RequestException(
+              "Could not instanciate Destination class [" + 
+              className + "]: " + exc);
+        }
+      }
+
+      AgentId createdDestId = dest.getId();
+
+      if (! destNameActivated)
+        destName = createdDestId.toString();
+
+      destDesc = new DestinationDesc(createdDestId, destName, 
+          className, destType);
+      if (! destDesc.isAssignableTo(type)) {
+        throw new RequestException("Destination type not compliant");
+      }
+
+      try {
+        dest.deploy();
+        destinationsTable.put(destName, destDesc);
+
+        strbuf.append("Request [").append(requestClassName)
+        .append("], processed by AdminTopic on server [").append(serverId)
+        .append("], successful [true]: ").append(className).append(" [")
+        .append(createdDestId.toString()).append("] has been created and deployed");
+
+      } catch (Exception exc) {
+        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
+        throw new RequestException("Error while deploying Destination [" + 
+            clazz + "]: " + exc);
+      }
+    }
+    return destDesc;
+  }
+
+  /**
+   * is destinationTable contain destName ?
+   * 
+   * @param destName destination name.
+   * @return true if contain.
+   */
+  public boolean isDestinationTableContain(String destName) {
+    return destinationsTable.containsKey(destName);
+  }
+  
   /**
    * Processes a <code>DeleteDestination</code> instance requesting the
    * deletion of a destination.
@@ -1201,7 +1239,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception RequestException  If the user already exists but with a
    *              different password, or if the proxy deployment failed.
    */
-  private void doProcess(CreateUserRequest request,
+  public void doProcess(CreateUserRequest request,
                          AgentId replyTo,
                          String msgId)
                throws UnknownServerException, RequestException
@@ -1368,10 +1406,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * Processes a <code>SetRight</code> instance requesting to grant a user
    * a given right on a given destination.
    */
-  private void doProcess(SetRight request,
-                         AgentId replyTo,
-                         String msgId) throws UnknownServerException
-  {
+  public void doProcess(SetRight request,
+                        AgentId replyTo,
+                        String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDestId());
 
     if (checkServerId(destId.getTo())) {
@@ -1399,7 +1436,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
              new AdminRequestNot(replyTo, msgId, request));
     }
   }
-
+  
   /**
    * Processes a <code>SetDefaultDMQ</code> request requesting a given
    * dead message queue to be set as the default one.
@@ -2544,7 +2581,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-  static class DestinationDesc 
+  public static class DestinationDesc 
       implements java.io.Serializable {
     /**
      * 
