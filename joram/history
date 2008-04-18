@@ -1,4 +1,17 @@
 +==============================================================================
+| 2008/04/18 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+----------------------------------------------------------------
+1. AdminTopicImpl:
+  - change visibility of doProcess(CreateUser and SetRight).
+  - add creatDestination method.
+2. Destination and UserAgent:
+  - Bug fix: jmx register (osgi used).
+3. ConfigController
+  - add envProperties.
+  - Bug fix: reconf HTTP network NBDaemon. (report)
+4. Network:
+  - add setProperties().
++==============================================================================
 | 2008/04/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 1. Joram adminsitration:
