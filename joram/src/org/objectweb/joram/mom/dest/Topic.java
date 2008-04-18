@@ -27,7 +27,6 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.AbstractRequest;
 import org.objectweb.joram.mom.notifications.ClusterRequest;
-import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.Monit_GetCluster;
 import org.objectweb.joram.mom.notifications.Monit_GetFather;
