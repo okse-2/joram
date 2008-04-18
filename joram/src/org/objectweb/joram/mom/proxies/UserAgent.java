@@ -125,13 +125,17 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     proxyImpl.initialize(firstTime);
     cleaningTask = new CleaningTask();
     cleaningTask.schedule();
-    MXWrapper.registerMBean(proxyImpl, "Joram", getMBeanName());
+    try {
+    MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
+    } catch (Exception exc) {
+      JoramTracing.dbgProxy.log(BasicLevel.ERROR, this + " jmx failed", exc);
+    }
   }
 
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
     try {
-      MXWrapper.unregisterMBean("Joram", getMBeanName());
+      MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
