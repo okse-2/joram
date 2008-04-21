@@ -20,8 +20,6 @@
  * Initial developer(s):ScalAgent D.T.
  * Contributor(s): 
  */
-
-
 package a3.base;
 
 import joram.framework.TestCase;
@@ -49,13 +47,15 @@ public class test16 extends TestCase {
 
     sender.receiver1 = receiver1.getId();
     sender.receiver2 = receiver2.getId();
-    sender.bounce = bounce;
+
+    receiver1.sender = sender.getId();
+    receiver2.sender = sender.getId();
 
     sender.deploy();
     receiver1.deploy();
     receiver2.deploy();
 
-    Channel.sendTo(sender.getId(), new Go());
+    Channel.sendTo(sender.getId(), new Go(bounce));
   }
 
   protected void tearDown() {
@@ -68,6 +68,11 @@ public class test16 extends TestCase {
   }
 
   static class Go extends Notification {
+    public int bounce;
+
+    public Go(int bounce) {
+      this.bounce = bounce;
+    }
   }
 
   static class Token extends Notification {
@@ -93,11 +98,13 @@ public class test16 extends TestCase {
   }
 
   static class Sender extends Agent {
-    int bounce;
+    int bounce = -999;
     int stop;
 
     AgentId receiver1;
+    int bounce1;
     AgentId receiver2;
+    int bounce2;
 
     Sender(short serverId) {
       super(serverId);
@@ -106,20 +113,48 @@ public class test16 extends TestCase {
     public void react(AgentId from, Notification not) throws Exception {
       try {
         if(not instanceof Go) {
-          stop = 2;
-          Token tok = new Token(bounce, 10);
+          if (bounce == -999) {
+            // firts time..
+            stop = 2;
+
+            bounce = ((Go) not).bounce;
+            bounce1 = bounce;
+            bounce2 = bounce;
+          }
+
+          Token tok = new Token(bounce, 1000);
           if (tok.bounce >= 0) {
+            // Sends token to receivers
             sendTo(receiver1, tok);
             sendTo(receiver2, tok);
+            // Sends a Go notification to loop one more time
             bounce -= 1;
-            sendTo(getId(), new Go());
-
-//             if ((tok.bounce %10) == 9)
-            Thread.sleep(100L);
+            sendTo(getId(), not);
           }
+
+//           if ((bounce %50) == 49)
+//             System.out.println("sends " + bounce);
+
+//           if (((bounce - bounce1) > 50) || ((bounce - bounce2) > 50)) {
+//             System.out.println("sleeping..");
+//             Thread.sleep(100L);
+//           }
         } else if (not instanceof Token) {
-          System.out.println("recv#" + ((Token) not).bounce + " from " + from);
+          int tbounce = ((Token) not).bounce;
+          TestCase.assertTrue((from.equals(receiver1)) || (from.equals(receiver2)));
+          if (from.equals(receiver1)) {
+            TestCase.assertEquals(((Token) not).bounce, bounce1);
+            bounce1 -= 1;
+          } else if (from.equals(receiver2)) {
+            TestCase.assertEquals(((Token) not).bounce, bounce2);
+            bounce2 -= 1;
+          }
+
+//           if ((((Token) not).bounce %10) == 9)
+//             System.out.println("recv#" + ((Token) not).bounce + " from " + from);
         } else if (not instanceof Stop) {
+//           System.out.println("Stop from " + from);
+
           stop -= 1;
           if (stop == 0) {
             System.out.println("Stop");
@@ -137,6 +172,8 @@ public class test16 extends TestCase {
   }
 
   static class Receiver extends Agent {
+    AgentId sender;
+
     Receiver(short serverId) {
       super(serverId);
     }

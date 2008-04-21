@@ -27,8 +27,8 @@ import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
 
 public class test17 extends TestCase {
-  short ServerReceiver1 = 1;
-  short ServerReceiver2 = 2;
+  short ServerSender1 = 1;
+  short ServerSender2 = 2;
 
   public test17() {
     super();
@@ -37,30 +37,31 @@ public class test17 extends TestCase {
   protected void setUp() throws Exception {
     int bounce = Integer.getInteger("bounce", 200).intValue();
 
-    //    timeout = (long) (10000 * bounce);
-    timeout =1200000;
-    Sender sender = new Sender((short) 0);
-    Receiver receiver1 = new Receiver(ServerReceiver1);
-    Receiver receiver2 = new Receiver(ServerReceiver2);
+    timeout = (long) (10000 * bounce);
 
-    startAgentServer(ServerReceiver1);
-    startAgentServer(ServerReceiver2);
+    Receiver receiver = new Receiver((short) 0);
+    Sender sender1 = new Sender(ServerSender1);
+    Sender sender2 = new Sender(ServerSender2);
 
-    sender.receiver1 = receiver1.getId();
-    sender.receiver2 = receiver2.getId();
-    receiver1.sender = sender.getId();
-    receiver2.sender = sender.getId();
+    startAgentServer(ServerSender1);
+    startAgentServer(ServerSender2);
 
-    sender.deploy();
-    receiver1.deploy();
-    receiver2.deploy();
+    receiver.sender1 = sender1.getId();
+    receiver.sender2 = sender2.getId();
 
-    Channel.sendTo(sender.getId(), new Go(bounce));
+    sender1.receiver = receiver.getId();
+    sender2.receiver = receiver.getId();
+
+    receiver.deploy();
+    sender1.deploy();
+    sender2.deploy();
+
+    Channel.sendTo(receiver.getId(), new Go(bounce));
   }
 
   protected void tearDown() {
-    crashAgentServer(ServerReceiver1);
-    crashAgentServer(ServerReceiver2);
+    crashAgentServer(ServerSender1);
+    crashAgentServer(ServerSender2);
   }
 
   public static void main(String args[]) {
@@ -97,14 +98,15 @@ public class test17 extends TestCase {
   static class Stop extends Notification {
   }
 
-  static class Sender extends Agent {
-    int bounce;
+  static class Receiver extends Agent {
     int stop;
 
-    AgentId receiver1;
-    AgentId receiver2;
+    AgentId sender1;
+    int bounce1;
+    AgentId sender2;
+    int bounce2;
 
-    Sender(short serverId) {
+    Receiver(short serverId) {
       super(serverId);
     }
 
@@ -113,12 +115,25 @@ public class test17 extends TestCase {
         if(not instanceof Go) {
           stop = 2;
 
-          bounce = ((Go) not).bounce;
+          bounce1 = ((Go) not).bounce;
+          bounce2 = bounce1;
 
-          sendTo(receiver1, not);
-          sendTo(receiver2, not);
+          sendTo(sender1, not);
+          sendTo(sender2, not);
         } else if (not instanceof Token) {
-          System.out.println("recv#" + ((Token) not).bounce + " from " + from);
+          int tbounce = ((Token) not).bounce;
+          TestCase.assertTrue((from.equals(sender1)) || (from.equals(sender2)));
+          if (from.equals(sender1)) {
+            TestCase.assertEquals(((Token) not).bounce, bounce1);
+            bounce1 -= 1;
+          } else if (from.equals(sender2)) {
+            TestCase.assertEquals(((Token) not).bounce, bounce2);
+            bounce2 -= 1;
+          }
+
+          if ((((Token) not).bounce %10) == 9)
+            System.out.println("recv#" + ((Token) not).bounce + " from " + from);
+
           if (((Token) not).bounce == 0) {
             stop -= 1;
             if (stop == 0) {
@@ -137,26 +152,20 @@ public class test17 extends TestCase {
     }
   }
 
-  static class Receiver extends Agent {
-    AgentId sender;
+  static class Sender extends Agent {
+    AgentId receiver;
 
-    Receiver(short serverId) {
+    Sender(short serverId) {
       super(serverId);
     }
 
     public void react(AgentId from, Notification not) throws Exception {
       if(not instanceof Go) {
-        Token token = new Token(((Go) not).bounce, 50000);
-        sendTo(sender, token);
-        sendTo(getId(), token);
-      } else if (not instanceof Token) {
-//         if ((((Token) not).bounce %10) == 9)
-          Thread.sleep(250L);
+        if (((Go) not).bounce >= 0) {
+          Token token = new Token(((Go) not).bounce, 1000);
+          sendTo(receiver, token);
 
-        if (((Token) not).bounce > 0) {
-          ((Token) not).bounce -= 1;
-
-          sendTo(sender, not);
+          ((Go) not).bounce -= 1;
           sendTo(getId(), not);
         }
       } else {
