@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<!DOCTYPE config SYSTEM "a3config.dtd">
 
 <config>
   <domain name="D1" network="fr.dyade.aaa.agent.SSLNetwork"/>
