@@ -71,10 +71,8 @@ public class test8 extends TestCase {
   }
 
   protected void tearDown() {
-      if(nbStopTask0 <= 2 && nbStopTask1 <= 2 ){
-	crashAgentServer(ServerPong1);
-	crashAgentServer(ServerPong2);
-      }
+    crashAgentServer(ServerPong1);
+    crashAgentServer(ServerPong2);
     timer.cancel();
   }
 
