@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -187,11 +187,8 @@ public class ConfigController {
     try {
       Transaction transaction = AgentServer.getTransaction();
       transaction.begin();
-      AgentServer.getTransaction().save(
-          a3cmlConfig, AgentServer.DEFAULT_SER_CFG_FILE);
-      transaction.save(
-        new Short(serverCounter),
-        SERVER_COUNTER);      
+      a3cmlConfig.save();
+      transaction.save(new Short(serverCounter), SERVER_COUNTER);      
       transaction.commit(true);
     } catch (Exception exc) {
       throw new Error(exc.toString());
@@ -700,8 +697,8 @@ public class ConfigController {
     // In order to ensure idempotency we must check
     // that the consumer is still there.
     if (AgentServer.getConsumer(domainName) != null) {
-    AgentServer.removeConsumer(domainName);
-  }
+      AgentServer.removeConsumer(domainName);
+    }
   }
 
   private void stopService(String serviceClassName) throws Exception {
