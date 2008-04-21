@@ -176,44 +176,50 @@ public abstract class StreamNetwork extends Network {
 
   /**
    * Initializes a new <tt>StreamNetwork</tt> component.
-   * 
+   *
+   * @param name	The domain name.
+   * @param port	The listen port.
+   * @param servers	The list of servers directly accessible from this
+   *			network interface.
+   *
    * @see Network
-   * 
-   * @param name
-   *            The domain name.
-   * @param port
-   *            The listen port.
-   * @param servers
-   *            The list of servers directly accessible from this network
-   *            interface.
    */
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
+  }
+  
+  /**
+   * Set the properties of the network.
+   * Inherited from Network class, can be extended by subclasses.
+   */
+  public void setProperties() throws Exception {
+    logmon.log(BasicLevel.DEBUG, domain + ", StreamNetwork.setProperties()");
+    super.setProperties();
 
     CnxRetry = Integer.getInteger("CnxRetry", CnxRetry).intValue();
-    CnxRetry = Integer.getInteger(name + ".CnxRetry", CnxRetry).intValue();
+    CnxRetry = Integer.getInteger(domain + ".CnxRetry", CnxRetry).intValue();
 
     backlog = Integer.getInteger("backlog", backlog).intValue();
-    backlog = Integer.getInteger(name + ".backlog", backlog).intValue();
+    backlog = Integer.getInteger(domain + ".backlog", backlog).intValue();
 
-    TcpNoDelay = Boolean.getBoolean(name + ".TcpNoDelay");
+    TcpNoDelay = Boolean.getBoolean(domain + ".TcpNoDelay");
     if (! TcpNoDelay) TcpNoDelay = Boolean.getBoolean("TcpNoDelay");
 
     SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
-    SoLinger = Integer.getInteger(name + ".SoLinger", SoLinger).intValue();
+    SoLinger = Integer.getInteger(domain + ".SoLinger", SoLinger).intValue();
 
     SoTimeout = Integer.getInteger("SoTimeout", SoTimeout).intValue();
-    SoTimeout = Integer.getInteger(name + ".SoTimeout", SoTimeout).intValue();
+    SoTimeout = Integer.getInteger(domain + ".SoTimeout", SoTimeout).intValue();
 
     ConnectTimeout = Integer.getInteger("ConnectTimeout",
                                         ConnectTimeout).intValue();
-    ConnectTimeout = Integer.getInteger(name + ".ConnectTimeout",
+    ConnectTimeout = Integer.getInteger(domain + ".ConnectTimeout",
                                         ConnectTimeout).intValue();
 
     String inLocalAddressStr = null;
     inLocalAddressStr = System.getProperty("InLocalAddress",
                                            inLocalAddressStr);
-    inLocalAddressStr = System.getProperty(name + ".InLocalAddress",
+    inLocalAddressStr = System.getProperty(domain + ".InLocalAddress",
                                            inLocalAddressStr);
     if (inLocalAddressStr != null)
       inLocalAddr = InetAddress.getByName(inLocalAddressStr);
@@ -221,19 +227,19 @@ public abstract class StreamNetwork extends Network {
     String outLocalAddressStr = null;
     outLocalAddressStr = System.getProperty("OutLocalAddress",
                                            outLocalAddressStr);
-    outLocalAddressStr = System.getProperty(name + ".OutLocalAddress",
+    outLocalAddressStr = System.getProperty(domain + ".OutLocalAddress",
                                            outLocalAddressStr);
     if (outLocalAddressStr != null)
       outLocalAddr = InetAddress.getByName(outLocalAddressStr);
 
     outLocalPort = Integer.getInteger("OutLocalPort",
                                       outLocalPort).intValue();
-    outLocalPort = Integer.getInteger(name + ".OutLocalPort",
+    outLocalPort = Integer.getInteger(domain + ".OutLocalPort",
                                       outLocalPort).intValue();
 
     String sfcn = System.getProperty("SocketFactory",
                                      SocketFactory.DefaultFactory);
-    sfcn = System.getProperty(name + ".SocketFactory", sfcn);
+    sfcn = System.getProperty(domain + ".SocketFactory", sfcn);
     socketFactory = SocketFactory.getFactory(sfcn);
   }
 
