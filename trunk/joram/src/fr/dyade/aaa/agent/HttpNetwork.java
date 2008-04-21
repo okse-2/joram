@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,6 +58,16 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   String proxyhost = null;
+  
+  /**
+   * Gets the proxyhost value.
+   *
+   * @return the proxyhost value
+   */
+  public String getProxyhost() {
+    return proxyhost;
+  }
+
   /**
    *  Port number of proxy if any.
    *  This value can be adjusted for all HttpNetwork components by setting
@@ -69,6 +79,15 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int proxyport = 0;
+  
+  /**
+   * Gets the proxyport value.
+   *
+   * @return the proxyport value
+   */
+  public long getProxyport() {
+    return proxyport;
+  }
 
   /**
    * Period of time between two activation of NetServerOut, it matches to the
