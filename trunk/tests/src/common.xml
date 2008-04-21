@@ -1,9 +1,16 @@
+<!-- BE CAREFUL
+  -  This file is included in build files in sub-directory: a3, jndi, jms,
+  -  joram, etc. In particular the init.src target is defined in the including
+  -  build file, it defines the set of sources to compile.
+  -->
+
 <target name="init" depends="init.src">
+
   <!-- Initialize the environment properties, use ${env.name} -->
   <property environment="env" />
 
   <!-- Get the user defined properties from file -->
-  <property file="build.properties" />
+  <property file="../build.properties" />
 
   <!-- Detect unix or cygwin unix emulation on windows-->
   <condition property="unix">
@@ -19,12 +26,12 @@
   </condition>
 
   <!-- Initialize the directory structure properties -->
-  <property name="src.dir" location="." />
-  <property name="obj.dir" location="../classes" />
+  <property name="src.dir" location=".." />
+  <property name="obj.dir" location="../../classes" />
   <!-- property name="ship.dir" location="../../joram/ship"/ -->
   <property name="lib.dir" location="${ship.dir}/lib" />
-  <property name="test.dir" location="../run" />
-  <property name="testlib.dir" location="../lib" />
+  <property name="test.dir" location="../../run" />
+  <property name="testlib.dir" location="../../lib" />
   <!-- creates the directory when no file has been extracted -->
   <mkdir dir="${testlib.dir}" />
 
