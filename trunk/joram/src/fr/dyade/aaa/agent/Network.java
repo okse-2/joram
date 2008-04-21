@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -403,35 +403,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     logmon = Debug.getLogger(Debug.A3Network + '.' + name);
     logmon.log(BasicLevel.INFO, name + ", initialized");
 
-    WDActivationPeriod = Long.getLong("WDActivationPeriod",
-                                      WDActivationPeriod).longValue();
-    WDActivationPeriod = Long.getLong(name + ".WDActivationPeriod",
-                                      WDActivationPeriod).longValue();
-
-    WDNbRetryLevel1 = Integer.getInteger("WDNbRetryLevel1",
-                                         WDNbRetryLevel1).intValue();
-    WDNbRetryLevel1 = Integer.getInteger(name + ".WDNbRetryLevel1",
-                                         WDNbRetryLevel1).intValue();
-
-    WDRetryPeriod1 = Long.getLong("WDRetryPeriod1",
-                                  WDRetryPeriod1).longValue();
-    WDRetryPeriod1 = Long.getLong(name + ".WDRetryPeriod1",
-                                  WDRetryPeriod1).longValue();
-
-    WDNbRetryLevel2 = Integer.getInteger("WDNbRetryLevel2",
-                                         WDNbRetryLevel2).intValue();
-    WDNbRetryLevel2 = Integer.getInteger(name + ".WDNbRetryLevel2",
-                                         WDNbRetryLevel2).intValue();
-
-    WDRetryPeriod2 = Long.getLong("WDRetryPeriod2",
-                                  WDRetryPeriod2).longValue();
-    WDRetryPeriod2 = Long.getLong(name + ".WDRetryPeriod2",
-                                  WDRetryPeriod2).longValue();
-
-    WDRetryPeriod3 = Long.getLong("WDRetryPeriod3",
-                                  WDRetryPeriod3).longValue();
-    WDRetryPeriod3 = Long.getLong(name + ".WDRetryPeriod3",
-                                  WDRetryPeriod3).longValue();
+    // Set the properties of the network.
+    setProperties();
 
     // Sorts the array of server ids into ascending numerical order.
     Arrays.sort(servers);
@@ -444,36 +417,41 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
-   * Set the properties of the network. Can be extended by subclasses.
+   * Set the properties of the network.
+   * Can be extended by subclasses.
    */
   public void setProperties() throws Exception {
     logmon.log(BasicLevel.DEBUG, domain + ", Network.setProperties()");
-    WDActivationPeriod = Long.getLong("WDActivationPeriod", WDActivationPeriod)
-        .longValue();
+
+    WDActivationPeriod = Long.getLong("WDActivationPeriod",
+                                      WDActivationPeriod).longValue();
     WDActivationPeriod = Long.getLong(domain + ".WDActivationPeriod",
-        WDActivationPeriod).longValue();
+                                      WDActivationPeriod).longValue();
 
-    WDNbRetryLevel1 = Integer.getInteger("WDNbRetryLevel1", WDNbRetryLevel1)
-        .intValue();
+    WDNbRetryLevel1 = Integer.getInteger("WDNbRetryLevel1",
+                                         WDNbRetryLevel1).intValue();
     WDNbRetryLevel1 = Integer.getInteger(domain + ".WDNbRetryLevel1",
-        WDNbRetryLevel1).intValue();
+                                         WDNbRetryLevel1).intValue();
 
-    WDRetryPeriod1 = Long.getLong("WDRetryPeriod1", WDRetryPeriod1).longValue();
-    WDRetryPeriod1 = Long.getLong(domain + ".WDRetryPeriod1", WDRetryPeriod1)
-        .longValue();
+    WDRetryPeriod1 = Long.getLong("WDRetryPeriod1",
+                                  WDRetryPeriod1).longValue();
+    WDRetryPeriod1 = Long.getLong(domain + ".WDRetryPeriod1",
+                                  WDRetryPeriod1).longValue();
 
-    WDNbRetryLevel2 = Integer.getInteger("WDNbRetryLevel2", WDNbRetryLevel2)
-        .intValue();
+    WDNbRetryLevel2 = Integer.getInteger("WDNbRetryLevel2",
+                                         WDNbRetryLevel2).intValue();
     WDNbRetryLevel2 = Integer.getInteger(domain + ".WDNbRetryLevel2",
-        WDNbRetryLevel2).intValue();
+                                         WDNbRetryLevel2).intValue();
 
-    WDRetryPeriod2 = Long.getLong("WDRetryPeriod2", WDRetryPeriod2).longValue();
-    WDRetryPeriod2 = Long.getLong(domain + ".WDRetryPeriod2", WDRetryPeriod2)
-        .longValue();
+    WDRetryPeriod2 = Long.getLong("WDRetryPeriod2",
+                                  WDRetryPeriod2).longValue();
+    WDRetryPeriod2 = Long.getLong(domain + ".WDRetryPeriod2",
+                                  WDRetryPeriod2).longValue();
 
-    WDRetryPeriod3 = Long.getLong("WDRetryPeriod3", WDRetryPeriod3).longValue();
-    WDRetryPeriod3 = Long.getLong(domain + ".WDRetryPeriod3", WDRetryPeriod3)
-        .longValue();
+    WDRetryPeriod3 = Long.getLong("WDRetryPeriod3",
+                                  WDRetryPeriod3).longValue();
+    WDRetryPeriod3 = Long.getLong(domain + ".WDRetryPeriod3",
+                                  WDRetryPeriod3).longValue();
   }
 
   /**
