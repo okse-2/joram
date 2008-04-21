@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<!DOCTYPE config SYSTEM "a3config.dtd">
 
 <config>
   <property name="fr.dyade.aaa.jndi2.impl.LooseCoupling" value="true" />
