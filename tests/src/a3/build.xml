@@ -9,9 +9,6 @@
   &common;
 
   <target name="init.src">
-    <!-- Get specific properties from file -->
-    <property file="../env.properties"/>
-
     <!-- Tests specific sources set -->
     <patternset id="specific">
       <include name="a3/**/*.java"/>
@@ -683,18 +680,8 @@
     -->
   <target name="test1.recovery" depends="test1-3.recovery"/>
 
-  <target name="prop1.recovery" depends="prop1.recovery.windows,prop1.recovery.unix"/>
-
-  <target name="prop1.recovery.windows" if="windows">
-    <property name="jvmargs" value="-Dbounce=50000 -Dtimeout=1200000"/>
-  </target>
-
-  <target name="prop1.recovery.unix" if="unix">
-    <property name="jvmargs" value="-Dbounce=50000 -Dtimeout=1200000"/>
-  </target>
-
   <!-- 1 domain -->
-  <target name="test1-3.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test1-3.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test1"/>
       <param name="testid" value="3"/>
@@ -703,7 +690,7 @@
   </target>
 
   <!-- 1 domain, HttpNetwork -->
-  <target name="test1.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test1.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test1"/>
       <param name="testid" value="http-a"/>
@@ -718,18 +705,8 @@
 
   <target name="test2.recovery" depends="test2-1.recovery"/>
 
-  <target name="prop2.recovery" depends="prop2.recovery.windows,prop2.recovery.unix"/>
-
-  <target name="prop2.recovery.windows" if="windows">
-    <property name="jvmargs" value="-Dbounce=2500 -Dtimeout=360000"/>
-  </target>
-
-  <target name="prop2.recovery.unix" if="unix">
-    <property name="jvmargs" value="-Dbounce=50000 -Dtimeout=1200000"/>
-  </target>
-
   <!-- 2 domains -->
-  <target name="test2-1.recovery" depends="init.a3props,compile,prop2.recovery">
+  <target name="test2-1.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test2"/>
       <param name="testid" value="1"/>
@@ -738,7 +715,7 @@
   </target>
 
   <!-- 3 http servers, 1! domain -->
-  <target name="test2-1.http.recovery" depends="init.a3props,compile,prop2.recovery">
+  <target name="test2-1.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test2"/>
       <param name="testid" value="1.http"/>
@@ -747,7 +724,7 @@
   </target>
 
   <!-- 3 http servers, 2 domains -->
-  <target name="test2-2.http.recovery" depends="init.a3props,compile,prop2.recovery">
+  <target name="test2-2.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test2"/>
       <param name="testid" value="2a.http"/>
@@ -897,7 +874,7 @@
   <target name="test8.recovery" depends="test8-1.recovery,test8-2.recovery"/>
 
   <!-- 1 domain -->
-  <target name="test8-1.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test8-1.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test8"/>
       <param name="testid" value="1"/>
@@ -905,7 +882,7 @@
     </antcall>
   </target>
 
-  <target name="test8-2.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test8-2.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test8"/>
       <param name="testid" value="2"/>
@@ -914,7 +891,7 @@
   </target>
 
   <!-- 3 servers HttpNetwork, 1! domain -->
-  <target name="test8-1.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test8-1.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test8"/>
       <param name="testid" value="1a.http"/>
@@ -928,7 +905,7 @@
   </target>
 
   <!-- 3 servers HttpNetwork, 2 domains -->
-  <target name="test8-2.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test8-2.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test8"/>
       <param name="testid" value="2a.http"/>
@@ -944,7 +921,7 @@
   <!--
     - Test the detachable property of Notification in case of failure.
     -->
-  <target name="test9.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test9.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test9"/>
       <param name="testid" value="1"/>
@@ -953,7 +930,7 @@
   </target>
 
   <!-- 1 domain, HttpNetwork -->
-  <target name="test9.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test9.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test9"/>
       <param name="testid" value="3a"/>
@@ -969,7 +946,7 @@
   <!--
     - Test the expiration property of Notification in case of failure.
     -->
-  <target name="test10.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test10.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
       <param name="testid" value="1"/>
@@ -979,14 +956,14 @@
 
   <!-- 1 domain, HttpNetwork -->
   <target name="test10.http.recovery" depends="test10a.http.recovery,test10b.http.recovery"/>
-  <target name="test10a.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test10a.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
       <param name="testid" value="1a"/>
       <param name="a3conf" value="recovery/a3servers1.http.1.xml"/>
     </antcall>
   </target>
-  <target name="test10b.http.recovery" depends="init.a3props,compile,prop1.recovery">
+  <target name="test10b.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
       <param name="testid" value="1b"/>
