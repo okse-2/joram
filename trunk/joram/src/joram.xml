@@ -29,6 +29,7 @@
       <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
       <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/UDPNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
