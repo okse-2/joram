@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -863,6 +863,21 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 	
 	canStop = false;
 	if (! isRunning) break;
+
+        if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
+          // The notification is malformed.
+          logmon.log(BasicLevel.ERROR,
+                     getName() + ": Bad message [" +
+                     msg.from + ", " + msg.to + msg.not + ']');
+          // Remove the failed notification ..
+          qin.pop();
+          // .. then deletes it ..
+          msg.delete();
+          // .. and frees it.
+          msg.free();
+
+          continue;
+        }
 
         if ((msg.not.expiration <= 0L) ||
             (msg.not.expiration >= System.currentTimeMillis())) {
