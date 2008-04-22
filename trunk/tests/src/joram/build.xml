@@ -262,7 +262,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="tests.bridge" description=" --> launch all bridge tests">
-    <!-- ant dir="." antfile="build.xml" target="bridge.test1"/ -->
+    <ant dir="." antfile="build.xml" target="bridge.test1"/>
     <ant dir="." antfile="build.xml" target="bridge.test2"/>
     <ant dir="." antfile="build.xml" target="bridge.test3"/>
     <ant dir="." antfile="build.xml" target="bridge.test4"/>
