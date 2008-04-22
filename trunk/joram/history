@@ -1,11 +1,16 @@
+###############################################################################
+# 2008/04/22 | Joram 5.0.9 tag.
+###############################################################################
 +==============================================================================
 | 2008/04/22 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Add a network over UDP.
+ Add a Network component over UDP.
 +==============================================================================
 | 2008/04/21 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Report modifications from SADT base.
+1. Engine: Fix a potential bug with a malformed message (should never happened).
+2. Debug: Improve internal PrivateLogger class in order to allow level handling.
+3. Report minor modifications from SADT base.
 +==============================================================================
 | 2008/04/18 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+----------------------------------------------------------------
@@ -15,10 +20,10 @@
 2. Destination and UserAgent:
   - Bug fix: jmx register (osgi used).
 3. ConfigController
-  - add envProperties.
-  - Bug fix: reconf HTTP network NBDaemon. (report)
+  - Add envProperties.
+  - Allows NBDaemon reconfiguration with HTTPNetwork (report from SADT base).
 4. Network:
-  - add setProperties().
+  - Define a setProperties method allowing overloading in subclasses.
 +==============================================================================
 | 2008/04/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
