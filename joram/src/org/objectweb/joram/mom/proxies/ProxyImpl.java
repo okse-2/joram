@@ -123,6 +123,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -350,7 +351,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (!cSub.getDurable()) {
         subsTable.remove(subName);
         try {
-          MXWrapper.unregisterMBean("Joram", getMBeanName(subName));
+          MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName(subName));
         } catch (Exception e1) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
@@ -363,7 +364,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                           messages,
                           true);
         try {
-          MXWrapper.registerMBean(cSub, "Joram", getMBeanName(subName));
+          MXWrapper.registerMBean(cSub, "Joram#"+AgentServer.getServerId(), getMBeanName(subName));
         } catch (Exception e1) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e1);
@@ -925,7 +926,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
       subsTable.put(subName, cSub);
       try {
-        MXWrapper.registerMBean(cSub, "Joram", getMBeanName(subName));
+        MXWrapper.registerMBean(cSub, "Joram#"+AgentServer.getServerId(), getMBeanName(subName));
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e);
@@ -1099,7 +1100,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     activeCtx.removeSubName(subName);
     subsTable.remove(subName);
     try {
-      MXWrapper.unregisterMBean("Joram", getMBeanName(subName));
+      MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName(subName));
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
@@ -1627,7 +1628,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         sub.delete();
         subsTable.remove(subName);
         try {
-          MXWrapper.unregisterMBean("Joram", getMBeanName(subName));
+          MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName(subName));
         } catch (Exception e) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
@@ -2027,7 +2028,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           name = (String) e.nextElement();
           sub = (ClientSubscription) subsTable.remove(name);
           try {
-            MXWrapper.unregisterMBean("Joram", getMBeanName(name));
+            MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName(name));
           } catch (Exception e1) {
             if (logger.isLoggable(BasicLevel.WARN))
               logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
@@ -2102,7 +2103,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         name = (String) e.nextElement();
         sub = (ClientSubscription) subsTable.remove(name);
         try {
-          MXWrapper.unregisterMBean("Joram", getMBeanName(name));
+          MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName(name));
         } catch (Exception e1) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
