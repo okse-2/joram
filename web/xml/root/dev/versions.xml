@@ -11,6 +11,26 @@
   </properties>
 
   <body>
+    <s1 name="JORAM maintenance release 5.0.9 (April 22, 2008)">
+      <p>Joram 5.0.9 is available in the CVS repository with tag JORAM_5_0_9.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvments">
+	<ul>
+	  <li>Adds a new UDP based network component.</li>
+	  <li>Adds JMX based administration for JNDI implementation.</li>
+	  <li>Enhancement in JMX use in an OSGI environment.</li>
+	  <li>RA behavior in an HA colocated mode.</li>
+	  <li>Javadoc and logging enhancements.</li>
+	</ul>
+      </s2>
+      <s2 name="Bug fixes">
+	<ul>
+          <li>NTransaction: No longer call System.exit in case of fatal errors.</li>
+          <li>JNDI: don't freeze the server in case of context loosing..</li>
+	</ul>
+      </s2>
+    </s1>
+
     <s1 name="JORAM maintenance release 5.0.8 (February 12, 2008)">
       <p>Joram 5.0.8 is available in the CVS repository with tag JORAM_5_0_8.
        This release provides many features and changes:</p>
