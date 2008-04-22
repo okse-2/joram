@@ -47,7 +47,7 @@ public class test8 extends TestCase {
 
   protected void setUp() throws Exception {
     int bounce = Integer.getInteger("bounce", 250).intValue();
-    timeout = 200L * bounce;
+    timeout = 500L * bounce;
     timeout = Long.getLong("timeout", timeout).longValue();
     
     timer = new Timer(true);

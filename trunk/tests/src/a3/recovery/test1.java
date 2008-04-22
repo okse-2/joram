@@ -43,7 +43,7 @@ public class test1 extends TestCase {
     startAgentServer(ServerPong);
 
     int bounce = Integer.getInteger("bounce", 1500).intValue();
-    timeout = 100L * bounce;
+    timeout = 250L * bounce;
     timeout = Long.getLong("timeout", timeout).longValue();
     
     Timer timer = new Timer(true);
