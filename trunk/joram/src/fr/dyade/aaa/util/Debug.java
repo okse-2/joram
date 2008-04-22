@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,6 @@ import java.io.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.*;
-import org.objectweb.util.monolog.wrapper.remote.lib.MonologFactoryMBeanImpl;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * This class handles the debug traces.
@@ -186,7 +184,20 @@ public class Debug {
       BasicLevel.WARN = 600;
       BasicLevel.INFO = 400;
       BasicLevel.DEBUG = 200;
+
+      level = BasicLevel.WARN;
+
+      try {
+        out = new PrintStream(new FileOutputStream("joram.log"), true);
+      } catch (FileNotFoundException exc) {
+        exc.printStackTrace();
+        out = System.err;
+      }
     }
+
+    int level;
+
+    PrintStream out = null;
 
     // Interface Handler
 
@@ -241,14 +252,18 @@ public class Debug {
      *
      * @param  l  The new IntLevel value
      */
-    public void setIntLevel(int l) {}
+    public void setIntLevel(int l) {
+      level = l;
+    }
 
     /**
      *  Sets the Level attribute of the LoggerImpl object
      *
      * @param  l  The new Level value
      */
-    public void setLevel(Level l) {}
+    public void setLevel(Level l) {
+      level = l.getIntValue();
+    }
 
     /**
      *  Gets the CurrentIntLevel attribute of the LoggerImpl object
@@ -256,7 +271,7 @@ public class Debug {
      * @return    The CurrentIntLevel value
      */
     public int getCurrentIntLevel() {
-      return BasicLevel.ERROR;
+      return level;
     }
 
     /**
@@ -275,7 +290,7 @@ public class Debug {
      * @return    The Loggable value
      */
     public boolean isLoggable(int level) {
-      if (level >= BasicLevel.ERROR)
+      if (level >= getCurrentIntLevel())
         return true;
       return false;
     }
@@ -287,7 +302,7 @@ public class Debug {
      * @return    The Loggable value
      */
     public boolean isLoggable(Level l) {
-      if (l.getIntValue() >= BasicLevel.ERROR)
+      if (l.getIntValue() >= getCurrentIntLevel())
         return true;
       return false;
     }
@@ -307,8 +322,8 @@ public class Debug {
      * given message is treated
      */
     public void log(int level, Object o) {
-      if (level >= BasicLevel.ERROR)
-        System.err.println(o.toString());
+      if (level >= getCurrentIntLevel())
+        out.println(o.toString());
     }
     /**
      * Log a message, with no arguments.
@@ -316,8 +331,8 @@ public class Debug {
      * given message is treated
      */
     public void log(Level l, Object o) {
-      if (l.getIntValue() >= BasicLevel.ERROR)
-        System.err.println(o.toString());
+      if (l.getIntValue() >= getCurrentIntLevel())
+        out.println(o.toString());
     }
 
     /**
@@ -325,16 +340,16 @@ public class Debug {
      * error or a context..
      */
     public void log(int level, Object o, Throwable t) {
-      if (level >= BasicLevel.ERROR)
-        System.err.println(o.toString() + ":" + t.toString());
+      if (level >= getCurrentIntLevel())
+        out.println(o.toString() + ":" + t.toString());
     }
     /**
      * Log a message, with a throwable arguments which can represent an 
      * error or a context..
      */
     public void log(Level l, Object o, Throwable t) {
-      if (l.getIntValue() >= BasicLevel.ERROR)
-        System.err.println(o.toString() + ":" + t.toString());
+      if (l.getIntValue() >= getCurrentIntLevel())
+        out.println(o.toString() + ":" + t.toString());
     }
 
 
@@ -346,8 +361,8 @@ public class Debug {
      * represents the method name.
      */
     public void log(int level, Object o, Object location, Object method) {
-      if (level >= BasicLevel.ERROR)
-        System.err.println(location.toString() + "." + method.toString() +
+      if (level >= getCurrentIntLevel())
+        out.println(location.toString() + "." + method.toString() +
                            "(...) :" + o.toString());
     }
     /**
@@ -359,8 +374,8 @@ public class Debug {
      */
     public void log(Level l, Object o, Object location,
                     Object method) {
-      if (l.getIntValue() >= BasicLevel.ERROR)
-        System.err.println(location.toString() + "." + method.toString() +
+      if (l.getIntValue() >= getCurrentIntLevel())
+        out.println(location.toString() + "." + method.toString() +
                            "(...) :" + o.toString());
     }
 
@@ -373,8 +388,8 @@ public class Debug {
      * The throwable parameter permits to log an Exception. 
      */
     public void log(int level, Object o, Throwable t, Object location, Object method) {
-      if (level >= BasicLevel.ERROR)
-        System.err.println(location.toString() + "." + method.toString() +
+      if (level >= getCurrentIntLevel())
+        out.println(location.toString() + "." + method.toString() +
                            "(...) :" + o.toString() + " " + t.toString());
     }
     /**
@@ -387,8 +402,8 @@ public class Debug {
      */
     public void log(Level l, Object o, Throwable t, Object location,
                     Object method) {
-      if (l.getIntValue() >= BasicLevel.ERROR)
-        System.err.println(location.toString() + "." + method.toString() +
+      if (l.getIntValue() >= getCurrentIntLevel())
+        out.println(location.toString() + "." + method.toString() +
                            "(...) :" + o.toString() + " " + t.toString());
     }
 
