@@ -261,19 +261,30 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="xa.test4"/>
   </target>
 
+  
   <target name="tests.bridge" description=" --> launch all bridge tests">
     <ant dir="." antfile="build.xml" target="bridge.test1"/>
+    <ant dir="." antfile="build.xml" target="bridge.test1.1"/>
     <ant dir="." antfile="build.xml" target="bridge.test2"/>
+    <ant dir="." antfile="build.xml" target="bridge.test2.1"/>
     <ant dir="." antfile="build.xml" target="bridge.test3"/>
+    <ant dir="." antfile="build.xml" target="bridge.test3.1"/>
     <ant dir="." antfile="build.xml" target="bridge.test4"/>
     <ant dir="." antfile="build.xml" target="bridge.test5"/>
+    <ant dir="." antfile="build.xml" target="bridge.test5.1"/>
     <ant dir="." antfile="build.xml" target="bridge.test6"/>
+    <ant dir="." antfile="build.xml" target="bridge.test6.1"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest1"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest1.1"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest2"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest2.1"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest3"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest4"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest4.1"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest5"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest5.1"/>
     <ant dir="." antfile="build.xml" target="bridge.xatest6"/>
+    <ant dir="." antfile="build.xml" target="bridge.xatest6.1"/>
   </target>
 
   <target name="tests.schedqueue"
@@ -2983,258 +2994,348 @@ description=" --> launch all exceptionlistener tests">
   <!-- end test xa -->
 
   <!-- start bridge test -->
-
+  <target name="bridge.test" depends="init.a3props,compile">
+     <parallel>
+       <antcall target="test.run" inheritAll="true"/>
+       
+       <sequential>
+         <sleep seconds="8"/>
+         <java classname="${adminClassName}" failonerror="no" fork="yes" dir="${test.dir}">
+           <classpath path="${project.class.path}"/>
+           <jvmarg line="${jvmadminArgs}"/>
+         </java>
+       </sequential>
+     </parallel>
+   </target>
+  
   <target name="bridge.test1" depends="init.a3props,compile"
           description=" --> producer on foreign queue, consumer on bridge queue ">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test1"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
         <param name="className" value="joram.bridge.BridgeTest"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.Admin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
   </target>
-
+  
+  <target name="bridge.test1.1" depends="init.a3props,compile"
+           description=" --> producer on foreign queue, consumer on bridge queue (automatic)">
+       <antcall target="bridge.test" inheritAll="true">
+         <param name="testid" value="bridge.test1.1"/>
+         <param name="adminClassName" value="joram.bridge.Admin"/>
+         <param name="className" value="joram.bridge.BridgeTest"/>
+         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+         <param name="jndiconf" value="bridge/jndi.properties"/>
+         <param name="a3conf" value="bridge/a3servers.xml"/>
+         <param name="jvmargs" value=""/>
+         <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+       </antcall>
+   </target>
+  
   <target name="bridge.test2" depends="init.a3props,compile"
           description=" --> publisher on foreign topic and subscriber on bridge topic">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test2"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
         <param name="className" value="joram.bridge.BridgeTest2"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.Admin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.test2.1" depends="init.a3props,compile"
+          description=" --> publisher on foreign topic and subscriber on bridge topic (automatic)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test2.1"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
+        <param name="className" value="joram.bridge.BridgeTest2"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
   </target>
 
   <target name="bridge.test3" depends="init.a3props,compile"
           description=" --> publisher on bridge topic and subscriber on foreign topic">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test3"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
         <param name="className" value="joram.bridge.BridgeTest3"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.Admin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.test3.1" depends="init.a3props,compile"
+          description=" --> publisher on bridge topic and subscriber on foreign topic (automatic)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test3.1"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
+        <param name="className" value="joram.bridge.BridgeTest3"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
   </target>
 
   <target name="bridge.test4" depends="init.a3props,compile"
           description=" --> producer on bridge queue ans consumer on foreign queue">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test4"/>
+        <param name="adminClassName" value="joram.bridge.Admin"/>
         <param name="className" value="joram.bridge.BridgeTest4"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.Admin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
   </target>
-
+  
   <target name="bridge.test5" depends="init.a3props,compile"
           description=" --> producer on bridge queue and subscriber on foreign topic">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test5"/>
+        <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
         <param name="className" value="joram.bridge.BridgeTest5"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.CrossAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.test5.1" depends="init.a3props,compile"
+          description=" --> producer on bridge queue and subscriber on foreign topic (automatic)">
+    <antcall target="bridge.test" inheritAll="true">
+      <param name="testid" value="bridge.test5.1"/>
+       <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
+       <param name="className" value="joram.bridge.BridgeTest5"/>
+       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+       <param name="jndiconf" value="bridge/jndi.properties"/>
+       <param name="a3conf" value="bridge/a3servers.xml"/>
+       <param name="jvmargs" value=""/>
+       <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+    </antcall>
   </target>
 
   <target name="bridge.test6" depends="init.a3props,compile"
           description=" --> publisher on bridge queue and consumer on  foreign queue">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test6"/>
+        <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
         <param name="className" value="joram.bridge.BridgeTest6"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.CrossAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.test6.1" depends="init.a3props,compile"
+          description=" --> publisher on bridge queue and consumer on  foreign queue (automatic)">
+    <antcall target="bridge.test" inheritAll="true">
+      <param name="testid" value="bridge.test6.1"/>
+      <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
+      <param name="className" value="joram.bridge.BridgeTest6"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+    </antcall>
   </target>
 
   <target name="bridge.xatest1" depends="init.a3props,compile"
           description=" --> producer on XA foreign queue and consumer on a bridge">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest1"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest1"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.XAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.xatest1.1" depends="init.a3props,compile"
+          description=" --> producer on XA foreign queue and consumer on a bridge (automatic)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest1.1"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
+        <param name="className" value="joram.bridge.XABridgeTest1"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
   </target>
 
   <target name="bridge.xatest2" depends="init.a3props,compile"
           description=" --> publisher on XA foreign topic and subscriber on a bridge">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest2"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest2"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.XAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
   </target>
 
+  <target name="bridge.xatest2.1" depends="init.a3props,compile"
+          description=" --> publisher on XA foreign topic and subscriber on a bridge (automatic)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest2.1"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
+        <param name="className" value="joram.bridge.XABridgeTest2"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
+  </target>
+  
   <target name="bridge.xatest3" depends="init.a3props,compile"
           description=" --> consumer on XA foreign queue and producer on bridge queue">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest3"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest3"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.XAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
   </target>
-
+ 
   <target name="bridge.xatest4" depends="init.a3props,compile"
           description=" --> subscriber on XA foreign topic and publisher on bridge topic">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest4"/>
+        <param name="adminClassName" value="joram.bridge.XAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest4"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.XAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
   </target>
 
+  <target name="bridge.xatest4.1" depends="init.a3props,compile"
+           description=" --> subscriber on XA foreign topic and publisher on bridge topic (automatic)">
+       <antcall target="bridge.test" inheritAll="true">
+         <param name="testid" value="bridge.xatest4.1"/>
+         <param name="adminClassName" value="joram.bridge.XAAdmin"/>
+         <param name="className" value="joram.bridge.XABridgeTest4"/>
+         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+         <param name="jndiconf" value="bridge/jndi.properties"/>
+         <param name="a3conf" value="bridge/a3servers.xml"/>
+         <param name="jvmargs" value=""/>
+         <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+       </antcall>
+   </target>
 
   <target name="bridge.xatest5" depends="init.a3props,compile"
           description=" --> consumer on XA foreign queue and publisher on bridge topic">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest5"/>
+        <param name="adminClassName" value="joram.bridge.CrossXAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest5"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.CrossXAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.xatest5.1" depends="init.a3props,compile"
+          description=" --> consumer on XA foreign queue and publisher on bridge topic">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest5.1"/>
+        <param name="adminClassName" value="joram.bridge.CrossXAAdmin"/>
+        <param name="className" value="joram.bridge.XABridgeTest5"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
   </target>
 
   <target name="bridge.xatest6" depends="init.a3props,compile"
           description=" -->  subscriber on XA foreign topic and producer on bridge queue">
-    <parallel>
-      <antcall target="test.run" inheritAll="true">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest6"/>
+        <param name="adminClassName" value="joram.bridge.CrossXAAdmin"/>
         <param name="className" value="joram.bridge.XABridgeTest6"/>
         <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
         <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
-
-      <sequential>
-        <sleep seconds="8"/>
-        <java classname="joram.bridge.CrossXAAdmin" failonerror="no" fork="yes" dir="${test.dir}">
-          <classpath path="${project.class.path}"/>
-        </java>
-      </sequential>
-    </parallel>
+  </target>
+  
+  <target name="bridge.xatest6.1" depends="init.a3props,compile"
+          description=" -->  subscriber on XA foreign topic and producer on bridge queue (automatic)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.xatest6.1"/>
+        <param name="adminClassName" value="joram.bridge.CrossXAAdmin"/>
+        <param name="className" value="joram.bridge.XABridgeTest6"/>
+        <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+        <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
   </target>
 
   <!-- end bridge test -->
