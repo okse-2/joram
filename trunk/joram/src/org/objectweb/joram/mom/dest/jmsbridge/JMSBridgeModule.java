@@ -961,11 +961,36 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     /** Notifies the daemon of a new "receive" request. */
     protected synchronized void receive() {
       requests++;
-
+      start();
+    }
+    
+    /**
+     * @see fr.dyade.aaa.util.Daemon#start()
+     */
+    public void start() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "start() running =  " + running);
+      
       if (running)
         return;
-
-      start();
+      
+      int retry = 0;
+      while (retry < 10) {
+        try {
+          super.start();
+          break;
+        } catch (IllegalThreadStateException e) {
+          logger.log(BasicLevel.ERROR, "EXCEPTION:: start() retry = " + retry, e);
+          retry++;
+          try {
+            if (retry > 6)
+            Thread.sleep(1000);
+            else 
+              Thread.sleep(100);
+          } catch (InterruptedException e1) {
+          }
+        }
+      }
     }
     
     /** The daemon's loop. */
