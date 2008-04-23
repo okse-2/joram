@@ -1,3 +1,25 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s):ScalAgent D.T.
+ * Contributor(s): 
+ */
 package joram.bridge;
 
 import java.util.Properties;
@@ -8,22 +30,19 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-
-
 public class CrossAdmin  {
 
-   
-    public static void main(String[] args) {
-	new CrossAdmin().run();
-    }
-          
-    public void run() {
-	try{
-	    AdminModule.connect("root", "root", 60);
-	    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    
-	    User.create("anonymous", "anonymous", 0);
-	    User.create("anonymous", "anonymous", 1);
+  public static void main(String[] args) {
+    new CrossAdmin().run();
+  }
+
+  public void run() {
+    try{
+      AdminModule.connect("root", "root", 60);
+      javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+
+      User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 1);
     
 	    // create The foreign destination and connectionFactory
 	    Queue foreignQueue = Queue.create(1, "foreignQueue");
@@ -51,7 +70,8 @@ public class CrossAdmin  {
 	    // Foreign Queue JNDI name: foreignDest
 	    prop.setProperty("destinationName", "foreignTopic");
 	    // automaticRequest
-	    prop.setProperty("automaticRequest", "false");
+      String autoReq = System.getProperty("automaticRequest", "false");
+      prop.setProperty("automaticRequest", autoReq);
 
 	    // Creating a Queue bridge on server 0:
 	    Queue joramQueue = Queue.create(0,
@@ -86,7 +106,7 @@ public class CrossAdmin  {
 
 	    AdminModule.disconnect();
 	    System.out.println("Admin closed.");
-	}catch(Exception exc){
-	}
+    }catch(Exception exc){
     }
+  }
 }

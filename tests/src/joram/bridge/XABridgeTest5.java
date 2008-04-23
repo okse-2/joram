@@ -45,80 +45,79 @@ import org.objectweb.joram.client.jms.XidImpl;
 
 public class XABridgeTest5 extends TestCase {
 
-   
-    public static void main(String[] args) {
-	new XABridgeTest5().run();
-    }
-          
-    public void run() {
-	try {
-	    System.out.println("servers start");
-	    startAgentServer((short)0);
-	    startAgentServer((short)1);
-	    Thread.sleep(8000);
-	    //admin();
-	    System.out.println("admin config ok");
 
-	    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-	    Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
-	    XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
-	    
-	    Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
-	    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
-	    jndiCtx.close();
-	    
-	    XAConnection foreignCnx = foreignCF.createXAConnection();
-	    XASession foreignSess = foreignCnx.createXASession();
-	    MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
-	    XAResource resource = ((XASession) foreignSess).getXAResource();
+  public static void main(String[] args) {
+    new XABridgeTest5().run();
+  }
 
-	    Connection joramCnx = joramCF.createConnection();
-	    Session joramSess = joramCnx.createSession(true, 0);
-	    MessageProducer joramSender = joramSess.createProducer(joramDest);
-	    foreignCnx.start();   
-	    
-	    TextMessage msg = joramSess.createTextMessage();
-	    
-	    for (int i = 1; i < 11; i++) {
-		msg.setText("Joram message number " + i);
-		System.out.println("send msg = " + msg.getText());
-		joramSender.send(msg);
-	    }
-	    
-	    joramSess.commit();
-	    
-	    
-	    Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());
-	    resource.start(xid, XAResource.TMNOFLAGS);
-	    System.out.println("resource = " + resource);
-	    
-	    for (int i = 1; i < 11; i++) {
-		msg =(TextMessage) foreignCons.receive();
-		if (msg != null){
-		    System.out.println("reiceive : " + msg.getText());
-		    assertEquals("Joram message number " + i, msg.getText());
-		}else{
-		    System.out.println("msg = null");
-		    error(new Exception("msg == null"));
-		}
-	    }
-	    
-	    System.out.println("commit xid = " + xid);
-	    resource.end(xid, XAResource.TMSUCCESS);
-	    resource.prepare(xid);
-	    resource.commit(xid, false);
-	    
-	    foreignCnx.close();
-	    joramCnx.close();
-	} catch (Throwable exc) {
-	    exc.printStackTrace();
-	    error(exc);
-	} finally {
-	    System.out.println("Server stop ");
-	    killAgentServer((short)0);
-	    killAgentServer((short)1);
-	    endTest(); 
-	}
+  public void run() {
+    try {
+      System.out.println("servers start");
+      startAgentServer((short)0);
+      startAgentServer((short)1);
+      Thread.sleep(8000);
+      System.out.println("admin config ok");
+
+      javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+      Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
+      XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
+
+      Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
+      ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+      jndiCtx.close();
+
+      XAConnection foreignCnx = foreignCF.createXAConnection();
+      XASession foreignSess = foreignCnx.createXASession();
+      MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
+      XAResource resource = ((XASession) foreignSess).getXAResource();
+
+      Connection joramCnx = joramCF.createConnection();
+      Session joramSess = joramCnx.createSession(true, 0);
+      MessageProducer joramSender = joramSess.createProducer(joramDest);
+      foreignCnx.start();   
+
+      TextMessage msg = joramSess.createTextMessage();
+
+      for (int i = 1; i < 11; i++) {
+        msg.setText("Joram message number " + i);
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+
+      joramSess.commit();
+
+
+      Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());
+      resource.start(xid, XAResource.TMNOFLAGS);
+      System.out.println("resource = " + resource);
+
+      for (int i = 1; i < 11; i++) {
+        msg =(TextMessage) foreignCons.receive();
+        if (msg != null){
+          System.out.println("reiceive : " + msg.getText());
+          assertEquals("Joram message number " + i, msg.getText());
+        }else{
+          System.out.println("msg = null");
+          error(new Exception("msg == null"));
+        }
+      }
+
+      System.out.println("commit xid = " + xid);
+      resource.end(xid, XAResource.TMSUCCESS);
+      resource.prepare(xid);
+      resource.commit(xid, false);
+
+      foreignCnx.close();
+      joramCnx.close();
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("Server stop ");
+      killAgentServer((short)0);
+      killAgentServer((short)1);
+      endTest(); 
     }
-    
+  }
+
 }

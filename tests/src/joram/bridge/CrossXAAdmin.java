@@ -73,7 +73,8 @@ public class CrossXAAdmin {
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignTopic");
     // automaticRequest
-    prop.setProperty("automaticRequest", "false");
+    String autoReq = System.getProperty("automaticRequest", "false");
+    prop.setProperty("automaticRequest", autoReq);
 
     // Creating a Queue bridge on server 0:
     Queue joramQueue = Queue.create(0,
