@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE project [
-    <!ENTITY common SYSTEM "file:./common.xml">
+    <!ENTITY common SYSTEM "./common.xml">
 ]>
 
 <project default="ship" basedir=".">
@@ -26,30 +26,18 @@
       <include name="fr/dyade/aaa/agent/HAEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
       <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
-      <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
       <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
       <include name="fr/dyade/aaa/agent/UDPNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
       <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
-      <include name="fr/dyade/aaa/agent/HttpDebug.java"/>
       <include name="fr/dyade/aaa/agent/UnknownDomainException.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
-      <include name="com/scalagent/jmx/*.java"/>
-      <include name="com/scalagent/scheduler/**/*.java"/>
-      <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
-      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
-      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
 
-      <include name="com/scalagent/joram/osgi/server/Activator.java"/>
-      <include name="com/scalagent/joram/osgi/client/Activator.java"/>
-      <include name="com/scalagent/joram/osgi/test/Activator.java"/>
-      <include name="com/scalagent/joram/osgi/test2/Activator.java"/>
-
-      <include name="fr/dyade/aaa/admin/**/*.java"/>
-      <include name="fr/dyade/aaa/jndi2/**/*.java"/>
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
       <include name="fr/dyade/aaa/util/JTransaction.java"/>
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
@@ -57,16 +45,52 @@
       <include name="fr/dyade/aaa/util/DBRepository.java"/>
       <include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/>
       <include name="fr/dyade/aaa/util/DerbyDBTransaction.java"/>
-      <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
+
+      <!-- Begin - Needed for JMX monitoring -->
       <include name="fr/dyade/aaa/util/management/*.java"/>
+      <include name="com/scalagent/jmx/*.java"/>
+      <!-- End - Needed for JMX monitoring -->
+
+      <include name="fr/dyade/aaa/admin/**/*.java"/>
+
+      <!-- Begin - Needed for JNDI -->
+      <include name="fr/dyade/aaa/jndi2/**/*.java"/>
+      <!-- End - Needed for task JNDI -->
+
+      <!-- Begin - Needed for OSGI -->
+      <include name="com/scalagent/joram/osgi/server/Activator.java"/>
+      <include name="com/scalagent/joram/osgi/client/Activator.java"/>
+      <!-- include name="com/scalagent/joram/osgi/test/Activator.java"/ -->
+      <!-- include name="com/scalagent/joram/osgi/test2/Activator.java"/ -->
+      <!-- End - Needed for task OSGI -->
+
+      <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
+
+      <!-- Begin - Needed for JORAM -->
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
       <include name="org/objectweb/joram/shared/admin/**/*.java"/>
       <include name="org/objectweb/joram/shared/client/**/*.java"/>
       <include name="org/objectweb/joram/shared/excepts/**/*.java"/>
       <include name="org/objectweb/joram/shared/messages/**/*.java"/>
+
       <include name="org/objectweb/joram/client/**/*.java"/>
       <exclude name="org/objectweb/joram/kclient/*.java"/>
       <include name="org/objectweb/joram/mom/**/*.java"/>
+      <!-- End - Needed for JORAM -->
+
+      <!-- Begin - Needed for JORAM FTP destinations -->
+      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
+      <!-- End - Needed for JORAM FTP destinations -->
+
+      <!-- Begin - Needed for JORAM Mail destinations -->
+      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
+      <!-- End - Needed for JORAM Mail destinations -->
+
+      <!-- Begin - Needed for JORAM Scheduler destinations -->
+      <include name="com/scalagent/scheduler/*.java"/>
+      <include name="com/scalagent/scheduler/event/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
+      <!-- End - Needed for JORAM Scheduler destinations -->
     </patternset>
 
     <!-- Specific classpath needed for compilation -->
@@ -130,10 +154,7 @@
         <include name="fr/dyade/aaa/jndi2/server/*.class"/>
         <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
         <include name="org/objectweb/joram/mom/**/*.class"/>
-        <include name="com/scalagent/joram/mom/dest/scheduler/*.class"/>
-        <include name="com/scalagent/joram/mom/dest/ftp/*.class"/>
-        <include name="com/scalagent/joram/mom/dest/mail/*.class"/>
-        <include name="com/scalagent/scheduler/**/*.class"/>
+        <include name="com/scalagent/joram/mom/**/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
