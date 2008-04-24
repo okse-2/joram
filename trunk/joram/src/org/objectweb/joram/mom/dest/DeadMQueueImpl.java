@@ -33,7 +33,6 @@ import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
-import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetDMQRequest;
@@ -46,6 +45,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.util.Debug;
 

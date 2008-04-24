@@ -34,7 +34,6 @@ import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
 import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
 import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
@@ -52,6 +51,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
 

@@ -36,7 +36,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-import org.objectweb.joram.mom.notifications.ExpiredNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
