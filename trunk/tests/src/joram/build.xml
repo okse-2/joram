@@ -124,10 +124,7 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="recovery.test6"/>
     <ant dir="." antfile="build.xml" target="recovery.test7"/>
     <ant dir="." antfile="build.xml" target="recovery.test8"/>
-    <ant dir="." antfile="build.xml" target="recovery.test8_2"/>
-    <ant dir="." antfile="build.xml" target="recovery.test8_3"/>
     <ant dir="." antfile="build.xml" target="recovery.test9"/>
-    <ant dir="." antfile="build.xml" target="recovery.test9_2"/>
   </target>
 
   <target name="tests.dist"
@@ -874,49 +871,66 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="recovery.test8" depends="init.a3props,compile"
+  <target name="recovery.test8"
+          description=" --> test the DMQ recovery">
+    <ant dir="." antfile="build.xml" target="recovery.test8-1"/>
+    <ant dir="." antfile="build.xml" target="recovery.test8-2"/>
+    <ant dir="." antfile="build.xml" target="recovery.test8-3"/>
+  </target>
+
+  <target name="recovery.test8-1" depends="init.a3props,compile"
           description=" --> test  the DMQ recovery">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8"/>
+      <param name="testid" value="1"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
-  <target name="recovery.test8_2" depends="init.a3props,compile"
-          description=" --> test  the DMQ recovery. DMQ is on other server">
+  <target name="recovery.test8-2" depends="init.a3props,compile"
+          description=" --> test the DMQ recovery. DMQ is on other server">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8_2"/>
+      <param name="testid" value="2"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
-  <target name="recovery.test8_3" depends="init.a3props,compile"
-          description=" --> test  the DMQ recovery">
+  <target name="recovery.test8-3" depends="init.a3props,compile"
+          description=" --> test the DMQ recovery">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8_3"/>
+      <param name="testid" value="3"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
-  <target name="recovery.test9" depends="init.a3props,compile">
+  <target name="recovery.test9">
+    <ant dir="." antfile="build.xml" target="recovery.test9-1"/>
+    <ant dir="." antfile="build.xml" target="recovery.test9-2"/>
+  </target>
+
+  <target name="recovery.test9-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test9"/>
+      <param name="testid" value="1"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers4.xml"/>
       <param name="jvmargs" value="-DMsgSize=10240"/>
     </antcall>
   </target>
 
-  <target name="recovery.test9_2" depends="init.a3props,compile"
+  <target name="recovery.test9-2" depends="init.a3props,compile"
           description=" --> test recovery with several big message">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test9_2"/>
+      <param name="testid" value="2"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers4.xml"/>
       <param name="jvmargs" value="-DMsgSize=10240"/>
