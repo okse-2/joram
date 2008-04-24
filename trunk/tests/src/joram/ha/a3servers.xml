@@ -4,7 +4,7 @@
 
     <cluster id="0" name="C0">
       <property name="Engine" value="fr.dyade.aaa.agent.HAEngine"/>
-      <property name="JGroups.MCastAddr" value="224.0.0.128"/>
+      <property name="JGroups.MCastAddr" value="224.0.0.251"/>
       <property name="JGroups.MCastPort" value="56789"/>
       <server id="0" hostname="localhost">
         <network domain="D1" port="16301"/>        
