@@ -153,9 +153,12 @@ public class HATest2 extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      p0.destroy();
-      p1.destroy();
-      p2.destroy();
+      if (p0 != null)
+        p0.destroy();
+      if (p1 != null)
+        p1.destroy();
+      if (p2 != null)
+        p2.destroy();
       endTest();
     }
     System.out.println("end");
