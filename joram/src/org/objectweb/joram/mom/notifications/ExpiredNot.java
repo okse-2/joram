@@ -1,6 +1,5 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,23 +16,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s):
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-package hajndi;
+package org.objectweb.joram.mom.notifications;
 
-import javax.jms.*;
+import fr.dyade.aaa.agent.Notification;
 
+/**
+ * The ExpiredNot holds an expired notification (timeout) which is sent to the
+ * previously specified deadNotificationAgent.
+ * 
+ * @see #setDeadNotificationAgentId(fr.dyade.aaa.agent.AgentId)
+ */
+public class ExpiredNot extends Notification {
 
-public class Listener implements MessageListener {
-  public void onMessage(Message msg) {
-    try {
-      if (msg instanceof TextMessage)
-        System.out.println(((TextMessage) msg).getText());
-      else if (msg instanceof ObjectMessage)
-        System.out.println(((ObjectMessage) msg).getObject());
-    } catch (JMSException jE) {
-      System.err.println("Exception in listener: " + jE);
-    }
+  private static final long serialVersionUID = 1L;
+
+  private Notification expiredNot;
+
+  public ExpiredNot(Notification expiredNot) {
+    this.expiredNot = expiredNot;
   }
+
+  public Notification getExpiredNot() {
+    return expiredNot;
+  }
+
 }
