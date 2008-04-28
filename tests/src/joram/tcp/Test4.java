@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,79 +20,66 @@
  * Initial developer(s): Feliot David  (ScalAgent D.T.)
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
-
 package joram.tcp;
 
 import java.io.File;
 
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
+import javax.jms.IllegalStateException;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 
 /**
- * Close a connection (stop the server).
- * Check that onException is called.
- * With and without heart beat.
- * 
- * @author feliot
- *
- *
+ *  Check that the onException method is called when the connection is closed
+ * (closed by a server stop).
+ *  The test is launched 2 times: with and without "hear beat" timer.
  */
 public class Test4 extends TestCase {
-
-  public static final int MESSAGE_NUMBER = 10;
-
   public Test4() {
     super();
   }
 
-  private volatile JMSException expectedException;
-
   public void run() {
     try {
-      startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+      startAgentServer((short) 0);
+      Thread.sleep(1000);
 
-      AdminModule.connect("localhost", 2560,
-                          "root", "root", 2);
+      AdminModule.connect("localhost", 2560, "root", "root", 10);
 
-       org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User
-          .create("anonymous", "anonymous", 0);
+      User user = User.create("anonymous", "anonymous", 0);
 
-      TopicConnectionFactory tcf = TopicTcpConnectionFactory
-          .create("localhost", 2560);
+      ConnectionFactory tcf = TcpConnectionFactory.create("localhost", 2560);
       
-      org.objectweb.joram.client.jms.Topic topic = org.objectweb.joram.client.jms.Topic
-          .create(0);
+      Topic topic = Topic.create(0);
       topic.setFreeReading();
       topic.setFreeWriting();
-      
-      doTest(tcf, topic);
-      
-      new File("./s0/lock").delete();
-      startAgentServer(
-          (short)0, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
-
-      ((TopicTcpConnectionFactory)tcf).getParameters().connectingTimer = 4;
-      ((TopicTcpConnectionFactory)tcf).getParameters().cnxPendingTimer = 500;
-      
-      doTest(tcf, topic);
 
       AdminModule.disconnect();
+      
+      doTest(tcf, topic);
+      Thread.sleep(2000);
+      
+      new File("./s0/lock").delete();
+      startAgentServer((short)0);
+      Thread.sleep(1000);
 
+      ((TcpConnectionFactory)tcf).getParameters().connectingTimer = 4;
+      ((TcpConnectionFactory)tcf).getParameters().cnxPendingTimer = 500;
+      
+      doTest(tcf, topic);
     } catch (Exception exc) {
       stopAgentServer((short)0);
       error(exc);
@@ -101,17 +88,19 @@ public class Test4 extends TestCase {
     }
   }
 
-  private void doTest(TopicConnectionFactory tcf, Topic topic) throws Exception {
+  private volatile JMSException expectedException;
+
+  private void doTest(ConnectionFactory cf, Topic topic) throws Exception {
     expectedException = null;
     
     //  Topic pub/sub
-    TopicConnection tc = tcf.createTopicConnection();
-    TopicSession ts = tc.createTopicSession(true, 0);
-    TopicPublisher tpub = ts.createPublisher(topic);
-    TopicSubscriber tsub = ts.createSubscriber(topic);
-    tc.start();
+    Connection cnx = cf.createConnection();
+    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageProducer prod = session.createProducer(topic);
+    MessageConsumer cons = session.createConsumer(topic);
+    cnx.start();
 
-    tc.setExceptionListener(new ExceptionListener() {
+    cnx.setExceptionListener(new ExceptionListener() {
       public void onException(JMSException exception) {
         System.out.println("onException(" + exception + ')');
         expectedException = exception;
@@ -121,18 +110,18 @@ public class Test4 extends TestCase {
     stopAgentServer((short)0);
 
     // Wait for the connection failure detection
-    Thread.sleep(6000);
+    Thread.sleep(5000);
     
-    assertTrue("onException not called with " + tcf, 
+    assertTrue("onException not called with " + cf, 
         expectedException instanceof javax.jms.JMSException);
     
-    tpub.close();
+    prod.close();
     
     // Currently fails, bug ?
     // tsub.close();
     
-    ts.close();
-    tc.close(); 
+    session.close();
+    cnx.close(); 
 
 
   }
