@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2003 - Bull SA
- * Copyright (C) 2007 - ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -140,6 +140,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   private XAResource producerRes = null;
   /** consumer XAResource */
   private XAResource consumerRes = null;
+  /** serializable object for synchronization */
+  private Object lock = new String();
 
   /** Constructs a <code>BridgeUnifiedModule</code> module. */
   public JMSBridgeModule() {} 
@@ -209,6 +211,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     consumerDaemon = new ConsumerDaemon();
     reconnectionDaemon = new ReconnectionDaemon();
 
+    // start daemon.
+    consumerDaemon.start();
+    
     // Administered objects have not been retrieved: launching the startup
     // daemon.
     if ((!isXA && cnxFact == null) ||
@@ -285,81 +290,83 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       logger.log(BasicLevel.DEBUG, "receiveNoWait()");
     
     Message momMessage = null;
-    try {
-      setConsumer();
-      consumerCnx.start();
-      Xid xid = null;
+    synchronized (lock) {
       try {
-        if (isXA) {
-          xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+        setConsumer();
+        consumerCnx.start();
+        Xid xid = null;
+        try {
+          if (isXA) {
+            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "receiveNoWait: XA xid=" + xid);
+
+            try {
+              consumerRes.start(xid, XAResource.TMNOFLAGS);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.WARN))
+                logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + consumerRes, e);
+            }
+          }
+          org.objectweb.joram.client.jms.Message clientMessage = 
+            org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receiveNoWait());
+
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "receiveNoWait: XA xid=" + xid);
-          try {
-            consumerRes.start(xid, XAResource.TMNOFLAGS);
-          } catch (XAException e) {
-            if (logger.isLoggable(BasicLevel.WARN))
-              logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + consumerRes, e);
-          }
-        }
-        org.objectweb.joram.client.jms.Message clientMessage = 
-          org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receiveNoWait());
-       
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "receiveNoWait: clientMessage=" + clientMessage);
-        
-        momMessage = clientMessage.getMomMsg();
-        if (isXA) {
-          try {
-            consumerRes.end(xid, XAResource.TMSUCCESS);
+            logger.log(BasicLevel.DEBUG, "receiveNoWait: clientMessage=" + clientMessage);
+
+          momMessage = clientMessage.getMomMsg();
+          if (isXA) {
+            try {
+              consumerRes.end(xid, XAResource.TMSUCCESS);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "receiveNoWait: XA end " + consumerRes);
+
+            } catch (XAException e) {
+              throw new JMSException("XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
+            }
+            try {
+              int ret = consumerRes.prepare(xid);
+              if (ret == XAResource.XA_OK)
+                consumerRes.commit(xid, false);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "receiveNoWait: XA commit " + consumerRes);
+            } catch (XAException e) {
+              try {
+                consumerRes.rollback(xid);
+                if (logger.isLoggable(BasicLevel.DEBUG))
+                  logger.log(BasicLevel.DEBUG, "receiveNoWait: XA rollback" + consumerRes);
+              } catch (XAException e1) { }
+              throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
+                  consumerRes + " :: " + e.getMessage());
+            }
+          } else {
+            consumerSession.commit();
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "receiveNoWait: XA end " + consumerRes);
-            
-          } catch (XAException e) {
-            throw new JMSException("XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
+              logger.log(BasicLevel.DEBUG, "receiveNoWait: commit " + consumerSession);
           }
-          try {
-            int ret = consumerRes.prepare(xid);
-            if (ret == XAResource.XA_OK)
-              consumerRes.commit(xid, false);
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "receiveNoWait: XA commit " + consumerRes);
-          } catch (XAException e) {
+        } catch (MessageFormatException exc) {
+          // Conversion error: denying the message.
+          if (isXA) {
             try {
               consumerRes.rollback(xid);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "receiveNoWait: XA rollback" + consumerRes);
+                logger.log(BasicLevel.DEBUG, "receiveNoWait: XA rollback " + consumerRes);
             } catch (XAException e1) { }
-            throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
-                consumerRes + " :: " + e.getMessage());
-          }
-        } else {
-          consumerSession.commit();
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "receiveNoWait: commit " + consumerSession);
-        }
-      } catch (MessageFormatException exc) {
-        // Conversion error: denying the message.
-        if (isXA) {
-          try {
-            consumerRes.rollback(xid);
+          } else {
+            consumerSession.rollback();
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "receiveNoWait: XA rollback " + consumerRes);
-          } catch (XAException e1) { }
-        } else {
-          consumerSession.rollback();
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "receiveNoWait: rollback " + consumerSession);
+              logger.log(BasicLevel.DEBUG, "receiveNoWait: rollback " + consumerSession);
+          }
         }
+      } catch (JMSException commitExc) {
+        // Connection start, or session commit/rollback failed:
+        // setting the message to null.
+        momMessage = null;
       }
-    } catch (JMSException commitExc) {
-      // Connection start, or session commit/rollback failed:
-      // setting the message to null.
-      momMessage = null;
     }
-    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "receiveNoWait: momMessage=" + momMessage);
-    
+
     return momMessage;
   }
 
@@ -388,61 +395,64 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    *              be converted into a foreign JMS message.
    */
   public void send(org.objectweb.joram.shared.messages.Message message)
-              throws JMSException {
+  throws JMSException {
     if (! usable)
       throw new IllegalStateException(notUsableMessage);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "send(" + message + ')');
-    
-    try {
-      Xid xid = null;
-      if (isXA) {
-        xid = new XidImpl(new byte[0], 1, message.id.getBytes());
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "send: xid=" + xid);
-        try {
-          producerRes.start(xid, XAResource.TMNOFLAGS);
-        } catch (XAException e) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + producerRes, e);
-        }
-      }
-      producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "send: " + producer + " send.");
-      acknowledge(message);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "send: acknowledge.");
-      if (isXA) {
-        try {
-          producerRes.end(xid, XAResource.TMSUCCESS);
+
+    synchronized (lock) {
+      try {
+        Xid xid = null;
+        if (isXA) {
+          xid = new XidImpl(new byte[0], 1, message.id.getBytes());
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "send: XA end " + producerRes);
-        } catch (XAException e) {
-          throw new JMSException("resource end(...) failed: " + producerRes + " :: " + e.getMessage());
-        }
-        try {
-          int ret = producerRes.prepare(xid);
-          if (ret == XAResource.XA_OK)
-            producerRes.commit(xid, false);
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "send: XA commit " + producerRes);
-        } catch (XAException e) {
+            logger.log(BasicLevel.DEBUG, "send: xid=" + xid);
+
           try {
-            producerRes.rollback(xid);
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "send: XA rollback " + producerRes);
-          } catch (XAException e1) { }
-          throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
-                producerRes + " :: " + e.getMessage());
+            producerRes.start(xid, XAResource.TMNOFLAGS);
+          } catch (XAException e) {
+            if (logger.isLoggable(BasicLevel.WARN))
+              logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + producerRes, e);
+          }
         }
+        producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "send: " + producer + " send.");
+        acknowledge(message);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "send: acknowledge.");
+        if (isXA) {
+          try {
+            producerRes.end(xid, XAResource.TMSUCCESS);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "send: XA end " + producerRes);
+          } catch (XAException e) {
+            throw new JMSException("resource end(...) failed: " + producerRes + " :: " + e.getMessage());
+          }
+          try {
+            int ret = producerRes.prepare(xid);
+            if (ret == XAResource.XA_OK)
+              producerRes.commit(xid, false);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "send: XA commit " + producerRes);
+          } catch (XAException e) {
+            try {
+              producerRes.rollback(xid);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "send: XA rollback " + producerRes);
+            } catch (XAException e1) { }
+            throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
+                producerRes + " :: " + e.getMessage());
+          }
+        }
+      } catch (javax.jms.JMSException exc) {
+        // Connection failure? Keeping the message for later delivery.
+        qout.add(message);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "send: Exception qout=" + qout);
       }
-    } catch (javax.jms.JMSException exc) {
-      // Connection failure? Keeping the message for later delivery.
-      qout.add(message);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "send: Exception qout=" + qout);
     }
   }
 
@@ -495,72 +505,75 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
     try {
       Xid xid = null;
-      try {
-        if (isXA) {
-          xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+      synchronized (lock) {
+        try {
+          if (isXA) {
+            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "onMessage: xid=" + xid);
+
+            try {
+              consumerRes.start(xid, XAResource.TMNOFLAGS);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.WARN))
+                logger.log(BasicLevel.WARN, "Exception onMessage:: XA can't start resource : " + consumerRes, e);
+            }
+          }
+          org.objectweb.joram.client.jms.Message clientMessage = 
+            org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
+          Message momMessage = clientMessage.getMomMsg();
+          if (isXA) {
+            try {
+              consumerRes.end(xid, XAResource.TMSUCCESS);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "onMessage: XA end " + consumerRes);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource end(...) failed: " + consumerRes, e);
+              throw new JMSException("onMessage: XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
+            }
+            try {
+              int ret = consumerRes.prepare(xid);
+              if (ret == XAResource.XA_OK)
+                consumerRes.commit(xid, false);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "onMessage: XA commit " + consumerRes);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource rollback(" + xid + ")", e);
+              try {
+                consumerRes.rollback(xid);
+                if (logger.isLoggable(BasicLevel.DEBUG))
+                  logger.log(BasicLevel.DEBUG, "onMessage: XA rollback " + consumerRes);
+              } catch (XAException e1) { }
+              throw new JMSException("onMessage: XA resource rollback(" + xid + ") failed: " + 
+                  consumerRes + " :: " + e.getMessage());
+            }
+
+          } else {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "onMessage: commit.");
+            consumerSession.commit();
+          }
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "onMessage: xid=" + xid);
-          try {
-            consumerRes.start(xid, XAResource.TMNOFLAGS);
-          } catch (XAException e) {
-            if (logger.isLoggable(BasicLevel.WARN))
-              logger.log(BasicLevel.WARN, "Exception onMessage:: XA can't start resource : " + consumerRes, e);
-          }
-        }
-        org.objectweb.joram.client.jms.Message clientMessage = 
-          org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
-        Message momMessage = clientMessage.getMomMsg();
-        if (isXA) {
-          try {
-            consumerRes.end(xid, XAResource.TMSUCCESS);
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "onMessage: XA end " + consumerRes);
-          } catch (XAException e) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource end(...) failed: " + consumerRes, e);
-            throw new JMSException("onMessage: XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
-          }
-          try {
-            int ret = consumerRes.prepare(xid);
-            if (ret == XAResource.XA_OK)
-              consumerRes.commit(xid, false);
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "onMessage: XA commit " + consumerRes);
-          } catch (XAException e) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource rollback(" + xid + ")", e);
+            logger.log(BasicLevel.DEBUG, "onMessage: send JMSBridgeDeliveryNot.");
+          Channel.sendTo(agentId, new JMSBridgeDeliveryNot(momMessage));
+
+        } catch (MessageFormatException conversionExc) {
+          // Conversion error: denying the message.
+          if (isXA) {
             try {
               consumerRes.rollback(xid);
               if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "onMessage: XA rollback " + consumerRes);
+                logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
             } catch (XAException e1) { }
-            throw new JMSException("onMessage: XA resource rollback(" + xid + ") failed: " + 
-                consumerRes + " :: " + e.getMessage());
-          }
-          
-        } else {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "onMessage: commit.");
-          consumerSession.commit();
-        }
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "onMessage: send JMSBridgeDeliveryNot.");
-        Channel.sendTo(agentId, new JMSBridgeDeliveryNot(momMessage));
-        
-      } catch (MessageFormatException conversionExc) {
-        // Conversion error: denying the message.
-        if (isXA) {
-          try {
-            consumerRes.rollback(xid);
+          } else {
+            consumerSession.rollback();
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
-          } catch (XAException e1) { }
-        } else {
-          consumerSession.rollback();
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
+              logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
+          }
         }
-      } 
+      }
     } catch (JMSException exc) {
       // Commit or rollback failed: nothing to do.
     }
@@ -750,8 +763,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "run: factory=" + factory + ", destination=" + dest);
           
-          if (dest instanceof Topic)
+          if (dest instanceof Topic) {
             automaticRequest = false;
+          }
         }
         try {
           if (isXA) {
@@ -760,9 +774,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
             doConnect();
           }
           
-          if (automaticRequest) {
-            consumerDaemon.start();
-          }
+          // start consumer daemon
+          consumerDaemon.start();
         } catch (AbstractMethodError exc) {
           usable = false;
           notUsableMessage = "Retrieved administered objects types not "
@@ -949,6 +962,10 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     /** Counter of pending "receive" requests. */
     private int requests = 0;
 
+    /** object for synchronization */
+    private Object consumerLock = new Object();
+    /** true if new "receive" request */
+    boolean receiveRequest = false;
 
     /** Constructs a <code>ReceiverDaemon</code> thread. */
     protected ConsumerDaemon() {
@@ -959,38 +976,35 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     }
 
     /** Notifies the daemon of a new "receive" request. */
-    protected synchronized void receive() {
-      requests++;
-      start();
+    protected void receive() {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+            "receive() automaticRequest = " + automaticRequest +
+            ", receiveRequest = " + receiveRequest);
+      if (!automaticRequest) {
+        synchronized (consumerLock) {
+          requests++;
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "receive(): notify");
+          consumerLock.notify();
+          receiveRequest = true;
+        }
+      }
     }
-    
+
     /**
      * @see fr.dyade.aaa.util.Daemon#start()
      */
     public void start() {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "start() running =  " + running);
+        logger.log(BasicLevel.DEBUG, 
+            "start() running =  " + running +
+            ", automaticRequest = " + automaticRequest);
       
       if (running)
         return;
       
-      int retry = 0;
-      while (retry < 10) {
-        try {
-          super.start();
-          break;
-        } catch (IllegalThreadStateException e) {
-          logger.log(BasicLevel.ERROR, "EXCEPTION:: start() retry = " + retry, e);
-          retry++;
-          try {
-            if (retry > 6)
-            Thread.sleep(1000);
-            else 
-              Thread.sleep(100);
-          } catch (InterruptedException e1) {
-          }
-        }
-      }
+      super.start();
     }
     
     /** The daemon's loop. */
@@ -999,86 +1013,30 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         logger.log(BasicLevel.DEBUG, "run()");
 
       try {
-        Message momMessage;
-        JMSBridgeDeliveryNot notif;
-
         setConsumer();
         consumerCnx.start();
-        while ((requests > 0 || automaticRequest) && running) {
-          canStop = true; 
-          Xid xid = null;
-          try {
-            if (isXA) {
-              xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "run: xid=" + xid);
-              try {
-                consumerRes.start(xid, XAResource.TMNOFLAGS);
-              } catch (XAException e) {
-                if (logger.isLoggable(BasicLevel.WARN))
-                  logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + consumerRes, e);
-              }
-            }
-            org.objectweb.joram.client.jms.Message clientMessage = 
-              org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receive());
-
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "run: clientMessage=" + clientMessage);
-            
-            momMessage = clientMessage.getMomMsg();
-            if (isXA) {
-              try {
-                consumerRes.end(xid, XAResource.TMSUCCESS);
-                if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "run: XA end " + consumerRes);
-              } catch (XAException e) {
-                if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "Exception:: XA resource end(...) failed: " + consumerRes, e);
-                throw new JMSException("XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
-              }
-              try {
-                int ret = consumerRes.prepare(xid);
-                if (ret == XAResource.XA_OK)
-                  consumerRes.commit(xid, false);
-                if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "run: XA commit " + consumerRes);
-              } catch (XAException e) {
-                if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "Exception:: XA resource rollback(" + xid + ")", e);
-                try {
-                  consumerRes.rollback(xid);
-                  if (logger.isLoggable(BasicLevel.DEBUG))
-                    logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
-                } catch (XAException e1) { }
-                throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
-                    consumerRes + " :: " + e.getMessage());
-              }
-            } else {
-              consumerSession.commit();
-            }
-          } catch (MessageFormatException messageExc) {
-            // Conversion error: denying the message.
-            if (isXA) {
-              try {
-                consumerRes.rollback(xid);
-                if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
-              } catch (XAException e1) { }
-            } else {
-              consumerSession.rollback();
-              if (logger.isLoggable(BasicLevel.DEBUG))
-                logger.log(BasicLevel.DEBUG, "run: rollback " + consumerSession);
-            }
-            continue;
-          }
-          // Processing the delivery.
-          canStop = false;
-          notif = new JMSBridgeDeliveryNot(momMessage);
-          Channel.sendTo(agentId, notif);
+        while (running) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "run: sendTo momMessage=" + momMessage);
-          if (!automaticRequest)
-            requests--;
+            logger.log(BasicLevel.DEBUG, "run: receiveRequest=" + receiveRequest +
+                ", automaticRequest=" + automaticRequest);
+          
+          synchronized (consumerLock) {
+            if (automaticRequest || receiveRequest) {
+              process(); 
+            } else {
+              try {
+                if (logger.isLoggable(BasicLevel.DEBUG))
+                  logger.log(BasicLevel.DEBUG, "run(): wait");
+                consumerLock.wait(); 
+                if (logger.isLoggable(BasicLevel.DEBUG))
+                  logger.log(BasicLevel.DEBUG, "run(): after wait");
+                process();
+              } catch (InterruptedException e2) {
+                break;
+              }
+            }
+            receiveRequest = false;
+          }
         }
       } catch (JMSException exc) {
         // Connection loss?
@@ -1088,6 +1046,96 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       }
     }
 
+    private void process() throws JMSException {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "process()");
+
+      Message momMessage;
+      JMSBridgeDeliveryNot notif;
+
+      canStop = true; 
+      Xid xid = null;
+      synchronized (lock) {
+        try {
+          if (isXA) {
+            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "run: xid=" + xid);
+
+            try {
+              consumerRes.start(xid, XAResource.TMNOFLAGS);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.WARN))
+                logger.log(BasicLevel.WARN, 
+                    "Exception:: XA can't start resource : " + consumerRes +
+                    ", xid = " + xid, e);
+            }
+          }
+          org.objectweb.joram.client.jms.Message clientMessage = 
+            org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receive());
+
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "run: clientMessage=" + clientMessage);
+
+          momMessage = clientMessage.getMomMsg();
+          if (isXA) {
+            try {
+              consumerRes.end(xid, XAResource.TMSUCCESS);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "run: XA end " + consumerRes);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, 
+                    "Exception:: XA resource end(...) failed: " + consumerRes +
+                    ", xid = " + xid, e);
+              throw new JMSException("XA resource end(...) failed: " + consumerRes + " :: " + e.getMessage());
+            }
+            try {
+              int ret = consumerRes.prepare(xid);
+              if (ret == XAResource.XA_OK)
+                consumerRes.commit(xid, false);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "run: XA commit " + consumerRes);
+            } catch (XAException e) {
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "Exception:: XA resource rollback(" + xid + ")", e);
+              try {
+                consumerRes.rollback(xid);
+                if (logger.isLoggable(BasicLevel.DEBUG))
+                  logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
+              } catch (XAException e1) { }
+              throw new JMSException("XA resource rollback(" + xid + ") failed: " + 
+                  consumerRes + " :: " + e.getMessage());
+            }
+          } else {
+            consumerSession.commit();
+          }
+        } catch (MessageFormatException messageExc) {
+          // Conversion error: denying the message.
+          if (isXA) {
+            try {
+              consumerRes.rollback(xid);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "run: XA rollback " + consumerRes);
+            } catch (XAException e1) { }
+          } else {
+            consumerSession.rollback();
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "run: rollback " + consumerSession);
+          }
+          return;
+        }
+      }
+      // Processing the delivery.
+      canStop = false;
+      notif = new JMSBridgeDeliveryNot(momMessage);
+      Channel.sendTo(agentId, notif);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "run: sendTo momMessage=" + momMessage);
+      if (!automaticRequest)
+        requests--;
+    }
+    
     /** Shuts the daemon down. */
     public void shutdown() {
     }
@@ -1120,34 +1168,38 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     public void run() {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "run()");
-      
-      Xid xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
-      try {
-        resource.start(xid, XAResource.TMNOFLAGS);
-      } catch (XAException exc) {
-        if(logger.isLoggable(BasicLevel.WARN))
+
+      synchronized (lock) {
+        Xid xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "run: xid = " + xid);
+
+        try {
+          resource.start(xid, XAResource.TMNOFLAGS);
+        } catch (XAException exc) {
+          if(logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + resource, exc);
-      }
-      
-      try {
-        Xid[] xids = resource.recover(XAResource.TMNOFLAGS);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "run: XA xid.length=" + xids.length);
-        // if needed recover this resource, and commit.
-        for (int i = 0; i < xids.length; i++) {
-          if (logger.isLoggable(BasicLevel.INFO))
-            logger.log(BasicLevel.INFO, "XARecoverDaemon : commit this " + xids[i].getGlobalTransactionId());
-          resource.commit(xids[i], false);
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "run: XA commit xid=" + xids[i]);
         }
-        
-        // ended the recover.
-        resource.end(xid, XAResource.TMSUCCESS);
-        
-      } catch (XAException e) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Exception:: run", e);
+
+        try {
+          Xid[] xids = resource.recover(XAResource.TMNOFLAGS);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "run: XA xid.length=" + xids.length);
+          // if needed recover this resource, and commit.
+          for (int i = 0; i < xids.length; i++) {
+            if (logger.isLoggable(BasicLevel.INFO))
+              logger.log(BasicLevel.INFO, "XARecoverDaemon : commit this " + xids[i].getGlobalTransactionId());
+            resource.commit(xids[i], false);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "run: XA commit xid=" + xids[i]);
+          }
+
+          // ended the recover.
+          resource.end(xid, XAResource.TMSUCCESS);
+        } catch (XAException e) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Exception:: run", e);
+        }
       }
     }
   }
