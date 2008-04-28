@@ -114,6 +114,8 @@ final class Message implements Serializable {
    */
   private void writeObject(java.io.ObjectOutputStream out)
        throws IOException {
+    if (iobuf == null)
+      iobuf = new byte[LENGTH];
     int idx = writeToBuf(iobuf, 0);
 
     // Writes notification attributes
@@ -174,8 +176,9 @@ final class Message implements Serializable {
    */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
-    iobuf = new byte[25];
-    in.readFully(iobuf, 0, 25);
+    if (iobuf == null)
+      iobuf = new byte[LENGTH];
+    in.readFully(iobuf, 0, LENGTH);
 
     int idx = readFromBuf(iobuf, 0);
 
