@@ -1512,6 +1512,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.tcp.Test"/>
+      <param name="testid" value="tcp.test1"/>
       <param name="jndiconf" value="tcp/jndi.properties"/>
       <param name="a3conf" value="tcp/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1524,6 +1525,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.tcp.Test2"/>
+      <param name="testid" value="tcp.test2"/>
       <param name="jndiconf" value="tcp/jndi.properties"/>
       <param name="a3conf" value="tcp/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1534,8 +1536,10 @@ description=" --> launch all exceptionlistener tests">
   <target name="tcp.test3" depends="init.a3props,compile"
           description=" --> test call of exception when recieve a message and when stop a server">
     <antcall target="test.run" inheritAll="true">
-      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <!-- Be careful ! Use NTransaction -->
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="className" value="joram.tcp.Test3"/>
+      <param name="testid" value="tcp.test3"/>
       <param name="jndiconf" value="tcp/jndi.properties"/>
       <param name="a3conf" value="tcp/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1546,8 +1550,10 @@ description=" --> launch all exceptionlistener tests">
   <target name="tcp.test4" depends="init.a3props,compile"
           description=" --> test call of exception when stop a server">
     <antcall target="test.run" inheritAll="true">
-      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <!-- Be careful ! Use NTransaction -->
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="className" value="joram.tcp.Test4"/>
+      <param name="testid" value="tcp.test4"/>
       <param name="jndiconf" value="tcp/jndi.properties"/>
       <param name="a3conf" value="tcp/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1559,6 +1565,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test call of exception when use a bad password">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="tcp.test5"/>
       <param name="className" value="joram.tcp.Test5"/>
       <param name="jndiconf" value="tcp/jndi.properties"/>
       <param name="a3conf" value="tcp/a3servers.xml"/>
