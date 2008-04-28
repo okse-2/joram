@@ -59,15 +59,9 @@ public class Test2 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
-      startAgentServer(
-        (short)1, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
-      startAgentServer(
-        (short)2, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+      startAgentServer((short) 0);
+      startAgentServer((short) 1);
+      startAgentServer((short) 2);
       
       AdminModule.connect("localhost", 2560,
                     "root", "root", 60);
@@ -127,9 +121,9 @@ public class Test2 extends TestCase {
     } catch (Exception exc) {
       error(exc);
     } finally {
-      stopAgentServer((short)0);
-      stopAgentServer((short)1);
-      stopAgentServer((short)2);
+      stopAgentServer((short) 0);
+      stopAgentServer((short) 1);
+      stopAgentServer((short) 2);
       endTest();     
     }
   }
