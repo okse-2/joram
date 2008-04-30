@@ -1006,7 +1006,6 @@ public final class AgentServer {
           A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
           s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
           s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
-          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.HttpDebug","20080"));
           d.addServer(s);
           a3config = new A3CMLConfig();
           a3config.addDomain(d);
