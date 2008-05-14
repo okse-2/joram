@@ -30,7 +30,8 @@
 
     <subtitle>API documentation</subtitle>
       <ul>
-        <li>Browsing the <a href="../current/javadoc/">Joram 5.0.8 javadoc</a>.</li>
+        <li>Browsing the user <a href="../current/javadoc/">Joram 5.0.9 javadoc</a>.</li>
+        <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/dox/html/index.html">here</a>.</li>
       </ul>
     </s1>
 
