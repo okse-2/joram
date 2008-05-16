@@ -595,8 +595,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     /** The communication socket. */
     private Socket sock = null;
 
-    MessageInputStream nis = null;
-    MessageOutputStream nos = null;
+    NetworkInputStream nis = null;
+    NetworkOutputStream nos = null;
 
     /** */
     private MessageVector sendList;
@@ -755,8 +755,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
-        nis = new MessageInputStream(sock.getInputStream());
-        nos = new MessageOutputStream(sock.getOutputStream());
+        nis = new NetworkInputStream(sock.getInputStream());
+        nos = new NetworkOutputStream(sock.getOutputStream());
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
@@ -825,8 +825,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
-        nis = new MessageInputStream(sock.getInputStream());
-        nos = new MessageOutputStream(sock.getOutputStream());
+        nis = new NetworkInputStream(sock.getInputStream());
+        nos = new NetworkOutputStream(sock.getOutputStream());
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.sock = sock;
@@ -1168,6 +1168,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 	logmon.log(BasicLevel.ERROR, getName() + ", exited", exc);
       } finally {
 	logmon.log(BasicLevel.DEBUG, getName() + ", ends");
+
 	running = false;
 	close();
       }
@@ -1176,123 +1177,28 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     /**
      * Class used to read messages through a stream.
      */
-    final class MessageInputStream extends ByteArrayInputStream {
-      private InputStream is = null;
-
-      MessageInputStream(InputStream is) {
-        super(new byte[256]);
+    final class NetworkInputStream extends BufferedMessageInputStream {
+      NetworkInputStream(InputStream is) {
+        super();
         this.is = is;
       }
 
-      private void readFully(int length) throws IOException {
-        count = 0;
-        if (length > buf.length) buf = new byte[length];
-
-        int nb = -1;
-        do {
-          nb = is.read(buf, count, length-count);
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", reads:" + nb);
-          if (nb < 0) throw new EOFException();
-          count += nb;
-        } while (count != length);
-        pos  = 0;
-      }
-
-      Message readMessage() throws Exception {
-        count = 0;
-        readFully(Message.LENGTH +4 -1);
-        // Reads boot timestamp of source server
-        int length = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
-          ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
-
-        Message msg = Message.alloc();
-        int idx = msg.readFromBuf(buf, 4);
-
-        if (length > idx) {
-          // Be careful, the buffer is resetted
-          readFully(length - idx);
-
-          // Reads notification attributes
-          boolean persistent = ((buf[0] & Message.PERSISTENT) == 0)?false:true;
-          boolean detachable = ((buf[0] & Message.DETACHABLE) == 0)?false:true;
-
-          pos = 1;
-          // Reads notification object
-          ObjectInputStream ois = new ObjectInputStream(this);
-          msg.not = (Notification) ois.readObject();
-          if (msg.not.expiration > 0)
-            msg.not.expiration += System.currentTimeMillis();
-          msg.not.persistent = persistent;
-          msg.not.detachable = detachable;
-          msg.not.detached = false;
-        } else {
-          msg.not = null;
-        }
-
-        return msg;
-      }
+      /**
+       * Reads the protocol header from this output stream.
+       */
+      protected void readHeader() throws IOException {}
     }
 
     /**
      * Class used to send messages through a stream.
      */
-    final class MessageOutputStream extends ByteArrayOutputStream {
-      private OutputStream os = null;
-      private ObjectOutputStream oos = null;
-
-      MessageOutputStream(OutputStream os) throws IOException {
-        super(256);
-
-        this.os = os;
-        oos = new ObjectOutputStream(this);
-        count = 0;
-        buf[Message.LENGTH +4] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-        buf[Message.LENGTH +5] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-        buf[Message.LENGTH +6] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-        buf[Message.LENGTH +7] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+    final class NetworkOutputStream extends BufferedMessageOutputStream {
+      NetworkOutputStream(OutputStream os) throws IOException {
+        super();
+        this.out = os;
       }
 
-      void writeMessage(Message msg,
-                        long currentTimeMillis) throws IOException {
-        logmon.log(BasicLevel.DEBUG, getName() + ", sends " + msg);
-
-        int idx = msg.writeToBuf(buf, 4);
-        // Be careful, notification attribute are not written if there
-        // is no notification.
-        count = Message.LENGTH +4 -1;
-        
-        try {
-          if (msg.not != null) {
-            // Writes notification attributes
-            buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
-                                 (msg.not.detachable?Message.DETACHABLE:0));
-
-            // Be careful, the stream header is hard-written in buf
-            count = Message.LENGTH +8;
-
-            if (msg.not.expiration > 0)
-              msg.not.expiration -= currentTimeMillis;
-            oos.writeObject(msg.not);
-            
-            oos.reset();
-            oos.flush();
-          }
-
-          // Writes length at beginning
-          buf[0] = (byte) (count >>>  24);
-          buf[1] = (byte) (count >>>  16);
-          buf[2] = (byte) (count >>>  8);
-          buf[3] = (byte) (count >>>  0);
-
-          os.write(buf, 0, count);;
-          os.flush();
-        } finally {
-          if ((msg.not != null) && (msg.not.expiration > 0))
-            msg.not.expiration += currentTimeMillis;
-          count = 0;
-        }
-      }
+      protected void writeHeader() {}
     }
   }
 
