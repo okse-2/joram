@@ -29,8 +29,6 @@ import java.io.Serializable;
  * Be careful this InputStream is not synchronized.
  */
 public abstract class MessageInputStream extends InputStream {
-  protected Logger logger = null;
-
   /**
    * The internal buffer where data is stored. 
    */
@@ -196,8 +194,7 @@ public abstract class MessageInputStream extends InputStream {
       msg.not = (Notification) ois.readObject();
       if (msg.not.expiration > 0)
         msg.not.expiration += System.currentTimeMillis();
-      msg.not.persistent = ((opt & Message.PERSISTENT) != 0);
-      msg.not.detachable = ((opt & Message.DETACHABLE) != 0);
+      msg.optFromByte(opt);
       msg.not.detached = false;
       // Skips the remaining TC_RESET byte
       read();

@@ -34,8 +34,6 @@ import java.io.Serializable;
  * Be careful this OutputStream is not synchronized.
  */
 public abstract class MessageOutputStream extends OutputStream {
-  protected Logger logger = null;
-
   /**
    * The internal ObjectOutputStream needed to serialize the notification.
    */
@@ -194,9 +192,7 @@ public abstract class MessageOutputStream extends OutputStream {
         flush();
       } else {
         // Writes notification attributes
-        buf[count++] = (byte) (Message.NOTNULL |
-                               (msg.not.persistent?Message.PERSISTENT:0) |
-                               (msg.not.detachable?Message.DETACHABLE:0));
+        buf[count++] = msg.optToByte();
 
         try {
           if (msg.not.expiration > 0)
