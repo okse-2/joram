@@ -169,7 +169,7 @@ public class SimpleNetwork extends StreamNetwork {
 //   }
 
   final class NetServerOut extends Daemon {
-    MessageOutputStream nos = null;
+    NetworkOutputStream nos = null;
 
     NetServerOut(String name, Logger logmon) {
       super(name + ".NetServerOut");
@@ -189,7 +189,7 @@ public class SimpleNetwork extends StreamNetwork {
 
       try {
         try {
-          nos = new MessageOutputStream();
+          nos = new NetworkOutputStream();
         } catch (IOException exc) {
           logmon.log(BasicLevel.FATAL,
                      getName() + ", cannot start.");
@@ -496,17 +496,19 @@ public class SimpleNetwork extends StreamNetwork {
       }
     }
 
-    public void send(Socket socket,
-                     Message msg,
-                     long currentTimeMillis) throws IOException {
+    void send(Socket socket,
+              Message msg,
+              long currentTimeMillis) throws IOException {
       InputStream is = null;
+      OutputStream os = null;
 
       try {
+        os = socket.getOutputStream();
         // Send the message,
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", write message");
-        nos.writeMessage(socket, msg, currentTimeMillis);
+        nos.writeMessage(os, msg, currentTimeMillis);
         // and wait the acknowledge.
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
@@ -520,7 +522,7 @@ public class SimpleNetwork extends StreamNetwork {
                           this.getName() + ", receive ack");
       } finally {
         try {
-          socket.getOutputStream().close();
+          os.close();
         } catch (Exception exc) {}
         try {
           is.close();
@@ -557,9 +559,8 @@ public class SimpleNetwork extends StreamNetwork {
 
     public void run() {
       Socket socket = null;
+      InputStream is = null;
       OutputStream os = null;
-      ObjectInputStream ois = null;
-      byte[] iobuf = new byte[29];
 
       try {
         // After a stop we needs to create anew the listen socket.
@@ -568,6 +569,7 @@ public class SimpleNetwork extends StreamNetwork {
           listen = createServerSocket();
         }
 
+        NetworkInputStream nis = new NetworkInputStream();
 	while (running) {
 	  try {
 	    canStop = true;
@@ -589,64 +591,37 @@ public class SimpleNetwork extends StreamNetwork {
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", connected");
 
-	    // Read the message,
-	    os = socket.getOutputStream();
-            InputStream is = socket.getInputStream();
-
-            Message msg = Message.alloc();
-            int n = 0;
-            do {
-              int count = is.read(iobuf, n, Message.LENGTH +4 - n);
-              if (count < 0) throw new EOFException();
-              n += count;
-            } while (n < (Message.LENGTH +4));
-
-            // Reads boot timestamp of source server
-            int boot = ((iobuf[0] & 0xFF) << 24) +
-              ((iobuf[1] & 0xFF) << 16) +
-              ((iobuf[2] & 0xFF) <<  8) +
-              ((iobuf[3] & 0xFF) <<  0);
-            
-            int idx = msg.readFromBuf(iobuf, 4);
-
-            // Reads notification attributes
-            boolean persistent = ((iobuf[idx] & Message.PERSISTENT) == 0)?false:true;
-            boolean detachable = ((iobuf[idx] & Message.DETACHABLE) == 0)?false:true;
-
-            // Reads notification object
-            ois = new ObjectInputStream(is);
-            msg.not = (Notification) ois.readObject();
-            if (msg.not.expiration > 0L)
-              msg.not.expiration += System.currentTimeMillis();
-            msg.not.persistent = persistent;
-            msg.not.detachable = detachable;
-            msg.not.detached = false;
+            // Read the message,
+            os = socket.getOutputStream();
+            is = socket.getInputStream();
+     
+            Message msg = nis.readMessage(is);
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", msg received");
 
-            testBootTS(msg.getSource(), boot);
             deliver(msg);
-
+        
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", send ack");
 
-	    // then send the acknowledge.
-	    os.write(0);
+            // then send the acknowledge.
+            os.write(0);
             os.flush();
 	  } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR, 
                             this.getName() + ", closed", exc);
 	  } finally {
+            nis.clean();
 	    try {
 	      os.close();
 	    } catch (Exception exc) {}
 	    os = null;
 	    try {
-	      ois.close();
+	      is.close();
 	    } catch (Exception exc) {}
-	    ois = null;
+	    is = null;
 	    try {
 	      socket.close();
 	    } catch (Exception exc) {}
@@ -662,55 +637,67 @@ public class SimpleNetwork extends StreamNetwork {
     }
   }
 
-  /**
-   * Class used to send messages through a TCP stream.
-   */
-  final class MessageOutputStream extends ByteArrayOutputStream {
-    private ObjectOutputStream oos = null;
-    private OutputStream os = null;
-
-    MessageOutputStream() throws IOException {
-      super(256);
-      oos = new ObjectOutputStream(this);
-      count = 0;
-      buf[Message.LENGTH +4] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[Message.LENGTH +5] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[Message.LENGTH +6] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[Message.LENGTH +7] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+  final class NetworkOutputStream extends BufferedMessageOutputStream {
+    NetworkOutputStream() throws IOException {
+      super();
     }
 
-    void writeMessage(Socket sock,
+    /**
+     * Writes the protocol header to this output stream.
+     */
+    protected void writeHeader() {
+      logmon.log(BasicLevel.FATAL,
+                 getName() + "writeHeader -> " + getBootTS());
+      writeInt(getBootTS());
+    }
+
+    /**
+     * Writes a message to the output stream of the socket.
+     * Be careful, the buffer must be large enough to contain the header.
+     *
+     * @param sock	      The output socket.
+     * @param msg 	      The message to write out.
+     * @param currentTimeMillis The current time in milliseconds, this
+     *        parameter is used to the handling of notification expiration.
+     */
+    void writeMessage(OutputStream os,
                       Message msg,
                       long currentTimeMillis) throws IOException {
-      os = sock.getOutputStream();
+      out = os;
+      writeMessage(msg, currentTimeMillis);
+    }
+  }
 
-      // Writes boot timestamp of source server
-      buf[0] = (byte) (getBootTS() >>>  24);
-      buf[1] = (byte) (getBootTS() >>>  16);
-      buf[2] = (byte) (getBootTS() >>>  8);
-      buf[3] = (byte) (getBootTS() >>>  0);
+  final class NetworkInputStream extends BufferedMessageInputStream {
+    NetworkInputStream() {
+      super();
+    }
 
-      int idx = msg.writeToBuf(buf, 4);
-      // Writes notification attributes
-      buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
-                           (msg.not.detachable?Message.DETACHABLE:0));
+    // The boot timestamp of the incoming message.
+    int boot;
 
-      // Be careful, the stream header is hard-written in buf
-      count = Message.LENGTH +8;
+    /**
+     * Reads the protocol header from this output stream.
+     */
+    protected void readHeader() throws IOException {
+      readFully(Message.LENGTH +4);
+      // Reads boot timestamp of source server
+      boot = readInt();
+      logmon.log(BasicLevel.FATAL,
+                 getName() + "readHeader -> " + boot);
+    }
 
-      try {
-        if (msg.not.expiration > 0L)
-          msg.not.expiration -= currentTimeMillis;
-        oos.writeObject(msg.not);
-        oos.reset();
-        oos.flush();
-        os.write(buf, 0, count);
-        os.flush();
-      } finally {
-        if (msg.not.expiration > 0L)
-          msg.not.expiration += currentTimeMillis;
-        count = 0;
-      }
+    /**
+     * Reads the message from the input stream.
+     *
+     * @param is the input stream.
+     * @return the incoming message.
+     */
+    Message readMessage(InputStream is) throws Exception {
+      this.is = is;
+      Message msg = readMessage();
+      testBootTS(msg.getSource(), boot);
+      return msg;
     }
   }
 }
