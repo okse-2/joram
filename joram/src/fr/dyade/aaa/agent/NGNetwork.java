@@ -783,8 +783,7 @@ public class NGNetwork extends StreamNetwork {
 
         if (msg.not != null) {
           // Writes notification attributes
-          buf[28] = (byte) ((msg.not.persistent?0x01:0) |
-                            (msg.not.detachable?0x10:0));
+          buf[28] = msg.optToByte();
           // Be careful, the stream header is hard-written in buf[29..32]
           count = 33;
 
@@ -1029,6 +1028,8 @@ public class NGNetwork extends StreamNetwork {
       }
 
       Message readMessage() throws Exception {
+        // AF: Be careful I think that there is an error here. The buffer has
+        // been refilled and may be reallocated !! 
         if (length > 28) {
           // Reads notification attributes
           boolean persistent = ((buf[28] & 0x01) == 0x01) ? true : false;
