@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,28 +17,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package joram.ha;
 
 import java.io.File;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnectionFactory;
+
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.Topic;
 
 import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 
 public class HATest2 extends TestCase {
+  public static final int MESSAGE_NUMBER = 50;
 
-  public static final int MESSAGE_NUMBER = 20;
+  public static final int  pause = 100;
 
   public HATest2() {
     super();
@@ -48,49 +53,29 @@ public class HATest2 extends TestCase {
     Process p0 = null;
     Process p1 = null;
     Process p2 = null;
+
     try {
-      File r0 = new File("r0");
-      r0.mkdir();
-
-      File r1 = new File("r1");
-      r1.mkdir();
-
-      File r2 = new File("r2");
-      r2.mkdir();
-
       System.out.println("Start the replica 0");
-      p0 = startAgentServer((short) 0, r0, new String[] {
-          "-DnbClusterExpected=1",
-          "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-          "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.." },
-          new String[] { "0" });
+      p0 = startHACollocatedClient((short) 0, null, "0");
       
-      try {
-        Thread.sleep(4000);
-      } catch (InterruptedException exc) {
-      }
+      Thread.sleep(2000);
 
       System.out.println("Start the replica 1");
-      p1 = startAgentServer((short) 0, r1, new String[] {
-          "-DnbClusterExpected=1",
-          "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-          "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.." },
-          new String[] { "1" });
+      p1 = startHACollocatedClient((short) 0, null, "1");
 
-     Thread.sleep(4000);
+      Thread.sleep(1000);
 
-      TopicConnectionFactory cf = TopicHATcpConnectionFactory
-          .create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-      ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
-      ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().connectingTimer = 30;
-      AdminModule.connect(cf, "root", "root");
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-      Topic topic = org.objectweb.joram.client.jms.Topic.create(0, "topic");
-      ((org.objectweb.joram.client.jms.Topic) topic).setFreeReading();
-      ((org.objectweb.joram.client.jms.Topic) topic).setFreeWriting();
+      User user = User.create("anonymous", "anonymous", 0);
 
-      org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User
-          .create("anonymous", "anonymous", 0);
+      ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+      ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
+      ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 30;
+
+      Topic topic = Topic.create(0, "topic");
+      topic.setFreeReading();
+      topic.setFreeWriting();
 
       AdminModule.disconnect();
 
@@ -99,51 +84,42 @@ public class HATest2 extends TestCase {
       MessageProducer producer = session.createProducer(topic);
       cnx.start();
 
-      new HATest.Killer(p0, 0, 500 * (MESSAGE_NUMBER / 2)).start();
-
-      Thread.sleep(8000);
+      new HATest.Killer(p0, 0, pause * (MESSAGE_NUMBER / 2)).start();
+      Thread.sleep(2000);
       
       for (int i = 0; i < MESSAGE_NUMBER; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
         producer.send(msg);
-         System.out.println("Msg sent: " + msg.getText());
-        Thread.sleep(500);
+        System.out.println("Msg sent: " + msg.getText());
+        Thread.sleep(pause);
       }
 
       System.out.println("Start the replica 2");
-      p2 = startAgentServer((short) 0, r2, new String[] {
-          "-DnbClusterExpected=1",
-          "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-          "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.." },
-          new String[] { "2" });
+      p2 = startHACollocatedClient((short) 0, null, "2");
 
-      Thread.sleep(8000);
+      Thread.sleep(2000);
 
-      new HATest.Killer(p1, 1, 500 * (MESSAGE_NUMBER / 2)).start();
+      new HATest.Killer(p1, 1, pause * (MESSAGE_NUMBER / 2)).start();
 
       for (int i = MESSAGE_NUMBER; i < MESSAGE_NUMBER * 2; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
-         System.out.println("Msg sent: " + msg.getText());
+        System.out.println("Msg sent: " + msg.getText());
         producer.send(msg);
-        Thread.sleep(500);
+        Thread.sleep(pause);
       }
 
       System.out.println("Start the replica 0");
-      p0 = startAgentServer((short) 0, r0, new String[] {
-          "-DnbClusterExpected=1",
-          "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-          "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.." },
-          new String[] { "0" });
+      p0 = startHACollocatedClient((short) 0, null, "0");
 
-      Thread.sleep(8000);
+      Thread.sleep(2000);
 
-      new HATest.Killer(p2, 2, 500 * (MESSAGE_NUMBER / 2)).start();
+      new HATest.Killer(p2, 2, pause * (MESSAGE_NUMBER / 2)).start();
 
       for (int i = MESSAGE_NUMBER * 2; i < MESSAGE_NUMBER * 3; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
         producer.send(msg);
-         System.out.println("Msg sent: " + msg.getText());
-        Thread.sleep(500);
+        System.out.println("Msg sent: " + msg.getText());
+        Thread.sleep(pause);
       }
 
       // Wait to enable the consumer to receive the messages.
@@ -164,10 +140,23 @@ public class HATest2 extends TestCase {
     System.out.println("end");
   }
 
-  public static Process startAgentServer(short sid, File dir, String[] jvmarg,
-      String[] servarg) throws Exception {
-    return HATest.startAgentServer(sid, dir, jvmarg, servarg,
-        "joram.ha.CollocatedClient");
+  public static Process startHACollocatedClient(short sid,
+                                                File dir,
+                                                String rid) throws Exception {
+    String[] jvmargs = new String[] {
+      "-DnbClusterExpected=1",
+      "-DTransaction=fr.dyade.aaa.util.NullTransaction",
+      "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.."};
+
+    String[] args = new String[] { rid };
+
+    Process p =  getAdmin().execAgentServer(sid, dir,
+                                            jvmargs,
+                                            "joram.ha.CollocatedClient",
+                                            args);
+    getAdmin().closeServerStream(p);
+
+    return p;
   }
 
   public static void main(String args[]) {
