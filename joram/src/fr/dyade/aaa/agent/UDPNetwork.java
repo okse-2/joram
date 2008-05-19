@@ -688,13 +688,53 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       }
     }
 
-    void rewriteMessage(ServerInfo serverInfo, SocketAddress addr, int startIndex, Message msg,
-        long currentTimeMillis) throws IOException {
+    /**
+     *  Write the Message internal state to the buffer.
+     */
+    int writeToBuf(Message msg, int idx) {
+      // Writes sender's AgentId
+      buf[idx++] = (byte) (msg.from.from >>>  8);
+      buf[idx++] = (byte) (msg.from.from >>>  0);
+      buf[idx++] = (byte) (msg.from.to >>>  8);
+      buf[idx++] = (byte) (msg.from.to >>>  0);
+      buf[idx++] = (byte) (msg.from.stamp >>>  24);
+      buf[idx++] = (byte) (msg.from.stamp >>>  16);
+      buf[idx++] = (byte) (msg.from.stamp >>>  8);
+      buf[idx++] = (byte) (msg.from.stamp >>>  0);
+      // Writes adressee's AgentId
+      buf[idx++]  = (byte) (msg.to.from >>>  8);
+      buf[idx++]  = (byte) (msg.to.from >>>  0);
+      buf[idx++] = (byte) (msg.to.to >>>  8);
+      buf[idx++] = (byte) (msg.to.to >>>  0);
+      buf[idx++] = (byte) (msg.to.stamp >>>  24);
+      buf[idx++] = (byte) (msg.to.stamp >>>  16);
+      buf[idx++] = (byte) (msg.to.stamp >>>  8);
+      buf[idx++] = (byte) (msg.to.stamp >>>  0);
+      // Writes source server id of message
+      buf[idx++]  = (byte) (msg.source >>>  8);
+      buf[idx++]  = (byte) (msg.source >>>  0);
+      // Writes destination server id of message
+      buf[idx++] = (byte) (msg.dest >>>  8);
+      buf[idx++] = (byte) (msg.dest >>>  0);
+      // Writes stamp of message
+      buf[idx++] = (byte) (msg.stamp >>>  24);
+      buf[idx++] = (byte) (msg.stamp >>>  16);
+      buf[idx++] = (byte) (msg.stamp >>>  8);
+      buf[idx++] = (byte) (msg.stamp >>>  0);
+
+      return idx;
+    }
+
+    void rewriteMessage(ServerInfo serverInfo,
+                        SocketAddress addr,
+                        int startIndex,
+                        Message msg,
+                        long currentTimeMillis) throws IOException {
       serverAddr = addr;
       datagramStamp = startIndex;
       this.serverInfo = serverInfo;
       
-      int idx = msg.writeToBuf(buf, 8);
+      int idx = writeToBuf(msg, 8);
       // Writes notification attributes
       buf[idx++] = (byte) ((msg.not.persistent ? Message.PERSISTENT : 0) 
           | (msg.not.detachable ? Message.DETACHABLE : 0));
@@ -752,6 +792,32 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       pipeIn = new PipedInputStream();
       pipeOut = new PipedOutputStream(pipeIn);
     }
+ 
+    void readMessageHdrFromStream(Message msg) throws IOException {
+      // Reads sender's AgentId
+      msg.from = new AgentId(
+        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
+        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
+        ((pipeIn.read() & 0xFF) << 24) + ((pipeIn.read() & 0xFF) << 16) +
+        ((pipeIn.read() & 0xFF) << 8) + ((pipeIn.read() & 0xFF) << 0));
+      // Reads adressee's AgentId
+      msg.to = new AgentId(
+        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
+        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
+        ((pipeIn.read() & 0xFF) << 24) + ((pipeIn.read() & 0xFF) << 16) +
+        ((pipeIn.read() & 0xFF) << 8) + ((pipeIn.read() & 0xFF) << 0));
+      // Reads source server id of message
+      msg.source = (short) (((pipeIn.read() & 0xFF) << 8) +
+                            ((pipeIn.read() & 0xFF) << 0));
+      // Reads destination server id of message
+      msg.dest = (short) (((pipeIn.read() & 0xFF) << 8) +
+                          ((pipeIn.read() & 0xFF) << 0));
+      // Reads stamp of message
+      msg.stamp = ((pipeIn.read() & 0xFF) << 24) +
+        ((pipeIn.read() & 0xFF) << 16) +
+        ((pipeIn.read() & 0xFF) << 8) +
+        ((pipeIn.read() & 0xFF) << 0);
+    }
 
     public void feed(DatagramPacket packet) throws IOException {
       pipeOut.write(packet.getData(), packet.getOffset() + 8, packet.getLength() - 8);
@@ -767,7 +833,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
             canStop = true;
             try {
-              message.readFromStream(pipeIn);
+              readMessageHdrFromStream(message);
             } catch (IOException ioe) {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, getName() + ", interrupted " + message);
