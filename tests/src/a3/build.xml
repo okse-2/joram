@@ -17,8 +17,43 @@
 
   <target name="tests.all"
           description=" --> launch all a3 tests">
-    <ant dir="." antfile="build.xml" target="tests"/>
+    <ant dir="." antfile="build.xml" target="tests.simple"/>
+    <ant dir="." antfile="build.xml" target="tests.pool"/>
+    <ant dir="." antfile="build.xml" target="tests.ng"/>
+    <ant dir="." antfile="build.xml" target="tests.udp"/>
     <ant dir="." antfile="build.xml" target="tests.http"/>
+  </target>
+
+  <!--
+    - We should divide tests: centralized vs distributed.
+    -->
+
+  <target name="tests.simple"
+          description=" --> launch tests with SimpleNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.pool"
+          description=" --> launch tests with PoolNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.ng"
+          description=" --> launch tests with NGNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.NGNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.udp"
+          description=" --> launch tests with UDPNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.UDPNetwork"/>
+    </antcall>
   </target>
 
   <target name="tests"
@@ -590,31 +625,16 @@
   </target>
 
   <!-- Test forwarding of expired notification with different networks -->
-  <target name="test18.base" depends="test18-1.base,test18-2.base,test18-3.base"/>
-
-  <target name="test18-1.base" depends="init.a3props,compile">
-    <!-- 2 server, NTransaction, SimpleNetwork -->
+  <target name="test18.base" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test18"/>
       <param name="testid" value="1"/>
       <param name="a3conf" value="base/a3servers2.xml"/>
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
-  <target name="test18-2.base" depends="init.a3props,compile">
-    <!-- 2 server, NTransaction, PoolNetwork -->
-    <antcall target="test.run" inheritAll="true">
-      <param name="classname" value="a3.base.test18"/>
-      <param name="testid" value="2"/>
-      <param name="a3conf" value="base/a3servers2.xml"/>
-      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-      <param name="jvmargs" value=""/>
-    </antcall>
-  </target>
-
-  <target name="test18-3.base" depends="init.a3props,compile">
+  <target name="test18.http.base" depends="init.a3props,compile">
     <!-- 2 server, NTransaction, HttpNetwork -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test18"/>
@@ -626,11 +646,10 @@
 
   <!-- Test forwarding of expired notification within the engine -->
   <target name="test19.base" depends="init.a3props,compile">
-    <!-- 2 server, NTransaction, SimpleNetwork -->
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test19"/>
       <param name="testid" value="1"/>
-      <param name="a3conf" value="base/a3servers2e1.xml"/>
+      <param name="a3conf" value="base/a3servers2.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
