@@ -109,7 +109,7 @@ public class TestCase extends BaseTestCase {
       // The process is still alive, kill it!
       getAdmin().killAgentServer(sid);
       getAdmin().joinAgentServer(sid);
-      getAdmin().startAgentServer(sid, dir);
+      getAdmin().startAgentServer(sid, dir, jvmargs);
     }
   }
 
