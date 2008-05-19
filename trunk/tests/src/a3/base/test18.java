@@ -29,6 +29,7 @@ import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.ExpiredNot;
 
 public class test18 extends TestCase {
   
@@ -39,8 +40,8 @@ public class test18 extends TestCase {
   protected void setUp() throws Exception {
     timeout = 10000L;
 
-    DMQAgentBis dmqAgent = new DMQAgentBis((short) 0);
-    ReceiveAgentBis receiveAgent = new ReceiveAgentBis((short) 1);
+    DMQAgent dmqAgent = new DMQAgent((short) 0);
+    ReceiveAgent receiveAgent = new ReceiveAgent((short) 1);
     dmqAgent.deploy();
     receiveAgent.deploy();
     
@@ -64,28 +65,29 @@ public class test18 extends TestCase {
   protected void tearDown() {
     crashAgentServer((short) 1);
   }
-}
 
-class DMQAgent extends Agent {
+  static class DMQAgent extends Agent {
+    public DMQAgent(short to) {
+      super(to);
+    }
 
-  public DMQAgent(short to) {
-    super(to);
+    public void react(AgentId from, Notification not) {
+      BaseTestCase.assertEquals(ExpiredNot.class.getName(),
+                                not.getClass().getName());
+      BaseTestCase.endTest();
+    }
   }
 
-  public void react(AgentId from, Notification not) {
-    BaseTestCase.assertEquals("org.objectweb.joram.mom.notifications.ExpiredNot", not.getClass().getName());
-    BaseTestCase.endTest();
-  }
-}
+  static class ReceiveAgent extends Agent {
 
-class ReceiveAgent extends Agent {
+    public ReceiveAgent(short to) {
+      super(to);
+    }
 
-  public ReceiveAgent(short to) {
-    super(to);
-  }
-
-  public void react(AgentId from, Notification not) {
-    BaseTestCase.assertTrue(from.isNullId());
-    BaseTestCase.assertEquals("fr.dyade.aaa.agent.Notification", not.getClass().getName());
+    public void react(AgentId from, Notification not) {
+      BaseTestCase.assertTrue(from.isNullId());
+      BaseTestCase.assertEquals(Notification.class.getName(),
+                                not.getClass().getName());
+    }
   }
 }
