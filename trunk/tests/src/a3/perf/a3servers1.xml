@@ -9,12 +9,10 @@
   <server id="0" name="S0" hostname="localhost">
     <network domain="D1" port="16300"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
-    <service class="fr.dyade.aaa.agent.HttpDebug" args="8080"/>
   </server>
 
   <server id="1" name="S1" hostname="localhost">
     <network domain="D1" port="16301"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>
-    <service class="fr.dyade.aaa.agent.HttpDebug" args="8081"/>
   </server>
 </config>
