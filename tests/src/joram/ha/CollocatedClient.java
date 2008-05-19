@@ -26,11 +26,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.TopicSubscriber;
+import javax.jms.TextMessage;
+
+import org.objectweb.joram.client.jms.Session;
+import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
+import org.objectweb.joram.client.jms.Topic;
 
 import joram.framework.TestCase;
 
@@ -39,7 +42,6 @@ import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
 
-
 public class CollocatedClient extends TestCase {
 
   public static void main(String[] args) throws Exception {
@@ -47,39 +49,42 @@ public class CollocatedClient extends TestCase {
     AgentServer.start();
 
     File file = new File("traces" + System.currentTimeMillis() + ".txt");
-    PrintWriter pw = new PrintWriter(
-      new FileOutputStream(file));
+    PrintWriter pw = new PrintWriter(new FileOutputStream(file));
+    
+    AdminModule.connect("localhost", 2560, "root", "root", 60);
+    Topic topic = Topic.create(0, "topic");
+    AdminModule.disconnect();    
 
-    pw.println("Collocated client #" + args[2] + 
-               " - create collocated connection");
-    
-    TopicHALocalConnectionFactory cf = new TopicHALocalConnectionFactory();
-    TopicConnection cnx = cf.createTopicConnection("root", "root");
-    
-    pw.println("Collocated client #" + args[2] + 
-               " - connected to the master replica");
-    
-    pw.println("Collocated client #" + args[2] + 
-               " - get topic");
-    
-    AdminModule.connect(cf, "root", "root");
-    Topic topic = 
-      org.objectweb.joram.client.jms.Topic.create(0, "topic");
-    ((org.objectweb.joram.client.jms.Topic)topic).setFreeReading();
-    ((org.objectweb.joram.client.jms.Topic)topic).setFreeWriting();
+    HALocalConnectionFactory cf = new HALocalConnectionFactory();
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
+    Session session = (Session) cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    session.setTopicActivationThreshold(50);
+    session.setTopicPassivationThreshold(150);
+    session.setTopicAckBufferMax(10);
 
-    pw.println("Collocated client #" + args[2] + 
-               " - subscribe");
-    
-    Session session = cnx.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
     TopicSubscriber tsub = session.createDurableSubscriber(topic, "test");
-    //MessageConsumer tsub = session.createConsumer(topic);
+//  MessageConsumer tsub = session.createConsumer(topic);
     cnx.start();
-   
+ 
+    int i = 0;
+    int idx = -1;
+    long start = System.currentTimeMillis();
+    pw.println("client#" + args[2] + " start - " + start);
+    pw.flush();
     while (true) {
-      TextMessage msg = (TextMessage)tsub.receive();
-      pw.println("Collocated client #" + args[2] + 
-                 " - received message: " + msg.getText());
+      TextMessage msg = (TextMessage) tsub.receive();
+      int idx2 = msg.getIntProperty("index");
+      if ((idx != -1) && (idx2 != idx +1)) {
+        pw.println("Message lost #" + (idx +1) + " - " + idx2);
+      }
+      idx = idx2;
+      pw.println("client#" + args[2] + " - msg#" + msg.getText());
+      if ((i %1000) == 999) {
+        long end = System.currentTimeMillis();
+        pw.println("Round #" + (i /1000) + " - " + (end - start));
+        start = end;
+      }
+      i++;
       pw.flush();
     }
   }
