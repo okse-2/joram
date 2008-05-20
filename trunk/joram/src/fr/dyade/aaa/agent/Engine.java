@@ -866,8 +866,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
           // The notification is malformed.
           logmon.log(BasicLevel.ERROR,
-                     getName() + ": Bad message [" +
-                     msg.from + ", " + msg.to + msg.not + ']');
+                     AgentServer.getName() + ": Bad message [" +
+                     msg.from + ", " + msg.to + ", " + msg.not + ']');
           // Remove the failed notification ..
           qin.pop();
           // .. then deletes it ..
