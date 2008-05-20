@@ -67,8 +67,8 @@ final class JGroups
     nbClusterExpected = AgentServer.getInteger("nbClusterExpected", nbClusterExpected).intValue();
   }
 
-  void init(String name) throws Exception {
-    channelName = "HAJGroups." + name;
+  void init(short sid) throws Exception {
+    channelName = "HAJGroups#" + sid;
 
     lock = new Object();
 
@@ -139,25 +139,43 @@ final class JGroups
     t.start();
   }
 
-  void send(Serializable message) throws Exception {
-    if (channel == null) return;
+  void send(Serializable obj) throws Exception {
+    if (channel == null) {
+      logmon.log(BasicLevel.ERROR,
+                 AgentServer.getName() + "JGroups send(" + obj + ") -> on null channel.");
+      return;
+    }
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,"JGroups send(" + message + ")");
+      logmon.log(BasicLevel.DEBUG,"JGroups send(" + obj + ")");
 
-    byte[] buf = null;
-    try {
-      ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
-      ObjectOutputStream oos = new ObjectOutputStream(bos);
-      oos.writeObject(message);
-      buf = bos.toByteArray();
-      oos.flush();
-    } catch(Exception e) {
-      logmon.log(BasicLevel.ERROR,"JGroups send message",e);
-      throw e;
+//     byte[] buf = null;
+//     try {
+//       ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
+
+//       ObjectOutputStream oos = new ObjectOutputStream(bos);
+//       oos.writeObject(obj);
+//       buf = bos.toByteArray();
+//       oos.flush();
+//     } catch(Exception exc) {
+//       logmon.log(BasicLevel.ERROR,"JGroups send message", exc);
+//       throw exc;
+//     }
+//     if (buf == null) return;
+
+//     Message msg = new Message(null, null, buf);
+
+    if (obj instanceof fr.dyade.aaa.agent.Message) {
+      fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
+      if (m.not == null)
+        logmon.log(BasicLevel.ERROR,
+                   AgentServer.getName() + "JGroups send null not " + m);
+      if (m.not.detachable)
+        logmon.log(BasicLevel.ERROR,
+                   AgentServer.getName() + "JGroups send detachable not " + m);
     }
-    if (buf == null) return;
-    Message msg = new Message(null, null, buf);
+
+    Message msg = new Message(null, null, obj);
     synchronized (lock) {
       channel.send(msg);
       lock.wait();
@@ -165,10 +183,26 @@ final class JGroups
   }
   
   void sendTo(Address dst, Serializable obj) throws Exception {
-    if (channel == null) return;
+    if (channel == null) {
+      logmon.log(BasicLevel.ERROR,
+                 "JGroups sendTo(" + dst + ", " + obj + ") -> on null channel.");
+      return;
+    }
+
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups sendTo(" + dst + "," + obj + ")");
-    channel.send(dst,myAddr,obj);
+
+    if (obj instanceof fr.dyade.aaa.agent.Message) {
+      fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
+      if (m.not == null)
+        logmon.log(BasicLevel.ERROR,
+                   AgentServer.getName() + "JGroups send null not " + m);
+      if (m.not.detachable)
+        logmon.log(BasicLevel.ERROR,
+                   AgentServer.getName() + "JGroups send detachable not " + m);
+    }
+
+    channel.send(dst, myAddr, obj);
   }
 
   Address getCoordinatorAddr() {
@@ -212,6 +246,17 @@ final class JGroups
         if ((obj instanceof fr.dyade.aaa.agent.Message) ||
             (obj instanceof JGroupsAckMsg) ||
             (obj instanceof HAStateReply)) {
+
+          if (obj instanceof fr.dyade.aaa.agent.Message) {
+            fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
+            if (m.not == null)
+              logmon.log(BasicLevel.ERROR,
+                         AgentServer.getName() + "JGroups recv own null not " + m);
+            if (m.not.detachable)
+              logmon.log(BasicLevel.ERROR,
+                         AgentServer.getName() + "JGroups recv own detachable not " + m);
+          }
+
           synchronized (lock) {
             lock.notify();
           }
@@ -243,6 +288,14 @@ final class JGroups
         if (state != RUNNING) return;
 
         fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
+
+        if (m.not == null)
+          logmon.log(BasicLevel.ERROR,
+                     AgentServer.getName() + "JGroups recv null not " + m);
+        if (m.not.detachable)
+          logmon.log(BasicLevel.ERROR,
+                     AgentServer.getName() + "JGroups recv detachable not " + m);
+
         if ((network != null) &&
             (m.from.getTo() != AgentServer.getServerId())) {
           network.deliver(m);
