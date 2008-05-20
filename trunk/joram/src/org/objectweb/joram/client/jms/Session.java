@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -133,7 +133,8 @@ public class Session implements javax.jms.Session {
 
   /**
    * The status of the current request.
-   * Only valid in the mode RECEIVE.
+   * Only valid in when the session is used to synchronously receive messages
+   * (RECEIVE mode).
    */  
   private static class RequestStatus {
     /** No request. This is the initial status. */
@@ -259,12 +260,6 @@ public class Session implements javax.jms.Session {
    * The current active control thread.
    */
   private Thread singleThreadOfControl;
-
-  /**
-   * Status boolean indicating whether the message input is activated or not
-   * for the message listeners.
-   */
-  private boolean passiveMsgInput;
   
   /**
    * Used to synchronize the method close()
@@ -272,40 +267,284 @@ public class Session implements javax.jms.Session {
   private Closer closer;
   
   /**
-   * Indicates whether the messages produced are asynchronously
-   * sent or not (without or with acknowledgement).
+   *  Indicates whether the messages produced are asynchronously sent
+   * or not (without or with acknowledgement).
    */
   private boolean asyncSend;
 
+  /** 
+   *  Indicates whether the messages produced are asynchronously sent
+   * or not (without or with acknowledgement).
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * by default false. 
+   *
+   * @return true if messages produced are asynchronously sent.
+   *
+   * @see FactoryParameters.asyncSend
+   */
+  public boolean isAsyncSend() {
+    return asyncSend;
+  }
+
   /**
-   * Maximum number of messages that can be read at once from a queue.
-   * Default is 1.
+   *  Sets asynchronously sending for this session.
+   * <p>
+   *  Determines whether the messages produced are asynchronously sent
+   * or not (without or with acknowledgement).
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * by default false. 
+   * 
+   * @param asyncSend	if true sets asynchronous sending for this session.
+   */
+  public void setAsyncSend(boolean asyncSend) {
+    this.asyncSend = asyncSend;
+  }
+
+  /**
+   *  Maximum number of messages that can be read at once from a queue.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 1.
+   *
+   * @see FactoryParameters.queueMessageReadMax
    */
   private int queueMessageReadMax;
   
   /**
-   * Maximum number of acknowledgements that can be buffered in
-   * Session.DUPS_OK_ACKNOWLEDGE mode, default is 0.
+   *  Get the maximum number of messages that can be read at once from a queue
+   * for this Session.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 1.
+   * 
+   * @return    The maximum number of messages that can be read at once from
+   *            a queue.
+   *
+   * @see queueMessageReadMax
+   * @see FactoryParameters.queueMessageReadMax
+   * @see setQueueMessageReadMax
+   */
+  public final int getQueueMessageReadMax() {
+    return queueMessageReadMax;
+  }
+    
+  /**
+   *  Set the maximum number of messages that can be read at once from a queue
+   * for this Session.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 1.
+   * 
+   * @param queueMessageReadMax	The maximum number of messages that can be
+   *				read at once from a queue.
+   *
+   * @see queueMessageReadMax
+   * @see FactoryParameters.queueMessageReadMax
+   * @see getQueueMessageReadMax
+   */
+  public void setQueueMessageReadMax(int queueMessageReadMax) {
+    this.queueMessageReadMax = queueMessageReadMax;
+  }
+
+  /**
+   *  Maximum number of acknowledgements that can be buffered when using
+   * Session.DUPS_OK_ACKNOWLEDGE mode.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   *  default value is 0.
+   * 
+   * @see FactoryParameters.topicAckBufferMax
    */
   private int topicAckBufferMax;
+
+  /**
+   *  Get the maximum number of acknowledgements that can be buffered when
+   * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   *  default value is 0.
+   *
+   * @return The Maximum number of acknowledgements that can be buffered when
+   *         using Session.DUPS_OK_ACKNOWLEDGE mode.
+   *
+   * @see topicAckBufferMax
+   * @see FactoryParameters.topicAckBufferMax
+   * @see setTopicAckBufferMax
+   */
+  public final int getTopicAckBufferMax() {
+    return topicAckBufferMax;
+  }
   
   /**
-   * This threshold is the maximum messages number over which the
+   * Set the maximum number of acknowledgements that can be buffered when
+   * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   *  default value is 0.
+   *
+   * @param topicAckBufferMax The Maximum number of acknowledgements that
+   *			      can be buffered in Session.DUPS_OK_ACKNOWLEDGE
+   *			      mode.
+   *
+   * @see topicAckBufferMax
+   * @see FactoryParameters.topicAckBufferMax
+   * @see getTopicAckBufferMax
+   */
+  public void setTopicAckBufferMax(int topicAckBufferMax) {
+    this.topicAckBufferMax = topicAckBufferMax;
+  }
+
+  /**
+   * Status boolean indicating whether the message input is activated or not
+   * for the message listeners.
+   */
+  private boolean passiveMsgInput;
+
+  /**
+   *  This threshold is the maximum messages number over which the
    * subscription is passivated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is Integer.MAX_VALUE.
+   *
+   * @see FactoryParameters.topicPassivationThreshold
    */
   private int topicPassivationThreshold;
+
+  /**
+   * Get the threshold of passivation for this session.
+   * <p>
+   * This threshold is the maximum messages number over which the
+   * subscription is passivated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is Integer.MAX_VALUE.
+   *
+   * @return The maximum messages number over which the subscription
+   *         is passivated.
+   *
+   * @see topicPassivationThreshold
+   * @see FactoryParameters.topicPassivationThreshold
+   * @see setTopicPassivationThreshold
+   */
+  public final int getTopicPassivationThreshold() {
+    return topicPassivationThreshold;
+  }
   
+  /**
+   * Set the threshold of passivation for this session.
+   * <p>
+   * This threshold is the maximum messages number over which the
+   * subscription is passivated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is Integer.MAX_VALUE.
+   *
+   * @param topicPassivationThreshold The maximum messages number over which
+   *				      the subscription is passivated.
+   * @return The maximum messages number over which the subscription
+   *         is passivated.
+   *
+   * @see topicPassivationThreshold
+   * @see FactoryParameters.topicPassivationThreshold
+   * @see setTopicPassivationThreshold
+   */
+  public void setTopicPassivationThreshold(int topicPassivationThreshold) {
+    topicPassivationThreshold = topicPassivationThreshold;
+  }
+
   /**
    * This threshold is the minimum messages number below which
    * the subscription is activated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 0.
+   *
+   * @see FactoryParameters.topicActivationThreshold
    */
   private int topicActivationThreshold;
-  
-  private MessageConsumerListener messageConsumerListener;
-  
-  /** For asynchronous subscription request. */
+
+  /**
+   * Get the threshold of activation for this session.
+   * <p>
+   * This threshold is the minimum messages number below which
+   * the subscription is activated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 0.
+   *
+   * @see topicActivationThreshold
+   * @see FactoryParameters.topicActivationThreshold
+   * @see setTopicActivationThreshold
+   *
+   * @return The minimum messages number below which the subscription
+   *         is activated.
+   */
+  public final int getTopicActivationThreshold() {
+    return topicActivationThreshold;
+  }
+
+  /**
+   * Set the threshold of activation for this session.
+   * <p>
+   * This threshold is the minimum messages number below which
+   * the subscription is activated.
+   * <p>
+   *  This attribute is inherited from Connection at initialisation,
+   * default value is 0.
+   *
+   * @param topicActivationThreshold The minimum messages number below which
+   *			   	     the subscription is activated.
+   *
+   * @see topicActivationThreshold
+   * @see FactoryParameters.topicActivationThreshold
+   * @see getTopicActivationThreshold
+   */
+  public void setTopicActivationThreshold(int topicActivationThreshold) {
+    topicActivationThreshold = topicActivationThreshold;
+  }
+
+  /**
+   *  Indicates whether the subscription requests are asynchronously handled
+   * or not.
+   * <p>
+   *  Default value is false, the subscription is handled synchronously so the
+   * topic must be accessible.
+   */
   private boolean asyncSub = false;
-  
+
+  /** 
+   *  Indicates whether the subscription request is asynchronously handled
+   * or not.
+   * <p>
+   *  Default value is false, the subscription is handled synchronously so the
+   * topic must be accessible.
+   *
+   * @return true if the subscription requests are asynchronously handled.
+   */
+  public boolean isAsyncSub() {
+    return asyncSub;
+  }
+
+  /** 
+   * Sets asynchronous subscription for this session. 
+   * <p>
+   *  Determines whether the subscription request is asynchronously handled
+   * or not.
+   * <p>
+   *  Default value is false, the subscription is handled synchronously so the
+   * topic must be accessible.
+   *
+   * @param asyncSub if true sets  asynchronous subscription for this session.
+   */
+  public void setAsyncSub(boolean asyncSub) {
+    this.asyncSub = asyncSub;
+  }
+
+  private MessageConsumerListener messageConsumerListener;
+
   /**
    * Opens a session.
    *
@@ -357,6 +596,8 @@ public class Session implements javax.jms.Session {
         cnx.getTxPendingTimer() * 1000);
     }
     
+    // Retrieves default parameters from connection. The user can configure
+    // the session through get/set methods.
     asyncSend = cnx.getAsyncSend();
     queueMessageReadMax = cnx.getQueueMessageReadMax();
     topicAckBufferMax = cnx.getTopicAckBufferMax();
@@ -670,19 +911,6 @@ public class Session implements javax.jms.Session {
       (Destination) dest);
     addProducer(mp);
     return mp;
-  }
-
-  /** 
-   * return true for asynchronous subscription request. 
-   */
-  public boolean isAsyncSub() {
-    return asyncSub;
-  }
-  /** 
-   * set true for asynchronous subscription request. 
-   */
-  public void setAsyncSub(boolean asyncSub) {
-    this.asyncSub = asyncSub;
   }
   
   /**
@@ -1426,10 +1654,9 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Called by MessageConsumer
-   * Not synchronized because ot it can be
-   * concurrently called by close()
-   * and Connection.stop().
+   * Called by MessageConsumer.
+   * This method is not synchronized because it can be concurrently called
+   * by close() and Connection.stop().
    */
   javax.jms.Message receive(
     long requestTimeToLive,
@@ -1950,121 +2177,6 @@ public class Session implements javax.jms.Session {
       cons.passivateMessageInput();
     }
     passiveMsgInput = true;
-  }
-
-  /**
-   * Set asyncSend for this Session.
-   * Indicates whether the messages produced are asynchronously
-   * sent or not (without or with acknowledgement).
-   * 
-   * @param b
-   */
-  public void setAsyncSend(boolean b) {
-    asyncSend = b;
-  }
-  
-  /**
-   * Set queueMessageReadMax for this Session.
-   *
-   * @see queueMessageReadMax
-   * @see getQueueMessageReadMax
-   * 
-   * @param i	The maximum number of messages that can be read at once from
-   *             a queue.
-   */
-  public void setQueueMessageReadMax(int i) {
-    queueMessageReadMax = i;
-  }
-  
-  /**
-   * Get queueMessageReadMax for this Session.
-   *
-   * @see queueMessageReadMax
-   * @see setQueueMessageReadMax
-   * 
-   * @return    The maximum number of messages that can be read at once from
-   *            a queue.
-   */
-  public final int getQueueMessageReadMax() {
-    return queueMessageReadMax;
-  }
-  
-  /**
-   * Get topicAckBufferMax for this session.
-   *
-   * @see topicAckBufferMax
-   * @see setTopicAckBufferMax
-   *
-   * @return The Maximum number of acknowledgements that can be buffered in
-   *         Session.DUPS_OK_ACKNOWLEDGE mode, default is 0.
-   */
-  public final int getTopicAckBufferMax() {
-    return topicAckBufferMax;
-  }
-  
-  /**
-   * Set topicAckBufferMax for this session.
-   *
-   * @see topicAckBufferMax
-   * @see getTopicAckBufferMax
-   *
-   * @param i	 The Maximum number of acknowledgements that can be buffered in
-   *             Session.DUPS_OK_ACKNOWLEDGE mode, default is 0.
-   */
-  public void setTopicAckBufferMax(int i) {
-    topicAckBufferMax = i;
-  }
-  
-  /**
-   * Get topicActivationThreshold for this session.
-   *
-   * @see topicActivationThreshold
-   * @see setTopicActivationThreshold
-   *
-   * @return The minimum messages number below which the subscription
-   *         is activated.
-   */
-  public final int getTopicActivationThreshold() {
-    return topicActivationThreshold;
-  }
-  
-  /**
-   * Set topicActivationThreshold for this session.
-   *
-   * @see topicActivationThreshold
-   * @see getTopicActivationThreshold
-   *
-   * @param i	The minimum messages number below which the subscription
-   *            is activated.
-   */
-  public void setTopicActivationThreshold(int i) {
-    topicActivationThreshold = i;
-  }
-  
-  /**
-   * Get topicPassivationThreshold for this session.
-   *
-   * @see topicPassivationThreshold
-   * @see setTopicPassivationThreshold
-   *
-   * @return The maximum messages number over which the subscription
-   *         is passivated.
-   */
-  public final int getTopicPassivationThreshold() {
-    return topicPassivationThreshold;
-  }
-  
-  /**
-   * Set topicPassivationThreshold for this session.
-   *
-   * @see topicPassivationThreshold
-   * @see getTopicPassivationThreshold
-   *
-   * @param i	The maximum messages number over which the subscription
-   *         	is passivated.
-   */
-  public void setTopicPassivationThreshold(int i) {
-    topicPassivationThreshold = i;
   }
   
   /**

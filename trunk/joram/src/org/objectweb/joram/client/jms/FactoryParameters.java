@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -96,67 +96,72 @@ public class FactoryParameters implements java.io.Serializable {
   public String socketFactory = SocketFactory.DefaultFactory;
 
   /**
-   * Determines whether the produced messages are asynchronously
+   *  Determines whether the produced messages are asynchronously
    * sent or not (without or with acknowledgement)
-   * Default is false (with ack).
+   * <p>
+   *  Default is false (with ack).
    */
   public boolean asyncSend = false;
 
   /**
-   * The maximum number of messages that can be
-   * read at once from a queue.
-   * Default is 1.
+   *  The maximum number of messages that can be read at once from a queue.
+   * <p>
+   *  Default is 1.
    */
   public int queueMessageReadMax = 1;
 
   /**
-   * The maximum number of acknowledgements
-   * that can be buffered in
+   *  The maximum number of acknowledgements that can be buffered in
    * Session.DUPS_OK_ACKNOWLEDGE mode when listening to a topic.
-   * Default is 0.
+   * <p>
+   *  Default is 0.
    */
   public int topicAckBufferMax = 0;
 
   /**
-   * Determines whether client threads
-   * which are using the same connection
-   * are synchronized
-   * in order to group together the requests they
-   * send.
+   * Determines whether client threads which are using the same connection
+   * are synchronized in order to group together the requests they send.
    */
   public boolean multiThreadSync = false;
 
   /**
-   * The maximum time the threads hang if 'multiThreadSync' is true. Either they
-   * wake up (wait time out) or they are notified (by the first waken up
-   * thread). Default value is 1ms.
+   * The maximum time the threads hang if 'multiThreadSync' is true.
+   * <p>
+   *  Either they wake up (wait time out) or they are notified (by the first
+   * waken up thread).
+   * <p>
+   *  Default value is 1ms.
    */
   public int multiThreadSyncDelay = 1;
 
   /**
    * The maximum numbers of threads that hang if 'multiThreadSync' is true.
+   * <p>
    * Default value is 10 waiting threads.
    */
   public int multiThreadSyncThreshold = 10;
 
   /**
-   * This threshold is the maximum messages number over which the
+   *  This threshold is the maximum messages number over which the
    * subscription is passivated.
-   * Default is Integer.MAX_VALUE.
+   * <p>
+   *  Default is Integer.MAX_VALUE.
    */
   public int topicPassivationThreshold = Integer.MAX_VALUE;
 
   /**
-   * This threshold is the minimum messages number below which the
+   *  This threshold is the minimum messages number below which the
    * subscription is activated.
-   * Default is 0.
+   * <p>
+   *  Default value is 0.
    */
   public int topicActivationThreshold = 0;
   
   /**
-   * This is the local IP address on which the TCP connection is activated. The
-   * value can either be a machine name, such as "java.sun.com", or a textual
-   * representation of its IP address.
+   *  This is the local IP address on which the TCP connection is activated. 
+   * <p>
+   *  The value can either be a machine name, such as "java.sun.com", or a
+   * textual representation of its IP address.
    */
   public String outLocalAddress = null;
 
@@ -195,18 +200,26 @@ public class FactoryParameters implements java.io.Serializable {
 
   /**
    * Returns the name of host hosting the server to create connections with.
+   *
+   * @return The name of host hosting the server.
    */
   public String getHost() {
     return host;
   }
 
-  /** Returns the port to be used for accessing the server. */
+  /**
+   * Returns the port to be used for accessing the server.
+   *
+   * @return The port to be used for accessing the server.
+   */
   public int getPort() {
     return port;
   }
 
   /**
-   * Returns the url.
+   * Returns the url to be used for accessing the server.
+   *
+   * @return The url to be used for accessing the server.
    */
   public String getUrl() {
     return url;
