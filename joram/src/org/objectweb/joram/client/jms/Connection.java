@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -240,26 +240,90 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.txPendingTimer;
   }
   
+  /** 
+   *  Indicates whether the messages produced are asynchronously sent
+   * or not (without or with acknowledgement).
+   * <p>
+   *  This attribute is inherited from FactoryParameters, by default false. 
+   *
+   * @return true if messages produced are asynchronously sent.
+   *
+   * @see FactoryParameters.asyncSend
+   * @see Session.asyncSend
+   */
   final boolean getAsyncSend() {
     return factoryParameters.asyncSend;
   }
   
+  /**
+   *  Get the maximum number of messages that can be read at once from a queue
+   * for this Connection.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, default value is 1.
+   * 
+   * @return    The maximum number of messages that can be read at once from
+   *            a queue.
+   *
+   * @see FactoryParameters.queueMessageReadMax
+   * @see Session.queueMessageReadMax
+   */
   final int getQueueMessageReadMax() {
     return factoryParameters.queueMessageReadMax;
   }
   
+  /**
+   *  Get the maximum number of acknowledgements that can be buffered when
+   * using Session.DUPS_OK_ACKNOWLEDGE mode for this Connection.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, default value is 0.
+   *
+   * @return The Maximum number of acknowledgements that can be buffered when
+   *         using Session.DUPS_OK_ACKNOWLEDGE mode.
+   *
+   * @see FactoryParameters.topicAckBufferMax
+   * @see Session.setTopicAckBufferMax
+   */
   final int getTopicAckBufferMax() {
     return factoryParameters.topicAckBufferMax;
   }
   
-  final int getTopicActivationThreshold() {
-    return factoryParameters.topicActivationThreshold;
-  }
-
+  /**
+   * Get the threshold of passivation for this Connection.
+   * <p>
+   * This threshold is the maximum messages number over which the
+   * subscription is passivated.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, default value is
+   * Integer.MAX_VALUE.
+   *
+   * @return The maximum messages number over which the subscription
+   *         is passivated.
+   *
+   * @see FactoryParameters.topicPassivationThreshold
+   * @see Session.setTopicPassivationThreshold
+   */
   final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
   }
   
+  /**
+   * Get the threshold of activation for this Connection.
+   * <p>
+   * This threshold is the minimum messages number below which
+   * the subscription is activated.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, default value is 0.
+   *
+   * @return The minimum messages number below which the subscription
+   *         is activated.
+   *
+   * @see FactoryParameters.topicActivationThreshold
+   * @see Session.setTopicActivationThreshold
+   */
+  final int getTopicActivationThreshold() {
+    return factoryParameters.topicActivationThreshold;
+  }
+
   final String getOutLocalAddress() {
     return factoryParameters.outLocalAddress;
   }
