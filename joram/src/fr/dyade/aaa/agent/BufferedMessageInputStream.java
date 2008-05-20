@@ -58,7 +58,8 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
   }
 
   /**
-   * Reset the stream for a new use.
+   * Resets the stream for a new use.
+   * Removes all datas.
    */
   protected final void clean() {
     pos = 0; count = 0;
@@ -159,9 +160,8 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
   }
 
   /**
-   * Reads the protocol header from this output stream.
-   * Be careful, the buffer must contain enough data to read the short.
-   * This method must be overloaded in subclass.
+   * Reads length bytes of data from the input stream. This method returns
+   * when length bytes are available or if end of stream is reached.
    */
   protected final void readFully(int length) throws IOException {
     int valid = count - pos;
@@ -172,8 +172,13 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
         byte[] newbuf = new byte[length];
         System.arraycopy(buf, pos, newbuf, 0, valid);
         buf = newbuf; pos = 0; count = valid;
+      } else if ((pos + length) > buf.length) {
+        // Clear already read datas in order to allow the read of next.
+        System.arraycopy(buf, pos, buf, 0, valid);
+        pos = 0;
+        count = valid;
       }
-    
+
       do {
         int nb = is.read(buf, count, buf.length - count);
         if (nb < 0) throw new EOFException();
