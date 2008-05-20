@@ -899,7 +899,10 @@ public final class AgentServer {
                           String path,
                           LoggerFactory loggerFactory,
                           short cid) throws Exception {
-    name = new StringBuffer("AgentServer#").append(sid).toString();
+    if (cid == NULL_ID)
+      name = new StringBuffer("AgentServer#").append(sid).toString();
+    else
+      name = new StringBuffer("AgentServer#").append(sid).append('.').append(cid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
     logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer.#" + sid);
@@ -1158,7 +1161,7 @@ public final class AgentServer {
       engine.init();
 
       // If the server is part of an HA group starts the JGroup component
-      if (jgroups != null) jgroups.init(getName());
+      if (jgroups != null) jgroups.init(sid);
 
       logmon.log(BasicLevel.WARN,
                  getName() + ", initialized at " + new Date());
