@@ -26,6 +26,9 @@ import java.io.Serializable;
 
 import fr.dyade.aaa.util.Pool;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 /**
  * The internal message structure.
  * A message is divided in 2 parts:<ul>
@@ -145,6 +148,9 @@ final class Message implements Serializable {
     out.writeInt(stamp);
 
     if (not == null) {
+      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                                                "Message.writeObject() -> null notification.");
+
       out.write(NULL);
     } else {
       // Writes notification attributes
@@ -152,6 +158,9 @@ final class Message implements Serializable {
       if (! not.detachable) {
         // Writes notification object
         out.writeObject(not);
+      } else {
+        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
+                                                  "Message.writeObject() -> detachable notification: " + not);
       }
     }
   }
@@ -177,6 +186,9 @@ final class Message implements Serializable {
 
     int opt = in.read();
     if (opt == NULL) {
+      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
+                                                "Message.readObject -> null notification.");
+
       not = null;
     } else {
       // Reads notification attributes
@@ -189,6 +201,10 @@ final class Message implements Serializable {
         not.detachable = detachable;
         not.persistent = persistent;
         not.detached = false;
+      } else {
+        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
+                                                  "Message.readObject -> " + opt);
+
       }
     }
   }
