@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -96,7 +96,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   *
+   * Indicates to the Engine component that a commit is needed.
    */
   protected final boolean needToBeCommited() {
     try {
