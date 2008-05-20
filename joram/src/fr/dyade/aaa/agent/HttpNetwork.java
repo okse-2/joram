@@ -342,8 +342,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
 
-    logmon.log(BasicLevel.FATAL, name + ", writes:" + nos.size());
-
     nos.writeTo(os);
     nos.reset();
 
@@ -417,8 +415,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
-
-    logmon.log(BasicLevel.FATAL, name + ", writes:" + nos.size());
 
     nos.writeTo(os);
     nos.reset();
