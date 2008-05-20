@@ -646,8 +646,6 @@ public class SimpleNetwork extends StreamNetwork {
      * Writes the protocol header to this output stream.
      */
     protected void writeHeader() {
-      logmon.log(BasicLevel.FATAL,
-                 getName() + "writeHeader -> " + getBootTS());
       writeInt(getBootTS());
     }
 
@@ -683,8 +681,6 @@ public class SimpleNetwork extends StreamNetwork {
       readFully(Message.LENGTH +4);
       // Reads boot timestamp of source server
       boot = readInt();
-      logmon.log(BasicLevel.FATAL,
-                 getName() + "readHeader -> " + boot);
     }
 
     /**
