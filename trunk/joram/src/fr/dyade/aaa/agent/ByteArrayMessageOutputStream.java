@@ -69,6 +69,7 @@ public abstract class ByteArrayMessageOutputStream extends MessageOutputStream {
       newcount = Math.max(buf.length << 1, newcount);
       byte[] newbuf = new byte[newcount];
       System.arraycopy(buf, 0, newbuf, 0, count);
+      buf = newbuf;
     }
     buf[count++] = (byte) b;
   }
@@ -88,6 +89,7 @@ public abstract class ByteArrayMessageOutputStream extends MessageOutputStream {
       newcount = Math.max(buf.length << 1, newcount);
       byte[] newbuf = new byte[newcount];
       System.arraycopy(buf, 0, newbuf, 0, count);
+      buf = newbuf;
     }
     System.arraycopy(b, off, buf, count, len);
     count += len;
