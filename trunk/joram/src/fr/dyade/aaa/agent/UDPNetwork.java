@@ -22,13 +22,10 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.io.StreamCorruptedException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
@@ -124,8 +121,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     /** Identifier for the last packet acked. */
     int lastPacketAck = 0;
     
-    /** Object used to deserialize messages sent to this server. */
-    MessageInputStream messageInputStream;
+    /** Object used to build messages from UDP packets. */
+    MessageBuilder messageIncomingBuilder;
     
     /** A FIFO list to store sent messages waiting to be acked. */
     List messagesToAck = Collections.synchronizedList(new LinkedList());
@@ -237,8 +234,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       Enumeration enumSrvInfo = serversInfo.elements();
       while (enumSrvInfo.hasMoreElements()) {
         ServerInfo srvInfo = (ServerInfo) enumSrvInfo.nextElement();
-        if (srvInfo.messageInputStream != null) {
-          srvInfo.messageInputStream.shutdown();
+        if (srvInfo.messageIncomingBuilder != null) {
+          srvInfo.messageIncomingBuilder.shutdown();
         }
       }
       close();
@@ -321,7 +318,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               isNack = true;
             }
 
-            // Suppress the acked notifications from waiting list and deletes it.
+            // Suppress the acked notifications from waiting list and delete the messages.
             AgentServer.getTransaction().begin();
             while (!srvInfo.messagesToAck.isEmpty()
                 && ((MessageAndIndex) srvInfo.messagesToAck.get(0)).index
@@ -349,28 +346,36 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
               if (packetNumber != srvInfo.lastPacketReceived + 1) {
                 if (packetNumber <= srvInfo.lastPacketReceived) {
-                  if (logmon.isLoggable(BasicLevel.INFO)) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG)) {
                     logmon.log(BasicLevel.DEBUG, getName() + ", Already received packet "
                         + packetNumber + "-> Ignored");
                   }
                 } else {
-                  if (logmon.isLoggable(BasicLevel.INFO)) {
-                    logmon.log(BasicLevel.DEBUG, getName() + ", Missing packet -> Send nack "
+                  if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                    logmon.log(BasicLevel.DEBUG, getName() + ", Missing packet "
                         + (srvInfo.lastPacketReceived + 1));
                   }
-                  srvInfo.lastPacketAck = -(srvInfo.lastPacketReceived + 1);
-                  netServerOut.messageOutputStream.writeAck(srvInfo.lastPacketAck, socketAddress);
+                  
+                  // Only send nack one time for each missing packet.
+                  if (srvInfo.lastPacketAck != -(srvInfo.lastPacketReceived + 1)) {
+                    if (logmon.isLoggable(BasicLevel.WARN)) {
+                      logmon.log(BasicLevel.WARN, getName() + ", Send NACK "
+                          + (srvInfo.lastPacketReceived + 1));
+                    }
+                    srvInfo.lastPacketAck = -(srvInfo.lastPacketReceived + 1);
+                    netServerOut.messageOutputStream.writeAck(srvInfo.lastPacketAck, socketAddress);
+                  }
                 }
 
               } else {
 
                 srvInfo.lastPacketReceived++;
 
-                if (srvInfo.messageInputStream == null || !srvInfo.messageInputStream.isRunning()) {
-                  srvInfo.messageInputStream = new MessageInputStream(srvInfo, logmon);
-                  srvInfo.messageInputStream.start();
+                if (srvInfo.messageIncomingBuilder == null || !srvInfo.messageIncomingBuilder.isRunning()) {
+                  srvInfo.messageIncomingBuilder = new MessageBuilder(srvInfo, logmon);
+                  srvInfo.messageIncomingBuilder.start();
                 }
-                srvInfo.messageInputStream.feed(packet);
+                srvInfo.messageIncomingBuilder.feed(packet);
               }
             }
 
@@ -395,14 +400,13 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
      * @throws Exception
      */
     private void cleanServerInfo(ServerInfo srvInfo, int bootstamp) throws IOException, Exception {
-      if (srvInfo.messageInputStream != null) {
-        srvInfo.messageInputStream.shutdown();
+      if (srvInfo.messageIncomingBuilder != null) {
+        srvInfo.messageIncomingBuilder.shutdown();
       }
-      srvInfo.messageInputStream = new MessageInputStream(srvInfo, logmon);
+      srvInfo.messageIncomingBuilder = new MessageBuilder(srvInfo, logmon);
       
       short remotesid = (short) (((buf[8] & 0xF) << 8) + ((buf[9] & 0xF) << 0));
       
-      AgentServer.getTransaction().begin();
       synchronized (srvInfo.messagesToAck) {
         
         srvInfo.handshaken = true;
@@ -419,22 +423,23 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         Iterator iterMessages = srvInfo.messagesToAck.iterator();
         MessageAndIndex msgi = null;
         
+        long currentTimeMillis = System.currentTimeMillis();
         while (iterMessages.hasNext()) {
           msgi = (MessageAndIndex) iterMessages.next();
           
-          ExpiredNot expiredNot = null;
           if ((msgi.msg.not.expiration > 0L)
-              && (msgi.msg.not.expiration < System.currentTimeMillis())) {
+              && (msgi.msg.not.expiration < currentTimeMillis)) {
             if (msgi.msg.not.deadNotificationAgentId != null) {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
                     + msgi.msg.from + ", " + msgi.msg.not + " to "
                     + msgi.msg.not.deadNotificationAgentId);
               }
-              expiredNot = new ExpiredNot(msgi.msg.not);
+              AgentServer.getTransaction().begin();
               Channel.post(Message.alloc(AgentId.localId, msgi.msg.not.deadNotificationAgentId,
-                  expiredNot));
+                  new ExpiredNot(msgi.msg.not)));
               Channel.validate();
+              AgentServer.getTransaction().commit(true);
             } else {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
@@ -458,14 +463,13 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       }
       
       testBootTS(remotesid, bootstamp);
-      AgentServer.getTransaction().commit(true);
     }
   }
 
   final class NetServerOut extends Daemon {
 
-    MessageOutputStream messageOutputStream = null;
-    MessageOutputStream reSendMessageOutputStream = null;
+    DatagramOutputStream messageOutputStream = null;
+    DatagramOutputStream reSendMessageOutputStream = null;
 
     protected NetServerOut(String name, Logger logmon) throws Exception {
       super(name + ".NetServerOut", logmon);
@@ -487,8 +491,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       try {
 
         try {
-          messageOutputStream = new MessageOutputStream();
-          reSendMessageOutputStream = new MessageOutputStream();
+          messageOutputStream = new DatagramOutputStream();
+          reSendMessageOutputStream = new DatagramOutputStream();
         } catch (IOException exc) {
           logmon.log(BasicLevel.FATAL, getName() + ", cannot start.");
           return;
@@ -575,12 +579,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
   /**
    * Class used to send messages with UDP packets.
    */
-  final class MessageOutputStream extends OutputStream {
+  final class DatagramOutputStream extends MessageOutputStream {
 
-    private ObjectOutputStream oos = null;
-    
-    private byte[] buf = new byte[DATAGRAM_MAX_SIZE];
-    private int count = 0;
     private int datagramStamp;
     private int size;
     
@@ -590,8 +590,12 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     private byte[] ackBuf = new byte[10];
     private byte[] handshakeBuf = new byte[10];
 
-    MessageOutputStream() throws IOException {
-      oos = new ObjectOutputStream(this);
+    DatagramOutputStream() throws IOException {
+      super(DATAGRAM_MAX_SIZE);
+      
+      // Skip datagram header
+      count = 8;
+      
       // Stamp 1 for handshaking
       handshakeBuf[4] = 0;
       handshakeBuf[5] = 0;
@@ -622,7 +626,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       
       synchronized (serverInfo.messagesToAck) {
         size = 0;
-        rewriteMessage(serverInfo, addr, serverInfo.nextPacketNumber, msg, currentTimeMillis);
+        writeMessage(serverInfo, addr, serverInfo.nextPacketNumber, msg, currentTimeMillis);
         serverInfo.messagesToAck.add(new MessageAndIndex(msg, serverInfo.nextPacketNumber, size));
         serverInfo.nextPacketNumber = datagramStamp;
       }
@@ -654,7 +658,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         ackBuf[8] = 0;
         ackBuf[9] = 0;
       }
-      socket.send(new DatagramPacket(ackBuf, 10, addr));
+      socket.send(new DatagramPacket(ackBuf, ackBuf.length, addr));
     }
 
     public void write(int b) throws IOException {
@@ -662,7 +666,6 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       count++;
       if (count == DATAGRAM_MAX_SIZE) {
         sendPacket();
-        count = 8;
       }
     }
 
@@ -681,90 +684,25 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
       datagramStamp++;
       size++;
-
-      serverInfo.lastMsgSentDate = System.currentTimeMillis();
       if (serverInfo.handshaken) {
         socket.send(new DatagramPacket(buf, count, serverAddr));
       }
+      count = 8;
     }
 
-    /**
-     *  Write the Message internal state to the buffer.
-     */
-    int writeToBuf(Message msg, int idx) {
-      // Writes sender's AgentId
-      buf[idx++] = (byte) (msg.from.from >>>  8);
-      buf[idx++] = (byte) (msg.from.from >>>  0);
-      buf[idx++] = (byte) (msg.from.to >>>  8);
-      buf[idx++] = (byte) (msg.from.to >>>  0);
-      buf[idx++] = (byte) (msg.from.stamp >>>  24);
-      buf[idx++] = (byte) (msg.from.stamp >>>  16);
-      buf[idx++] = (byte) (msg.from.stamp >>>  8);
-      buf[idx++] = (byte) (msg.from.stamp >>>  0);
-      // Writes adressee's AgentId
-      buf[idx++]  = (byte) (msg.to.from >>>  8);
-      buf[idx++]  = (byte) (msg.to.from >>>  0);
-      buf[idx++] = (byte) (msg.to.to >>>  8);
-      buf[idx++] = (byte) (msg.to.to >>>  0);
-      buf[idx++] = (byte) (msg.to.stamp >>>  24);
-      buf[idx++] = (byte) (msg.to.stamp >>>  16);
-      buf[idx++] = (byte) (msg.to.stamp >>>  8);
-      buf[idx++] = (byte) (msg.to.stamp >>>  0);
-      // Writes source server id of message
-      buf[idx++]  = (byte) (msg.source >>>  8);
-      buf[idx++]  = (byte) (msg.source >>>  0);
-      // Writes destination server id of message
-      buf[idx++] = (byte) (msg.dest >>>  8);
-      buf[idx++] = (byte) (msg.dest >>>  0);
-      // Writes stamp of message
-      buf[idx++] = (byte) (msg.stamp >>>  24);
-      buf[idx++] = (byte) (msg.stamp >>>  16);
-      buf[idx++] = (byte) (msg.stamp >>>  8);
-      buf[idx++] = (byte) (msg.stamp >>>  0);
-
-      return idx;
-    }
-
-    void rewriteMessage(ServerInfo serverInfo,
+    void writeMessage(ServerInfo serverInfo,
                         SocketAddress addr,
                         int startIndex,
                         Message msg,
                         long currentTimeMillis) throws IOException {
-      serverAddr = addr;
-      datagramStamp = startIndex;
+      this.serverAddr = addr;
+      this.datagramStamp = startIndex;
       this.serverInfo = serverInfo;
-      
-      int idx = writeToBuf(msg, 8);
-      // Writes notification attributes
-      buf[idx++] = (byte) ((msg.not.persistent ? Message.PERSISTENT : 0) 
-          | (msg.not.detachable ? Message.DETACHABLE : 0));
 
-      buf[Message.LENGTH + 8] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
-      buf[Message.LENGTH + 9] = (byte) ((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
-      buf[Message.LENGTH + 10] = (byte) ((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
-      buf[Message.LENGTH + 11] = (byte) ((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
+      writeMessage(msg, currentTimeMillis);
+      sendPacket();
 
-      // Be careful, the stream header is hard-written in buf
-      count = Message.LENGTH + 12;
-
-      boolean hasExpiration = false;
-      try {
-        if (msg.not.expiration > 0L) {
-          msg.not.expiration -= currentTimeMillis;
-          hasExpiration = true;
-        }
-        oos.writeObject(msg.not);
-        oos.reset();
-        oos.flush();
-
-        sendPacket();
-
-      } finally {
-        if (hasExpiration) {
-          msg.not.expiration += currentTimeMillis;
-        }
-        count = 0;
-      }
+      serverInfo.lastMsgSentDate = currentTimeMillis;
     }
     
     void handShake(SocketAddress addr) throws IOException {
@@ -773,52 +711,44 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       handshakeBuf[1] = (byte) (boot >>> 16);
       handshakeBuf[2] = (byte) (boot >>> 8);
       handshakeBuf[3] = (byte) (boot >>> 0);
-      socket.send(new DatagramPacket(handshakeBuf, 10, addr));
+      socket.send(new DatagramPacket(handshakeBuf, handshakeBuf.length, addr));
+    }
+
+    public void write(byte[] b, int off, int len) throws IOException {
+      int sizeMax = buf.length - count;
+      if (len > sizeMax) {
+        System.arraycopy(b, off, buf, count, sizeMax);
+        count = buf.length;
+        sendPacket();
+        write(b, off + sizeMax, len - sizeMax);
+        return;
+      }
+      System.arraycopy(b, off, buf, count, len);
+      count += len;
+    }
+
+    protected void writeHeader() {
+      // No message header for this protocol. (message header != datagram header)
     }
   }
 
   /**
    * Class used to transform UDP packets into a stream, to build the messages.
    */
-  final class MessageInputStream extends Daemon {
+  final class MessageBuilder extends Daemon {
 
     private ServerInfo servInfo;
-    private PipedInputStream pipeIn;
-    private PipedOutputStream pipeOut;
+    private NetworkInputStream pipeIn;
+    private OutputStream pipeOut;
 
-    public MessageInputStream(ServerInfo info, Logger logmon) throws IOException {
-      super(name + ".MessageInputStream", logmon);
+    public MessageBuilder(ServerInfo info, Logger logmon) throws IOException {
+      super(name + ".MessageBuilder", logmon);
       this.servInfo = info;
-      pipeIn = new PipedInputStream();
-      pipeOut = new PipedOutputStream(pipeIn);
+      PipedInputStream is = new PipedInputStream();
+      this.pipeIn = new NetworkInputStream(is);
+      this.pipeOut = new PipedOutputStream(is);
     }
- 
-    void readMessageHdrFromStream(Message msg) throws IOException {
-      // Reads sender's AgentId
-      msg.from = new AgentId(
-        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
-        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
-        ((pipeIn.read() & 0xFF) << 24) + ((pipeIn.read() & 0xFF) << 16) +
-        ((pipeIn.read() & 0xFF) << 8) + ((pipeIn.read() & 0xFF) << 0));
-      // Reads adressee's AgentId
-      msg.to = new AgentId(
-        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
-        (short) (((pipeIn.read() & 0xFF) << 8) + (pipeIn.read() & 0xFF)),
-        ((pipeIn.read() & 0xFF) << 24) + ((pipeIn.read() & 0xFF) << 16) +
-        ((pipeIn.read() & 0xFF) << 8) + ((pipeIn.read() & 0xFF) << 0));
-      // Reads source server id of message
-      msg.source = (short) (((pipeIn.read() & 0xFF) << 8) +
-                            ((pipeIn.read() & 0xFF) << 0));
-      // Reads destination server id of message
-      msg.dest = (short) (((pipeIn.read() & 0xFF) << 8) +
-                          ((pipeIn.read() & 0xFF) << 0));
-      // Reads stamp of message
-      msg.stamp = ((pipeIn.read() & 0xFF) << 24) +
-        ((pipeIn.read() & 0xFF) << 16) +
-        ((pipeIn.read() & 0xFF) << 8) +
-        ((pipeIn.read() & 0xFF) << 0);
-    }
-
+    
     public void feed(DatagramPacket packet) throws IOException {
       pipeOut.write(packet.getData(), packet.getOffset() + 8, packet.getLength() - 8);
       pipeOut.flush();
@@ -829,48 +759,24 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       try {
         while (running) {
           try {
-            Message message = Message.alloc();
+            Message message = null;
 
             canStop = true;
             try {
-              readMessageHdrFromStream(message);
+              message = pipeIn.readMessage();
             } catch (IOException ioe) {
-              if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, getName() + ", interrupted " + message);
+              if (logmon.isLoggable(BasicLevel.WARN)) {
+                logmon.log(BasicLevel.WARN, getName() + ", interrupted: ", ioe);
               }
               break;
             }
             canStop = false;
 
-            // Reads notification attributes
-            byte octet = (byte) pipeIn.read();
-            boolean persistent = ((octet & Message.PERSISTENT) == 0) ? false : true;
-            boolean detachable = ((octet & Message.DETACHABLE) == 0) ? false : true;
-
-            // Reads notification object
-            ObjectInputStream ois;
-            try {
-              ois = new ObjectInputStream(pipeIn);
-            } catch (StreamCorruptedException exc) {
-              logmon.log(BasicLevel.ERROR, getName(), exc);
-              continue;
-            }
-
-            message.not = (Notification) ois.readObject();
-            if (message.not.expiration > 0L) {
-              message.not.expiration += System.currentTimeMillis();
-            }
-            message.not.persistent = persistent;
-            message.not.detachable = detachable;
-            message.not.detached = false;
-
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
               logmon.log(BasicLevel.DEBUG, getName() + ", msg received " + message);
             }
-
             deliver(message);
-
-            pipeIn.read();
+            
             servInfo.lastPacketAck = servInfo.lastPacketReceived;
           } catch (Exception exc) {
             logmon.log(BasicLevel.ERROR, getName(), exc);
@@ -896,6 +802,20 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       close();
     }
   }
+  
+  final class NetworkInputStream extends BufferedMessageInputStream {
+    NetworkInputStream(InputStream is) {
+      super();
+      this.is = is;
+    }
+
+    /**
+     * Reads the protocol header from this output stream.
+     */
+    protected void readHeader() throws IOException {
+    }
+  }
+  
   
   final class WatchDog extends Daemon {
     /** Use to synchronize thread */
@@ -958,9 +878,11 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                   continue;
                 }
                 
+                // If the message to send is the same as last one.
                 if (!servInfo.messagesToAck.isEmpty()) {
                   if (servInfo.lastMsgSentNumber == ((MessageAndIndex) servInfo.messagesToAck.get(0)).msg.stamp) {
                     servInfo.retry++;
+                    // If it's the 5th time, consider that the connection is lost (ie handshake needed again)
                     if (servInfo.retry > 4) {
                       if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
                         this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connection lost with the server.");
@@ -1021,7 +943,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                 while (iterMessages.hasNext()) {
                   try {
                     MessageAndIndex msgi = (MessageAndIndex) iterMessages.next();
-                    netServerOut.reSendMessageOutputStream.rewriteMessage(servInfo, addr, msgi.index,
+                    netServerOut.reSendMessageOutputStream.writeMessage(servInfo, addr, msgi.index,
                         msgi.msg, currentTimeMillis);
                     if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
                       this.logmon.log(BasicLevel.DEBUG, this.getName() + ", re-send message " + msgi.msg);
@@ -1045,37 +967,19 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         .append(",serverDest=#").append(socketAddress).toString();
   }
 
-  public int getSocketReceiveBufferSize() {
-    try {
-      return socket.getReceiveBufferSize();
-    } catch (SocketException exc) {
-      exc.printStackTrace();
-    }
-    return -1;
+  public int getSocketReceiveBufferSize() throws SocketException {
+    return socket.getReceiveBufferSize();
   }
 
-  public int getSocketSendBufferSize() {
-    try {
-      return socket.getSendBufferSize();
-    } catch (SocketException exc) {
-      exc.printStackTrace();
-    }
-    return -1;
+  public int getSocketSendBufferSize() throws SocketException {
+    return socket.getSendBufferSize();
   }
 
-  public void setSocketReceiveBufferSize(int size) {
-    try {
-      socket.setReceiveBufferSize(size);
-    } catch (SocketException exc) {
-      exc.printStackTrace();
-    }
+  public void setSocketReceiveBufferSize(int size) throws SocketException {
+    socket.setReceiveBufferSize(size);
   }
 
-  public void setSocketSendBufferSize(int size) {
-    try {
-      socket.setSendBufferSize(size);
-    } catch (SocketException exc) {
-      exc.printStackTrace();
-    }
+  public void setSocketSendBufferSize(int size) throws SocketException {
+    socket.setSendBufferSize(size);
   }
 }
