@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@ import fr.dyade.aaa.util.*;
 
 /**
  *  Implementation of Engine that used JGroups in order to improve 
- *  fiability.
+ *  reliability.
  */
 final class HAEngine extends Engine {
   /**  Queue of messages provide from external agent. */ 
@@ -206,7 +206,7 @@ final class HAEngine extends Engine {
    */
   synchronized void getState() throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", getState()");
+      logmon.log(BasicLevel.DEBUG, AgentServer.getName() + ", getState()");
 
     HAStateReply reply = new HAStateReply();
     // Get clock
@@ -240,6 +240,13 @@ final class HAEngine extends Engine {
     baos.reset();
     oos = new ObjectOutputStream(baos);
     try {
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        for (int i=0; i<qinFromExt.size(); i++) {
+          Message msg = (Message) qinFromExt.elementAt(i);
+          logmon.log(BasicLevel.DEBUG,
+                     AgentServer.getName() + " getState() -> " + msg);
+        }
+      }
       oos.writeObject(qinFromExt);
       reply.messages = baos.toByteArray();
     } finally {
@@ -261,7 +268,7 @@ final class HAEngine extends Engine {
 
   synchronized void setState(HAStateReply reply) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", setState()");
+      logmon.log(BasicLevel.DEBUG, AgentServer.getName() + ", setState()");
     
     now = reply.now;
     setStamp(reply.stamp);
@@ -296,6 +303,13 @@ final class HAEngine extends Engine {
     ois = new ObjectInputStream(bis);
     try {
       qinFromExt = (Vector) ois.readObject();
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        for (int i=0; i<qinFromExt.size(); i++) {
+          Message msg = (Message) qinFromExt.elementAt(i);
+          logmon.log(BasicLevel.DEBUG,
+                     AgentServer.getName() + " setState() -> " + msg);
+        }
+      }
       postFromExt();
     } finally {
       try {
