@@ -76,8 +76,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
   /** Identifier of the destination's administrator. */
   private AgentId adminId;
+
+  /**
+   * Reference to the agent hosting the destination.
+   */
+  private transient Destination agent;
   /** Identifier of the agent hosting the destination. */
-  protected AgentId destId;
+  public final AgentId getId() {
+  	return agent.getId();
+  }
 
   /** <code>true</code> if the READ access is granted to everybody. */
   protected boolean freeReading = false;
@@ -101,12 +108,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
   /**
    * Transient <code>StringBuffer</code> used to build message, this buffer
-   * is created during agent <tt>AdminTopicinitialization</tt>, then reused
-   * during the topic life.
+   * is created during agent initialization, then reused during the destination
+   * life.
    */
   transient StringBuffer strbuf;
-
-  private Destination agent;
 
   /**
    * date of creation.
@@ -124,8 +129,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @param adminId  Identifier of the administrator of the destination.
    * @param prop     The initial set of properties.
    */ 
-  public DestinationImpl(AgentId destId, AgentId adminId, Properties prop) {
-    this.destId = destId;
+  public DestinationImpl(AgentId adminId, Properties prop) {
     this.adminId = adminId;
     clients = new Hashtable();
     strbuf = new StringBuffer();
@@ -153,6 +157,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
   }
 
+	/**
+	 * Initializes the destination.
+	 * 
+   * @param firstTime		true when first called by the factory
+	 */
+	public abstract void initialize(boolean firstTime);
+
   public void setAgent(Destination agent) {
     // state change, so save.
     setSave();
@@ -160,7 +171,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
 
   protected boolean isLocal(AgentId id) {
-    return (destId.getTo() == id.getTo());
+    return (getId().getTo() == id.getTo());
   }
 
   /** Returns <code>true</code> if the destination might be deleted. */
@@ -188,7 +199,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
         .append("], sent to Destination [")
-        .append(destId)
+        .append(getId())
         .append("], successful [true]: user [")
         .append(user)
         .append("] set with right [" + right +"]").toString();
@@ -198,7 +209,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
         .append("], sent to Destination [")
-        .append(destId)
+        .append(getId())
         .append("], successful [false]: ")
         .append(exc.getMessage()).toString();
       strbuf.setLength(0);
@@ -274,7 +285,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     String info = strbuf.append("Request [")
       .append(not.getClass().getName())
       .append("], sent to Destination [")
-      .append(destId)
+      .append(getId())
       .append("], successful [true]: dmq [")
       .append(dmqId)
       .append("] set").toString();
@@ -489,7 +500,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (isAdministrator(not.agent)) {
       if (logger.isLoggable(BasicLevel.ERROR))
             logger.log(BasicLevel.ERROR,
-                       "Admin of dest " + destId + " does not exist anymore.");
+                       "Admin of dest " + getId() + " does not exist anymore.");
     } else if (not.agent.equals(dmqId)) {
       // state change, so save.
       setSave();
@@ -544,7 +555,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
         .append("], sent to Destination [")
-        .append(destId)
+        .append(getId())
         .append("], successful [true] ").toString();
       strbuf.setLength(0);
       forward(from, new AdminReply(not, true, info, obj)); 
@@ -552,7 +563,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       info = strbuf.append("Request [")
         .append(not.getClass().getName())
         .append("], sent to Destination [")
-        .append(destId)
+        .append(getId())
         .append("], successful [false]: ")
         .append(exc.getMessage()).toString();
       strbuf.setLength(0);
@@ -664,13 +675,12 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     } else if (this.dmqId != null) {
       // Sending the dead messages to the destination's DMQ
       destDmqId = this.dmqId;
-    } else if (DeadMQueueImpl.id != null) {
+    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
       // Sending the dead messages to the server's default DMQ
-      destDmqId = DeadMQueueImpl.id;
+      destDmqId = DeadMQueueImpl.getDefaultDMQId();
     }
 
-    if (destDmqId != null &&
-        ! destDmqId.equals(destId)) {
+    if (destDmqId != null && ! destDmqId.equals(getId())) {
       forward(destDmqId, deadMessages);
     }
     // Else it means that the dead message queue is
@@ -704,7 +714,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     throws IOException {
     out.writeBoolean(deletable);
     out.writeObject(adminId);
-    out.writeObject(destId);
     out.writeBoolean(freeReading);
     out.writeBoolean(freeWriting);
     out.writeObject(clients);    
@@ -713,14 +722,12 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     out.writeLong(nbMsgsReceiveSinceCreation);
     out.writeLong(nbMsgsDeliverSinceCreation);
     out.writeLong(nbMsgsSendToDMQSinceCreation);
-    out.writeObject(agent);
   }
 
   private void readObject(java.io.ObjectInputStream in)
     throws IOException, ClassNotFoundException {
     deletable = in.readBoolean();
     adminId = (AgentId)in.readObject();
-    destId = (AgentId)in.readObject();    
     freeReading = in.readBoolean();
     freeWriting = in.readBoolean();
     clients = (Hashtable)in.readObject();
@@ -730,7 +737,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     nbMsgsReceiveSinceCreation = in.readLong();
     nbMsgsDeliverSinceCreation = in.readLong();
     nbMsgsSendToDMQSinceCreation = in.readLong();
-    agent = (Destination)in.readObject();
   }
 
   // DestinationMBean interface
@@ -741,7 +747,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @return the unique identifier of the destination.
    */
   public final String getDestinationId() {
-    return destId.toString();
+    return getId().toString();
   }
 
   /**
