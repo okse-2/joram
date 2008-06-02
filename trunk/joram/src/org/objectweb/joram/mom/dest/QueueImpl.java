@@ -80,9 +80,7 @@ import fr.dyade.aaa.util.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class QueueImpl extends DestinationImpl implements QueueImplMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(QueueImpl.class.getName());
@@ -108,7 +106,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   public void setPeriod(long period) {
     if ((this.period == -1L) && (period != -1L)) {
       // Schedule the CleaningTask.
-      forward(destId, new WakeUpNot());
+      forward(getId(), new WakeUpNot());
     }
     this.period = period;
   }
@@ -219,12 +217,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (! message.isValid(currentTime)) {
         messages.remove(index);
         message.delete();
-        
-        message.msg.expired = true;
 
         if (deadMessages == null)
           deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
@@ -291,12 +287,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /**
    * Constructs a <code>QueueImpl</code> instance.
    *
-   * @param destId   Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    * @param prop     The initial set of properties.
    */
-  public QueueImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public QueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
 
     try {
       if (prop != null)
@@ -309,12 +304,52 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     contexts = new Hashtable();
     requests = new Vector();
   }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime		true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    cleanWaitingRequest(System.currentTimeMillis());
+
+    receiving = false;
+    messages = new Vector();
+    deliveredMsgs = new Hashtable();
+    
+    if (firstTime) return;
+
+    // Retrieving the persisted messages, if any.
+    Vector persistedMsgs = null;
+    persistedMsgs = Message.loadAll(getMsgTxPrefix().toString());
+
+    if (persistedMsgs != null) {
+      Message persistedMsg;
+      AgentId consId;
+      while (! persistedMsgs.isEmpty()) {
+        persistedMsg = (Message) persistedMsgs.remove(0);
+        consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
+        if (consId == null) {
+          addMessage(persistedMsg);
+        } else if (isLocal(consId)) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       " -> deny " + persistedMsg.getIdentifier());
+          consumers.remove(persistedMsg.getIdentifier());
+          contexts.remove(persistedMsg.getIdentifier());
+          addMessage(persistedMsg);
+        } else {
+          deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
+        }
+      }
+    }
+  }
 
   /**
    * Returns a string representation of this destination.
    */
   public String toString() {
-    return "QueueImpl:" + (destId == null ? "null" : destId.toString());
+    return "QueueImpl:" + getId().toString();
   }
 
   /**
@@ -346,7 +381,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     threshold = req.getThreshold();
     
     String info = strbuf.append("Request [").append(req.getClass().getName())
-      .append("], sent to Queue [").append(destId)
+      .append("], sent to Queue [").append(getId())
       .append("], successful [true]: threshold [")
       .append(threshold).append("] set").toString();
     strbuf.setLength(0);
@@ -369,7 +404,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     nbMaxMsg = req.getNbMaxMsg();
     
     String info = strbuf.append("Request [").append(req.getClass().getName())
-      .append("], sent to Queue [").append(destId)
+      .append("], sent to Queue [").append(getId())
       .append("], successful [true]: nbMaxMsg [")
       .append(nbMaxMsg).append("] set").toString();
     strbuf.setLength(0);
@@ -529,9 +564,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     Message message;
     while (i < messages.size()) {
       message = (Message) messages.get(i);
-      if (Selector.matches(message.msg, not.getSelector())) {
+      if (Selector.matches(message.getHeaderMessage(), not.getSelector())) {
         // Matching selector: adding the message:
-        rep.addMessage(message.msg);
+        rep.addMessage(message.getFullMessage());
       }
       i++;
     }
@@ -623,17 +658,17 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           consumers.remove(msgId);
           contexts.remove(msgId);
           deliveredMsgs.remove(msgId);
-          message.msg.redelivered = true;
+          message.setRedelivered();
 
           // If message considered as undeliverable, adding
           // it to the vector of dead messages:
           if (isUndeliverable(message)) {
             message.delete();
-            message.msg.undeliverable = true;
+            message.setUndeliverable();
 
             if (deadMessages == null)
               deadMessages = new ClientMessages();
-            deadMessages.addMessage(message.msg);
+            deadMessages.addMessage(message.getFullMessage());
           } else {
             // Else, putting the message back into the deliverables vector:
             storeMessage(message);
@@ -661,7 +696,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         break;
       }
 
-      message.msg.redelivered = true;
+      message.setRedelivered();
 
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -677,11 +712,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (isUndeliverable(message)) {
         message.delete();
 
-        message.msg.undeliverable = true;
+        message.setUndeliverable();
 
         if (deadMessages == null)
           deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
       } else {
         // Else, putting the message back into the deliverables vector:
         storeMessage(message);
@@ -766,7 +801,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         break;
     }
     if (message != null) {
-      replyToTopic(new GetQueueMessageRep(message.msg),
+      replyToTopic(new GetQueueMessageRep(message.getFullMessage()),
                    replyTo, requestMsgId, replyMsgId);
     } else {
       
@@ -787,7 +822,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         messages.removeElementAt(i);
         message.delete();
         ClientMessages deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
         sendToDMQ(deadMessages, null);
         break;
       }
@@ -805,7 +840,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       for (int i = 0; i < messages.size(); i++) {
         Message message = (Message) messages.elementAt(i);
         message.delete();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
       }
       sendToDMQ(deadMessages, null);
       messages.clear();
@@ -930,7 +965,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       // denying it.
       if (consId.equals(client)) {
         deliveredMsgs.remove(msgId);
-        message.msg.redelivered = true;
+        message.setRedelivered();
 
         // state change, so save.
         setSave();
@@ -941,10 +976,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         // vector of dead messages:
         if (isUndeliverable(message)) {
           message.delete();
-          message.msg.undeliverable = true;
+          message.setUndeliverable();
           if (deadMessages == null)
             deadMessages = new ClientMessages();
-          deadMessages.addMessage(message.msg);
+          deadMessages.addMessage(message.getFullMessage());
         } else {
           // Else, putting it back into the deliverables vector:
           storeMessage(message);
@@ -972,8 +1007,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   protected void doDeleteNot(DeleteNot not) {
     // Building the exception to send to the pending receivers:
-    DestinationException exc = new DestinationException("Queue " + destId
-                                                        + " is deleted.");
+    DestinationException exc = new DestinationException("Queue " + getId() + " is deleted.");
     ReceiveRequest rec;
     ExceptionReply excRep;
     // Sending it to the pending receivers:
@@ -984,8 +1018,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       excRep = new ExceptionReply(rec, exc);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
-                   "Requester " + rec.requester +
-                   " notified of the queue deletion.");
+                   "Requester " + rec.requester + " notified of the queue deletion.");
       forward(rec.requester, excRep);
     }
     // Sending the remaining messages to the DMQ, if needed:
@@ -994,27 +1027,32 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       ClientMessages deadMessages = new ClientMessages();
       while (! messages.isEmpty()) {
         message = (Message) messages.remove(0);
-        message.msg.deletedDest = true;
-        deadMessages.addMessage(message.msg);
+        message.setDeletedDest();
+        deadMessages.addMessage(message.getFullMessage());
       }
       sendToDMQ(deadMessages, null);
     }
 
     // Deleting the messages:
-    Message.deleteAll(getMsgTxname());
+    Message.deleteAll(getMsgTxPrefix().toString());
   }
 
-  transient String msgTxname = null;
+  transient StringBuffer msgTxPrefix = null;
+  transient int msgTxPrefixLength = 0;
 
-  protected final String getMsgTxname() {
-    if (msgTxname == null)
-      msgTxname = 'M' + getDestinationId() + '_';
-    return msgTxname;
+  protected final StringBuffer getMsgTxPrefix() {
+    if (msgTxPrefix == null) {
+    	msgTxPrefix = new StringBuffer(18).append('M').append(getId().toString()).append('_');
+    	msgTxPrefixLength = msgTxPrefix.length();
+    }
+    return msgTxPrefix;
   }
 
   protected final void setMsgTxName(Message msg) {
-    if (msg.getTxName() == null)
-      msg.setTxName(getMsgTxname() + msg.order);
+    if (msg.getTxName() == null) {
+      msg.setTxName(getMsgTxPrefix().append(msg.order).toString());
+      msgTxPrefix.setLength(msgTxPrefixLength);
+    }
   }
 
   /**
@@ -1039,7 +1077,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       ClientMessages deadMessages = new ClientMessages();
-      deadMessages.addMessage(message.msg);
+      deadMessages.addMessage(message.getFullMessage());
       sendToDMQ(deadMessages, null);
       return;
     }
@@ -1116,7 +1154,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     Iterator itMessages = lsMessages.iterator();
     while (itMessages.hasNext()) {
       message = (Message) itMessages.next();
-      cm.addMessage(message.msg);
+      cm.addMessage(message.getFullMessage());
     }
     return cm;
   }
@@ -1134,8 +1172,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       msgId = (String) itMsgId.next();
       message = getMessage(msgId, remove);
 
-      if (checkDelivery(message.msg)) {
-        message.msg.deliveryCount++;
+      if (checkDelivery(message.getHeaderMessage())) {
+        message.incDeliveryCount();
         nbMsgsDeliverSinceCreation++;
         
         // use in sub class see ClusterQueueImpl
@@ -1144,7 +1182,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Message " + msgId);
 
-        cm.addMessage(message.msg);
+        cm.addMessage(message.getFullMessage());
       }
     }
     return cm;
@@ -1194,16 +1232,16 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       message = (Message) messages.get(j);
 
       // If selector matches, sending the message:
-      if (Selector.matches(message.msg, selector) &&
-          checkDelivery(message.msg)) {
-        message.msg.deliveryCount++;
+      if (Selector.matches(message.getHeaderMessage(), selector) &&
+          checkDelivery(message.getHeaderMessage())) {
+        message.incDeliveryCount();
         nbMsgsDeliverSinceCreation++;
         
         // use in sub class see ClusterQueueImpl
         messageDelivered(message.getIdentifier());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Message " + message.msg.id);
+          logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier());
 
         lsMessages.add(message);
         
@@ -1245,8 +1283,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
 
     Message message =  getMomMessage(msgId);
-      if (checkDelivery(message.msg)) {
-        message.msg.deliveryCount++;
+      if (checkDelivery(message.getHeaderMessage())) {
+        message.incDeliveryCount();
         nbMsgsDeliverSinceCreation++;
         
         // use in sub class see ClusterQueueImpl
@@ -1303,7 +1341,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       Iterator itMessages = lsMessages.iterator();
       while (itMessages.hasNext()) {
         message = (Message) itMessages.next();
-        notMsg.addMessage(message.msg);
+        notMsg.addMessage(message.getFullMessage());
         if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
           consumers.put(message.getIdentifier(), notRec.requester);
@@ -1314,7 +1352,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-              "Message " + message.msg.id + " to " + notRec.requester +
+              "Message " + message.getIdentifier() + " to " + notRec.requester +
               " as reply to " + notRec.getRequestId());
       }
 
@@ -1435,19 +1473,24 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 //      sendToDMQ(deadMessages, null);
 //  }
 
+  /**
+   * Returns true if conditions are ok to deliver the message.
+   * This method must be overloaded in subclasses.
+   * Be careful only the message header is accessible.
+   */
   protected boolean checkDelivery(org.objectweb.joram.shared.messages.Message msg) {
     return true;
   }
 
   /** 
    * call in deliverMessages just after forward(msg),
-   * overload this methode to process a specific treatment.
+   * overload this method to process a specific treatment.
    */
   protected void messageDelivered(String msgId) {}
 
   /** 
    * call in deliverMessages just after a remove message (invalid),
-   * overload this methode to process a specific treatment.
+   * overload this method to process a specific treatment.
    */
   protected void messageRemoved(String msgId) {}
   
@@ -1458,50 +1501,19 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   protected boolean isUndeliverable(Message message) {
     if (threshold != null)
-      return message.msg.deliveryCount == threshold.intValue();
+      return (message.getDeliveryCount() == threshold.intValue());
     else if (DeadMQueueImpl.threshold != null)
-      return message.msg.deliveryCount == DeadMQueueImpl.threshold.intValue();
+      return (message.getDeliveryCount() == DeadMQueueImpl.threshold.intValue());
     return false;
   }
 
-  /** Deserializes a <code>QueueImpl</code> instance. */
-  private void readObject(java.io.ObjectInputStream in)
-               throws IOException, ClassNotFoundException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "QueueImpl.readObject()");
-    in.defaultReadObject();
-
-    cleanWaitingRequest(System.currentTimeMillis());
-
-    receiving = false;
-    messages = new Vector();
-    deliveredMsgs = new Hashtable();
-
-    // Retrieving the persisted messages, if any.
-    Vector persistedMsgs = null;
-    persistedMsgs = Message.loadAll(getMsgTxname());
-
-    if (persistedMsgs != null) {
-      Message persistedMsg;
-      AgentId consId;
-      while (! persistedMsgs.isEmpty()) {
-        persistedMsg = (Message) persistedMsgs.remove(0);
-        consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
-        if (consId == null) {
-          addMessage(persistedMsg);
-        } else if (isLocal(consId)) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       " -> deny " + persistedMsg.getIdentifier());
-          consumers.remove(persistedMsg.getIdentifier());
-          contexts.remove(persistedMsg.getIdentifier());
-          addMessage(persistedMsg);
-        } else {
-          deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-        }
-      }
-    }
-  }
+//  /** Deserializes a <code>QueueImpl</code> instance. */
+//  private void readObject(java.io.ObjectInputStream in)
+//               throws IOException, ClassNotFoundException {
+//    if (logger.isLoggable(BasicLevel.DEBUG))
+//      logger.log(BasicLevel.DEBUG, "QueueImpl.readObject()");
+//    in.defaultReadObject();
+//  }
 
   public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     receiving = in.readBoolean();
