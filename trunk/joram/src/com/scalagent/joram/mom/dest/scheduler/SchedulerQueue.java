@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,10 +34,11 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
 public class SchedulerQueue extends Queue {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  public static Logger logger = Debug.getLogger(SchedulerQueue.class.getName());
+
   public static final String QUEUE_SCHEDULER_TYPE = "queue_scheduler";
 
   public static String getDestinationType() {
@@ -60,7 +61,7 @@ public class SchedulerQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new SchedulerQueueImpl(getId(), adminId, prop);
+    return new SchedulerQueueImpl(adminId, prop);
   }
   
   public void react(AgentId from, Notification not)
