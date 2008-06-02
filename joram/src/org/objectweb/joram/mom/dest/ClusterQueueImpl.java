@@ -101,11 +101,11 @@ public class ClusterQueueImpl extends QueueImpl {
   /**
    * Constructs a <code>ClusterQueueImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
+   * @param prop     The initial set of properties.
    */
-  public ClusterQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public ClusterQueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
 
     /** producer threshold */
     int producThreshold = -1;
@@ -142,10 +142,7 @@ public class ClusterQueueImpl extends QueueImpl {
         timeThreshold = period;
       }
     }
-
-    clusters = new Hashtable();
-    clusters.put(destId, new Float(1));
-
+    
     loadingFactor = new LoadingFactor(this,
                                       producThreshold,
                                       consumThreshold,
@@ -154,11 +151,27 @@ public class ClusterQueueImpl extends QueueImpl {
     timeTable = new Hashtable();
     visitTable = new Hashtable();
     clusterDeliveryCount = 0;
+  }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    super.initialize(firstTime);
 
+    if (firstTime) {
+      clusters = new Hashtable();
+      clusters.put(getId(), new Float(1));
+    }
   }
 
   public String toString() {
-    return "ClusterQueueImpl:" + destId.toString();
+    return "ClusterQueueImpl:" + getId().toString();
   }
  
   /**
@@ -227,7 +240,7 @@ public class ClusterQueueImpl extends QueueImpl {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
-                                    " ClusterQueueImpl.addQueueCluster in " + destId +
+                                    " ClusterQueueImpl.addQueueCluster in " + getId() +
                                     "\njoiningQueue=" + joiningQueue +
                                     "\nclusters=" + clusters);
 
@@ -255,7 +268,7 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   public void removeQueueCluster(String removeQueue) {
     AgentId id = AgentId.fromString(removeQueue);
-    if (destId.equals(id)) {
+    if (getId().equals(id)) {
       clusters.clear();
     } else
       clusters.remove(id);
@@ -269,7 +282,7 @@ public class ClusterQueueImpl extends QueueImpl {
     if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
                                     "--- " + this +
-                                    " ClusterQueueImpl.removeQueueCluster in " + destId +
+                                    " ClusterQueueImpl.removeQueueCluster in " + getId() +
                                     "\nremoveQueue=" + removeQueue +
                                     "\nclusters=" + clusters);
   }
@@ -340,7 +353,7 @@ public class ClusterQueueImpl extends QueueImpl {
       String msgId = (String) e.nextElement();
       if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
         toGive.add(msgId);
-        storeMsgIdInVisitTable(msgId,destId);
+        storeMsgIdInVisitTable(msgId, getId());
       }
     }
 
@@ -361,7 +374,7 @@ public class ClusterQueueImpl extends QueueImpl {
               cycle.setClientMessages(new ClientMessages());
             }
             ClientMessages cm = cycle.getClientMessages();
-            cm.addMessage(message.msg);
+            cm.addMessage(message.getFullMessage());
             cycle.putInVisitTable(msgId,visit);
             table.put(id,cycle);
             break;
@@ -620,7 +633,7 @@ public class ClusterQueueImpl extends QueueImpl {
 
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
-      if (! id.equals(destId))
+      if (! id.equals(getId()))
         forward(id,not);
     }
   }
@@ -639,7 +652,7 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   private void storeMsgIdInTimeTable(String msgId, Long date) {
     try {
-      timeTable.put(msgId,date);
+      timeTable.put(msgId, date);
     } catch (NullPointerException exc) {}
   }
 
@@ -652,7 +665,7 @@ public class ClusterQueueImpl extends QueueImpl {
     Vector alreadyVisit = (Vector) visitTable.get(msgId);
     if (alreadyVisit == null) alreadyVisit = new Vector();
     alreadyVisit.add(destId);
-    visitTable.put(msgId,alreadyVisit);
+    visitTable.put(msgId, alreadyVisit);
   }
 
   /**
@@ -705,23 +718,5 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   public void setAutoEvalThreshold(boolean autoEvalThreshold) {
     loadingFactor.autoEvalThreshold = autoEvalThreshold;
-  }
-
-  /**
-   * 
-   * @param in
-   * @throws IOException
-   * @throws ClassNotFoundException
-   */
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-
-    in.defaultReadObject();
-
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.readObject" +
-                                    " loadingFactor = " + loadingFactor);
   }
 }
