@@ -61,7 +61,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see DestinationItf
  */
 public abstract class Destination extends Agent implements AdminDestinationItf {
-
+  /** logger */
   public static Logger logger = Debug.getLogger(Destination.class.getName());
   
   /**
@@ -114,7 +114,13 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    *	unspecialized exception
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "agentInitialize(" + firstTime + ')');
+
     super.agentInitialize(firstTime);
+    destImpl.setAgent(this);
+    destImpl.initialize(firstTime);
+    
     try {
       MXWrapper.registerMBean(destImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
