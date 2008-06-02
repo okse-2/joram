@@ -138,9 +138,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * destinations replies to clients.
  */ 
 public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(ProxyImpl.class.getName());
@@ -478,7 +476,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
-      not.setDMQId(DeadMQueueImpl.getId());
+      not.setDMQId(DeadMQueueImpl.getDefaultDMQId());
     }
   }
 
@@ -2135,8 +2133,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                subsTable.get(keys.nextElement())).setDMQId(null);
         }
         // Sending the messages again if not coming from the default DMQ:
-        if (DeadMQueueImpl.getId() != null
-            && ! agId.equals(DeadMQueueImpl.getId())) {
+        if (DeadMQueueImpl.getDefaultDMQId() != null
+            && ! agId.equals(DeadMQueueImpl.getDefaultDMQId())) {
           // Setting 'deletedDest' attribute for each message
           for (Enumeration msgs = ((ClientMessages) req).getMessages().elements();
                msgs.hasMoreElements();) {
@@ -2328,7 +2326,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
       if (message != null) {
         GetSubscriptionMessageRep reply = 
-          new GetSubscriptionMessageRep(message.msg);
+          new GetSubscriptionMessageRep(message.getFullMessage());
         replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
       } else {
         replyToTopic(
@@ -2500,8 +2498,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
     if (dmqId != null) {
       proxyAgent.sendNot(dmqId, messages);
-    } else if (DeadMQueueImpl.getId() != null) {
-      proxyAgent.sendNot(DeadMQueueImpl.getId(), messages);
+    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
+      proxyAgent.sendNot(DeadMQueueImpl.getDefaultDMQId(), messages);
     }
   }
 
@@ -2523,11 +2521,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       messagesTable.remove(id);
       if (message.durableAcksCounter > 0)
         message.delete();
-      message.msg.expired = true;
 
       if (deadMessages == null)
         deadMessages = new ClientMessages();
-      deadMessages.addMessage(message.msg);
+      deadMessages.addMessage(message.getFullMessage());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
