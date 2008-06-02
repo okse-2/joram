@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -51,16 +51,15 @@ import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>DeadMQueueImpl</code> class implements the MOM dead message queue
- * behaviour, basically storing dead messages and delivering them upon clients
+ * behavior, basically storing dead messages and delivering them upon clients
  * requests.
  */
 public class DeadMQueueImpl extends QueueImpl {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** Static value holding the default DMQ identifier for a server. */
-  static AgentId id = null;
+  static AgentId defaultDMQId = null;
   /** Static value holding the default threshold for a server. */
   static Integer threshold = null;
   
@@ -69,22 +68,21 @@ public class DeadMQueueImpl extends QueueImpl {
   /**
    * Constructs a <code>DeadMQueueImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    * @param prop     The initial set of properties.
    */
-  public DeadMQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public DeadMQueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
     setFreeWriting(true);
   }
 
   public String toString() {
-    return "DeadMQueueImpl:" + destId.toString();
+    return "DeadMQueueImpl:" + getId().toString();
   }
 
   /** Static method returning the default DMQ identifier. */
-  public static AgentId getId() {
-    return id;
+  public static AgentId getDefaultDMQId() {
+    return defaultDMQId;
   }
   
   /** Static method returning the default threshold. */
@@ -167,8 +165,8 @@ public class DeadMQueueImpl extends QueueImpl {
     for (int i = 0; i < messages.size(); i++) {
       message = (Message) messages.get(i);
       // Message matching the selector: adding it.
-      if (Selector.matches(message.msg, not.getSelector()))
-        rep.addMessage(message.msg);
+      if (Selector.matches(message.getHeaderMessage(), not.getSelector()))
+        rep.addMessage(message.getFullMessage());
     }
     // Delivering the reply:
     forward(from, rep);
@@ -241,8 +239,8 @@ public class DeadMQueueImpl extends QueueImpl {
         message = (Message) messages.get(j);
         
         // If the selector matches, sending it:
-        if (Selector.matches(message.msg, notRec.getSelector())) {
-          notMsg.addMessage(message.msg);
+        if (Selector.matches(message.getHeaderMessage(), notRec.getSelector())) {
+          notMsg.addMessage(message.getFullMessage());
           
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " sent to "
