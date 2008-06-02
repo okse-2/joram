@@ -809,7 +809,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    */
   public final synchronized void garbage() {
     if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, stops");
+      logmon.log(BasicLevel.INFO, "NTransaction, garbages");
 
     while (phase != FREE) {
       // Wait for the transaction subsystem to be free
@@ -829,15 +829,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
-                 "NTransaction, stopped: " +
-                 "saved=" + getNbSavedObjects() + ", " +
-                 "deleted=" + getNbDeletedObjects() + ", " +
-                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
-                 "loaded=" + getNbLoadedObjects() + ", " +
-                 "garbage=" + getGarbageCount() + ", " +
-                 "commit=" + getCommitCount() + ", " +
-                 "time=" + getGarbageTime() + ", " +
-                 "ratio=" + getGarbageRatio());
+                 "NTransaction, garbaged: " + toString());
     }
   }
 
@@ -869,15 +861,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
-                 "NTransaction, stopped: " +
-                 "saved=" + getNbSavedObjects() + ", " +
-                 "deleted=" + getNbDeletedObjects() + ", " +
-                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
-                 "loaded=" + getNbLoadedObjects() + ", " +
-                 "garbage=" + getGarbageCount() + ", " +
-                 "commit=" + getCommitCount() + ", " +
-                 "time=" + getGarbageTime() + ", " +
-                 "ratio=" + getGarbageRatio());
+                 "NTransaction, stopped: " + toString());
     }
   }
 
@@ -889,7 +873,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    */
   public synchronized void close() {
     if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, stops");
+      logmon.log(BasicLevel.INFO, "NTransaction, closes");
 
     if (phase == INIT) return;
 
@@ -907,15 +891,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
       logmon.log(BasicLevel.INFO,
-                 "NTransaction, closed: " +
-                 "saved=" + getNbSavedObjects() + ", " +
-                 "deleted=" + getNbDeletedObjects() + ", " +
-                 "baddeleted=" + getNbBadDeletedObjects() + ", " +
-                 "loaded=" + getNbLoadedObjects() + ", " +
-                 "garbage=" + getGarbageCount() + ", " +
-                 "commit=" + getCommitCount() + ", " +
-                 "time=" + getGarbageTime() + ", " +
-                 "ratio=" + getGarbageRatio());
+                 "NTransaction, closed: " + toString());
     }
   }
 
@@ -1126,6 +1102,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
         op = (Operation) e.nextElement();
         if (op.type == Operation.NOOP) continue;
 
+//      if (logmon.isLoggable(BasicLevel.DEBUG))
+//         if (op.type == Operation.SAVE) {
+//           logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
+//         } else if (op.type == Operation.CREATE) {
+//           logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
+//         } else if (op.type == Operation.DELETE) {
+//           logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
+//         }
+//      }
+
         // Save the operation to the log on disk
         write(op.type);
         if (op.dirName != null) {
@@ -1182,8 +1168,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     private final void garbage() throws IOException {
       long start = System.currentTimeMillis();
 
-      if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO,
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
                    "NTransaction.LogFile.garbage() - begin");
 
       garbageCount += 1;
@@ -1226,32 +1212,58 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       lastGarbageTime = end;
       garbageTime += end - start;
 
-      if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO,
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
                    "NTransaction.LogFile.garbage() - end: " + (end - start));
     }
 
     void stop() {
       if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO, "NTransaction, stops");
+        logmon.log(BasicLevel.INFO, "NTransaction.LogFile, stops");
 
       try {
         garbage();
         logFile.close();
         repository.close();
       } catch (IOException exc) {
-        logmon.log(BasicLevel.WARN, "NTransaction, can't close logfile", exc);
+        logmon.log(BasicLevel.WARN,
+                   "NTransaction.LogFile, can't close logfile", exc);
       }
 
       if ((lockFile != null) && (! lockFile.delete())) {
         logmon.log(BasicLevel.FATAL,
-                   "NTransaction, - can't delete lockfile: " +
+                   "NTransaction.LogFile, - can't delete lockfile: " +
                    lockFile.getAbsolutePath());
       }
 
       if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO, "NTransaction, exits.");
+        logmon.log(BasicLevel.INFO, "NTransaction.LogFile, stopped.");
     }
+  }
+
+  /**
+   * Returns a string representation for this object.
+   *
+   * @return	A string representation of this object. 
+   */
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",StartTime=").append(getStartTime());
+    strbuf.append(",MaxLogMemorySize=").append(getMaxLogMemorySize());
+    strbuf.append(",LogMemorySize=").append(getLogMemorySize());
+    strbuf.append(",LogFileSize=").append(getLogFileSize());
+    strbuf.append(",CommitCount=").append(getCommitCount());
+    strbuf.append(",GarbageCount=").append(getGarbageCount());
+    strbuf.append(",GarbageRatio=").append(getGarbageRatio());
+    strbuf.append(",NbSavedObjects=").append(getNbSavedObjects());
+    strbuf.append(",NbDeletedObjects=").append(getNbDeletedObjects());
+    strbuf.append(",NbBadDeletedObjects=").append(getNbBadDeletedObjects());
+    strbuf.append(",NbLoadedObjects=").append(getNbLoadedObjects());
+    strbuf.append(')');
+    
+    return strbuf.toString();
   }
 
   public static void main(String[] args) throws Exception {
@@ -1267,10 +1279,9 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 }
 
 final class Operation implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   static final int SAVE = 1;
   static final int CREATE = 4;
   static final int DELETE = 2;
