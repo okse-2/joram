@@ -293,6 +293,11 @@ final class HAEngine extends Engine {
         createAgent(agent);
       }
     } catch (EOFException exc) {
+      logmon.log(BasicLevel.WARN,
+                 AgentServer.getName() + " setState()", exc);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 AgentServer.getName() + " setState()", exc);
     } finally {
       try {
         ois.close();
