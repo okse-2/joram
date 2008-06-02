@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - Bull SA
- * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest.jmsbridge;
 
@@ -62,10 +62,7 @@ import fr.dyade.aaa.util.Daemon;
 public class JMSBridgeModule implements javax.jms.ExceptionListener,
                                             javax.jms.MessageListener,
                                             java.io.Serializable {
-  
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** logger */
@@ -143,25 +140,15 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   /** serializable object for synchronization */
   private Object lock = new String();
 
-  /** Constructs a <code>BridgeUnifiedModule</code> module. */
-  public JMSBridgeModule() {} 
-
-
   /**
-   * Initializes the module's parameters.
-   *
-   * @param agentId  Identifier of the agent using the module.
+   * Constructs a <code>BridgeUnifiedModule</code> module.
+   * 
    * @param prop  JMS properties required for establishing the link with the
    *          foreign JMS server.
-   *
-   * @exception IllegalArgumentException  If the provided properties are
-   *              invalid.
    */
-  public void init(AgentId agentId, Properties prop) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "init(" + agentId + ", " + prop + ')');
-    
-    this.agentId = agentId;
+  public JMSBridgeModule(Properties prop) {
+    if (logger.isLoggable(BasicLevel.FATAL))
+      logger.log(BasicLevel.FATAL, "<init>(" + prop + ')');
 
     jndiFactory = prop.getProperty("jndiFactory");
     jndiUrl = prop.getProperty("jndiUrl");
@@ -186,9 +173,19 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     selector = prop.getProperty("selector");
     automaticRequest = Boolean.valueOf(
           prop.getProperty("automaticRequest","false")).booleanValue();
-    
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "init: automaticRequest=" + automaticRequest);
+  } 
+
+
+  /**
+   * Initializes the module's parameters.
+   *
+   * @param agentId  Identifier of the agent using the module.
+   *
+   * @exception IllegalArgumentException  If the provided properties are
+   *              invalid.
+   */
+  public void init(AgentId agentId) {
+    this.agentId = agentId;
   }
 
   /**

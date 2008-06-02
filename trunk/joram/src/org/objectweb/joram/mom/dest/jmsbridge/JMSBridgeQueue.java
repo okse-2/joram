@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -38,9 +38,7 @@ import fr.dyade.aaa.agent.Notification;
  * @see JMSBridgeQueueImpl
  */
 public class JMSBridgeQueue extends Queue {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -60,7 +58,7 @@ public class JMSBridgeQueue extends Queue {
    * @exception IllegalArgumentException  If the JMS properties are invalid.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    JMSBridgeQueueImpl queueImpl = new JMSBridgeQueueImpl(getId(), adminId, prop);
+    JMSBridgeQueueImpl queueImpl = new JMSBridgeQueueImpl(adminId, prop);
     return queueImpl;
   }
   

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -38,8 +38,10 @@ import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.DeleteNot;
 
 /**
@@ -51,12 +53,15 @@ import fr.dyade.aaa.agent.DeleteNot;
  * This queue is in fact a bridge linking JORAM and a foreign JMS server.
  */
 public class JMSBridgeQueueImpl extends QueueImpl {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  /** logger */
+  public static Logger logger = Debug.getLogger(JMSBridgeQueueImpl.class.getName());
+  
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
+  
   /**
    * Table persisting the outgoing messages until acknowledgement by the
    * bridge module.
@@ -69,21 +74,71 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   /**
    * Constructs a <code>BridgeQueueImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    * @param prop     The initial set of properties.
    */
-  public JMSBridgeQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public JMSBridgeQueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
+    // creates the table for outgoing messages.
     outTable = new Hashtable();
-    jmsModule = new JMSBridgeModule();
+    // creates the JMS module for communication with external provider
+    jmsModule = new JMSBridgeModule(prop);
+  }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    // initialize the destination
+    super.initialize(firstTime);
 
     // Initializing the JMS module.
-    jmsModule.init(destId, prop);
-  }
+    jmsModule.init(getId());
 
+    // Re-launching the JMS module.
+    try {
+      jmsModule.connect();
+
+      // Re-emitting the receive requests:
+      for (int i = 0; i < requests.size(); i++)
+        jmsModule.receive();
+
+      // Re-emetting the pending messages:
+      Message momMsg;
+      Vector outMessages = new Vector();
+      Message currentMsg;
+      for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
+        momMsg = (Message) outTable.get(keys.nextElement());
+  
+        int i = 0;
+        while (i < outMessages.size()) {
+          currentMsg = (Message) outMessages.get(i);
+  
+          if (momMsg.order < currentMsg.order)
+            break;
+  
+          i++;
+        }
+        outMessages.insertElementAt(momMsg, i);
+      }
+
+      while (! outMessages.isEmpty()) {
+        momMsg = (Message) outMessages.remove(0);
+        jmsModule.send(momMsg.getFullMessage());
+      }
+    } catch (Exception exc) {
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+    }
+  }
+  
   public String toString() {
-    return "BridgeQueueImpl:" + destId.toString();
+    return "BridgeQueueImpl:" + getId().toString();
   }
 
   /**
@@ -98,7 +153,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
     clientMessages.addMessage(not.getMessage());
     // it come from bridge, so set destId for from 
     //(do not preProcess this ClientMessage).
-    super.doClientMessages(destId, clientMessages);
+    super.doClientMessages(getId(), clientMessages);
   }
 
   /**
@@ -186,7 +241,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
    * This method sends the messages to the foreign JMS destination.
    */
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    if (destId.equals(from))
+    if (getId().equals(from))
       return not;
     
     // Sending each message:
@@ -199,7 +254,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
       outTable.put(message.getIdentifier(), message);
 
       try {
-        jmsModule.send(message.msg);
+        jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
         if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
           JoramTracing.dbgDestination.log(BasicLevel.ERROR,
@@ -208,7 +263,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
         outTable.remove(message.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(message.msg);
+        deadM.addMessage(message.getFullMessage());
         sendToDMQ(deadM, not.getDMQId());
       }
     }
@@ -225,79 +280,5 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   protected void doDeleteNot(DeleteNot not) {
     jmsModule.close(); 
     super.doDeleteNot(not);
-  }
-
-
-  /** Deserializes a <code>BridgeQueueImpl</code> instance. */
-  private void readObject(java.io.ObjectInputStream in)
-               throws IOException, ClassNotFoundException {
-    in.defaultReadObject();
-
-    messages = new Vector();
-    deliveredMsgs = new Hashtable();
-
-    // Retrieving the persisted messages, if any.
-    // AF: TODO
-    Vector persistedMsgs = null;
-//     persistedMsgs = MessagePersistenceModule.loadAll(getDestinationId());
-
-    // AF: This code is already in QueueImpl, it seems the message are
-    // loaded 2 times !!
-    if (persistedMsgs != null) {
-      Message persistedMsg;
-      AgentId consId;
-      while (! persistedMsgs.isEmpty()) {
-        persistedMsg = (Message) persistedMsgs.remove(0);
-        consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
-        if (consId == null) {
-          addMessage(persistedMsg);
-        } else if (isLocal(consId)) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgDestination.log(
-              BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
-          consumers.remove(persistedMsg.getIdentifier());
-          contexts.remove(persistedMsg.getIdentifier());
-          addMessage(persistedMsg);
-        } else {
-          deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
-        }
-      }
-    }
-
-    // Re-launching the JMS module.
-    try {
-      jmsModule.connect();
-
-      // Re-emitting the receive requests:
-      for (int i = 0; i < requests.size(); i++)
-        jmsModule.receive();
-
-      // Re-emetting the pending messages:
-      Message momMsg;
-      Vector outMessages = new Vector();
-      Message currentMsg;
-      for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
-        momMsg = (Message) outTable.get(keys.nextElement());
-  
-        int i = 0;
-        while (i < outMessages.size()) {
-          currentMsg = (Message) outMessages.get(i);
-  
-          if (momMsg.order < currentMsg.order)
-            break;
-  
-          i++;
-        }
-        outMessages.insertElementAt(momMsg, i);
-      }
-
-      while (! outMessages.isEmpty()) {
-        momMsg = (Message) outMessages.remove(0);
-        jmsModule.send(momMsg.msg);
-      }
-    } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
-    }
   }
 }
