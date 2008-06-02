@@ -19,7 +19,7 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package com.scalagent.scheduler;
+package com.scalagent.scheduler.proxy;
 
 import java.io.*;
 import java.net.*;

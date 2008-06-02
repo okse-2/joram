@@ -19,7 +19,7 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package com.scalagent.scheduler;
+package com.scalagent.scheduler.proxy;
 
 import java.io.*;
 import java.text.*;
@@ -29,6 +29,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.*;
+import com.scalagent.scheduler.*;
 import com.scalagent.scheduler.event.*;
 
 /**
