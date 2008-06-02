@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -498,14 +498,14 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       // test nbMaxMsg
       if (nbMaxMsg > -1 && nbMaxMsg <= messageIds.size()) {
         ClientMessages deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
         sendToDMQ(deadMessages);
         continue;
       }
 
       // Keeping the message if filtering is successful.
       if (noFiltering ||
-          (Selector.matches(message.msg, selector) &&
+          (Selector.matches(message.getHeaderMessage(), selector) &&
            (! noLocal || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
 
         // It's the first delivery, adds the message to the proxy's table
@@ -577,10 +577,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount and denied fields.
             deliveryAttempts = (Integer) deniedMsgs.get(id);
             if (deliveryAttempts == null)
-              message.msg.deliveryCount = 1;
+              message.setDeliveryCount(1);
             else {
-              message.msg.deliveryCount = deliveryAttempts.intValue() + 1;
-              message.msg.redelivered = true;
+              message.setDeliveryCount(deliveryAttempts.intValue() +1);
+              message.setRedelivered();
             }
 
             // Inserting it according to its priority.
@@ -598,7 +598,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               }
             }
             lastPrior = message.getPriority();
-            deliverables.insertElementAt(message.msg.clone(), insertionIndex);
+            deliverables.insertElementAt(message.getFullMessage().clone(), insertionIndex);
 
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, this + ": message " + id + " added for delivery.");
@@ -613,13 +613,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
             if (deliveryAttempts != null) {
-              message.msg.deliveryCount = deliveryAttempts.intValue();
-              message.msg.redelivered = true;
+              message.setDeliveryCount(deliveryAttempts.intValue() +1);
+              message.setRedelivered();
             }
-            message.msg.expired = true;
             if (deadMessages == null)
               deadMessages = new ClientMessages();
-            deadMessages.addMessage(message.msg);
+            deadMessages.addMessage(message.getFullMessage());
           }
         } else {
           // Message has already been deleted.
@@ -667,14 +666,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
             if (deliveryAttempts != null) {
-              message.msg.deliveryCount = deliveryAttempts.intValue();
-              message.msg.redelivered = true;
+              message.setDeliveryCount(deliveryAttempts.intValue());
+              message.setRedelivered();
             }
-            message.msg.expired = true;
             
             if (deadMessages == null)
               deadMessages = new ClientMessages();
-            deadMessages.addMessage(message.msg);
+            deadMessages.addMessage(message.getFullMessage());
           }
         } else {
           // Message has already been deleted.
@@ -696,12 +694,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         // Setting the message's deliveryCount and denied fields.
         deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getIdentifier());
         if (deliveryAttempts == null)
-          keptMsg.msg.deliveryCount = 1;
+          keptMsg.setDeliveryCount(1);
         else {
-          keptMsg.msg.deliveryCount = deliveryAttempts.intValue() + 1;
-          keptMsg.msg.redelivered = true;
+          keptMsg.setDeliveryCount(deliveryAttempts.intValue() +1);
+          keptMsg.setRedelivered();
         }
-        deliverables.add(keptMsg.msg.clone());
+        deliverables.add(keptMsg.getFullMessage().clone());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger
@@ -804,11 +802,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       // deliverable to this sbscriber.
       if (isUndeliverable(deliveryAttempts)) {
         deniedMsgs.remove(id);
-        message.msg.deliveryCount = deliveryAttempts;
-        message.msg.undeliverable = true;
+        message.setDeliveryCount(deliveryAttempts);
+        message.setUndeliverable();
         if (deadMessages == null)
           deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
         
         message.acksCounter--;
         if (message.acksCounter == 0)
@@ -894,8 +892,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
     if (dmqId != null) {
       Channel.sendTo(dmqId, messages);
-    } else if (DeadMQueueImpl.getId() != null) {
-      Channel.sendTo(DeadMQueueImpl.getId(), messages);
+    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
+      Channel.sendTo(DeadMQueueImpl.getDefaultDMQId(), messages);
     }
   }
   
@@ -927,7 +925,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     save();
     if (message != null) {
       ClientMessages deadMessages = new ClientMessages();
-      deadMessages.addMessage(message.msg);
+      deadMessages.addMessage(message.getFullMessage());
       sendToDMQ(deadMessages);
     }
   }
@@ -940,7 +938,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       if (message != null) {
         if (deadMessages == null)
           deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.msg);
+        deadMessages.addMessage(message.getFullMessage());
       }
     }
     if (deadMessages != null)
