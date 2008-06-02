@@ -168,17 +168,15 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
  * basically processing administration requests.
  */
 public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  /** Reference of the server's local AdminTopicImpl instance. */
-  static AdminTopicImpl ref;
-  
-  public final static AdminTopicImpl getReference() {
-    return ref;
-  }
+//  /** Reference of the server's local AdminTopicImpl instance. */
+//  static AdminTopicImpl ref;
+//  
+//  public final static AdminTopicImpl getReference() {
+//    return ref;
+//  }
 
   /** Identifier of the server this topic is deployed on. */
   private int serverId;
@@ -216,13 +214,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
 
-  /**
-   * Identifier of the server's default dead message queue, kept here for
-   * persisting it.
-   */
-  private AgentId defaultDMQId;
-  /** Server's default threshold value, kept here for persisting it. */
-  private Integer defaultThreshold;
 
   /**
    * Constructs an <code>AdminTopicImpl</code> instance.
@@ -230,7 +221,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @param topicId  Identifier of the agent hosting the AdminTopicImpl.
    */
   public AdminTopicImpl(AgentId topicId) {
-    super(topicId, topicId, null);
+    super(topicId, null);
     serverId = AgentServer.getServerId();
     destinationsTable = new Hashtable();
     usersTable = new Hashtable();
@@ -239,7 +230,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   public String toString() {
-    return "AdminTopicImpl:" + destId.toString();
+    return "AdminTopicImpl:" + getId().toString();
   }
 
 
@@ -301,11 +292,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     return usersTable.containsKey(name);
   }
   
-  /** Method returning the id of the admin topic. */ 
-  public AgentId getId() {
-    return destId;
-  }
-
   /**
    * Method implementing the reaction to a
    * <code>org.objectweb.joram.mom.proxies.AdminNotification</code>
@@ -620,8 +606,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   public void clusterTest(AgentId from, ClusterTest request) {
     forward(from, new ClusterAck(request, false,
-                                 "Topic [" + destId
-                                 + "] is an admin topic"));
+                                 "Topic [" + getId() + "] is an admin topic"));
   }
 
   /**
@@ -676,7 +661,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   public void fatherTest(AgentId from, FatherTest not) {
     forward(from, new FatherAck(not, false,
-                                "Topic [" + destId
+                                "Topic [" + getId()
                                 + "] can't accept topic [" + from
                                 + "] as a son as it is an AdminTopic"));
   }
@@ -1044,20 +1029,18 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         }
 
         if (adminId == null)
-          adminId = this.destId;
+          adminId = getId();
         ((AdminDestinationItf) dest).init(adminId, properties);
 
         Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
         destType = (String)getTypeM.invoke(null, new Object[0]);
       } catch (Exception exc) {
+        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
+                                        "Could not instanciate Destination class [" + className + "]: ", exc);
         if (exc instanceof ClassCastException) {
-          throw new RequestException(
-              "Class [" + className + 
-          "] is not a Destination class.");
+          throw new RequestException("Class [" + className + "] is not a Destination class.");
         } else {
-          throw new RequestException(
-              "Could not instanciate Destination class [" + 
-              className + "]: " + exc);
+          throw new RequestException("Could not instanciate Destination class [" + className + "]: " + exc);
         }
       }
 
@@ -1455,7 +1438,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (request.getDmqId() != null)
         dmqId = AgentId.fromString(request.getDmqId());
 
-      DeadMQueueImpl.id = dmqId;
+      DeadMQueueImpl.defaultDMQId = dmqId;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -1634,7 +1617,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // If this server is the target server, process the request.
       String info;
 
-      DeadMQueueImpl.id = null;
+      DeadMQueueImpl.defaultDMQId = null;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -2001,8 +1984,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (checkServerId(request.getServerId())) {
         Monitor_GetDMQSettingsRep reply;
         String id = null;
-        if (DeadMQueueImpl.id != null)
-          id = DeadMQueueImpl.id.toString();
+        if (DeadMQueueImpl.defaultDMQId != null)
+          id = DeadMQueueImpl.defaultDMQId.toString();
         reply = new Monitor_GetDMQSettingsRep(id, DeadMQueueImpl.threshold);
         distributeReply(replyTo, msgId, reply);
       } else {
@@ -2508,7 +2491,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
  
   private String createMessageId() {
     msgCounter++;
-    return "ID:" + destId.toString() + '_' + msgCounter;
+    return "ID:" + getId().toString() + '_' + msgCounter;
   }
 
   /** 
@@ -2533,7 +2516,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     message.id = createMessageId();
     message.correlationId = msgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(destId.toString(), Topic.TOPIC_TYPE);
+    message.setDestination(getId().toString(), Topic.TOPIC_TYPE);
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
@@ -2545,22 +2528,22 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-
   /** Serializes an <code>AdminTopicImpl</code> instance. */
-  private void writeObject(java.io.ObjectOutputStream out)
-               throws java.io.IOException {
-    defaultDMQId = DeadMQueueImpl.id;
-    defaultThreshold = DeadMQueueImpl.threshold;
+  private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+  	// Saves DMQ defaults.
+  	out.writeObject(DeadMQueueImpl.defaultDMQId);
+  	out.writeObject(DeadMQueueImpl.threshold);
+
     out.defaultWriteObject();
   }
 
   /** Deserializes an <code>AdminTopicImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
                throws java.io.IOException, ClassNotFoundException {
+    DeadMQueueImpl.defaultDMQId = (AgentId) in.readObject();
+    DeadMQueueImpl.threshold = (Integer) in.readObject();
     in.defaultReadObject();
-    ref = this;
-    DeadMQueueImpl.id = defaultDMQId;
-    DeadMQueueImpl.threshold = defaultThreshold;
+//    ref = this;
   }
 
   static class AdminRequestNot extends Notification {
@@ -2581,11 +2564,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-  public static class DestinationDesc 
-      implements java.io.Serializable {
-    /**
-     * 
-     */
+  public static class DestinationDesc implements java.io.Serializable {
+  	/** define serialVersionUID for interoperability */
     private static final long serialVersionUID = 1L;
     private AgentId id;
     private String name;
