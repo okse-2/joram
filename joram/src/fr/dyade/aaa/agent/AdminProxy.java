@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -34,13 +34,15 @@ import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 
 /**
- * A <code>AdminProxy</code> service provides an interface to access
- * to administration functions in running agent servers.
+ * A <code>AdminProxy</code> service provides a TCP service allowing remote
+ * administration of agent servers.
  * <p>
  * The <code>AdminProxy</code> service can be configured by the way of
  * service argument:
- * the TCP port number, by default this port is 8091.
- * the number of monitor needed to handled requests.
+ * <ul>
+ * <li>the TCP port number, by default this port is 8091.
+ * <li>the number of monitor needed to handled requests.
+ * </ul>
  */
 public class AdminProxy {
 
@@ -50,7 +52,7 @@ public class AdminProxy {
 
   /** Property that define the TCP listen port */
   public final static String LISTENPORT = "fr.dyade.aaa.agent.AdminProxy.port";
-  /** The TCP listen port */
+  /** The TCP listen port, by default 8091 */
   private static int port = 8091;
   /** The number of monitors.*/
   private static int nbm;
