@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,9 +42,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Debug;
 
 public class SchedulerQueueImpl extends QueueImpl {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger =
@@ -57,15 +55,14 @@ public class SchedulerQueueImpl extends QueueImpl {
   /**
    * Constructs a <code>SchedulerQueueImpl</code> instance.
    *
-   * @param destId   Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    * @param prop     The initial set of properties.
    */
-  public SchedulerQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public SchedulerQueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "SchedulerQueueImpl.<init>(" + destId + ',' + adminId + ')');
+                 "SchedulerQueueImpl.<init>(" + getId() + ',' + adminId + ')');
   }
 
   public void postProcess(ClientMessages not) {
@@ -123,7 +120,6 @@ public class SchedulerQueueImpl extends QueueImpl {
     } else {
       long currentTime = System.currentTimeMillis();
       return !(scheduleDate > currentTime);
-
     }
   }
 }
