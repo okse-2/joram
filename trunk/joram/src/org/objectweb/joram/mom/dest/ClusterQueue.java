@@ -63,7 +63,7 @@ public class ClusterQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    ClusterQueueImpl queueImpl = new ClusterQueueImpl(getId(), adminId, prop);
+    ClusterQueueImpl queueImpl = new ClusterQueueImpl(adminId, prop);
     return queueImpl;
   }
   
