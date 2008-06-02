@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -36,10 +36,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 
 public class LoadingFactor implements Serializable {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static class Status {
@@ -55,10 +52,11 @@ public class LoadingFactor implements Serializable {
     public final static int CONSUMER_HIGH_ACTIVITY = 1;
     public final static int CONSUMER_NORMAL_ACTIVITY = 2;
     
-    public final static String[] names = 
-    {"CONSUMER_NO_ACTIVITY", 
-     "CONSUMER_HIGH_ACTIVITY",
-     "CONSUMER_NORMAL_ACTIVITY"};
+    public final static String[] names = {
+      "CONSUMER_NO_ACTIVITY", 
+      "CONSUMER_HIGH_ACTIVITY",
+      "CONSUMER_NORMAL_ACTIVITY"
+    };
   }
   
   public static class ProducerStatus {
@@ -66,10 +64,11 @@ public class LoadingFactor implements Serializable {
     public final static int PRODUCER_HIGH_ACTIVITY = 1;
     public final static int PRODUCER_NORMAL_ACTIVITY = 2;
     
-    public final static String[] names = 
-    {"PRODUCER_NO_ACTIVITY",
-     "PRODUCER_HIGH_ACTIVITY",
-     "PRODUCER_NORMAL_ACTIVITY"};
+    public final static String[] names =  {
+      "PRODUCER_NO_ACTIVITY",
+      "PRODUCER_HIGH_ACTIVITY",
+      "PRODUCER_NORMAL_ACTIVITY"
+    };
   }
   
   /** status */
@@ -359,7 +358,7 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() >= 1 && 
-          !id.equals(clusterQueueImpl.destId))
+          !id.equals(clusterQueueImpl.getId()))
         selected.add(id);
     }
     
@@ -410,7 +409,7 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() <= 1 && 
-          !id.equals(clusterQueueImpl.destId))
+          !id.equals(clusterQueueImpl.getId()))
         selected.add(id);
     }
 

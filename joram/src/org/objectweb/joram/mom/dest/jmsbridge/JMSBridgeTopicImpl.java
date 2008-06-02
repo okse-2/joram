@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
  */
 package org.objectweb.joram.mom.dest.jmsbridge;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -37,8 +38,10 @@ import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.DeleteNot;
 
 /**
@@ -51,10 +54,11 @@ import fr.dyade.aaa.agent.DeleteNot;
  * and which is accessible through the Pub/Sub communication mode.
  */
 public class JMSBridgeTopicImpl extends TopicImpl {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  /** logger */
+  public static Logger logger = Debug.getLogger(JMSBridgeTopicImpl.class.getName());
 
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
@@ -74,21 +78,70 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   /**
    * Constructs a <code>BridgeTopicImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the topic.
    * @param adminId  Identifier of the administrator of the topic.
    * @param prop     The initial set of properties.
    */
-  public JMSBridgeTopicImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public JMSBridgeTopicImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
+    // creates the table for outgoing messages.
     outTable = new Hashtable();
-    jmsModule = new JMSBridgeModule();
+    // creates the table for outgoing messages.
+    jmsModule = new JMSBridgeModule(prop);
+  }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    // initialize the destination
+    super.initialize(firstTime);
 
     // Initializing the JMS module.
-    jmsModule.init(destId, prop);
+    jmsModule.init(getId());
+
+    // Re-launching the JMS module.
+    try {
+      jmsModule.connect();
+
+      if (! subscribers.isEmpty())
+        jmsModule.setMessageListener();
+
+      // Re-emetting the pending messages:
+      Message momMsg;
+      Vector outMessages = new Vector();
+      Message currentMsg;
+      for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
+        momMsg = (Message) outTable.get(keys.nextElement());
+  
+        int i = 0;
+        while (i < outMessages.size()) {
+          currentMsg = (Message) outMessages.get(i);
+  
+          if (momMsg.order < currentMsg.order)
+            break;
+  
+          i++;
+        }
+        outMessages.insertElementAt(momMsg, i);
+      }
+
+      while (! outMessages.isEmpty()) {
+        momMsg = (Message) outMessages.remove(0);
+        jmsModule.send(momMsg.getFullMessage());
+      }
+    } catch (Exception exc) {
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+    }
   }
 
   public String toString() {
-    return "BridgeTopicImpl:" + destId.toString();
+    return "BridgeTopicImpl:" + getId().toString();
   }
 
   /**
@@ -98,7 +151,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   public void bridgeDeliveryNot(AgentId from, JMSBridgeDeliveryNot not) {
     ClientMessages clientMessages = new ClientMessages();
     clientMessages.addMessage(not.getMessage());
-    super.doClientMessages(destId, clientMessages);
+    super.doClientMessages(getId(), clientMessages);
   }
 
   /**
@@ -168,12 +221,12 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       outTable.put(message.getIdentifier(), message);
 
       try {
-        jmsModule.send(message.msg);
+        jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages();
-        deadM.addMessage(message.msg);
+        deadM.addMessage(message.getFullMessage());
         sendToDMQ(deadM, null);
       }
     }
@@ -187,7 +240,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
    * to the cluster fellows if any, and to the foreign JMS destination.
    */
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    if (destId.equals(from))
+    if (getId().equals(from))
       return not;
     
     // Forwarding the messages to the father or the cluster fellows, if any:
@@ -203,12 +256,12 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       outTable.put(message.getIdentifier(), message);
 
       try {
-        jmsModule.send(message.msg);
+        jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
         ClientMessages deadM;
         deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(message.msg);
+        deadM.addMessage(message.getFullMessage());
         sendToDMQ(deadM, not.getDMQId());
       }
     }
@@ -225,47 +278,5 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   protected void doDeleteNot(DeleteNot not) {
     jmsModule.close(); 
     super.doDeleteNot(not);
-  }
-
-  /** Deserializes a <code>BridgeTopicImpl</code> instance. */
-  private void readObject(java.io.ObjectInputStream in)
-               throws java.io.IOException, ClassNotFoundException {
-    in.defaultReadObject();
-
-    // Re-launching the JMS module.
-    try {
-      jmsModule.connect();
-
-      if (! subscribers.isEmpty())
-        jmsModule.setMessageListener();
-
-      // Re-emetting the pending messages:
-      Message momMsg;
-      Vector outMessages = new Vector();
-      Message currentMsg;
-      for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
-        momMsg = (Message) outTable.get(keys.nextElement());
-  
-        int i = 0;
-        while (i < outMessages.size()) {
-          currentMsg = (Message) outMessages.get(i);
-  
-          if (momMsg.order < currentMsg.order)
-            break;
-  
-          i++;
-        }
-        outMessages.insertElementAt(momMsg, i);
-      }
-
-      while (! outMessages.isEmpty()) {
-        momMsg = (Message) outMessages.remove(0);
-        jmsModule.send(momMsg.msg);
-      }
-    }
-    catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
-    }
   }
 }
