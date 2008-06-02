@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,9 +46,7 @@ import fr.dyade.aaa.util.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(JavaMailTopicImpl.class.getName());
@@ -75,19 +73,17 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   /**
    * Constructs a <code>JavaMailTopicImpl</code> instance.
    *
-   * @param destId  	Identifier of the agent hosting the topic.
    * @param adminId  	Identifier of the administrator of the topic.
    * @param prop	Properties to configure the topic.
    */
-  public JavaMailTopicImpl(AgentId destId, 
-                           AgentId adminId,
+  public JavaMailTopicImpl(AgentId adminId,
                            Properties prop) {
-    super(destId, adminId, prop);
+    super(adminId, prop);
     setProperties(prop);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " JavaMailTopicImpl : " +
+                 "--- " + this + " JavaMailTopicImpl.<init>: " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +
@@ -119,6 +115,30 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
     popUser = prop.getProperty("popUser", popUser);
     popPassword = prop.getProperty("popPassword", popPassword);
     expunge = Boolean.valueOf(prop.getProperty("expunge")).booleanValue();
+  }
+ 
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    super.initialize(firstTime);
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "--- " + this +
+                 " JavaMailTopicImpl.initialize: " +
+                 "\nsenderInfos=" + senderInfos +
+                 "\npopServer=" + popServer +
+                 "\npopUser=" + popUser +
+                 "\npopPeriod=" + popPeriod +
+                 "\nexpunge=" + expunge);
+
+    javaMailUtil = new JavaMailUtil();
   }
 
   // ==================================================
@@ -354,7 +374,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   // ==================================================
 
   public String toString() {
-    return "JavaMailTopicImpl:" + destId.toString();
+    return "JavaMailTopicImpl:" + getId().toString();
   }
 
   protected Object specialAdminProcess(SpecialAdminRequest not) 
@@ -469,9 +489,9 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
           MailMessage m = 
             javaMailUtil.createMessage(prop,
-                                       destId.toString()+"mail_"+count,
+                                       getId().toString()+"mail_"+count,
                                        Topic.getDestinationType(),
-                                       destId.toString(),
+                                       getId().toString(),
                                        Topic.getDestinationType());
           publish(m.getSharedMessage());
 
@@ -502,24 +522,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
     messages.add(msg);
     ClientMessages cm = new ClientMessages(-1,-1,messages);
     // not use channel.sendTo(...) because from=#0.0.0
-    //javaMailTopic.send(destId,cm);
-    forward(destId,cm);
-  }
-
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-
-    in.defaultReadObject();
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "--- " + this +
-                 " JavaMailTopicImpl.readObject : " +
-                 "\nsenderInfos=" + senderInfos +
-                 "\npopServer=" + popServer +
-                 "\npopUser=" + popUser +
-                 "\npopPeriod=" + popPeriod +
-                 "\nexpunge=" + expunge);
-    javaMailUtil = new JavaMailUtil();
+    //javaMailTopic.send(getId(),cm);
+    forward(getId(),cm);
   }
 }

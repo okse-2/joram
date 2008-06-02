@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,9 +43,7 @@ import fr.dyade.aaa.agent.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class FtpQueueImpl extends QueueImpl {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(FtpQueueImpl.class.getName());
@@ -65,14 +63,12 @@ public class FtpQueueImpl extends QueueImpl {
   /**
    * Constructs a <code>FtpQueueImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the queue.
    * @param adminId  Identifier of the administrator of the queue.
    * @param prop     The initial set of properties.
    */
-  public FtpQueueImpl(AgentId destId, 
-                      AgentId adminId,
+  public FtpQueueImpl(AgentId adminId,
                       Properties prop) {
-    super(destId, adminId, prop);
+    super(adminId, prop);
     setProperties(prop);
 
     transferTable = new Hashtable();
@@ -95,9 +91,55 @@ public class FtpQueueImpl extends QueueImpl {
     path = prop.getProperty("path", path);
     ftpImplName = prop.getProperty("ftpImpl", ftpImplName);
   }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    super.initialize(firstTime);
+
+    try {
+      if ((ftpImplName != null) && (ftpImplName.length() > 0))
+        transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
+    } catch (Exception exc) {
+      transfer = null;
+      logger.log(BasicLevel.ERROR, 
+                  "--- " + this + " initialize : transfer = null" ,exc);
+    }
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                  "--- " + this + " initialize transfer = "+ transfer);
+
+    if (transfer != null) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+                   "--- " + this + " initialize : transferTable = " + transferTable);
+
+      for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
+        Message msg = (Message) e.nextElement();
+        FtpMessage ftpMsg = new FtpMessage(msg);
+        FtpThread t = new FtpThread(transfer,
+                                    (FtpMessage) ftpMsg.clone(),
+                                    getId(),
+                                    dmq,
+                                    clientContext,
+                                    requestId,
+                                    user,
+                                    pass,
+                                    path);
+        t.start();
+      }
+    }
+  }
 
   public String toString() {
-    return "FtpQueueImpl:" + destId.toString();
+    return "FtpQueueImpl:" + getId().toString();
   }
 
   public void ftpNot(FtpNot not) {
@@ -149,7 +191,7 @@ public class FtpQueueImpl extends QueueImpl {
       if (dmq == null && super.dmqId != null)
         dmq = super.dmqId;
       else if ( dmq == null)
-        dmq = DeadMQueueImpl.getId();
+        dmq = DeadMQueueImpl.getDefaultDMQId();
 
       clientContext = not.getClientContext();
       requestId = not.getRequestId();
@@ -158,7 +200,7 @@ public class FtpQueueImpl extends QueueImpl {
       transferTable.put(ftpMsg.getIdentifier(),ftpMsg);
       FtpThread t = new FtpThread(transfer,
                                   (FtpMessage) ftpMsg.clone(),
-                                  destId,
+                                  getId(),
                                   dmq,
                                   clientContext,
                                   requestId,
@@ -174,44 +216,6 @@ public class FtpQueueImpl extends QueueImpl {
       msg.notWriteable = true;
       deadM.addMessage(msg);
       sendToDMQ(deadM,not.getDMQId());
-    }
-  }
-
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-    in.defaultReadObject();
-
-    try {
-      if ((ftpImplName != null) && (ftpImplName.length() > 0))
-        transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
-    } catch (Exception exc) {
-      transfer = null;
-      logger.log(BasicLevel.ERROR, 
-                 "readObject : transfer = null" ,exc);
-    }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
-                 " readObject transfer = "+ transfer);
-
-    if (transfer != null) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- " + this +
-                   " readObject : transferTable = " + transferTable);
-
-      for (Enumeration e = transferTable.elements(); e.hasMoreElements(); ) {
-        Message msg = (Message) e.nextElement();
-        FtpMessage ftpMsg = new FtpMessage(msg);
-        FtpThread t = new FtpThread(transfer,
-                                    (FtpMessage) ftpMsg.clone(),
-                                    destId,
-                                    dmq,
-                                    clientContext,
-                                    requestId,
-                                    user,
-                                    pass,
-                                    path);
-        t.start();
-      }
     }
   }
 }
