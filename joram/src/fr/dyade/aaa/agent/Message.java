@@ -233,10 +233,10 @@ final class Message implements Serializable {
    */
   void save() throws IOException {
     if (isPersistent()) {
-      AgentServer.getTransaction().save(this, toStringId());
+      AgentServer.getTransaction().create(this, toStringId());
       if (not.detachable) {
         not.messageId = StringId.toStringId('N', '_', dest, stamp, -1);
-        AgentServer.getTransaction().save(not, not.messageId);
+        AgentServer.getTransaction().create(not, not.messageId);
       }
     }
   }
