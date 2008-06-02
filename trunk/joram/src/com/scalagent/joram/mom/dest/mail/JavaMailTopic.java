@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,9 +44,7 @@ import fr.dyade.aaa.util.TimerTask;
  * @see JavaMailTopicImpl
  */
 public class JavaMailTopic extends Topic {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(JavaMailTopic.class.getName());
@@ -63,7 +61,7 @@ public class JavaMailTopic extends Topic {
   public JavaMailTopic() {}
 
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    JavaMailTopicImpl topicImpl = new JavaMailTopicImpl(getId(), adminId, prop);
+    JavaMailTopicImpl topicImpl = new JavaMailTopicImpl(adminId, prop);
     return topicImpl;
   }
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,9 +46,7 @@ import fr.dyade.aaa.util.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(JavaMailQueueImpl.class.getName());
@@ -75,19 +73,16 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
   /**
    * Constructs a <code>JavaMailQueueImpl</code> instance.
    *
-   * @param destId  	Identifier of the agent hosting the queue.
    * @param adminId  	Identifier of the administrator of the queue.
    * @param prop	Properties to configure the queue.
    */
-  public JavaMailQueueImpl(AgentId destId, 
-                           AgentId adminId,
-                           Properties prop) {
-    super(destId, adminId, prop);
+  public JavaMailQueueImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
     setProperties(prop);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " JavaMailQueueImpl : " +
+                 "--- " + this + " JavaMailQueueImpl.<init>: " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +
@@ -119,6 +114,29 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     popUser = prop.getProperty("popUser", popUser);
     popPassword = prop.getProperty("popPassword", popPassword);
     expunge = Boolean.valueOf(prop.getProperty("expunge")).booleanValue();
+  }
+  
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime   true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
+    
+    super.initialize(firstTime);
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "--- " + this + " JavaMailQueueImpl.initialize: " +
+                 "\nsenderInfos=" + senderInfos +
+                 "\npopServer=" + popServer +
+                 "\npopUser=" + popUser +
+                 "\npopPeriod=" + popPeriod +
+                 "\nexpunge=" + expunge);
+
+    javaMailUtil = new JavaMailUtil();
   }
 
   // ==================================================
@@ -354,7 +372,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
   // ==================================================
 
   public String toString() {
-    return "JavaMailQueueImpl:" + destId.toString();
+    return "JavaMailQueueImpl:" + getId().toString();
   }
 
   protected Object specialAdminProcess(SpecialAdminRequest not) 
@@ -474,9 +492,9 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
           MailMessage m = 
             javaMailUtil.createMessage(prop,
-                                       destId.toString()+"mail_"+count,
+                                       getId().toString()+"mail_"+count,
                                        Queue.getDestinationType(),
-                                       destId.toString(),
+                                       getId().toString(),
                                        Queue.getDestinationType());
           storeMessage(new org.objectweb.joram.mom.messages.Message(m.getSharedMessage()));
 
@@ -497,21 +515,5 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
 
     javaMailUtil.closeFolder(toExpunge,expunge);
     toExpunge.clear();
-  }
-
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-
-    in.defaultReadObject();
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " JavaMailQueueImpl.readObject : " +
-                 "\nsenderInfos=" + senderInfos +
-                 "\npopServer=" + popServer +
-                 "\npopUser=" + popUser +
-                 "\npopPeriod=" + popPeriod +
-                 "\nexpunge=" + expunge);
-    javaMailUtil = new JavaMailUtil();
   }
 }
