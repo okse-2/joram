@@ -104,17 +104,25 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * @param adminId  Identifier of the administrator of the topic.
    * @param prop     The initial set of properties.
    */
-  public TopicImpl(AgentId destId, AgentId adminId, Properties prop) {
-    super(destId, adminId, prop);
+  public TopicImpl(AgentId adminId, Properties prop) {
+    super(adminId, prop);
     subscribers = new Vector();
     selectors = new Hashtable();
   }
 
   /**
+   * Initializes the destination.
+   * 
+   * @param firstTime		true when first called by the factory
+   */
+  public void initialize(boolean firstTime) {
+  }
+  
+  /**
    * Returns a string representation of this destination.
    */
   public String toString() {
-    return "TopicImpl:" + destId.toString();
+    return "TopicImpl:" + getId().toString();
   }
 
   /**
@@ -132,7 +140,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     String info = null;
     if (fatherId != null) {
       info = strbuf.append("Request [").append(req.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: topic part of a hierarchy").toString();
       strbuf.setLength(0);
       forward(from, new AdminReply(req, false, info));
@@ -147,9 +155,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       friends = new HashSet();
     }
 
-    if (destId.equals(newFriendId)) {
+    if (getId().equals(newFriendId)) {
       info = strbuf.append("Request [").append(req.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: joining topic already")
         .append(" part of cluster").toString();
       strbuf.setLength(0);
@@ -171,17 +179,17 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     // The topic is already part of a cluster: can't join an other cluster.
     if (friends != null && ! friends.isEmpty()) {
       if (friends.contains(from)) {
-        info = strbuf.append("Topic [").append(destId)
+        info = strbuf.append("Topic [").append(getId())
           .append("] already joined cluster of topic [").append(from)
           .append(']').toString();
         strbuf.setLength(0);
         friends.add(from);
         friends.addAll(not.friends);
         // Remove self if present
-        friends.remove(destId);
+        friends.remove(getId());
         forward(from, new ClusterAck(not, true, info));
       } else {
-        info = strbuf.append("Topic [").append(destId)
+        info = strbuf.append("Topic [").append(getId())
           .append("] can't join cluster of topic [").append(from)
           .append("] as it is already part of a cluster").toString();
         strbuf.setLength(0);
@@ -189,7 +197,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       }
     // The topic is already part of a hierarchy: can't join a cluster.
     } else if (fatherId != null) {
-      info = strbuf.append("Topic [").append(destId)
+      info = strbuf.append("Topic [").append(getId())
         .append("] can't join cluster of topic [").append(from)
         .append("] as it is already part of a hierarchy").toString();
       strbuf.setLength(0);
@@ -202,8 +210,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       friends.add(from);
       friends.addAll(not.friends);
       // Remove self if present
-      friends.remove(destId);
-      info = strbuf.append("Topic [").append(destId)
+      friends.remove(getId());
+      info = strbuf.append("Topic [").append(getId())
         .append("] ok for joining cluster of topic [").append(from)
         .append(']').toString();
       strbuf.setLength(0);
@@ -211,7 +219,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
       if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
-                                      + destId.toString() + " joins cluster"
+                                      + getId().toString() + " joins cluster"
                                       + "cluster of topic " + from.toString());
     }
   }
@@ -239,7 +247,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     String info = strbuf.append("Request [")
       .append(ack.request.getClass().getName())
-      .append("], sent to Topic [").append(destId)
+      .append("], sent to Topic [").append(getId())
       .append("], successful [true]: topic [")
       .append(from).append("] joined cluster").toString();
     strbuf.setLength(0);
@@ -255,7 +263,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * of a new cluster fellow.
    */
   public void clusterNot(AgentId from, ClusterNot not) {
-    if (! not.topicId.equals(destId)) {
+    if (! not.topicId.equals(getId())) {
       // state change, so save.
       setSave();
       friends.add(not.topicId);
@@ -280,7 +288,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (friends == null || friends.isEmpty()) {
       String info = strbuf.append("Request [")
         .append(request.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: topic not part of a cluster")
         .toString();
       strbuf.setLength(0);
@@ -300,7 +308,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     String info = strbuf.append("Request [")
       .append(request.getClass().getName())
-      .append("], sent to Topic [").append(destId)
+      .append("], sent to Topic [").append(getId())
       .append("], successful [true]: topic left the cluster").toString();
     strbuf.setLength(0);
     forward(from, new AdminReply(request, true, info));
@@ -338,7 +346,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     if ((fatherId != null) && ! fatherId.equals(request.getFatherId())) {
       strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: topic already part of a hierarchy");
       forward(from, new AdminReply(request, false, strbuf.toString()));
       strbuf.setLength(0);
@@ -347,7 +355,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     if (friends != null) {
       strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: topic already part of a cluster");
       forward(from, new AdminReply(request, false, strbuf.toString()));
       strbuf.setLength(0);
@@ -363,13 +371,13 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    */ 
   public void fatherTest(AgentId from, FatherTest not) {
     if (friends != null && ! friends.isEmpty()) {
-      strbuf.append("Topic [").append(destId)
+      strbuf.append("Topic [").append(getId())
         .append("] can't accept topic [").append(from)
         .append("] as a son as it is part of a cluster");
       forward(from, new FatherAck(not, false, strbuf.toString()));
       strbuf.setLength(0);
     } else {
-      strbuf.append("Topic [").append(destId)
+      strbuf.append("Topic [").append(getId())
         .append("] accepts topic [").append(from).append("] as a son");
       forward(from, new FatherAck(not, true, strbuf.toString()));
       strbuf.setLength(0);
@@ -394,7 +402,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   
     String info = strbuf.append("Request [")
       .append(not.request.getClass().getName())
-      .append("], sent to Topic [").append(destId)
+      .append("], sent to Topic [").append(getId())
       .append("], successful [true]: topic [")
       .append(from).append("] set as father").toString();
     strbuf.setLength(0);
@@ -417,7 +425,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     String info = null;
     if (fatherId == null) {
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to Topic [").append(destId)
+        .append("], sent to Topic [").append(getId())
         .append("], successful [false]: topic is not a son").toString();
       strbuf.setLength(0);
       forward(from, new AdminReply(request, false, info));
@@ -429,7 +437,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     fatherId = null;
 
     info = strbuf.append("Request [").append(request.getClass().getName())
-      .append("], sent to Topic [").append(destId)
+      .append("], sent to Topic [").append(getId())
       .append("], successful [true]: father unset").toString();
     strbuf.setLength(0);
     forward(from, new AdminReply(request, true, info));
@@ -486,7 +494,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       while (iterator.hasNext()) {
         cluster.add(iterator.next().toString());
       }
-      cluster.add(destId.toString());
+      cluster.add(getId().toString());
     }
 
     forward(from, new Monit_GetClusterRep(not, cluster));
@@ -745,7 +753,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     // For each subscriber...
     for (int i = 0; i < subscribers.size(); i++) {
       clientId = (AgentId) subscribers.get(i);
-      forward(clientId, new UnknownAgent(destId, null));
+      forward(clientId, new UnknownAgent(getId(), null));
     }
 
     // For each cluster fellow if any...
@@ -869,7 +877,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
-      not.setDMQId(DeadMQueueImpl.getId());
+      not.setDMQId(DeadMQueueImpl.getDefaultDMQId());
     }
   }
 

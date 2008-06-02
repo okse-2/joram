@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -51,11 +51,9 @@ import fr.dyade.aaa.agent.Notification;
  * @see TopicImpl
  */
 public class Topic extends Destination {
-  
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   public static final String TOPIC_TYPE = "topic";
   
   public static String getDestinationType() {
@@ -83,7 +81,7 @@ public class Topic extends Destination {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new TopicImpl(getId(), adminId, prop);
+    return new TopicImpl(adminId, prop);
   }
   
   /**

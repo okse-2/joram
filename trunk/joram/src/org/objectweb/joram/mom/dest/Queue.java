@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -62,11 +62,9 @@ import fr.dyade.aaa.util.TimerTask;
  * @see QueueImpl
  */
 public class Queue extends Destination implements BagSerializer {
-  
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   public static final String QUEUE_TYPE = "queue";
 
   public static String getDestinationType() {
@@ -85,7 +83,7 @@ public class Queue extends Destination implements BagSerializer {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new QueueImpl(getId(), adminId, prop);
+    return new QueueImpl(adminId, prop);
   }
 
   private transient Task task;
@@ -158,8 +156,8 @@ public class Queue extends Destination implements BagSerializer {
     }
   }
 
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
+  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    destImpl.setAgent(this);
     ((QueueImpl) destImpl).readBag(in);
   }
 
@@ -174,7 +172,7 @@ public class Queue extends Destination implements BagSerializer {
     private Task(AgentId to) {
       this.to = to;
     }
-    
+
     /** Method called when the timer expires. */
     public void run() {
       try {
@@ -189,12 +187,12 @@ public class Queue extends Destination implements BagSerializer {
           Timer timer = ConnectionManager.getTimer();
           timer.schedule(this, period);
         } catch (Exception exc) {
-	    if( (!AgentServer.isHAServer()) ||
-		(AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
-		if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-		    JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                            "--- " + this + " Queue(...)", exc);
-	    }
+          if( (!AgentServer.isHAServer()) ||
+              (AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
+            if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+              JoramTracing.dbgDestination.log(BasicLevel.WARN,
+                                              "--- " + this + " Queue(...)", exc);
+          }
         }
       }
     }
