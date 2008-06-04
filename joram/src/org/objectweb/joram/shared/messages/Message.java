@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,9 +37,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Implements the <code>Message</code> data structure.
  */
 public final class Message implements Cloneable, Serializable, Streamable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -82,7 +80,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     optionalHeader.put(name, value);
   }
 
-  /** <code>true</code> if the body is read-only. */
+  /** Body of the message. */
   public transient byte[] body = null;
 
   /** The message properties table. */
@@ -416,10 +414,14 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @param os the stream to write the object to
    */
   public void writeTo(OutputStream os) throws IOException {
+    writeHeaderTo(os);
+    StreamUtil.writeTo(body, os);
+  }
+
+  public void writeHeaderTo(OutputStream os) throws IOException {
     int bool = 0;
 
     StreamUtil.writeTo(type, os);
-    StreamUtil.writeTo(body, os);
     StreamUtil.writeTo(optionalHeader, os);
 //     bool = bool | (bodyRO?bodyROFlag:0);
 //     bool = bool | (propertiesRO?propertiesROFlag:0);
@@ -451,8 +453,12 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @param is the stream to read data from in order to restore the object
    */
   public void readFrom(InputStream is) throws IOException {
-    type = StreamUtil.readIntFrom(is);
+    readHeaderFrom(is);
     body = StreamUtil.readByteArrayFrom(is);
+  }
+
+  public void readHeaderFrom(InputStream is) throws IOException {
+    type = StreamUtil.readIntFrom(is);
     optionalHeader = StreamUtil.readPropertiesFrom(is);
     properties = StreamUtil.readPropertiesFrom(is);
     id = StreamUtil.readStringFrom(is);
@@ -501,7 +507,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
       }
     }
   }
-
 
   /**
    *  this method allows to read from the input stream a vector of messages.
