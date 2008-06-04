@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,9 +26,11 @@ import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.agent.AgentServer;
@@ -44,9 +46,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * by properties and "header" fields.
  */
 public final class Message implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** Arrival position of this message on its queue or proxy. */
@@ -69,13 +69,72 @@ public final class Message implements Serializable {
    */
   public transient int durableAcksCounter;
 
-  public transient org.objectweb.joram.shared.messages.Message msg;
-
+  /**
+   * Reference to the MOM message.
+   */
+  private transient org.objectweb.joram.shared.messages.Message msg;
+  /**
+   * SoftReference to the body of the MOM message.
+   */
+  private transient SoftReference body = null;
+  /** <code>true</code> if the body is empty. */
+  private transient boolean nobody;
+  
   /**
    * Constructs a <code>Message</code> instance.
    */
   public Message(org.objectweb.joram.shared.messages.Message msg) {
+    this(msg, false);
+  }
+  
+  /**
+   * Constructs a <code>Message</code> instance with .
+   */
+  public Message(org.objectweb.joram.shared.messages.Message msg, boolean soft) {
     this.msg = msg;
+    nobody = (msg.body == null);
+    if (soft & !nobody)
+      body = new SoftReference(msg.body);
+  }
+
+  /**
+   * Returns the contained message eventually without the body.
+   * 
+   * @return The contained message.
+   */
+  public org.objectweb.joram.shared.messages.Message getHeaderMessage() {
+  	return msg;
+  }
+
+  /**
+   * Returns the contained message with body.
+   * If needed the body is loaded from repository.
+   * 
+   * @return The contained message.
+   */
+  public org.objectweb.joram.shared.messages.Message getFullMessage() {
+    // AF: be careful if the message has no body
+    if (msg.body != null)
+      return msg;
+
+    if (body != null)
+      msg.body = (byte[]) body.get();
+
+    if (msg.body != null) {
+      // Try lo load the body from repository
+    }
+    
+  	return msg;
+  }
+  
+  /** Returns the message type. */
+  public int getType() {
+    return msg.type;
+  }
+
+  /** Returns the message identifier. */
+  public String getIdentifier() {
+    return msg.id;
   }
 
   /** Sets the message identifier. */ 
@@ -83,9 +142,19 @@ public final class Message implements Serializable {
     msg.id = id;
   }
 
+  /** Returns <code>true</code> if the message is persistent. */
+  public boolean getPersistent() {
+    return msg.persistent;
+  }
+
   /** Sets the message persistence mode. */
   public void setPersistent(boolean persistent) {
     msg.persistent = persistent;
+  }
+
+  /** Returns the message priority. */
+  public int getPriority() {
+    return msg.priority;
   }
 
   /**
@@ -98,6 +167,11 @@ public final class Message implements Serializable {
       msg.priority = priority;
   }
 
+  /** Returns the message expiration time. */
+  public long getExpiration() {
+    return msg.expiration;
+  }
+
   /**
    * Sets the message expiration.
    *
@@ -107,91 +181,56 @@ public final class Message implements Serializable {
     if (expiration >= 0)
       msg.expiration = expiration;
   }
-
-  /** Sets the message time stamp. */
-  public void setTimestamp(long timestamp) {
-    msg.timestamp = timestamp;
-  }
-
-//   /**
-//    * Sets the message destination.
-//    *
-//    * @param id  The destination identifier.
-//    * @param type The type of the destination.
-//    */
-//   public void setDestination(String id, String type) {
-//     msg.setDestination(id, type);
-//   }
-
-  /** Sets the message correlation identifier. */
-  public void setCorrelationId(String correlationId) {
-    msg.correlationId = correlationId;
-  }
-
-//   /**
-//    * Sets the destination to which a reply should be sent.
-//    *
-//    * @param id  The destination identifier.
-//    * @param type The destination type.
-//    */
-//   public void setReplyTo(String id, String type) {
-//     msg.setReplyTo(id, type);
-//   }
-
-  /** Returns the message type. */
-  public int getType() {
-    return msg.type;
-  }
-
-  /** Returns the message identifier. */
-  public String getIdentifier() {
-    return msg.id;
-  }
-
-  /** Returns <code>true</code> if the message is persistent. */
-  public boolean getPersistent() {
-    return msg.persistent;
-  }
-
-  /** Returns the message priority. */
-  public int getPriority() {
-    return msg.priority;
-  }
-
-  /** Returns the message expiration time. */
-  public long getExpiration() {
-    return msg.expiration;
-  }
   
   /** Returns the message time stamp. */
   public long getTimestamp() {
     return msg.timestamp;
   }
 
-//   /** Returns the message destination identifier. */
-//   public final String getDestinationId() {
-//     return msg.toId;
-//   }
-
-//   /** Returns <code>true</code> if the destination is a queue. */
-//   public final String toType() {
-//     return msg.toType;
-//   }
+  /** Sets the message time stamp. */
+  public void setTimestamp(long timestamp) {
+    msg.timestamp = timestamp;
+  }
 
   /** Returns the message correlation identifier. */
   public final String getCorrelationId() {
     return msg.correlationId;
   }
 
-//   /** Returns the destination id the reply should be sent to. */
-//   public final String getReplyToId() {
-//     return msg.replyToId;
-//   }
+  /** Sets the message correlation identifier. */
+  public void setCorrelationId(String correlationId) {
+    msg.correlationId = correlationId;
+  }
 
-//   /** Returns <code>true</code> if the reply to destination is a queue. */
-//   public final String replyToType() {
-//     return msg.replyToType;
-//   }
+	/** Returns the message delivery count.*/
+	public int getDeliveryCount() {
+		return msg.deliveryCount;
+	}
+
+  /** Sets the message delivery count. */
+  public void setDeliveryCount(int deliveryCount) {
+    msg.deliveryCount = deliveryCount;
+  }
+
+  /** Increments the message delivery count. */
+  public void incDeliveryCount() {
+    msg.deliveryCount += 1;
+  }
+
+	/** Sets the message redelivered flag. */
+	public void setRedelivered() {
+		msg.redelivered = true;
+	}
+
+	/** Sets the message undeliverable flag. */
+	public void setUndeliverable() {
+		msg.undeliverable = true;
+	}
+
+	/** Sets the destination deleted flag. */
+	public void setDeletedDest() {
+		msg.deletedDest = true;
+	}
 
   /**
    * Sets a property value.
@@ -263,25 +302,17 @@ public final class Message implements Serializable {
 
   /**
    * Returns <code>true</code> if the message is valid.
+   * If the message is no longer valid set the expired flag true.
    *
    * @param currentTime	The current time to verify the expiration time.
    */
   public boolean isValid(long currentTime) {
-    if (msg.expiration == 0)
-      return true;
-
-    return ((msg.expiration - currentTime) > 0);
+    if ((msg.expiration == 0) || (msg.expiration > currentTime))
+    	return true;
+    
+    msg.expired = true;
+    return false;
   }
-
-//   /** Clones the message. */
-// AF: No longer needed, just inherit from super class.
-//   public Object clone() {
-//     if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
-//       JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
-//                                     "Message.clone()");
-//     Message clone = (Message) super.clone();
-//     return clone;
-//   }
 
   /** Name used to store the message */
   transient String txname = null;
@@ -375,53 +406,30 @@ public final class Message implements Serializable {
     }
   }
 
-//   /* ***** ***** ***** ***** *****
-//    * Streamable interface
-//    * ***** ***** ***** ***** ***** */
-
-//   /**
-//    *  The object implements the writeTo method to write its contents to
-//    * the output stream.
-//    *
-//    * @param os the stream to write the object to
-//    */
-//   public void writeTo(OutputStream os) throws IOException {
-//     StreamUtil.writeTo(type, os);
-//     super.writeTo(os);
-//   }
-
-//   /**
-//    *  The object implements the readFrom method to restore its contents from
-//    * the input stream.
-//    *
-//    * @param is the stream to read data from in order to restore the object
-//    */
-//   public void readMessage(InputStream is) throws IOException {
-//     int type = StreamUtil.readIntFrom(is);
-//     super.readFrom(is);
-//   }
-
   /** ***** ***** ***** ***** ***** ***** ***** *****
    * Serializable interface
    * ***** ***** ***** ***** ***** ***** ***** ***** */
 
+  public final static int SIZE = Integer.MAX_VALUE;
+
   private void writeObject(ObjectOutputStream out) throws IOException {
     out.writeLong(order);
-//     out.writeBoolean(denied);
-//     out.writeInt(acksCounter);
-//     out.writeInt(durableAcksCounter);
-    msg.writeTo(out);
+    msg.writeHeaderTo(out);
+    if ((msg.body != null) && (msg.body.length > SIZE)) {
+      StreamUtil.writeTo((byte[]) null, out);
+    } else {
+      StreamUtil.writeTo(msg.body, out);
+    }
   }
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     order = in.readLong();
-//     denied = in.readBoolean();
-//     acksCounter = in.readInt();
+
     acksCounter = 0;
-//     durableAcksCounter = in.readInt();
     durableAcksCounter = 0;
 
     msg = new org.objectweb.joram.shared.messages.Message();
-    msg.readFrom(in);
+    msg.readHeaderFrom(in);
+    msg.body = StreamUtil.readByteArrayFrom(in);
   }
 }
