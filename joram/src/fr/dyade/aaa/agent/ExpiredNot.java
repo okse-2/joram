@@ -28,15 +28,52 @@ package fr.dyade.aaa.agent;
  * @see #setDeadNotificationAgentId(fr.dyade.aaa.agent.AgentId)
  */
 public class ExpiredNot extends Notification {
-  /** define serialVersionUID for interoperability */
+  
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
+  /** The expiration which had expired. **/
   private Notification expiredNot;
+  
+  /** The agent which sent the expired notification. */
+  private AgentId from;
 
-  public ExpiredNot(Notification expiredNot) {
-    this.expiredNot = expiredNot;
+  /** The destination agent of the expired notification. */
+  private AgentId to;
+
+  /**
+   * @return The agent which sent the expired notification.
+   */
+  public AgentId getFromAgentId() {
+    return from;
   }
 
+  /**
+   * @return The destination agent of the expired notification.
+   */
+  public AgentId getToAgentId() {
+    return to;
+  }
+
+  /**
+   * Builds a notification carrying an expired notification.
+   * 
+   * @param expiredNot
+   *          The expiration which had expired.
+   * @param from
+   *          The agent which sent the expired notification.
+   * @param to
+   *          The destination agent of the expired notification.
+   */
+  public ExpiredNot(Notification expiredNot, AgentId from, AgentId to) {
+    this.expiredNot = expiredNot;
+    this.from = from;
+    this.to = to;
+  }
+
+  /**
+   * @return The notification which had expired.
+   */
   public Notification getExpiredNot() {
     return expiredNot;
   }

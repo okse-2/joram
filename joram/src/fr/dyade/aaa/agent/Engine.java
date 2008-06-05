@@ -911,7 +911,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
               logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
                   + msg.not + " to " + msg.not.deadNotificationAgentId);
             }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not);
+            ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
             push(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot);
           } else {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {

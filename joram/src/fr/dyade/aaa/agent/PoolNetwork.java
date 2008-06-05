@@ -21,15 +21,10 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.OptionalDataException;
 import java.io.OutputStream;
 import java.io.StreamCorruptedException;
@@ -916,7 +911,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                 logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
                     + msg.not + " to " + msg.not.deadNotificationAgentId);
               }
-              expiredNot = new ExpiredNot(msg.not);
+              expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
             } else {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
@@ -1045,7 +1040,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                 logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
                     + msg.not + " to " + msg.not.deadNotificationAgentId);
               }
-              expiredNot = new ExpiredNot(msg.not);
+              expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
             } else {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
                 logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
