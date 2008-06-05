@@ -21,14 +21,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -609,7 +603,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                       logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
                           + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
-                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
+                    ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
                     AgentServer.getTransaction().begin();
                     Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
                         expiredNot));
@@ -752,7 +746,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                       logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
                           + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
-                    ExpiredNot expiredNot = new ExpiredNot(msgout.not);
+                    ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
                     AgentServer.getTransaction().begin();
                     Channel.post(Message.alloc(AgentId.localId,
                                                msgout.not.deadNotificationAgentId,

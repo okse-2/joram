@@ -437,7 +437,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               }
               AgentServer.getTransaction().begin();
               Channel.post(Message.alloc(AgentId.localId, msgi.msg.not.deadNotificationAgentId,
-                  new ExpiredNot(msgi.msg.not)));
+                  new ExpiredNot(msgi.msg.not, msgi.msg.from, msgi.msg.to)));
               Channel.validate();
               AgentServer.getTransaction().commit(true);
             } else {
@@ -535,7 +535,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                     logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 " + msg.from
                         + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
                   }
-                  expiredNot = new ExpiredNot(msg.not);
+                  expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
                 } else {
                   if (logmon.isLoggable(BasicLevel.DEBUG)) {
                     logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from

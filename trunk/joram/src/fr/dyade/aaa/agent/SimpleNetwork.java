@@ -22,13 +22,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.ServerSocket;
@@ -310,7 +305,7 @@ public class SimpleNetwork extends StreamNetwork {
                       + msg.from
                       + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
                 }
-                expiredNot = new ExpiredNot(msg.not);
+                expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
               } else {
                 if (logmon.isLoggable(BasicLevel.DEBUG)) {
                   logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from
@@ -386,7 +381,7 @@ public class SimpleNetwork extends StreamNetwork {
                   + ", "
                   + msg.not + " to " + msg.not.deadNotificationAgentId);
             }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not);
+            ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
             Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
             Channel.validate();
           } else {
