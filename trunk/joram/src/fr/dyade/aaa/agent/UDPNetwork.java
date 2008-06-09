@@ -62,6 +62,18 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
   /** A socket used to send and receive datagrams */
   private DatagramSocket socket;
+  
+  /**
+   * Value of the SO_RCVBUF option for the DatagramSocket, that is the buffer size used by the
+   * platform for input on the DatagramSocket.
+   */
+  private int socketReceiveBufferSize = -1;
+
+  /**
+   * Value of the SO_SNDBUF option for the DatagramSocket, that is the buffer size used by the
+   * platform for output on the DatagramSocket
+   */
+  private int socketSendBufferSize = -1;
 
   public boolean isRunning() {
     if ((netServerIn != null) && netServerIn.isRunning() && (netServerOut != null)
@@ -218,12 +230,14 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     protected NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn", logmon);
       socket = new DatagramSocket(port);
-      socket.setReceiveBufferSize(Integer.getInteger("UDPReceiveBufferSize", 1000000).intValue());
-      socket.setSendBufferSize(Integer.getInteger("UDPSendBufferSize", 10000).intValue());
+      socket.setReceiveBufferSize(Integer.getInteger("UDPReceiveBufferSize", 1048576).intValue());
+      socket.setSendBufferSize(Integer.getInteger("UDPSendBufferSize", 8192).intValue());
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         logmon.log(BasicLevel.DEBUG, this.getName() + ", socket buffer sizes: Receive:"
             + socket.getReceiveBufferSize() + " Send:" + socket.getSendBufferSize());
       }
+      socketReceiveBufferSize = socket.getReceiveBufferSize();
+      socketSendBufferSize = socket.getSendBufferSize();
     }
 
     protected void close() {
@@ -968,18 +982,11 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
   }
 
   public int getSocketReceiveBufferSize() throws SocketException {
-    return socket.getReceiveBufferSize();
+    return socketReceiveBufferSize;
   }
 
   public int getSocketSendBufferSize() throws SocketException {
-    return socket.getSendBufferSize();
+    return socketSendBufferSize;
   }
 
-  public void setSocketReceiveBufferSize(int size) throws SocketException {
-    socket.setReceiveBufferSize(size);
-  }
-
-  public void setSocketSendBufferSize(int size) throws SocketException {
-    socket.setSendBufferSize(size);
-  }
 }
