@@ -8,8 +8,4 @@ public interface UDPNetworkMBean extends NetworkMBean {
 
   public int getSocketSendBufferSize() throws SocketException;
 
-  public void setSocketReceiveBufferSize(int size) throws SocketException;
-
-  public void setSocketSendBufferSize(int size) throws SocketException;
-
 }
