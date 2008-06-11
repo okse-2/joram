@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -713,6 +713,30 @@ ConsumerSubRequest::ConsumerSubRequest(char* topic, char* subName,
   this->selector = selector;
   this->noLocal = noLocal;
   this->durable = durable;
+  this->asyncSub = false;                                 
+}
+                                       
+/**
+ * Constructs a <code>ConsumerSubRequest</code>.
+ *
+ * @param topic  The topic identifier the client wishes to subscribe to.
+ * @param subName  The subscription's name.
+ * @param selector  The selector for filtering messages, if any.
+ * @param noLocal  <code>true</code> for not consuming the local messages.
+ * @param durable  <code>true</code> for a durable subscription.
+ * @param asyncSub <code>true</code> if the subscription is asynchrone.
+ */
+ConsumerSubRequest::ConsumerSubRequest(char* topic, char* subName,
+                                       char* selector,
+                                       boolean noLocal,
+                                       boolean durable,
+                                       boolean asyncSub) : AbstractRequest(topic) {
+  classid = CONSUMER_SUB_REQUEST;
+  this->subName = subName;
+  this->selector = selector;
+  this->noLocal = noLocal;
+  this->durable = durable;
+  this->asyncSub = asyncSub;
 }
 
 ConsumerSubRequest::~ConsumerSubRequest() {
@@ -784,6 +808,7 @@ void ConsumerSubRequest::writeTo(OutputStream* os) throw(IOException) {
   if (os->writeString(selector) == -1)  throw IOException();
   if (os->writeBoolean(noLocal) == -1)  throw IOException();
   if (os->writeBoolean(durable) == -1)  throw IOException();
+  if (os->writeBoolean(asyncSub) == -1)  throw IOException();
 }
 
 /**
@@ -798,6 +823,7 @@ void ConsumerSubRequest::readFrom(InputStream* is) throw(IOException) {
   if (is->readString(&selector) == -1)  throw IOException();
   if (is->readBoolean(&noLocal) == -1)  throw IOException();
   if (is->readBoolean(&durable) == -1)  throw IOException();
+  if (is->readBoolean(&asyncSub) == -1)  throw IOException();
 }
 
 // ######################################################################
