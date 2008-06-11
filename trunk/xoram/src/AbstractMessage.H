@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -457,6 +457,9 @@ class ConsumerSubRequest : public AbstractRequest {
 
   /** <code>true</code> if the subscription is durable. */
   boolean durable;
+  
+  /** <code>true</code> if the subscription is asynchrone. */
+  boolean asyncSub;
 
  public:
   /**
@@ -477,6 +480,22 @@ class ConsumerSubRequest : public AbstractRequest {
                      char* selector,
                      boolean noLocal,
                      boolean durable);
+                     
+                       /**
+   * Constructs a <code>ConsumerSubRequest</code>.
+   *
+   * @param topic  The topic identifier the client wishes to subscribe to.
+   * @param subName  The subscription's name.
+   * @param selector  The selector for filtering messages, if any.
+   * @param noLocal  <code>true</code> for not consuming the local messages.
+   * @param durable  <code>true</code> for a durable subscription.
+   * @param asyncSub <code>true</code> if the subscription is asynchrone.
+   */
+  ConsumerSubRequest(char* topic, char* subName,
+                     char* selector,
+                     boolean noLocal,
+                     boolean durable,
+                     boolean asyncSub);
 
   ~ConsumerSubRequest();
 
