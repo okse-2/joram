@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,15 +64,24 @@ public class JMXServer implements MXServer, Serializable {
   public void registerMBean(Object bean,
                             String domain,
                             String name) throws Exception {
-    if (mxserver == null) return;
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(domain).append(':').append(name);
+    registerMBean(bean, strbuf.toString());
+  }
 
+  public void unregisterMBean(String domain,
+                              String name) throws Exception {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain);
-    if (name != null)
-      strbuf.append(':').append(name);
+    strbuf.append(':').append(name);
+    unregisterMBean(strbuf.toString());
+  }
 
+  public void registerMBean(Object bean, String fullName) throws Exception {
+    if (mxserver == null)
+      return;
     try {
-      mxserver.registerMBean(bean, new ObjectName(strbuf.toString()));
+      mxserver.registerMBean(bean, new ObjectName(fullName));
     } catch (InstanceAlreadyExistsException exc) {
       // The MBean is already under the control of the MBean server.
       throw exc;
@@ -89,16 +98,11 @@ public class JMXServer implements MXServer, Serializable {
     }
   }
 
-  public void unregisterMBean(String domain,
-                              String name) throws Exception {
-    if (mxserver == null) return;
-
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(domain);
-    strbuf.append(':').append(name);
-
+  public void unregisterMBean(String fullName) throws Exception {
+    if (mxserver == null)
+      return;
     try {
-      mxserver.unregisterMBean(new ObjectName(strbuf.toString()));
+      mxserver.unregisterMBean(new ObjectName(fullName));
     } catch (InstanceNotFoundException exc) {
       // The MBean is not registered in the MBean server.
       throw exc;

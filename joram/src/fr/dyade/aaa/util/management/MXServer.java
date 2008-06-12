@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,11 +18,12 @@
  */
 package fr.dyade.aaa.util.management;
 
-public interface  MXServer {
-  public void registerMBean(Object bean,
-                            String domain,
-                            String name) throws Exception;
+public interface MXServer {
+  public void registerMBean(Object bean, String domain, String name) throws Exception;
 
-  public void unregisterMBean(String domain,
-                              String name) throws Exception;
+  public void unregisterMBean(String domain, String name) throws Exception;
+
+  public void registerMBean(Object bean, String fullName) throws Exception;
+
+  public void unregisterMBean(String fullName) throws Exception;
 }
