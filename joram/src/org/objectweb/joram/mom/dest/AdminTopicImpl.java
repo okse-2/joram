@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -171,9 +172,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-//  /** Reference of the server's local AdminTopicImpl instance. */
-//  static AdminTopicImpl ref;
-//  
+  /** Reference of the server's local AdminTopicImpl instance. */
+  private static AdminTopicImpl ref;
+  
 //  public final static AdminTopicImpl getReference() {
 //    return ref;
 //  }
@@ -1075,13 +1076,53 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   /**
+   * Instanciating the destination class or retrieving the destination
+   * and save Agent AdminTopic. (used by ScalAgent mediation)
+   * 
+   * @param destName           destination Name
+   * @param adminId            other admin (null for TopicAdmin)
+   * @param properties         destination properties
+   * @param type               destination type ("queue" or "topic")
+   * @param className          creates an instance of the class
+   * @param requestClassName  
+   * @param strbuf             information
+   * @return DestinationDesc   contain destination description
+   * @throws UnknownServerException
+   * @throws RequestException
+   * @throws IOException  transaction exception.
+   */
+  public static DestinationDesc createDestinationAndSave(
+      String destName,
+      AgentId adminId,
+      Properties properties,
+      String type,
+      String className,
+      String requestClassName,
+      StringBuffer strbuf)
+  throws UnknownServerException, RequestException, IOException {
+    // create destination.
+    DestinationDesc destDesc = ref.createDestination(
+        destName,
+        adminId,
+        properties,
+        type,
+        className,
+        requestClassName,
+        strbuf);
+    // save Agent AdminTopic
+    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
+    return destDesc;
+  }
+  
+  /**
    * is destinationTable contain destName ?
+   * (used by ScalAgent mediation)
    * 
    * @param destName destination name.
    * @return true if contain.
    */
-  public boolean isDestinationTableContain(String destName) {
-    return destinationsTable.containsKey(destName);
+  public static boolean isDestinationTableContain(String destName) {
+    return ref.destinationsTable.containsKey(destName);
   }
   
   /**
@@ -1284,6 +1325,27 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
+
+  /**
+   * Processes a <code>CreateUserRequest</code> instance requesting the
+   * creation of a <code>UserAgent</code> for a given user and save Agent
+   * AdminTopic. (used by ScalAgent mediation)
+   *
+   * @exception UnknownServerException  If the target server does not exist.
+   * @exception RequestException  If the user already exists but with a
+   *              different password, or if the proxy deployment failed.
+   * @throws IOException transaction exception
+   */
+  public static void CreateUserAndSave(
+      CreateUserRequest request,
+      AgentId replyTo,
+      String msgId)
+  throws UnknownServerException, RequestException, IOException {
+    ref.doProcess(request, replyTo, msgId);
+    //  save Agent AdminTopic
+    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
+  }
+
   /**
    * Processes an <code>UpdateUser</code> instance requesting to modify the
    * identification of a user.
@@ -1418,6 +1480,26 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(destId.getTo()),
              new AdminRequestNot(replyTo, msgId, request));
     }
+  }
+  
+  /**
+   * Processes a <code>SetRight</code> instance requesting to grant a user
+   * a given right on a given destination. And save Agent TopicAdmin.
+   * (used by ScalAgent mediation)
+   *
+   * @param request
+   * @param replyTo
+   * @param msgId
+   * @throws UnknownServerException
+   * @throws IOException
+   */
+  public static void setRightAndSave(
+      SetRight request,
+      AgentId replyTo,
+      String msgId) throws UnknownServerException, IOException {
+    ref.doProcess(request, replyTo, msgId);
+    // save Agent AdminTopic
+    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
   }
   
   /**
@@ -2543,7 +2625,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     DeadMQueueImpl.defaultDMQId = (AgentId) in.readObject();
     DeadMQueueImpl.threshold = (Integer) in.readObject();
     in.defaultReadObject();
-//    ref = this;
+    ref = this;
   }
 
   static class AdminRequestNot extends Notification {
