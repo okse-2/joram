@@ -80,7 +80,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   /**
    * Reference to the agent hosting the destination.
    */
-  private transient Destination agent;
+  protected transient Destination agent;
   /** Identifier of the agent hosting the destination. */
   public final AgentId getId() {
   	return agent.getId();
