@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -916,6 +916,12 @@ public class Message implements javax.jms.Message {
     return momMsg;
   }
 
+  public String toString() {
+      StringBuffer strbuf = new StringBuffer();
+      toString(strbuf);
+      return strbuf.toString();
+  }
+  
   public void toString(StringBuffer strbuf) {
     try {
       strbuf.append('(');
