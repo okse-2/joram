@@ -46,9 +46,7 @@ import fr.dyade.aaa.agent.Notification;
  * @see AdminTopicImpl
  */
 public class AdminTopic extends Topic {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**

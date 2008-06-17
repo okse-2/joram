@@ -122,15 +122,13 @@ public class ConnectionManager {
   public static void init(String args, boolean firstTime) 
     throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ConnectionManager.init(" + args + ',' + firstTime + ')');    
-
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "ConnectionManager.init(" + args + ',' + firstTime + ')');    
     if (! firstTime) return;
 
     AdminTopic adminTopic = new AdminTopic();
     adminTopic.deploy();
-
+    
     inFlow = Integer.getInteger("ConnectionManager.inFlow", inFlow).intValue();
 
     if (args != null) {
