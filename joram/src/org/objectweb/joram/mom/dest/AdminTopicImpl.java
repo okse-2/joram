@@ -231,7 +231,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   public String toString() {
-    return "AdminTopicImpl:" + getId().toString();
+    return "AdminTopicImpl";
   }
 
 
