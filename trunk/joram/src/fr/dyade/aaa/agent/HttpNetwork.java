@@ -310,6 +310,8 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       strbuf.append("-1");
     }
     strbuf.append(" HTTP/1.1");
+    
+    nos.reset();
     nos.writeMessage(msg, ack, currentTimeMillis);
 
     if (proxy != null)
@@ -337,8 +339,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
 
     nos.writeTo(os);
-    nos.reset();
-
     os.flush();
   }
 
@@ -365,7 +365,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       line = readLine(is, buf);
       if ((line != null) && line.startsWith("Content-Length: ")) {
         // get content length
-	length = Integer.parseInt(line.substring(16));
+        length = Integer.parseInt(line.substring(16));
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, name + ", length:" + length);
       }
@@ -378,14 +378,15 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   }
 
   protected final void sendReply(Message msg,
-                           OutputStream os,
-                           NetworkOutputStream nos,
-                           int ack,
-                           long currentTimeMillis) throws Exception {
+                                 OutputStream os,
+                                 NetworkOutputStream nos,
+                                 int ack,
+                                 long currentTimeMillis) throws Exception {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append("HTTP/1.1 200 OK\r\n");
 
+    nos.reset();
     nos.writeMessage(msg, ack, currentTimeMillis);
 
     strbuf.append("Date: ").append("Fri, 21 Feb 2003 14:30:51 GMT");
@@ -411,8 +412,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       logmon.log(BasicLevel.DEBUG, name + ", writes:" + nos.size());
 
     nos.writeTo(os);
-    nos.reset();
-
     os.flush();
   }
 
@@ -477,23 +476,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     return -1;
   }
 
-  /**
-   * This method creates a tunnelling socket if a proxy is used.
-   *
-   * @param host	the server host.
-   * @param port	the server port.
-   * @param proxy	the proxy host.
-   * @param proxyport	the proxy port.
-   * @return		a socket connected to a ServerSocket at the specified
-   *			network address and port.
-   *
-   * @exception IOException	if the connection can't be established
-   */
-  Socket createTunnelSocket(InetAddress host, int port,
-                            InetAddress proxy, int proxyport) throws IOException {
-    return createSocket(proxy, proxyport);
-  }
-
   final class NetServerOut extends Daemon {
     Socket socket = null;
 
@@ -511,26 +493,52 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       nis = new NetworkInputStream();
       nos = new NetworkOutputStream();
     }
+    
+    int nbCnxTry = 0;
+    long lastCnxTry = 0;
 
-    protected void open() throws IOException {
+  protected void open(long currentTimeMillis) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 this.getName() + ", open: " + nbCnxTry);
+    
+    // Open the connection.
+    socket = null;
+    if (nbCnxTry != 0) {
+      if (! (((nbCnxTry < WDNbRetryLevel1) && 
+              ((lastCnxTry + WDRetryPeriod1) < currentTimeMillis)) ||
+             ((nbCnxTry < WDNbRetryLevel2) &&
+              ((lastCnxTry + WDRetryPeriod2) < currentTimeMillis)) ||
+             ((lastCnxTry + WDRetryPeriod3) < currentTimeMillis))) {
+        throw new IOException("Wait for watchdog period");
+      }
+    }
+
+    lastCnxTry = currentTimeMillis;
       // Open the connection.
       socket = null;
 
       if (proxy == null) {
-        socket = createSocket(server);
+        try {
+          socket = createSocket(server);
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.WARN,
+                     this.getName() + ", connection refused", exc);
+          nbCnxTry += 1;
+          throw exc;
+        }
       } else {
         try {
-          socket = createTunnelSocket(server.getAddr(), server.getPort(),
-                                      proxy, proxyport);
+          socket = createSocket(proxy, proxyport);
         } catch (IOException exc) {
           logmon.log(BasicLevel.WARN,
                      this.getName() + ", connection refused, reset addr");
-          server.resetAddr();
           proxy = InetAddress.getByName(proxyhost);
-          socket = createTunnelSocket(server.getAddr(), server.getPort(),
-                                      proxy, proxyport);
+          nbCnxTry += 1;
+          throw exc;
         }
       }
+      nbCnxTry = 0;
       setSocketOption(socket);
 
       os = socket.getOutputStream();
@@ -560,40 +568,64 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     public void run() {
       Message msgout = null;
       int ack = -1;
-
+      long currentTimeMillis = -1;
       byte[] buf = new byte[120];
 
       try {
-	while (running) {
+        while (running) {
           canStop = true;
 
-          // AF: Il faudrait faire une passe ici sur la queue afin d'eliminer
-          // les messages expires. lors d'une panne, si le premier message
-          // n'expire pas, les suivants ne sont pas supprimés!
-          // AF: Il faudrait aussi reprendre le code permettant de moduler
-          // la periode de reconnection en fonction des erreurs.
-          // AF: Voir le code correspondant dans la base CVS d'aurore.
+          try {
+            currentTimeMillis = System.currentTimeMillis();
+            do {
+              // Removes all expired messages in qout.
+              // AF: This task should be run regularly.
+              msgout = qout.removeExpired(currentTimeMillis);
+              if (msgout != null) {
+                logmon.log(BasicLevel.DEBUG,
+                           this.getName() + ", Handles expired message: " + msgout);
 
-	  try {
-	    try {
+                if (msgout.not.deadNotificationAgentId != null) {
+                  ExpiredNot expiredNot = new ExpiredNot(msgout.not,
+                                                         msgout.from,
+                                                         msgout.to);
+                  AgentServer.getTransaction().begin();
+                  Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
+                                             expiredNot));
+                  Channel.validate();
+                  AgentServer.getTransaction().commit(true);
+                }
+                // Suppress the processed notification from message queue and deletes it.
+                // It can be done outside of a transaction and committed later (on next handle).
+                try {
+                  msgout.delete();
+                } catch (IOException exc) {
+                  logmon.log(BasicLevel.ERROR,
+                             this.getName() + ", cannot delete message", exc);
+                }
+                msgout.free();
+              }
+            } while (msgout != null);
+
+            try {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
-                           this.getName() + ", waiting message");
+                           this.getName() + ", waiting message: " + activationPeriod);
 
               msgout = qout.get(activationPeriod);
-	    } catch (InterruptedException exc) {
+            } catch (InterruptedException exc) {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", interrupted");
-	    }
-            open();
+            }
+            open(currentTimeMillis);
 
             do {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendRequest: " + msgout + ", ack=" + ack);
 
-              long currentTimeMillis = System.currentTimeMillis();
+              currentTimeMillis = System.currentTimeMillis();
               do {
                 if ((msgout != null) &&
                     (msgout.not.expiration > 0) &&
@@ -601,18 +633,18 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                   if (msgout.not.deadNotificationAgentId != null) {
                     if (logmon.isLoggable(BasicLevel.DEBUG)) {
                       logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
-                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
+                                 + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
                     ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
                     AgentServer.getTransaction().begin();
                     Channel.post(Message.alloc(AgentId.localId, msgout.not.deadNotificationAgentId,
-                        expiredNot));
+                                               expiredNot));
                     Channel.validate();
                     AgentServer.getTransaction().commit(true);
                   } else {
                     if (logmon.isLoggable(BasicLevel.DEBUG)) {
                       logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification "
-                          + msgout.from + ", " + msgout.not);
+                                 + msgout.from + ", " + msgout.not);
                     }
                   }
                   // Suppress the processed notification from message queue,
@@ -644,13 +676,13 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
           } finally {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                          this.getName() + ", connection ends");
+                         this.getName() + ", connection ends");
             close();
           }
         }
       } finally {
         logmon.log(BasicLevel.WARN, ", exited");
-	finish();
+        finish();
       }
     }
   }
@@ -704,7 +736,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     protected void shutdown() {
       close();
       try {
-	listen.close();
+        listen.close();
       } catch (Exception exc) {}
       listen = null;
     }
@@ -716,7 +748,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       byte[] buf = new byte[120];
 
       try {
-	while (running) {
+        while (running) {
           canStop = true;
 
           // Get the connection
@@ -726,7 +758,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                          this.getName() + ", waiting connection");
             socket = listen.accept();
             open(socket);
-            
+
             msgout = null;
             short from = getRequest(is, nis, buf);
             long currentTimeMillis = System.currentTimeMillis();
@@ -740,11 +772,11 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
 
                 if ((msgout != null) && (msgout.not.expiration > 0L)
                     && (msgout.not.expiration < currentTimeMillis)) {
-                  
+
                   if (msgout.not.deadNotificationAgentId != null) {
                     if (logmon.isLoggable(BasicLevel.DEBUG)) {
                       logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification "
-                          + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
+                                 + msgout.from + ", " + msgout.not + " to " + msgout.not.deadNotificationAgentId);
                     }
                     ExpiredNot expiredNot = new ExpiredNot(msgout.not, msgout.from, msgout.to);
                     AgentServer.getTransaction().begin();
@@ -771,7 +803,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 }
                 break;
               } while (true);
- 
+
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            this.getName() + ", sendReply: " + msgout);
@@ -818,19 +850,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       ack = readInt();
     }
 
-    /**
-     * Reads the message from the input stream.
-     *
-     * @param is the input stream.
-     * @return the incoming message.
-     */
-//     Message readMessage(InputStream is) throws Exception {
-//       this.is = is;
-//       Message msg = readMessage();
-//       testBootTS(msg.getSource(), boot);
-//       return msg;
-//     }
-
     Message msg = null;
 
     int readFrom(InputStream is, int length) throws Exception {
@@ -850,42 +869,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     Message getMessage() {
       return msg;
     }
-
-//       readFully(is, 12);
-//       // Reads message length
-//       msgLen = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
-//         ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
-//       // Reads boot timestamp of source server
-//       msgBoot = ((buf[4] & 0xFF) << 24) + ((buf[5] & 0xFF) << 16) +
-//         ((buf[6] & 0xFF) <<  8) + ((buf[7] & 0xFF) <<  0);
-//       msgAck = ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
-//         ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0);
-
-//       if (msgLen > (Message.LENGTH +11)) {
-//         msg = Message.alloc();
-//         readFully(is, Message.LENGTH);
-
-//         int idx = msg.readFromBuf(buf, 0);
-//         // Reads notification attributes
-//         boolean persistent = ((buf[idx] & Message.PERSISTENT) == 0)?false:true;
-//         boolean detachable = ((buf[idx] & Message.DETACHABLE) == 0)?false:true;
-
-//         readFully(is, msgLen - (Message.LENGTH +12));
-//         // Reads notification object
-//         ObjectInputStream ois = new ObjectInputStream(this);
-//         msg.not = (Notification) ois.readObject();
-//         if (msg.not.expiration > 0L) {
-//           msg.not.expiration += System.currentTimeMillis();
-//         }
-//         msg.not.persistent = persistent;
-//         msg.not.detachable = detachable;
-//         msg.not.detached = false;
-
-//         return msgLen;
-//       }
-//       msg = null;
-//       return 12;
-//     }
 
     int getBootTS() {
       return boot;
@@ -921,34 +904,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                       long currentTimeMillis) throws IOException {
       this.ack = ack;
       super.writeMessage(msg, currentTimeMillis);
-
-//       count = 12;
-//       if (msg != null) {
-//         int idx = msg.writeToBuf(buf, 12);
-//         // Writes notification attributes
-//         buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
-//                              (msg.not.detachable?Message.DETACHABLE:0));
-//         // Be careful, the stream header is hard-written in buf
-//         count = (Message.LENGTH + 12 +4);
-
-//         try {
-//           if (msg.not.expiration > 0L) {
-//             msg.not.expiration -= currentTimeMillis;
-//           }
-//           oos.writeObject(msg.not);
-//           oos.reset();
-//           oos.flush();
-//         } finally {
-//           if ((msg.not != null) && (msg.not.expiration > 0L)) {
-//             msg.not.expiration += currentTimeMillis;
-//           }
-//         }
-//       }
-//       // Writes boot timestamp of source server
-//       buf[0] = (byte) (count >>>  24);
-//       buf[1] = (byte) (count >>>  16);
-//       buf[2] = (byte) (count >>>  8);
-//       buf[3] = (byte) (count >>>  0);
     }
   }
 }
