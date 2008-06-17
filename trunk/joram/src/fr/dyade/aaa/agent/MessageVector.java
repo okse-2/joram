@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -291,6 +291,35 @@ final class MessageVector implements MessageQueue {
       logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + stamp + " ->" +i);
 
     return i;
+  }
+
+  /**
+   *  Removes the first messages with a timestamp less than the specified one.
+   * Be careful with the use of this method, in particular it does not take in
+   * account the multiples incoming nodes.
+   */
+  synchronized Message removeExpired(long currentTimeMillis) {
+    if (validated == 0) return null;
+    
+    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 logmsg + "removeExpired - " + currentTimeMillis);
+
+    for (int i = 0; i<validated; i++) {
+      Message msg = getMessageAt(i);
+      if ((msg.not.expiration > 0) &&
+          (currentTimeMillis >= msg.not.expiration)) {
+        removeMessageAt(i);
+        validated -= 1;
+    
+        if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + msg.getStamp());
+
+        return msg;
+      }
+    }
+
+    return null;
   }
 
   /**
