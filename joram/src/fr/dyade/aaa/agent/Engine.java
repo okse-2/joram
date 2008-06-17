@@ -227,8 +227,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * for the <code>recoveryPolicy</code> variable.
    */
   static final String[] rpStrings = {
-    "notification",
-    "exit"
+                                     "notification",
+                                     "exit"
   };
   /**
    * recovery policy in case of exception in agent specific code.
@@ -284,7 +284,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
                  getName() + ", push(" + from + ", " + to + ", " + not + ")");
     if ((to == null) || to.isNullId())
       return;
-    
+
     mq.push(Message.alloc(from, to, not));
   }
 
@@ -306,9 +306,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     while (! mq.isEmpty()) {
       try {
-	msg = (Message) mq.get();
+        msg = (Message) mq.get();
       } catch (InterruptedException exc) {
-	continue;
+        continue;
       }
 
       if (msg.from == null) msg.from = AgentId.localId;
@@ -349,7 +349,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       NbMaxAgents = Integer.MAX_VALUE;
     }
     mq = new Queue();
- 
+
     isRunning = false;
     canStop = false;
     thread = null;
@@ -381,19 +381,19 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
       // loads all fixed agents
       for (int i=0; i<fixedAgentIdList.size(); ) {
-	try {
+        try {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        getName() + ", loads fixed agent" +
                        fixedAgentIdList.elementAt(i));
-	  Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
+          Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
           i += 1;
-	} catch (Exception exc) {
+        } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
                      getName() + ", can't restore fixed agent" + 
                      fixedAgentIdList.elementAt(i), exc);
           fixedAgentIdList.removeElementAt(i);
-	}
+        }
       }
     } catch (IOException exc) {
       logmon.log(BasicLevel.ERROR, getName() + ", can't initialize");
@@ -414,7 +414,18 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         logmon.log(BasicLevel.DEBUG,
                    "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
       agents.remove(ag[i].id);
-      ag[i].agentFinalize(false);
+      try {
+        // Set current agent running in order to allow from field fixed
+        // for sendTo during agentFinalize (We assume that only Engine
+        // use this method).
+        agent = ag[i];
+        ag[i].agentFinalize(false);
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR,
+                   "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
+      } finally {
+        agent = null;
+      }
       ag[i] = null;
     }
   }
@@ -458,7 +469,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // Memorize the agent creation and ...
     now += 1;
     garbage();
-    
+
     agents.put(agent.getId(), agent);
   }
 
@@ -488,7 +499,18 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (ag.isFixed())
       removeFixedAgentId(ag.id);
     agents.remove(ag.getId());
-    ag.agentFinalize(true);
+    try {
+      // Set current agent running in order to allow from field fixed
+      // for sendTo during agentFinalize (We assume that only Engine
+      // use this method).
+      agent = ag;
+      ag.agentFinalize(true);
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR,
+                 "Agent" + ag.id + " [" + ag.name + "] error during agentFinalize", exc);
+    } finally {
+      agent = null;
+    }
   }
 
   /**
@@ -513,10 +535,21 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     for (i--; i>=0; i--) {
       if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
-	  logmon.log(BasicLevel.DEBUG,
+          logmon.log(BasicLevel.DEBUG,
                      "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
-	agents.remove(ag[i].id);
-        ag[i].agentFinalize(false);
+        agents.remove(ag[i].id);
+        try {
+          // Set current agent running in order to allow from field fixed
+          // for sendTo during agentFinalize (We assume that only Engine
+          // use this method).
+          agent = ag[i];
+          ag[i].agentFinalize(false);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.ERROR,
+                     "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
+        } finally {
+          agent = null;
+        }
         ag[i] = null;
       }
     }
@@ -579,7 +612,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @return	A string representation of specified agent.
    */
   public String dumpAgent(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
+  throws IOException, ClassNotFoundException, Exception {
     Agent ag = (Agent) agents.get(id);
     if (ag == null) {
       ag = Agent.load(id);
@@ -612,7 +645,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    *	when executing class specific initialization
    */
   final Agent load(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
+  throws IOException, ClassNotFoundException, Exception {
     now += 1;
 
     Agent ag = (Agent) agents.get(id);
@@ -640,7 +673,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    *	unspecialized exception
    */
   final Agent reload(AgentId id)
-    throws IOException, ClassNotFoundException, Exception {
+  throws IOException, ClassNotFoundException, Exception {
     Agent ag = null;
     if ((ag = Agent.load(id)) != null) {
       try {
@@ -654,8 +687,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         // AF: May be we have to delete the agent or not to allow
         // reaction on it.
         logmon.log(BasicLevel.ERROR,
-                   getName() + "Can't initialize Agent" + ag.id +
-                   " [" + ag.name + "]",
+                   getName() + "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
                    exc);
         throw new Exception(getName() + "Can't initialize Agent" + ag.id);
       }
@@ -707,10 +739,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     String rp = AgentServer.getProperty("Engine.recoveryPolicy");
     if (rp != null) {
       for (int i = rpStrings.length; i-- > 0;) {
-	if (rp.equals(rpStrings[i])) {
-	  recoveryPolicy = i;
-	  break;
-	}
+        if (rp.equals(rpStrings[i])) {
+          recoveryPolicy = i;
+          break;
+        }
       }
     }
     isRunning = true;
@@ -719,7 +751,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     logmon.log(BasicLevel.DEBUG, getName() + " started.");
   }
-  
+
   /**
    * Forces the engine to stop executing.
    *
@@ -790,9 +822,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       modified = true;
     } else {
       stamp = ((stampBuf[0] & 0xFF) << 24) +
-        ((stampBuf[1] & 0xFF) << 16) +
-        ((stampBuf[2] & 0xFF) <<  8) +
-        (stampBuf[3] & 0xFF);
+      ((stampBuf[1] & 0xFF) << 16) +
+      ((stampBuf[2] & 0xFF) <<  8) +
+      (stampBuf[3] & 0xFF);
       modified = false;
     }
   }
@@ -845,119 +877,121 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   public void run() {
     try {
       main_loop:
-      while (isRunning) {
-	agent = null;
-	canStop = true;
+        while (isRunning) {
+          agent = null;
+          canStop = true;
 
-	// Get a notification, then execute the right reaction.
-	try {
-	  msg = qin.get(timeout);
-          if (msg == null) {
-            onTimeOut();
+          // Get a notification, then execute the right reaction.
+          try {
+            msg = qin.get(timeout);
+            if (msg == null) {
+              onTimeOut();
+              continue;
+            }
+          } catch (InterruptedException exc) {
             continue;
           }
-	} catch (InterruptedException exc) {
-	  continue;
-	}
-	
-	canStop = false;
-	if (! isRunning) break;
 
-        if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
-          // The notification is malformed.
-          logmon.log(BasicLevel.ERROR,
-                     AgentServer.getName() + ": Bad message [" +
-                     msg.from + ", " + msg.to + ", " + msg.not + ']');
-          // Remove the failed notification ..
-          qin.pop();
-          // .. then deletes it ..
-          msg.delete();
-          // .. and frees it.
-          msg.free();
+          canStop = false;
+          if (! isRunning) break;
 
-          continue;
-        }
-
-        if ((msg.not.expiration <= 0L) ||
-            (msg.not.expiration >= System.currentTimeMillis())) {
-          // The message is valid, try to load the destination agent
-          try {
-            agent = load(msg.to);
-          } catch (UnknownAgentException exc) {
-            //  The destination agent don't exists, send an error
-            // notification to sending agent.
+          if ((msg.from == null) || (msg.to == null) || (msg.not == null)) {
+            // The notification is malformed.
             logmon.log(BasicLevel.ERROR,
-                       getName() + ": Unknown agent, " + msg.to + ".react(" +
-                       msg.from + ", " + msg.not + ")");
-            agent = null;
-            push(AgentId.localId,
-                 msg.from,
-                 new UnknownAgent(msg.to, msg.not));
-          } catch (Exception exc) {
-            //  Can't load agent then send an error notification
-            // to sending agent.
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ": Can't load agent, " + msg.to + ".react(" +
-                       msg.from + ", " + msg.not + ")",
-                       exc);
-            agent = null;
-            // Stop the AgentServer
-            AgentServer.stop(false);
-            break main_loop;
+                       AgentServer.getName() + ": Bad message [" +
+                       msg.from + ", " + msg.to + ", " + msg.not + ']');
+            // Remove the failed notification ..
+            qin.pop();
+            // .. then deletes it ..
+            msg.delete();
+            // .. and frees it.
+            msg.free();
+
+            continue;
           }
-        } else {
-          if (msg.not.deadNotificationAgentId != null) {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
-                  + msg.not + " to " + msg.not.deadNotificationAgentId);
-            }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-            push(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot);
-          } else {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                  + msg.not);
-            }
-          }
-        }
 
-	if (agent != null) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + ": " + agent + ".react(" +
-                       msg.from + ", " + msg.not + ")");
-	  try {
-            agent.react(msg.from, msg.not);
-          } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR,
-                       getName() + ": Uncaught exception during react, " +
-                       agent + ".react(" + msg.from + ", " + msg.not + ")",
-                       exc);
-	    switch (recoveryPolicy) {
-	    case RP_EXC_NOT:
-	    default:
-	      // In case of unrecoverable error during the reaction we have
-	      // to rollback.
-	      abort(exc);
-	      // then continue.
-	      continue;
-	    case RP_EXIT:
+          if ((msg.not.expiration <= 0L) ||
+              (msg.not.expiration >= System.currentTimeMillis())) {
+            // The message is valid, try to load the destination agent
+            try {
+              agent = load(msg.to);
+            } catch (UnknownAgentException exc) {
+              //  The destination agent don't exists, send an error
+              // notification to sending agent.
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ": Unknown agent, " + msg.to + ".react(" +
+                         msg.from + ", " + msg.not + ")");
+              agent = null;
+              push(AgentId.localId,
+                   msg.from,
+                   new UnknownAgent(msg.to, msg.not));
+            } catch (Exception exc) {
+              //  Can't load agent then send an error notification
+              // to sending agent.
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ": Can't load agent, " + msg.to + ".react(" +
+                         msg.from + ", " + msg.not + ")",
+                         exc);
+              agent = null;
               // Stop the AgentServer
               AgentServer.stop(false);
-	      break main_loop;
-	    }
-	  }
-	}
+              break main_loop;
+            }
+          } else {
+            if (msg.not.deadNotificationAgentId != null) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG,
+                           getName() + ": forward expired notification " +
+                           msg.from + ", " + msg.not + " to " +
+                           msg.not.deadNotificationAgentId);
+              }
+              ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
+              push(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot);
+            } else {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG,
+                           getName() + ": removes expired notification " +
+                           msg.from + ", " + msg.not);
+              }
+            }
+          }
 
-	// Commit all changes then continue.
-	commit();
-      }
+          if (agent != null) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + ": " + agent + ".react(" +
+                         msg.from + ", " + msg.not + ")");
+            try {
+              agent.react(msg.from, msg.not);
+            } catch (Exception exc) {
+              logmon.log(BasicLevel.ERROR,
+                         getName() + ": Uncaught exception during react, " +
+                         agent + ".react(" + msg.from + ", " + msg.not + ")",
+                         exc);
+              switch (recoveryPolicy) {
+              case RP_EXC_NOT:
+              default:
+                // In case of unrecoverable error during the reaction we have
+                // to rollback.
+                abort(exc);
+              // then continue.
+              continue;
+              case RP_EXIT:
+                // Stop the AgentServer
+                AgentServer.stop(false);
+                break main_loop;
+              }
+            }
+          }
+
+          // Commit all changes then continue.
+          commit();
+        }
     } catch (Throwable exc) {
       //  There is an unrecoverable exception during the transaction
       // we must exit from server.
       logmon.log(BasicLevel.FATAL,
-                 getName() + ": Fatal error",
-                 exc);
+                 getName() + ": Fatal error", exc);
       canStop = false;
       // Stop the AgentServer
       AgentServer.stop(false);
