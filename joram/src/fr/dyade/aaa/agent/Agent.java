@@ -376,15 +376,11 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @param stamp	well known stamp
    */
   public Agent(String name, boolean fixed, int stamp) {
-    if (stamp < AgentId.MinWKSIdStamp ||
-	stamp > AgentId.MaxWKSIdStamp) {
-      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
-                               ".#" + AgentServer.getServerId());
+    if (stamp < AgentId.MinWKSIdStamp || stamp > AgentId.MaxWKSIdStamp) {
+      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent + ".#" + AgentServer.getServerId());
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() +
-                 ", well known service stamp out of range: " + stamp);
-      throw new IllegalArgumentException(
-	"Well known service stamp out of range: " + stamp);
+                 AgentServer.getName() + ", well known service stamp out of range: " + stamp);
+      throw new IllegalArgumentException("Well known service stamp out of range: " + stamp);
     }
     AgentId id = new AgentId(AgentServer.getServerId(),
                              AgentServer.getServerId(),
@@ -440,21 +436,19 @@ public abstract class Agent implements AgentMBean, Serializable {
   public final void deploy(AgentId reply) throws IOException {
     if ((id == null) || id.isNullId()) {
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() +
-                 ", can't deploy " + this.toString() + ", id is null");
+                 AgentServer.getName() + ", can't deploy " + this.toString() + ", id is null");
       throw new IOException("Can't deploy agent, id is null");
     }
     if (deployed) {
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() +
-                 ", can't deploy " + this.toString() + ", already deployed");
+                 AgentServer.getName() + ", can't deploy " + this.toString() + ", already deployed");
       throw new IOException("Can't deploy agent, already deployed");
     }
 
     //  If we use sendTo agent's method the from field is the agent id, and
     // on reception the from node (from.to) can be false.
     Channel.sendTo(AgentId.factoryId(id.getTo()),
-		   new AgentCreateRequest(this, reply));
+                   new AgentCreateRequest(this, reply));
     deployed = true;
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -522,7 +516,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * <p>
    * This function is not declared <code>final</code> so that derived classes
    * may change their reload policy. The implementation of this method provided
-   * by the <code>Agent</code> class does nothing.
+   * by the <code>Agent</code> class just registers the JMS MBean.
    *
    * @param firstTime		true when first called by the factory
    *
@@ -561,7 +555,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * until reaction commit.
    * <p>
    * Be careful if you use this method outside of an agent reaction,
-   * its behavior is slightly different: each notification is immediatly
+   * its behavior is slightly different: each notification is immediately
    * sent using a local transaction.
    *
    * @see Channel#sendTo
@@ -669,14 +663,17 @@ public abstract class Agent implements AgentMBean, Serializable {
 
   /**
    * Called to inform this agent that it is garbaged and that it should free
-   * any active ressources that it has allocated.
+   * any active resources that it has allocated.
    * A subclass of <code>Agent</code> should override this method if it has
    * any operation that it wants to perform before it is garbaged. For example,
    * an agent with threads (a ProxyAgent for example) would use the initialize
    * method to create the threads and the <code>agentFinalize</code> method to
    * stop them.
+   * <p>
+   * Be careful, the notification sending is not allowed in this method.
+   * <p>
    * The implementation of this method provided by the <code>Agent</code> class
-   * does nothing.
+   * just unregister the JMX MBean if needed.
    *
    * @param lastTime	true when last called by the factory on agent deletion.
    */
