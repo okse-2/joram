@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,14 +18,18 @@
  */
 package fr.dyade.aaa.agent;
 
+/**
+ * JMX interface of a NetSesion component.
+ * <p>
+ * This interface is defined through a wrapper as the NetSession component
+ * is an internal object of PoolNetwork.
+ */
 public interface NetSessionWrapperMBean {
-//   /**
-//    * Returns this session's name.
-//    *
-//    * @return this session's name.
-//    */
-//   public String getName();
-
+  /**
+   * Gets the server identification of remote host.
+   *
+   * @return	the server identification of remote host.
+   */
   public short getRemoteSID();
 
   /**
@@ -42,22 +46,31 @@ public interface NetSessionWrapperMBean {
    */
   public int getNbWaitingMessages();
 
-//   /** Causes this engine to begin execution */
-//   public void start() throws Exception;
-
-//   /** Forces the engine to stop executing */
-//   public void stop();
-
-//   /**
-//    * Returns a string representation of this consumer.
-//    *
-//    * @return	A string representation of this consumer. 
-//    */
-//   public String toString();
-
+  /**
+   * Returns the number of messages sent since last reboot.
+   * 
+   * @return  the number of messages sent since last reboot.
+   */
   public int getNbMessageSent();
 
+  /**
+   * Returns the number of messages received since last reboot.
+   * 
+   * @return  the number of messages received since last reboot.
+   */
   public int getNbMessageReceived();
 
+  /**
+   * Returns the number of acknowledge sent since last reboot.
+   * 
+   * @return  the number of acknowledge sent since last reboot.
+   */
   public int getNbAckSent();
+  
+  /**
+   * Returns the time in milliseconds of last message received.
+   * 
+   * @return the time in milliseconds of last message received.
+   */
+  public long getLastReceived();
 }

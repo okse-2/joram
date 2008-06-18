@@ -192,10 +192,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
   private String getMBeanName(short sid) {
     return new StringBuffer()
-    .append("server=").append(AgentServer.getName())
-    .append(",cons=").append(name)
-    .append(",session=netSession#").append(sid)
-    .toString();
+      .append("server=").append(AgentServer.getName())
+      .append(",cons=").append(name)
+      .append(",session=netSession#").append(sid)
+      .toString();
   }
 
   /**
@@ -294,36 +294,94 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     return false;
   }
 
+  /**
+   * Returns the NetSession component handling the communication with the
+   * remote server that id is passed in parameter.
+   *
+   * @param sid the server id of remote server.
+   * @return	the NetSession component handling the communication with the
+   *            remote server.
+   */
   final NetSession getSession(short sid) {
     return sessions[index(sid)];
   }
 
+  /**
+   * Returns the maximum number of concurrent connected sessions.
+   *
+   * @return	the number of concurrent connected sessions.
+   */
   public int getNbMaxActiveSession() {
     return nbMaxCnx;
   }
 
+  /**
+   * Returns the number of currently connected sessions.
+   *
+   * @return	the number of currently connected sessions.
+   */
   public int getNbActiveSession() {
     return nbActiveCnx;
   }
 
+  /**
+   * Tests if the session is connected.
+   *
+   * @param sid the server id of remote server.
+   * @return	true if this session is connected; false otherwise.
+   */
   final boolean isSessionRunning(short sid) {
     return sessions[index(sid)].isRunning();
   }
 
+  /**
+   * Gets the number of waiting messages to send for this session.
+   *
+   * @param sid the server id of remote server.
+   * @return	the number of waiting messages.
+   */
   final int getSessionNbWaitingMessages(short sid) {
     return sessions[index(sid)].getNbWaitingMessages();
   }
 
-  final  int getNbMessageSent(short sid) {
+  /**
+   * Returns the number of messages sent since last reboot.
+   * 
+   * @param sid the server id of remote server.
+   * @return  the number of messages sent since last reboot.
+   */
+  final int getNbMessageSent(short sid) {
     return sessions[index(sid)].getNbMessageSent();
   }
 
-  final  int getNbMessageReceived(short sid) {
+  /**
+   * Returns the number of messages received since last reboot.
+   * 
+   * @param sid the server id of remote server.
+   * @return  the number of messages received since last reboot.
+   */
+  final int getNbMessageReceived(short sid) {
     return sessions[index(sid)].getNbMessageReceived();
   }
 
-  final  int getNbAckSent(short sid) {
+  /**
+   * Returns the number of acknowledge sent since last reboot.
+   * 
+   * @param sid the server id of remote server.
+   * @return  the number of acknowledge sent since last reboot.
+   */
+  final int getNbAckSent(short sid) {
     return sessions[index(sid)].getNbAckSent();
+  }
+  
+  /**
+   * Returns the time in milliseconds of last message received.
+   * 
+   * @param sid the server id of remote server.
+   * @return the time in milliseconds of last message received.
+   */
+  final long getLastReceived(short sid) {
+    return sessions[index(sid)].getLastReceived();
   }
 
   /**
@@ -713,6 +771,20 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
 
     /**
+     * Time in milliseconds of last message received.
+     */
+    long lastReceived = 0L;
+    
+    /**
+     * Returns the time in milliseconds of last message received.
+     * 
+     * @return the time in milliseconds of last message received.
+     */
+    long getLastReceived() {
+      return lastReceived;
+    }
+
+    /**
      * Starts the session opening the connection with the remote server.
      * <p>
      * The protocol is synchronized in order to avoid a 'double' connection
@@ -727,10 +799,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         logmon.log(BasicLevel.DEBUG, getName() + ", started");
 
       if (((server.retry < WDNbRetryLevel1) && 
-          ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
+           ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
           ((server.retry < WDNbRetryLevel2) &&
-              ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
-              ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
+           ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
+          ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
         if (localStart()) {
           startEnd();
         } else {
@@ -1139,20 +1211,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         // The stream is closed, exits !
       }
     }
-
-    /**
-     * Time in milliseconds of last message received.
-     */
-    long lastReceived = 0L;
-    
-    /**
-     * Returns the time in milliseconds of last message received.
-     * 
-     * @return the time in milliseconds of last message received.
-     */
-    long getLastReceived() {
-      return lastReceived;
-    }
     
     /**
      * 
@@ -1298,7 +1356,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     readFully(in, iobuf);
     boot.sid = (short) (((iobuf[0] & 0xFF) <<  8) + (iobuf[1] & 0xFF));
     boot.boot = ((iobuf[2] & 0xFF) << 24) + ((iobuf[3] & 0xFF) << 16) +
-    ((iobuf[4] & 0xFF) <<  8) + ((iobuf[5] & 0xFF) <<  0);
+      ((iobuf[4] & 0xFF) <<  8) + ((iobuf[5] & 0xFF) <<  0);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", readBoot from #" + boot.sid +
@@ -1324,7 +1382,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     byte[] iobuf = new byte[4];
     readFully(in, iobuf);
     int boot = ((iobuf[0] & 0xFF) << 24) + ((iobuf[1] & 0xFF) << 16) +
-    ((iobuf[2] & 0xFF) <<  8) + ((iobuf[3] & 0xFF) <<  0);
+      ((iobuf[2] & 0xFF) <<  8) + ((iobuf[3] & 0xFF) <<  0);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", readAck:" + boot);
@@ -1337,24 +1395,22 @@ final class NetSessionWrapper implements NetSessionWrapperMBean {
   PoolNetwork network = null;
   short sid;
 
+  /**
+   *
+   */
   NetSessionWrapper(PoolNetwork network, short sid) {
     this.network = network;
     this.sid = sid;
   }
 
-//   /**
-//    * Returns this session's name.
-//    *
-//    * @return this session's name.
-//    */
-//   public String getName() {
-//     return session.getName();
-//   }
-
+  /**
+   * Gets the server identification of remote host.
+   *
+   * @return	the server identification of remote host.
+   */
   public short getRemoteSID() {
     return sid;
   }
-
 
   /**
    * Tests if the session is connected.
@@ -1365,7 +1421,6 @@ final class NetSessionWrapper implements NetSessionWrapperMBean {
     return network.isSessionRunning(sid);
   }
 
-
   /**
    * Gets the number of waiting messages to send for this session.
    *
@@ -1375,31 +1430,39 @@ final class NetSessionWrapper implements NetSessionWrapperMBean {
     return network.getSessionNbWaitingMessages(sid);
   }
 
-
-//   /** Causes this engine to begin execution */
-//   public void start() throws Exception;
-
-//   /** Forces the engine to stop executing */
-//   public void stop();
-
-//   /**
-//    * Returns a string representation of this consumer.
-//    *
-//    * @return	A string representation of this consumer. 
-//    */
-//   public String toString() {
-//     return session.;
-//   }
-
+  /**
+   * Returns the number of messages sent since last reboot.
+   * 
+   * @return  the number of messages sent since last reboot.
+   */
   public int getNbMessageSent() {
     return network.getNbMessageSent(sid);
   }
 
+  /**
+   * Returns the number of messages received since last reboot.
+   * 
+   * @return  the number of messages received since last reboot.
+   */
   public int getNbMessageReceived() {
     return network.getNbMessageReceived(sid);
   }
 
+  /**
+   * Returns the number of acknowledge sent since last reboot.
+   * 
+   * @return  the number of acknowledge sent since last reboot.
+   */
   public int getNbAckSent() {
     return network.getNbAckSent(sid);
+  }
+  
+  /**
+   * Returns the time in milliseconds of last message received.
+   * 
+   * @return the time in milliseconds of last message received.
+   */
+  public long getLastReceived() {
+    return network.getLastReceived(sid);
   }
 }
