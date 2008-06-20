@@ -153,6 +153,9 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     
     /** Number of the last message sent */
     int lastMsgSentNumber;
+    
+    /** Number of NACK sent. Used for monitoring. **/
+    int nackCount;
 
     public int getNextPacketNumber() {
       return nextPacketNumber;
@@ -176,6 +179,10 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
     public long getLastMsgSentDate() {
       return lastMsgSentDate;
+    }
+
+    public int getNackCount() {
+      return nackCount;
     } 
   }
   
@@ -192,6 +199,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     public long getLastMsgReceivedDate();
 
     public long getLastMsgSentDate();
+    
+    public int getNackCount();
 
   }
 
@@ -376,6 +385,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                       logmon.log(BasicLevel.WARN, getName() + ", Send NACK "
                           + (srvInfo.lastPacketReceived + 1));
                     }
+                    srvInfo.nackCount++;
                     srvInfo.lastPacketAck = -(srvInfo.lastPacketReceived + 1);
                     netServerOut.messageOutputStream.writeAck(srvInfo.lastPacketAck, socketAddress);
                   }
