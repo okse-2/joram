@@ -44,8 +44,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.ExpiredNot;
+import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.util.Debug;
 
@@ -76,6 +76,9 @@ public class DeadMQueueImpl extends QueueImpl {
     setFreeWriting(true);
   }
 
+  /**
+   * Returns a string representation of this destination.
+   */
   public String toString() {
     return "DeadMQueueImpl:" + getId().toString();
   }
@@ -273,12 +276,6 @@ public class DeadMQueueImpl extends QueueImpl {
         index++;
     }
   }
-
-  /** 
-   * Overwrites this <code>DestinationImpl</code> method so that no messages
-   * may be sent by the DMQ to itself.
-   */
-  protected void sendToDMQ(Vector deadMessages, AgentId dmqId) {}
 
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {
     Notification expiredNot = not.getExpiredNot();
