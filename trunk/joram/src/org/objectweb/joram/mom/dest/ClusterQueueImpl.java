@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -546,10 +545,10 @@ public class ClusterQueueImpl extends QueueImpl {
 
     long current = System.currentTimeMillis();
     // Cleaning the possible expired messages.
-    ClientMessages deadMessages = cleanPendingMessage(current);
+    DMQManager dmqManager = cleanPendingMessage(current);
     // If needed, sending the dead messages to the DMQ:
-    if (deadMessages != null)
-      sendToDMQ(deadMessages, null);
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
     
     if (loadingFactor.getRateOfFlow() < 1) {
       int possibleGive = getPendingMessageCount() - getWaitingRequestCount();

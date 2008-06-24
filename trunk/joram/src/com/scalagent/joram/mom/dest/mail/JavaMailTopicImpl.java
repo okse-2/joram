@@ -22,7 +22,6 @@
  */
 package com.scalagent.joram.mom.dest.mail;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -435,29 +434,29 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   }
 
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
+    DMQManager dmqManager = null;
+    for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
       Message msg = (Message) msgs.nextElement();
       SenderInfo si = match(msg);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " match=" + (si!=null));
+        logger.log(BasicLevel.DEBUG, "--- " + this + " match=" + (si != null));
       if (si != null) {
         try {
           javaMailUtil.sendJavaMail(si, new MailMessage(msg));
         } catch (Exception exc) {
-          ClientMessages deadM = 
-            new ClientMessages(not.getClientContext(), 
-                               not.getRequestId());
-          
-          deadM.addMessage(msg);
-          sendToDMQ(deadM,not.getDMQId());
-          
+          if (dmqManager == null) {
+            dmqManager = new DMQManager(not.getDMQId());
+          }
+          dmqManager.addDeadMessage(msg);
+
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "JavaMailTopicImpl.sendJavaMail", exc);
         }
       }
+    }
+    if (dmqManager != null) {
+      dmqManager.sendToDMQ();
     }
     return not;
   }

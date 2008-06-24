@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.mom.dest.jmsbridge;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -212,9 +211,9 @@ public class JMSBridgeTopicImpl extends TopicImpl {
     
     // Sending the received messages to the foreign JMS destination:
     Message message;
-    for (Enumeration msgs = not.messages.getMessages().elements();
-         msgs.hasMoreElements();) {
-      // AF: TODO it seems not usefull to transform the message !!
+    DMQManager dmqManager = null;
+    for (Enumeration msgs = not.messages.getMessages().elements(); msgs.hasMoreElements();) {
+      // AF: TODO it seems not useful to transform the message !!
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
       message.order = arrivalsCounter++;
 
@@ -224,11 +223,14 @@ public class JMSBridgeTopicImpl extends TopicImpl {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
-        ClientMessages deadM;
-        deadM = new ClientMessages();
-        deadM.addMessage(message.getFullMessage());
-        sendToDMQ(deadM, null);
+        if (dmqManager == null) {
+          dmqManager = new DMQManager();
+        }
+        dmqManager.addDeadMessage(message.getFullMessage());
       }
+    }
+    if (dmqManager != null) {
+      dmqManager.sendToDMQ();
     }
   }
 
@@ -248,22 +250,24 @@ public class JMSBridgeTopicImpl extends TopicImpl {
 
     // Sending the received messages to the foreign JMS destination:
     Message message;
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
+    DMQManager dmqManager = null;
+    for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
       message.order = arrivalsCounter++;
-
       outTable.put(message.getIdentifier(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
-        ClientMessages deadM;
-        deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(message.getFullMessage());
-        sendToDMQ(deadM, not.getDMQId());
+        if (dmqManager == null) {
+          dmqManager = new DMQManager(not.getDMQId());
+        }
+        dmqManager.addDeadMessage(message.getFullMessage());
       }
+    }
+    if (dmqManager != null) {
+      dmqManager.sendToDMQ();
     }
     return null;
   }
