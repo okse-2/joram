@@ -23,7 +23,6 @@
  */
 package org.objectweb.joram.mom.dest.jmsbridge;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -261,10 +260,9 @@ public class JMSBridgeQueueImpl extends QueueImpl {
                                           "Failing sending to remote  destination: ", exc);
 
         outTable.remove(message.getIdentifier());
-        ClientMessages deadM;
-        deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-        deadM.addMessage(message.getFullMessage());
-        sendToDMQ(deadM, not.getDMQId());
+        DMQManager dmqManager = new DMQManager(not.getDMQId());
+        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.sendToDMQ();
       }
     }
     return null;

@@ -462,18 +462,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
-    if (! isWriter(from)) {
-      ClientMessages deadM;
-      deadM = new ClientMessages(not.getClientContext(), not.getRequestId());
-
+    if (!isWriter(from)) {
+      DMQManager dmqManager = new DMQManager(not.getDMQId());
       Message msg;
-      for (Enumeration msgs = not.getMessages().elements();
-           msgs.hasMoreElements();) {
+      for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
         msg = (Message) msgs.nextElement();
         msg.notWriteable = true;
-        deadM.addMessage(msg);
+        dmqManager.addDeadMessage(msg);
       }
-      sendToDMQ(deadM, not.getDMQId());
+      dmqManager.sendToDMQ();
       throw new AccessException("WRITE right not granted");
     }
 
@@ -652,41 +649,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       client.equals(AdminTopic.getDefault());
   }
 
-  /**
-   * Sends dead messages to the appropriate dead message queue.
-   *
-   * @param deadMessages  The dead messages.
-   * @param dmqId  Identifier of the dead message queue to use,
-   *          <code>null</code> if not provided.
-   */
-  protected void sendToDMQ(ClientMessages deadMessages, AgentId dmqId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + deadMessages);
-
-    deadMessages.setExpiration(0);
-    
-    Vector messages = deadMessages.getMessages();
-    nbMsgsSendToDMQSinceCreation += messages.size();
-
-    AgentId destDmqId = null;
-    if (dmqId != null) {
-      // Sending the dead messages to the provided DMQ
-      destDmqId = dmqId;
-    } else if (this.dmqId != null) {
-      // Sending the dead messages to the destination's DMQ
-      destDmqId = this.dmqId;
-    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
-      // Sending the dead messages to the server's default DMQ
-      destDmqId = DeadMQueueImpl.getDefaultDMQId();
-    }
-
-    if (destDmqId != null && ! destDmqId.equals(getId())) {
-      forward(destDmqId, deadMessages);
-    }
-    // Else it means that the dead message queue is
-    // the queue itself: drop the messages.
-  }
-
   abstract protected void doRightRequest(SetRightRequest not);
   abstract protected void doClientMessages(AgentId from, ClientMessages not);
   abstract protected void doUnknownAgent(UnknownAgent not);
@@ -861,7 +823,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
     message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
-    message.id = replyMsgId;;
+    message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
@@ -878,4 +840,79 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
   
   public abstract void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not);
+
+  /**
+   * The <code>DMQManager</code> is made to stock the dead messages before sending them to the dead
+   * message queue, only if such a queue is defined.
+   */
+  protected class DMQManager {
+
+    private ClientMessages deadMessages = null;
+    private AgentId destDmqId = null;
+
+    /**
+     * Creates a DMQManager.
+     * 
+     * @param dmqId
+     *          Identifier of the dead message queue to use. If <code>null</code>, destination DMQ
+     *          is used if it exists, else default DMQ is used. If none exists, dead messages will
+     *          be lost.
+     */
+    public DMQManager(AgentId dmqId) {
+      if (dmqId != null) {
+        // Sending the dead messages to the provided DMQ
+        destDmqId = dmqId;
+      } else if (DestinationImpl.this.dmqId != null) {
+        // Sending the dead messages to the destination's DMQ
+        destDmqId = DestinationImpl.this.dmqId;
+      } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
+        // Sending the dead messages to the server's default DMQ
+        destDmqId = DeadMQueueImpl.getDefaultDMQId();
+      }
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ", destDmqId: " + destDmqId);
+    }
+
+    /**
+     * Creates a DMQManager. Destination DMQ is used if it exists, else default DMQ is used. If none
+     * exists, dead messages will be lost.
+     */
+    public DMQManager() {
+      this(null);
+    }
+
+    /**
+     * Stocks a dead message waiting to be sent to the DMQ. If no DMQ was found at creation time,
+     * the message is lost.
+     * 
+     * @param mess
+     *          the message to stock
+     */
+    public void addDeadMessage(Message mess) {
+      if (destDmqId != null) {
+        if (deadMessages == null) {
+          deadMessages = new ClientMessages();
+        }
+        deadMessages.addMessage(mess);
+      }
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ", addDeadMessage for dmq: " + destDmqId + ". Msg: " + mess);
+    }
+
+    /**
+     * Sends previously stocked messages to the appropriate DMQ.
+     */
+    public void sendToDMQ() {
+      deadMessages.setExpiration(0);
+      nbMsgsSendToDMQSinceCreation += deadMessages.getMessages().size();
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ", sendToDMQ " + destDmqId);
+      if (destDmqId != null && !destDmqId.equals(getId())) {
+        forward(destDmqId, deadMessages);
+      }
+      // Else it means that the dead message queue is
+      // the queue itself: drop the messages.
+    }
+  }
+  
 }

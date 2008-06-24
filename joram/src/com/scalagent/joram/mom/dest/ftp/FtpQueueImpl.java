@@ -22,11 +22,9 @@
  */
 package com.scalagent.joram.mom.dest.ftp;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.DeadMQueueImpl;
 import org.objectweb.joram.mom.dest.QueueImpl;
@@ -52,7 +50,6 @@ public class FtpQueueImpl extends QueueImpl {
   private String pass = "no@no.no";
   private String path = null;
   private transient TransferItf transfer = null;
-  private ClientMessages currentNot = null;
   private AgentId dmq = null;
   private int clientContext;
   private int requestId;
@@ -147,7 +144,7 @@ public class FtpQueueImpl extends QueueImpl {
       logger.log(BasicLevel.DEBUG, "--- " + this +
                  " ftpNot(" + not + ")\n" +
                  "transferTable = " + transferTable);
-    Message msg = (Message) ((Vector) not.getMessages()).get(0);
+    Message msg = (Message) not.getMessages().get(0);
     storeMessage(new org.objectweb.joram.mom.messages.Message(msg));
     deliverMessages(0);
     transferTable.remove(new FtpMessage(msg).getIdentifier());
@@ -209,13 +206,10 @@ public class FtpQueueImpl extends QueueImpl {
                                   path);
       t.start();
     } else {
-      ClientMessages deadM = 
-        new ClientMessages(not.getClientContext(), 
-                           not.getRequestId());
-      
+      DMQManager dmqManager = new DMQManager(not.getDMQId());
       msg.notWriteable = true;
-      deadM.addMessage(msg);
-      sendToDMQ(deadM,not.getDMQId());
+      dmqManager.addDeadMessage(msg);
+      dmqManager.sendToDMQ();
     }
   }
 }
