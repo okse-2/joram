@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,13 +44,52 @@ public abstract class SocketFactory {
    */
   public static final String DefaultFactory = "fr.dyade.aaa.util.SocketFactory14";
 
+  private static String[] factoryClasses = {
+    DefaultFactory,
+    "fr.dyade.aaa.util.SocketFactory13"
+  };
+
+  private static SocketFactory factory;
+
+  /**
+   * Returns the SocketFactory singleton.
+   * 
+   * @return SocketFactory singleton.
+   * @throws Exception
+   */
+  public static SocketFactory getSocketFactory() throws Exception {
+    if (factory == null) {
+      // Tries to load the more recent version
+      Class clazz = null;
+      for (int i = 0; i < factoryClasses.length; i++) {
+        try {
+          clazz = Class.forName(factoryClasses[i]);
+        } catch (ClassNotFoundException exc) {
+          // continue
+        }
+      }
+      if (clazz != null) {
+        Method method = clazz.getMethod("getFactory", null);
+        factory = (SocketFactory) method.invoke(null, null);
+      } else {
+        throw new Exception("Socket factory class not found");
+      }
+    }
+    return factory;
+  } 
+  
+  
   /**
    * Returns the SocketFactory singleton for the specified default class.
    *
    * @return The SocketFactory singleton for the default class.
    */
   public static SocketFactory getDefaultFactory() {
-    return SocketFactory14.getFactory();
+    try {
+      return getFactory(DefaultFactory);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /**
