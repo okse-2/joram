@@ -32,6 +32,8 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import joram.framework.BaseTestCase;
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
@@ -59,24 +61,24 @@ class ExcList21 implements ExceptionListener {
 class MsgList21B implements MessageListener {
   public void onMessage(Message msg) {
     try {
-	int index = msg.getIntProperty("Index");
-      
-	if (msg.getBooleanProperty("JMS_JORAM_DELETEDDEST")){
-	    System.out.println("msg#" + index + ", Destination does not exist.");
-	} else if (msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE")){
-	    System.out.println("msg#" + index + ", Non writable destination.");
-	    Test21.assertTrue((1==index)|| (2==index));
-	} else if (msg.getBooleanProperty("JMS_JORAM_EXPIRED")){
-	    System.out.println("msg#" + index + ", Message expired.");
-	} else if (msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE")){
-	    System.out.println("msg#" + index + ", Undeliverable message: " +
-			       msg.getIntProperty("JMSXDeliveryCount"));
-	    Test21.assertEquals(0,index);
-	} else{
-	    System.out.println("receives msg#" + index);
-	}
-    } catch(Exception exc) {
-	exc.printStackTrace();
+      int index = msg.getIntProperty("Index");
+
+      if (index == 0) {
+        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+        System.out.println("msg#" + index + ", Undeliverable message: "
+            + msg.getIntProperty("JMSXDeliveryCount"));
+      } else if (index == 1) {
+        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
+        System.out.println("msg#" + index + ", Non writable destination.");
+      } else if (index == 2) {
+        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
+        System.out.println("msg#" + index + ", Destination does not exist.");
+      } else {
+        BaseTestCase.assertTrue(false);
+      }
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      BaseTestCase.error(exc);
     }
   }
 }
