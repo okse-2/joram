@@ -33,9 +33,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
-import org.objectweb.joram.mom.dest.AdminTopicImpl;
-import org.objectweb.joram.mom.dest.DeadMQueueImpl;
 import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
@@ -476,7 +475,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
-      not.setDMQId(DeadMQueueImpl.getDefaultDMQId());
+      not.setDMQId(QueueImpl.getDefaultDMQId());
     }
   }
 
@@ -2133,13 +2132,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                subsTable.get(keys.nextElement())).setDMQId(null);
         }
         // Sending the messages again if not coming from the default DMQ:
-        if (DeadMQueueImpl.getDefaultDMQId() != null
-            && ! agId.equals(DeadMQueueImpl.getDefaultDMQId())) {
+        if (QueueImpl.getDefaultDMQId() != null && !agId.equals(QueueImpl.getDefaultDMQId())) {
           // Setting 'deletedDest' attribute for each message
           for (Enumeration msgs = ((ClientMessages) req).getMessages().elements();
                msgs.hasMoreElements();) {
             org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
-            msg.deletedDest = true;
+            msg.setProperty("JMS_JORAM_DELETEDDEST", Boolean.TRUE);
+            msg.expiration = 0;
           }
           sendToDMQ((ClientMessages) req);
         }
@@ -2494,12 +2493,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   private void sendToDMQ(ClientMessages messages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
-    messages.setExpiration(0);
     nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
     if (dmqId != null) {
       proxyAgent.sendNot(dmqId, messages);
-    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
-      proxyAgent.sendNot(DeadMQueueImpl.getDefaultDMQId(), messages);
+    } else if (QueueImpl.getDefaultDMQId() != null) {
+      proxyAgent.sendNot(QueueImpl.getDefaultDMQId(), messages);
     }
   }
 
@@ -2516,7 +2514,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     for (Enumeration ids = messagesTable.keys(); ids.hasMoreElements(); ) {
       id = (String) ids.nextElement();
       message = (Message) messagesTable.get(id);
-      if ((message == null) || message.isValid(currentTime)) continue;
+      if ((message == null) || message.isValid(currentTime))
+        continue;
 
       messagesTable.remove(id);
       if (message.durableAcksCounter > 0)
@@ -2524,6 +2523,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
       if (deadMessages == null)
         deadMessages = new ClientMessages();
+      message.setExpiration(0);
       deadMessages.addMessage(message.getFullMessage());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
