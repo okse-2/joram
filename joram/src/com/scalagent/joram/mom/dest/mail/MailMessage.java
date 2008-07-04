@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
  */
 package com.scalagent.joram.mom.dest.mail;
 
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 
 
@@ -171,7 +173,13 @@ public class MailMessage {
    * @return deleted destination
    */
   public boolean getDeletedDest() {
-    return sharedMsg.deletedDest;
+    boolean deleted = false;
+    try {
+      deleted = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_DELETEDDEST"));
+    } catch (MessageValueException exc1) {
+      return false;
+    }
+    return deleted;
   }
 
   /**
@@ -179,7 +187,13 @@ public class MailMessage {
    * @return expired
    */
   public boolean getExpired() {
-    return sharedMsg.expired;
+    boolean expired = false;
+    try {
+      expired = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_EXPIRED"));
+    } catch (MessageValueException exc1) {
+      return false;
+    }
+    return expired;
   }
 
   /**
@@ -187,11 +201,23 @@ public class MailMessage {
    * @return written on the destination
    */
   public boolean getNotWriteable() {
-    return sharedMsg.notWriteable;
+    boolean notWriteable = false;
+    try {
+      notWriteable = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_NOTWRITABLE"));
+    } catch (MessageValueException exc1) {
+      return false;
+    }
+    return notWriteable;
   }
 
   public boolean getUndeliverable() {
-    return sharedMsg.undeliverable;
+    boolean undeliverable = false;
+    try {
+      undeliverable = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_UNDELIVERABLE"));
+    } catch (MessageValueException exc1) {
+      return false;
+    }
+    return undeliverable;
   }
 
   /**
@@ -302,7 +328,7 @@ public class MailMessage {
    * @param deletedDest
    */
   public void setDeletedDest(boolean deletedDest) {
-    sharedMsg.deletedDest = deletedDest;
+    sharedMsg.setProperty("JMS_JORAM_DELETEDDEST", new Boolean(deletedDest));
   }
 
   /**
@@ -310,7 +336,7 @@ public class MailMessage {
    * @param expired
    */
   public void setExpired(boolean expired) {
-    sharedMsg.expired = expired;
+    sharedMsg.setProperty("JMS_JORAM_EXPIRED", new Boolean(expired));
   }
 
   /**
@@ -318,7 +344,7 @@ public class MailMessage {
    * @param notWriteable
    */
   public void setNotWriteable(boolean notWriteable) {
-    sharedMsg.notWriteable = notWriteable;
+    sharedMsg.setProperty("JMS_JORAM_NOTWRITABLE", new Boolean(notWriteable));
   }
 
   /**
@@ -326,7 +352,7 @@ public class MailMessage {
    * @param undeliverable
    */
   public void setUndeliverable(boolean undeliverable) {
-    sharedMsg.undeliverable = undeliverable;
+     sharedMsg.setProperty("JMS_JORAM_UNDELIVERABLE", new Boolean(undeliverable));
   }
 
   /**
