@@ -261,7 +261,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
 
         outTable.remove(message.getIdentifier());
         DMQManager dmqManager = new DMQManager(not.getDMQId());
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNEXPECTED_ERROR);
         dmqManager.sendToDMQ();
       }
     }

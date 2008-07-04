@@ -226,7 +226,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
         if (dmqManager == null) {
           dmqManager = new DMQManager();
         }
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNEXPECTED_ERROR);
       }
     }
     if (dmqManager != null) {
@@ -263,7 +263,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
         if (dmqManager == null) {
           dmqManager = new DMQManager(not.getDMQId());
         }
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
       }
     }
     if (dmqManager != null) {
