@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.DeadMQueueImpl;
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.messages.Message;
@@ -188,7 +187,7 @@ public class FtpQueueImpl extends QueueImpl {
       if (dmq == null && super.dmqId != null)
         dmq = super.dmqId;
       else if ( dmq == null)
-        dmq = DeadMQueueImpl.getDefaultDMQId();
+        dmq = QueueImpl.getDefaultDMQId();
 
       clientContext = not.getClientContext();
       requestId = not.getRequestId();
@@ -207,8 +206,7 @@ public class FtpQueueImpl extends QueueImpl {
       t.start();
     } else {
       DMQManager dmqManager = new DMQManager(not.getDMQId());
-      msg.notWriteable = true;
-      dmqManager.addDeadMessage(msg);
+      dmqManager.addDeadMessage(msg, DMQManager.NOT_WRITEABLE);
       dmqManager.sendToDMQ();
     }
   }
