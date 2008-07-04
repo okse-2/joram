@@ -824,7 +824,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
         // Current subscriber does not filter messages: all messages
         // will be sent.
         if (! local) {
-          // Subscriber not local, or no other sending occured locally:
+          // Subscriber not local, or no other sending occurred locally:
           // directly sending the messages.
           deliverables = messages;
           persistent = true;
@@ -877,7 +877,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
-      not.setDMQId(DeadMQueueImpl.getDefaultDMQId());
+      not.setDMQId(QueueImpl.getDefaultDMQId());
     }
   }
 
