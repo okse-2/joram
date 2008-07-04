@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -56,6 +56,7 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
 import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
+import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
@@ -71,6 +72,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.util.Debug;
@@ -87,7 +89,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   /** period to run task at regular interval: cleaning, load-balancing, etc. */
   protected long period = -1;
-
+  
+  /** Static value holding the default DMQ identifier for a server. */
+  static AgentId defaultDMQId = null;
+  
   /**
    * Returns  the period value of this queue, -1 if not set.
    *
@@ -117,6 +122,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * not set.
    */
   private Integer threshold = null;
+  
+  /** Static value holding the default threshold for a server. */
+  static Integer defaultThreshold = null;
 
   /**
    * Returns  the threshold value of this queue, -1 if not set.
@@ -128,6 +136,16 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       return -1;
     else
       return threshold.intValue();
+  }
+  
+  /** Static method returning the default threshold. */
+  public static Integer getDefaultThreshold() {
+    return defaultThreshold;
+  }
+  
+  /** Static method returning the default DMQ identifier. */
+  public static AgentId getDefaultDMQId() {
+    return defaultDMQId;
   }
 
   /**
@@ -220,7 +238,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
         if (dmqManager == null)
           dmqManager = new DMQManager();
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Removes expired message " + message.getIdentifier(), new Exception());
@@ -559,15 +577,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // Cleaning the possibly expired messages.
     DMQManager dmqManager = cleanPendingMessage(System.currentTimeMillis());
     // Adding the deliverable messages to it:
-    int i = 0;
     Message message;
-    while (i < messages.size()) {
+    for (int i = 0; i < messages.size(); i++) {
       message = (Message) messages.get(i);
       if (Selector.matches(message.getHeaderMessage(), not.getSelector())) {
         // Matching selector: adding the message:
         rep.addMessage(message.getFullMessage());
       }
-      i++;
     }
 
     // Sending the dead messages to the DMQ, if needed:
@@ -663,11 +679,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           // it to the vector of dead messages:
           if (isUndeliverable(message)) {
             message.delete();
-            message.setUndeliverable();
-
             if (dmqManager == null)
               dmqManager = new DMQManager();
-            dmqManager.addDeadMessage(message.getFullMessage());
+            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
           } else {
             // Else, putting the message back into the deliverables vector:
             storeMessage(message);
@@ -710,12 +724,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       // to the vector of dead messages:
       if (isUndeliverable(message)) {
         message.delete();
-
-        message.setUndeliverable();
-
         if (dmqManager == null)
           dmqManager = new DMQManager();
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
       } else {
         // Else, putting the message back into the deliverables vector:
         storeMessage(message);
@@ -821,7 +832,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         messages.removeElementAt(i);
         message.delete();
         DMQManager dmqManager = new DMQManager();
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
         dmqManager.sendToDMQ();
         break;
       }
@@ -839,7 +850,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       for (int i = 0; i < messages.size(); i++) {
         Message message = (Message) messages.elementAt(i);
         message.delete();
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
       }
       dmqManager.sendToDMQ();
       messages.clear();
@@ -914,8 +925,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (clientMsgs != null) {
       Message msg;
       // Storing each received message:
-      for (Enumeration msgs = clientMsgs.getMessages().elements();
-           msgs.hasMoreElements();) {
+      for (Enumeration msgs = clientMsgs.getMessages().elements(); msgs.hasMoreElements();) {
 
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
 
@@ -925,7 +935,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       }
     }
     
-    // Lauching a delivery sequence:
+    // Launching a delivery sequence:
     deliverMessages(0);
 
     if (clientMsgs != null)
@@ -975,10 +985,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         // vector of dead messages:
         if (isUndeliverable(message)) {
           message.delete();
-          message.setUndeliverable();
           if (dmqManager == null)
             dmqManager = new DMQManager();
-          dmqManager.addDeadMessage(message.getFullMessage());
+          dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
         } else {
           // Else, putting it back into the deliverables vector:
           storeMessage(message);
@@ -1026,8 +1035,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       DMQManager dmqManager = new DMQManager();
       while (! messages.isEmpty()) {
         message = (Message) messages.remove(0);
-        message.setDeletedDest();
-        dmqManager.addDeadMessage(message.getFullMessage());
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.DELETED_DEST);
       }
       dmqManager.sendToDMQ();
     }
@@ -1076,7 +1084,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       DMQManager dmqManager = new DMQManager();
-      dmqManager.addDeadMessage(message.getFullMessage());
+      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.QUEUE_FULL);
       dmqManager.sendToDMQ();
       return;
     }
@@ -1154,35 +1162,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     while (itMessages.hasNext()) {
       message = (Message) itMessages.next();
       cm.addMessage(message.getFullMessage());
-    }
-    return cm;
-  }
-  
-  protected ClientMessages getClientMessages(List lsMsgId, boolean remove) {   
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "QueueImpl.getClientMessages(" + lsMsgId + ',' + remove + ')');
-
-    ClientMessages cm = new ClientMessages();
-    Message message = null;
-    String msgId = null;
-    Iterator itMsgId = lsMsgId.iterator();
-    // Checking the deliverable messages:
-    while (itMsgId.hasNext()) {
-      msgId = (String) itMsgId.next();
-      message = getMessage(msgId, remove);
-
-      if (checkDelivery(message.getHeaderMessage())) {
-        message.incDeliveryCount();
-        nbMsgsDeliverSinceCreation++;
-        
-        // use in sub class see ClusterQueueImpl
-        messageDelivered(message.getIdentifier());
-
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Message " + msgId);
-
-        cm.addMessage(message.getFullMessage());
-      }
     }
     return cm;
   }
@@ -1405,8 +1384,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected boolean isUndeliverable(Message message) {
     if (threshold != null)
       return (message.getDeliveryCount() == threshold.intValue());
-    else if (DeadMQueueImpl.threshold != null)
-      return (message.getDeliveryCount() == DeadMQueueImpl.threshold.intValue());
+    else if (QueueImpl.defaultThreshold != null)
+      return (message.getDeliveryCount() == QueueImpl.defaultThreshold.intValue());
     return false;
   }
 
@@ -1431,5 +1410,35 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   public long getNbMsgsReceiveSinceCreation() {
     return nbMsgsSendToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
+  }
+  
+  protected void handleExpiredNot(AgentId from, ExpiredNot not) {
+    Notification expiredNot = not.getExpiredNot();
+    Vector messages;
+    ClientMessages clientMessages;
+    // ClientMessages and TopicMsgsReply are the notifications which can expire in the networks.
+    // QueueMsgReply can't expire due to protocol limitations
+    if (expiredNot instanceof ClientMessages) {
+      messages = ((ClientMessages) expiredNot).getMessages();
+      clientMessages = (ClientMessages) expiredNot;
+    } else if (expiredNot instanceof TopicMsgsReply) {
+      messages = ((TopicMsgsReply) expiredNot).getMessages();
+      clientMessages = new ClientMessages(((TopicMsgsReply) expiredNot).getClientContext(),
+          ((TopicMsgsReply) expiredNot).getCorrelationId(), messages);
+    } else {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Expired notification holds an unknown notification: "
+            + expiredNot.getClass().getName());
+      return;
+    }
+    
+    for (Iterator iterator = messages.iterator(); iterator.hasNext();) {
+      org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) iterator.next();
+      msg.setProperty("JMS_JORAM_EXPIRED", Boolean.TRUE);
+      msg.setProperty("JMS_JORAM_EXPIRATIONDATE", new Long(msg.expiration));
+      msg.expiration = 0;
+    }
+    
+    doClientMessages(from, clientMessages);
   }
 }
