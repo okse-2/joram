@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,11 +23,18 @@
  */
 package com.scalagent.kjoram;
 
-import com.scalagent.kjoram.excepts.IllegalStateException;
-import com.scalagent.kjoram.excepts.*;
-import com.scalagent.kjoram.messages.*;
+import java.util.Enumeration;
 
-import java.util.*;
+import com.scalagent.kjoram.excepts.IllegalStateException;
+import com.scalagent.kjoram.excepts.JMSException;
+import com.scalagent.kjoram.excepts.MessageEOFException;
+import com.scalagent.kjoram.excepts.MessageException;
+import com.scalagent.kjoram.excepts.MessageFormatException;
+import com.scalagent.kjoram.excepts.MessageNotWriteableException;
+import com.scalagent.kjoram.excepts.MessageROException;
+import com.scalagent.kjoram.excepts.MessageValueException;
+import com.scalagent.kjoram.messages.ConversionHelper;
+import com.scalagent.kjoram.messages.MessageType;
 
 /**
  * A Joram message wraps a proprietary MOM message which is actually the
@@ -750,16 +757,6 @@ public class Message
         value = new Integer(momMsg.deliveryCount);
       else
         value = momMsg.getOptionalHeader(name);
-    }
-    else if (name.startsWith("JMS_JORAM")) {
-      if (name.equals("JMS_JORAM_DELETEDDEST"))
-        value = new Boolean(momMsg.deletedDest);
-      else if (name.equals("JMS_JORAM_NOTWRITABLE"))
-        value = new Boolean(momMsg.notWriteable);
-      else if (name.equals("JMS_JORAM_EXPIRED"))
-        value = new Boolean(momMsg.expired);
-      else if (name.equals("JMS_JORAM_UNDELIVERABLE"))
-        value = new Boolean(momMsg.undeliverable);
     }
     else
       value = momMsg.getObjectProperty(name);

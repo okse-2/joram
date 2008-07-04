@@ -22,28 +22,19 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.Serializable;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.OutputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
-import java.util.*;
-
-import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
-import javax.jms.MessageEOFException;
+import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
 import org.objectweb.joram.client.jms.admin.AdminMessage;
-import org.objectweb.joram.shared.stream.StreamUtil;
-import org.objectweb.joram.shared.messages.ConversionHelper;
-import org.objectweb.joram.shared.excepts.MessageValueException;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.Message</code> interface.
@@ -814,19 +805,9 @@ public class Message implements javax.jms.Message {
         return new Integer(momMsg.deliveryCount);
       else
         return momMsg.getOptionalHeader(name);
-    } else if (name.startsWith("JMS_JORAM")) {
-      if (name.equals("JMS_JORAM_DELETEDDEST"))
-        return new Boolean(momMsg.deletedDest);
-      else if (name.equals("JMS_JORAM_NOTWRITABLE"))
-        return new Boolean(momMsg.notWriteable);
-      else if (name.equals("JMS_JORAM_EXPIRED"))
-        return new Boolean(momMsg.expired);
-      else if (name.equals("JMS_JORAM_UNDELIVERABLE"))
-        return new Boolean(momMsg.undeliverable);
     } else {
       return momMsg.getProperty(name);
     }
-    return null;
   }
 
   /**
@@ -902,10 +883,6 @@ public class Message implements javax.jms.Message {
    */
   protected void prepare() throws JMSException {
     momMsg.redelivered = false;
-    momMsg.deletedDest = false;
-    momMsg.expired = false;
-    momMsg.notWriteable = false;
-    momMsg.undeliverable = false;
   }
 
   
