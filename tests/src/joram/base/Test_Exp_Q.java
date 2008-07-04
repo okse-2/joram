@@ -89,7 +89,7 @@ public class Test_Exp_Q extends TestCase {
 	    producer.send(msg);
 	    
 	    // sleep to be safe that the message expired
-	    Thread.sleep(1000L);
+	    Thread.sleep(1100L);
 	    
 	    // the consumer no receive the message from the queue
 	    Message msg1= consumer.receive(3000);
@@ -97,14 +97,10 @@ public class Test_Exp_Q extends TestCase {
 	    
 	    // but the message is in the deadqueue
 	     msg1= consumer_dead.receive(3000);
-	     if(msg1 != null){
-		 // System.out.println("message expired !");
-		 //test messages
 		 assertEquals(true, msg1.getBooleanProperty("JMS_JORAM_EXPIRED"));
 		 assertEquals(msg.getJMSMessageID(),msg1.getJMSMessageID());
 		 assertEquals(msg.getJMSType(),msg1.getJMSType());
 		 assertEquals(msg.getJMSDestination(),msg1.getJMSDestination());
-	     }
 	     
 	    cnx.close();
 	    cnx_dead.close();
