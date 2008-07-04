@@ -37,12 +37,8 @@ import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
 
-
-
-
 /**
- * test threshold parameter and test DMQ with message more and more big
- *
+ * Test threshold parameter and test DMQ with message becoming bigger and bigger
  */
 public class Test46 extends BaseTest {
     public static void main (String args[]) {
@@ -55,7 +51,7 @@ public class Test46 extends BaseTest {
 	    Thread.sleep(1000L);
 
 	    AdminModule.connect("root", "root", 60);
-	    User user = User.create("anonymous", "anonymous");
+	    User.create("anonymous", "anonymous");
 	    Queue queue = Queue.create(0);
 	    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
 	    dmq.setFreeReading();
@@ -105,11 +101,10 @@ public class Test46 extends BaseTest {
 		msg = (BytesMessage) cons2.receive();
 		assertEquals(i,index);
 		index = msg.getIntProperty("Index");
-		if (msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE")){
-		    assertEquals(2, msg.getIntProperty("JMSXDeliveryCount"));
-		    //System.out.println("msg#" + index + ", Undeliverable message: " + msg.getIntProperty("JMSXDeliveryCount"));
-		}
 		
+		assertTrue(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+        assertEquals(3, msg.getIntProperty("JMSXDeliveryCount"));
+        //System.out.println("msg#" + index + ", Undeliverable message: " + msg.getIntProperty("JMSXDeliveryCount"));
 	    }
 
 	    sess1.close();
