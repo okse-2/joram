@@ -32,7 +32,7 @@ import java.util.Vector;
 
 import javax.management.openmbean.TabularData;
 
-import org.objectweb.joram.mom.dest.DeadMQueueImpl;
+import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.JoramTracing;
@@ -618,6 +618,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             }
             if (deadMessages == null)
               deadMessages = new ClientMessages();
+            message.setExpiration(0);
             deadMessages.addMessage(message.getFullMessage());
           }
         } else {
@@ -672,6 +673,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             
             if (deadMessages == null)
               deadMessages = new ClientMessages();
+            message.setExpiration(0);
             deadMessages.addMessage(message.getFullMessage());
           }
         } else {
@@ -799,11 +801,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         deliveryAttempts = value.intValue() + 1;
       
       // If maximum delivery attempts reached, the message is no more
-      // deliverable to this sbscriber.
+      // deliverable to this subscriber.
       if (isUndeliverable(deliveryAttempts)) {
         deniedMsgs.remove(id);
         message.setDeliveryCount(deliveryAttempts);
-        message.setUndeliverable();
+        message.getHeaderMessage().setProperty("JMS_JORAM_UNDELIVERABLE", Boolean.TRUE);
+        message.setExpiration(0);
         if (deadMessages == null)
           deadMessages = new ClientMessages();
         deadMessages.addMessage(message.getFullMessage());
@@ -877,8 +880,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   private boolean isUndeliverable(int deliveryAttempts) {
     if (threshold != null)
       return deliveryAttempts == threshold.intValue();
-    else if (DeadMQueueImpl.getDefaultThreshold() != null)
-      return deliveryAttempts == DeadMQueueImpl.getDefaultThreshold().intValue();
+    else if (QueueImpl.getDefaultThreshold() != null)
+      return deliveryAttempts == QueueImpl.getDefaultThreshold().intValue();
     return false;
   }
 
@@ -888,12 +891,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   private void sendToDMQ(ClientMessages messages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
-    messages.setExpiration(0);
     nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
     if (dmqId != null) {
       Channel.sendTo(dmqId, messages);
-    } else if (DeadMQueueImpl.getDefaultDMQId() != null) {
-      Channel.sendTo(DeadMQueueImpl.getDefaultDMQId(), messages);
+    } else if (QueueImpl.getDefaultDMQId() != null) {
+      Channel.sendTo(QueueImpl.getDefaultDMQId(), messages);
     }
   }
   
