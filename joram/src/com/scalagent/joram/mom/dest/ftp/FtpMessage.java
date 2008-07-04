@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,21 +28,14 @@ import org.objectweb.joram.shared.messages.Message;
 
 
 /**
- * A mail message encapsulates a proprietary message which is also used
+ * An FtpMessage encapsulates a proprietary message which is also used
  * for effective MOM transport facility.
  */
 public class FtpMessage {
   private Message sharedMsg;
 
   /**
-   * Constructs a bright new <code>MailMessage</code>.
-   */
-  public FtpMessage() {
-    sharedMsg = new Message();
-  }
-
-  /**
-   * Instanciates a <code>MailMessage</code> wrapping a consumed
+   * Instantiates an <code>FtpMessage</code> wrapping a consumed
    * MOM simple message.
    *
    * @param momMsg  The MOM message to wrap.
@@ -65,14 +58,6 @@ public class FtpMessage {
    */
   public String getIdentifier() {
     return sharedMsg.id;
-  }
-
-  /**
-   * <code>true</code> if the message could not be written on the dest.
-   * @param notWriteable
-   */
-  public void setNotWriteable(boolean notWriteable) {
-    sharedMsg.notWriteable = notWriteable;
   }
 
   public String getStringProperty(String key) {
