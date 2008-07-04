@@ -37,6 +37,7 @@ import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 
@@ -114,8 +115,8 @@ public class Test1_Topic extends TestCase {
       
       startAgentServer((short) 1);
       
-      // No additional message should be present on the DMQ, they should have
-      // been deleted by the network
+      // No additional messages should be present on the DMQ1, they should have
+      // been sent to DMQ0 before traveling on the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       assertEquals(3, dmqueue1.getPendingMessages());
       assertEquals(10, dmqueue0.getPendingMessages());
@@ -150,9 +151,8 @@ public class Test1_Topic extends TestCase {
     AdminModule.setDefaultDMQ(0, dmqueue0);
 
     // create a user
-    org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
-    org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User.create(
-        "anonymous", "anonymous", 1);
+    User.create("anonymous", "anonymous", 0);
+    User user = User.create("anonymous", "anonymous", 1);
     user.setDMQ(dmqueue1);
     // set permissions
     topic.setFreeReading();
