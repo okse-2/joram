@@ -75,7 +75,6 @@ import org.objectweb.joram.mom.proxies.UserAgent;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
-import org.objectweb.joram.shared.admin.AddServiceRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
@@ -117,7 +116,6 @@ import org.objectweb.joram.shared.admin.Monitor_GetWriters;
 import org.objectweb.joram.shared.admin.QueueAdminRequest;
 import org.objectweb.joram.shared.admin.RemoveDomainRequest;
 import org.objectweb.joram.shared.admin.RemoveServerRequest;
-import org.objectweb.joram.shared.admin.RemoveServiceRequest;
 import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetDefaultDMQ;
 import org.objectweb.joram.shared.admin.SetDefaultThreshold;
@@ -175,10 +173,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Reference of the server's local AdminTopicImpl instance. */
   private static AdminTopicImpl ref;
   
-//  public final static AdminTopicImpl getReference() {
-//    return ref;
-//  }
-
   /** Identifier of the server this topic is deployed on. */
   private int serverId;
 
@@ -283,7 +277,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
       name = (String) e.nextElement();
       if (proxyId.equals(proxiesTable.get(name)))
-        return (String) usersTable.get(name);;
+        return (String) usersTable.get(name);
     }
     return null;
   }
@@ -1278,7 +1272,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       // The user has already been set. 
       if (proxId != null) {
-        if (! pass.equals((String) usersTable.get(name))) {
+        if (!pass.equals(usersTable.get(name))) {
           throw new RequestException("User [" + name + "] already exists"
                                      + " but with a different password.");
         }
@@ -1375,8 +1369,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (! newName.equals(name)
           && (usersTable.containsKey(newName)))
         throw new RequestException("Name [" + newName + "] already used");
-
-      String newPass = request.getNewPass();
 
       if (usersTable.containsKey(name)) {
         usersTable.remove(name);
@@ -1520,7 +1512,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (request.getDmqId() != null)
         dmqId = AgentId.fromString(request.getDmqId());
 
-      DeadMQueueImpl.defaultDMQId = dmqId;
+      QueueImpl.defaultDMQId = dmqId;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -1597,7 +1589,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // If this server is the target server, process the request.
       String info;
 
-      DeadMQueueImpl.threshold = new Integer(request.getThreshold());
+      QueueImpl.defaultThreshold = new Integer(request.getThreshold());
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -1699,7 +1691,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // If this server is the target server, process the request.
       String info;
 
-      DeadMQueueImpl.defaultDMQId = null;
+      QueueImpl.defaultDMQId = null;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -1773,7 +1765,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // If this server is the target server, process the request.
       String info;
 
-      DeadMQueueImpl.threshold = null;
+      QueueImpl.defaultThreshold = null;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], sent to AdminTopic on server [").append(serverId)
@@ -1867,7 +1859,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         int i = 0;
         while (servers.hasMoreElements()) {
           A3CMLServer server = (A3CMLServer)servers.nextElement();
-          ids[i] = (int)server.sid;
+          ids[i] = server.sid;
           names[i] = server.name;
           hostNames[i] = server.hostname;
           i++;
@@ -2066,9 +2058,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (checkServerId(request.getServerId())) {
         Monitor_GetDMQSettingsRep reply;
         String id = null;
-        if (DeadMQueueImpl.defaultDMQId != null)
-          id = DeadMQueueImpl.defaultDMQId.toString();
-        reply = new Monitor_GetDMQSettingsRep(id, DeadMQueueImpl.threshold);
+        if (QueueImpl.defaultDMQId != null)
+          id = QueueImpl.defaultDMQId.toString();
+        reply = new Monitor_GetDMQSettingsRep(id, QueueImpl.defaultThreshold);
         distributeReply(replyTo, msgId, reply);
       } else {
         // Forward the request to the right AdminTopic agent.
@@ -2413,55 +2405,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-  private void doProcess(AddServiceRequest request,
-                         AgentId replyTo,
-                         String msgId,
-                         AgentId from) {
-    try {
-      ServerConfigHelper helper = new ServerConfigHelper(true);
-      helper.addService(
-        request.getServerId(),
-        request.getClassName(),
-        request.getArgs());
-      distributeReply(replyTo, msgId,
-                      new AdminReply(true, "Service added"));
-      if (from == null) {
-        broadcastRequest(request, 
-                         -1, 
-                         replyTo, msgId);
-      }
-    } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      distributeReply(replyTo, msgId,
-                      new AdminReply(false, exc.toString()));
-    }
-  }
-
-  private void doProcess(RemoveServiceRequest request,
-                         AgentId replyTo,
-                         String msgId,
-                         AgentId from) {
-    try {
-      ServerConfigHelper helper = new ServerConfigHelper(true);
-      helper.removeService(
-        request.getServerId(),
-        request.getClassName());
-      distributeReply(replyTo, msgId,
-                      new AdminReply(true, "Service removed"));
-      if (from == null) {
-        broadcastRequest(request, 
-                         -1, 
-                         replyTo, msgId);
-      }
-    } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
-      distributeReply(replyTo, msgId,
-                      new AdminReply(false, exc.toString()));
-    }
-  }
-
   private void broadcastRequest(AdminRequest req,
                                 int avoidServerId,
                                 AgentId replyTo,
@@ -2613,8 +2556,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Serializes an <code>AdminTopicImpl</code> instance. */
   private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
   	// Saves DMQ defaults.
-  	out.writeObject(DeadMQueueImpl.defaultDMQId);
-  	out.writeObject(DeadMQueueImpl.threshold);
+  	out.writeObject(QueueImpl.defaultDMQId);
+  	out.writeObject(QueueImpl.defaultThreshold);
 
     out.defaultWriteObject();
   }
@@ -2622,8 +2565,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Deserializes an <code>AdminTopicImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
                throws java.io.IOException, ClassNotFoundException {
-    DeadMQueueImpl.defaultDMQId = (AgentId) in.readObject();
-    DeadMQueueImpl.threshold = (Integer) in.readObject();
+    QueueImpl.defaultDMQId = (AgentId) in.readObject();
+    QueueImpl.defaultThreshold = (Integer) in.readObject();
     in.defaultReadObject();
     ref = this;
   }

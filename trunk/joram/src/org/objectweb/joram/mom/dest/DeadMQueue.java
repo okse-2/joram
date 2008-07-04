@@ -54,6 +54,8 @@ public class DeadMQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new DeadMQueueImpl(adminId, prop);
+    DestinationImpl dest = new QueueImpl(adminId, prop);
+    dest.setFreeWriting(true);
+    return dest;
   }
 }
