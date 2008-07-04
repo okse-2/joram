@@ -65,7 +65,7 @@
     <ant dir="." antfile="build.xml" target="base.test_T_MMap"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MStream"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MStream"/>
-    <ant dir="." antfile="build.xml" target="base.test_dmqb"/>
+    <ant dir="." antfile="build.xml" target="base.test_DMQ_Body"/>
   </target>
 
   <target name="tests.property"
@@ -313,18 +313,19 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="tests.dmq"
           description=" --> launch all dmq tests">
-    <ant dir="." antfile="build.xml" target="dmq.test1"/>
-    <ant dir="." antfile="build.xml" target="dmq.test2"/>
-    <ant dir="." antfile="build.xml" target="dmq.test3"/>
-    <ant dir="." antfile="build.xml" target="dmq.test4"/>
-    <ant dir="." antfile="build.xml" target="dmq.test5"/>
-    <ant dir="." antfile="build.xml" target="dmq.test6"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq1"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq2"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq3"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq4"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq5"/>
+    <ant dir="." antfile="build.xml" target="dmq.TestDmq6"/>
+    <ant dir="." antfile="build.xml" target="dmq.ChainedDMQ"/>
   </target>
 
   <target name="tests.ttl"
           description=" --> launch all ttl tests">
-    <ant dir="." antfile="build.xml" target="ttl.test1"/>
-    <ant dir="." antfile="build.xml" target="ttl.test2"/>
+    <ant dir="." antfile="build.xml" target="ttl.Test1_Topic"/>
+    <ant dir="." antfile="build.xml" target="ttl.Test2_Queue"/>
   </target>
 
   <target name="tests.sub"
@@ -646,7 +647,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="base.test_dmqb" depends="init.a3props,compile"
+  <target name="base.test_DMQ_Body" depends="init.a3props,compile"
           description=" --> test that a message body is not delete on a Dqueue when restart server">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -2627,6 +2628,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2637,6 +2639,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="2"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2647,6 +2650,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="3"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -2657,6 +2661,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="4"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -2677,6 +2682,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2687,6 +2693,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="2"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2697,6 +2704,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="3"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -2707,6 +2715,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="4"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3532,7 +3541,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <!--  start dmq tests -->
-  <target name="dmq.test1" depends="init.a3props,compile"
+  <target name="dmq.TestDmq1" depends="init.a3props,compile"
           description=" --> check threshold of specigik queue and user">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3543,7 +3552,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
-  <target name="dmq.test2" depends="init.a3props,compile"
+  <target name="dmq.TestDmq2" depends="init.a3props,compile"
           description=" --> check default threshold">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3554,7 +3563,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
-  <target name="dmq.test3" depends="init.a3props,compile"
+  <target name="dmq.TestDmq3" depends="init.a3props,compile"
           description=" --> check default dmq">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3565,7 +3574,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
-  <target name="dmq.test4" depends="init.a3props,compile"
+  <target name="dmq.TestDmq4" depends="init.a3props,compile"
           description=" --> check default dmq and default threshold for queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3577,7 +3586,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="dmq.test5" depends="init.a3props,compile"
+  <target name="dmq.TestDmq5" depends="init.a3props,compile"
           description=" --> check default dmq and default threshold for user">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3589,7 +3598,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="dmq.test6" depends="init.a3props,compile"
+  <target name="dmq.TestDmq6" depends="init.a3props,compile"
           description=" --> check config dmq with joramAdmin.xml">
     <parallel>
       <antcall target="test.run" inheritAll="true">
@@ -3612,11 +3621,23 @@ description=" --> launch all exceptionlistener tests">
       </sequential>
     </parallel>
   </target>
+  
+  <target name="dmq.ChainedDMQ" depends="init.a3props,compile"
+          description=" --> test chaining dmqs">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.dmq.ChainedDMQ"/>
+      <param name="jndiconf" value="dmq/jndi.properties"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 
   <!-- end DMQ tests -->
 
   <!-- TTL tests -->
-  <target name="ttl.test1" depends="init.a3props,compile"
+  <target name="ttl.Test1_Topic" depends="init.a3props,compile"
           description=" --> test ttl with with 2 distributed serveurs and a topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
@@ -3628,7 +3649,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="ttl.test2" depends="init.a3props,compile"
+  <target name="ttl.Test2_Queue" depends="init.a3props,compile"
           description=" --> test ttl with with 2 distributed serveurs and a queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
