@@ -22,21 +22,22 @@
  */
 package org.objectweb.joram.mom.messages;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.shared.stream.StreamUtil;
-
-import fr.dyade.aaa.util.Transaction;
-import fr.dyade.aaa.agent.AgentServer;
-
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.excepts.MessageException;
+import org.objectweb.joram.shared.excepts.MessageROException;
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Transaction;
 
 /** 
  * The <code>Message</code> class actually provides the transport facility
@@ -222,16 +223,6 @@ public final class Message implements Serializable {
 		msg.redelivered = true;
 	}
 
-	/** Sets the message undeliverable flag. */
-	public void setUndeliverable() {
-		msg.undeliverable = true;
-	}
-
-	/** Sets the destination deleted flag. */
-	public void setDeletedDest() {
-		msg.deletedDest = true;
-	}
-
   /**
    * Sets a property value.
    *
@@ -307,11 +298,7 @@ public final class Message implements Serializable {
    * @param currentTime	The current time to verify the expiration time.
    */
   public boolean isValid(long currentTime) {
-    if ((msg.expiration == 0) || (msg.expiration > currentTime))
-    	return true;
-    
-    msg.expired = true;
-    return false;
+    return msg.expiration == 0 || msg.expiration > currentTime;
   }
 
   /** Name used to store the message */
