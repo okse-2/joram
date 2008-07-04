@@ -24,35 +24,56 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.Reader;
-import java.io.FileReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 import java.util.Vector;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TemporaryTopic;
+import javax.jms.TopicConnection;
 
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.TopicConnectionFactory;
-import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-import org.objectweb.joram.shared.admin.*;
-
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.admin.AddDomainRequest;
+import org.objectweb.joram.shared.admin.AddServerRequest;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.AdminRequest;
+import org.objectweb.joram.shared.admin.GetConfigRequest;
+import org.objectweb.joram.shared.admin.GetDomainNames;
+import org.objectweb.joram.shared.admin.GetDomainNamesRep;
+import org.objectweb.joram.shared.admin.GetLocalServer;
+import org.objectweb.joram.shared.admin.GetLocalServerRep;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetDestinations;
+import org.objectweb.joram.shared.admin.Monitor_GetDestinationsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetServersIds;
+import org.objectweb.joram.shared.admin.Monitor_GetServersIdsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetUsers;
+import org.objectweb.joram.shared.admin.Monitor_GetUsersRep;
+import org.objectweb.joram.shared.admin.RemoveDomainRequest;
+import org.objectweb.joram.shared.admin.RemoveServerRequest;
+import org.objectweb.joram.shared.admin.SetDefaultDMQ;
+import org.objectweb.joram.shared.admin.SetDefaultThreshold;
+import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -89,8 +110,6 @@ public class AdminModule {
 
   /** Reply object received from the platform. */
   protected static AdminReply reply;
-
-  private static int requestCounter;
 
   private static long requestTimeout =
       Long.getLong(REQUEST_TIMEOUT_PROP,
@@ -964,8 +983,7 @@ public class AdminModule {
       timeout = requestTimeout;
 
     try {
-      replyMsg = (AdminMessage) requestor.request(
-        request, timeout);
+      replyMsg = (AdminMessage) requestor.request(request, timeout);
       reply = (AdminReply) replyMsg.getAdminMessage();
 
       if (! reply.succeeded()) {
@@ -1004,7 +1022,6 @@ public class AdminModule {
   }
 
   public static class AdminRequestor {
-    private javax.jms.TopicConnection cnx;
     private javax.jms.TopicSession sess;
     private javax.jms.Topic topic;
     private TemporaryTopic tmpTopic;
@@ -1013,9 +1030,7 @@ public class AdminModule {
 
     public AdminRequestor(javax.jms.TopicConnection cnx)
       throws JMSException {
-      this.cnx = cnx;
-      sess = cnx.createTopicSession(
-        false, Session.AUTO_ACKNOWLEDGE);
+      sess = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
       topic = sess.createTopic("#AdminTopic");
       producer = sess.createProducer(topic);
       tmpTopic = sess.createTemporaryTopic();
