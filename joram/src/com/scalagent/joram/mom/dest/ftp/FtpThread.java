@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -184,10 +184,9 @@ public class FtpThread extends Thread {
                                         clone.getSharedMessage()));
       
     } catch (Exception exc) {
-      ClientMessages deadM = 
-        new ClientMessages(clientContext, 
-                           requestId);
-      msg.setNotWriteable(true);
+      ClientMessages deadM = new ClientMessages(clientContext, requestId);
+      msg.setObjectProperty("JMS_JORAM_NOTWRITABLE", Boolean.TRUE);
+      msg.getSharedMessage().expiration = 0;
       deadM.addMessage(msg.getSharedMessage());
       if (dmqId != null)
         Channel.sendTo(dmqId, deadM);
