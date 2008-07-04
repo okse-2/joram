@@ -447,7 +447,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
           if (dmqManager == null) {
             dmqManager = new DMQManager(not.getDMQId());
           }
-          dmqManager.addDeadMessage(msg);
+          dmqManager.addDeadMessage(msg, DMQManager.UNEXPECTED_ERROR);
           logger.log(BasicLevel.WARN, "JavaMailQueueImpl.sendJavaMail", exc);
         }
         not.getMessages().remove(msg);

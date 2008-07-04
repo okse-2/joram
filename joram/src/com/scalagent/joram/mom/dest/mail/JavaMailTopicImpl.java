@@ -448,7 +448,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
           if (dmqManager == null) {
             dmqManager = new DMQManager(not.getDMQId());
           }
-          dmqManager.addDeadMessage(msg);
+          dmqManager.addDeadMessage(msg, DMQManager.UNEXPECTED_ERROR);
 
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "JavaMailTopicImpl.sendJavaMail", exc);
