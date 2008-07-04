@@ -113,13 +113,13 @@ public class TestDmq1 extends TestCase {
 	    msg1=(TextMessage) consumert.receive(500); 
 	    assertEquals(null,msg1);
 	   
-	    msg1=(TextMessage) consumerdq.receive();
+	    msg1 = (TextMessage) consumerdq.receive();
 	    assertEquals("message_q",msg1.getText());
-	    assertEquals(2,msg1.getIntProperty("JMSXDeliveryCount"));
+	    assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
 	     
-	    msg1=(TextMessage) consumerdq1.receive();
+	    msg1 = (TextMessage) consumerdq1.receive();
 	    assertEquals("message_t",msg1.getText());
-	    assertEquals(2,msg1.getIntProperty("JMSXDeliveryCount"));
+	    assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
 	    
 	    cnxq.close();
 	    cnxdq.close();

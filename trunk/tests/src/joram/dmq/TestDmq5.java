@@ -95,7 +95,7 @@ public class TestDmq5 extends TestCase {
 	    msg1=(TextMessage) consumerdq.receive();
 	    //test messages
 	    assertEquals("message_1",msg1.getText());
-	    assertEquals(2,msg1.getIntProperty("JMSXDeliveryCount"));
+	    assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
 	    
 	    cnx.close();
 	} catch (Throwable exc) {

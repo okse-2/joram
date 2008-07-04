@@ -95,7 +95,7 @@ public class TestDmq2 extends TestCase {
 	    msg1=(TextMessage) consumerdq.receive();
 	    //test messages
 	    assertEquals("message_1",msg1.getText());
-	    assertEquals(2,msg1.getIntProperty("JMSXDeliveryCount"));
+	    assertEquals(3, msg1.getIntProperty("JMSXDeliveryCount"));
 	    
 	    cnx.close();
 	} catch (Throwable exc) {
@@ -117,8 +117,7 @@ public class TestDmq2 extends TestCase {
 	org.objectweb.joram.client.jms.admin.AdminModule.connect("localhost", 2560,
 								 "root", "root", 60);
 	// create a Queue   
-	org.objectweb.joram.client.jms.Queue queue =
-	    (org.objectweb.joram.client.jms.Queue) org.objectweb.joram.client.jms.Queue.create("queue"); 
+	org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue.create("queue"); 
 	// set permissions
 	queue.setFreeReading();
 	queue.setFreeWriting();
