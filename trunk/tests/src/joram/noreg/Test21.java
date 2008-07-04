@@ -59,10 +59,11 @@ class ExcList21 implements ExceptionListener {
 }
 
 class MsgList21B implements MessageListener {
+  int nbReceived;
   public void onMessage(Message msg) {
+    nbReceived++;
     try {
       int index = msg.getIntProperty("Index");
-
       if (index == 0) {
         BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
         System.out.println("msg#" + index + ", Undeliverable message: "
@@ -73,6 +74,9 @@ class MsgList21B implements MessageListener {
       } else if (index == 2) {
         BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
         System.out.println("msg#" + index + ", Destination does not exist.");
+      } else if (index == 3) {
+        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
+        System.out.println("msg#" + index + ", An admin has deleted the message.");
       } else {
         BaseTestCase.assertTrue(false);
       }
@@ -139,7 +143,8 @@ public class Test21 extends BaseTest{
 	    cnx_b.setExceptionListener(new ExcList21("ClientB"));
 	    sess_b = cnx_b.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 	    MessageConsumer cons_b = sess_b.createConsumer(dmq);
-	    cons_b.setMessageListener(new MsgList21B());
+	    msglst_b = new MsgList21B();
+	    cons_b.setMessageListener(msglst_b);
 	    cnx_b.start();
 
 	    Message msg = sess_a.createMessage();
@@ -177,10 +182,23 @@ public class Test21 extends BaseTest{
 	    sess_a.commit();
 	    }catch(JMSException jj){}
 
-	    cnx_a.close();
-	    cnx_b.close();
-
+	    Thread.sleep(500);
+	    
+  	    msg = sess_a.createMessage();
+  	    msg.setIntProperty("Index", 3);
+  	    prod_a.send(queue1, msg);
+  	    try{
+  	      sess_a.commit();
+  	    } catch(JMSException jj) {}
+        AdminModule.connect("localhost", 16010, "root", "root", 60);
+        queue1.clear();
+        AdminModule.disconnect();
+        
+  	    cnx_a.close();
+  	    cnx_b.close();
+  	    
 	    Thread.sleep(1000L);
+	    assertEquals(4, msglst_b.nbReceived);
 	}catch(Throwable exc){
 	    exc.printStackTrace();
 	    error(exc);
