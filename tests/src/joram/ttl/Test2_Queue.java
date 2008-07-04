@@ -39,6 +39,7 @@ import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 
@@ -79,10 +80,10 @@ public class Test2_Queue extends TestCase {
       cnxCons.start();
 
       MessageConsumer consumer = sessionc.createConsumer(queue);
+      MessageConsumer consumerdq1 = sessionc.createConsumer(dmqueue1);
       MessageProducer producer = sessionp.createProducer(queue);
 
       TextMessage msg = null;
-      TextMessage msg1 = null;
 
       for (int j = 0; j < 3; j++) {
         msg = sessionp.createTextMessage();
@@ -93,14 +94,24 @@ public class Test2_Queue extends TestCase {
       // Waiting for the messages to be out of date
       Thread.sleep(4000);
 
-      msg1 = (TextMessage) consumer.receive(1000);
-      assertEquals(null, msg1);
+      msg = (TextMessage) consumer.receive(1000);
+      assertEquals(null, msg);
       
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
 
       assertEquals(3, dmqueue1.getPendingMessages());
       AdminModule.disconnect();
+
+      // Check some message properties
+      msg = (TextMessage) consumerdq1.receive(500);
+      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
+      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
 
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
@@ -120,11 +131,21 @@ public class Test2_Queue extends TestCase {
       // No additional messages should be present on the DMQ1, they should have
       // been sent to DMQ0 before traveling on the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue1.getPendingMessages());
+      assertEquals(2, dmqueue1.getPendingMessages());
       assertEquals(10, dmqueue0.getPendingMessages());
       assertEquals(0, ((org.objectweb.joram.client.jms.Queue) queue).getPendingMessages());
-      
       AdminModule.disconnect();
+      
+      // Check some message properties
+      MessageConsumer consumerdq0 = sessionp.createConsumer(dmqueue0);
+      msg = (TextMessage) consumerdq0.receive(500);
+      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
+      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
+      assertFalse(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
       
       cnx.close();
       cnxCons.close();
@@ -157,12 +178,14 @@ public class Test2_Queue extends TestCase {
     AdminModule.setDefaultDMQ(0, dmqueue0);
 
     // create a user
-    org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
-    org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 1);
+    User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 1);
     // set permissions
     queue.setFreeReading();
     queue.setFreeWriting();
     queue.setDMQ(dmqueue1);
+    dmqueue0.setFreeReading();
+    dmqueue1.setFreeReading();
     
     ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 2560);
     ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 2561);
