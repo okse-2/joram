@@ -22,15 +22,22 @@
  */
 package org.objectweb.joram.shared.messages;
 
-import java.util.*;
-import java.io.*;
-
-import org.objectweb.joram.shared.util.Properties;
-import org.objectweb.joram.shared.admin.AbstractAdminMessage;
-import org.objectweb.joram.shared.stream.Streamable;
-import org.objectweb.joram.shared.stream.StreamUtil;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.admin.AbstractAdminMessage;
+import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.joram.shared.util.Properties;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -208,14 +215,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
   /** The correlation identifier field. */
   public transient String correlationId = null;
  
-  /** <code>true</code> if the message target destination is deleted. */
-  public transient  boolean deletedDest = false;
-  /** <code>true</code> if the message expired. */
-  public transient  boolean expired = false;
-  /** <code>true</code> if the message could not be written on the dest. */
-  public transient  boolean notWriteable = false;
-  /** <code>true</code> if the message is considered as undeliverable. */
-  public transient  boolean undeliverable = false;
   /** The number of delivery attempts for this message. */
   public transient  int deliveryCount = 0;
 
@@ -398,10 +397,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
 //   public static int propertiesROFlag =  0x00000002;
   public static int redeliveredFlag =   0x00000004;
   public static int persistentFlag =    0x00000008;
-  public static int deletedDestFlag =   0x00000010;
-  public static int expiredFlag =       0x00000020;
-  public static int notWriteableFlag =  0x00000040;
-  public static int undeliverableFlag = 0x00000080;
 
   /* ***** ***** ***** ***** *****
    * Streamable interface
@@ -439,10 +434,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
     bool = bool | (redelivered?redeliveredFlag:0);
     bool = bool | (persistent?persistentFlag:0);
-    bool = bool | (deletedDest?deletedDestFlag:0);
-    bool = bool | (expired?expiredFlag:0);
-    bool = bool | (notWriteable?notWriteableFlag:0);
-    bool = bool | (undeliverable?undeliverableFlag:0);
     StreamUtil.writeTo(bool, os);
   }
 
@@ -477,10 +468,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
 //     propertiesRO = ((bool & propertiesROFlag) != 0);
     redelivered = ((bool & redeliveredFlag) != 0);
     persistent = ((bool & persistentFlag) != 0);
-    deletedDest = ((bool & deletedDestFlag) != 0);
-    expired = ((bool & expiredFlag) != 0);
-    notWriteable = ((bool & notWriteableFlag) != 0);
-    undeliverable = ((bool & undeliverableFlag) != 0);
   }
 
   /**
