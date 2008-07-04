@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,10 +23,9 @@
  */
 package org.objectweb.joram.shared.selectors;
 
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.*;
-
 import java.util.StringTokenizer;
+
+import org.objectweb.joram.shared.messages.Message;
 
 /** 
  * The <code>Interpreter</code> class is used for interpreting selector
@@ -97,18 +96,6 @@ class Interpreter
         value = new Integer(message.deliveryCount);
       else
         value = message.getOptionalHeader(name);
-    } else if (name.equals("JMS_JORAM_DELETEDDEST")) {
-      // Checking JORAM specific header names:
-      value = new Boolean(message.deletedDest);
-    } else if (name.equals("JMS_JORAM_NOTWRITEABLE")) {
-      // Checking JORAM specific header names:
-      value = new Boolean(message.notWriteable);
-    } else if (name.equals("JMS_JORAM_EXPIRED")) {
-      // Checking JORAM specific header names:
-      value = new Boolean(message.expired);
-    } else if (name.equals("JMS_JORAM_UNDELIVERABLE")) {
-      // Checking JORAM specific header names:
-      value = new Boolean(message.undeliverable);
     } else {
       // Checking properties:
       value = message.getProperty(name);
