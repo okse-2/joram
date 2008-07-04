@@ -50,8 +50,8 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.ExpiredNot;
+import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
 
@@ -133,7 +133,7 @@ public class Queue extends Destination implements BagSerializer {
       else if (not instanceof AbortReceiveRequest)
         ((QueueImpl)destImpl).abortReceiveRequest(from, (AbortReceiveRequest) not);
       else if (not instanceof ExpiredNot)
-        ((DeadMQueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
+        ((QueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
 //      else if (not instanceof DestinationAdminRequestNot)
 //        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else if (not instanceof WakeUpNot) {
